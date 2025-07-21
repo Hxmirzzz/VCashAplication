@@ -1,0 +1,110 @@
+2025-07-10 16:00:07.028 -05:00 [WRN] Sensitive data logging is enabled. Log entries and exception messages may include sensitive application data; this mode should only be enabled during development.
+2025-07-10 16:00:07.088 -05:00 [INF] warn: 10/07/2025 16:00:07.087 CoreEventId.SensitiveDataLoggingEnabledWarning[10400] (Microsoft.EntityFrameworkCore.Infrastructure) 
+      Sensitive data logging is enabled. Log entries and exception messages may include sensitive application data; this mode should only be enabled during development.
+2025-07-10 16:00:08.377 -05:00 [INF] [SeedData] Rol 'Admin' ya existe.
+2025-07-10 16:00:08.394 -05:00 [INF] [SeedData] Rol 'Planeador' ya existe.
+2025-07-10 16:00:08.399 -05:00 [INF] [SeedData] Rol 'CEF' ya existe.
+2025-07-10 16:00:08.403 -05:00 [INF] [SeedData] Rol 'Supervisor' ya existe.
+2025-07-10 16:00:08.408 -05:00 [INF] [SeedData] Rol 'ADATM01' ya existe.
+2025-07-10 16:00:08.413 -05:00 [INF] [SeedData] Rol 'ADCEF01' ya existe.
+2025-07-10 16:00:08.417 -05:00 [INF] [SeedData] Rol 'ADCF01' ya existe.
+2025-07-10 16:00:08.421 -05:00 [INF] [SeedData] Rol 'ADGRG01' ya existe.
+2025-07-10 16:00:08.425 -05:00 [INF] [SeedData] Rol 'ADMTF01' ya existe.
+2025-07-10 16:00:08.430 -05:00 [INF] [SeedData] Rol 'ADSER01' ya existe.
+2025-07-10 16:00:08.434 -05:00 [INF] [SeedData] Rol 'ADSER02' ya existe.
+2025-07-10 16:00:08.437 -05:00 [INF] [SeedData] Rol 'ADTH01' ya existe.
+2025-07-10 16:00:08.441 -05:00 [INF] [SeedData] Rol 'ADTI01' ya existe.
+2025-07-10 16:00:08.445 -05:00 [INF] [SeedData] Rol 'COCEF01' ya existe.
+2025-07-10 16:00:08.448 -05:00 [INF] [SeedData] Rol 'COSTV01' ya existe.
+2025-07-10 16:00:08.452 -05:00 [INF] [SeedData] Rol 'GRSER001' ya existe.
+2025-07-10 16:00:08.456 -05:00 [INF] [SeedData] Rol 'SUPTV01' ya existe.
+2025-07-10 16:00:08.544 -05:00 [INF] [SeedData] Usuario 'adminvcash' ya existe.
+2025-07-10 16:00:08.548 -05:00 [INF] [SeedData] Usuario 'planeador1' ya existe.
+2025-07-10 16:00:08.552 -05:00 [INF] [SeedData] Usuario 'planeador2' ya existe.
+2025-07-10 16:00:08.554 -05:00 [INF] [SeedData] Usuario 'cef1' ya existe.
+2025-07-10 16:00:08.557 -05:00 [INF] [SeedData] Usuario 'supervisor1' ya existe.
+2025-07-10 16:00:08.565 -05:00 [INF] [SeedData] Iniciando seeding de permisos por sucursal...
+2025-07-10 16:00:08.711 -05:00 [INF] [SeedData] Seeding de permisos por sucursal completado.
+2025-07-10 16:00:08.716 -05:00 [INF] [SeedData] Iniciando seeding de permisos de perfiles y vistas...
+2025-07-10 16:00:08.798 -05:00 [INF] [SeedData] Vistas creadas/actualizadas.
+2025-07-10 16:00:08.841 -05:00 [INF] [SeedData] Permisos RUD actualizados para rol Admin.
+2025-07-10 16:00:08.846 -05:00 [INF] [SeedData] Permisos RUD actualizados para rol Planeador.
+2025-07-10 16:00:08.850 -05:00 [INF] [SeedData] Permisos RUD actualizados para rol CEF.
+2025-07-10 16:00:08.853 -05:00 [INF] [SeedData] Permisos RUD actualizados para rol Supervisor.
+2025-07-10 16:00:08.863 -05:00 [INF] [SeedData] Permisos RUDHIS actualizados para rol Admin.
+2025-07-10 16:00:08.867 -05:00 [INF] [SeedData] Permisos RUDHIS actualizados para rol Planeador.
+2025-07-10 16:00:08.876 -05:00 [INF] [SeedData] Permisos RUDHIS actualizados para rol CEF.
+2025-07-10 16:00:08.887 -05:00 [INF] [SeedData] Permisos RUDHIS actualizados para rol Supervisor.
+2025-07-10 16:00:09.624 -05:00 [INF] [SeedData] Seeding de permisos de perfiles y vistas completado.
+2025-07-10 16:00:10.755 -05:00 [INF] Now listening on: https://localhost:7024
+2025-07-10 16:00:10.757 -05:00 [INF] Now listening on: http://localhost:5006
+2025-07-10 16:00:10.822 -05:00 [INF] Application started. Press Ctrl+C to shut down.
+2025-07-10 16:00:10.825 -05:00 [INF] Hosting environment: Development
+2025-07-10 16:00:10.826 -05:00 [INF] Content root path: C:\Users\hamirrocha\source\repos\VCashApp
+2025-07-10 16:00:13.547 -05:00 [WRN] Error unprotecting the session cookie.
+System.Security.Cryptography.CryptographicException: The key {7bb33ef4-ee75-4865-bf27-40137277b93a} was not found in the key ring. For more information go to https://aka.ms/aspnet/dataprotectionwarning
+   at Microsoft.AspNetCore.DataProtection.KeyManagement.KeyRingBasedDataProtector.UnprotectCore(Byte[] protectedData, Boolean allowOperationsOnRevokedKeys, UnprotectStatus& status)
+   at Microsoft.AspNetCore.DataProtection.KeyManagement.KeyRingBasedDataProtector.Unprotect(Byte[] protectedData)
+   at Microsoft.AspNetCore.Session.CookieProtection.Unprotect(IDataProtector protector, String protectedText, ILogger logger)
+2025-07-10 16:00:13.702 -05:00 [INF] Identity.Application was not authenticated. Failure message: Ticket expired
+2025-07-10 16:00:13.714 -05:00 [INF] Executing endpoint 'VCashApp.Controllers.HomeController.Index (VCashApp)'
+2025-07-10 16:50:45.903 -05:00 [WRN] Sensitive data logging is enabled. Log entries and exception messages may include sensitive application data; this mode should only be enabled during development.
+2025-07-10 16:50:45.962 -05:00 [INF] warn: 10/07/2025 16:50:45.961 CoreEventId.SensitiveDataLoggingEnabledWarning[10400] (Microsoft.EntityFrameworkCore.Infrastructure) 
+      Sensitive data logging is enabled. Log entries and exception messages may include sensitive application data; this mode should only be enabled during development.
+2025-07-10 16:50:47.192 -05:00 [INF] [SeedData] Rol 'Admin' ya existe.
+2025-07-10 16:50:47.221 -05:00 [INF] [SeedData] Rol 'Planeador' ya existe.
+2025-07-10 16:50:47.225 -05:00 [INF] [SeedData] Rol 'CEF' ya existe.
+2025-07-10 16:50:47.239 -05:00 [INF] [SeedData] Rol 'Supervisor' ya existe.
+2025-07-10 16:50:47.244 -05:00 [INF] [SeedData] Rol 'ADATM01' ya existe.
+2025-07-10 16:50:47.247 -05:00 [INF] [SeedData] Rol 'ADCEF01' ya existe.
+2025-07-10 16:50:47.250 -05:00 [INF] [SeedData] Rol 'ADCF01' ya existe.
+2025-07-10 16:50:47.254 -05:00 [INF] [SeedData] Rol 'ADGRG01' ya existe.
+2025-07-10 16:50:47.258 -05:00 [INF] [SeedData] Rol 'ADMTF01' ya existe.
+2025-07-10 16:50:47.263 -05:00 [INF] [SeedData] Rol 'ADSER01' ya existe.
+2025-07-10 16:50:47.266 -05:00 [INF] [SeedData] Rol 'ADSER02' ya existe.
+2025-07-10 16:50:47.269 -05:00 [INF] [SeedData] Rol 'ADTH01' ya existe.
+2025-07-10 16:50:47.271 -05:00 [INF] [SeedData] Rol 'ADTI01' ya existe.
+2025-07-10 16:50:47.275 -05:00 [INF] [SeedData] Rol 'COCEF01' ya existe.
+2025-07-10 16:50:47.278 -05:00 [INF] [SeedData] Rol 'COSTV01' ya existe.
+2025-07-10 16:50:47.281 -05:00 [INF] [SeedData] Rol 'GRSER001' ya existe.
+2025-07-10 16:50:47.283 -05:00 [INF] [SeedData] Rol 'SUPTV01' ya existe.
+2025-07-10 16:50:47.394 -05:00 [INF] [SeedData] Rol 'Seguridad' creado.
+2025-07-10 16:50:47.458 -05:00 [INF] [SeedData] Usuario 'adminvcash' ya existe.
+2025-07-10 16:50:47.462 -05:00 [INF] [SeedData] Usuario 'planeador1' ya existe.
+2025-07-10 16:50:47.465 -05:00 [INF] [SeedData] Usuario 'planeador2' ya existe.
+2025-07-10 16:50:47.467 -05:00 [INF] [SeedData] Usuario 'cef1' ya existe.
+2025-07-10 16:50:47.470 -05:00 [INF] [SeedData] Usuario 'supervisor1' ya existe.
+2025-07-10 16:50:47.472 -05:00 [INF] [SeedData] Usuario 'supervisor2' ya existe.
+2025-07-10 16:50:47.730 -05:00 [INF] [SeedData] Usuario 'seguridad1' creado y asignado al rol 'Seguridad'.
+2025-07-10 16:50:47.837 -05:00 [INF] [SeedData] Usuario 'supervisorSeguridad' creado y asignado al rol 'Seguridad'.
+2025-07-10 16:50:47.842 -05:00 [INF] [SeedData] Iniciando seeding de permisos por sucursal...
+2025-07-10 16:50:47.985 -05:00 [INF] [SeedData] Claim 'SucursalId:1' añadido a usuario 'seguridad1'.
+2025-07-10 16:50:48.000 -05:00 [INF] [SeedData] Claim 'SucursalId:1' añadido a usuario 'supervisorSeguridad'.
+2025-07-10 16:50:48.002 -05:00 [INF] [SeedData] Seeding de permisos por sucursal completado.
+2025-07-10 16:50:48.006 -05:00 [INF] [SeedData] Iniciando seeding de permisos de perfiles y vistas...
+2025-07-10 16:50:48.049 -05:00 [INF] [SeedData] Vistas creadas/actualizadas.
+2025-07-10 16:50:48.084 -05:00 [INF] [SeedData] Permisos RUD actualizados para rol Admin.
+2025-07-10 16:50:48.089 -05:00 [INF] [SeedData] Permisos RUD actualizados para rol Planeador.
+2025-07-10 16:50:48.093 -05:00 [INF] [SeedData] Permisos RUD actualizados para rol CEF.
+2025-07-10 16:50:48.095 -05:00 [INF] [SeedData] Permisos RUD actualizados para rol Supervisor.
+2025-07-10 16:50:48.103 -05:00 [INF] [SeedData] Permisos RUDHIS actualizados para rol Admin.
+2025-07-10 16:50:48.108 -05:00 [INF] [SeedData] Permisos RUDHIS actualizados para rol Planeador.
+2025-07-10 16:50:48.111 -05:00 [INF] [SeedData] Permisos RUDHIS actualizados para rol CEF.
+2025-07-10 16:50:48.113 -05:00 [INF] [SeedData] Permisos RUDHIS actualizados para rol Supervisor.
+2025-07-10 16:50:48.128 -05:00 [INF] [SeedData] Permisos REG asignados al rol Admin.
+2025-07-10 16:50:48.132 -05:00 [INF] [SeedData] Permisos REG asignados al rol Seguridad.
+2025-07-10 16:50:48.147 -05:00 [INF] [SeedData] Permisos REGHIS asignados al rol Admin.
+2025-07-10 16:50:48.152 -05:00 [INF] [SeedData] Permisos REGHIS asignados al rol Seguridad.
+2025-07-10 16:50:48.170 -05:00 [INF] [SeedData] Seeding de permisos de perfiles y vistas completado.
+2025-07-10 16:50:48.418 -05:00 [INF] Now listening on: https://localhost:7024
+2025-07-10 16:50:48.420 -05:00 [INF] Now listening on: http://localhost:5006
+2025-07-10 16:50:48.449 -05:00 [INF] Application started. Press Ctrl+C to shut down.
+2025-07-10 16:50:48.451 -05:00 [INF] Hosting environment: Development
+2025-07-10 16:50:48.452 -05:00 [INF] Content root path: C:\Users\hamirrocha\source\repos\VCashApp
+2025-07-10 16:50:49.238 -05:00 [WRN] Error unprotecting the session cookie.
+System.Security.Cryptography.CryptographicException: The key {7bb33ef4-ee75-4865-bf27-40137277b93a} was not found in the key ring. For more information go to https://aka.ms/aspnet/dataprotectionwarning
+   at Microsoft.AspNetCore.DataProtection.KeyManagement.KeyRingBasedDataProtector.UnprotectCore(Byte[] protectedData, Boolean allowOperationsOnRevokedKeys, UnprotectStatus& status)
+   at Microsoft.AspNetCore.DataProtection.KeyManagement.KeyRingBasedDataProtector.Unprotect(Byte[] protectedData)
+   at Microsoft.AspNetCore.Session.CookieProtection.Unprotect(IDataProtector protector, String protectedText, ILogger logger)
+2025-07-10 16:50:49.267 -05:00 [INF] Identity.Application was not authenticated. Failure message: Ticket expired
+2025-07-10 16:50:49.273 -05:00 [INF] Executing endpoint 'VCashApp.Controllers.HomeController.Index (VCashApp)'

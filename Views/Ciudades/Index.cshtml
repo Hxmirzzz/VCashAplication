@@ -1,0 +1,73 @@
+﻿@model IEnumerable<VCashApp.Models.Entities.AdmCiudad>
+@using VCashApp.Models.Entities
+@using Microsoft.AspNetCore.Mvc.Rendering
+
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewData["Title"] = "Ciudades";
+
+    string currentSearchTerm = ViewBag.SearchTerm ?? "";
+    int currentPage = ViewBag.CurrentPage ?? 1;
+    int totalPages = ViewBag.TotalPages ?? 1;
+    int totalData = ViewBag.TotalData ?? 0;
+    int pageSize = ViewBag.PageSize ?? 15;
+}
+
+<div class="search-container">
+    <div class="table-controls">
+        <input type="text" id="tableSearch" placeholder="Buscar...">
+        <div class="table-buttons">
+            <img src="/assets/icon-img/add.png" alt="Agregar" class="control-button-icon" id="addButton">
+            <img src="/assets/icon-img/download.png" alt="Descargar" class="control-button-icon" id="downloadButton">
+            <img src="/assets/icon-img/filter-on.png" alt="Filtrar" class="control-button-icon" id="filterButton">
+        </div>
+    </div>
+</div>
+
+<div class="filter-sidebar" id="filterSidebar">
+    <div class="filter-sidebar-content">
+        <h3>Filtros Avanzados</h3>
+        <div class="form-group">
+            <label for="FilterEstado">Estado:</label>
+            <select id="FilterEstado" class="input-control" name="estado"></select>
+        </div>
+
+        <div class="filter-buttons">
+            <button type="button" class="apply-filter-btn" id="applyFilters">Aplicar</button>
+            <button type="button" class="cancel-filter-btn" id="clearFilters">Limpiar</button>
+        </div>
+    </div>
+</div>
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success">@TempData["SuccessMessage"]</div>
+}
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger">@TempData["ErrorMessage"]</div>
+}
+
+<div id="dataTablePartial">
+    @Html.Partial("~/Views/Ciudades/_CiudadesTablePartial.cshtml", Model)
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    <script>
+        $(document).ready(function () {
+            setupTablePaginationAndFilters({
+                tableContainerId: 'dataTablePartial',
+                controllerName: 'Ciudades',
+                actionName: 'Index',
+                searchInputId: 'tableSearch',
+                filterInputsSelector: '#FilterEstado',
+                applyFiltersButtonId: 'applyFilters',
+                clearFiltersButtonId: 'clearFilters',
+                defaultPageSize: @pageSize
+            });
+        });
+    </script>
+}

@@ -1,0 +1,172 @@
+﻿@model IEnumerable<VCashApp.Models.Entities.SegRegistroEmpleado>
+@using VCashApp.Models.Entities
+@using VCashApp.Enums
+@using Microsoft.AspNetCore.Mvc.Rendering
+@using System.Globalization;
+
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = "Employee Log History";
+
+    string currentSearchTerm = ViewBag.SearchTerm ?? "";
+    int currentPage = ViewBag.CurrentPage ?? 1;
+    int pageSize = ViewBag.PageSize ?? 15;
+
+    string currentCargoId = (ViewBag.CurrentCargoId ?? "").ToString();
+    string currentUnitId = ViewBag.CurrentUnitId ?? "";
+    string currentBranchId = (ViewBag.CurrentBranchId ?? "").ToString();
+    string currentStartDate = ViewBag.CurrentStartDate ?? "";
+    string currentEndDate = ViewBag.CurrentEndDate ?? "";
+    string currentLogStatus = (ViewBag.CurrentLogStatus ?? "").ToString();
+
+    SelectList cargosFilterList = ViewBag.Cargos as SelectList ?? new SelectList(new List<SelectListItem>());
+    SelectList unidadesFilterList = ViewBag.Unidades as SelectList ?? new SelectList(new List<SelectListItem>());
+    SelectList sucursalesFilterList = ViewBag.Sucursales as SelectList ?? new SelectList(new List<SelectListItem>());
+
+    bool canCreateLog = ViewBag.CanCreateLog ?? false;
+    bool canEditLog = ViewBag.CanEditLog ?? false;
+    bool canViewHistory = ViewBag.CanViewHistory ?? false;
+}
+
+<div class="search-container">
+    <div class="table-controls">
+        <input type="text" id="tableSearch" placeholder="Buscar...">
+        <div class="table-buttons">
+            @if (canCreateLog)
+            {
+                <div class="control-button-wrapper">
+                    <a href="@Url.Action("LogEntry", "EmployeeLog")" class="control-button-icon" id="addLogEntryButton" title="Record New Employee Log">
+                        <img src="/assets/icon-img/add.png" alt="Add Log Entry">
+                    </a>
+                </div>
+            }
+
+            <div class="control-button-wrapper">
+                <img src="/assets/icon-img/download.png" alt="Download" class="control-button-icon" id="downloadButton">
+            </div>
+
+            <div class="control-button-wrapper">
+                <img src="/assets/icon-img/filter-on.png" alt="Filter" class="control-button-icon" id="filterButton">
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="filter-sidebar" id="filterSidebar">
+    <div class="filter-sidebar-content">
+        <h3>Advanced Filters</h3>
+        
+        <div class="form-group">
+            <label for="filterCargoId">Cargo:</label>
+            <select id="filterCargoId" class="input-control" name="cargoId" asp-items="cargosFilterList"></select>
+        </div>
+
+        <div class="form-group">
+            <label for="filterUnitId">Unidad:</label>
+            <select id="filterUnitId" class="input-control" name="unitId" asp-items="unidadesFilterList"></select>
+        </div>
+
+        <div class="form-group">
+            <label for="filterBranchId">Sucursal:</label>
+            <select id="filterBranchId" class="input-control" name="branchId" asp-items="sucursalesFilterList"></select>
+        </div>
+
+        <div class="form-group">
+            <label for="filterStartDate">Desde:</label>
+            <input type="date" id="filterStartDate" class="input-control" name="startDate" value="@currentStartDate" />
+        </div>
+
+        <div class="form-group">
+            <label for="filterEndDate">Hasta:</label>
+            <input type="date" id="filterEndDate" class="input-control" name="endDate" value="@currentEndDate" />
+        </div>
+
+        <div class="form-group">
+            <label for="filterLogStatus">Estado:</label>
+            <select id="filterLogStatus" class="input-control" name="logStatus">
+                <option value="">Select</option>
+                <option value="1">COMPLETO</option>
+                <option value="0">EN PROGRESO</option>
+            </select>
+        </div>
+
+        <div class="filter-buttons">
+            <div class="cancel-filter-btn" id="clearFilters">
+                <img src="~/assets/icon-img/filter-off.png" alt="OffFilterImage" title="Limpiar Filtros" id="clearFilters" />
+            </div>
+        </div>
+    </div>
+</div>
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success">@TempData["SuccessMessage"]</div>
+}
+@if (TempData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger">@TempData["ErrorMessage"]</div>
+}
+
+<div id="dataTablePartial">
+    @Html.Partial("~/Views/EmployeeLog/_EmployeeLogTablePartial.cshtml", Model)
+</div>
+
+@section Scripts {
+    @{ await Html.RenderPartialAsync("_ValidationScriptsPartial"); }
+    <script>
+        $(document).ready(function () {
+            setupTablePaginationAndFilters({
+                tableContainerId: 'dataTablePartial',
+                controllerName: 'EmployeeLog',
+                actionName: 'EmployeeLogHistory',
+                searchInputId: 'tableSearch',
+                filterInputsSelector: '#filterCargoId, #filterUnitId, #filterBranchId, #filterStartDate, #filterEndDate, #filterLogStatus',
+                clearFiltersButtonId: 'clearFilters',
+                defaultPageSize: @pageSize
+            });
+
+            $('#downloadButton').on('click', function () {
+                showConfirmationModal(
+                    "Seleccione el formato de exportación deseado:",
+                    function (format) {
+                        if (!format) {
+                            alert("No se seleccionó un formato de exportación.");
+                            return;
+                        }
+
+                        var form = $('<form>', {
+                            'action': '@Url.Action("ExportEmployeeLogs", "EmployeeLog")',
+                            'method': 'GET',
+                            'target': '_blank',
+                            'style': 'display:none;'
+                        }).appendTo('body');
+
+                        var search = $("#tableSearch").val();
+                        var cargoId = $("#filterCargoId").val();
+                        var unitId = $("#filterUnitId").val();
+                        var branchId = $("#filterBranchId").val();
+                        var startDate = $("#filterStartDate").val();
+                        var endDate = $("#filterEndDate").val();
+                        var logStatus = $("#filterLogStatus").val();
+
+                        form.append($('<input>', { name: 'search', value: search }));
+                        form.append($('<input>', { name: 'cargoId', value: cargoId }));
+                        form.append($('<input>', { name: 'unitId', value: unitId }));
+                        form.append($('<input>', { name: 'branchId', value: branchId }));
+                        form.append($('<input>', { name: 'startDate', value: startDate }));
+                        form.append($('<input>', { name: 'endDate', value: endDate }));
+                        form.append($('<input>', { name: 'logStatus', value: logStatus }));
+                        form.append($('<input>', { name: 'exportFormat', value: format }));
+
+                        form.submit();
+                        form.remove();
+                    },
+                    "Exportar Datos",
+                    null,
+                    "btn-primary",
+                    true
+                );
+            });
+        });
+    </script>
+}

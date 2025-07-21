@@ -1,0 +1,641 @@
+﻿@model VCashApp.Models.Entities.SegRegistroEmpleado
+@using VCashApp.Services
+@using VCashApp.Models.Entities
+@using System.Globalization
+
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = "Create";
+
+    string userName = ViewBag.UserName ?? "N/A";
+    string pageName = ViewBag.PageName ?? "Crear";
+    string unitName = ViewBag.UnidadName ?? "N/A";
+    string branchName = ViewBag.BranchName ?? "N/A";
+    string fullName = ViewBag.FullName ?? "N/A";
+
+    bool canCreateLog = ViewBag.CanCreateLog ?? false;
+    bool canEditLog = ViewBag.CanEditLog ?? false;
+}
+
+<div class="form-container">
+    <div class="row mt-3">
+        <div class="col-12">
+            <div class="alert alert-info" id="statusMessage" style="display:none;"></div>
+            <div class="alert alert-warning" id="confirmationMessage" style="display:none;"></div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-12">
+                    <label for="employeeSearchInput" class="label-required form-label">Buscar empleado (Cédula o Nombre):</label>
+                    <div class="autocomplete-container">
+                        <input type="text" class="form-control form-control-sm" id="employeeSearchInput" placeholder="Ingrese número de cédula o nombre completo" autocomplete="off" required>
+                        <div id="employeeSearchResults" class="autocomplete-results" style="display:none;">
+                        </div>
+                    </div>
+                    <small class="form-text text-muted">Ejemplo: 12345 o Juan Pérez</small>
+                </div>
+            </div>
+
+            <hr />
+
+            <form id="employeeLogForm">
+                @Html.AntiForgeryToken()
+
+                <div class="row d-flex justify-content-center align-items-center" id="employeeDetailsSection" style="display:none;">
+                    <div class="col-md-2">
+                        <div class="reg-preview-container">
+                            <img id="photo-preview" src="~/assets/profile-img/default-profile.jpg" alt="Vista Previa de Foto">
+                        </div>
+                    </div>
+                    <div class="col-md-10">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label for="employeeIdDisplay" class="form-label">Número de Cédula:</label>
+                                <input type="text" style="font-weight: bold;" class="form-control form-control-sm" id="employeeIdDisplay" readonly>
+
+                                <input type="hidden" id="hdnEmployeeId" name="EmployeeId" />
+                                <input type="hidden" id="hdnFirstName" name="FirstName" />
+                                <input type="hidden" id="hdnMiddleName" name="MiddleName" />
+                                <input type="hidden" id="hdnLastName" name="LastName" />
+                                <input type="hidden" id="hdnSecondLastName" name="SecondLastName" />
+                            </div>
+                            <div class="col-md-6">
+                                <label for="fullNameDisplay">Nombre del Empleado:</label>
+                                <input type="text" style="font-weight: bold;" class="form-control form-control-sm" id="fullNameDisplay" readonly>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-4">
+                                <label for="cargoNameDisplay">Cargo:</label>
+                                <input type="text" class="form-control form-control-sm" id="cargoNameDisplay" readonly>
+                                <input type="hidden" id="hdnCargoId" name="CargoId">
+                                <input type="hidden" id="hdnCargoName" name="CargoName">
+                            </div>
+                            <div class="col-md-4">
+                                <label for="unitNameDisplay">Unidad:</label>
+                                <input type="text" class="form-control form-control-sm" id="unitNameDisplay" readonly>
+                                <input type="hidden" id="hdnUnitId" name="UnitId">
+                                <input type="hidden" id="hdnUnitName" name="UnitName">
+                                <input type="hidden" id="hdnUnitType" name="UnitType">
+                            </div>
+                            <div class="col-md-4">
+                                <label for="branchNameDisplay">Sucursal:</label>
+                                <input type="text" class="form-control form-control-sm" id="branchNameDisplay" readonly>
+                                <input type="hidden" id="hdnBranchId" name="BranchId">
+                                <input type="hidden" id="hdnBranchName" name="BranchName">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <hr />
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <label for="entryDateInput">Fecha de Entrada:</label>
+                        <input type="date" class="form-control form-control-sm" id="entryDateInput" name="EntryDate" readonly>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="entryTimeInput">Hora de Entrada:</label>
+                        <input type="time" class="form-control form-control-sm" id="entryTimeInput" name="EntryTime" readonly>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <label for="exitDateInput">Fecha de Salida:</label>
+                        <input type="date" class="form-control form-control-sm" id="exitDateInput" name="ExitDate" readonly>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="exitTimeInput">Hora de Salida:</label>
+                        <input type="time" class="form-control form-control-sm" id="exitTimeInput" name="ExitTime" readonly>
+                    </div>
+                </div>
+
+                <input type="hidden" id="hdnIsEntryRecorded" name="IsEntryRecorded" value="false" />
+                <input type="hidden" id="hdnIsExitRecorded" name="IsExitRecorded" value="false" />
+                <input type="hidden" id="hdnLogId" name="LogId" value="0" />
+                <input type="hidden" id="hdnConfirmedValidation" name="ConfirmedValidation" />
+
+                <div class="submit-container-reg form-group col-md-12 mt-4">
+                    <button type="button" class="btn btn-primary" id="btnRecordEntry" disabled>Registrar Entrada</button>
+                    <button type="button" class="btn btn-danger" id="btnRecordExit" disabled>Registrar Salida</button>
+                    <button type="button" class="btn btn-exit" id="btnCancel">Cancelar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    <script>
+        $(document).ready(function () {
+            const employeeSearchInput = $('#employeeSearchInput');
+            const employeeSearchResults = $('#employeeSearchResults');
+            const employeeDetailsSection = $('#employeeDetailsSection');
+
+            const photoPreview = $('#photo-preview');
+            const fullNameDisplay = $('#fullNameDisplay');
+            const employeeIdDisplay = $('#employeeIdDisplay');
+            const cargoNameDisplay = $('#cargoNameDisplay');
+            const unitNameDisplay = $('#unitNameDisplay');
+
+            const entryDateInput = $('#entryDateInput');
+            const entryTimeInput = $('#entryTimeInput');
+            const exitDateInput = $('#exitDateInput');
+            const exitTimeInput = $('#exitTimeInput');
+
+            const btnRecordEntry = $('#btnRecordEntry');
+            const btnRecordExit = $('#btnRecordExit');
+            const btnCancel = $('#btnCancel');
+
+            // Hidden fields
+            const hdnEmployeeId = $('#hdnEmployeeId');
+            const hdnFirstName = $('#hdnFirstName');
+            const hdnMiddleName = $('#hdnMiddleName');
+            const hdnLastName = $('#hdnLastName');
+            const hdnSecondLastName = $('#hdnSecondLastName');
+            const hdnCargoId = $('#hdnCargoId');
+            const hdnCargoName = $('#hdnCargoName');
+            const hdnUnitId = $('#hdnUnitId');
+            const hdnUnitName = $('#hdnUnitName');
+            const hdnBranchId = $('#hdnBranchId');
+            const hdnBranchName = $('#hdnBranchName');
+            const hdnUnitType = $('#hdnUnitType');
+            const hdnIsEntryRecorded = $('#hdnIsEntryRecorded');
+            const hdnIsExitRecorded = $('#hdnIsExitRecorded');
+            const hdnLogId = $('#hdnLogId');
+            const hdnConfirmedValidation = $('#hdnConfirmedValidation');
+
+            function resetForm() {
+                employeeSearchInput.val('');
+                employeeSearchResults.hide();
+                employeeSearchResults.empty();
+                employeeDetailsSection.hide();
+
+                photoPreview.attr('src', '/assets/profile-img/default-profile.jpg');
+                fullNameDisplay.val('');
+                employeeIdDisplay.val('');
+                cargoNameDisplay.val('');
+                unitNameDisplay.val('');
+
+                entryDateInput.val('');
+                entryTimeInput.val('');
+                exitDateInput.val('');
+                exitTimeInput.val('');
+                entryDateInput.prop('readonly', true);
+                entryTimeInput.prop('readonly', true);
+                exitDateInput.prop('readonly', true);
+                exitTimeInput.prop('readonly', true);
+
+                hdnEmployeeId.val('');
+                hdnFirstName.val('');
+                hdnMiddleName.val('');
+                hdnLastName.val('');
+                hdnSecondLastName.val('');
+                hdnCargoId.val('');
+                hdnCargoName.val('');
+                hdnUnitId.val('');
+                hdnUnitName.val('');
+                hdnBranchId.val('');
+                hdnBranchName.val('');
+                hdnUnitType.val('');
+                hdnIsEntryRecorded.val('false');
+                hdnIsExitRecorded.val('false');
+                hdnLogId.val('0');
+                hdnConfirmedValidation.val('');
+
+                btnRecordEntry.prop('disabled', true);
+                btnRecordExit.prop('disabled', true);
+            }
+
+            // Function to handle employee selection from search results
+            async function selectEmployee(employeeData) {
+                hdnEmployeeId.val(employeeData.employeeId);
+                hdnFirstName.val(employeeData.firstName);
+                hdnMiddleName.val(employeeData.middleName);
+                hdnLastName.val(employeeData.lastName);
+                hdnSecondLastName.val(employeeData.secondLastName);
+                hdnCargoId.val(employeeData.cargoId);
+                hdnCargoName.val(employeeData.cargoName);
+                hdnUnitId.val(employeeData.unitId);
+                hdnUnitName.val(employeeData.unitName);
+                hdnBranchId.val(employeeData.branchId);
+                hdnBranchName.val(employeeData.branchName);
+                hdnUnitType.val(employeeData.unitType);
+
+                fullNameDisplay.val(employeeData.employeeName);
+                employeeIdDisplay.val(employeeData.employeeId);
+                cargoNameDisplay.val(employeeData.cargoName);
+                unitNameDisplay.val(employeeData.unitName);
+
+                const photoSrc = employeeData.photoUrl ? `/${employeeData.photoUrl.startsWith('/') ? employeeData.photoUrl.substring(1) : employeeData.photoUrl}` : '/assets/profile-img/default-profile.jpg';
+                photoPreview.attr('src', photoSrc);
+
+                employeeSearchResults.hide();
+                employeeSearchInput.val('');
+                employeeDetailsSection.show();
+
+                await getEmployeeLogStatus(employeeData.employeeId);
+            }
+
+            // Function to get employee log status and update UI
+            async function getEmployeeLogStatus(employeeId) {
+                btnRecordEntry.prop('disabled', true);
+                btnRecordExit.prop('disabled', true);
+                hdnConfirmedValidation.val('');
+                hdnLogId.val('0');
+
+                entryDateInput.prop('readonly', true).val('');
+                entryTimeInput.prop('readonly', true).val('');
+                exitDateInput.prop('readonly', true).val('');
+                exitTimeInput.prop('readonly', true).val('');
+
+                try {
+                    const response = await fetch(`@Url.Action("GetEmployeeLogStatus", "EmployeeLog")?employeeId=${employeeId}`);
+                    const data = await response.json();
+
+                    if (data.status === 'error') {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: data.errorMessage
+                        });
+                        return;
+                    }
+
+                    if (data.status === 'noEntry') {
+                        btnRecordEntry.prop('disabled', false);
+                        hdnIsEntryRecorded.val('true');
+                        hdnIsExitRecorded.val('false');
+
+                        entryDateInput.val(data.currentDate);
+                        entryTimeInput.val(data.currentTime);
+                        exitDateInput.val('');
+                        exitTimeInput.val('');
+                        exitDateInput.prop('readonly', true);
+                        exitTimeInput.prop('readonly', true);
+
+                    } else if (data.status === 'openEntry' || data.status === 'openEntryYesterday') {
+                        btnRecordExit.prop('disabled', false);
+                        hdnIsEntryRecorded.val('true');
+                        hdnIsExitRecorded.val('true');
+                        hdnLogId.val(data.openLogId);
+
+                        entryDateInput.val(data.entryDate || '');
+                        entryTimeInput.val(data.entryTime || '');
+
+                        exitDateInput.val(data.currentDate || '');
+                        exitTimeInput.val(data.currentTime || '');
+                        exitDateInput.prop('readonly', false);
+                        exitTimeInput.prop('readonly', false);
+
+                    } else if (data.status === 'completeEntry') {
+                        Swal.fire({
+                            icon: 'warning',
+                            title: 'Estado del Registro',
+                            text: 'Este empleado ya tiene un registro completo (entrada y salida) para hoy.'
+                        });
+                        btnRecordEntry.prop('disabled', true);
+                        btnRecordExit.prop('disabled', true);
+
+                        entryDateInput.val(data.entryDate);
+                        entryTimeInput.val(data.entryTime);
+                        exitDateInput.val(data.exitDate);
+                        exitTimeInput.val(data.exitTime);
+
+                        entryDateInput.prop('readonly', true);
+                        entryTimeInput.prop('readonly', true);
+                        exitDateInput.prop('readonly', true);
+                        exitTimeInput.prop('readonly', true);
+                    }
+                } catch (error) {
+                    console.error('Error al obtener estado del registro de empleado:', error);
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'Error al obtener el estado del empleado.'
+                    });
+                }
+            }
+
+            // Function to send log data to controller via AJAX
+            async function sendLogData(actionName, data, logIdForUpdate = null) {
+                const isConfirmationRetry = data.ConfirmedValidation !== undefined && data.ConfirmedValidation !== null && data.ConfirmedValidation !== '';
+
+                let url;
+                if (actionName === "UpdateLog" && logIdForUpdate !== null) {
+                    url = `/EmployeeLog/UpdateLog/${logIdForUpdate}`;
+                } else if (actionName === "RecordEntryExit") {
+                    url = `/EmployeeLog/RecordEntryExit`;
+                } else {
+                    Swal.close(); // Asegúrate de cerrar cualquier SweetAlert de carga previo
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error Interno',
+                        text: 'Acción o ID de log no válidos.'
+                    });
+                    return { success: false, message: 'Error interno: Acción o ID de log no válidos.' };
+                }
+
+                // --- Mostrar la pantalla de carga de SweetAlert2 ---
+                Swal.fire({
+                    title: 'Procesando...',
+                    text: 'Por favor, espere.',
+                    allowOutsideClick: false, // Evita que el usuario cierre la alerta haciendo clic fuera
+                    didOpen: () => {
+                        Swal.showLoading(); // Muestra el spinner de carga
+                    }
+                });
+
+                try {
+                    const response = await fetch(url, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
+                        },
+                        body: JSON.stringify(data)
+                    });
+
+                    if (!response.ok) {
+                        const errorText = await response.text();
+                        console.error(`Error HTTP de AJAX: ${response.status} ${response.statusText} - ${errorText}`);
+                        const msg = `Error del servidor: ${response.status} ${response.statusText}`;
+                        Swal.close(); // Cierra la pantalla de carga si hay un error HTTP
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error del Servidor',
+                            text: msg
+                        });
+                        return { success: false, message: msg };
+                    }
+
+                    const result = await response.json();
+
+                    if (result.needsConfirmation && !isConfirmationRetry) {
+                        Swal.close(); // Cierra la pantalla de carga para mostrar la confirmación
+
+                        Swal.fire({
+                            title: 'Confirmación Requerida',
+                            text: result.message + " ¿Desea continuar con el registro?",
+                            icon: 'warning',
+                            showCancelButton: true,
+                            confirmButtonColor: '#3085d6',
+                            cancelButtonColor: '#d33',
+                            confirmButtonText: 'Sí, Continuar',
+                            cancelButtonText: 'Cancelar'
+                        }).then(async (swalResult) => {
+                            if (swalResult.isConfirmed) {
+                                // Se volverá a mostrar el loading al inicio de la segunda llamada a sendLogData
+                                const currentLogDto = { ...data };
+                                currentLogDto.ConfirmedValidation = result.validationType;
+                                await sendLogData(actionName, currentLogDto, logIdForUpdate);
+                            } else {
+                                Swal.close(); // Si el usuario cancela, cierra cualquier alerta de SweetAlert pendiente
+                                Swal.fire('Cancelado', 'La operación ha sido cancelada.', 'info');
+                            }
+                        });
+                        return { success: false, needsConfirmation: true, message: result.message, validationType: result.validationType, hoursWorked: result.hoursWorked };
+                    } else {
+                        if (result.success) {
+                            Swal.close(); // Cierra la pantalla de carga antes de mostrar la alerta de éxito
+                            await Swal.fire({
+                                icon: 'success',
+                                title: '¡Éxito!',
+                                text: result.message
+                            });
+                            // La redirección ocurrirá después de que el usuario cierre la alerta de éxito
+                            window.location.href = '@Url.Action("LogEntry", "EmployeeLog")';
+                            return result;
+                        } else {
+                            Swal.close(); // Cierra la pantalla de carga si hay un error de negocio
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Error',
+                                text: result.message
+                            });
+                            hdnConfirmedValidation.val('');
+                            return result;
+                        }
+                    }
+                } catch (error) {
+                    console.error('Error al enviar datos de registro:', error);
+                    Swal.close(); // Cierra la pantalla de carga si ocurre un error inesperado
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error Inesperado',
+                        text: 'Ocurrió un error inesperado. Por favor, revise la consola.'
+                    });
+                    hdnConfirmedValidation.val('');
+                    return { success: false, message: "Ocurrió un error inesperado. Por favor, revise la consola." };
+                }
+            }
+
+            // Event listener for search input (con debounce para rendimiento)
+            let searchTimeout;
+            employeeSearchInput.on('input', function () {
+                clearTimeout(searchTimeout);
+                const searchTerm = $(this).val().trim();
+
+                if (searchTerm.length === 0) {
+                    employeeSearchResults.hide();
+                    employeeSearchResults.empty();
+                    employeeDetailsSection.hide();
+                    resetForm();
+                    return;
+                }
+
+                const isNumber = /^\d+$/.test(searchTerm);
+                const isTextSearchValid = searchTerm.length >= 2 && !isNumber;
+
+                if (isNumber || isTextSearchValid) {
+                    searchTimeout = setTimeout(async () => {
+                        try {
+                            const response = await fetch(`@Url.Action("GetEmployeeInfo", "EmployeeLog")?searchInput=${encodeURIComponent(searchTerm)}`);
+
+                            if (!response.ok) {
+                                throw new Error(`HTTP error! status: ${response.status}`);
+                            }
+
+                            const data = await response.json();
+
+                            employeeSearchResults.empty();
+
+                            if (data.error) {
+                                employeeSearchResults.append(`<div class="autocomplete-item no-results-message">${data.error}</div>`);
+                                employeeSearchResults.show();
+                                employeeDetailsSection.hide();
+                            } else if (Array.isArray(data) && data.length > 0) {
+                                data.forEach(emp => {
+                                    const employeeJsonString = JSON.stringify(emp).replace(/"/g, '&quot;');
+                                    const itemHtml = `
+                                        <div class="autocomplete-item" data-employee='${employeeJsonString}'>
+                                            <img src="${emp.photoUrl ? `/${emp.photoUrl.startsWith('/') ? emp.photoUrl.substring(1) : emp.photoUrl}` : '/assets/profile-img/default-profile.jpg'}" class="autocomplete-item-icon" alt="Foto">
+                                            <span class="autocomplete-item-text">${emp.employeeName}</span>
+                                            <span class="autocomplete-item-details">(${emp.employeeId}) - ${emp.branchName || 'N/A'}</span>
+                                        </div>`;
+                                    employeeSearchResults.append(itemHtml);
+                                });
+                                employeeSearchResults.show();
+                                employeeDetailsSection.hide();
+                            } else {
+                                employeeSearchResults.append(`<div class="autocomplete-item no-results-message">No se encontraron empleados.</div>`);
+                                employeeSearchResults.show();
+                                employeeDetailsSection.hide();
+                            }
+                        } catch (error) {
+                            console.error('Error al buscar empleados:', error);
+                            employeeSearchResults.empty().append(`<div class="autocomplete-item no-results-message">Error al buscar: ${error.message}</div>`);
+                            employeeSearchResults.show();
+                            employeeDetailsSection.hide();
+                        }
+                    }, 300);
+                } else {
+                    employeeSearchResults.hide();
+                    employeeSearchResults.empty();
+                    employeeDetailsSection.hide();
+                }
+            });
+
+            // Event listener for clicking on a search result's select button
+            employeeSearchResults.on('click', '.autocomplete-item', function() {
+                const employeeData = $(this).data('employee');
+                selectEmployee(employeeData);
+            });
+
+            // Ocultar resultados al hacer clic fuera del buscador o de los resultados
+            $(document).on('click', function(event) {
+                if (!$(event.target).closest('.autocomplete-container').length) {
+                    employeeSearchResults.hide();
+                }
+            });
+            employeeSearchInput.on('focus', function() {
+                if (employeeSearchResults.children().length > 0 && employeeSearchInput.val().trim().length > 0) {
+                    employeeSearchResults.show();
+                }
+            });
+
+            // Handle Record Entry button click
+            btnRecordEntry.on('click', async function() {
+                if (!hdnEmployeeId.val()) {
+                    // --- USAR SWEETALERT2 PARA VALIDACIÓN ---
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Validación',
+                        text: 'Por favor, seleccione un empleado primero.'
+                    });
+                    return;
+                }
+                if (!entryDateInput.val() || !entryTimeInput.val()) {
+                    // --- USAR SWEETALERT2 PARA VALIDACIÓN ---
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Validación',
+                        text: 'La fecha y hora de entrada son obligatorias.'
+                    });
+                    return;
+                }
+
+                const logDto = {
+                    EmployeeId: parseInt(hdnEmployeeId.val()),
+                    FirstName: hdnFirstName.val(),
+                    MiddleName: hdnMiddleName.val(),
+                    LastName: hdnLastName.val(),
+                    SecondLastName: hdnSecondLastName.val(),
+                    CargoId: parseInt(hdnCargoId.val()),
+                    CargoName: hdnCargoName.val(),
+                    UnitId: hdnUnitId.val(),
+                    UnitName: hdnUnitName.val(),
+                    BranchId: parseInt(hdnBranchId.val()),
+                    BranchName: hdnBranchName.val(),
+                    EntryDate: entryDateInput.val(),
+                    EntryTime: entryTimeInput.val(),
+                    ExitDate: null,
+                    ExitTime: null,
+                    IsEntryRecorded: true,
+                    IsExitRecorded: false
+                };
+
+                await sendLogData('RecordEntryExit', logDto);
+            });
+
+            // Handle Record Exit button click
+            btnRecordExit.on('click', async function() {
+                if (!hdnEmployeeId.val()) {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Validación',
+                        text: 'Por favor, seleccione un empleado primero.'
+                    });
+                    return;
+                }
+                if (!hdnLogId.val() || hdnLogId.val() === '0') {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'No se encontró un registro abierto para registrar la salida.'
+                    });
+                    return;
+                }
+                if (!exitDateInput.val() || !exitTimeInput.val()) {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Validación',
+                        text: 'La fecha y hora de salida son obligatorias para registrar la salida.'
+                    });
+                    return;
+                }
+
+                if (!entryDateInput.val() || !entryTimeInput.val()) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error Interno',
+                        text: 'La fecha u hora de entrada del registro original no está disponible. Intente seleccionar el empleado de nuevo.'
+                    });
+                    return;
+                }
+
+                const logDto = {
+                    EmployeeId: parseInt(hdnEmployeeId.val()),
+                    FirstName: hdnFirstName.val(),
+                    MiddleName: hdnMiddleName.val(),
+                    LastName: hdnLastName.val(),
+                    SecondLastName: hdnSecondLastName.val(),
+                    CargoId: parseInt(hdnCargoId.val()),
+                    CargoName: hdnCargoName.val(),
+                    UnitId: hdnUnitId.val(),
+                    UnitName: hdnUnitName.val(),
+                    BranchId: parseInt(hdnBranchId.val()),
+                    BranchName: hdnBranchName.val(),
+                    EntryDate: entryDateInput.val(),
+                    EntryTime: entryTimeInput.val(),
+                    ExitDate: exitDateInput.val(),
+                    ExitTime: exitTimeInput.val(),
+                    IsEntryRecorded: true,
+                    IsExitRecorded: true
+                };
+
+                if (hdnConfirmedValidation.val() !== '') {
+                    logDto.ConfirmedValidation = hdnConfirmedValidation.val();
+                }
+
+                await sendLogData('UpdateLog', logDto, parseInt(hdnLogId.val()));
+            });
+
+            btnCancel.on('click', function() {
+                window.history.back();
+            });
+
+            // Initial form reset on page load
+            resetForm();
+        });
+    </script>
+}

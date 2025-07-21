@@ -1,0 +1,173 @@
+﻿@model IEnumerable<VCashApp.Models.Entities.TdvRutaDiaria>
+@using VCashApp.Enums
+@using VCashApp.Models.Entities
+@using Microsoft.AspNetCore.Mvc.Rendering
+
+@{
+    bool canEditPlaneador = ViewBag.canEditPlaneador ?? false;
+    bool canCargarEfectivoCef = ViewBag.canCargarEfectivoCef ?? false;
+    bool canDescargarEfectivoCef = ViewBag.canDescargarEfectivoCef ?? false;
+    bool canRegistrarSalidaSupervisor = ViewBag.canRegistrarSalidaSupervisor ?? false;
+    bool canRegistrarEntradaSupervisor = ViewBag.canRegistrarEntradaSupervisor ?? false;
+
+    int currentPage = ViewBag.CurrentPage ?? 1;
+    int totalPages = ViewBag.TotalPages ?? 1;
+    int totalData = ViewBag.TotalData ?? 0;
+    int pageSize = ViewBag.PageSize ?? 15;
+
+    const int maxPagesToShow = 5;
+    int halfPagesToShow = (maxPagesToShow - 1) / 2;
+
+    int startPage = Math.Max(1, currentPage - halfPagesToShow);
+    int endPage = Math.Min(totalPages, currentPage + halfPagesToShow);
+
+    if (endPage - startPage + 1 < maxPagesToShow)
+    {
+        if (startPage == 1)
+        {
+            endPage = Math.Min(totalPages, startPage + maxPagesToShow - 1);
+        }
+        else if (endPage == totalPages)
+        {
+            startPage = Math.Max(1, endPage - maxPagesToShow + 1);
+        }
+    }
+}
+
+<div class="table-section">
+    <div class="table-container">
+        <div class="table-wrapper">
+            <table class="table" id="dataTable">
+                <thead>
+                    <tr>
+                        <th>@Html.DisplayNameFor(model => model.Id)</th>
+                        <th>Ruta</th>
+                        <th>Sucursal</th>
+                        <th>Programación</th>
+                        <th>Planeador</th>
+                        <th>Tipo de Ruta</th>
+                        <th>Vehículo</th>
+                        <th>Estado</th>
+                        <th><i class="ri-list-settings-fill"></i></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model != null && Model.Any())
+                    {
+                        @foreach (var item in Model)
+                        {
+                            <tr>
+                                <td>@Html.DisplayFor(modelItem => item.Id)</td>
+                                <td>@Html.DisplayFor(modelItem => item.NombreRuta)</td>
+                                <td>@Html.DisplayFor(modelItem => item.NombreSucursal)</td>
+                                <td>@Html.DisplayFor(modelItem => item.FechaEjecucion)</td>
+                                <td>@Html.DisplayFor(modelItem => item.UsuarioPlaneacionObj.NombreUsuario)</td>
+                                <td>
+                                    @{
+                                        string tipoRuta = item.TipoRuta switch
+                                        {
+                                            "T" => "TRADICIONAL",
+                                            "A" => "ATM",
+                                            "M" => "MIXTA",
+                                            "L" => "LIBERACIÓN DE EFECTIVO",
+                                            _ => "Otro"
+                                        };
+                                    }
+                                    @tipoRuta
+                                </td>
+                                <td>
+                                    @{
+                                        string tipoVehiculo = item.TipoVehiculo switch
+                                        {
+                                            "C" => "CAMIONETA",
+                                            "B" => "BLINDADO",
+                                            "M" => "MOTO",
+                                            "T" => "CAMION",
+                                            _ => "Otro"
+                                        };
+                                    }
+                                    @tipoVehiculo
+                                </td>
+                                <td>@((EstadoRuta)item.Estado)</td>
+                                <td>
+                                    <div class="action-buttons d-flex align-items-center justify-content-center">
+                                        @if (item.Estado == (int)EstadoRuta.GENERADO && canEditPlaneador)
+                                        {
+                                            <a href="@Url.Action("Edit", "RutasDiarias", new { id = item.Id })" class="btn-edit">
+                                                <i class="ri-pencil-fill"></i>
+                                            </a>
+                                        }
+
+                                        @if (item.Estado == (int)EstadoRuta.PLANEADO && canCargarEfectivoCef)
+                                        {
+                                            <a href="@Url.Action("CargarEfectivo", "RutasDiarias", new { id = item.Id })" class="btn-load-cash">
+                                                <img src="~/assets/icon-img/loading.png" />
+                                            </a>
+                                        }
+
+                                        @if (item.Estado == (int)EstadoRuta.CARGUE_REGISTRADO && canRegistrarSalidaSupervisor && !item.FechaSalidaRuta.HasValue)
+                                        {
+                                            <a href="@Url.Action("RegistrarSalida", "RutasDiarias", new { id = item.Id })" class="btn-register-departure">
+                                                <img src="~/assets/icon-img/rout_exit.png" />
+                                            </a>
+                                        }
+
+                                        @if (item.Estado == (int)EstadoRuta.SALIDA_REGISTRADA && item.FechaSalidaRuta.HasValue && canDescargarEfectivoCef && !item.FechaDescargue.HasValue)
+                                        {
+                                            <a href="@Url.Action("DescargarEfectivo", "RutasDiarias", new { id = item.Id })" class="btn-unload-cash">
+                                                <img src="~/assets/icon-img/unloading.png" />
+                                            </a>
+                                        }
+
+                                        @if (item.Estado == (int)EstadoRuta.DESCARGUE_REGISTRADO && item.FechaDescargue.HasValue && canRegistrarEntradaSupervisor && item.FechaSalidaRuta.HasValue)
+                                        {
+                                            <a href="@Url.Action("RegistrarEntrada", "RutasDiarias", new { id = item.Id })" class="btn-register-arrival">
+                                                <img src="~/assets/icon-img/rout_entry.png" />
+                                            </a>
+                                        }
+                                        <a href="@Url.Action("DetailRUD", "RutasDiarias", new { id = item.Id })" class="btn-detail">
+                                            <i class="ri-eye-fill"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="9" class="text-center">No se encontraron rutas.</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="table-footer">
+        <div class="page-message">Página @currentPage de @totalPages (Total: @totalData registros)</div>
+        <div class="pagination">
+            <button class="page-link" data-page="1" @(currentPage == 1 ? "disabled" : "")>&laquo;</button>
+
+            <button class="page-link" data-page="@(currentPage - 1)" @(currentPage == 1 ? "disabled" : "")>&lt;</button>
+
+            @if (startPage > 1)
+            {
+                <button class="page-link" data-page="@(startPage - 1)">...</button>
+            }
+
+            @for (int i = startPage; i <= endPage; i++)
+            {
+                <button class="page-link @(currentPage == i ? "active-page" : "")" data-page="@i">@i</button>
+            }
+
+            @if (endPage < totalPages)
+            {
+                <button class="page-link" data-page="@(endPage + 1)">...</button>
+            }
+
+            <button class="page-link" data-page="@(currentPage + 1)" @(currentPage == totalPages ? "disabled" : "")>&gt;</button>
+
+            <button class="page-link" data-page="@totalPages" @(currentPage == totalPages ? "disabled" : "")>&raquo;</button>
+        </div>
+    </div>
+</div>

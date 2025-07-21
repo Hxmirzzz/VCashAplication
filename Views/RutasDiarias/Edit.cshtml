@@ -1,0 +1,300 @@
+﻿@model VCashApp.Models.Entities.TdvRutaDiaria
+@using VCashApp.Enums
+@using Microsoft.AspNetCore.Mvc.Rendering
+
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewData["Title"] = "Edit";
+}
+
+<div class="form-container">
+    <div class="card col-md-12">
+        <div class="card-body">
+            <form asp-action="Edit" asp-route-id="@Model.Id" method="post">
+                @Html.AntiForgeryToken()
+
+                @if (TempData["SuccessMessage"] != null)
+                {
+                    <div class="alert alert-success">@TempData["SuccessMessage"]</div>
+                }
+                @if (TempData["ErrorMessage"] != null)
+                {
+                    <div class="alert alert-danger">@TempData["ErrorMessage"]</div>
+                }
+
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                <input type="hidden" asp-for="Id" />
+                <input type="hidden" asp-for="CodSucursal" id="CodSucursalSelect" />
+                <input type="hidden" asp-for="NombreRuta" />
+                <input type="hidden" asp-for="NombreSucursal" />
+                <input type="hidden" asp-for="TipoRuta" />
+                <input type="hidden" asp-for="TipoVehiculo" />
+                <input type="hidden" asp-for="UsuarioPlaneacion" />
+                <input type="hidden" asp-for="CodRutaSuc" />
+
+
+                <fieldset disabled>
+                    <legend>Información Base de la Ruta</legend>
+                    <div class="row">
+                        <div class="form-group col-12 col-md-2">
+                            <label asp-for="Id" class="control-label"></label>
+                            <input asp-for="Id" class="form-control form-control-sm" />
+                        </div>
+                        <div class="form-group col-12 col-md-2">
+                            <label asp-for="CodRutaSuc" class="control-label">Código</label>
+                            <input asp-for="CodRutaSuc" class="form-control form-control-sm" />
+                        </div>
+                        <div class="form-group col-12 col-md-2">
+                            <label asp-for="NombreRuta" class="control-label">Nombre</label>
+                            <input asp-for="NombreRuta" class="form-control form-control-sm" />
+                        </div>
+                        <div class="form-group col-12 col-md-2">
+                            <label asp-for="TipoRuta" class="control-label">Tipo de Ruta</label>
+                            <select asp-for="TipoRuta" class="form-control form-control-sm" asp-items="ViewBag.TiposRuta">
+                            </select>
+                        </div>
+                        <div class="form-group col-12 col-md-2">
+                            <label asp-for="TipoVehiculo" class="control-label">Vehiculo</label>
+                            <select asp-for="TipoVehiculo" class="form-control form-control-sm" id="TipoVehiculoSelect" asp-items="ViewBag.TiposVehiculo">
+                            </select>
+                        </div>
+                        <div class="form-group col-12 col-md-2">
+                            <label asp-for="FechaEjecucion" class="control-label">Programación</label>
+                            <input asp-for="FechaEjecucion" type="date" class="form-control form-control-sm" />
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="form-group col-12 col-md-4">
+                            <label asp-for="NombreSucursal" class="control-label"></label>
+                            <input asp-for="NombreSucursal" class="form-control form-control-sm" />
+                        </div>
+                        <div class="form-group col-12 col-md-2">
+                            <label asp-for="FechaPlaneacion" class="control-label"></label>
+                            <input asp-for="FechaPlaneacion" type="date" class="form-control form-control-sm" />
+                        </div>
+                        <div class="form-group col-12 col-md-2">
+                            <label asp-for="HoraPlaneacion" class="control-label"></label>
+                            <input asp-for="HoraPlaneacion" type="time" step="1" class="form-control form-control-sm" />
+                        </div>
+                        <div class="form-group col-12 col-md-2">
+                            <label asp-for="UsuarioPlaneacion" class="control-label">Planeador</label>
+                            <input value="@(Model.UsuarioPlaneacionObj?.NombreUsuario ?? Model.UsuarioPlaneacion)" id="UsuarioPlanaeacion" class="form-control form-control-sm" />
+                        </div>
+                        <div class="form-group col-12 col-md-2">
+                            <label asp-for="Estado" class="control-label"></label>
+                            <select asp-for="Estado" class="form-control form-control-sm" asp-items="Html.GetEnumSelectList<EstadoRuta>()">
+                            </select>
+                        </div>
+                    </div>
+                </fieldset>
+                <hr />
+                <div class="title-container">
+                    <h5>Asignación de Personal y Vehículo</h5>
+                </div>
+
+                <div class="row">
+                    <div class="form-group col-12 col-md-6">
+                        <label for="CodVehiculoSelect" class="control-label">Vehículo</label>
+                        <select asp-for="CodVehiculo" class="form-control form-control-sm" id="CodVehiculoSelect" asp-items="ViewBag.Vehiculos">
+                            <option value="">-- Seleccione un Vehículo --</option>
+                        </select>
+                        <span asp-validation-for="CodVehiculo" class="text-danger"></span>
+                    </div>
+                    <div class="form-group col-12 col-md-6" id="jtFields">
+                        <label for="CedulaJTSelect" class="control-label">Jefe de Tripulación</label>
+                        <select asp-for="CedulaJT" class="form-control form-control-sm" id="CedulaJTSelect" asp-items="ViewBag.JefesTurno">
+                            <option value="">-- Seleccione un Jefe de Tripulación --</option>
+                        </select>
+                        <span asp-validation-for="CedulaJT" class="text-danger"></span>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="form-group col-12 col-md-6" id="conductorFields">
+                        <label for="CedulaConductorSelect" class="control-label">Conductor</label>
+                        <select asp-for="CedulaConductor" class="form-control form-control-sm" id="CedulaConductorSelect" asp-items="ViewBag.Conductores">
+                            <option value="">-- Seleccione un Conductor --</option>
+                        </select>
+                        <span asp-validation-for="CedulaConductor" class="text-danger"></span>
+                    </div>
+                    <div class="form-group col-12 col-md-6" id="tripulanteFields">
+                        <label for="CedulaTripulanteSelect" class="control-label">Tripulante</label>
+                        <select asp-for="CedulaTripulante" class="form-control form-control-sm" id="CedulaTripulanteSelect" asp-items="ViewBag.Tripulantes">
+                            <option value="">-- Seleccione un Tripulante --</option>
+                        </select>
+                        <span asp-validation-for="CedulaTripulante" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <input type="hidden" asp-for="NombreJT" id="NombreJTHidden" />
+                <input type="hidden" asp-for="CodCargoJT" id="CargoJTHidden" />
+                <input type="hidden" asp-for="FechaIngresoJT" />
+                <input type="hidden" asp-for="HoraIngresoJT" />
+                <input type="hidden" asp-for="FechaSalidaJT" />
+                <input type="hidden" asp-for="HoraSalidaJT" />
+                <input type="hidden" asp-for="NombreConductor" id="NombreConductorHidden"/>
+                <input type="hidden" asp-for="CodCargoConductor" id="CargoConductorHidden"/>
+                <input type="hidden" asp-for="NombreTripulante" id="NombreTripulanteHidden"/>
+                <input type="hidden" asp-for="CodCargoTripulante" id="CargoTripulanteHidden"/>
+                <input type="hidden" asp-for="FechaCargue" />
+                <input type="hidden" asp-for="HoraCargue" />
+                <input type="hidden" asp-for="CantBolsaBilleteEntrega" />
+                <input type="hidden" asp-for="CantBolsaMonedaEntrega" />
+                <input type="hidden" asp-for="UsuarioCEFCargue" />
+                <input type="hidden" asp-for="FechaDescargue" />
+                <input type="hidden" asp-for="HoraDescargue" />
+                <input type="hidden" asp-for="CantBolsaBilleteRecibe" />
+                <input type="hidden" asp-for="CantBolsaMonedaRecibe" />
+                <input type="hidden" asp-for="UsuarioCEFDescargue" />
+                <input type="hidden" asp-for="KmInicial" />
+                <input type="hidden" asp-for="FechaSalidaRuta" />
+                <input type="hidden" asp-for="HoraSalidaRuta" />
+                <input type="hidden" asp-for="UsuarioSupervisorApertura" />
+                <input type="hidden" asp-for="KmFinal" />
+                <input type="hidden" asp-for="FechaEntradaRuta" />
+                <input type="hidden" asp-for="HoraEntradaRuta" />
+                <input type="hidden" asp-for="UsuarioSupervisorCierre" />
+
+                <hr />
+
+                <div class="submit-container form-group col-md-12">
+                    <button type="submit" class="btn btn-primary">Guardar</button>
+                    <button type="button" class="btn btn-danger" onclick="window.location.href='@Url.Action("ListGenerated", "RutasDiarias")'">Cancelar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    <script>
+        $(document).ready(function () {
+            // Guardar valores iniciales para el reset si es necesario
+            $('#CedulaJTSelect').data('previous-value', '@Model.CedulaJT');
+            $('#CedulaConductorSelect').data('previous-value', '@Model.CedulaConductor');
+            $('#CedulaTripulanteSelect').data('previous-value', '@Model.CedulaTripulante');
+            $('#CodVehiculoSelect').data('previous-value', '@Model.CodVehiculo');
+            $('#TipoVehiculoSelect').data('previous-value', '@Model.TipoVehiculo');
+
+            // --- Función principal para actualizar campos derivados y dependientes ---
+            async function updateDerivedAndDependentFields(triggerElementId) {
+                // Parsear a número o null para pasar a C#
+                const selectedTipoVehiculo = $('#TipoVehiculoSelect').val();
+                const selectedCodVehiculo = $('#CodVehiculoSelect').val();
+                const selectedCodSucursalText = $('#CodSucursalSelect').val();
+                const selectedCodSucursal = selectedCodSucursalText ? parseInt(selectedCodSucursalText) : null; // Convierte a number o null
+
+                const selectedJTCedula = $('#CedulaJTSelect').val();
+                const selectedConductorCedula = $('#CedulaConductorSelect').val();
+                const selectedTripulanteCedula = $('#CedulaTripulanteSelect').val();
+
+                // 1. Lógica para mostrar/ocultar campos de personal según TipoVehiculo
+                const jtFields = $('#jtFields');
+                const conductorFields = $('#conductorFields');
+                const tripulanteFields = $('#tripulanteFields');
+
+                if (selectedTipoVehiculo === "M") { // Moto
+                    jtFields.hide();
+                    conductorFields.show();
+                    tripulanteFields.hide();
+                } else if (selectedTipoVehiculo === "B") { // Blindado
+                    jtFields.show();
+                    conductorFields.show();
+                    tripulanteFields.show();
+                } else if (selectedTipoVehiculo === "C" || selectedTipoVehiculo === "T") { // Camioneta, Camion
+                    jtFields.show();
+                    conductorFields.show();
+                    tripulanteFields.hide();
+                } else { // Si no se ha seleccionado tipo de vehículo
+                    jtFields.hide();
+                    conductorFields.hide();
+                    tripulanteFields.hide();
+                }
+
+                // 2. Lógica para rellenar SelectLists de Personal (JT, Conductor, Tripulante)
+                // Solo se dispararán las llamadas AJAX. El ViewBag ahora solo se usa para la carga inicial.
+                if (triggerElementId === 'CodSucursalSelect' || triggerElementId === 'initialLoad' || triggerElementId === 'TipoVehiculoSelect') {
+                    // Cargar Jefes de Turno por sucursal
+                    await populateSelect(
+                        $('#CedulaJTSelect'), selectedCodSucursal, '@Url.Action("GetJefesTurnoBySucursal", "RutasDiarias")', '-- Seleccione un Jefe de Tripulación --', selectedJTCedula
+                    );
+                    // Cargar Conductores por sucursal
+                    await populateSelect(
+                        $('#CedulaConductorSelect'), selectedCodSucursal, '@Url.Action("GetConductoresBySucursal", "RutasDiarias")', '-- Seleccione un Conductor --', selectedConductorCedula
+                    );
+                    // Cargar Tripulantes por sucursal
+                    await populateSelect(
+                        $('#CedulaTripulanteSelect'), selectedCodSucursal, '@Url.Action("GetTripulantesBySucursal", "RutasDiarias")', '-- Seleccione un Tripulante --', selectedTripulanteCedula
+                    );
+                    // RECARGAR VEHÍCULOS TAMBIÉN SI CAMBIA SUCURSAL O TIPO DE VEHÍCULO (o carga inicial)
+                    await populateSelect(
+                        $('#CodVehiculoSelect'), selectedCodSucursal, '@Url.Action("GetVehiclesBySucursal", "RutasDiarias")', '-- Seleccione un Vehículo --', selectedCodVehiculo
+                    );
+                }
+
+                // 3. Lógica para rellenar campos ocultos de Nombre y Cargo basado en la selección
+                await updateHiddenEmployeeFields(selectedJTCedula, 'JT');
+                await updateHiddenEmployeeFields(selectedConductorCedula, 'Conductor');
+                await updateHiddenEmployeeFields(selectedTripulanteCedula, 'Tripulante');
+            }
+
+            // --- Funciones Auxiliares para el JS de la Vista de Edición ---
+            async function populateSelect(selectElement, codSuc, url, defaultText, selectedValue) {
+                selectElement.empty();
+                selectElement.append($('<option></option>').val('').text(defaultText));
+
+                if (codSuc !== null) { // Solo hacer AJAX si codSuc no es null
+                    try {
+                        const response = await $.ajax({
+                            url: url, type: 'GET', data: { codSuc: codSuc }
+                        });
+                        if (response && response.length > 0) {
+                            $.each(response, function (index, item) {
+                                selectElement.append($('<option></option>').val(item.value).text(item.text));
+                            });
+                            if (selectedValue && selectElement.find('option[value="' + selectedValue + '"]').length) {
+                                selectElement.val(selectedValue);
+                            }
+                        }
+                    } catch (error) {
+                        console.error(`Error al obtener ${defaultText.toLowerCase()}:`, error);
+                    }
+                }
+            }
+
+            async function updateHiddenEmployeeFields(employeeCedula, employeeType) {
+                if (employeeCedula) {
+                    try {
+                        const response = await $.ajax({
+                            url: '@Url.Action("GetEmployeeDetails", "RutasDiarias")', type: 'GET', data: { cedula: employeeCedula }
+                        });
+                        if (response) {
+                            $(`#Nombre${employeeType}Hidden`).val(response.nombreCompleto || '');
+                            $(`#Cargo${employeeType}Hidden`).val(response.codCargo || '');
+                        }
+                    } catch (error) {
+                        console.error(`Error al obtener detalles del ${employeeType}:`, error);
+                    }
+                } else {
+                    $(`#Nombre${employeeType}Hidden`).val('');
+                    $(`#Cargo${employeeType}Hidden`).val('');
+                }
+            }
+
+            // --- Eventos de Cambio ---
+            $('#CodVehiculoSelect').change(function () { updateDerivedAndDependentFields('CodVehiculoSelect'); });
+            $('#TipoVehiculoSelect').change(function () { updateDerivedAndDependentFields('TipoVehiculoSelect'); });
+            $('#CodSucursalSelect').change(function () { updateDerivedAndDependentFields('CodSucursalSelect'); });
+            $('#CedulaJTSelect').change(function () { updateDerivedAndDependentFields('CedulaJTSelect'); });
+            $('#CedulaConductorSelect').change(function () { updateDerivedAndDependentFields('CedulaConductorSelect'); });
+            $('#CedulaTripulanteSelect').change(function () { updateDerivedAndDependentFields('CedulaTripulanteSelect'); });
+
+            // Llamada inicial para poblar los campos y SelectLists al cargar la página
+            updateDerivedAndDependentFields('initialLoad');
+        });
+    </script>
+}

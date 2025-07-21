@@ -1,0 +1,291 @@
+﻿@model VCashApp.Models.Entities.SegRegistroEmpleado
+@using VCashApp.Services
+@using VCashApp.Models.Entities
+@using System.Globalization
+@using System.IO
+
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = "Edit";
+
+    string userName = ViewBag.UserName ?? "N/A";
+    string pageName = ViewBag.PageName ?? "Editar Registro de Empleado";
+    string unitName = ViewBag.UnidadName ?? "N/A";
+    string branchName = ViewBag.BranchName ?? "N/A";
+    string fullName = ViewBag.FullName ?? "N/A"; 
+
+    bool canEditLog = ViewBag.CanEditLog ?? false;
+}
+
+<div class="form-container">
+    <div class="card">
+        <div class="card-body">
+            <h4 class="mb-4">Información del Registro #@Model.Id</h4>
+            <hr />
+
+            <form id="editEmployeeLogForm">
+                @Html.AntiForgeryToken()
+                <input type="hidden" id="hdnLogId" name="Id" value="@Model.Id" />
+                <input type="hidden" id="hdnEmployeeId" name="EmployeeId" value="@Model.CodCedula" />
+                <input type="hidden" id="hdnCargoId" name="CargoId" value="@Model.Empleado?.CodCargo" />
+                <input type="hidden" id="hdnUnitId" name="UnitId" value="@Model.Empleado?.Cargo?.Unidad?.CodUnidad" />
+                <input type="hidden" id="hdnBranchId" name="BranchId" value="@Model.CodSucursal" />
+                <input type="hidden" id="hdnConfirmedValidation" name="ConfirmedValidation" value="" />
+
+
+                <div class="row d-flex justify-content-center align-items-center">
+                    <div class="col-md-2">
+                        <div class="reg-preview-container">
+                            <img id="photo-preview" src="@(Model.Empleado?.FotoUrl != null ? Url.Content($"~/assets/profile-img/{System.IO.Path.GetFileName(Model.Empleado.FotoUrl)}") : Url.Content("~/assets/profile-img/default-profile.jpg"))" alt="Vista Previa de Foto">
+                        </div>
+                    </div>
+                    <div class="col-md-10">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <label for="employeeIdDisplay" class="form-label">Número de Cédula:</label>
+                                <input type="text" style="font-weight: bold;" class="form-control form-control-sm" id="employeeIdDisplay" value="@Model.CodCedula" readonly>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="fullNameDisplay">Nombre del Empleado:</label>
+                                <input type="text" style="font-weight: bold;" class="form-control form-control-sm" id="fullNameDisplay" value="@(Model.Empleado?.NombreCompleto ?? $"{Model.Empleado?.PrimerNombre} {Model.Empleado?.PrimerApellido}")" readonly>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-4">
+                                <label for="cargoNameDisplay">Cargo:</label>
+                                <input type="text" class="form-control form-control-sm" id="cargoNameDisplay" value="@Model.Empleado?.Cargo?.NombreCargo" readonly>
+                            </div>
+                            <div class="col-md-4">
+                                <label for="unitNameDisplay">Unidad:</label>
+                                <input type="text" class="form-control form-control-sm" id="unitNameDisplay" value="@Model.Empleado?.Cargo?.Unidad?.NombreUnidad" readonly>
+                            </div>
+                            <div class="col-md-4">
+                                <label for="branchNameDisplay">Sucursal:</label>
+                                <input type="text" class="form-control form-control-sm" id="branchNameDisplay" value="@Model.Sucursal?.NombreSucursal" readonly>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <hr />
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <label for="entryDateInput">Fecha de Entrada:</label>
+                        <input type="date" class="form-control form-control-sm" id="entryDateInput" name="EntryDate" value="@(Model.FechaEntrada.ToString("yyyy-MM-dd"))">
+                    </div>
+                    <div class="col-md-6">
+                        <label for="entryTimeInput">Hora de Entrada:</label>
+                        <input type="time" class="form-control form-control-sm" id="entryTimeInput" name="EntryTime" value="@(Model.HoraEntrada.ToString("HH:mm"))">
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <label for="exitDateInput">Fecha de Salida:</label>
+                        <input type="date" class="form-control form-control-sm" id="exitDateInput" name="ExitDate" value="@(Model.FechaSalida?.ToString("yyyy-MM-dd"))">
+                    </div>
+                    <div class="col-md-6">
+                        <label for="exitTimeInput">Hora de Salida:</label>
+                        <input type="time" class="form-control form-control-sm" id="exitTimeInput" name="ExitTime" value="@(Model.HoraSalida?.ToString("HH:mm"))">
+                    </div>
+                </div>
+
+                <div class="submit-container-reg form-group col-md-12 mt-4">
+                    <button type="submit" class="btn btn-primary" id="btnUpdateLog" @(canEditLog ? "" : "disabled")>Guardar</button>
+                    <button type="button" class="btn btn-exit" id="btnCancel">Cancelar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    <script>
+        $(document).ready(function () {
+            const hdnLogId = $('#hdnLogId');
+            const hdnEmployeeId = $('#hdnEmployeeId');
+            const hdnConfirmedValidation = $('#hdnConfirmedValidation');
+            const exitDateInput = $('#exitDateInput');
+            const exitTimeInput = $('#exitTimeInput');
+            const entryDateDisplay = $('#entryDateDisplay');
+            const entryTimeDisplay = $('#entryTimeDisplay');
+            const hdnFirstName = $('#hdnFirstName');
+            const hdnMiddleName = $('#hdnMiddleName');
+            const hdnLastName = $('#hdnLastName');
+            const hdnSecondLastName = $('#hdnSecondLastName');
+
+            const hdnCargoId = $('#hdnCargoId');
+            const hdnCargoName = $('#hdnCargoName');
+
+            const hdnUnitId = $('#hdnUnitId');
+            const hdnUnitName = $('#hdnUnitName');
+            const hdnUnitType = $('#hdnUnitType');
+
+            const hdnBranchId = $('#hdnBranchId');
+            const hdnBranchName = $('#hdnBranchName');
+
+            const btnRecordManualExit = $('#btnRecordManualExit');
+            const btnCancel = $('#btnCancel');
+
+            hdnConfirmedValidation.val('');
+
+            async function sendManualExitData(data) {
+                const logId = hdnLogId.val();
+                const isConfirmationRetry = data.ConfirmedValidation !== undefined && data.ConfirmedValidation !== null && data.ConfirmedValidation !== '';
+
+                if (!logId || logId === '0') {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error Interno',
+                        text: 'ID de registro no válido para la salida manual.'
+                    });
+                    return { success: false, message: 'ID de registro no válido.' };
+                }
+
+                Swal.fire({
+                    title: 'Registrando Salida...',
+                    text: 'Por favor, espere.',
+                    allowOutsideClick: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    }
+                });
+
+                try {
+                    const response = await fetch(`/EmployeeLog/RecordManualExit/${logId}`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
+                        },
+                        body: JSON.stringify(data)
+                    });
+
+                    if (!response.ok) {
+                        const errorText = await response.text();
+                        console.error(`Error HTTP de AJAX: ${response.status} ${response.statusText} - ${errorText}`);
+                        const msg = `Error del servidor: ${response.status} ${response.statusText}`;
+                        Swal.close();
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error del Servidor',
+                            text: msg
+                        });
+                        return { success: false, message: msg };
+                    }
+
+                    const result = await response.json();
+
+                    if (result.needsConfirmation && !isConfirmationRetry) {
+                        Swal.close();
+
+                        Swal.fire({
+                            title: 'Confirmación Requerida',
+                            text: result.message + " ¿Desea continuar con el registro de salida manual?",
+                            icon: 'warning',
+                            showCancelButton: true,
+                            confirmButtonColor: '#3085d6',
+                            cancelButtonColor: '#d33',
+                            confirmButtonText: 'Sí, Continuar',
+                            cancelButtonText: 'Cancelar'
+                        }).then(async (swalResult) => { 
+                            if (swalResult.isConfirmed) {
+                                const currentLogDto = { ...data };
+                                currentLogDto.ConfirmedValidation = result.validationType;
+                                await sendManualExitData(currentLogDto);
+                            } else {
+                                Swal.close();
+                                Swal.fire('Cancelado', 'La operación de salida manual ha sido cancelada.', 'info');
+                            }
+                        });
+                        return { success: false, needsConfirmation: true, message: result.message, validationType: result.validationType, hoursWorked: result.hoursWorked };
+                    } else {
+                        if (result.success) {
+                            Swal.close();
+                            await Swal.fire({
+                                icon: 'success',
+                                title: '¡Éxito!',
+                                text: result.message
+                            });
+                            window.location.href = '@Url.Action("EmployeeLog", "EmployeeLog")';
+                            return result;
+                        } else {
+                            Swal.close();
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Error',
+                                text: result.message
+                            });
+                            hdnConfirmedValidation.val('');
+                            return result;
+                        }
+                    }
+                } catch (error) {
+                    console.error('Error al enviar datos de salida manual:', error);
+                    Swal.close();
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error Inesperado',
+                        text: 'Ocurrió un error inesperado. Por favor, revise la consola para más detalles.'
+                    });
+                    hdnConfirmedValidation.val('');
+                    return { success: false, message: "Ocurrió un error inesperado. Por favor, revise la consola." };
+                }
+            }
+
+            btnRecordManualExit.on('click', async function(e) {
+                e.preventDefault();
+
+                if (!exitDateInput.val() || !exitTimeInput.val()) {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Validación',
+                        text: 'La fecha y hora de salida son obligatorias para registrar la salida manual.'
+                    });
+                    return;
+                }
+
+                const logDto = {
+                    Id: parseInt(hdnLogId.val()),
+                    EmployeeId: parseInt(hdnEmployeeId.val()),
+
+                    FirstName: hdnFirstName.val(),
+                    MiddleName: hdnMiddleName.val(),
+                    LastName: hdnLastName.val(),
+                    SecondLastName: hdnSecondLastName.val(),
+
+                    CargoId: parseInt(hdnCargoId.val()),
+                    CargoName: hdnCargoName.val(),
+
+                    UnitId: hdnUnitId.val(),
+                    UnitName: hdnUnitName.val(),
+
+                    BranchId: parseInt(hdnBranchId.val()),
+                    BranchName: hdnBranchName.val(),
+
+                    EntryDate: entryDateDisplay.val(),
+                    EntryTime: entryTimeDisplay.val(),
+
+                    ExitDate: exitDateInput.val(),
+                    ExitTime: exitTimeInput.val(),
+
+                    IsEntryRecorded: true,
+                    IsExitRecorded: true,
+
+                    ConfirmedValidation: hdnConfirmedValidation.val()
+                };
+
+                await sendManualExitData(logDto);
+            });
+
+            btnCancel.on('click', function() {
+                window.history.back();
+            });
+        });
+    </script>
+}

@@ -1,0 +1,211 @@
+﻿@model VCashApp.Models.Entities.TdvRutaDiaria
+@using VCashApp.Enums
+@using Microsoft.AspNetCore.Mvc.Rendering
+
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = "Detalle de Ruta";
+
+    string returnUrl = ViewBag.ReturnUrl as string ?? Url.Action("OperationsDashboard", "RutasDiarias");
+}
+
+<div class="form-container">
+    <div class="card col-md-12">
+        <div class="card-body">
+            <fieldset>
+                <legend>Información Base de la Ruta</legend>
+                <div class="row">
+                    <div class="form-group col-12 col-md-2">
+                        <label asp-for="Id" class="control-label"></label>
+                        <input asp-for="Id" class="form-control form-control-sm" readonly />
+                    </div>
+                    <div class="form-group col-12 col-md-2">
+                        <label asp-for="CodRutaSuc" class="control-label">Código Ruta Maestra</label>
+                        <input asp-for="CodRutaSuc" class="form-control form-control-sm" readonly />
+                    </div>
+                    <div class="form-group col-12 col-md-2">
+                        <label asp-for="NombreRuta" class="control-label">Nombre Ruta Maestra</label>
+                        <input asp-for="NombreRuta" class="form-control form-control-sm" readonly />
+                    </div>
+                    <div class="form-group col-12 col-md-2">
+                        <label asp-for="TipoRuta" class="control-label">Tipo de Ruta</label>
+                        <input class="form-control form-control-sm" value="@(Model.TipoRuta switch {"T" => "TRADICIONAL", "A" => "ATM", "M" => "MIXTA", "L" => "LIBERACIÓN DE EFECTIVO", _ => Model.TipoRuta})" readonly />
+                    </div>
+                    <div class="form-group col-12 col-md-2">
+                        <label asp-for="TipoVehiculo" class="control-label">Vehículo</label>
+                        <input class="form-control form-control-sm" value="@(Model.TipoVehiculo switch {"C" => "CAMIONETA", "B" => "BLINDADO", "M" => "MOTO", "T" => "CAMION", _ => Model.TipoVehiculo})" readonly />
+                    </div>
+                    <div class="form-group col-12 col-md-2">
+                        <label asp-for="FechaEjecucion" class="control-label">Programación</label>
+                        <input asp-for="FechaEjecucion" type="date" class="form-control form-control-sm" value="@(Model.FechaEjecucion.ToString("yyyy-MM-dd"))" readonly /> @* Add readonly & format *@
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="form-group col-12 col-md-4">
+                        <label asp-for="NombreSucursal" class="control-label"></label>
+                        <input asp-for="NombreSucursal" class="form-control form-control-sm" readonly />
+                    </div>
+                    <div class="form-group col-12 col-md-2">
+                        <label asp-for="FechaPlaneacion" class="control-label"></label>
+                        <input asp-for="FechaPlaneacion" type="date" class="form-control form-control-sm" value="@(Model.FechaPlaneacion.ToString("yyyy-MM-dd"))" readonly /> @* Add readonly & format *@
+                    </div>
+                    <div class="form-group col-12 col-md-2">
+                        <label asp-for="HoraPlaneacion" class="control-label"></label>
+                        <input asp-for="HoraPlaneacion" type="time" class="form-control form-control-sm" value="@(Model.HoraPlaneacion.ToString("HH:mm"))" readonly /> @* Add readonly & format *@
+                    </div>
+                    <div class="form-group col-12 col-md-2">
+                        <label asp-for="UsuarioPlaneacion" class="control-label">Planeador</label>
+                        <input value="@(Model.UsuarioPlaneacionObj?.NombreUsuario ?? Model.UsuarioPlaneacion)" class="form-control form-control-sm" readonly /> @* Add readonly *@
+                    </div>
+                    <div class="form-group col-12 col-md-2">
+                        <label asp-for="Estado" class="control-label"></label>
+                        <input class="form-control form-control-sm" value="@(((EstadoRuta)Model.Estado).ToString().Replace("_", " "))" readonly />
+                    </div>
+                </div>
+            </fieldset>
+
+            <hr />
+
+            <fieldset>
+                <legend>Asignación de Personal y Vehículo</legend>
+                <div class="row">
+                    <div class="form-group col-12 col-md-3">
+                        <label asp-for="CodVehiculo" class="control-label">Vehículo</label>
+                        <input asp-for="CodVehiculo" class="form-control form-control-sm" readonly />
+                    </div>
+                    <div class="form-group col-12 col-md-3">
+                        <label asp-for="NombreJT" class="control-label">Jefe de Tripulación</label>
+                        <input asp-for="NombreJT" class="form-control form-control-sm" readonly />
+                    </div>
+                    <div class="form-group col-12 col-md-3">
+                        <label asp-for="NombreConductor" class="control-label">Conductor</label>
+                        <input asp-for="NombreConductor" class="form-control form-control-sm" readonly />
+                    </div>
+                    <div class="form-group col-12 col-md-3">
+                        <label asp-for="NombreTripulante" class="control-label">Tripulante</label>
+                        <input asp-for="NombreTripulante" class="form-control form-control-sm" readonly />
+                    </div>
+                </div>
+            </fieldset>
+
+            <hr />
+
+            <fieldset>
+                <legend>Registro de Cargue de Efectivo</legend>
+                <div class="row">
+                    <div class="form-group col-12 col-md-2">
+                        <label asp-for="FechaCargue" class="control-label">Fecha de Cargue</label>
+                        <input asp-for="FechaCargue" type="date" class="form-control form-control-sm" value="@(Model.FechaCargue?.ToString("yyyy-MM-dd"))" readonly />
+                    </div>
+                    <div class="form-group col-12 col-md-2">
+                        <label asp-for="HoraCargue" class="control-label">Hora de Cargue</label>
+                        <input asp-for="HoraCargue" type="time" class="form-control form-control-sm" value="@(Model.HoraCargue?.ToString("HH:mm"))" readonly />
+                    </div>
+                    <div class="form-group col-12 col-md-2">
+                        <label asp-for="CantBolsaBilleteEntrega" class="control-label">Bolsas Billete Entregadas</label>
+                        <input asp-for="CantBolsaBilleteEntrega" type="number" class="form-control form-control-sm" readonly />
+                    </div>
+                    <div class="form-group col-12 col-md-2">
+                        <label asp-for="CantBolsaMonedaEntrega" class="control-label">Bolsas Moneda Entregadas</label>
+                        <input asp-for="CantBolsaMonedaEntrega" type="number" class="form-control form-control-sm" readonly />
+                    </div>
+                    <div class="form-group col-12 col-md-4">
+                        <label asp-for="UsuarioCEFCargue" class="control-label">Usuario CEF Cargue</label>
+                        <input value="@(Model.UsuarioCEFCargueObj?.NombreUsuario ?? Model.UsuarioCEFCargue)" class="form-control form-control-sm" readonly />
+                    </div>
+                </div>
+            </fieldset>
+
+            <hr />
+
+            <fieldset>
+                <legend>Registro de Salida del Vehículo</legend>
+                <div class="row">
+                    <div class="form-group col-12 col-md-4">
+                        <label asp-for="KmInicial" class="control-label">Kilometraje Inicial</label>
+                        <input asp-for="KmInicial" type="number" class="form-control form-control-sm" readonly />
+                    </div>
+                    <div class="form-group col-12 col-md-2">
+                        <label asp-for="FechaSalidaRuta" class="control-label">Fecha de Salida</label>
+                        <input asp-for="FechaSalidaRuta" type="date" class="form-control form-control-sm" value="@(Model.FechaSalidaRuta?.ToString("yyyy-MM-dd"))" readonly /> @* Add readonly & format *@
+                    </div>
+                    <div class="form-group col-12 col-md-2">
+                        <label asp-for="HoraSalidaRuta" class="control-label">Hora de Salida</label>
+                        <input asp-for="HoraSalidaRuta" type="time" class="form-control form-control-sm" value="@(Model.HoraSalidaRuta?.ToString("HH:mm"))" readonly /> @* Add readonly & format *@
+                    </div>
+                    <div class="form-group col-12 col-md-4">
+                        <label asp-for="UsuarioSupervisorApertura" class="control-label">Supervisor Salida</label>
+                        <input value="@(Model.UsuarioSupervisorAperturaObj?.NombreUsuario ?? Model.UsuarioSupervisorApertura)" class="form-control form-control-sm" readonly />
+                    </div>
+                </div>
+            </fieldset>
+
+            <hr />
+
+            <fieldset>
+                <legend>Registro de Descargue de Efectivo</legend>
+                <div class="row">
+                    <div class="form-group col-12 col-md-2">
+                        <label asp-for="FechaDescargue" class="control-label">Fecha de Descargue</label>
+                        <input asp-for="FechaDescargue" type="date" class="form-control form-control-sm" value="@(Model.FechaDescargue?.ToString("yyyy-MM-dd"))" readonly />
+                    </div>
+                    <div class="form-group col-12 col-md-2">
+                        <label asp-for="HoraDescargue" class="control-label">Hora de Descargue</label>
+                        <input asp-for="HoraDescargue" type="time" class="form-control form-control-sm" value="@(Model.HoraDescargue?.ToString("HH:mm"))" readonly />
+                    </div>
+                    <div class="form-group col-12 col-md-2">
+                        <label asp-for="CantBolsaBilleteRecibe" class="control-label">Bolsas Billete Recibidas</label>
+                        <input asp-for="CantBolsaBilleteRecibe" type="number" class="form-control form-control-sm" readonly />
+                    </div>
+                    <div class="form-group col-12 col-md-2">
+                        <label asp-for="CantBolsaMonedaRecibe" class="control-label">Bolsas Moneda Recibidas</label>
+                        <input asp-for="CantBolsaMonedaRecibe" type="number" class="form-control form-control-sm" readonly />
+                    </div>
+                    <div class="form-group col-12 col-md-4">
+                        <label asp-for="UsuarioCEFDescargue" class="control-label">Usuario CEF Descargue</label>
+                        <input value="@(Model.UsuarioCEFDescargueObj?.NombreUsuario ?? Model.UsuarioCEFDescargue)" class="form-control form-control-sm" readonly />
+                    </div>
+                </div>
+            </fieldset>
+
+            <hr />
+
+            <fieldset>
+                <legend>Registro de Entrada del Vehículo</legend>
+                <div class="row">
+                    <div class="form-group col-12 col-md-4">
+                        <label asp-for="KmFinal" class="control-label">Kilometraje Final</label>
+                        <input asp-for="KmFinal" type="number" class="form-control form-control-sm" readonly />
+                    </div>
+                    <div class="form-group col-12 col-md-2">
+                        <label asp-for="FechaEntradaRuta" class="control-label">Fecha de Entrada</label>
+                        <input asp-for="FechaEntradaRuta" type="date" class="form-control form-control-sm"
+                               value="@(Model.FechaEntradaRuta?.ToString("yyyy-MM-dd"))" readonly />
+                    </div>
+                    <div class="form-group col-12 col-md-2">
+                        <label asp-for="HoraEntradaRuta" class="control-label">Hora de Entrada</label>
+                        <input asp-for="HoraEntradaRuta" type="time" class="form-control form-control-sm"
+                               value="@(Model.HoraEntradaRuta?.ToString("HH:mm"))" readonly />
+                    </div>
+                    <div class="form-group col-12 col-md-4">
+                        <label asp-for="UsuarioSupervisorCierre" class="control-label">Supervisor Entrada</label>
+                        <input value="@(Model.UsuarioSupervisorCierreObj?.NombreUsuario ?? Model.UsuarioSupervisorCierre)" class="form-control form-control-sm" readonly />
+                    </div>
+                </div>
+            </fieldset>
+
+            <hr />
+
+            <div class="submit-container form-group col-md-12 mt-4">
+                <button type="button" class="btn btn-secondary" onclick="window.location.href='@returnUrl'">Volver</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

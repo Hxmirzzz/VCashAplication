@@ -1,0 +1,1385 @@
+2025-07-04 15:08:32.043 -05:00 [WRN] Sensitive data logging is enabled. Log entries and exception messages may include sensitive application data; this mode should only be enabled during development.
+2025-07-04 15:08:32.153 -05:00 [INF] warn: 04/07/2025 15:08:32.152 CoreEventId.SensitiveDataLoggingEnabledWarning[10400] (Microsoft.EntityFrameworkCore.Infrastructure) 
+      Sensitive data logging is enabled. Log entries and exception messages may include sensitive application data; this mode should only be enabled during development.
+2025-07-04 15:08:33.521 -05:00 [INF] [SeedData] Rol 'Admin' ya existe.
+2025-07-04 15:08:33.534 -05:00 [INF] [SeedData] Rol 'Planeador' ya existe.
+2025-07-04 15:08:33.537 -05:00 [INF] [SeedData] Rol 'CEF' ya existe.
+2025-07-04 15:08:33.541 -05:00 [INF] [SeedData] Rol 'Supervisor' ya existe.
+2025-07-04 15:08:33.544 -05:00 [INF] [SeedData] Rol 'ADATM01' ya existe.
+2025-07-04 15:08:33.548 -05:00 [INF] [SeedData] Rol 'ADCEF01' ya existe.
+2025-07-04 15:08:33.551 -05:00 [INF] [SeedData] Rol 'ADCF01' ya existe.
+2025-07-04 15:08:33.554 -05:00 [INF] [SeedData] Rol 'ADGRG01' ya existe.
+2025-07-04 15:08:33.558 -05:00 [INF] [SeedData] Rol 'ADMTF01' ya existe.
+2025-07-04 15:08:33.563 -05:00 [INF] [SeedData] Rol 'ADSER01' ya existe.
+2025-07-04 15:08:33.566 -05:00 [INF] [SeedData] Rol 'ADSER02' ya existe.
+2025-07-04 15:08:33.570 -05:00 [INF] [SeedData] Rol 'ADTH01' ya existe.
+2025-07-04 15:08:33.573 -05:00 [INF] [SeedData] Rol 'ADTI01' ya existe.
+2025-07-04 15:08:33.577 -05:00 [INF] [SeedData] Rol 'COCEF01' ya existe.
+2025-07-04 15:08:33.582 -05:00 [INF] [SeedData] Rol 'COSTV01' ya existe.
+2025-07-04 15:08:33.586 -05:00 [INF] [SeedData] Rol 'GRSER001' ya existe.
+2025-07-04 15:08:33.590 -05:00 [INF] [SeedData] Rol 'SUPTV01' ya existe.
+2025-07-04 15:08:33.701 -05:00 [INF] [SeedData] Usuario 'adminvcash' ya existe.
+2025-07-04 15:08:33.708 -05:00 [INF] [SeedData] Usuario 'planeador1' ya existe.
+2025-07-04 15:08:33.713 -05:00 [INF] [SeedData] Usuario 'planeador2' ya existe.
+2025-07-04 15:08:33.717 -05:00 [INF] [SeedData] Usuario 'cef1' ya existe.
+2025-07-04 15:08:33.722 -05:00 [INF] [SeedData] Usuario 'supervisor1' ya existe.
+2025-07-04 15:08:33.732 -05:00 [INF] [SeedData] Iniciando seeding de permisos por sucursal...
+2025-07-04 15:08:33.961 -05:00 [INF] [SeedData] Seeding de permisos por sucursal completado.
+2025-07-04 15:08:33.970 -05:00 [INF] [SeedData] Iniciando seeding de permisos de perfiles y vistas...
+2025-07-04 15:08:34.124 -05:00 [INF] [SeedData] Vistas creadas/actualizadas.
+2025-07-04 15:08:34.208 -05:00 [INF] [SeedData] Permisos RUD actualizados para rol Admin.
+2025-07-04 15:08:34.215 -05:00 [INF] [SeedData] Permisos RUD actualizados para rol Planeador.
+2025-07-04 15:08:34.223 -05:00 [INF] [SeedData] Permisos RUD actualizados para rol CEF.
+2025-07-04 15:08:34.229 -05:00 [INF] [SeedData] Permisos RUD actualizados para rol Supervisor.
+2025-07-04 15:08:34.246 -05:00 [INF] [SeedData] Permisos RUDHIS actualizados para rol Admin.
+2025-07-04 15:08:34.251 -05:00 [INF] [SeedData] Permisos RUDHIS actualizados para rol Planeador.
+2025-07-04 15:08:34.256 -05:00 [INF] [SeedData] Permisos RUDHIS actualizados para rol CEF.
+2025-07-04 15:08:34.265 -05:00 [INF] [SeedData] Permisos RUDHIS actualizados para rol Supervisor.
+2025-07-04 15:08:34.492 -05:00 [INF] [SeedData] Seeding de permisos de perfiles y vistas completado.
+2025-07-04 15:08:35.053 -05:00 [ERR] Hosting failed to start
+System.IO.IOException: Failed to bind to address https://127.0.0.1:7024: address already in use.
+ ---> Microsoft.AspNetCore.Connections.AddressInUseException: Solo se permite un uso de cada dirección de socket (protocolo/dirección de red/puerto)
+ ---> System.Net.Sockets.SocketException (10048): Solo se permite un uso de cada dirección de socket (protocolo/dirección de red/puerto)
+   at System.Net.Sockets.Socket.UpdateStatusAfterSocketErrorAndThrowException(SocketError error, Boolean disconnectOnFailure, String callerName)
+   at System.Net.Sockets.Socket.DoBind(EndPoint endPointSnapshot, SocketAddress socketAddress)
+   at System.Net.Sockets.Socket.Bind(EndPoint localEP)
+   at Microsoft.AspNetCore.Server.Kestrel.Transport.Sockets.SocketTransportOptions.CreateDefaultBoundListenSocket(EndPoint endpoint)
+   at Microsoft.AspNetCore.Server.Kestrel.Transport.Sockets.SocketConnectionListener.Bind()
+   --- End of inner exception stack trace ---
+   at Microsoft.AspNetCore.Server.Kestrel.Transport.Sockets.SocketConnectionListener.Bind()
+   at Microsoft.AspNetCore.Server.Kestrel.Transport.Sockets.SocketTransportFactory.BindAsync(EndPoint endpoint, CancellationToken cancellationToken)
+   at Microsoft.AspNetCore.Server.Kestrel.Core.Internal.Infrastructure.TransportManager.BindAsync(EndPoint endPoint, ConnectionDelegate connectionDelegate, EndpointConfig endpointConfig, CancellationToken cancellationToken)
+   at Microsoft.AspNetCore.Server.Kestrel.Core.KestrelServerImpl.<>c__DisplayClass28_0`1.<<StartAsync>g__OnBind|0>d.MoveNext()
+--- End of stack trace from previous location ---
+   at Microsoft.AspNetCore.Server.Kestrel.Core.Internal.AddressBinder.BindEndpointAsync(ListenOptions endpoint, AddressBindContext context, CancellationToken cancellationToken)
+   --- End of inner exception stack trace ---
+   at Microsoft.AspNetCore.Server.Kestrel.Core.Internal.AddressBinder.BindEndpointAsync(ListenOptions endpoint, AddressBindContext context, CancellationToken cancellationToken)
+   at Microsoft.AspNetCore.Server.Kestrel.Core.LocalhostListenOptions.BindAsync(AddressBindContext context, CancellationToken cancellationToken)
+   at Microsoft.AspNetCore.Server.Kestrel.Core.Internal.AddressBinder.AddressesStrategy.BindAsync(AddressBindContext context, CancellationToken cancellationToken)
+   at Microsoft.AspNetCore.Server.Kestrel.Core.KestrelServerImpl.BindAsync(CancellationToken cancellationToken)
+   at Microsoft.AspNetCore.Server.Kestrel.Core.KestrelServerImpl.StartAsync[TContext](IHttpApplication`1 application, CancellationToken cancellationToken)
+   at Microsoft.AspNetCore.Hosting.GenericWebHostService.StartAsync(CancellationToken cancellationToken)
+   at Microsoft.Extensions.Hosting.Internal.Host.<StartAsync>b__14_1(IHostedService service, CancellationToken token)
+   at Microsoft.Extensions.Hosting.Internal.Host.ForeachService[T](IEnumerable`1 services, CancellationToken token, Boolean concurrent, Boolean abortOnFirstException, List`1 exceptions, Func`3 operation)
+2025-07-04 15:11:38.950 -05:00 [WRN] Sensitive data logging is enabled. Log entries and exception messages may include sensitive application data; this mode should only be enabled during development.
+2025-07-04 15:11:39.058 -05:00 [INF] warn: 04/07/2025 15:11:39.057 CoreEventId.SensitiveDataLoggingEnabledWarning[10400] (Microsoft.EntityFrameworkCore.Infrastructure) 
+      Sensitive data logging is enabled. Log entries and exception messages may include sensitive application data; this mode should only be enabled during development.
+2025-07-04 15:11:40.339 -05:00 [INF] [SeedData] Rol 'Admin' ya existe.
+2025-07-04 15:11:40.352 -05:00 [INF] [SeedData] Rol 'Planeador' ya existe.
+2025-07-04 15:11:40.356 -05:00 [INF] [SeedData] Rol 'CEF' ya existe.
+2025-07-04 15:11:40.360 -05:00 [INF] [SeedData] Rol 'Supervisor' ya existe.
+2025-07-04 15:11:40.365 -05:00 [INF] [SeedData] Rol 'ADATM01' ya existe.
+2025-07-04 15:11:40.369 -05:00 [INF] [SeedData] Rol 'ADCEF01' ya existe.
+2025-07-04 15:11:40.373 -05:00 [INF] [SeedData] Rol 'ADCF01' ya existe.
+2025-07-04 15:11:40.394 -05:00 [INF] [SeedData] Rol 'ADGRG01' ya existe.
+2025-07-04 15:11:40.399 -05:00 [INF] [SeedData] Rol 'ADMTF01' ya existe.
+2025-07-04 15:11:40.403 -05:00 [INF] [SeedData] Rol 'ADSER01' ya existe.
+2025-07-04 15:11:40.408 -05:00 [INF] [SeedData] Rol 'ADSER02' ya existe.
+2025-07-04 15:11:40.412 -05:00 [INF] [SeedData] Rol 'ADTH01' ya existe.
+2025-07-04 15:11:40.420 -05:00 [INF] [SeedData] Rol 'ADTI01' ya existe.
+2025-07-04 15:11:40.424 -05:00 [INF] [SeedData] Rol 'COCEF01' ya existe.
+2025-07-04 15:11:40.428 -05:00 [INF] [SeedData] Rol 'COSTV01' ya existe.
+2025-07-04 15:11:40.433 -05:00 [INF] [SeedData] Rol 'GRSER001' ya existe.
+2025-07-04 15:11:40.437 -05:00 [INF] [SeedData] Rol 'SUPTV01' ya existe.
+2025-07-04 15:11:40.529 -05:00 [INF] [SeedData] Usuario 'adminvcash' ya existe.
+2025-07-04 15:11:40.532 -05:00 [INF] [SeedData] Usuario 'planeador1' ya existe.
+2025-07-04 15:11:40.536 -05:00 [INF] [SeedData] Usuario 'planeador2' ya existe.
+2025-07-04 15:11:40.539 -05:00 [INF] [SeedData] Usuario 'cef1' ya existe.
+2025-07-04 15:11:40.542 -05:00 [INF] [SeedData] Usuario 'supervisor1' ya existe.
+2025-07-04 15:11:40.546 -05:00 [INF] [SeedData] Iniciando seeding de permisos por sucursal...
+2025-07-04 15:11:40.717 -05:00 [INF] [SeedData] Seeding de permisos por sucursal completado.
+2025-07-04 15:11:40.723 -05:00 [INF] [SeedData] Iniciando seeding de permisos de perfiles y vistas...
+2025-07-04 15:11:40.801 -05:00 [INF] [SeedData] Vistas creadas/actualizadas.
+2025-07-04 15:11:40.841 -05:00 [INF] [SeedData] Permisos RUD actualizados para rol Admin.
+2025-07-04 15:11:40.846 -05:00 [INF] [SeedData] Permisos RUD actualizados para rol Planeador.
+2025-07-04 15:11:40.849 -05:00 [INF] [SeedData] Permisos RUD actualizados para rol CEF.
+2025-07-04 15:11:40.852 -05:00 [INF] [SeedData] Permisos RUD actualizados para rol Supervisor.
+2025-07-04 15:11:40.862 -05:00 [INF] [SeedData] Permisos RUDHIS actualizados para rol Admin.
+2025-07-04 15:11:40.866 -05:00 [INF] [SeedData] Permisos RUDHIS actualizados para rol Planeador.
+2025-07-04 15:11:40.869 -05:00 [INF] [SeedData] Permisos RUDHIS actualizados para rol CEF.
+2025-07-04 15:11:40.872 -05:00 [INF] [SeedData] Permisos RUDHIS actualizados para rol Supervisor.
+2025-07-04 15:11:41.040 -05:00 [INF] [SeedData] Seeding de permisos de perfiles y vistas completado.
+2025-07-04 15:11:41.418 -05:00 [ERR] Hosting failed to start
+System.IO.IOException: Failed to bind to address https://127.0.0.1:7024: address already in use.
+ ---> Microsoft.AspNetCore.Connections.AddressInUseException: Solo se permite un uso de cada dirección de socket (protocolo/dirección de red/puerto)
+ ---> System.Net.Sockets.SocketException (10048): Solo se permite un uso de cada dirección de socket (protocolo/dirección de red/puerto)
+   at System.Net.Sockets.Socket.UpdateStatusAfterSocketErrorAndThrowException(SocketError error, Boolean disconnectOnFailure, String callerName)
+   at System.Net.Sockets.Socket.DoBind(EndPoint endPointSnapshot, SocketAddress socketAddress)
+   at System.Net.Sockets.Socket.Bind(EndPoint localEP)
+   at Microsoft.AspNetCore.Server.Kestrel.Transport.Sockets.SocketTransportOptions.CreateDefaultBoundListenSocket(EndPoint endpoint)
+   at Microsoft.AspNetCore.Server.Kestrel.Transport.Sockets.SocketConnectionListener.Bind()
+   --- End of inner exception stack trace ---
+   at Microsoft.AspNetCore.Server.Kestrel.Transport.Sockets.SocketConnectionListener.Bind()
+   at Microsoft.AspNetCore.Server.Kestrel.Transport.Sockets.SocketTransportFactory.BindAsync(EndPoint endpoint, CancellationToken cancellationToken)
+   at Microsoft.AspNetCore.Server.Kestrel.Core.Internal.Infrastructure.TransportManager.BindAsync(EndPoint endPoint, ConnectionDelegate connectionDelegate, EndpointConfig endpointConfig, CancellationToken cancellationToken)
+   at Microsoft.AspNetCore.Server.Kestrel.Core.KestrelServerImpl.<>c__DisplayClass28_0`1.<<StartAsync>g__OnBind|0>d.MoveNext()
+--- End of stack trace from previous location ---
+   at Microsoft.AspNetCore.Server.Kestrel.Core.Internal.AddressBinder.BindEndpointAsync(ListenOptions endpoint, AddressBindContext context, CancellationToken cancellationToken)
+   --- End of inner exception stack trace ---
+   at Microsoft.AspNetCore.Server.Kestrel.Core.Internal.AddressBinder.BindEndpointAsync(ListenOptions endpoint, AddressBindContext context, CancellationToken cancellationToken)
+   at Microsoft.AspNetCore.Server.Kestrel.Core.LocalhostListenOptions.BindAsync(AddressBindContext context, CancellationToken cancellationToken)
+   at Microsoft.AspNetCore.Server.Kestrel.Core.Internal.AddressBinder.AddressesStrategy.BindAsync(AddressBindContext context, CancellationToken cancellationToken)
+   at Microsoft.AspNetCore.Server.Kestrel.Core.KestrelServerImpl.BindAsync(CancellationToken cancellationToken)
+   at Microsoft.AspNetCore.Server.Kestrel.Core.KestrelServerImpl.StartAsync[TContext](IHttpApplication`1 application, CancellationToken cancellationToken)
+   at Microsoft.AspNetCore.Hosting.GenericWebHostService.StartAsync(CancellationToken cancellationToken)
+   at Microsoft.Extensions.Hosting.Internal.Host.<StartAsync>b__14_1(IHostedService service, CancellationToken token)
+   at Microsoft.Extensions.Hosting.Internal.Host.ForeachService[T](IEnumerable`1 services, CancellationToken token, Boolean concurrent, Boolean abortOnFirstException, List`1 exceptions, Func`3 operation)
+2025-07-04 15:14:45.077 -05:00 [WRN] Sensitive data logging is enabled. Log entries and exception messages may include sensitive application data; this mode should only be enabled during development.
+2025-07-04 15:14:45.119 -05:00 [INF] warn: 04/07/2025 15:14:45.118 CoreEventId.SensitiveDataLoggingEnabledWarning[10400] (Microsoft.EntityFrameworkCore.Infrastructure) 
+      Sensitive data logging is enabled. Log entries and exception messages may include sensitive application data; this mode should only be enabled during development.
+2025-07-04 15:14:46.406 -05:00 [INF] [SeedData] Rol 'Admin' ya existe.
+2025-07-04 15:14:46.415 -05:00 [INF] [SeedData] Rol 'Planeador' ya existe.
+2025-07-04 15:14:46.419 -05:00 [INF] [SeedData] Rol 'CEF' ya existe.
+2025-07-04 15:14:46.423 -05:00 [INF] [SeedData] Rol 'Supervisor' ya existe.
+2025-07-04 15:14:46.427 -05:00 [INF] [SeedData] Rol 'ADATM01' ya existe.
+2025-07-04 15:14:46.431 -05:00 [INF] [SeedData] Rol 'ADCEF01' ya existe.
+2025-07-04 15:14:46.435 -05:00 [INF] [SeedData] Rol 'ADCF01' ya existe.
+2025-07-04 15:14:46.439 -05:00 [INF] [SeedData] Rol 'ADGRG01' ya existe.
+2025-07-04 15:14:46.442 -05:00 [INF] [SeedData] Rol 'ADMTF01' ya existe.
+2025-07-04 15:14:46.446 -05:00 [INF] [SeedData] Rol 'ADSER01' ya existe.
+2025-07-04 15:14:46.449 -05:00 [INF] [SeedData] Rol 'ADSER02' ya existe.
+2025-07-04 15:14:46.452 -05:00 [INF] [SeedData] Rol 'ADTH01' ya existe.
+2025-07-04 15:14:46.455 -05:00 [INF] [SeedData] Rol 'ADTI01' ya existe.
+2025-07-04 15:14:46.458 -05:00 [INF] [SeedData] Rol 'COCEF01' ya existe.
+2025-07-04 15:14:46.461 -05:00 [INF] [SeedData] Rol 'COSTV01' ya existe.
+2025-07-04 15:14:46.464 -05:00 [INF] [SeedData] Rol 'GRSER001' ya existe.
+2025-07-04 15:14:46.467 -05:00 [INF] [SeedData] Rol 'SUPTV01' ya existe.
+2025-07-04 15:14:46.524 -05:00 [INF] [SeedData] Usuario 'adminvcash' ya existe.
+2025-07-04 15:14:46.528 -05:00 [INF] [SeedData] Usuario 'planeador1' ya existe.
+2025-07-04 15:14:46.534 -05:00 [INF] [SeedData] Usuario 'planeador2' ya existe.
+2025-07-04 15:14:46.537 -05:00 [INF] [SeedData] Usuario 'cef1' ya existe.
+2025-07-04 15:14:46.541 -05:00 [INF] [SeedData] Usuario 'supervisor1' ya existe.
+2025-07-04 15:14:46.545 -05:00 [INF] [SeedData] Iniciando seeding de permisos por sucursal...
+2025-07-04 15:14:46.655 -05:00 [INF] [SeedData] Seeding de permisos por sucursal completado.
+2025-07-04 15:14:46.660 -05:00 [INF] [SeedData] Iniciando seeding de permisos de perfiles y vistas...
+2025-07-04 15:14:46.719 -05:00 [INF] [SeedData] Vistas creadas/actualizadas.
+2025-07-04 15:14:46.758 -05:00 [INF] [SeedData] Permisos RUD actualizados para rol Admin.
+2025-07-04 15:14:46.763 -05:00 [INF] [SeedData] Permisos RUD actualizados para rol Planeador.
+2025-07-04 15:14:46.767 -05:00 [INF] [SeedData] Permisos RUD actualizados para rol CEF.
+2025-07-04 15:14:46.770 -05:00 [INF] [SeedData] Permisos RUD actualizados para rol Supervisor.
+2025-07-04 15:14:46.778 -05:00 [INF] [SeedData] Permisos RUDHIS actualizados para rol Admin.
+2025-07-04 15:14:46.783 -05:00 [INF] [SeedData] Permisos RUDHIS actualizados para rol Planeador.
+2025-07-04 15:14:46.785 -05:00 [INF] [SeedData] Permisos RUDHIS actualizados para rol CEF.
+2025-07-04 15:14:46.788 -05:00 [INF] [SeedData] Permisos RUDHIS actualizados para rol Supervisor.
+2025-07-04 15:14:46.885 -05:00 [INF] [SeedData] Seeding de permisos de perfiles y vistas completado.
+2025-07-04 15:14:47.149 -05:00 [INF] Now listening on: https://localhost:7024
+2025-07-04 15:14:47.151 -05:00 [INF] Now listening on: http://localhost:5006
+2025-07-04 15:14:47.184 -05:00 [INF] Application started. Press Ctrl+C to shut down.
+2025-07-04 15:14:47.188 -05:00 [INF] Hosting environment: Development
+2025-07-04 15:14:47.189 -05:00 [INF] Content root path: C:\Users\hamirrocha\source\repos\VCashApp
+2025-07-04 15:14:47.944 -05:00 [INF] Identity.Application was not authenticated. Failure message: Ticket expired
+2025-07-04 15:14:47.949 -05:00 [INF] Executing endpoint 'VCashApp.Controllers.HomeController.Index (VCashApp)'
+2025-07-04 15:14:49.999 -05:00 [INF] Identity.Application was not authenticated. Failure message: Ticket expired
+2025-07-04 15:14:50.002 -05:00 [INF] Executing endpoint '/Account/Login'
+2025-07-04 15:14:50.047 -05:00 [INF] Executing handler method VCashApp.Areas.Identity.Pages.Account.LoginModel.OnGetAsync - ModelState is "Valid"
+2025-07-04 15:14:50.062 -05:00 [INF] AuthenticationScheme: Identity.External signed out.
+2025-07-04 15:14:50.064 -05:00 [INF] Executed handler method OnGetAsync, returned result .
+2025-07-04 15:14:50.067 -05:00 [INF] Executing an implicit handler method - ModelState is "Valid"
+2025-07-04 15:14:50.068 -05:00 [INF] Executed an implicit handler method, returned result Microsoft.AspNetCore.Mvc.RazorPages.PageResult.
+2025-07-04 15:14:50.118 -05:00 [INF] Executed page /Account/Login in 97.7086ms
+2025-07-04 15:15:11.288 -05:00 [INF] Identity.Application was not authenticated. Failure message: Ticket expired
+2025-07-04 15:15:11.290 -05:00 [INF] Executing endpoint '/Account/Login'
+2025-07-04 15:15:11.303 -05:00 [INF] Executing handler method VCashApp.Areas.Identity.Pages.Account.LoginModel.OnPostAsync - ModelState is "Valid"
+2025-07-04 15:15:11.435 -05:00 [INF] Executed handler method OnPostAsync, returned result Microsoft.AspNetCore.Mvc.RazorPages.PageResult.
+2025-07-04 15:15:11.443 -05:00 [INF] Executed page /Account/Login in 150.8607ms
+2025-07-04 15:15:27.954 -05:00 [INF] Identity.Application was not authenticated. Failure message: Ticket expired
+2025-07-04 15:15:27.956 -05:00 [INF] Executing endpoint '/Account/Login'
+2025-07-04 15:15:27.958 -05:00 [INF] Executing handler method VCashApp.Areas.Identity.Pages.Account.LoginModel.OnPostAsync - ModelState is "Valid"
+2025-07-04 15:15:28.091 -05:00 [INF] AuthenticationScheme: Identity.Application signed in.
+2025-07-04 15:15:28.095 -05:00 [INF] User logged in.
+2025-07-04 15:15:28.097 -05:00 [INF] Executed handler method OnPostAsync, returned result Microsoft.AspNetCore.Mvc.LocalRedirectResult.
+2025-07-04 15:15:28.100 -05:00 [INF] Executing LocalRedirectResult, redirecting to /.
+2025-07-04 15:15:28.101 -05:00 [INF] Executed page /Account/Login in 143.8264ms
+2025-07-04 15:15:28.122 -05:00 [INF] Executing endpoint 'VCashApp.Controllers.HomeController.Index (VCashApp)'
+2025-07-04 15:15:33.764 -05:00 [INF] Executing endpoint 'VCashApp.Controllers.RutasDiariasController.ListGenerated (VCashApp)'
+2025-07-04 15:15:33.806 -05:00 [INF] | AuthFilter: VCashApp.Controllers.RutasDiariasController.ListGenerated (VCashApp) | Usuario: planeador1 | IP: 0.0.0.1 | Resultado: Acceso concedido. TipoPermiso: "View". Vista: 'RUD'. Roles del usuario: Planeador.
+2025-07-04 15:15:33.902 -05:00 [INF] Executing endpoint 'VCashApp.Controllers.RutasDiariasController.PlannerDashboard (VCashApp)'
+2025-07-04 15:15:33.923 -05:00 [INF] | AuthFilter: VCashApp.Controllers.RutasDiariasController.PlannerDashboard (VCashApp) | Usuario: planeador1 | IP: 0.0.0.1 | Resultado: Acceso concedido. TipoPermiso: "View". Vista: 'RUD'. Roles del usuario: Planeador.
+2025-07-04 15:15:34.094 -05:00 [INF] | Usuario: planeador1 | Ip: 0.0.0.1 | Acción: Acceso a Planner Dashboard | Cantidad de rutas: 15 | Respuesta: Acceso permitido | 
+2025-07-04 15:15:34.249 -05:00 [INF] Executing endpoint 'VCashApp.Controllers.RutasDiariasController.PlannerDashboard (VCashApp)'
+2025-07-04 15:15:34.264 -05:00 [INF] | AuthFilter: VCashApp.Controllers.RutasDiariasController.PlannerDashboard (VCashApp) | Usuario: planeador1 | IP: 0.0.0.1 | Resultado: Acceso concedido. TipoPermiso: "View". Vista: 'RUD'. Roles del usuario: Planeador.
+2025-07-04 15:15:34.309 -05:00 [INF] | Usuario: planeador1 | Ip: 0.0.0.1 | Acción: Acceso a Planner Dashboard | Cantidad de rutas: 15 | Respuesta: Acceso permitido | 
+2025-07-04 15:15:34.313 -05:00 [INF] Executing PartialViewResult, running view ~/Views/RutasDiarias/_RoutesTablePartial.cshtml.
+2025-07-04 15:15:34.330 -05:00 [INF] Executed PartialViewResult - view ~/Views/RutasDiarias/_RoutesTablePartial.cshtml executed in 17.3799ms.
+2025-07-04 15:15:38.454 -05:00 [INF] Executing endpoint 'VCashApp.Controllers.RutasDiariasController.PlannerDashboard (VCashApp)'
+2025-07-04 15:15:38.465 -05:00 [INF] | AuthFilter: VCashApp.Controllers.RutasDiariasController.PlannerDashboard (VCashApp) | Usuario: planeador1 | IP: 0.0.0.1 | Resultado: Acceso concedido. TipoPermiso: "View". Vista: 'RUD'. Roles del usuario: Planeador.
+2025-07-04 15:15:38.503 -05:00 [INF] | Usuario: planeador1 | Ip: 0.0.0.1 | Acción: Acceso a Planner Dashboard | Cantidad de rutas: 2 | Respuesta: Acceso permitido | 
+2025-07-04 15:15:38.506 -05:00 [INF] Executing PartialViewResult, running view ~/Views/RutasDiarias/_RoutesTablePartial.cshtml.
+2025-07-04 15:15:38.508 -05:00 [INF] Executed PartialViewResult - view ~/Views/RutasDiarias/_RoutesTablePartial.cshtml executed in 2.4036ms.
+2025-07-04 15:15:39.922 -05:00 [INF] Executing endpoint 'VCashApp.Controllers.RutasDiariasController.PlannerDashboard (VCashApp)'
+2025-07-04 15:15:39.931 -05:00 [INF] | AuthFilter: VCashApp.Controllers.RutasDiariasController.PlannerDashboard (VCashApp) | Usuario: planeador1 | IP: 0.0.0.1 | Resultado: Acceso concedido. TipoPermiso: "View". Vista: 'RUD'. Roles del usuario: Planeador.
+2025-07-04 15:15:39.953 -05:00 [INF] | Usuario: planeador1 | Ip: 0.0.0.1 | Acción: Acceso a Planner Dashboard | Cantidad de rutas: 15 | Respuesta: Acceso permitido | 
+2025-07-04 15:15:39.954 -05:00 [INF] Executing PartialViewResult, running view ~/Views/RutasDiarias/_RoutesTablePartial.cshtml.
+2025-07-04 15:15:39.966 -05:00 [INF] Executed PartialViewResult - view ~/Views/RutasDiarias/_RoutesTablePartial.cshtml executed in 11.1102ms.
+2025-07-04 15:15:44.496 -05:00 [INF] Executing endpoint 'VCashApp.Controllers.RutasDiariasController.PlannerDashboard (VCashApp)'
+2025-07-04 15:15:44.510 -05:00 [INF] | AuthFilter: VCashApp.Controllers.RutasDiariasController.PlannerDashboard (VCashApp) | Usuario: planeador1 | IP: 0.0.0.1 | Resultado: Acceso concedido. TipoPermiso: "View". Vista: 'RUD'. Roles del usuario: Planeador.
+2025-07-04 15:15:44.532 -05:00 [INF] | Usuario: planeador1 | Ip: 0.0.0.1 | Acción: Acceso a Planner Dashboard | Cantidad de rutas: 15 | Respuesta: Acceso permitido | 
+2025-07-04 15:15:44.535 -05:00 [INF] Executing PartialViewResult, running view ~/Views/RutasDiarias/_RoutesTablePartial.cshtml.
+2025-07-04 15:15:44.546 -05:00 [INF] Executed PartialViewResult - view ~/Views/RutasDiarias/_RoutesTablePartial.cshtml executed in 10.4636ms.
+2025-07-04 15:15:49.064 -05:00 [INF] Executing endpoint 'VCashApp.Controllers.RutasDiariasController.PlannerDashboard (VCashApp)'
+2025-07-04 15:15:49.084 -05:00 [INF] | AuthFilter: VCashApp.Controllers.RutasDiariasController.PlannerDashboard (VCashApp) | Usuario: planeador1 | IP: 0.0.0.1 | Resultado: Acceso concedido. TipoPermiso: "View". Vista: 'RUD'. Roles del usuario: Planeador.
+2025-07-04 15:15:49.119 -05:00 [INF] | Usuario: planeador1 | Ip: 0.0.0.1 | Acción: Acceso a Planner Dashboard | Cantidad de rutas: 15 | Respuesta: Acceso permitido | 
+2025-07-04 15:15:49.122 -05:00 [INF] Executing PartialViewResult, running view ~/Views/RutasDiarias/_RoutesTablePartial.cshtml.
+2025-07-04 15:15:49.151 -05:00 [INF] Executed PartialViewResult - view ~/Views/RutasDiarias/_RoutesTablePartial.cshtml executed in 29.0723ms.
+2025-07-04 15:15:50.971 -05:00 [INF] Executing endpoint 'VCashApp.Controllers.RutasDiariasController.PlannerDashboard (VCashApp)'
+2025-07-04 15:15:50.985 -05:00 [INF] | AuthFilter: VCashApp.Controllers.RutasDiariasController.PlannerDashboard (VCashApp) | Usuario: planeador1 | IP: 0.0.0.1 | Resultado: Acceso concedido. TipoPermiso: "View". Vista: 'RUD'. Roles del usuario: Planeador.
+2025-07-04 15:15:51.004 -05:00 [INF] | Usuario: planeador1 | Ip: 0.0.0.1 | Acción: Acceso a Planner Dashboard | Cantidad de rutas: 15 | Respuesta: Acceso permitido | 
+2025-07-04 15:15:51.008 -05:00 [INF] Executing PartialViewResult, running view ~/Views/RutasDiarias/_RoutesTablePartial.cshtml.
+2025-07-04 15:15:51.018 -05:00 [INF] Executed PartialViewResult - view ~/Views/RutasDiarias/_RoutesTablePartial.cshtml executed in 9.6706ms.
+2025-07-04 15:15:51.154 -05:00 [INF] Executing endpoint 'VCashApp.Controllers.RutasDiariasController.PlannerDashboard (VCashApp)'
+2025-07-04 15:15:51.164 -05:00 [INF] | AuthFilter: VCashApp.Controllers.RutasDiariasController.PlannerDashboard (VCashApp) | Usuario: planeador1 | IP: 0.0.0.1 | Resultado: Acceso concedido. TipoPermiso: "View". Vista: 'RUD'. Roles del usuario: Planeador.
+2025-07-04 15:15:51.182 -05:00 [INF] | Usuario: planeador1 | Ip: 0.0.0.1 | Acción: Acceso a Planner Dashboard | Cantidad de rutas: 15 | Respuesta: Acceso permitido | 
+2025-07-04 15:15:51.184 -05:00 [INF] Executing PartialViewResult, running view ~/Views/RutasDiarias/_RoutesTablePartial.cshtml.
+2025-07-04 15:15:51.195 -05:00 [INF] Executed PartialViewResult - view ~/Views/RutasDiarias/_RoutesTablePartial.cshtml executed in 10.5246ms.
+2025-07-04 15:15:51.339 -05:00 [INF] Executing endpoint 'VCashApp.Controllers.RutasDiariasController.PlannerDashboard (VCashApp)'
+2025-07-04 15:15:51.355 -05:00 [INF] | AuthFilter: VCashApp.Controllers.RutasDiariasController.PlannerDashboard (VCashApp) | Usuario: planeador1 | IP: 0.0.0.1 | Resultado: Acceso concedido. TipoPermiso: "View". Vista: 'RUD'. Roles del usuario: Planeador.
+2025-07-04 15:15:51.373 -05:00 [INF] | Usuario: planeador1 | Ip: 0.0.0.1 | Acción: Acceso a Planner Dashboard | Cantidad de rutas: 15 | Respuesta: Acceso permitido | 
+2025-07-04 15:15:51.376 -05:00 [INF] Executing PartialViewResult, running view ~/Views/RutasDiarias/_RoutesTablePartial.cshtml.
+2025-07-04 15:15:51.385 -05:00 [INF] Executed PartialViewResult - view ~/Views/RutasDiarias/_RoutesTablePartial.cshtml executed in 9.2864ms.
+2025-07-04 15:15:57.075 -05:00 [INF] Executing endpoint 'VCashApp.Controllers.RutasDiariasController.PlannerDashboard (VCashApp)'
+2025-07-04 15:15:57.087 -05:00 [INF] | AuthFilter: VCashApp.Controllers.RutasDiariasController.PlannerDashboard (VCashApp) | Usuario: planeador1 | IP: 0.0.0.1 | Resultado: Acceso concedido. TipoPermiso: "View". Vista: 'RUD'. Roles del usuario: Planeador.
+2025-07-04 15:15:57.106 -05:00 [INF] | Usuario: planeador1 | Ip: 0.0.0.1 | Acción: Acceso a Planner Dashboard | Cantidad de rutas: 15 | Respuesta: Acceso permitido | 
+2025-07-04 15:15:57.109 -05:00 [INF] Executing PartialViewResult, running view ~/Views/RutasDiarias/_RoutesTablePartial.cshtml.
+2025-07-04 15:15:57.118 -05:00 [INF] Executed PartialViewResult - view ~/Views/RutasDiarias/_RoutesTablePartial.cshtml executed in 9.4584ms.
+2025-07-04 15:15:58.803 -05:00 [INF] Executing endpoint 'VCashApp.Controllers.RutasDiariasController.PlannerDashboard (VCashApp)'
+2025-07-04 15:15:58.813 -05:00 [INF] | AuthFilter: VCashApp.Controllers.RutasDiariasController.PlannerDashboard (VCashApp) | Usuario: planeador1 | IP: 0.0.0.1 | Resultado: Acceso concedido. TipoPermiso: "View". Vista: 'RUD'. Roles del usuario: Planeador.
+2025-07-04 15:15:58.838 -05:00 [INF] | Usuario: planeador1 | Ip: 0.0.0.1 | Acción: Acceso a Planner Dashboard | Cantidad de rutas: 15 | Respuesta: Acceso permitido | 
+2025-07-04 15:15:58.840 -05:00 [INF] Executing PartialViewResult, running view ~/Views/RutasDiarias/_RoutesTablePartial.cshtml.
+2025-07-04 15:15:58.852 -05:00 [INF] Executed PartialViewResult - view ~/Views/RutasDiarias/_RoutesTablePartial.cshtml executed in 11.3691ms.
+2025-07-04 15:15:59.227 -05:00 [INF] Executing endpoint 'VCashApp.Controllers.RutasDiariasController.PlannerDashboard (VCashApp)'
+2025-07-04 15:15:59.240 -05:00 [INF] | AuthFilter: VCashApp.Controllers.RutasDiariasController.PlannerDashboard (VCashApp) | Usuario: planeador1 | IP: 0.0.0.1 | Resultado: Acceso concedido. TipoPermiso: "View". Vista: 'RUD'. Roles del usuario: Planeador.
+2025-07-04 15:15:59.259 -05:00 [INF] | Usuario: planeador1 | Ip: 0.0.0.1 | Acción: Acceso a Planner Dashboard | Cantidad de rutas: 15 | Respuesta: Acceso permitido | 
+2025-07-04 15:15:59.262 -05:00 [INF] Executing PartialViewResult, running view ~/Views/RutasDiarias/_RoutesTablePartial.cshtml.
+2025-07-04 15:15:59.271 -05:00 [INF] Executed PartialViewResult - view ~/Views/RutasDiarias/_RoutesTablePartial.cshtml executed in 9.6203ms.
+2025-07-04 15:15:59.433 -05:00 [INF] Executing endpoint 'VCashApp.Controllers.RutasDiariasController.PlannerDashboard (VCashApp)'
+2025-07-04 15:15:59.443 -05:00 [INF] | AuthFilter: VCashApp.Controllers.RutasDiariasController.PlannerDashboard (VCashApp) | Usuario: planeador1 | IP: 0.0.0.1 | Resultado: Acceso concedido. TipoPermiso: "View". Vista: 'RUD'. Roles del usuario: Planeador.
+2025-07-04 15:15:59.461 -05:00 [INF] | Usuario: planeador1 | Ip: 0.0.0.1 | Acción: Acceso a Planner Dashboard | Cantidad de rutas: 15 | Respuesta: Acceso permitido | 
+2025-07-04 15:15:59.464 -05:00 [INF] Executing PartialViewResult, running view ~/Views/RutasDiarias/_RoutesTablePartial.cshtml.
+2025-07-04 15:15:59.474 -05:00 [INF] Executed PartialViewResult - view ~/Views/RutasDiarias/_RoutesTablePartial.cshtml executed in 9.5258ms.
+2025-07-04 15:15:59.569 -05:00 [INF] Executing endpoint 'VCashApp.Controllers.RutasDiariasController.PlannerDashboard (VCashApp)'
+2025-07-04 15:15:59.580 -05:00 [INF] | AuthFilter: VCashApp.Controllers.RutasDiariasController.PlannerDashboard (VCashApp) | Usuario: planeador1 | IP: 0.0.0.1 | Resultado: Acceso concedido. TipoPermiso: "View". Vista: 'RUD'. Roles del usuario: Planeador.
+2025-07-04 15:15:59.599 -05:00 [INF] | Usuario: planeador1 | Ip: 0.0.0.1 | Acción: Acceso a Planner Dashboard | Cantidad de rutas: 15 | Respuesta: Acceso permitido | 
+2025-07-04 15:15:59.602 -05:00 [INF] Executing PartialViewResult, running view ~/Views/RutasDiarias/_RoutesTablePartial.cshtml.
+2025-07-04 15:15:59.611 -05:00 [INF] Executed PartialViewResult - view ~/Views/RutasDiarias/_RoutesTablePartial.cshtml executed in 9.3735ms.
+2025-07-04 15:15:59.715 -05:00 [INF] Executing endpoint 'VCashApp.Controllers.RutasDiariasController.PlannerDashboard (VCashApp)'
+2025-07-04 15:15:59.725 -05:00 [INF] | AuthFilter: VCashApp.Controllers.RutasDiariasController.PlannerDashboard (VCashApp) | Usuario: planeador1 | IP: 0.0.0.1 | Resultado: Acceso concedido. TipoPermiso: "View". Vista: 'RUD'. Roles del usuario: Planeador.
+2025-07-04 15:15:59.749 -05:00 [INF] | Usuario: planeador1 | Ip: 0.0.0.1 | Acción: Acceso a Planner Dashboard | Cantidad de rutas: 15 | Respuesta: Acceso permitido | 
+2025-07-04 15:15:59.754 -05:00 [INF] Executing PartialViewResult, running view ~/Views/RutasDiarias/_RoutesTablePartial.cshtml.
+2025-07-04 15:15:59.764 -05:00 [INF] Executed PartialViewResult - view ~/Views/RutasDiarias/_RoutesTablePartial.cshtml executed in 10.3807ms.
+2025-07-04 15:16:01.643 -05:00 [INF] Executing endpoint 'VCashApp.Controllers.RutasDiariasController.PlannerDashboard (VCashApp)'
+2025-07-04 15:16:01.656 -05:00 [INF] | AuthFilter: VCashApp.Controllers.RutasDiariasController.PlannerDashboard (VCashApp) | Usuario: planeador1 | IP: 0.0.0.1 | Resultado: Acceso concedido. TipoPermiso: "View". Vista: 'RUD'. Roles del usuario: Planeador.
+2025-07-04 15:16:01.675 -05:00 [INF] | Usuario: planeador1 | Ip: 0.0.0.1 | Acción: Acceso a Planner Dashboard | Cantidad de rutas: 15 | Respuesta: Acceso permitido | 
+2025-07-04 15:16:01.678 -05:00 [INF] Executing PartialViewResult, running view ~/Views/RutasDiarias/_RoutesTablePartial.cshtml.
+2025-07-04 15:16:01.687 -05:00 [INF] Executed PartialViewResult - view ~/Views/RutasDiarias/_RoutesTablePartial.cshtml executed in 9.4411ms.
+2025-07-04 15:16:11.688 -05:00 [INF] Executing endpoint 'VCashApp.Controllers.RutasDiariasController.GenerateRoutesForTomorrow (VCashApp)'
+2025-07-04 15:16:11.708 -05:00 [INF] | AuthFilter: VCashApp.Controllers.RutasDiariasController.GenerateRoutesForTomorrow (VCashApp) | Usuario: planeador1 | IP: 0.0.0.1 | Resultado: Acceso concedido. TipoPermiso: "Create". Vista: 'RUD'. Roles del usuario: Planeador.
+2025-07-04 15:16:11.726 -05:00 [INF] | Usuario: planeador1 | Ip: 0.0.0.1 | Acción: Intento de Generar Rutas | Resultado: Rutas ya generadas para "2025-07-05" |
+2025-07-04 15:16:11.742 -05:00 [INF] Executing endpoint 'VCashApp.Controllers.RutasDiariasController.PlannerDashboard (VCashApp)'
+2025-07-04 15:16:11.754 -05:00 [INF] | AuthFilter: VCashApp.Controllers.RutasDiariasController.PlannerDashboard (VCashApp) | Usuario: planeador1 | IP: 0.0.0.1 | Resultado: Acceso concedido. TipoPermiso: "View". Vista: 'RUD'. Roles del usuario: Planeador.
+2025-07-04 15:16:11.772 -05:00 [INF] | Usuario: planeador1 | Ip: 0.0.0.1 | Acción: Acceso a Planner Dashboard | Cantidad de rutas: 15 | Respuesta: Acceso permitido | 
+2025-07-04 15:16:11.877 -05:00 [INF] Executing endpoint 'VCashApp.Controllers.RutasDiariasController.PlannerDashboard (VCashApp)'
+2025-07-04 15:16:11.890 -05:00 [INF] | AuthFilter: VCashApp.Controllers.RutasDiariasController.PlannerDashboard (VCashApp) | Usuario: planeador1 | IP: 0.0.0.1 | Resultado: Acceso concedido. TipoPermiso: "View". Vista: 'RUD'. Roles del usuario: Planeador.
+2025-07-04 15:16:11.912 -05:00 [INF] | Usuario: planeador1 | Ip: 0.0.0.1 | Acción: Acceso a Planner Dashboard | Cantidad de rutas: 15 | Respuesta: Acceso permitido | 
+2025-07-04 15:16:11.915 -05:00 [INF] Executing PartialViewResult, running view ~/Views/RutasDiarias/_RoutesTablePartial.cshtml.
+2025-07-04 15:16:11.927 -05:00 [INF] Executed PartialViewResult - view ~/Views/RutasDiarias/_RoutesTablePartial.cshtml executed in 12.2224ms.
+2025-07-04 15:16:14.318 -05:00 [INF] Executing endpoint 'VCashApp.Controllers.RutasDiariasController.PlannerDashboard (VCashApp)'
+2025-07-04 15:16:14.332 -05:00 [INF] | AuthFilter: VCashApp.Controllers.RutasDiariasController.PlannerDashboard (VCashApp) | Usuario: planeador1 | IP: 0.0.0.1 | Resultado: Acceso concedido. TipoPermiso: "View". Vista: 'RUD'. Roles del usuario: Planeador.
+2025-07-04 15:16:14.353 -05:00 [INF] | Usuario: planeador1 | Ip: 0.0.0.1 | Acción: Acceso a Planner Dashboard | Cantidad de rutas: 15 | Respuesta: Acceso permitido | 
+2025-07-04 15:16:14.447 -05:00 [INF] Executing endpoint 'VCashApp.Controllers.RutasDiariasController.PlannerDashboard (VCashApp)'
+2025-07-04 15:16:14.460 -05:00 [INF] | AuthFilter: VCashApp.Controllers.RutasDiariasController.PlannerDashboard (VCashApp) | Usuario: planeador1 | IP: 0.0.0.1 | Resultado: Acceso concedido. TipoPermiso: "View". Vista: 'RUD'. Roles del usuario: Planeador.
+2025-07-04 15:16:14.484 -05:00 [INF] | Usuario: planeador1 | Ip: 0.0.0.1 | Acción: Acceso a Planner Dashboard | Cantidad de rutas: 15 | Respuesta: Acceso permitido | 
+2025-07-04 15:16:14.488 -05:00 [INF] Executing PartialViewResult, running view ~/Views/RutasDiarias/_RoutesTablePartial.cshtml.
+2025-07-04 15:16:14.500 -05:00 [INF] Executed PartialViewResult - view ~/Views/RutasDiarias/_RoutesTablePartial.cshtml executed in 11.8193ms.
+2025-07-04 15:16:31.634 -05:00 [INF] Identity.Application was not authenticated. Failure message: Ticket expired
+2025-07-04 15:16:31.636 -05:00 [INF] Executing endpoint 'VCashApp.Controllers.RutasDiariasController.HistorialRutas (VCashApp)'
+2025-07-04 15:16:31.645 -05:00 [WRN] | AuthFilter: VCashApp.Controllers.RutasDiariasController.HistorialRutas (VCashApp) | Usuario: NoAutenticado | IP: 0.0.0.1 | Resultado: No autenticado. Redirigiendo a Login.
+2025-07-04 15:16:31.648 -05:00 [INF] Authorization failed for the request at filter 'VCashApp.Filters.RequiredPermissionFilter'.
+2025-07-04 15:16:31.658 -05:00 [INF] Identity.Application was not authenticated. Failure message: Ticket expired
+2025-07-04 15:16:35.515 -05:00 [INF] Identity.Application was not authenticated. Failure message: Ticket expired
+2025-07-04 15:16:35.517 -05:00 [INF] Executing endpoint 'VCashApp.Controllers.HomeController.Index (VCashApp)'
+2025-07-04 15:34:11.028 -05:00 [WRN] Sensitive data logging is enabled. Log entries and exception messages may include sensitive application data; this mode should only be enabled during development.
+2025-07-04 15:34:11.084 -05:00 [INF] warn: 04/07/2025 15:34:11.083 CoreEventId.SensitiveDataLoggingEnabledWarning[10400] (Microsoft.EntityFrameworkCore.Infrastructure) 
+      Sensitive data logging is enabled. Log entries and exception messages may include sensitive application data; this mode should only be enabled during development.
+2025-07-04 15:34:12.022 -05:00 [INF] [SeedData] Rol 'Admin' ya existe.
+2025-07-04 15:34:12.030 -05:00 [INF] [SeedData] Rol 'Planeador' ya existe.
+2025-07-04 15:34:12.035 -05:00 [INF] [SeedData] Rol 'CEF' ya existe.
+2025-07-04 15:34:12.040 -05:00 [INF] [SeedData] Rol 'Supervisor' ya existe.
+2025-07-04 15:34:12.044 -05:00 [INF] [SeedData] Rol 'ADATM01' ya existe.
+2025-07-04 15:34:12.047 -05:00 [INF] [SeedData] Rol 'ADCEF01' ya existe.
+2025-07-04 15:34:12.050 -05:00 [INF] [SeedData] Rol 'ADCF01' ya existe.
+2025-07-04 15:34:12.053 -05:00 [INF] [SeedData] Rol 'ADGRG01' ya existe.
+2025-07-04 15:34:12.057 -05:00 [INF] [SeedData] Rol 'ADMTF01' ya existe.
+2025-07-04 15:34:12.059 -05:00 [INF] [SeedData] Rol 'ADSER01' ya existe.
+2025-07-04 15:34:12.062 -05:00 [INF] [SeedData] Rol 'ADSER02' ya existe.
+2025-07-04 15:34:12.064 -05:00 [INF] [SeedData] Rol 'ADTH01' ya existe.
+2025-07-04 15:34:12.068 -05:00 [INF] [SeedData] Rol 'ADTI01' ya existe.
+2025-07-04 15:34:12.071 -05:00 [INF] [SeedData] Rol 'COCEF01' ya existe.
+2025-07-04 15:34:12.073 -05:00 [INF] [SeedData] Rol 'COSTV01' ya existe.
+2025-07-04 15:34:12.075 -05:00 [INF] [SeedData] Rol 'GRSER001' ya existe.
+2025-07-04 15:34:12.078 -05:00 [INF] [SeedData] Rol 'SUPTV01' ya existe.
+2025-07-04 15:34:12.149 -05:00 [INF] [SeedData] Usuario 'adminvcash' ya existe.
+2025-07-04 15:34:12.153 -05:00 [INF] [SeedData] Usuario 'planeador1' ya existe.
+2025-07-04 15:34:12.170 -05:00 [INF] [SeedData] Usuario 'planeador2' ya existe.
+2025-07-04 15:34:12.174 -05:00 [INF] [SeedData] Usuario 'cef1' ya existe.
+2025-07-04 15:34:12.178 -05:00 [INF] [SeedData] Usuario 'supervisor1' ya existe.
+2025-07-04 15:34:12.192 -05:00 [INF] [SeedData] Iniciando seeding de permisos por sucursal...
+2025-07-04 15:34:12.312 -05:00 [INF] [SeedData] Seeding de permisos por sucursal completado.
+2025-07-04 15:34:12.318 -05:00 [INF] [SeedData] Iniciando seeding de permisos de perfiles y vistas...
+2025-07-04 15:34:12.391 -05:00 [INF] [SeedData] Vistas creadas/actualizadas.
+2025-07-04 15:34:12.436 -05:00 [INF] [SeedData] Permisos RUD actualizados para rol Admin.
+2025-07-04 15:34:12.441 -05:00 [INF] [SeedData] Permisos RUD actualizados para rol Planeador.
+2025-07-04 15:34:12.446 -05:00 [INF] [SeedData] Permisos RUD actualizados para rol CEF.
+2025-07-04 15:34:12.451 -05:00 [INF] [SeedData] Permisos RUD actualizados para rol Supervisor.
+2025-07-04 15:34:12.461 -05:00 [INF] [SeedData] Permisos RUDHIS actualizados para rol Admin.
+2025-07-04 15:34:12.465 -05:00 [INF] [SeedData] Permisos RUDHIS actualizados para rol Planeador.
+2025-07-04 15:34:12.469 -05:00 [INF] [SeedData] Permisos RUDHIS actualizados para rol CEF.
+2025-07-04 15:34:12.473 -05:00 [INF] [SeedData] Permisos RUDHIS actualizados para rol Supervisor.
+2025-07-04 15:34:12.589 -05:00 [INF] [SeedData] Seeding de permisos de perfiles y vistas completado.
+2025-07-04 15:34:12.921 -05:00 [INF] Now listening on: https://localhost:7024
+2025-07-04 15:34:12.923 -05:00 [INF] Now listening on: http://localhost:5006
+2025-07-04 15:34:12.954 -05:00 [INF] Application started. Press Ctrl+C to shut down.
+2025-07-04 15:34:12.956 -05:00 [INF] Hosting environment: Development
+2025-07-04 15:34:12.957 -05:00 [INF] Content root path: C:\Users\hamirrocha\source\repos\VCashApp
+2025-07-04 15:34:13.454 -05:00 [INF] Identity.Application was not authenticated. Failure message: Ticket expired
+2025-07-04 15:34:13.458 -05:00 [INF] Executing endpoint 'VCashApp.Controllers.HomeController.Index (VCashApp)'
+2025-07-04 15:35:19.162 -05:00 [WRN] Sensitive data logging is enabled. Log entries and exception messages may include sensitive application data; this mode should only be enabled during development.
+2025-07-04 15:35:19.208 -05:00 [INF] warn: 04/07/2025 15:35:19.208 CoreEventId.SensitiveDataLoggingEnabledWarning[10400] (Microsoft.EntityFrameworkCore.Infrastructure) 
+      Sensitive data logging is enabled. Log entries and exception messages may include sensitive application data; this mode should only be enabled during development.
+2025-07-04 15:35:20.694 -05:00 [INF] [SeedData] Rol 'Admin' ya existe.
+2025-07-04 15:35:20.712 -05:00 [INF] [SeedData] Rol 'Planeador' ya existe.
+2025-07-04 15:35:20.716 -05:00 [INF] [SeedData] Rol 'CEF' ya existe.
+2025-07-04 15:35:20.721 -05:00 [INF] [SeedData] Rol 'Supervisor' ya existe.
+2025-07-04 15:35:20.726 -05:00 [INF] [SeedData] Rol 'ADATM01' ya existe.
+2025-07-04 15:35:20.731 -05:00 [INF] [SeedData] Rol 'ADCEF01' ya existe.
+2025-07-04 15:35:20.736 -05:00 [INF] [SeedData] Rol 'ADCF01' ya existe.
+2025-07-04 15:35:20.741 -05:00 [INF] [SeedData] Rol 'ADGRG01' ya existe.
+2025-07-04 15:35:20.745 -05:00 [INF] [SeedData] Rol 'ADMTF01' ya existe.
+2025-07-04 15:35:20.749 -05:00 [INF] [SeedData] Rol 'ADSER01' ya existe.
+2025-07-04 15:35:20.756 -05:00 [INF] [SeedData] Rol 'ADSER02' ya existe.
+2025-07-04 15:35:20.760 -05:00 [INF] [SeedData] Rol 'ADTH01' ya existe.
+2025-07-04 15:35:20.764 -05:00 [INF] [SeedData] Rol 'ADTI01' ya existe.
+2025-07-04 15:35:20.767 -05:00 [INF] [SeedData] Rol 'COCEF01' ya existe.
+2025-07-04 15:35:20.771 -05:00 [INF] [SeedData] Rol 'COSTV01' ya existe.
+2025-07-04 15:35:20.775 -05:00 [INF] [SeedData] Rol 'GRSER001' ya existe.
+2025-07-04 15:35:20.779 -05:00 [INF] [SeedData] Rol 'SUPTV01' ya existe.
+2025-07-04 15:35:20.860 -05:00 [INF] [SeedData] Usuario 'adminvcash' ya existe.
+2025-07-04 15:35:20.864 -05:00 [INF] [SeedData] Usuario 'planeador1' ya existe.
+2025-07-04 15:35:20.867 -05:00 [INF] [SeedData] Usuario 'planeador2' ya existe.
+2025-07-04 15:35:20.870 -05:00 [INF] [SeedData] Usuario 'cef1' ya existe.
+2025-07-04 15:35:20.874 -05:00 [INF] [SeedData] Usuario 'supervisor1' ya existe.
+2025-07-04 15:35:20.879 -05:00 [INF] [SeedData] Iniciando seeding de permisos por sucursal...
+2025-07-04 15:35:21.002 -05:00 [INF] [SeedData] Seeding de permisos por sucursal completado.
+2025-07-04 15:35:21.009 -05:00 [INF] [SeedData] Iniciando seeding de permisos de perfiles y vistas...
+2025-07-04 15:35:21.083 -05:00 [INF] [SeedData] Vistas creadas/actualizadas.
+2025-07-04 15:35:21.124 -05:00 [INF] [SeedData] Permisos RUD actualizados para rol Admin.
+2025-07-04 15:35:21.129 -05:00 [INF] [SeedData] Permisos RUD actualizados para rol Planeador.
+2025-07-04 15:35:21.133 -05:00 [INF] [SeedData] Permisos RUD actualizados para rol CEF.
+2025-07-04 15:35:21.139 -05:00 [INF] [SeedData] Permisos RUD actualizados para rol Supervisor.
+2025-07-04 15:35:21.148 -05:00 [INF] [SeedData] Permisos RUDHIS actualizados para rol Admin.
+2025-07-04 15:35:21.153 -05:00 [INF] [SeedData] Permisos RUDHIS actualizados para rol Planeador.
+2025-07-04 15:35:21.156 -05:00 [INF] [SeedData] Permisos RUDHIS actualizados para rol CEF.
+2025-07-04 15:35:21.160 -05:00 [INF] [SeedData] Permisos RUDHIS actualizados para rol Supervisor.
+2025-07-04 15:35:21.296 -05:00 [INF] [SeedData] Seeding de permisos de perfiles y vistas completado.
+2025-07-04 15:35:21.653 -05:00 [INF] Now listening on: https://localhost:7024
+2025-07-04 15:35:21.655 -05:00 [INF] Now listening on: http://localhost:5006
+2025-07-04 15:35:21.713 -05:00 [INF] Application started. Press Ctrl+C to shut down.
+2025-07-04 15:35:21.715 -05:00 [INF] Hosting environment: Development
+2025-07-04 15:35:21.717 -05:00 [INF] Content root path: C:\Users\hamirrocha\source\repos\VCashApp
+2025-07-04 15:35:21.913 -05:00 [INF] Identity.Application was not authenticated. Failure message: Ticket expired
+2025-07-04 15:35:21.918 -05:00 [INF] Executing endpoint 'VCashApp.Controllers.HomeController.Index (VCashApp)'
+2025-07-04 15:35:54.913 -05:00 [INF] Identity.Application was not authenticated. Failure message: Ticket expired
+2025-07-04 15:35:54.916 -05:00 [INF] Executing endpoint '/Account/Login'
+2025-07-04 15:35:54.955 -05:00 [INF] Executing handler method VCashApp.Areas.Identity.Pages.Account.LoginModel.OnGetAsync - ModelState is "Valid"
+2025-07-04 15:35:54.964 -05:00 [INF] AuthenticationScheme: Identity.External signed out.
+2025-07-04 15:35:54.967 -05:00 [INF] Executed handler method OnGetAsync, returned result .
+2025-07-04 15:35:54.969 -05:00 [INF] Executing an implicit handler method - ModelState is "Valid"
+2025-07-04 15:35:54.971 -05:00 [INF] Executed an implicit handler method, returned result Microsoft.AspNetCore.Mvc.RazorPages.PageResult.
+2025-07-04 15:35:55.010 -05:00 [INF] Executed page /Account/Login in 77.704ms
+2025-07-04 15:36:14.664 -05:00 [INF] Identity.Application was not authenticated. Failure message: Ticket expired
+2025-07-04 15:36:14.667 -05:00 [INF] Executing endpoint '/Account/Login'
+2025-07-04 15:36:14.680 -05:00 [INF] Executing handler method VCashApp.Areas.Identity.Pages.Account.LoginModel.OnPostAsync - ModelState is "Valid"
+2025-07-04 15:36:14.877 -05:00 [INF] AuthenticationScheme: Identity.Application signed in.
+2025-07-04 15:36:14.879 -05:00 [INF] User logged in.
+2025-07-04 15:36:14.881 -05:00 [INF] Executed handler method OnPostAsync, returned result Microsoft.AspNetCore.Mvc.LocalRedirectResult.
+2025-07-04 15:36:14.883 -05:00 [INF] Executing LocalRedirectResult, redirecting to /.
+2025-07-04 15:36:14.884 -05:00 [INF] Executed page /Account/Login in 215.9941ms
+2025-07-04 15:36:14.901 -05:00 [INF] Executing endpoint 'VCashApp.Controllers.HomeController.Index (VCashApp)'
+2025-07-04 15:36:20.007 -05:00 [INF] Executing endpoint 'VCashApp.Controllers.RutasDiariasController.ListGenerated (VCashApp)'
+2025-07-04 15:36:20.052 -05:00 [INF] | AuthFilter: VCashApp.Controllers.RutasDiariasController.ListGenerated (VCashApp) | Usuario: planeador1 | IP: 0.0.0.1 | Resultado: Acceso concedido. TipoPermiso: "View". Vista: 'RUD'. Roles del usuario: Planeador.
+2025-07-04 15:36:20.135 -05:00 [INF] Executing endpoint 'VCashApp.Controllers.RutasDiariasController.PlannerDashboard (VCashApp)'
+2025-07-04 15:36:20.152 -05:00 [INF] | AuthFilter: VCashApp.Controllers.RutasDiariasController.PlannerDashboard (VCashApp) | Usuario: planeador1 | IP: 0.0.0.1 | Resultado: Acceso concedido. TipoPermiso: "View". Vista: 'RUD'. Roles del usuario: Planeador.
+2025-07-04 15:36:20.317 -05:00 [INF] | Usuario: planeador1 | Ip: 0.0.0.1 | Acción: Acceso a Planner Dashboard | Cantidad de rutas: 15 | Respuesta: Acceso permitido | 
+2025-07-04 15:36:20.467 -05:00 [INF] Executing endpoint 'VCashApp.Controllers.RutasDiariasController.PlannerDashboard (VCashApp)'
+2025-07-04 15:36:20.485 -05:00 [INF] | AuthFilter: VCashApp.Controllers.RutasDiariasController.PlannerDashboard (VCashApp) | Usuario: planeador1 | IP: 0.0.0.1 | Resultado: Acceso concedido. TipoPermiso: "View". Vista: 'RUD'. Roles del usuario: Planeador.
+2025-07-04 15:36:20.538 -05:00 [INF] | Usuario: planeador1 | Ip: 0.0.0.1 | Acción: Acceso a Planner Dashboard | Cantidad de rutas: 15 | Respuesta: Acceso permitido | 
+2025-07-04 15:36:20.542 -05:00 [INF] Executing PartialViewResult, running view ~/Views/RutasDiarias/_RoutesTablePartial.cshtml.
+2025-07-04 15:36:20.563 -05:00 [INF] Executed PartialViewResult - view ~/Views/RutasDiarias/_RoutesTablePartial.cshtml executed in 21.2703ms.
+2025-07-04 15:36:35.911 -05:00 [INF] Executing endpoint '/Account/Logout'
+2025-07-04 15:36:35.924 -05:00 [INF] Executing handler method VCashApp.Areas.Identity.Pages.Account.LogoutModel.OnPost - ModelState is "Valid"
+2025-07-04 15:36:35.928 -05:00 [INF] AuthenticationScheme: Identity.Application signed out.
+2025-07-04 15:36:35.931 -05:00 [INF] AuthenticationScheme: Identity.External signed out.
+2025-07-04 15:36:35.932 -05:00 [INF] AuthenticationScheme: Identity.TwoFactorUserId signed out.
+2025-07-04 15:36:35.933 -05:00 [INF] User logged out.
+2025-07-04 15:36:35.934 -05:00 [INF] Executed handler method OnPost, returned result Microsoft.AspNetCore.Mvc.LocalRedirectResult.
+2025-07-04 15:36:35.935 -05:00 [INF] Executing LocalRedirectResult, redirecting to /Identity/Account/Login.
+2025-07-04 15:36:35.936 -05:00 [INF] Executed page /Account/Logout in 14.4471ms
+2025-07-04 15:36:35.950 -05:00 [INF] Executing endpoint '/Account/Login'
+2025-07-04 15:36:35.952 -05:00 [INF] Executing handler method VCashApp.Areas.Identity.Pages.Account.LoginModel.OnGetAsync - ModelState is "Valid"
+2025-07-04 15:36:35.953 -05:00 [INF] AuthenticationScheme: Identity.External signed out.
+2025-07-04 15:36:35.955 -05:00 [INF] Executed handler method OnGetAsync, returned result .
+2025-07-04 15:36:35.957 -05:00 [INF] Executing an implicit handler method - ModelState is "Valid"
+2025-07-04 15:36:35.959 -05:00 [INF] Executed an implicit handler method, returned result Microsoft.AspNetCore.Mvc.RazorPages.PageResult.
+2025-07-04 15:36:35.962 -05:00 [INF] Executed page /Account/Login in 10.8688ms
+2025-07-04 15:36:39.895 -05:00 [INF] Executing endpoint '/Account/Login'
+2025-07-04 15:36:39.903 -05:00 [INF] Executing handler method VCashApp.Areas.Identity.Pages.Account.LoginModel.OnPostAsync - ModelState is "Valid"
+2025-07-04 15:36:40.002 -05:00 [INF] AuthenticationScheme: Identity.Application signed in.
+2025-07-04 15:36:40.005 -05:00 [INF] User logged in.
+2025-07-04 15:36:40.008 -05:00 [INF] Executed handler method OnPostAsync, returned result Microsoft.AspNetCore.Mvc.LocalRedirectResult.
+2025-07-04 15:36:40.009 -05:00 [INF] Executing LocalRedirectResult, redirecting to /.
+2025-07-04 15:36:40.010 -05:00 [INF] Executed page /Account/Login in 112.7693ms
+2025-07-04 15:36:40.024 -05:00 [INF] Executing endpoint 'VCashApp.Controllers.HomeController.Index (VCashApp)'
+2025-07-04 15:58:42.343 -05:00 [WRN] Sensitive data logging is enabled. Log entries and exception messages may include sensitive application data; this mode should only be enabled during development.
+2025-07-04 15:58:42.446 -05:00 [INF] warn: 04/07/2025 15:58:42.445 CoreEventId.SensitiveDataLoggingEnabledWarning[10400] (Microsoft.EntityFrameworkCore.Infrastructure) 
+      Sensitive data logging is enabled. Log entries and exception messages may include sensitive application data; this mode should only be enabled during development.
+2025-07-04 15:58:43.439 -05:00 [INF] [SeedData] Rol 'Admin' ya existe.
+2025-07-04 15:58:43.450 -05:00 [INF] [SeedData] Rol 'Planeador' ya existe.
+2025-07-04 15:58:43.454 -05:00 [INF] [SeedData] Rol 'CEF' ya existe.
+2025-07-04 15:58:43.458 -05:00 [INF] [SeedData] Rol 'Supervisor' ya existe.
+2025-07-04 15:58:43.462 -05:00 [INF] [SeedData] Rol 'ADATM01' ya existe.
+2025-07-04 15:58:43.466 -05:00 [INF] [SeedData] Rol 'ADCEF01' ya existe.
+2025-07-04 15:58:43.470 -05:00 [INF] [SeedData] Rol 'ADCF01' ya existe.
+2025-07-04 15:58:43.474 -05:00 [INF] [SeedData] Rol 'ADGRG01' ya existe.
+2025-07-04 15:58:43.479 -05:00 [INF] [SeedData] Rol 'ADMTF01' ya existe.
+2025-07-04 15:58:43.482 -05:00 [INF] [SeedData] Rol 'ADSER01' ya existe.
+2025-07-04 15:58:43.485 -05:00 [INF] [SeedData] Rol 'ADSER02' ya existe.
+2025-07-04 15:58:43.488 -05:00 [INF] [SeedData] Rol 'ADTH01' ya existe.
+2025-07-04 15:58:43.492 -05:00 [INF] [SeedData] Rol 'ADTI01' ya existe.
+2025-07-04 15:58:43.495 -05:00 [INF] [SeedData] Rol 'COCEF01' ya existe.
+2025-07-04 15:58:43.498 -05:00 [INF] [SeedData] Rol 'COSTV01' ya existe.
+2025-07-04 15:58:43.501 -05:00 [INF] [SeedData] Rol 'GRSER001' ya existe.
+2025-07-04 15:58:43.504 -05:00 [INF] [SeedData] Rol 'SUPTV01' ya existe.
+2025-07-04 15:58:43.581 -05:00 [INF] [SeedData] Usuario 'adminvcash' ya existe.
+2025-07-04 15:58:43.586 -05:00 [INF] [SeedData] Usuario 'planeador1' ya existe.
+2025-07-04 15:58:43.589 -05:00 [INF] [SeedData] Usuario 'planeador2' ya existe.
+2025-07-04 15:58:43.592 -05:00 [INF] [SeedData] Usuario 'cef1' ya existe.
+2025-07-04 15:58:43.596 -05:00 [INF] [SeedData] Usuario 'supervisor1' ya existe.
+2025-07-04 15:58:43.601 -05:00 [INF] [SeedData] Iniciando seeding de permisos por sucursal...
+2025-07-04 15:58:43.730 -05:00 [INF] [SeedData] Seeding de permisos por sucursal completado.
+2025-07-04 15:58:43.738 -05:00 [INF] [SeedData] Iniciando seeding de permisos de perfiles y vistas...
+2025-07-04 15:58:43.808 -05:00 [INF] [SeedData] Vistas creadas/actualizadas.
+2025-07-04 15:58:43.849 -05:00 [INF] [SeedData] Permisos RUD actualizados para rol Admin.
+2025-07-04 15:58:43.854 -05:00 [INF] [SeedData] Permisos RUD actualizados para rol Planeador.
+2025-07-04 15:58:43.857 -05:00 [INF] [SeedData] Permisos RUD actualizados para rol CEF.
+2025-07-04 15:58:43.860 -05:00 [INF] [SeedData] Permisos RUD actualizados para rol Supervisor.
+2025-07-04 15:58:43.870 -05:00 [INF] [SeedData] Permisos RUDHIS actualizados para rol Admin.
+2025-07-04 15:58:43.874 -05:00 [INF] [SeedData] Permisos RUDHIS actualizados para rol Planeador.
+2025-07-04 15:58:43.877 -05:00 [INF] [SeedData] Permisos RUDHIS actualizados para rol CEF.
+2025-07-04 15:58:43.880 -05:00 [INF] [SeedData] Permisos RUDHIS actualizados para rol Supervisor.
+2025-07-04 15:58:43.989 -05:00 [INF] [SeedData] Seeding de permisos de perfiles y vistas completado.
+2025-07-04 15:58:44.415 -05:00 [INF] Now listening on: https://localhost:7024
+2025-07-04 15:58:44.422 -05:00 [INF] Now listening on: http://localhost:5006
+2025-07-04 15:58:44.481 -05:00 [INF] Application started. Press Ctrl+C to shut down.
+2025-07-04 15:58:44.483 -05:00 [INF] Hosting environment: Development
+2025-07-04 15:58:44.485 -05:00 [INF] Content root path: C:\Users\hamirrocha\source\repos\VCashApp
+2025-07-04 15:58:44.831 -05:00 [INF] Identity.Application was not authenticated. Failure message: Ticket expired
+2025-07-04 15:58:44.837 -05:00 [INF] Executing endpoint 'VCashApp.Controllers.HomeController.Index (VCashApp)'
+2025-07-04 15:58:52.703 -05:00 [INF] Identity.Application was not authenticated. Failure message: Ticket expired
+2025-07-04 15:58:52.705 -05:00 [INF] Executing endpoint '/Account/Login'
+2025-07-04 15:58:52.746 -05:00 [INF] Executing handler method VCashApp.Areas.Identity.Pages.Account.LoginModel.OnGetAsync - ModelState is "Valid"
+2025-07-04 15:58:52.755 -05:00 [INF] AuthenticationScheme: Identity.External signed out.
+2025-07-04 15:58:52.758 -05:00 [INF] Executed handler method OnGetAsync, returned result .
+2025-07-04 15:58:52.761 -05:00 [INF] Executing an implicit handler method - ModelState is "Valid"
+2025-07-04 15:58:52.762 -05:00 [INF] Executed an implicit handler method, returned result Microsoft.AspNetCore.Mvc.RazorPages.PageResult.
+2025-07-04 15:58:52.802 -05:00 [INF] Executed page /Account/Login in 77.0889ms
+2025-07-04 15:59:09.043 -05:00 [INF] Identity.Application was not authenticated. Failure message: Ticket expired
+2025-07-04 15:59:09.047 -05:00 [INF] Executing endpoint '/Account/Login'
+2025-07-04 15:59:09.061 -05:00 [INF] Executing handler method VCashApp.Areas.Identity.Pages.Account.LoginModel.OnPostAsync - ModelState is "Valid"
+2025-07-04 15:59:09.193 -05:00 [INF] Executed handler method OnPostAsync, returned result Microsoft.AspNetCore.Mvc.RazorPages.PageResult.
+2025-07-04 15:59:09.201 -05:00 [INF] Executed page /Account/Login in 152.0202ms
+2025-07-04 15:59:19.051 -05:00 [INF] Identity.Application was not authenticated. Failure message: Ticket expired
+2025-07-04 15:59:19.053 -05:00 [INF] Executing endpoint '/Account/Login'
+2025-07-04 15:59:19.056 -05:00 [INF] Executing handler method VCashApp.Areas.Identity.Pages.Account.LoginModel.OnPostAsync - ModelState is "Valid"
+2025-07-04 15:59:19.182 -05:00 [INF] AuthenticationScheme: Identity.Application signed in.
+2025-07-04 15:59:19.185 -05:00 [INF] User logged in.
+2025-07-04 15:59:19.186 -05:00 [INF] Executed handler method OnPostAsync, returned result Microsoft.AspNetCore.Mvc.LocalRedirectResult.
+2025-07-04 15:59:19.187 -05:00 [INF] Executing LocalRedirectResult, redirecting to /.
+2025-07-04 15:59:19.188 -05:00 [INF] Executed page /Account/Login in 133.3642ms
+2025-07-04 15:59:19.203 -05:00 [INF] Executing endpoint 'VCashApp.Controllers.HomeController.Index (VCashApp)'
+2025-07-04 16:00:25.748 -05:00 [INF] Identity.Application was not authenticated. Failure message: Ticket expired
+2025-07-04 16:00:25.752 -05:00 [INF] Executing endpoint 'VCashApp.Controllers.CiudadesController.Index (VCashApp)'
+2025-07-04 16:00:25.761 -05:00 [WRN] | AuthFilter: VCashApp.Controllers.CiudadesController.Index (VCashApp) | Usuario: NoAutenticado | IP: 0.0.0.1 | Resultado: No autenticado. Redirigiendo a Login.
+2025-07-04 16:00:25.766 -05:00 [INF] Authorization failed for the request at filter 'VCashApp.Filters.RequiredPermissionFilter'.
+2025-07-04 16:00:25.778 -05:00 [INF] Identity.Application was not authenticated. Failure message: Ticket expired
+2025-07-04 16:01:35.581 -05:00 [INF] Identity.Application was not authenticated. Failure message: Ticket expired
+2025-07-04 16:02:36.234 -05:00 [INF] Identity.Application was not authenticated. Failure message: Ticket expired
+2025-07-04 16:02:36.236 -05:00 [INF] Executing endpoint 'VCashApp.Controllers.HomeController.Index (VCashApp)'
+2025-07-04 16:02:47.574 -05:00 [INF] Application is shutting down...
+2025-07-04 16:02:55.359 -05:00 [WRN] Sensitive data logging is enabled. Log entries and exception messages may include sensitive application data; this mode should only be enabled during development.
+2025-07-04 16:02:55.409 -05:00 [INF] warn: 04/07/2025 16:02:55.408 CoreEventId.SensitiveDataLoggingEnabledWarning[10400] (Microsoft.EntityFrameworkCore.Infrastructure) 
+      Sensitive data logging is enabled. Log entries and exception messages may include sensitive application data; this mode should only be enabled during development.
+2025-07-04 16:02:56.950 -05:00 [INF] [SeedData] Rol 'Admin' ya existe.
+2025-07-04 16:02:56.961 -05:00 [INF] [SeedData] Rol 'Planeador' ya existe.
+2025-07-04 16:02:56.965 -05:00 [INF] [SeedData] Rol 'CEF' ya existe.
+2025-07-04 16:02:56.969 -05:00 [INF] [SeedData] Rol 'Supervisor' ya existe.
+2025-07-04 16:02:56.974 -05:00 [INF] [SeedData] Rol 'ADATM01' ya existe.
+2025-07-04 16:02:56.978 -05:00 [INF] [SeedData] Rol 'ADCEF01' ya existe.
+2025-07-04 16:02:56.982 -05:00 [INF] [SeedData] Rol 'ADCF01' ya existe.
+2025-07-04 16:02:56.985 -05:00 [INF] [SeedData] Rol 'ADGRG01' ya existe.
+2025-07-04 16:02:56.989 -05:00 [INF] [SeedData] Rol 'ADMTF01' ya existe.
+2025-07-04 16:02:56.992 -05:00 [INF] [SeedData] Rol 'ADSER01' ya existe.
+2025-07-04 16:02:56.995 -05:00 [INF] [SeedData] Rol 'ADSER02' ya existe.
+2025-07-04 16:02:56.997 -05:00 [INF] [SeedData] Rol 'ADTH01' ya existe.
+2025-07-04 16:02:57.000 -05:00 [INF] [SeedData] Rol 'ADTI01' ya existe.
+2025-07-04 16:02:57.003 -05:00 [INF] [SeedData] Rol 'COCEF01' ya existe.
+2025-07-04 16:02:57.006 -05:00 [INF] [SeedData] Rol 'COSTV01' ya existe.
+2025-07-04 16:02:57.010 -05:00 [INF] [SeedData] Rol 'GRSER001' ya existe.
+2025-07-04 16:02:57.013 -05:00 [INF] [SeedData] Rol 'SUPTV01' ya existe.
+2025-07-04 16:02:57.086 -05:00 [INF] [SeedData] Usuario 'adminvcash' ya existe.
+2025-07-04 16:02:57.090 -05:00 [INF] [SeedData] Usuario 'planeador1' ya existe.
+2025-07-04 16:02:57.094 -05:00 [INF] [SeedData] Usuario 'planeador2' ya existe.
+2025-07-04 16:02:57.097 -05:00 [INF] [SeedData] Usuario 'cef1' ya existe.
+2025-07-04 16:02:57.100 -05:00 [INF] [SeedData] Usuario 'supervisor1' ya existe.
+2025-07-04 16:02:57.103 -05:00 [INF] [SeedData] Iniciando seeding de permisos por sucursal...
+2025-07-04 16:02:57.217 -05:00 [INF] [SeedData] Seeding de permisos por sucursal completado.
+2025-07-04 16:02:57.222 -05:00 [INF] [SeedData] Iniciando seeding de permisos de perfiles y vistas...
+2025-07-04 16:02:57.283 -05:00 [INF] [SeedData] Vistas creadas/actualizadas.
+2025-07-04 16:02:57.325 -05:00 [INF] [SeedData] Permisos RUD actualizados para rol Admin.
+2025-07-04 16:02:57.329 -05:00 [INF] [SeedData] Permisos RUD actualizados para rol Planeador.
+2025-07-04 16:02:57.332 -05:00 [INF] [SeedData] Permisos RUD actualizados para rol CEF.
+2025-07-04 16:02:57.335 -05:00 [INF] [SeedData] Permisos RUD actualizados para rol Supervisor.
+2025-07-04 16:02:57.344 -05:00 [INF] [SeedData] Permisos RUDHIS actualizados para rol Admin.
+2025-07-04 16:02:57.348 -05:00 [INF] [SeedData] Permisos RUDHIS actualizados para rol Planeador.
+2025-07-04 16:02:57.351 -05:00 [INF] [SeedData] Permisos RUDHIS actualizados para rol CEF.
+2025-07-04 16:02:57.353 -05:00 [INF] [SeedData] Permisos RUDHIS actualizados para rol Supervisor.
+2025-07-04 16:02:57.447 -05:00 [INF] [SeedData] Seeding de permisos de perfiles y vistas completado.
+2025-07-04 16:02:57.738 -05:00 [INF] Now listening on: https://localhost:7024
+2025-07-04 16:02:57.740 -05:00 [INF] Now listening on: http://localhost:5006
+2025-07-04 16:02:57.769 -05:00 [INF] Application started. Press Ctrl+C to shut down.
+2025-07-04 16:02:57.771 -05:00 [INF] Hosting environment: Development
+2025-07-04 16:02:57.772 -05:00 [INF] Content root path: C:\Users\hamirrocha\source\repos\VCashApp
+2025-07-04 16:02:58.180 -05:00 [INF] Identity.Application was not authenticated. Failure message: Ticket expired
+2025-07-04 16:02:58.186 -05:00 [INF] Executing endpoint 'VCashApp.Controllers.HomeController.Index (VCashApp)'
+2025-07-04 16:03:09.740 -05:00 [INF] Identity.Application was not authenticated. Failure message: Ticket expired
+2025-07-04 16:03:09.743 -05:00 [INF] Executing endpoint '/Account/Login'
+2025-07-04 16:03:09.791 -05:00 [INF] Executing handler method VCashApp.Areas.Identity.Pages.Account.LoginModel.OnGetAsync - ModelState is "Valid"
+2025-07-04 16:03:09.801 -05:00 [INF] AuthenticationScheme: Identity.External signed out.
+2025-07-04 16:03:09.803 -05:00 [INF] Executed handler method OnGetAsync, returned result .
+2025-07-04 16:03:09.807 -05:00 [INF] Executing an implicit handler method - ModelState is "Valid"
+2025-07-04 16:03:09.808 -05:00 [INF] Executed an implicit handler method, returned result Microsoft.AspNetCore.Mvc.RazorPages.PageResult.
+2025-07-04 16:03:09.855 -05:00 [INF] Executed page /Account/Login in 90.4356ms
+2025-07-04 16:03:23.824 -05:00 [INF] Identity.Application was not authenticated. Failure message: Ticket expired
+2025-07-04 16:03:23.826 -05:00 [INF] Executing endpoint '/Account/Login'
+2025-07-04 16:03:23.838 -05:00 [INF] Executing handler method VCashApp.Areas.Identity.Pages.Account.LoginModel.OnPostAsync - ModelState is "Valid"
+2025-07-04 16:03:23.989 -05:00 [INF] Executed handler method OnPostAsync, returned result Microsoft.AspNetCore.Mvc.RazorPages.PageResult.
+2025-07-04 16:03:23.996 -05:00 [INF] Executed page /Account/Login in 168.8457ms
+2025-07-04 16:03:28.217 -05:00 [INF] Identity.Application was not authenticated. Failure message: Ticket expired
+2025-07-04 16:03:28.219 -05:00 [INF] Executing endpoint '/Account/Login'
+2025-07-04 16:03:28.223 -05:00 [INF] Executing handler method VCashApp.Areas.Identity.Pages.Account.LoginModel.OnPostAsync - ModelState is "Valid"
+2025-07-04 16:03:28.355 -05:00 [INF] AuthenticationScheme: Identity.Application signed in.
+2025-07-04 16:03:28.357 -05:00 [INF] User logged in.
+2025-07-04 16:03:28.358 -05:00 [INF] Executed handler method OnPostAsync, returned result Microsoft.AspNetCore.Mvc.LocalRedirectResult.
+2025-07-04 16:03:28.359 -05:00 [INF] Executing LocalRedirectResult, redirecting to /.
+2025-07-04 16:03:28.360 -05:00 [INF] Executed page /Account/Login in 139.0736ms
+2025-07-04 16:03:28.375 -05:00 [INF] Executing endpoint 'VCashApp.Controllers.HomeController.Index (VCashApp)'
+2025-07-04 16:04:04.709 -05:00 [INF] Identity.Application was not authenticated. Failure message: Ticket expired
+2025-07-04 16:04:04.711 -05:00 [INF] Executing endpoint 'VCashApp.Controllers.HomeController.Index (VCashApp)'
+2025-07-04 16:04:04.953 -05:00 [INF] Identity.Application was not authenticated. Failure message: Ticket expired
+2025-07-04 16:04:07.511 -05:00 [INF] Identity.Application was not authenticated. Failure message: Ticket expired
+2025-07-04 16:04:07.513 -05:00 [INF] Executing endpoint '/Account/Login'
+2025-07-04 16:04:07.515 -05:00 [INF] Executing handler method VCashApp.Areas.Identity.Pages.Account.LoginModel.OnGetAsync - ModelState is "Valid"
+2025-07-04 16:04:07.517 -05:00 [INF] AuthenticationScheme: Identity.External signed out.
+2025-07-04 16:04:07.519 -05:00 [INF] Executed handler method OnGetAsync, returned result .
+2025-07-04 16:04:07.524 -05:00 [INF] Executing an implicit handler method - ModelState is "Valid"
+2025-07-04 16:04:07.526 -05:00 [INF] Executed an implicit handler method, returned result Microsoft.AspNetCore.Mvc.RazorPages.PageResult.
+2025-07-04 16:04:07.532 -05:00 [INF] Executed page /Account/Login in 18.0136ms
+2025-07-04 16:04:07.836 -05:00 [INF] Identity.Application was not authenticated. Failure message: Ticket expired
+2025-07-04 16:04:23.316 -05:00 [INF] Identity.Application was not authenticated. Failure message: Ticket expired
+2025-07-04 16:04:23.318 -05:00 [INF] Executing endpoint '/Account/Login'
+2025-07-04 16:04:23.330 -05:00 [INF] Executing handler method VCashApp.Areas.Identity.Pages.Account.LoginModel.OnPostAsync - ModelState is "Valid"
+2025-07-04 16:04:23.429 -05:00 [INF] AuthenticationScheme: Identity.Application signed in.
+2025-07-04 16:04:23.431 -05:00 [INF] User logged in.
+2025-07-04 16:04:23.432 -05:00 [INF] Executed handler method OnPostAsync, returned result Microsoft.AspNetCore.Mvc.LocalRedirectResult.
+2025-07-04 16:04:23.433 -05:00 [INF] Executing LocalRedirectResult, redirecting to /.
+2025-07-04 16:04:23.434 -05:00 [INF] Executed page /Account/Login in 115.4283ms
+2025-07-04 16:04:23.515 -05:00 [INF] Executing endpoint 'VCashApp.Controllers.HomeController.Index (VCashApp)'
+2025-07-04 16:04:32.061 -05:00 [INF] Identity.Application was not authenticated. Failure message: Ticket expired
+2025-07-04 16:04:32.063 -05:00 [INF] Executing endpoint 'VCashApp.Controllers.CiudadesController.Index (VCashApp)'
+2025-07-04 16:04:32.077 -05:00 [WRN] | AuthFilter: VCashApp.Controllers.CiudadesController.Index (VCashApp) | Usuario: NoAutenticado | IP: 0.0.0.1 | Resultado: No autenticado. Redirigiendo a Login.
+2025-07-04 16:04:32.080 -05:00 [INF] Authorization failed for the request at filter 'VCashApp.Filters.RequiredPermissionFilter'.
+2025-07-04 16:04:32.090 -05:00 [INF] Identity.Application was not authenticated. Failure message: Ticket expired
+2025-07-04 16:04:34.891 -05:00 [INF] Identity.Application was not authenticated. Failure message: Ticket expired
+2025-07-04 16:04:34.892 -05:00 [INF] Executing endpoint 'VCashApp.Controllers.HomeController.Index (VCashApp)'
+2025-07-04 16:04:36.535 -05:00 [INF] Identity.Application was not authenticated. Failure message: Ticket expired
+2025-07-04 16:04:36.538 -05:00 [INF] Executing endpoint 'VCashApp.Controllers.CiudadesController.Index (VCashApp)'
+2025-07-04 16:04:36.540 -05:00 [WRN] | AuthFilter: VCashApp.Controllers.CiudadesController.Index (VCashApp) | Usuario: NoAutenticado | IP: 0.0.0.1 | Resultado: No autenticado. Redirigiendo a Login.
+2025-07-04 16:04:36.543 -05:00 [INF] Authorization failed for the request at filter 'VCashApp.Filters.RequiredPermissionFilter'.
+2025-07-04 16:04:36.554 -05:00 [INF] Identity.Application was not authenticated. Failure message: Ticket expired
+2025-07-04 16:05:27.582 -05:00 [INF] Identity.Application was not authenticated. Failure message: Ticket expired
+2025-07-04 16:05:27.584 -05:00 [INF] Executing endpoint 'VCashApp.Controllers.SucursalesController.Index (VCashApp)'
+2025-07-04 16:05:27.599 -05:00 [WRN] | AuthFilter: VCashApp.Controllers.SucursalesController.Index (VCashApp) | Usuario: NoAutenticado | IP: 0.0.0.1 | Resultado: No autenticado. Redirigiendo a Login.
+2025-07-04 16:05:27.601 -05:00 [INF] Authorization failed for the request at filter 'VCashApp.Filters.RequiredPermissionFilter'.
+2025-07-04 16:05:27.765 -05:00 [INF] Identity.Application was not authenticated. Failure message: Ticket expired
+2025-07-04 16:05:36.432 -05:00 [INF] Identity.Application was not authenticated. Failure message: Ticket expired
+2025-07-04 16:05:36.433 -05:00 [INF] Executing endpoint 'VCashApp.Controllers.HomeController.Index (VCashApp)'
+2025-07-04 16:05:36.674 -05:00 [INF] Identity.Application was not authenticated. Failure message: Ticket expired
+2025-07-04 16:05:40.799 -05:00 [INF] Identity.Application was not authenticated. Failure message: Ticket expired
+2025-07-04 16:05:40.801 -05:00 [INF] Executing endpoint 'VCashApp.Controllers.HomeController.Index (VCashApp)'
+2025-07-04 16:06:17.869 -05:00 [INF] Identity.Application was not authenticated. Failure message: Ticket expired
+2025-07-04 16:06:17.871 -05:00 [INF] Executing endpoint 'VCashApp.Controllers.CiudadesController.Index (VCashApp)'
+2025-07-04 16:06:17.874 -05:00 [WRN] | AuthFilter: VCashApp.Controllers.CiudadesController.Index (VCashApp) | Usuario: NoAutenticado | IP: 0.0.0.1 | Resultado: No autenticado. Redirigiendo a Login.
+2025-07-04 16:06:17.877 -05:00 [INF] Authorization failed for the request at filter 'VCashApp.Filters.RequiredPermissionFilter'.
+2025-07-04 16:06:18.060 -05:00 [INF] Identity.Application was not authenticated. Failure message: Ticket expired
+2025-07-04 16:06:33.586 -05:00 [INF] Identity.Application was not authenticated. Failure message: Ticket expired
+2025-07-04 16:06:33.589 -05:00 [INF] Executing endpoint 'VCashApp.Controllers.HomeController.Index (VCashApp)'
+2025-07-04 16:06:33.888 -05:00 [INF] Identity.Application was not authenticated. Failure message: Ticket expired
+2025-07-04 16:06:35.617 -05:00 [INF] Identity.Application was not authenticated. Failure message: Ticket expired
+2025-07-04 16:06:35.620 -05:00 [INF] Executing endpoint '/Account/Login'
+2025-07-04 16:06:35.623 -05:00 [INF] Executing handler method VCashApp.Areas.Identity.Pages.Account.LoginModel.OnGetAsync - ModelState is "Valid"
+2025-07-04 16:06:35.628 -05:00 [INF] AuthenticationScheme: Identity.External signed out.
+2025-07-04 16:06:35.631 -05:00 [INF] Executed handler method OnGetAsync, returned result .
+2025-07-04 16:06:35.634 -05:00 [INF] Executing an implicit handler method - ModelState is "Valid"
+2025-07-04 16:06:35.636 -05:00 [INF] Executed an implicit handler method, returned result Microsoft.AspNetCore.Mvc.RazorPages.PageResult.
+2025-07-04 16:06:35.641 -05:00 [INF] Executed page /Account/Login in 19.0454ms
+2025-07-04 16:06:36.003 -05:00 [INF] Identity.Application was not authenticated. Failure message: Ticket expired
+2025-07-04 16:06:47.110 -05:00 [INF] Identity.Application was not authenticated. Failure message: Ticket expired
+2025-07-04 16:06:47.111 -05:00 [INF] Executing endpoint '/Account/Login'
+2025-07-04 16:06:47.120 -05:00 [INF] Executing handler method VCashApp.Areas.Identity.Pages.Account.LoginModel.OnPostAsync - ModelState is "Valid"
+2025-07-04 16:06:47.262 -05:00 [INF] AuthenticationScheme: Identity.Application signed in.
+2025-07-04 16:06:47.264 -05:00 [INF] User logged in.
+2025-07-04 16:06:47.265 -05:00 [INF] Executed handler method OnPostAsync, returned result Microsoft.AspNetCore.Mvc.LocalRedirectResult.
+2025-07-04 16:06:47.267 -05:00 [INF] Executing LocalRedirectResult, redirecting to /.
+2025-07-04 16:06:47.268 -05:00 [INF] Executed page /Account/Login in 155.7098ms
+2025-07-04 16:06:47.295 -05:00 [INF] Executing endpoint 'VCashApp.Controllers.HomeController.Index (VCashApp)'
+2025-07-04 16:06:50.301 -05:00 [INF] Executing endpoint 'VCashApp.Controllers.SucursalesController.Index (VCashApp)'
+2025-07-04 16:06:50.353 -05:00 [INF] | AuthFilter: VCashApp.Controllers.SucursalesController.Index (VCashApp) | Usuario: adminvcash (Admin) | IP: 0.0.0.1 | Resultado: Acceso concedido (es Admin).
+2025-07-04 16:06:50.532 -05:00 [INF] | Usuario: adminvcash | Ip: 0.0.0.1 | Acción: Acceso a Lista de Sucursales | Cantidad de sucursales: 15 | Respuesta: Acceso permitido | 
+2025-07-04 16:06:51.947 -05:00 [INF] Executing endpoint 'VCashApp.Controllers.SucursalesController.Index (VCashApp)'
+2025-07-04 16:06:51.977 -05:00 [INF] | AuthFilter: VCashApp.Controllers.SucursalesController.Index (VCashApp) | Usuario: adminvcash (Admin) | IP: 0.0.0.1 | Resultado: Acceso concedido (es Admin).
+2025-07-04 16:06:52.005 -05:00 [INF] | Usuario: adminvcash | Ip: 0.0.0.1 | Acción: Acceso a Lista de Sucursales | Cantidad de sucursales: 15 | Respuesta: Acceso permitido | 
+2025-07-04 16:06:52.019 -05:00 [INF] Executing PartialViewResult, running view ~/Views/Sucursales/_SucursalesTablePartial.cshtml.
+2025-07-04 16:06:52.114 -05:00 [INF] Executed PartialViewResult - view ~/Views/Sucursales/_SucursalesTablePartial.cshtml executed in 95.6127ms.
+2025-07-04 16:06:56.846 -05:00 [INF] Executing endpoint '/Account/Logout'
+2025-07-04 16:06:56.858 -05:00 [INF] Executing handler method VCashApp.Areas.Identity.Pages.Account.LogoutModel.OnPost - ModelState is "Valid"
+2025-07-04 16:06:56.864 -05:00 [INF] AuthenticationScheme: Identity.Application signed out.
+2025-07-04 16:06:56.866 -05:00 [INF] AuthenticationScheme: Identity.External signed out.
+2025-07-04 16:06:56.868 -05:00 [INF] AuthenticationScheme: Identity.TwoFactorUserId signed out.
+2025-07-04 16:06:56.869 -05:00 [INF] User logged out.
+2025-07-04 16:06:56.869 -05:00 [INF] Executed handler method OnPost, returned result Microsoft.AspNetCore.Mvc.LocalRedirectResult.
+2025-07-04 16:06:56.871 -05:00 [INF] Executing LocalRedirectResult, redirecting to /Identity/Account/Login.
+2025-07-04 16:06:56.871 -05:00 [INF] Executed page /Account/Logout in 20.0948ms
+2025-07-04 16:06:57.031 -05:00 [INF] Executing endpoint '/Account/Login'
+2025-07-04 16:06:57.034 -05:00 [INF] Executing handler method VCashApp.Areas.Identity.Pages.Account.LoginModel.OnGetAsync - ModelState is "Valid"
+2025-07-04 16:06:57.036 -05:00 [INF] AuthenticationScheme: Identity.External signed out.
+2025-07-04 16:06:57.037 -05:00 [INF] Executed handler method OnGetAsync, returned result .
+2025-07-04 16:06:57.038 -05:00 [INF] Executing an implicit handler method - ModelState is "Valid"
+2025-07-04 16:06:57.040 -05:00 [INF] Executed an implicit handler method, returned result Microsoft.AspNetCore.Mvc.RazorPages.PageResult.
+2025-07-04 16:06:57.043 -05:00 [INF] Executed page /Account/Login in 9.4613ms
+2025-07-04 16:14:17.058 -05:00 [WRN] Sensitive data logging is enabled. Log entries and exception messages may include sensitive application data; this mode should only be enabled during development.
+2025-07-04 16:14:17.125 -05:00 [INF] warn: 04/07/2025 16:14:17.124 CoreEventId.SensitiveDataLoggingEnabledWarning[10400] (Microsoft.EntityFrameworkCore.Infrastructure) 
+      Sensitive data logging is enabled. Log entries and exception messages may include sensitive application data; this mode should only be enabled during development.
+2025-07-04 16:14:18.088 -05:00 [INF] [SeedData] Rol 'Admin' ya existe.
+2025-07-04 16:14:18.100 -05:00 [INF] [SeedData] Rol 'Planeador' ya existe.
+2025-07-04 16:14:18.103 -05:00 [INF] [SeedData] Rol 'CEF' ya existe.
+2025-07-04 16:14:18.110 -05:00 [INF] [SeedData] Rol 'Supervisor' ya existe.
+2025-07-04 16:14:18.114 -05:00 [INF] [SeedData] Rol 'ADATM01' ya existe.
+2025-07-04 16:14:18.117 -05:00 [INF] [SeedData] Rol 'ADCEF01' ya existe.
+2025-07-04 16:14:18.120 -05:00 [INF] [SeedData] Rol 'ADCF01' ya existe.
+2025-07-04 16:14:18.125 -05:00 [INF] [SeedData] Rol 'ADGRG01' ya existe.
+2025-07-04 16:14:18.129 -05:00 [INF] [SeedData] Rol 'ADMTF01' ya existe.
+2025-07-04 16:14:18.132 -05:00 [INF] [SeedData] Rol 'ADSER01' ya existe.
+2025-07-04 16:14:18.135 -05:00 [INF] [SeedData] Rol 'ADSER02' ya existe.
+2025-07-04 16:14:18.139 -05:00 [INF] [SeedData] Rol 'ADTH01' ya existe.
+2025-07-04 16:14:18.143 -05:00 [INF] [SeedData] Rol 'ADTI01' ya existe.
+2025-07-04 16:14:18.146 -05:00 [INF] [SeedData] Rol 'COCEF01' ya existe.
+2025-07-04 16:14:18.149 -05:00 [INF] [SeedData] Rol 'COSTV01' ya existe.
+2025-07-04 16:14:18.152 -05:00 [INF] [SeedData] Rol 'GRSER001' ya existe.
+2025-07-04 16:14:18.155 -05:00 [INF] [SeedData] Rol 'SUPTV01' ya existe.
+2025-07-04 16:14:18.241 -05:00 [INF] [SeedData] Usuario 'adminvcash' ya existe.
+2025-07-04 16:14:18.245 -05:00 [INF] [SeedData] Usuario 'planeador1' ya existe.
+2025-07-04 16:14:18.248 -05:00 [INF] [SeedData] Usuario 'planeador2' ya existe.
+2025-07-04 16:14:18.250 -05:00 [INF] [SeedData] Usuario 'cef1' ya existe.
+2025-07-04 16:14:18.253 -05:00 [INF] [SeedData] Usuario 'supervisor1' ya existe.
+2025-07-04 16:14:18.257 -05:00 [INF] [SeedData] Iniciando seeding de permisos por sucursal...
+2025-07-04 16:14:18.377 -05:00 [INF] [SeedData] Seeding de permisos por sucursal completado.
+2025-07-04 16:14:18.383 -05:00 [INF] [SeedData] Iniciando seeding de permisos de perfiles y vistas...
+2025-07-04 16:14:18.449 -05:00 [INF] [SeedData] Vistas creadas/actualizadas.
+2025-07-04 16:14:18.490 -05:00 [INF] [SeedData] Permisos RUD actualizados para rol Admin.
+2025-07-04 16:14:18.496 -05:00 [INF] [SeedData] Permisos RUD actualizados para rol Planeador.
+2025-07-04 16:14:18.500 -05:00 [INF] [SeedData] Permisos RUD actualizados para rol CEF.
+2025-07-04 16:14:18.505 -05:00 [INF] [SeedData] Permisos RUD actualizados para rol Supervisor.
+2025-07-04 16:14:18.516 -05:00 [INF] [SeedData] Permisos RUDHIS actualizados para rol Admin.
+2025-07-04 16:14:18.521 -05:00 [INF] [SeedData] Permisos RUDHIS actualizados para rol Planeador.
+2025-07-04 16:14:18.526 -05:00 [INF] [SeedData] Permisos RUDHIS actualizados para rol CEF.
+2025-07-04 16:14:18.531 -05:00 [INF] [SeedData] Permisos RUDHIS actualizados para rol Supervisor.
+2025-07-04 16:14:18.627 -05:00 [INF] [SeedData] Seeding de permisos de perfiles y vistas completado.
+2025-07-04 16:14:18.961 -05:00 [INF] Now listening on: https://localhost:7024
+2025-07-04 16:14:18.963 -05:00 [INF] Now listening on: http://localhost:5006
+2025-07-04 16:14:19.005 -05:00 [INF] Application started. Press Ctrl+C to shut down.
+2025-07-04 16:14:19.007 -05:00 [INF] Hosting environment: Development
+2025-07-04 16:14:19.009 -05:00 [INF] Content root path: C:\Users\hamirrocha\source\repos\VCashApp
+2025-07-04 16:14:19.329 -05:00 [INF] Executing endpoint '/Account/Login'
+2025-07-04 16:14:19.379 -05:00 [INF] Executing handler method VCashApp.Areas.Identity.Pages.Account.LoginModel.OnGetAsync - ModelState is "Valid"
+2025-07-04 16:14:19.388 -05:00 [INF] AuthenticationScheme: Identity.External signed out.
+2025-07-04 16:14:19.392 -05:00 [INF] Executed handler method OnGetAsync, returned result .
+2025-07-04 16:14:19.396 -05:00 [INF] Executing an implicit handler method - ModelState is "Valid"
+2025-07-04 16:14:19.397 -05:00 [INF] Executed an implicit handler method, returned result Microsoft.AspNetCore.Mvc.RazorPages.PageResult.
+2025-07-04 16:14:19.568 -05:00 [INF] Executed page /Account/Login in 203.079ms
+2025-07-04 16:15:52.643 -05:00 [WRN] Sensitive data logging is enabled. Log entries and exception messages may include sensitive application data; this mode should only be enabled during development.
+2025-07-04 16:15:52.784 -05:00 [INF] warn: 04/07/2025 16:15:52.782 CoreEventId.SensitiveDataLoggingEnabledWarning[10400] (Microsoft.EntityFrameworkCore.Infrastructure) 
+      Sensitive data logging is enabled. Log entries and exception messages may include sensitive application data; this mode should only be enabled during development.
+2025-07-04 16:15:53.811 -05:00 [INF] [SeedData] Rol 'Admin' ya existe.
+2025-07-04 16:15:53.823 -05:00 [INF] [SeedData] Rol 'Planeador' ya existe.
+2025-07-04 16:15:53.828 -05:00 [INF] [SeedData] Rol 'CEF' ya existe.
+2025-07-04 16:15:53.833 -05:00 [INF] [SeedData] Rol 'Supervisor' ya existe.
+2025-07-04 16:15:53.836 -05:00 [INF] [SeedData] Rol 'ADATM01' ya existe.
+2025-07-04 16:15:53.840 -05:00 [INF] [SeedData] Rol 'ADCEF01' ya existe.
+2025-07-04 16:15:53.843 -05:00 [INF] [SeedData] Rol 'ADCF01' ya existe.
+2025-07-04 16:15:53.847 -05:00 [INF] [SeedData] Rol 'ADGRG01' ya existe.
+2025-07-04 16:15:53.851 -05:00 [INF] [SeedData] Rol 'ADMTF01' ya existe.
+2025-07-04 16:15:53.854 -05:00 [INF] [SeedData] Rol 'ADSER01' ya existe.
+2025-07-04 16:15:53.857 -05:00 [INF] [SeedData] Rol 'ADSER02' ya existe.
+2025-07-04 16:15:53.861 -05:00 [INF] [SeedData] Rol 'ADTH01' ya existe.
+2025-07-04 16:15:53.865 -05:00 [INF] [SeedData] Rol 'ADTI01' ya existe.
+2025-07-04 16:15:53.869 -05:00 [INF] [SeedData] Rol 'COCEF01' ya existe.
+2025-07-04 16:15:53.872 -05:00 [INF] [SeedData] Rol 'COSTV01' ya existe.
+2025-07-04 16:15:53.877 -05:00 [INF] [SeedData] Rol 'GRSER001' ya existe.
+2025-07-04 16:15:53.880 -05:00 [INF] [SeedData] Rol 'SUPTV01' ya existe.
+2025-07-04 16:15:53.955 -05:00 [INF] [SeedData] Usuario 'adminvcash' ya existe.
+2025-07-04 16:15:53.959 -05:00 [INF] [SeedData] Usuario 'planeador1' ya existe.
+2025-07-04 16:15:53.962 -05:00 [INF] [SeedData] Usuario 'planeador2' ya existe.
+2025-07-04 16:15:53.966 -05:00 [INF] [SeedData] Usuario 'cef1' ya existe.
+2025-07-04 16:15:53.969 -05:00 [INF] [SeedData] Usuario 'supervisor1' ya existe.
+2025-07-04 16:15:53.975 -05:00 [INF] [SeedData] Iniciando seeding de permisos por sucursal...
+2025-07-04 16:15:54.118 -05:00 [INF] [SeedData] Seeding de permisos por sucursal completado.
+2025-07-04 16:15:54.123 -05:00 [INF] [SeedData] Iniciando seeding de permisos de perfiles y vistas...
+2025-07-04 16:15:54.198 -05:00 [INF] [SeedData] Vistas creadas/actualizadas.
+2025-07-04 16:15:54.238 -05:00 [INF] [SeedData] Permisos RUD actualizados para rol Admin.
+2025-07-04 16:15:54.242 -05:00 [INF] [SeedData] Permisos RUD actualizados para rol Planeador.
+2025-07-04 16:15:54.245 -05:00 [INF] [SeedData] Permisos RUD actualizados para rol CEF.
+2025-07-04 16:15:54.248 -05:00 [INF] [SeedData] Permisos RUD actualizados para rol Supervisor.
+2025-07-04 16:15:54.257 -05:00 [INF] [SeedData] Permisos RUDHIS actualizados para rol Admin.
+2025-07-04 16:15:54.261 -05:00 [INF] [SeedData] Permisos RUDHIS actualizados para rol Planeador.
+2025-07-04 16:15:54.264 -05:00 [INF] [SeedData] Permisos RUDHIS actualizados para rol CEF.
+2025-07-04 16:15:54.267 -05:00 [INF] [SeedData] Permisos RUDHIS actualizados para rol Supervisor.
+2025-07-04 16:15:54.361 -05:00 [INF] [SeedData] Seeding de permisos de perfiles y vistas completado.
+2025-07-04 16:15:54.709 -05:00 [INF] Now listening on: https://localhost:7024
+2025-07-04 16:15:54.711 -05:00 [INF] Now listening on: http://localhost:5006
+2025-07-04 16:15:54.750 -05:00 [INF] Application started. Press Ctrl+C to shut down.
+2025-07-04 16:15:54.753 -05:00 [INF] Hosting environment: Development
+2025-07-04 16:15:54.754 -05:00 [INF] Content root path: C:\Users\hamirrocha\source\repos\VCashApp
+2025-07-04 16:15:55.611 -05:00 [INF] Identity.Application was not authenticated. Failure message: Ticket expired
+2025-07-04 16:15:55.615 -05:00 [INF] Executing endpoint 'VCashApp.Controllers.HomeController.Index (VCashApp)'
+2025-07-04 16:15:58.613 -05:00 [INF] Identity.Application was not authenticated. Failure message: Ticket expired
+2025-07-04 16:15:58.616 -05:00 [INF] Executing endpoint '/Account/Login'
+2025-07-04 16:15:58.666 -05:00 [INF] Executing handler method VCashApp.Areas.Identity.Pages.Account.LoginModel.OnGetAsync - ModelState is "Valid"
+2025-07-04 16:15:58.677 -05:00 [INF] AuthenticationScheme: Identity.External signed out.
+2025-07-04 16:15:58.681 -05:00 [INF] Executed handler method OnGetAsync, returned result .
+2025-07-04 16:15:58.684 -05:00 [INF] Executing an implicit handler method - ModelState is "Valid"
+2025-07-04 16:15:58.686 -05:00 [INF] Executed an implicit handler method, returned result Microsoft.AspNetCore.Mvc.RazorPages.PageResult.
+2025-07-04 16:15:58.794 -05:00 [INF] Executed page /Account/Login in 155.3372ms
+2025-07-04 16:16:07.486 -05:00 [INF] Identity.Application was not authenticated. Failure message: Ticket expired
+2025-07-04 16:16:07.488 -05:00 [INF] Executing endpoint '/Account/Login'
+2025-07-04 16:16:07.499 -05:00 [INF] Executing handler method VCashApp.Areas.Identity.Pages.Account.LoginModel.OnPostAsync - ModelState is "Valid"
+2025-07-04 16:16:07.662 -05:00 [INF] AuthenticationScheme: Identity.Application signed in.
+2025-07-04 16:16:07.665 -05:00 [INF] User logged in.
+2025-07-04 16:16:07.667 -05:00 [INF] Executed handler method OnPostAsync, returned result Microsoft.AspNetCore.Mvc.LocalRedirectResult.
+2025-07-04 16:16:07.669 -05:00 [INF] Executing LocalRedirectResult, redirecting to /.
+2025-07-04 16:16:07.671 -05:00 [INF] Executed page /Account/Login in 181.3577ms
+2025-07-04 16:16:07.703 -05:00 [INF] Executing endpoint 'VCashApp.Controllers.HomeController.Index (VCashApp)'
+2025-07-04 16:17:14.497 -05:00 [INF] Identity.Application was not authenticated. Failure message: Ticket expired
+2025-07-04 16:17:14.499 -05:00 [INF] Executing endpoint 'VCashApp.Controllers.SucursalesController.Index (VCashApp)'
+2025-07-04 16:17:14.510 -05:00 [WRN] | AuthFilter: VCashApp.Controllers.SucursalesController.Index (VCashApp) | Usuario: NoAutenticado | IP: 0.0.0.1 | Resultado: No autenticado. Redirigiendo a Login.
+2025-07-04 16:17:14.513 -05:00 [INF] Authorization failed for the request at filter 'VCashApp.Filters.RequiredPermissionFilter'.
+2025-07-04 16:17:14.525 -05:00 [INF] Identity.Application was not authenticated. Failure message: Ticket expired
+2025-07-04 16:18:40.331 -05:00 [INF] Identity.Application was not authenticated. Failure message: Ticket expired
+2025-07-04 16:18:44.450 -05:00 [INF] Identity.Application was not authenticated. Failure message: Ticket expired
+2025-07-04 16:18:44.452 -05:00 [INF] Executing endpoint 'VCashApp.Controllers.HomeController.Index (VCashApp)'
+2025-07-04 16:18:44.500 -05:00 [INF] Identity.Application was not authenticated. Failure message: Ticket expired
+2025-07-04 16:18:46.518 -05:00 [INF] Identity.Application was not authenticated. Failure message: Ticket expired
+2025-07-04 16:18:46.519 -05:00 [INF] Executing endpoint 'VCashApp.Controllers.SucursalesController.Index (VCashApp)'
+2025-07-04 16:18:46.524 -05:00 [WRN] | AuthFilter: VCashApp.Controllers.SucursalesController.Index (VCashApp) | Usuario: NoAutenticado | IP: 0.0.0.1 | Resultado: No autenticado. Redirigiendo a Login.
+2025-07-04 16:18:46.527 -05:00 [INF] Authorization failed for the request at filter 'VCashApp.Filters.RequiredPermissionFilter'.
+2025-07-04 16:18:46.537 -05:00 [INF] Identity.Application was not authenticated. Failure message: Ticket expired
+2025-07-04 16:18:50.008 -05:00 [INF] Identity.Application was not authenticated. Failure message: Ticket expired
+2025-07-04 16:18:51.018 -05:00 [INF] Identity.Application was not authenticated. Failure message: Ticket expired
+2025-07-04 16:18:51.021 -05:00 [INF] Executing endpoint '/Account/Login'
+2025-07-04 16:18:51.024 -05:00 [INF] Executing handler method VCashApp.Areas.Identity.Pages.Account.LoginModel.OnGetAsync - ModelState is "Valid"
+2025-07-04 16:18:51.026 -05:00 [INF] AuthenticationScheme: Identity.External signed out.
+2025-07-04 16:18:51.029 -05:00 [INF] Executed handler method OnGetAsync, returned result .
+2025-07-04 16:18:51.032 -05:00 [INF] Executing an implicit handler method - ModelState is "Valid"
+2025-07-04 16:18:51.033 -05:00 [INF] Executed an implicit handler method, returned result Microsoft.AspNetCore.Mvc.RazorPages.PageResult.
+2025-07-04 16:18:51.040 -05:00 [INF] Executed page /Account/Login in 16.2215ms
+2025-07-04 16:18:51.093 -05:00 [INF] Identity.Application was not authenticated. Failure message: Ticket expired
+2025-07-04 16:19:03.532 -05:00 [INF] Identity.Application was not authenticated. Failure message: Ticket expired
+2025-07-04 16:19:03.533 -05:00 [INF] Executing endpoint '/Account/Login'
+2025-07-04 16:19:03.537 -05:00 [INF] Executing handler method VCashApp.Areas.Identity.Pages.Account.LoginModel.OnPostAsync - ModelState is "Valid"
+2025-07-04 16:19:03.628 -05:00 [INF] AuthenticationScheme: Identity.Application signed in.
+2025-07-04 16:19:03.630 -05:00 [INF] User logged in.
+2025-07-04 16:19:03.631 -05:00 [INF] Executed handler method OnPostAsync, returned result Microsoft.AspNetCore.Mvc.LocalRedirectResult.
+2025-07-04 16:19:03.632 -05:00 [INF] Executing LocalRedirectResult, redirecting to /.
+2025-07-04 16:19:03.633 -05:00 [INF] Executed page /Account/Login in 97.8474ms
+2025-07-04 16:19:03.648 -05:00 [INF] Executing endpoint 'VCashApp.Controllers.HomeController.Index (VCashApp)'
+2025-07-04 16:19:08.215 -05:00 [INF] Executing endpoint 'VCashApp.Controllers.HomeController.Index (VCashApp)'
+2025-07-04 16:19:12.944 -05:00 [INF] Executing endpoint 'VCashApp.Controllers.RutasDiariasController.ListGenerated (VCashApp)'
+2025-07-04 16:19:12.974 -05:00 [INF] | AuthFilter: VCashApp.Controllers.RutasDiariasController.ListGenerated (VCashApp) | Usuario: adminvcash (Admin) | IP: 0.0.0.1 | Resultado: Acceso concedido (es Admin).
+2025-07-04 16:19:13.049 -05:00 [WRN] | Usuario: adminvcash | Ip: 0.0.0.1 | Acción: Acceso a Listar Rutas Diarias | Resultado: Perfil no reconocido o sin dashboard específico: Admin |
+2025-07-04 16:19:13.064 -05:00 [INF] Executing endpoint 'VCashApp.Controllers.HomeController.Index (VCashApp)'
+2025-07-04 16:20:07.009 -05:00 [INF] Identity.Application was not authenticated. Failure message: Ticket expired
+2025-07-04 16:20:07.010 -05:00 [INF] Executing endpoint 'VCashApp.Controllers.RutasDiariasController.HistorialRutas (VCashApp)'
+2025-07-04 16:20:07.021 -05:00 [WRN] | AuthFilter: VCashApp.Controllers.RutasDiariasController.HistorialRutas (VCashApp) | Usuario: NoAutenticado | IP: 0.0.0.1 | Resultado: No autenticado. Redirigiendo a Login.
+2025-07-04 16:20:07.028 -05:00 [INF] Authorization failed for the request at filter 'VCashApp.Filters.RequiredPermissionFilter'.
+2025-07-04 16:20:07.043 -05:00 [INF] Identity.Application was not authenticated. Failure message: Ticket expired
+2025-07-04 16:25:22.965 -05:00 [INF] Identity.Application was not authenticated. Failure message: Ticket expired
+2025-07-04 16:25:22.968 -05:00 [INF] Executing endpoint '/Account/Login'
+2025-07-04 16:25:22.972 -05:00 [INF] Executing handler method VCashApp.Areas.Identity.Pages.Account.LoginModel.OnGetAsync - ModelState is "Valid"
+2025-07-04 16:25:22.975 -05:00 [INF] AuthenticationScheme: Identity.External signed out.
+2025-07-04 16:25:22.977 -05:00 [INF] Executed handler method OnGetAsync, returned result .
+2025-07-04 16:25:22.983 -05:00 [INF] Executing an implicit handler method - ModelState is "Invalid"
+2025-07-04 16:25:22.984 -05:00 [INF] Executed an implicit handler method, returned result Microsoft.AspNetCore.Mvc.RazorPages.PageResult.
+2025-07-04 16:25:22.995 -05:00 [INF] Executed page /Account/Login in 23.3034ms
+2025-07-04 16:25:23.043 -05:00 [INF] Identity.Application was not authenticated. Failure message: Ticket expired
+2025-07-04 16:29:14.928 -05:00 [WRN] Sensitive data logging is enabled. Log entries and exception messages may include sensitive application data; this mode should only be enabled during development.
+2025-07-04 16:29:14.975 -05:00 [INF] warn: 04/07/2025 16:29:14.975 CoreEventId.SensitiveDataLoggingEnabledWarning[10400] (Microsoft.EntityFrameworkCore.Infrastructure) 
+      Sensitive data logging is enabled. Log entries and exception messages may include sensitive application data; this mode should only be enabled during development.
+2025-07-04 16:29:15.494 -05:00 [INF] [SeedData] Rol 'Admin' ya existe.
+2025-07-04 16:29:15.502 -05:00 [INF] [SeedData] Rol 'Planeador' ya existe.
+2025-07-04 16:29:15.505 -05:00 [INF] [SeedData] Rol 'CEF' ya existe.
+2025-07-04 16:29:15.508 -05:00 [INF] [SeedData] Rol 'Supervisor' ya existe.
+2025-07-04 16:29:15.511 -05:00 [INF] [SeedData] Rol 'ADATM01' ya existe.
+2025-07-04 16:29:15.513 -05:00 [INF] [SeedData] Rol 'ADCEF01' ya existe.
+2025-07-04 16:29:15.515 -05:00 [INF] [SeedData] Rol 'ADCF01' ya existe.
+2025-07-04 16:29:15.517 -05:00 [INF] [SeedData] Rol 'ADGRG01' ya existe.
+2025-07-04 16:29:15.520 -05:00 [INF] [SeedData] Rol 'ADMTF01' ya existe.
+2025-07-04 16:29:15.522 -05:00 [INF] [SeedData] Rol 'ADSER01' ya existe.
+2025-07-04 16:29:15.524 -05:00 [INF] [SeedData] Rol 'ADSER02' ya existe.
+2025-07-04 16:29:15.526 -05:00 [INF] [SeedData] Rol 'ADTH01' ya existe.
+2025-07-04 16:29:15.528 -05:00 [INF] [SeedData] Rol 'ADTI01' ya existe.
+2025-07-04 16:29:15.530 -05:00 [INF] [SeedData] Rol 'COCEF01' ya existe.
+2025-07-04 16:29:15.531 -05:00 [INF] [SeedData] Rol 'COSTV01' ya existe.
+2025-07-04 16:29:15.533 -05:00 [INF] [SeedData] Rol 'GRSER001' ya existe.
+2025-07-04 16:29:15.537 -05:00 [INF] [SeedData] Rol 'SUPTV01' ya existe.
+2025-07-04 16:29:15.583 -05:00 [INF] [SeedData] Usuario 'adminvcash' ya existe.
+2025-07-04 16:29:15.587 -05:00 [INF] [SeedData] Usuario 'planeador1' ya existe.
+2025-07-04 16:29:15.590 -05:00 [INF] [SeedData] Usuario 'planeador2' ya existe.
+2025-07-04 16:29:15.594 -05:00 [INF] [SeedData] Usuario 'cef1' ya existe.
+2025-07-04 16:29:15.596 -05:00 [INF] [SeedData] Usuario 'supervisor1' ya existe.
+2025-07-04 16:29:15.600 -05:00 [INF] [SeedData] Iniciando seeding de permisos por sucursal...
+2025-07-04 16:29:15.700 -05:00 [INF] [SeedData] Seeding de permisos por sucursal completado.
+2025-07-04 16:29:15.704 -05:00 [INF] [SeedData] Iniciando seeding de permisos de perfiles y vistas...
+2025-07-04 16:29:15.765 -05:00 [INF] [SeedData] Vistas creadas/actualizadas.
+2025-07-04 16:29:15.798 -05:00 [INF] [SeedData] Permisos RUD actualizados para rol Admin.
+2025-07-04 16:29:15.803 -05:00 [INF] [SeedData] Permisos RUD actualizados para rol Planeador.
+2025-07-04 16:29:15.806 -05:00 [INF] [SeedData] Permisos RUD actualizados para rol CEF.
+2025-07-04 16:29:15.810 -05:00 [INF] [SeedData] Permisos RUD actualizados para rol Supervisor.
+2025-07-04 16:29:15.817 -05:00 [INF] [SeedData] Permisos RUDHIS actualizados para rol Admin.
+2025-07-04 16:29:15.821 -05:00 [INF] [SeedData] Permisos RUDHIS actualizados para rol Planeador.
+2025-07-04 16:29:15.825 -05:00 [INF] [SeedData] Permisos RUDHIS actualizados para rol CEF.
+2025-07-04 16:29:15.828 -05:00 [INF] [SeedData] Permisos RUDHIS actualizados para rol Supervisor.
+2025-07-04 16:29:15.909 -05:00 [INF] [SeedData] Seeding de permisos de perfiles y vistas completado.
+2025-07-04 16:29:16.169 -05:00 [INF] Now listening on: https://localhost:7024
+2025-07-04 16:29:16.171 -05:00 [INF] Now listening on: http://localhost:5006
+2025-07-04 16:29:16.204 -05:00 [INF] Application started. Press Ctrl+C to shut down.
+2025-07-04 16:29:16.206 -05:00 [INF] Hosting environment: Development
+2025-07-04 16:29:16.206 -05:00 [INF] Content root path: C:\Users\hamirrocha\source\repos\VCashApp
+2025-07-04 16:29:16.649 -05:00 [INF] Identity.Application was not authenticated. Failure message: Ticket expired
+2025-07-04 16:29:16.656 -05:00 [INF] Executing endpoint '/Account/Login'
+2025-07-04 16:29:16.693 -05:00 [INF] Executing handler method VCashApp.Areas.Identity.Pages.Account.LoginModel.OnGetAsync - ModelState is "Valid"
+2025-07-04 16:29:16.700 -05:00 [INF] AuthenticationScheme: Identity.External signed out.
+2025-07-04 16:29:16.703 -05:00 [INF] Executed handler method OnGetAsync, returned result .
+2025-07-04 16:29:16.707 -05:00 [INF] Executing an implicit handler method - ModelState is "Valid"
+2025-07-04 16:29:16.708 -05:00 [INF] Executed an implicit handler method, returned result Microsoft.AspNetCore.Mvc.RazorPages.PageResult.
+2025-07-04 16:29:16.824 -05:00 [INF] Executed page /Account/Login in 142.085ms
+2025-07-04 16:29:16.918 -05:00 [INF] Identity.Application was not authenticated. Failure message: Ticket expired
+2025-07-04 16:30:06.140 -05:00 [INF] Identity.Application was not authenticated. Failure message: Ticket expired
+2025-07-04 16:30:06.142 -05:00 [INF] Executing endpoint '/Account/Login'
+2025-07-04 16:30:06.169 -05:00 [INF] Executing handler method VCashApp.Areas.Identity.Pages.Account.LoginModel.OnPostAsync - ModelState is "Valid"
+2025-07-04 16:30:06.332 -05:00 [INF] AuthenticationScheme: Identity.Application signed in.
+2025-07-04 16:30:06.335 -05:00 [INF] User logged in.
+2025-07-04 16:30:06.336 -05:00 [INF] Executed handler method OnPostAsync, returned result Microsoft.AspNetCore.Mvc.LocalRedirectResult.
+2025-07-04 16:30:06.338 -05:00 [INF] Executing LocalRedirectResult, redirecting to /.
+2025-07-04 16:30:06.339 -05:00 [INF] Executed page /Account/Login in 194.4656ms
+2025-07-04 16:30:06.358 -05:00 [INF] Executing endpoint 'VCashApp.Controllers.HomeController.Index (VCashApp)'
+2025-07-04 16:30:08.576 -05:00 [INF] Executing endpoint '/Account/Logout'
+2025-07-04 16:30:08.590 -05:00 [INF] Executing handler method VCashApp.Areas.Identity.Pages.Account.LogoutModel.OnPost - ModelState is "Valid"
+2025-07-04 16:30:08.594 -05:00 [INF] AuthenticationScheme: Identity.Application signed out.
+2025-07-04 16:30:08.599 -05:00 [INF] AuthenticationScheme: Identity.External signed out.
+2025-07-04 16:30:08.601 -05:00 [INF] AuthenticationScheme: Identity.TwoFactorUserId signed out.
+2025-07-04 16:30:08.608 -05:00 [INF] User logged out.
+2025-07-04 16:30:08.609 -05:00 [INF] Executed handler method OnPost, returned result Microsoft.AspNetCore.Mvc.LocalRedirectResult.
+2025-07-04 16:30:08.616 -05:00 [INF] Executing LocalRedirectResult, redirecting to /Identity/Account/Login.
+2025-07-04 16:30:08.617 -05:00 [INF] Executed page /Account/Logout in 31.3427ms
+2025-07-04 16:30:08.645 -05:00 [INF] Executing endpoint '/Account/Login'
+2025-07-04 16:30:08.649 -05:00 [INF] Executing handler method VCashApp.Areas.Identity.Pages.Account.LoginModel.OnGetAsync - ModelState is "Valid"
+2025-07-04 16:30:08.651 -05:00 [INF] AuthenticationScheme: Identity.External signed out.
+2025-07-04 16:30:08.652 -05:00 [INF] Executed handler method OnGetAsync, returned result .
+2025-07-04 16:30:08.655 -05:00 [INF] Executing an implicit handler method - ModelState is "Valid"
+2025-07-04 16:30:08.657 -05:00 [INF] Executed an implicit handler method, returned result Microsoft.AspNetCore.Mvc.RazorPages.PageResult.
+2025-07-04 16:30:08.667 -05:00 [INF] Executed page /Account/Login in 18.718ms
+2025-07-04 16:30:14.083 -05:00 [INF] Executing endpoint '/Account/Login'
+2025-07-04 16:30:14.087 -05:00 [INF] Executing handler method VCashApp.Areas.Identity.Pages.Account.LoginModel.OnPostAsync - ModelState is "Valid"
+2025-07-04 16:30:14.189 -05:00 [INF] AuthenticationScheme: Identity.Application signed in.
+2025-07-04 16:30:14.192 -05:00 [INF] User logged in.
+2025-07-04 16:30:14.194 -05:00 [INF] Executed handler method OnPostAsync, returned result Microsoft.AspNetCore.Mvc.LocalRedirectResult.
+2025-07-04 16:30:14.195 -05:00 [INF] Executing LocalRedirectResult, redirecting to /.
+2025-07-04 16:30:14.197 -05:00 [INF] Executed page /Account/Login in 111.9126ms
+2025-07-04 16:30:14.213 -05:00 [INF] Executing endpoint 'VCashApp.Controllers.HomeController.Index (VCashApp)'
+2025-07-04 16:31:17.141 -05:00 [INF] Identity.Application was not authenticated. Failure message: Ticket expired
+2025-07-04 16:31:17.145 -05:00 [INF] Executing endpoint 'VCashApp.Controllers.CiudadesController.Index (VCashApp)'
+2025-07-04 16:31:17.159 -05:00 [WRN] | AuthFilter: VCashApp.Controllers.CiudadesController.Index (VCashApp) | Usuario: NoAutenticado | IP: 0.0.0.1 | Resultado: No autenticado. Redirigiendo a Login.
+2025-07-04 16:31:17.163 -05:00 [INF] Authorization failed for the request at filter 'VCashApp.Filters.RequiredPermissionFilter'.
+2025-07-04 16:31:17.172 -05:00 [INF] Executing RedirectToPageResult, redirecting to /Account/Login.
+2025-07-04 16:31:17.185 -05:00 [INF] Identity.Application was not authenticated. Failure message: Ticket expired
+2025-07-04 16:31:17.187 -05:00 [INF] Executing endpoint '/Account/Login'
+2025-07-04 16:31:17.188 -05:00 [INF] Executing handler method VCashApp.Areas.Identity.Pages.Account.LoginModel.OnGetAsync - ModelState is "Valid"
+2025-07-04 16:31:17.196 -05:00 [INF] AuthenticationScheme: Identity.External signed out.
+2025-07-04 16:31:17.201 -05:00 [INF] Executed handler method OnGetAsync, returned result .
+2025-07-04 16:31:17.203 -05:00 [INF] Executing an implicit handler method - ModelState is "Valid"
+2025-07-04 16:31:17.211 -05:00 [INF] Executed an implicit handler method, returned result Microsoft.AspNetCore.Mvc.RazorPages.PageResult.
+2025-07-04 16:31:17.218 -05:00 [INF] Executed page /Account/Login in 29.8073ms
+2025-07-04 16:31:17.257 -05:00 [INF] Identity.Application was not authenticated. Failure message: Ticket expired
+2025-07-04 16:38:32.015 -05:00 [WRN] Sensitive data logging is enabled. Log entries and exception messages may include sensitive application data; this mode should only be enabled during development.
+2025-07-04 16:38:32.211 -05:00 [INF] warn: 04/07/2025 16:38:32.210 CoreEventId.SensitiveDataLoggingEnabledWarning[10400] (Microsoft.EntityFrameworkCore.Infrastructure) 
+      Sensitive data logging is enabled. Log entries and exception messages may include sensitive application data; this mode should only be enabled during development.
+2025-07-04 16:38:33.234 -05:00 [INF] [SeedData] Rol 'Admin' ya existe.
+2025-07-04 16:38:33.251 -05:00 [INF] [SeedData] Rol 'Planeador' ya existe.
+2025-07-04 16:38:33.254 -05:00 [INF] [SeedData] Rol 'CEF' ya existe.
+2025-07-04 16:38:33.257 -05:00 [INF] [SeedData] Rol 'Supervisor' ya existe.
+2025-07-04 16:38:33.260 -05:00 [INF] [SeedData] Rol 'ADATM01' ya existe.
+2025-07-04 16:38:33.264 -05:00 [INF] [SeedData] Rol 'ADCEF01' ya existe.
+2025-07-04 16:38:33.268 -05:00 [INF] [SeedData] Rol 'ADCF01' ya existe.
+2025-07-04 16:38:33.271 -05:00 [INF] [SeedData] Rol 'ADGRG01' ya existe.
+2025-07-04 16:38:33.274 -05:00 [INF] [SeedData] Rol 'ADMTF01' ya existe.
+2025-07-04 16:38:33.277 -05:00 [INF] [SeedData] Rol 'ADSER01' ya existe.
+2025-07-04 16:38:33.283 -05:00 [INF] [SeedData] Rol 'ADSER02' ya existe.
+2025-07-04 16:38:33.287 -05:00 [INF] [SeedData] Rol 'ADTH01' ya existe.
+2025-07-04 16:38:33.290 -05:00 [INF] [SeedData] Rol 'ADTI01' ya existe.
+2025-07-04 16:38:33.293 -05:00 [INF] [SeedData] Rol 'COCEF01' ya existe.
+2025-07-04 16:38:33.296 -05:00 [INF] [SeedData] Rol 'COSTV01' ya existe.
+2025-07-04 16:38:33.300 -05:00 [INF] [SeedData] Rol 'GRSER001' ya existe.
+2025-07-04 16:38:33.304 -05:00 [INF] [SeedData] Rol 'SUPTV01' ya existe.
+2025-07-04 16:38:33.408 -05:00 [INF] [SeedData] Usuario 'adminvcash' ya existe.
+2025-07-04 16:38:33.412 -05:00 [INF] [SeedData] Usuario 'planeador1' ya existe.
+2025-07-04 16:38:33.416 -05:00 [INF] [SeedData] Usuario 'planeador2' ya existe.
+2025-07-04 16:38:33.419 -05:00 [INF] [SeedData] Usuario 'cef1' ya existe.
+2025-07-04 16:38:33.422 -05:00 [INF] [SeedData] Usuario 'supervisor1' ya existe.
+2025-07-04 16:38:33.426 -05:00 [INF] [SeedData] Iniciando seeding de permisos por sucursal...
+2025-07-04 16:38:33.597 -05:00 [INF] [SeedData] Seeding de permisos por sucursal completado.
+2025-07-04 16:38:33.605 -05:00 [INF] [SeedData] Iniciando seeding de permisos de perfiles y vistas...
+2025-07-04 16:38:33.695 -05:00 [INF] [SeedData] Vistas creadas/actualizadas.
+2025-07-04 16:38:33.743 -05:00 [INF] [SeedData] Permisos RUD actualizados para rol Admin.
+2025-07-04 16:38:33.747 -05:00 [INF] [SeedData] Permisos RUD actualizados para rol Planeador.
+2025-07-04 16:38:33.751 -05:00 [INF] [SeedData] Permisos RUD actualizados para rol CEF.
+2025-07-04 16:38:33.754 -05:00 [INF] [SeedData] Permisos RUD actualizados para rol Supervisor.
+2025-07-04 16:38:33.763 -05:00 [INF] [SeedData] Permisos RUDHIS actualizados para rol Admin.
+2025-07-04 16:38:33.767 -05:00 [INF] [SeedData] Permisos RUDHIS actualizados para rol Planeador.
+2025-07-04 16:38:33.770 -05:00 [INF] [SeedData] Permisos RUDHIS actualizados para rol CEF.
+2025-07-04 16:38:33.772 -05:00 [INF] [SeedData] Permisos RUDHIS actualizados para rol Supervisor.
+2025-07-04 16:38:33.895 -05:00 [INF] [SeedData] Seeding de permisos de perfiles y vistas completado.
+2025-07-04 16:38:34.341 -05:00 [INF] Now listening on: https://localhost:7024
+2025-07-04 16:38:34.342 -05:00 [INF] Now listening on: http://localhost:5006
+2025-07-04 16:38:34.396 -05:00 [INF] Application started. Press Ctrl+C to shut down.
+2025-07-04 16:38:34.398 -05:00 [INF] Hosting environment: Development
+2025-07-04 16:38:34.399 -05:00 [INF] Content root path: C:\Users\hamirrocha\source\repos\VCashApp
+2025-07-04 16:38:35.036 -05:00 [INF] Identity.Application was not authenticated. Failure message: Ticket expired
+2025-07-04 16:38:35.043 -05:00 [INF] Executing endpoint '/Account/Login'
+2025-07-04 16:38:35.087 -05:00 [INF] Executing handler method VCashApp.Areas.Identity.Pages.Account.LoginModel.OnGetAsync - ModelState is "Valid"
+2025-07-04 16:38:35.097 -05:00 [INF] AuthenticationScheme: Identity.External signed out.
+2025-07-04 16:38:35.100 -05:00 [INF] Executed handler method OnGetAsync, returned result .
+2025-07-04 16:38:35.106 -05:00 [INF] Executing an implicit handler method - ModelState is "Valid"
+2025-07-04 16:38:35.108 -05:00 [INF] Executed an implicit handler method, returned result Microsoft.AspNetCore.Mvc.RazorPages.PageResult.
+2025-07-04 16:38:35.240 -05:00 [INF] Executed page /Account/Login in 170.1141ms
+2025-07-04 16:38:35.306 -05:00 [INF] Identity.Application was not authenticated. Failure message: Ticket expired
+2025-07-04 16:39:09.078 -05:00 [INF] Identity.Application was not authenticated. Failure message: Ticket expired
+2025-07-04 16:39:09.080 -05:00 [INF] Executing endpoint '/Account/Login'
+2025-07-04 16:39:09.093 -05:00 [INF] Executing handler method VCashApp.Areas.Identity.Pages.Account.LoginModel.OnGetAsync - ModelState is "Valid"
+2025-07-04 16:39:09.095 -05:00 [INF] AuthenticationScheme: Identity.External signed out.
+2025-07-04 16:39:09.096 -05:00 [INF] Executed handler method OnGetAsync, returned result .
+2025-07-04 16:39:09.097 -05:00 [INF] Executing an implicit handler method - ModelState is "Valid"
+2025-07-04 16:39:09.098 -05:00 [INF] Executed an implicit handler method, returned result Microsoft.AspNetCore.Mvc.RazorPages.PageResult.
+2025-07-04 16:39:09.104 -05:00 [INF] Executed page /Account/Login in 22.1577ms
+2025-07-04 16:39:09.147 -05:00 [INF] Identity.Application was not authenticated. Failure message: Ticket expired
+2025-07-04 16:39:18.002 -05:00 [INF] Identity.Application was not authenticated. Failure message: Ticket expired
+2025-07-04 16:39:18.004 -05:00 [INF] Executing endpoint '/Account/Login'
+2025-07-04 16:39:18.023 -05:00 [INF] Executing handler method VCashApp.Areas.Identity.Pages.Account.LoginModel.OnPostAsync - ModelState is "Valid"
+2025-07-04 16:39:18.190 -05:00 [INF] AuthenticationScheme: Identity.Application signed in.
+2025-07-04 16:39:18.193 -05:00 [INF] User logged in.
+2025-07-04 16:39:18.194 -05:00 [INF] Executed handler method OnPostAsync, returned result Microsoft.AspNetCore.Mvc.LocalRedirectResult.
+2025-07-04 16:39:18.197 -05:00 [INF] Executing LocalRedirectResult, redirecting to /.
+2025-07-04 16:39:18.197 -05:00 [INF] Executed page /Account/Login in 191.0919ms
+2025-07-04 16:39:18.214 -05:00 [INF] Executing endpoint 'VCashApp.Controllers.HomeController.Index (VCashApp)'
+2025-07-04 16:39:21.387 -05:00 [INF] Executing endpoint 'VCashApp.Controllers.HomeController.Index (VCashApp)'
+2025-07-04 16:39:23.360 -05:00 [INF] Executing endpoint 'VCashApp.Controllers.HomeController.Index (VCashApp)'
+2025-07-04 16:39:24.741 -05:00 [INF] Executing endpoint 'VCashApp.Controllers.HomeController.Index (VCashApp)'
+2025-07-04 16:39:49.886 -05:00 [INF] Executing endpoint 'VCashApp.Controllers.SucursalesController.Index (VCashApp)'
+2025-07-04 16:39:49.923 -05:00 [INF] | AuthFilter: VCashApp.Controllers.SucursalesController.Index (VCashApp) | Usuario: adminvcash (Admin) | IP: 0.0.0.1 | Resultado: Acceso concedido (es Admin).
+2025-07-04 16:39:50.011 -05:00 [INF] | Usuario: adminvcash | Ip: 0.0.0.1 | Acción: Acceso a Lista de Sucursales | Cantidad de sucursales: 15 | Respuesta: Acceso permitido | 
+2025-07-04 16:39:50.256 -05:00 [INF] Executing endpoint 'VCashApp.Controllers.SucursalesController.Index (VCashApp)'
+2025-07-04 16:39:50.264 -05:00 [INF] | AuthFilter: VCashApp.Controllers.SucursalesController.Index (VCashApp) | Usuario: adminvcash (Admin) | IP: 0.0.0.1 | Resultado: Acceso concedido (es Admin).
+2025-07-04 16:39:50.283 -05:00 [INF] | Usuario: adminvcash | Ip: 0.0.0.1 | Acción: Acceso a Lista de Sucursales | Cantidad de sucursales: 15 | Respuesta: Acceso permitido | 
+2025-07-04 16:39:50.289 -05:00 [INF] Executing PartialViewResult, running view ~/Views/Sucursales/_SucursalesTablePartial.cshtml.
+2025-07-04 16:39:50.337 -05:00 [INF] Executed PartialViewResult - view ~/Views/Sucursales/_SucursalesTablePartial.cshtml executed in 48.3621ms.
+2025-07-04 16:39:53.520 -05:00 [INF] Executing endpoint 'VCashApp.Controllers.CiudadesController.Index (VCashApp)'
+2025-07-04 16:39:53.537 -05:00 [INF] | AuthFilter: VCashApp.Controllers.CiudadesController.Index (VCashApp) | Usuario: adminvcash (Admin) | IP: 0.0.0.1 | Resultado: Acceso concedido (es Admin).
+2025-07-04 16:39:53.628 -05:00 [INF] | Usuario: adminvcash | Ip: 0.0.0.1 | Acción: Acceso a Lista de Sucursales | Cantidad de sucursales: 15 | Respuesta: Acceso permitido | 
+2025-07-04 16:39:53.893 -05:00 [INF] Executing endpoint 'VCashApp.Controllers.CiudadesController.Index (VCashApp)'
+2025-07-04 16:39:53.904 -05:00 [INF] | AuthFilter: VCashApp.Controllers.CiudadesController.Index (VCashApp) | Usuario: adminvcash (Admin) | IP: 0.0.0.1 | Resultado: Acceso concedido (es Admin).
+2025-07-04 16:39:53.940 -05:00 [INF] | Usuario: adminvcash | Ip: 0.0.0.1 | Acción: Acceso a Lista de Sucursales | Cantidad de sucursales: 15 | Respuesta: Acceso permitido | 
+2025-07-04 16:39:53.944 -05:00 [INF] Executing PartialViewResult, running view ~/Views/Ciudades/_CiudadesTablePartial.cshtml.
+2025-07-04 16:39:53.972 -05:00 [INF] Executed PartialViewResult - view ~/Views/Ciudades/_CiudadesTablePartial.cshtml executed in 28.3349ms.
+2025-07-04 16:40:01.831 -05:00 [INF] Executing endpoint 'VCashApp.Controllers.RutasDiariasController.HistorialRutas (VCashApp)'
+2025-07-04 16:40:01.850 -05:00 [INF] | AuthFilter: VCashApp.Controllers.RutasDiariasController.HistorialRutas (VCashApp) | Usuario: adminvcash (Admin) | IP: 0.0.0.1 | Resultado: Acceso concedido (es Admin).
+2025-07-04 16:40:02.026 -05:00 [INF] | Usuario: adminvcash | Ip: 0.0.0.1 | Acción: Acceso a Historial de Rutas | Cantidad de rutas: 15 | Respuesta: Acceso permitido | 
+2025-07-04 16:40:02.338 -05:00 [INF] Executing endpoint 'VCashApp.Controllers.RutasDiariasController.HistorialRutas (VCashApp)'
+2025-07-04 16:40:02.351 -05:00 [INF] | AuthFilter: VCashApp.Controllers.RutasDiariasController.HistorialRutas (VCashApp) | Usuario: adminvcash (Admin) | IP: 0.0.0.1 | Resultado: Acceso concedido (es Admin).
+2025-07-04 16:40:02.400 -05:00 [INF] | Usuario: adminvcash | Ip: 0.0.0.1 | Acción: Acceso a Historial de Rutas | Cantidad de rutas: 0 | Respuesta: Acceso permitido | 
+2025-07-04 16:40:02.403 -05:00 [INF] Executing PartialViewResult, running view ~/Views/RutasDiarias/_RoutesTablePartial.cshtml.
+2025-07-04 16:40:02.406 -05:00 [INF] Executed PartialViewResult - view ~/Views/RutasDiarias/_RoutesTablePartial.cshtml executed in 2.5154ms.
+2025-07-04 16:42:35.589 -05:00 [INF] Executing endpoint 'VCashApp.Controllers.RutasDiariasController.HistorialRutas (VCashApp)'
+2025-07-04 16:42:35.601 -05:00 [INF] | AuthFilter: VCashApp.Controllers.RutasDiariasController.HistorialRutas (VCashApp) | Usuario: adminvcash (Admin) | IP: 0.0.0.1 | Resultado: Acceso concedido (es Admin).
+2025-07-04 16:42:35.614 -05:00 [INF] | Usuario: adminvcash | Ip: 0.0.0.1 | Acción: Acceso a Historial de Rutas | Cantidad de rutas: 15 | Respuesta: Acceso permitido | 
+2025-07-04 16:42:35.825 -05:00 [INF] Executing endpoint 'VCashApp.Controllers.RutasDiariasController.HistorialRutas (VCashApp)'
+2025-07-04 16:42:35.832 -05:00 [INF] | AuthFilter: VCashApp.Controllers.RutasDiariasController.HistorialRutas (VCashApp) | Usuario: adminvcash (Admin) | IP: 0.0.0.1 | Resultado: Acceso concedido (es Admin).
+2025-07-04 16:42:35.846 -05:00 [INF] | Usuario: adminvcash | Ip: 0.0.0.1 | Acción: Acceso a Historial de Rutas | Cantidad de rutas: 0 | Respuesta: Acceso permitido | 
+2025-07-04 16:42:35.848 -05:00 [INF] Executing PartialViewResult, running view ~/Views/RutasDiarias/_RoutesTablePartial.cshtml.
+2025-07-04 16:42:35.851 -05:00 [INF] Executed PartialViewResult - view ~/Views/RutasDiarias/_RoutesTablePartial.cshtml executed in 2.6523ms.
+2025-07-04 16:42:38.447 -05:00 [INF] Executing endpoint 'VCashApp.Controllers.RutasDiariasController.HistorialRutas (VCashApp)'
+2025-07-04 16:42:38.454 -05:00 [INF] | AuthFilter: VCashApp.Controllers.RutasDiariasController.HistorialRutas (VCashApp) | Usuario: adminvcash (Admin) | IP: 0.0.0.1 | Resultado: Acceso concedido (es Admin).
+2025-07-04 16:42:38.466 -05:00 [INF] | Usuario: adminvcash | Ip: 0.0.0.1 | Acción: Acceso a Historial de Rutas | Cantidad de rutas: 15 | Respuesta: Acceso permitido | 
+2025-07-04 16:42:38.639 -05:00 [INF] Executing endpoint 'VCashApp.Controllers.RutasDiariasController.HistorialRutas (VCashApp)'
+2025-07-04 16:42:38.646 -05:00 [INF] | AuthFilter: VCashApp.Controllers.RutasDiariasController.HistorialRutas (VCashApp) | Usuario: adminvcash (Admin) | IP: 0.0.0.1 | Resultado: Acceso concedido (es Admin).
+2025-07-04 16:42:38.662 -05:00 [INF] | Usuario: adminvcash | Ip: 0.0.0.1 | Acción: Acceso a Historial de Rutas | Cantidad de rutas: 0 | Respuesta: Acceso permitido | 
+2025-07-04 16:42:38.679 -05:00 [INF] Executing PartialViewResult, running view ~/Views/RutasDiarias/_RoutesTablePartial.cshtml.
+2025-07-04 16:42:38.681 -05:00 [INF] Executed PartialViewResult - view ~/Views/RutasDiarias/_RoutesTablePartial.cshtml executed in 2.8314ms.
+2025-07-04 16:43:00.753 -05:00 [INF] Executing endpoint 'VCashApp.Controllers.RutasDiariasController.HistorialRutas (VCashApp)'
+2025-07-04 16:43:00.763 -05:00 [INF] | AuthFilter: VCashApp.Controllers.RutasDiariasController.HistorialRutas (VCashApp) | Usuario: adminvcash (Admin) | IP: 0.0.0.1 | Resultado: Acceso concedido (es Admin).
+2025-07-04 16:43:00.776 -05:00 [INF] | Usuario: adminvcash | Ip: 0.0.0.1 | Acción: Acceso a Historial de Rutas | Cantidad de rutas: 15 | Respuesta: Acceso permitido | 
+2025-07-04 16:43:00.955 -05:00 [INF] Executing endpoint 'VCashApp.Controllers.RutasDiariasController.HistorialRutas (VCashApp)'
+2025-07-04 16:43:00.964 -05:00 [INF] | AuthFilter: VCashApp.Controllers.RutasDiariasController.HistorialRutas (VCashApp) | Usuario: adminvcash (Admin) | IP: 0.0.0.1 | Resultado: Acceso concedido (es Admin).
+2025-07-04 16:43:00.977 -05:00 [INF] | Usuario: adminvcash | Ip: 0.0.0.1 | Acción: Acceso a Historial de Rutas | Cantidad de rutas: 0 | Respuesta: Acceso permitido | 
+2025-07-04 16:43:00.981 -05:00 [INF] Executing PartialViewResult, running view ~/Views/RutasDiarias/_RoutesTablePartial.cshtml.
+2025-07-04 16:43:00.982 -05:00 [INF] Executed PartialViewResult - view ~/Views/RutasDiarias/_RoutesTablePartial.cshtml executed in 1.4911ms.
+2025-07-04 16:43:11.645 -05:00 [INF] Executing endpoint 'VCashApp.Controllers.RutasDiariasController.HistorialRutas (VCashApp)'
+2025-07-04 16:43:11.653 -05:00 [INF] | AuthFilter: VCashApp.Controllers.RutasDiariasController.HistorialRutas (VCashApp) | Usuario: adminvcash (Admin) | IP: 0.0.0.1 | Resultado: Acceso concedido (es Admin).
+2025-07-04 16:43:11.665 -05:00 [INF] | Usuario: adminvcash | Ip: 0.0.0.1 | Acción: Acceso a Historial de Rutas | Cantidad de rutas: 15 | Respuesta: Acceso permitido | 
+2025-07-04 16:43:11.843 -05:00 [INF] Executing endpoint 'VCashApp.Controllers.RutasDiariasController.HistorialRutas (VCashApp)'
+2025-07-04 16:43:11.851 -05:00 [INF] | AuthFilter: VCashApp.Controllers.RutasDiariasController.HistorialRutas (VCashApp) | Usuario: adminvcash (Admin) | IP: 0.0.0.1 | Resultado: Acceso concedido (es Admin).
+2025-07-04 16:43:11.865 -05:00 [INF] | Usuario: adminvcash | Ip: 0.0.0.1 | Acción: Acceso a Historial de Rutas | Cantidad de rutas: 0 | Respuesta: Acceso permitido | 
+2025-07-04 16:43:11.867 -05:00 [INF] Executing PartialViewResult, running view ~/Views/RutasDiarias/_RoutesTablePartial.cshtml.
+2025-07-04 16:43:11.869 -05:00 [INF] Executed PartialViewResult - view ~/Views/RutasDiarias/_RoutesTablePartial.cshtml executed in 1.1773ms.
+2025-07-04 16:43:13.424 -05:00 [INF] Executing endpoint 'VCashApp.Controllers.RutasDiariasController.HistorialRutas (VCashApp)'
+2025-07-04 16:43:13.432 -05:00 [INF] | AuthFilter: VCashApp.Controllers.RutasDiariasController.HistorialRutas (VCashApp) | Usuario: adminvcash (Admin) | IP: 0.0.0.1 | Resultado: Acceso concedido (es Admin).
+2025-07-04 16:43:13.444 -05:00 [INF] | Usuario: adminvcash | Ip: 0.0.0.1 | Acción: Acceso a Historial de Rutas | Cantidad de rutas: 15 | Respuesta: Acceso permitido | 
+2025-07-04 16:43:13.613 -05:00 [INF] Executing endpoint 'VCashApp.Controllers.RutasDiariasController.HistorialRutas (VCashApp)'
+2025-07-04 16:43:13.621 -05:00 [INF] | AuthFilter: VCashApp.Controllers.RutasDiariasController.HistorialRutas (VCashApp) | Usuario: adminvcash (Admin) | IP: 0.0.0.1 | Resultado: Acceso concedido (es Admin).
+2025-07-04 16:43:13.638 -05:00 [INF] | Usuario: adminvcash | Ip: 0.0.0.1 | Acción: Acceso a Historial de Rutas | Cantidad de rutas: 0 | Respuesta: Acceso permitido | 
+2025-07-04 16:43:13.640 -05:00 [INF] Executing PartialViewResult, running view ~/Views/RutasDiarias/_RoutesTablePartial.cshtml.
+2025-07-04 16:43:13.642 -05:00 [INF] Executed PartialViewResult - view ~/Views/RutasDiarias/_RoutesTablePartial.cshtml executed in 1.6153ms.
+2025-07-04 16:43:32.304 -05:00 [WRN] Sensitive data logging is enabled. Log entries and exception messages may include sensitive application data; this mode should only be enabled during development.
+2025-07-04 16:43:32.399 -05:00 [INF] warn: 04/07/2025 16:43:32.399 CoreEventId.SensitiveDataLoggingEnabledWarning[10400] (Microsoft.EntityFrameworkCore.Infrastructure) 
+      Sensitive data logging is enabled. Log entries and exception messages may include sensitive application data; this mode should only be enabled during development.
+2025-07-04 16:43:33.164 -05:00 [INF] [SeedData] Rol 'Admin' ya existe.
+2025-07-04 16:43:33.175 -05:00 [INF] [SeedData] Rol 'Planeador' ya existe.
+2025-07-04 16:43:33.178 -05:00 [INF] [SeedData] Rol 'CEF' ya existe.
+2025-07-04 16:43:33.182 -05:00 [INF] [SeedData] Rol 'Supervisor' ya existe.
+2025-07-04 16:43:33.184 -05:00 [INF] [SeedData] Rol 'ADATM01' ya existe.
+2025-07-04 16:43:33.187 -05:00 [INF] [SeedData] Rol 'ADCEF01' ya existe.
+2025-07-04 16:43:33.191 -05:00 [INF] [SeedData] Rol 'ADCF01' ya existe.
+2025-07-04 16:43:33.193 -05:00 [INF] [SeedData] Rol 'ADGRG01' ya existe.
+2025-07-04 16:43:33.196 -05:00 [INF] [SeedData] Rol 'ADMTF01' ya existe.
+2025-07-04 16:43:33.198 -05:00 [INF] [SeedData] Rol 'ADSER01' ya existe.
+2025-07-04 16:43:33.201 -05:00 [INF] [SeedData] Rol 'ADSER02' ya existe.
+2025-07-04 16:43:33.204 -05:00 [INF] [SeedData] Rol 'ADTH01' ya existe.
+2025-07-04 16:43:33.207 -05:00 [INF] [SeedData] Rol 'ADTI01' ya existe.
+2025-07-04 16:43:33.209 -05:00 [INF] [SeedData] Rol 'COCEF01' ya existe.
+2025-07-04 16:43:33.212 -05:00 [INF] [SeedData] Rol 'COSTV01' ya existe.
+2025-07-04 16:43:33.214 -05:00 [INF] [SeedData] Rol 'GRSER001' ya existe.
+2025-07-04 16:43:33.217 -05:00 [INF] [SeedData] Rol 'SUPTV01' ya existe.
+2025-07-04 16:43:33.270 -05:00 [INF] [SeedData] Usuario 'adminvcash' ya existe.
+2025-07-04 16:43:33.275 -05:00 [INF] [SeedData] Usuario 'planeador1' ya existe.
+2025-07-04 16:43:33.278 -05:00 [INF] [SeedData] Usuario 'planeador2' ya existe.
+2025-07-04 16:43:33.281 -05:00 [INF] [SeedData] Usuario 'cef1' ya existe.
+2025-07-04 16:43:33.283 -05:00 [INF] [SeedData] Usuario 'supervisor1' ya existe.
+2025-07-04 16:43:33.286 -05:00 [INF] [SeedData] Iniciando seeding de permisos por sucursal...
+2025-07-04 16:43:33.390 -05:00 [INF] [SeedData] Seeding de permisos por sucursal completado.
+2025-07-04 16:43:33.394 -05:00 [INF] [SeedData] Iniciando seeding de permisos de perfiles y vistas...
+2025-07-04 16:43:33.455 -05:00 [INF] [SeedData] Vistas creadas/actualizadas.
+2025-07-04 16:43:33.496 -05:00 [INF] [SeedData] Permisos RUD actualizados para rol Admin.
+2025-07-04 16:43:33.500 -05:00 [INF] [SeedData] Permisos RUD actualizados para rol Planeador.
+2025-07-04 16:43:33.503 -05:00 [INF] [SeedData] Permisos RUD actualizados para rol CEF.
+2025-07-04 16:43:33.506 -05:00 [INF] [SeedData] Permisos RUD actualizados para rol Supervisor.
+2025-07-04 16:43:33.514 -05:00 [INF] [SeedData] Permisos RUDHIS actualizados para rol Admin.
+2025-07-04 16:43:33.517 -05:00 [INF] [SeedData] Permisos RUDHIS actualizados para rol Planeador.
+2025-07-04 16:43:33.520 -05:00 [INF] [SeedData] Permisos RUDHIS actualizados para rol CEF.
+2025-07-04 16:43:33.524 -05:00 [INF] [SeedData] Permisos RUDHIS actualizados para rol Supervisor.
+2025-07-04 16:43:33.616 -05:00 [INF] [SeedData] Seeding de permisos de perfiles y vistas completado.
+2025-07-04 16:43:33.955 -05:00 [INF] Now listening on: https://localhost:7024
+2025-07-04 16:43:33.956 -05:00 [INF] Now listening on: http://localhost:5006
+2025-07-04 16:43:33.996 -05:00 [INF] Application started. Press Ctrl+C to shut down.
+2025-07-04 16:43:33.997 -05:00 [INF] Hosting environment: Development
+2025-07-04 16:43:33.998 -05:00 [INF] Content root path: C:\Users\hamirrocha\source\repos\VCashApp
+2025-07-04 16:43:34.985 -05:00 [INF] Executing endpoint 'VCashApp.Controllers.RutasDiariasController.HistorialRutas (VCashApp)'
+2025-07-04 16:43:35.112 -05:00 [INF] | AuthFilter: VCashApp.Controllers.RutasDiariasController.HistorialRutas (VCashApp) | Usuario: adminvcash (Admin) | IP: 127.0.0.1 | Resultado: Acceso concedido (es Admin).
+2025-07-04 16:43:35.366 -05:00 [INF] | Usuario: adminvcash | Ip: 127.0.0.1 | Acción: Acceso a Historial de Rutas | Cantidad de rutas: 15 | Respuesta: Acceso permitido | 
+2025-07-04 16:43:36.063 -05:00 [INF] Executing endpoint 'VCashApp.Controllers.RutasDiariasController.HistorialRutas (VCashApp)'
+2025-07-04 16:43:36.105 -05:00 [INF] | AuthFilter: VCashApp.Controllers.RutasDiariasController.HistorialRutas (VCashApp) | Usuario: adminvcash (Admin) | IP: 127.0.0.1 | Resultado: Acceso concedido (es Admin).
+2025-07-04 16:43:36.182 -05:00 [INF] | Usuario: adminvcash | Ip: 127.0.0.1 | Acción: Acceso a Historial de Rutas | Cantidad de rutas: 0 | Respuesta: Acceso permitido | 
+2025-07-04 16:43:36.190 -05:00 [INF] Executing PartialViewResult, running view ~/Views/RutasDiarias/_RoutesTablePartial.cshtml.
+2025-07-04 16:43:36.195 -05:00 [INF] Executed PartialViewResult - view ~/Views/RutasDiarias/_RoutesTablePartial.cshtml executed in 5.065ms.
+2025-07-04 16:44:27.872 -05:00 [WRN] Sensitive data logging is enabled. Log entries and exception messages may include sensitive application data; this mode should only be enabled during development.
+2025-07-04 16:44:27.958 -05:00 [INF] warn: 04/07/2025 16:44:27.957 CoreEventId.SensitiveDataLoggingEnabledWarning[10400] (Microsoft.EntityFrameworkCore.Infrastructure) 
+      Sensitive data logging is enabled. Log entries and exception messages may include sensitive application data; this mode should only be enabled during development.
+2025-07-04 16:44:29.112 -05:00 [INF] [SeedData] Rol 'Admin' ya existe.
+2025-07-04 16:44:29.124 -05:00 [INF] [SeedData] Rol 'Planeador' ya existe.
+2025-07-04 16:44:29.128 -05:00 [INF] [SeedData] Rol 'CEF' ya existe.
+2025-07-04 16:44:29.131 -05:00 [INF] [SeedData] Rol 'Supervisor' ya existe.
+2025-07-04 16:44:29.135 -05:00 [INF] [SeedData] Rol 'ADATM01' ya existe.
+2025-07-04 16:44:29.138 -05:00 [INF] [SeedData] Rol 'ADCEF01' ya existe.
+2025-07-04 16:44:29.142 -05:00 [INF] [SeedData] Rol 'ADCF01' ya existe.
+2025-07-04 16:44:29.147 -05:00 [INF] [SeedData] Rol 'ADGRG01' ya existe.
+2025-07-04 16:44:29.150 -05:00 [INF] [SeedData] Rol 'ADMTF01' ya existe.
+2025-07-04 16:44:29.153 -05:00 [INF] [SeedData] Rol 'ADSER01' ya existe.
+2025-07-04 16:44:29.156 -05:00 [INF] [SeedData] Rol 'ADSER02' ya existe.
+2025-07-04 16:44:29.159 -05:00 [INF] [SeedData] Rol 'ADTH01' ya existe.
+2025-07-04 16:44:29.163 -05:00 [INF] [SeedData] Rol 'ADTI01' ya existe.
+2025-07-04 16:44:29.166 -05:00 [INF] [SeedData] Rol 'COCEF01' ya existe.
+2025-07-04 16:44:29.169 -05:00 [INF] [SeedData] Rol 'COSTV01' ya existe.
+2025-07-04 16:44:29.171 -05:00 [INF] [SeedData] Rol 'GRSER001' ya existe.
+2025-07-04 16:44:29.174 -05:00 [INF] [SeedData] Rol 'SUPTV01' ya existe.
+2025-07-04 16:44:29.248 -05:00 [INF] [SeedData] Usuario 'adminvcash' ya existe.
+2025-07-04 16:44:29.251 -05:00 [INF] [SeedData] Usuario 'planeador1' ya existe.
+2025-07-04 16:44:29.254 -05:00 [INF] [SeedData] Usuario 'planeador2' ya existe.
+2025-07-04 16:44:29.257 -05:00 [INF] [SeedData] Usuario 'cef1' ya existe.
+2025-07-04 16:44:29.260 -05:00 [INF] [SeedData] Usuario 'supervisor1' ya existe.
+2025-07-04 16:44:29.264 -05:00 [INF] [SeedData] Iniciando seeding de permisos por sucursal...
+2025-07-04 16:44:29.439 -05:00 [INF] [SeedData] Seeding de permisos por sucursal completado.
+2025-07-04 16:44:29.446 -05:00 [INF] [SeedData] Iniciando seeding de permisos de perfiles y vistas...
+2025-07-04 16:44:29.539 -05:00 [INF] [SeedData] Vistas creadas/actualizadas.
+2025-07-04 16:44:29.594 -05:00 [INF] [SeedData] Permisos RUD actualizados para rol Admin.
+2025-07-04 16:44:29.602 -05:00 [INF] [SeedData] Permisos RUD actualizados para rol Planeador.
+2025-07-04 16:44:29.605 -05:00 [INF] [SeedData] Permisos RUD actualizados para rol CEF.
+2025-07-04 16:44:29.609 -05:00 [INF] [SeedData] Permisos RUD actualizados para rol Supervisor.
+2025-07-04 16:44:29.624 -05:00 [INF] [SeedData] Permisos RUDHIS actualizados para rol Admin.
+2025-07-04 16:44:29.628 -05:00 [INF] [SeedData] Permisos RUDHIS actualizados para rol Planeador.
+2025-07-04 16:44:29.634 -05:00 [INF] [SeedData] Permisos RUDHIS actualizados para rol CEF.
+2025-07-04 16:44:29.638 -05:00 [INF] [SeedData] Permisos RUDHIS actualizados para rol Supervisor.
+2025-07-04 16:44:29.813 -05:00 [INF] [SeedData] Seeding de permisos de perfiles y vistas completado.
+2025-07-04 16:44:30.282 -05:00 [INF] Now listening on: https://localhost:7024
+2025-07-04 16:44:30.285 -05:00 [INF] Now listening on: http://localhost:5006
+2025-07-04 16:44:30.335 -05:00 [INF] Application started. Press Ctrl+C to shut down.
+2025-07-04 16:44:30.337 -05:00 [INF] Hosting environment: Development
+2025-07-04 16:44:30.339 -05:00 [INF] Content root path: C:\Users\hamirrocha\source\repos\VCashApp
+2025-07-04 16:44:30.690 -05:00 [INF] Executing endpoint 'VCashApp.Controllers.RutasDiariasController.HistorialRutas (VCashApp)'
+2025-07-04 16:44:30.851 -05:00 [INF] | AuthFilter: VCashApp.Controllers.RutasDiariasController.HistorialRutas (VCashApp) | Usuario: adminvcash (Admin) | IP: 0.0.0.1 | Resultado: Acceso concedido (es Admin).
+2025-07-04 16:44:31.133 -05:00 [INF] | Usuario: adminvcash | Ip: 0.0.0.1 | Acción: Acceso a Historial de Rutas | Cantidad de rutas: 15 | Respuesta: Acceso permitido | 
+2025-07-04 16:44:31.880 -05:00 [INF] Executing endpoint 'VCashApp.Controllers.RutasDiariasController.HistorialRutas (VCashApp)'
+2025-07-04 16:44:31.920 -05:00 [INF] | AuthFilter: VCashApp.Controllers.RutasDiariasController.HistorialRutas (VCashApp) | Usuario: adminvcash (Admin) | IP: 0.0.0.1 | Resultado: Acceso concedido (es Admin).
+2025-07-04 16:44:32.012 -05:00 [INF] | Usuario: adminvcash | Ip: 0.0.0.1 | Acción: Acceso a Historial de Rutas | Cantidad de rutas: 0 | Respuesta: Acceso permitido | 
+2025-07-04 16:44:32.020 -05:00 [INF] Executing PartialViewResult, running view ~/Views/RutasDiarias/_RoutesTablePartial.cshtml.
+2025-07-04 16:44:32.027 -05:00 [INF] Executed PartialViewResult - view ~/Views/RutasDiarias/_RoutesTablePartial.cshtml executed in 7.0713ms.
+2025-07-04 16:44:39.069 -05:00 [INF] Executing endpoint 'VCashApp.Controllers.RutasDiariasController.HistorialRutas (VCashApp)'
+2025-07-04 16:44:39.077 -05:00 [INF] | AuthFilter: VCashApp.Controllers.RutasDiariasController.HistorialRutas (VCashApp) | Usuario: adminvcash (Admin) | IP: 0.0.0.1 | Resultado: Acceso concedido (es Admin).
+2025-07-04 16:44:39.091 -05:00 [INF] | Usuario: adminvcash | Ip: 0.0.0.1 | Acción: Acceso a Historial de Rutas | Cantidad de rutas: 15 | Respuesta: Acceso permitido | 
+2025-07-04 16:44:39.296 -05:00 [INF] Executing endpoint 'VCashApp.Controllers.RutasDiariasController.HistorialRutas (VCashApp)'
+2025-07-04 16:44:39.332 -05:00 [INF] | AuthFilter: VCashApp.Controllers.RutasDiariasController.HistorialRutas (VCashApp) | Usuario: adminvcash (Admin) | IP: 0.0.0.1 | Resultado: Acceso concedido (es Admin).
+2025-07-04 16:44:39.367 -05:00 [INF] | Usuario: adminvcash | Ip: 0.0.0.1 | Acción: Acceso a Historial de Rutas | Cantidad de rutas: 0 | Respuesta: Acceso permitido | 
+2025-07-04 16:44:39.370 -05:00 [INF] Executing PartialViewResult, running view ~/Views/RutasDiarias/_RoutesTablePartial.cshtml.
+2025-07-04 16:44:39.371 -05:00 [INF] Executed PartialViewResult - view ~/Views/RutasDiarias/_RoutesTablePartial.cshtml executed in 1.3421ms.
+2025-07-04 16:45:23.903 -05:00 [INF] Executing endpoint 'VCashApp.Controllers.RutasDiariasController.ListGenerated (VCashApp)'
+2025-07-04 16:45:23.927 -05:00 [INF] | AuthFilter: VCashApp.Controllers.RutasDiariasController.ListGenerated (VCashApp) | Usuario: adminvcash (Admin) | IP: 0.0.0.1 | Resultado: Acceso concedido (es Admin).
+2025-07-04 16:45:23.940 -05:00 [WRN] | Usuario: adminvcash | Ip: 0.0.0.1 | Acción: Acceso a Listar Rutas Diarias | Resultado: Perfil no reconocido o sin dashboard específico: Admin |
+2025-07-04 16:45:23.957 -05:00 [INF] Executing endpoint 'VCashApp.Controllers.HomeController.Index (VCashApp)'
+2025-07-04 16:45:26.678 -05:00 [INF] Executing endpoint 'VCashApp.Controllers.RutasDiariasController.HistorialRutas (VCashApp)'
+2025-07-04 16:45:26.691 -05:00 [INF] | AuthFilter: VCashApp.Controllers.RutasDiariasController.HistorialRutas (VCashApp) | Usuario: adminvcash (Admin) | IP: 0.0.0.1 | Resultado: Acceso concedido (es Admin).
+2025-07-04 16:45:26.706 -05:00 [INF] | Usuario: adminvcash | Ip: 0.0.0.1 | Acción: Acceso a Historial de Rutas | Cantidad de rutas: 15 | Respuesta: Acceso permitido | 
+2025-07-04 16:45:26.929 -05:00 [INF] Executing endpoint 'VCashApp.Controllers.RutasDiariasController.HistorialRutas (VCashApp)'
+2025-07-04 16:45:26.939 -05:00 [INF] | AuthFilter: VCashApp.Controllers.RutasDiariasController.HistorialRutas (VCashApp) | Usuario: adminvcash (Admin) | IP: 0.0.0.1 | Resultado: Acceso concedido (es Admin).
+2025-07-04 16:45:26.983 -05:00 [INF] | Usuario: adminvcash | Ip: 0.0.0.1 | Acción: Acceso a Historial de Rutas | Cantidad de rutas: 0 | Respuesta: Acceso permitido | 
+2025-07-04 16:45:26.988 -05:00 [INF] Executing PartialViewResult, running view ~/Views/RutasDiarias/_RoutesTablePartial.cshtml.
+2025-07-04 16:45:26.990 -05:00 [INF] Executed PartialViewResult - view ~/Views/RutasDiarias/_RoutesTablePartial.cshtml executed in 2.0918ms.
+2025-07-04 16:46:46.213 -05:00 [INF] Executing endpoint 'VCashApp.Controllers.RutasDiariasController.HistorialRutas (VCashApp)'
+2025-07-04 16:46:46.222 -05:00 [INF] | AuthFilter: VCashApp.Controllers.RutasDiariasController.HistorialRutas (VCashApp) | Usuario: adminvcash (Admin) | IP: 0.0.0.1 | Resultado: Acceso concedido (es Admin).
+2025-07-04 16:46:46.235 -05:00 [INF] | Usuario: adminvcash | Ip: 0.0.0.1 | Acción: Acceso a Historial de Rutas | Cantidad de rutas: 15 | Respuesta: Acceso permitido | 
+2025-07-04 16:46:46.421 -05:00 [INF] Executing endpoint 'VCashApp.Controllers.RutasDiariasController.HistorialRutas (VCashApp)'
+2025-07-04 16:46:46.429 -05:00 [INF] | AuthFilter: VCashApp.Controllers.RutasDiariasController.HistorialRutas (VCashApp) | Usuario: adminvcash (Admin) | IP: 0.0.0.1 | Resultado: Acceso concedido (es Admin).
+2025-07-04 16:46:46.441 -05:00 [INF] | Usuario: adminvcash | Ip: 0.0.0.1 | Acción: Acceso a Historial de Rutas | Cantidad de rutas: 0 | Respuesta: Acceso permitido | 
+2025-07-04 16:46:46.443 -05:00 [INF] Executing PartialViewResult, running view ~/Views/RutasDiarias/_RoutesTablePartial.cshtml.
+2025-07-04 16:46:46.445 -05:00 [INF] Executed PartialViewResult - view ~/Views/RutasDiarias/_RoutesTablePartial.cshtml executed in 1.3761ms.
+2025-07-04 16:46:54.786 -05:00 [INF] Executing endpoint 'VCashApp.Controllers.RutasDiariasController.HistorialRutas (VCashApp)'
+2025-07-04 16:46:54.793 -05:00 [INF] | AuthFilter: VCashApp.Controllers.RutasDiariasController.HistorialRutas (VCashApp) | Usuario: adminvcash (Admin) | IP: 0.0.0.1 | Resultado: Acceso concedido (es Admin).
+2025-07-04 16:46:54.804 -05:00 [INF] | Usuario: adminvcash | Ip: 0.0.0.1 | Acción: Acceso a Historial de Rutas | Cantidad de rutas: 15 | Respuesta: Acceso permitido | 
+2025-07-04 16:46:54.964 -05:00 [INF] Executing endpoint 'VCashApp.Controllers.RutasDiariasController.HistorialRutas (VCashApp)'
+2025-07-04 16:46:54.973 -05:00 [INF] | AuthFilter: VCashApp.Controllers.RutasDiariasController.HistorialRutas (VCashApp) | Usuario: adminvcash (Admin) | IP: 0.0.0.1 | Resultado: Acceso concedido (es Admin).
+2025-07-04 16:46:54.986 -05:00 [INF] | Usuario: adminvcash | Ip: 0.0.0.1 | Acción: Acceso a Historial de Rutas | Cantidad de rutas: 0 | Respuesta: Acceso permitido | 
+2025-07-04 16:46:54.989 -05:00 [INF] Executing PartialViewResult, running view ~/Views/RutasDiarias/_RoutesTablePartial.cshtml.
+2025-07-04 16:46:54.991 -05:00 [INF] Executed PartialViewResult - view ~/Views/RutasDiarias/_RoutesTablePartial.cshtml executed in 2.5349ms.
+2025-07-04 16:50:45.739 -05:00 [WRN] Sensitive data logging is enabled. Log entries and exception messages may include sensitive application data; this mode should only be enabled during development.
+2025-07-04 16:50:45.818 -05:00 [INF] warn: 04/07/2025 16:50:45.817 CoreEventId.SensitiveDataLoggingEnabledWarning[10400] (Microsoft.EntityFrameworkCore.Infrastructure) 
+      Sensitive data logging is enabled. Log entries and exception messages may include sensitive application data; this mode should only be enabled during development.
+2025-07-04 16:50:46.818 -05:00 [INF] [SeedData] Rol 'Admin' ya existe.
+2025-07-04 16:50:46.830 -05:00 [INF] [SeedData] Rol 'Planeador' ya existe.
+2025-07-04 16:50:46.833 -05:00 [INF] [SeedData] Rol 'CEF' ya existe.
+2025-07-04 16:50:46.837 -05:00 [INF] [SeedData] Rol 'Supervisor' ya existe.
+2025-07-04 16:50:46.840 -05:00 [INF] [SeedData] Rol 'ADATM01' ya existe.
+2025-07-04 16:50:46.843 -05:00 [INF] [SeedData] Rol 'ADCEF01' ya existe.
+2025-07-04 16:50:46.846 -05:00 [INF] [SeedData] Rol 'ADCF01' ya existe.
+2025-07-04 16:50:46.849 -05:00 [INF] [SeedData] Rol 'ADGRG01' ya existe.
+2025-07-04 16:50:46.852 -05:00 [INF] [SeedData] Rol 'ADMTF01' ya existe.
+2025-07-04 16:50:46.855 -05:00 [INF] [SeedData] Rol 'ADSER01' ya existe.
+2025-07-04 16:50:46.859 -05:00 [INF] [SeedData] Rol 'ADSER02' ya existe.
+2025-07-04 16:50:46.862 -05:00 [INF] [SeedData] Rol 'ADTH01' ya existe.
+2025-07-04 16:50:46.866 -05:00 [INF] [SeedData] Rol 'ADTI01' ya existe.
+2025-07-04 16:50:46.869 -05:00 [INF] [SeedData] Rol 'COCEF01' ya existe.
+2025-07-04 16:50:46.872 -05:00 [INF] [SeedData] Rol 'COSTV01' ya existe.
+2025-07-04 16:50:46.876 -05:00 [INF] [SeedData] Rol 'GRSER001' ya existe.
+2025-07-04 16:50:46.879 -05:00 [INF] [SeedData] Rol 'SUPTV01' ya existe.
+2025-07-04 16:50:46.979 -05:00 [INF] [SeedData] Usuario 'adminvcash' ya existe.
+2025-07-04 16:50:46.984 -05:00 [INF] [SeedData] Usuario 'planeador1' ya existe.
+2025-07-04 16:50:46.988 -05:00 [INF] [SeedData] Usuario 'planeador2' ya existe.
+2025-07-04 16:50:46.993 -05:00 [INF] [SeedData] Usuario 'cef1' ya existe.
+2025-07-04 16:50:46.997 -05:00 [INF] [SeedData] Usuario 'supervisor1' ya existe.
+2025-07-04 16:50:47.003 -05:00 [INF] [SeedData] Iniciando seeding de permisos por sucursal...
+2025-07-04 16:50:47.165 -05:00 [INF] [SeedData] Seeding de permisos por sucursal completado.
+2025-07-04 16:50:47.171 -05:00 [INF] [SeedData] Iniciando seeding de permisos de perfiles y vistas...
+2025-07-04 16:50:47.255 -05:00 [INF] [SeedData] Vistas creadas/actualizadas.
+2025-07-04 16:50:47.304 -05:00 [INF] [SeedData] Permisos RUD actualizados para rol Admin.
+2025-07-04 16:50:47.309 -05:00 [INF] [SeedData] Permisos RUD actualizados para rol Planeador.
+2025-07-04 16:50:47.312 -05:00 [INF] [SeedData] Permisos RUD actualizados para rol CEF.
+2025-07-04 16:50:47.316 -05:00 [INF] [SeedData] Permisos RUD actualizados para rol Supervisor.
+2025-07-04 16:50:47.327 -05:00 [INF] [SeedData] Permisos RUDHIS actualizados para rol Admin.
+2025-07-04 16:50:47.330 -05:00 [INF] [SeedData] Permisos RUDHIS actualizados para rol Planeador.
+2025-07-04 16:50:47.335 -05:00 [INF] [SeedData] Permisos RUDHIS actualizados para rol CEF.
+2025-07-04 16:50:47.338 -05:00 [INF] [SeedData] Permisos RUDHIS actualizados para rol Supervisor.
+2025-07-04 16:50:47.465 -05:00 [INF] [SeedData] Seeding de permisos de perfiles y vistas completado.
+2025-07-04 16:50:47.879 -05:00 [INF] Now listening on: https://localhost:7024
+2025-07-04 16:50:47.881 -05:00 [INF] Now listening on: http://localhost:5006
+2025-07-04 16:50:47.932 -05:00 [INF] Application started. Press Ctrl+C to shut down.
+2025-07-04 16:50:47.934 -05:00 [INF] Hosting environment: Development
+2025-07-04 16:50:47.935 -05:00 [INF] Content root path: C:\Users\hamirrocha\source\repos\VCashApp
+2025-07-04 16:50:48.793 -05:00 [INF] Executing endpoint 'VCashApp.Controllers.HomeController.Index (VCashApp)'
+2025-07-04 16:50:54.062 -05:00 [INF] Executing endpoint 'VCashApp.Controllers.HomeController.Index (VCashApp)'
+2025-07-04 16:50:57.914 -05:00 [INF] Executing endpoint 'VCashApp.Controllers.RutasDiariasController.ListGenerated (VCashApp)'
+2025-07-04 16:50:58.004 -05:00 [INF] | AuthFilter: VCashApp.Controllers.RutasDiariasController.ListGenerated (VCashApp) | Usuario: adminvcash (Admin) | IP: 0.0.0.1 | Resultado: Acceso concedido (es Admin).
+2025-07-04 16:50:58.145 -05:00 [WRN] | Usuario: adminvcash | Ip: 0.0.0.1 | Acción: Acceso a Listar Rutas Diarias | Resultado: Perfil no reconocido o sin dashboard específico: Admin |
+2025-07-04 16:50:58.169 -05:00 [INF] Executing endpoint 'VCashApp.Controllers.HomeController.Index (VCashApp)'
+2025-07-04 16:52:19.839 -05:00 [INF] Executing endpoint '/Account/Login'
+2025-07-04 16:52:19.867 -05:00 [INF] Executing handler method VCashApp.Areas.Identity.Pages.Account.LoginModel.OnGetAsync - ModelState is "Valid"
+2025-07-04 16:52:19.875 -05:00 [INF] AuthenticationScheme: Identity.External signed out.
+2025-07-04 16:52:19.879 -05:00 [INF] Executed handler method OnGetAsync, returned result .
+2025-07-04 16:52:19.882 -05:00 [INF] Executing an implicit handler method - ModelState is "Valid"
+2025-07-04 16:52:19.884 -05:00 [INF] Executed an implicit handler method, returned result Microsoft.AspNetCore.Mvc.RazorPages.PageResult.
+2025-07-04 16:52:19.932 -05:00 [INF] Executed page /Account/Login in 71.4648ms
+2025-07-04 16:52:34.572 -05:00 [INF] Executing endpoint '/Account/Login'
+2025-07-04 16:52:34.591 -05:00 [INF] Executing handler method VCashApp.Areas.Identity.Pages.Account.LoginModel.OnPostAsync - ModelState is "Valid"
+2025-07-04 16:52:34.730 -05:00 [INF] AuthenticationScheme: Identity.Application signed in.
+2025-07-04 16:52:34.734 -05:00 [INF] User logged in.
+2025-07-04 16:52:34.735 -05:00 [INF] Executed handler method OnPostAsync, returned result Microsoft.AspNetCore.Mvc.LocalRedirectResult.
+2025-07-04 16:52:34.739 -05:00 [INF] Executing LocalRedirectResult, redirecting to /.
+2025-07-04 16:52:34.740 -05:00 [INF] Executed page /Account/Login in 164.5084ms
+2025-07-04 16:52:34.763 -05:00 [INF] Executing endpoint 'VCashApp.Controllers.HomeController.Index (VCashApp)'
+2025-07-04 16:52:36.462 -05:00 [INF] Executing endpoint 'VCashApp.Controllers.RutasDiariasController.ListGenerated (VCashApp)'
+2025-07-04 16:52:36.485 -05:00 [INF] | AuthFilter: VCashApp.Controllers.RutasDiariasController.ListGenerated (VCashApp) | Usuario: planeador1 | IP: 0.0.0.1 | Resultado: Acceso concedido. TipoPermiso: "View". Vista: 'RUD'. Roles del usuario: Planeador.
+2025-07-04 16:52:36.520 -05:00 [INF] Executing endpoint 'VCashApp.Controllers.RutasDiariasController.PlannerDashboard (VCashApp)'
+2025-07-04 16:52:36.539 -05:00 [INF] | AuthFilter: VCashApp.Controllers.RutasDiariasController.PlannerDashboard (VCashApp) | Usuario: planeador1 | IP: 0.0.0.1 | Resultado: Acceso concedido. TipoPermiso: "View". Vista: 'RUD'. Roles del usuario: Planeador.
+2025-07-04 16:52:36.757 -05:00 [INF] | Usuario: planeador1 | Ip: 0.0.0.1 | Acción: Acceso a Planner Dashboard | Cantidad de rutas: 15 | Respuesta: Acceso permitido | 
+2025-07-04 16:52:36.952 -05:00 [INF] Executing endpoint 'VCashApp.Controllers.RutasDiariasController.PlannerDashboard (VCashApp)'
+2025-07-04 16:52:36.968 -05:00 [INF] | AuthFilter: VCashApp.Controllers.RutasDiariasController.PlannerDashboard (VCashApp) | Usuario: planeador1 | IP: 0.0.0.1 | Resultado: Acceso concedido. TipoPermiso: "View". Vista: 'RUD'. Roles del usuario: Planeador.
+2025-07-04 16:52:37.013 -05:00 [INF] | Usuario: planeador1 | Ip: 0.0.0.1 | Acción: Acceso a Planner Dashboard | Cantidad de rutas: 15 | Respuesta: Acceso permitido | 
+2025-07-04 16:52:37.016 -05:00 [INF] Executing PartialViewResult, running view ~/Views/RutasDiarias/_RoutesTablePartial.cshtml.
+2025-07-04 16:52:37.040 -05:00 [INF] Executed PartialViewResult - view ~/Views/RutasDiarias/_RoutesTablePartial.cshtml executed in 23.9983ms.
+2025-07-04 16:52:50.183 -05:00 [INF] Executing endpoint 'VCashApp.Controllers.RutasDiariasController.PlannerDashboard (VCashApp)'
+2025-07-04 16:52:50.197 -05:00 [INF] | AuthFilter: VCashApp.Controllers.RutasDiariasController.PlannerDashboard (VCashApp) | Usuario: planeador1 | IP: 0.0.0.1 | Resultado: Acceso concedido. TipoPermiso: "View". Vista: 'RUD'. Roles del usuario: Planeador.
+2025-07-04 16:52:50.218 -05:00 [INF] | Usuario: planeador1 | Ip: 0.0.0.1 | Acción: Acceso a Planner Dashboard | Cantidad de rutas: 15 | Respuesta: Acceso permitido | 
+2025-07-04 16:52:50.221 -05:00 [INF] Executing PartialViewResult, running view ~/Views/RutasDiarias/_RoutesTablePartial.cshtml.
+2025-07-04 16:52:50.233 -05:00 [INF] Executed PartialViewResult - view ~/Views/RutasDiarias/_RoutesTablePartial.cshtml executed in 12.3422ms.
+2025-07-04 16:52:51.049 -05:00 [INF] Executing endpoint 'VCashApp.Controllers.RutasDiariasController.PlannerDashboard (VCashApp)'
+2025-07-04 16:52:51.061 -05:00 [INF] | AuthFilter: VCashApp.Controllers.RutasDiariasController.PlannerDashboard (VCashApp) | Usuario: planeador1 | IP: 0.0.0.1 | Resultado: Acceso concedido. TipoPermiso: "View". Vista: 'RUD'. Roles del usuario: Planeador.
+2025-07-04 16:52:51.082 -05:00 [INF] | Usuario: planeador1 | Ip: 0.0.0.1 | Acción: Acceso a Planner Dashboard | Cantidad de rutas: 15 | Respuesta: Acceso permitido | 
+2025-07-04 16:52:51.085 -05:00 [INF] Executing PartialViewResult, running view ~/Views/RutasDiarias/_RoutesTablePartial.cshtml.
+2025-07-04 16:52:51.102 -05:00 [INF] Executed PartialViewResult - view ~/Views/RutasDiarias/_RoutesTablePartial.cshtml executed in 16.3359ms.
+2025-07-04 16:52:51.474 -05:00 [INF] Executing endpoint 'VCashApp.Controllers.RutasDiariasController.PlannerDashboard (VCashApp)'
+2025-07-04 16:52:51.486 -05:00 [INF] | AuthFilter: VCashApp.Controllers.RutasDiariasController.PlannerDashboard (VCashApp) | Usuario: planeador1 | IP: 0.0.0.1 | Resultado: Acceso concedido. TipoPermiso: "View". Vista: 'RUD'. Roles del usuario: Planeador.
+2025-07-04 16:52:51.505 -05:00 [INF] | Usuario: planeador1 | Ip: 0.0.0.1 | Acción: Acceso a Planner Dashboard | Cantidad de rutas: 15 | Respuesta: Acceso permitido | 
+2025-07-04 16:52:51.507 -05:00 [INF] Executing PartialViewResult, running view ~/Views/RutasDiarias/_RoutesTablePartial.cshtml.
+2025-07-04 16:52:51.520 -05:00 [INF] Executed PartialViewResult - view ~/Views/RutasDiarias/_RoutesTablePartial.cshtml executed in 12.3692ms.
+2025-07-04 16:52:51.625 -05:00 [INF] Executing endpoint 'VCashApp.Controllers.RutasDiariasController.PlannerDashboard (VCashApp)'
+2025-07-04 16:52:51.637 -05:00 [INF] | AuthFilter: VCashApp.Controllers.RutasDiariasController.PlannerDashboard (VCashApp) | Usuario: planeador1 | IP: 0.0.0.1 | Resultado: Acceso concedido. TipoPermiso: "View". Vista: 'RUD'. Roles del usuario: Planeador.
+2025-07-04 16:52:51.655 -05:00 [INF] | Usuario: planeador1 | Ip: 0.0.0.1 | Acción: Acceso a Planner Dashboard | Cantidad de rutas: 15 | Respuesta: Acceso permitido | 
+2025-07-04 16:52:51.657 -05:00 [INF] Executing PartialViewResult, running view ~/Views/RutasDiarias/_RoutesTablePartial.cshtml.
+2025-07-04 16:52:51.670 -05:00 [INF] Executed PartialViewResult - view ~/Views/RutasDiarias/_RoutesTablePartial.cshtml executed in 13.2335ms.
+2025-07-04 16:52:51.755 -05:00 [INF] Executing endpoint 'VCashApp.Controllers.RutasDiariasController.PlannerDashboard (VCashApp)'
+2025-07-04 16:52:51.766 -05:00 [INF] | AuthFilter: VCashApp.Controllers.RutasDiariasController.PlannerDashboard (VCashApp) | Usuario: planeador1 | IP: 0.0.0.1 | Resultado: Acceso concedido. TipoPermiso: "View". Vista: 'RUD'. Roles del usuario: Planeador.
+2025-07-04 16:52:51.792 -05:00 [INF] | Usuario: planeador1 | Ip: 0.0.0.1 | Acción: Acceso a Planner Dashboard | Cantidad de rutas: 15 | Respuesta: Acceso permitido | 
+2025-07-04 16:52:51.795 -05:00 [INF] Executing PartialViewResult, running view ~/Views/RutasDiarias/_RoutesTablePartial.cshtml.
+2025-07-04 16:52:51.808 -05:00 [INF] Executed PartialViewResult - view ~/Views/RutasDiarias/_RoutesTablePartial.cshtml executed in 12.2649ms.
+2025-07-04 16:52:51.889 -05:00 [INF] Executing endpoint 'VCashApp.Controllers.RutasDiariasController.PlannerDashboard (VCashApp)'
+2025-07-04 16:52:51.902 -05:00 [INF] | AuthFilter: VCashApp.Controllers.RutasDiariasController.PlannerDashboard (VCashApp) | Usuario: planeador1 | IP: 0.0.0.1 | Resultado: Acceso concedido. TipoPermiso: "View". Vista: 'RUD'. Roles del usuario: Planeador.
+2025-07-04 16:52:51.929 -05:00 [INF] | Usuario: planeador1 | Ip: 0.0.0.1 | Acción: Acceso a Planner Dashboard | Cantidad de rutas: 15 | Respuesta: Acceso permitido | 
+2025-07-04 16:52:51.932 -05:00 [INF] Executing PartialViewResult, running view ~/Views/RutasDiarias/_RoutesTablePartial.cshtml.
+2025-07-04 16:52:51.947 -05:00 [INF] Executed PartialViewResult - view ~/Views/RutasDiarias/_RoutesTablePartial.cshtml executed in 15.0978ms.
+2025-07-04 16:54:57.564 -05:00 [INF] Executing endpoint 'VCashApp.Controllers.SucursalesController.Index (VCashApp)'
+2025-07-04 16:54:57.576 -05:00 [INF] | AuthFilter: VCashApp.Controllers.SucursalesController.Index (VCashApp) | Usuario: adminvcash (Admin) | IP: 0.0.0.1 | Resultado: Acceso concedido (es Admin).
+2025-07-04 16:54:57.615 -05:00 [INF] | Usuario: adminvcash | Ip: 0.0.0.1 | Acción: Acceso a Lista de Sucursales | Cantidad de sucursales: 15 | Respuesta: Acceso permitido | 
+2025-07-04 16:54:57.851 -05:00 [INF] Executing endpoint 'VCashApp.Controllers.SucursalesController.Index (VCashApp)'
+2025-07-04 16:54:57.861 -05:00 [INF] | AuthFilter: VCashApp.Controllers.SucursalesController.Index (VCashApp) | Usuario: adminvcash (Admin) | IP: 0.0.0.1 | Resultado: Acceso concedido (es Admin).
+2025-07-04 16:54:57.873 -05:00 [INF] | Usuario: adminvcash | Ip: 0.0.0.1 | Acción: Acceso a Lista de Sucursales | Cantidad de sucursales: 15 | Respuesta: Acceso permitido | 
+2025-07-04 16:54:57.875 -05:00 [INF] Executing PartialViewResult, running view ~/Views/Sucursales/_SucursalesTablePartial.cshtml.
+2025-07-04 16:54:57.905 -05:00 [INF] Executed PartialViewResult - view ~/Views/Sucursales/_SucursalesTablePartial.cshtml executed in 29.6009ms.
+2025-07-04 16:55:08.423 -05:00 [INF] Executing endpoint 'VCashApp.Controllers.SucursalesController.Index (VCashApp)'
+2025-07-04 16:55:08.433 -05:00 [INF] | AuthFilter: VCashApp.Controllers.SucursalesController.Index (VCashApp) | Usuario: adminvcash (Admin) | IP: 0.0.0.1 | Resultado: Acceso concedido (es Admin).
+2025-07-04 16:55:08.452 -05:00 [INF] | Usuario: adminvcash | Ip: 0.0.0.1 | Acción: Acceso a Lista de Sucursales | Cantidad de sucursales: 7 | Respuesta: Acceso permitido | 
+2025-07-04 16:55:08.454 -05:00 [INF] Executing PartialViewResult, running view ~/Views/Sucursales/_SucursalesTablePartial.cshtml.
+2025-07-04 16:55:08.462 -05:00 [INF] Executed PartialViewResult - view ~/Views/Sucursales/_SucursalesTablePartial.cshtml executed in 8.3616ms.
+2025-07-04 16:55:09.917 -05:00 [INF] Executing endpoint 'VCashApp.Controllers.SucursalesController.Index (VCashApp)'
+2025-07-04 16:55:09.925 -05:00 [INF] | AuthFilter: VCashApp.Controllers.SucursalesController.Index (VCashApp) | Usuario: adminvcash (Admin) | IP: 0.0.0.1 | Resultado: Acceso concedido (es Admin).
+2025-07-04 16:55:09.936 -05:00 [INF] | Usuario: adminvcash | Ip: 0.0.0.1 | Acción: Acceso a Lista de Sucursales | Cantidad de sucursales: 15 | Respuesta: Acceso permitido | 
+2025-07-04 16:55:09.939 -05:00 [INF] Executing PartialViewResult, running view ~/Views/Sucursales/_SucursalesTablePartial.cshtml.
+2025-07-04 16:55:09.955 -05:00 [INF] Executed PartialViewResult - view ~/Views/Sucursales/_SucursalesTablePartial.cshtml executed in 15.8947ms.
+2025-07-04 16:56:45.733 -05:00 [INF] Executing endpoint 'VCashApp.Controllers.SucursalesController.Index (VCashApp)'
+2025-07-04 16:56:45.743 -05:00 [INF] | AuthFilter: VCashApp.Controllers.SucursalesController.Index (VCashApp) | Usuario: adminvcash (Admin) | IP: 0.0.0.1 | Resultado: Acceso concedido (es Admin).
+2025-07-04 16:56:45.755 -05:00 [INF] | Usuario: adminvcash | Ip: 0.0.0.1 | Acción: Acceso a Lista de Sucursales | Cantidad de sucursales: 15 | Respuesta: Acceso permitido | 
+2025-07-04 16:56:46.005 -05:00 [INF] Executing endpoint 'VCashApp.Controllers.SucursalesController.Index (VCashApp)'
+2025-07-04 16:56:46.016 -05:00 [INF] | AuthFilter: VCashApp.Controllers.SucursalesController.Index (VCashApp) | Usuario: adminvcash (Admin) | IP: 0.0.0.1 | Resultado: Acceso concedido (es Admin).
+2025-07-04 16:56:46.032 -05:00 [INF] | Usuario: adminvcash | Ip: 0.0.0.1 | Acción: Acceso a Lista de Sucursales | Cantidad de sucursales: 15 | Respuesta: Acceso permitido | 
+2025-07-04 16:56:46.037 -05:00 [INF] Executing PartialViewResult, running view ~/Views/Sucursales/_SucursalesTablePartial.cshtml.
+2025-07-04 16:56:46.079 -05:00 [INF] Executed PartialViewResult - view ~/Views/Sucursales/_SucursalesTablePartial.cshtml executed in 41.8392ms.
+2025-07-04 16:56:52.002 -05:00 [INF] Executing endpoint 'VCashApp.Controllers.SucursalesController.Index (VCashApp)'
+2025-07-04 16:56:52.010 -05:00 [INF] | AuthFilter: VCashApp.Controllers.SucursalesController.Index (VCashApp) | Usuario: adminvcash (Admin) | IP: 0.0.0.1 | Resultado: Acceso concedido (es Admin).
+2025-07-04 16:56:52.019 -05:00 [INF] | Usuario: adminvcash | Ip: 0.0.0.1 | Acción: Acceso a Lista de Sucursales | Cantidad de sucursales: 15 | Respuesta: Acceso permitido | 
+2025-07-04 16:56:52.612 -05:00 [INF] Executing endpoint 'VCashApp.Controllers.SucursalesController.Index (VCashApp)'
+2025-07-04 16:56:52.627 -05:00 [INF] | AuthFilter: VCashApp.Controllers.SucursalesController.Index (VCashApp) | Usuario: adminvcash (Admin) | IP: 0.0.0.1 | Resultado: Acceso concedido (es Admin).
+2025-07-04 16:56:52.640 -05:00 [INF] | Usuario: adminvcash | Ip: 0.0.0.1 | Acción: Acceso a Lista de Sucursales | Cantidad de sucursales: 15 | Respuesta: Acceso permitido | 
+2025-07-04 16:56:52.643 -05:00 [INF] Executing PartialViewResult, running view ~/Views/Sucursales/_SucursalesTablePartial.cshtml.
+2025-07-04 16:56:52.670 -05:00 [INF] Executed PartialViewResult - view ~/Views/Sucursales/_SucursalesTablePartial.cshtml executed in 27.2085ms.
+2025-07-04 16:57:01.840 -05:00 [INF] Executing endpoint 'VCashApp.Controllers.SucursalesController.Index (VCashApp)'
+2025-07-04 16:57:01.848 -05:00 [INF] | AuthFilter: VCashApp.Controllers.SucursalesController.Index (VCashApp) | Usuario: adminvcash (Admin) | IP: 0.0.0.1 | Resultado: Acceso concedido (es Admin).
+2025-07-04 16:57:01.857 -05:00 [INF] | Usuario: adminvcash | Ip: 0.0.0.1 | Acción: Acceso a Lista de Sucursales | Cantidad de sucursales: 7 | Respuesta: Acceso permitido | 
+2025-07-04 16:57:01.860 -05:00 [INF] Executing PartialViewResult, running view ~/Views/Sucursales/_SucursalesTablePartial.cshtml.
+2025-07-04 16:57:01.869 -05:00 [INF] Executed PartialViewResult - view ~/Views/Sucursales/_SucursalesTablePartial.cshtml executed in 9.3415ms.
+2025-07-04 16:57:03.070 -05:00 [INF] Executing endpoint 'VCashApp.Controllers.SucursalesController.Index (VCashApp)'
+2025-07-04 16:57:03.078 -05:00 [INF] | AuthFilter: VCashApp.Controllers.SucursalesController.Index (VCashApp) | Usuario: adminvcash (Admin) | IP: 0.0.0.1 | Resultado: Acceso concedido (es Admin).
+2025-07-04 16:57:03.087 -05:00 [INF] | Usuario: adminvcash | Ip: 0.0.0.1 | Acción: Acceso a Lista de Sucursales | Cantidad de sucursales: 15 | Respuesta: Acceso permitido | 
+2025-07-04 16:57:03.090 -05:00 [INF] Executing PartialViewResult, running view ~/Views/Sucursales/_SucursalesTablePartial.cshtml.
+2025-07-04 16:57:03.107 -05:00 [INF] Executed PartialViewResult - view ~/Views/Sucursales/_SucursalesTablePartial.cshtml executed in 17.1962ms.
+2025-07-04 16:57:07.387 -05:00 [INF] Executing endpoint 'VCashApp.Controllers.RutasDiariasController.PlannerDashboard (VCashApp)'
+2025-07-04 16:57:07.400 -05:00 [INF] | AuthFilter: VCashApp.Controllers.RutasDiariasController.PlannerDashboard (VCashApp) | Usuario: planeador1 | IP: 0.0.0.1 | Resultado: Acceso concedido. TipoPermiso: "View". Vista: 'RUD'. Roles del usuario: Planeador.
+2025-07-04 16:57:07.420 -05:00 [INF] | Usuario: planeador1 | Ip: 0.0.0.1 | Acción: Acceso a Planner Dashboard | Cantidad de rutas: 15 | Respuesta: Acceso permitido | 
+2025-07-04 16:57:07.906 -05:00 [INF] Executing endpoint 'VCashApp.Controllers.RutasDiariasController.PlannerDashboard (VCashApp)'
+2025-07-04 16:57:07.918 -05:00 [INF] | AuthFilter: VCashApp.Controllers.RutasDiariasController.PlannerDashboard (VCashApp) | Usuario: planeador1 | IP: 0.0.0.1 | Resultado: Acceso concedido. TipoPermiso: "View". Vista: 'RUD'. Roles del usuario: Planeador.
+2025-07-04 16:57:07.944 -05:00 [INF] | Usuario: planeador1 | Ip: 0.0.0.1 | Acción: Acceso a Planner Dashboard | Cantidad de rutas: 15 | Respuesta: Acceso permitido | 
+2025-07-04 16:57:07.947 -05:00 [INF] Executing PartialViewResult, running view ~/Views/RutasDiarias/_RoutesTablePartial.cshtml.
+2025-07-04 16:57:07.968 -05:00 [INF] Executed PartialViewResult - view ~/Views/RutasDiarias/_RoutesTablePartial.cshtml executed in 21.267ms.
+2025-07-04 16:57:14.628 -05:00 [INF] Executing endpoint 'VCashApp.Controllers.RutasDiariasController.PlannerDashboard (VCashApp)'
+2025-07-04 16:57:14.639 -05:00 [INF] | AuthFilter: VCashApp.Controllers.RutasDiariasController.PlannerDashboard (VCashApp) | Usuario: planeador1 | IP: 0.0.0.1 | Resultado: Acceso concedido. TipoPermiso: "View". Vista: 'RUD'. Roles del usuario: Planeador.
+2025-07-04 16:57:14.674 -05:00 [INF] | Usuario: planeador1 | Ip: 0.0.0.1 | Acción: Acceso a Planner Dashboard | Cantidad de rutas: 15 | Respuesta: Acceso permitido | 
+2025-07-04 16:57:14.677 -05:00 [INF] Executing PartialViewResult, running view ~/Views/RutasDiarias/_RoutesTablePartial.cshtml.
+2025-07-04 16:57:14.689 -05:00 [INF] Executed PartialViewResult - view ~/Views/RutasDiarias/_RoutesTablePartial.cshtml executed in 11.6602ms.
+2025-07-04 16:57:15.759 -05:00 [INF] Executing endpoint 'VCashApp.Controllers.RutasDiariasController.PlannerDashboard (VCashApp)'
+2025-07-04 16:57:15.768 -05:00 [INF] | AuthFilter: VCashApp.Controllers.RutasDiariasController.PlannerDashboard (VCashApp) | Usuario: planeador1 | IP: 0.0.0.1 | Resultado: Acceso concedido. TipoPermiso: "View". Vista: 'RUD'. Roles del usuario: Planeador.
+2025-07-04 16:57:15.788 -05:00 [INF] | Usuario: planeador1 | Ip: 0.0.0.1 | Acción: Acceso a Planner Dashboard | Cantidad de rutas: 0 | Respuesta: Acceso permitido | 
+2025-07-04 16:57:15.790 -05:00 [INF] Executing PartialViewResult, running view ~/Views/RutasDiarias/_RoutesTablePartial.cshtml.
+2025-07-04 16:57:15.791 -05:00 [INF] Executed PartialViewResult - view ~/Views/RutasDiarias/_RoutesTablePartial.cshtml executed in 1.0471ms.
+2025-07-04 16:57:17.262 -05:00 [INF] Executing endpoint 'VCashApp.Controllers.RutasDiariasController.PlannerDashboard (VCashApp)'
+2025-07-04 16:57:17.273 -05:00 [INF] | AuthFilter: VCashApp.Controllers.RutasDiariasController.PlannerDashboard (VCashApp) | Usuario: planeador1 | IP: 0.0.0.1 | Resultado: Acceso concedido. TipoPermiso: "View". Vista: 'RUD'. Roles del usuario: Planeador.
+2025-07-04 16:57:17.293 -05:00 [INF] | Usuario: planeador1 | Ip: 0.0.0.1 | Acción: Acceso a Planner Dashboard | Cantidad de rutas: 0 | Respuesta: Acceso permitido | 
+2025-07-04 16:57:17.296 -05:00 [INF] Executing PartialViewResult, running view ~/Views/RutasDiarias/_RoutesTablePartial.cshtml.
+2025-07-04 16:57:17.297 -05:00 [INF] Executed PartialViewResult - view ~/Views/RutasDiarias/_RoutesTablePartial.cshtml executed in 1.25ms.

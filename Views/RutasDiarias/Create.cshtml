@@ -1,0 +1,192 @@
+﻿@model VCashApp.Services.DTOs.RutaDiariaCreationDto
+@using VCashApp.Enums
+@using Microsoft.AspNetCore.Mvc.Rendering
+
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = "Crear Ruta Diaria";
+}
+
+<div class="form-container">
+    <div class="card col-md-12">
+        <div class="card-body">
+            <form asp-action="Create" method="post">
+                @Html.AntiForgeryToken()
+
+                @if (TempData["SuccessMessage"] != null)
+                {
+                    <div class="alert alert-success">@TempData["SuccessMessage"]</div>
+                }
+                @if (TempData["ErrorMessage"] != null)
+                {
+                    <div class="alert alert-danger">@TempData["ErrorMessage"]</div>
+                }
+
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                <fieldset>
+                    <legend>Información Base de la Ruta</legend>
+                    <div class="row">
+                        <div class="form-group col-12 col-md-4">
+                            <label asp-for="CodSucursal" class="control-label">Sucursal</label>
+                            <select asp-for="CodSucursal" class="form-control form-control-sm" asp-items="ViewBag.Sucursales" id="CodSucSelect">
+                                <option value="">-- Seleccione una Sucursal --</option>
+                            </select>
+                            <span asp-validation-for="CodSucursal" class="text-danger"></span>
+                        </div>
+                        <div class="form-group col-12 col-md-4">
+                            <label asp-for="CodRutaSuc" class="control-label">Ruta Maestra</label>
+                            <select asp-for="CodRutaSuc" class="form-control form-control-sm" id="CodigoRutaSelect">
+                                <option value="">-- Seleccione una Ruta Maestra --</option>
+                            </select>
+                            <span asp-validation-for="CodRutaSuc" class="text-danger"></span>
+                        </div>
+                        <div class="form-group col-12 col-md-4">
+                            <label asp-for="FechaEjecucion" class="control-label">Fecha de Ejecución</label>
+                            <input asp-for="FechaEjecucion" type="date" class="form-control form-control-sm" />
+                            <span asp-validation-for="FechaEjecucion" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    @* Campos de información base que se mostrarán como solo lectura o se rellenarán automáticamente *@
+                    <div class="row mt-3">
+                        <div class="form-group col-12 col-md-3">
+                            <label class="control-label">Tipo de Ruta</label>
+                            <input id="TipoRutaDisplay" class="form-control form-control-sm" readonly />
+                        </div>
+                        <div class="form-group col-12 col-md-3">
+                            <label class="control-label">Tipo de Vehículo Requerido</label>
+                            <input id="TipoVehiculoDisplay" class="form-control form-control-sm" readonly />
+                        </div>
+                        <div class="form-group col-12 col-md-6">
+                            <label class="control-label">Nombre de Sucursal</label>
+                            <input id="NombreSucursalDisplay" class="form-control form-control-sm" readonly />
+                        </div>
+                    </div>
+                </fieldset>
+
+                <hr />
+
+                <div class="submit-container form-group col-md-12">
+                    <button type="submit" class="btn btn-primary">Registrar</button>
+                    <button type="button" class="btn btn-danger" onclick="window.location.href='@Url.Action("ListGenerated", "RutasDiarias")'">Cancelar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    <script>
+        $(document).ready(function () {
+            // Guardar valores iniciales para posible re-selección
+            $('#CodigoRutaSelect').data('previous-value', $('#CodigoRutaSelect').val());
+            $('#CodSucSelect').data('previous-value', $('#CodSucSelect').val());
+
+            // Mapeos para mostrar nombres completos en lugar de códigos
+            const tipoRutaMap = {
+                "T": "TRADICIONAL",
+                "A": "ATM",
+                "M": "MIXTA",
+                "L": "LIBERACIÓN DE EFECTIVO"
+            };
+
+            const tipoVehiculoMap = {
+                "C": "CAMIONETA",
+                "B": "BLINDADO",
+                "M": "MOTO",
+                "T": "CAMION"
+            };
+
+            // Función para actualizar dinámicamente los campos ocultos Y los dropdowns dependientes
+            async function updateDerivedAndDependentFields(triggerElementId) {
+                var selectedRutaCod = $('#CodigoRutaSelect').val();
+                var selectedSucCod = $('#CodSucSelect').val();
+
+                $('#NombreRutaHidden').val('');
+                $('#TipoRutaHidden').val('');
+                $('#TipoVehiculoHidden').val('');
+                $('#NombreSucursalHidden').val('');
+
+                $('#TipoRutaDisplay').val('');
+                $('#TipoVehiculoDisplay').val('');
+                $('#NombreSucursalDisplay').val('');
+
+                if (triggerElementId === 'CodSucSelect' || triggerElementId === 'initialLoad') {
+                    var rutasMaestrasSelect = $('#CodigoRutaSelect');
+                    rutasMaestrasSelect.empty();
+                    rutasMaestrasSelect.append($('<option></option>').val('').text('-- Seleccione una Ruta Maestra --'));
+
+                    if (selectedSucCod) {
+                        try {
+                            const rutasResponse = await $.ajax({
+                                url: '@Url.Action("GetRutasMaestrasBySucursal", "RutasDiarias")',
+                                type: 'GET',
+                                data: { codSuc: selectedSucCod }
+                            });
+                            if (rutasResponse && rutasResponse.length > 0) {
+                                $.each(rutasResponse, function (index, ruta) {
+                                    rutasMaestrasSelect.append($('<option></option>').val(ruta.value).text(ruta.text));
+                                });
+                                var previousRutaCod = rutasMaestrasSelect.data('previous-value');
+                                if (previousRutaCod && rutasMaestrasSelect.find('option[value="' + previousRutaCod + '"]').length) {
+                                    rutasMaestrasSelect.val(previousRutaCod);
+                                }
+                            }
+                        } catch (error) {
+                            console.error('Error al obtener rutas maestras por sucursal:', error);
+                        }
+                    }
+                }
+
+                if (selectedRutaCod) {
+                    try {
+                        const response = await $.ajax({
+                            url: '@Url.Action("GetRutaDetails", "RutasDiarias")',
+                            type: 'GET',
+                            data: { codRutaSuc: selectedRutaCod }
+                        });
+                        if (response) {
+                            $('#NombreRutaHidden').val(response.nombreRuta);
+                            $('#TipoRutaHidden').val(response.rutaTipo);
+                            $('#TipoVehiculoHidden').val(response.rutaTipoVeh);
+
+                            $('#TipoRutaDisplay').val(tipoRutaMap[response.rutaTipo] || response.rutaTipo);
+                            $('#TipoVehiculoDisplay').val(tipoVehiculoMap[response.rutaTipoVeh] || response.rutaTipoVeh);
+                        }
+                    } catch (error) {
+                        console.error('Error al obtener detalles de la ruta maestra:', error);
+                    }
+                }
+
+                if (selectedSucCod) {
+                    try {
+                        const response = await $.ajax({
+                            url: '@Url.Action("GetSucursalDetails", "RutasDiarias")',
+                            type: 'GET',
+                            data: { codSuc: selectedSucCod }
+                        });
+                        if (response) {
+                            $('#NombreSucursalHidden').val(response.nombreSucursal);
+                            $('#NombreSucursalDisplay').val(response.nombreSucursal);
+                        }
+                    } catch (error) {
+                        console.error('Error al obtener detalles de la sucursal:', error);
+                    }
+                }
+            }
+
+            $('#CodigoRutaSelect').on('change', function() { updateDerivedAndDependentFields('CodigoRutaSelect'); });
+            $('#CodSucSelect').on('change', function() { updateDerivedAndDependentFields('CodSucSelect'); });
+
+            if ($('#CodSucSelect').val()) {
+                updateDerivedAndDependentFields('CodSucSelect');
+            } else {
+                updateDerivedAndDependentFields('initialLoad');
+            }
+        });
+    </script>
+}

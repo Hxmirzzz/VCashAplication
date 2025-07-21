@@ -1,0 +1,76 @@
+# Visual Studio
+.vs/
+*.suo
+*.user
+*.userosf
+*.sln.docstates
+
+# Build results
+[Dd]ebug/
+[Rr]elease/
+*.exe
+*.dll
+*.pdb
+*.obj
+*.ilk
+*.log
+*.bin
+*.o
+*.tlog
+*.cache
+*.exp
+obj/
+bin/
+
+# Packages
+packages/
+*.nupkg
+*.snupkg
+*.vstx
+*.vsi
+*.vsix
+.tools/
+
+# Rider
+.idea/
+
+# Azure WebSites
+*.publishsettings
+
+# User-specific files
+*.userprefs
+*.vspscc
+*.vssscc
+*.local
+
+# .NET Core
+project.lock.json
+project.fragment.lock.json
+artifacts/
+publish/
+.config/
+
+# DotNet tool files
+.config/dotnet-tools.json
+
+# Secret Manager files (CRÍTICO para tu caso si los usas)
+# Excluye appsettings.Development.json si contiene secretos específicos de desarrollo que no quieres en Git.
+# Si appsettings.json es donde pondrás la cadena sensible para que funcione, NO LO EXCLUYAS AQUÍ,
+# pero sé consciente de que las credenciales estarán en el repo.
+appsettings.Development.json
+
+# Para los archivos de secretos de usuario real (si Secret Manager funciona)
+.secrets/
+.usersecrets/
+*.usersecrets
+
+# Archivos de documentación generados
+# Si quieres subir los XML para que Swagger los use en GitHub Pages u otro host de docs:
+# No los excluyas, pero asegúrate de que se generen en la carpeta correcta y se añadan a Git.
+# Si no quieres subirlos, descomenta las siguientes líneas:
+# *.xml # Esto excluiría VCashApp.xml
+# bin/*/net*/VCashApp.xml # Excluye el archivo .xml generado en la carpeta de salida
+
+# Carpetas de Data Protection (si las creas en la raíz del proyecto)
+DataProtectionKeys/
+DataProtectionKeysStable/

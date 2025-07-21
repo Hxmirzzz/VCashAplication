@@ -1,0 +1,1580 @@
+2025-07-14 08:17:24.641 -05:00 [WRN] Sensitive data logging is enabled. Log entries and exception messages may include sensitive application data; this mode should only be enabled during development.
+2025-07-14 08:17:24.741 -05:00 [INF] warn: 14/07/2025 08:17:24.740 CoreEventId.SensitiveDataLoggingEnabledWarning[10400] (Microsoft.EntityFrameworkCore.Infrastructure) 
+      Sensitive data logging is enabled. Log entries and exception messages may include sensitive application data; this mode should only be enabled during development.
+2025-07-14 08:17:27.212 -05:00 [INF] Executed DbCommand (43ms) [Parameters=[@__normalizedName_0='ADMIN' (Size = 256)], CommandType='"Text"', CommandTimeout='30']
+SELECT TOP(1) [a].[Id], [a].[ConcurrencyStamp], [a].[Name], [a].[NormalizedName]
+FROM [AspNetRoles] AS [a]
+WHERE [a].[NormalizedName] = @__normalizedName_0
+2025-07-14 08:17:27.227 -05:00 [INF] info: 14/07/2025 08:17:27.227 RelationalEventId.CommandExecuted[20101] (Microsoft.EntityFrameworkCore.Database.Command) 
+      Executed DbCommand (43ms) [Parameters=[@__normalizedName_0='ADMIN' (Size = 256)], CommandType='Text', CommandTimeout='30']
+      SELECT TOP(1) [a].[Id], [a].[ConcurrencyStamp], [a].[Name], [a].[NormalizedName]
+      FROM [AspNetRoles] AS [a]
+      WHERE [a].[NormalizedName] = @__normalizedName_0
+2025-07-14 08:17:27.318 -05:00 [INF] [SeedData] Rol 'Admin' ya existe.
+2025-07-14 08:17:27.328 -05:00 [INF] Executed DbCommand (2ms) [Parameters=[@__normalizedName_0='PLANEADOR' (Size = 256)], CommandType='"Text"', CommandTimeout='30']
+SELECT TOP(1) [a].[Id], [a].[ConcurrencyStamp], [a].[Name], [a].[NormalizedName]
+FROM [AspNetRoles] AS [a]
+WHERE [a].[NormalizedName] = @__normalizedName_0
+2025-07-14 08:17:27.331 -05:00 [INF] info: 14/07/2025 08:17:27.331 RelationalEventId.CommandExecuted[20101] (Microsoft.EntityFrameworkCore.Database.Command) 
+      Executed DbCommand (2ms) [Parameters=[@__normalizedName_0='PLANEADOR' (Size = 256)], CommandType='Text', CommandTimeout='30']
+      SELECT TOP(1) [a].[Id], [a].[ConcurrencyStamp], [a].[Name], [a].[NormalizedName]
+      FROM [AspNetRoles] AS [a]
+      WHERE [a].[NormalizedName] = @__normalizedName_0
+2025-07-14 08:17:27.333 -05:00 [INF] [SeedData] Rol 'Planeador' ya existe.
+2025-07-14 08:17:27.336 -05:00 [INF] Executed DbCommand (1ms) [Parameters=[@__normalizedName_0='CEF' (Size = 256)], CommandType='"Text"', CommandTimeout='30']
+SELECT TOP(1) [a].[Id], [a].[ConcurrencyStamp], [a].[Name], [a].[NormalizedName]
+FROM [AspNetRoles] AS [a]
+WHERE [a].[NormalizedName] = @__normalizedName_0
+2025-07-14 08:17:27.342 -05:00 [INF] info: 14/07/2025 08:17:27.342 RelationalEventId.CommandExecuted[20101] (Microsoft.EntityFrameworkCore.Database.Command) 
+      Executed DbCommand (1ms) [Parameters=[@__normalizedName_0='CEF' (Size = 256)], CommandType='Text', CommandTimeout='30']
+      SELECT TOP(1) [a].[Id], [a].[ConcurrencyStamp], [a].[Name], [a].[NormalizedName]
+      FROM [AspNetRoles] AS [a]
+      WHERE [a].[NormalizedName] = @__normalizedName_0
+2025-07-14 08:17:27.344 -05:00 [INF] [SeedData] Rol 'CEF' ya existe.
+2025-07-14 08:17:27.347 -05:00 [INF] Executed DbCommand (1ms) [Parameters=[@__normalizedName_0='SUPERVISOR' (Size = 256)], CommandType='"Text"', CommandTimeout='30']
+SELECT TOP(1) [a].[Id], [a].[ConcurrencyStamp], [a].[Name], [a].[NormalizedName]
+FROM [AspNetRoles] AS [a]
+WHERE [a].[NormalizedName] = @__normalizedName_0
+2025-07-14 08:17:27.350 -05:00 [INF] info: 14/07/2025 08:17:27.350 RelationalEventId.CommandExecuted[20101] (Microsoft.EntityFrameworkCore.Database.Command) 
+      Executed DbCommand (1ms) [Parameters=[@__normalizedName_0='SUPERVISOR' (Size = 256)], CommandType='Text', CommandTimeout='30']
+      SELECT TOP(1) [a].[Id], [a].[ConcurrencyStamp], [a].[Name], [a].[NormalizedName]
+      FROM [AspNetRoles] AS [a]
+      WHERE [a].[NormalizedName] = @__normalizedName_0
+2025-07-14 08:17:27.356 -05:00 [INF] [SeedData] Rol 'Supervisor' ya existe.
+2025-07-14 08:17:27.359 -05:00 [INF] Executed DbCommand (1ms) [Parameters=[@__normalizedName_0='ADATM01' (Size = 256)], CommandType='"Text"', CommandTimeout='30']
+SELECT TOP(1) [a].[Id], [a].[ConcurrencyStamp], [a].[Name], [a].[NormalizedName]
+FROM [AspNetRoles] AS [a]
+WHERE [a].[NormalizedName] = @__normalizedName_0
+2025-07-14 08:17:27.362 -05:00 [INF] info: 14/07/2025 08:17:27.362 RelationalEventId.CommandExecuted[20101] (Microsoft.EntityFrameworkCore.Database.Command) 
+      Executed DbCommand (1ms) [Parameters=[@__normalizedName_0='ADATM01' (Size = 256)], CommandType='Text', CommandTimeout='30']
+      SELECT TOP(1) [a].[Id], [a].[ConcurrencyStamp], [a].[Name], [a].[NormalizedName]
+      FROM [AspNetRoles] AS [a]
+      WHERE [a].[NormalizedName] = @__normalizedName_0
+2025-07-14 08:17:27.363 -05:00 [INF] [SeedData] Rol 'ADATM01' ya existe.
+2025-07-14 08:17:27.367 -05:00 [INF] Executed DbCommand (1ms) [Parameters=[@__normalizedName_0='ADCEF01' (Size = 256)], CommandType='"Text"', CommandTimeout='30']
+SELECT TOP(1) [a].[Id], [a].[ConcurrencyStamp], [a].[Name], [a].[NormalizedName]
+FROM [AspNetRoles] AS [a]
+WHERE [a].[NormalizedName] = @__normalizedName_0
+2025-07-14 08:17:27.372 -05:00 [INF] info: 14/07/2025 08:17:27.372 RelationalEventId.CommandExecuted[20101] (Microsoft.EntityFrameworkCore.Database.Command) 
+      Executed DbCommand (1ms) [Parameters=[@__normalizedName_0='ADCEF01' (Size = 256)], CommandType='Text', CommandTimeout='30']
+      SELECT TOP(1) [a].[Id], [a].[ConcurrencyStamp], [a].[Name], [a].[NormalizedName]
+      FROM [AspNetRoles] AS [a]
+      WHERE [a].[NormalizedName] = @__normalizedName_0
+2025-07-14 08:17:27.374 -05:00 [INF] [SeedData] Rol 'ADCEF01' ya existe.
+2025-07-14 08:17:27.377 -05:00 [INF] Executed DbCommand (1ms) [Parameters=[@__normalizedName_0='ADCF01' (Size = 256)], CommandType='"Text"', CommandTimeout='30']
+SELECT TOP(1) [a].[Id], [a].[ConcurrencyStamp], [a].[Name], [a].[NormalizedName]
+FROM [AspNetRoles] AS [a]
+WHERE [a].[NormalizedName] = @__normalizedName_0
+2025-07-14 08:17:27.381 -05:00 [INF] info: 14/07/2025 08:17:27.381 RelationalEventId.CommandExecuted[20101] (Microsoft.EntityFrameworkCore.Database.Command) 
+      Executed DbCommand (1ms) [Parameters=[@__normalizedName_0='ADCF01' (Size = 256)], CommandType='Text', CommandTimeout='30']
+      SELECT TOP(1) [a].[Id], [a].[ConcurrencyStamp], [a].[Name], [a].[NormalizedName]
+      FROM [AspNetRoles] AS [a]
+      WHERE [a].[NormalizedName] = @__normalizedName_0
+2025-07-14 08:17:27.393 -05:00 [INF] [SeedData] Rol 'ADCF01' ya existe.
+2025-07-14 08:17:27.396 -05:00 [INF] Executed DbCommand (1ms) [Parameters=[@__normalizedName_0='ADGRG01' (Size = 256)], CommandType='"Text"', CommandTimeout='30']
+SELECT TOP(1) [a].[Id], [a].[ConcurrencyStamp], [a].[Name], [a].[NormalizedName]
+FROM [AspNetRoles] AS [a]
+WHERE [a].[NormalizedName] = @__normalizedName_0
+2025-07-14 08:17:27.400 -05:00 [INF] info: 14/07/2025 08:17:27.400 RelationalEventId.CommandExecuted[20101] (Microsoft.EntityFrameworkCore.Database.Command) 
+      Executed DbCommand (1ms) [Parameters=[@__normalizedName_0='ADGRG01' (Size = 256)], CommandType='Text', CommandTimeout='30']
+      SELECT TOP(1) [a].[Id], [a].[ConcurrencyStamp], [a].[Name], [a].[NormalizedName]
+      FROM [AspNetRoles] AS [a]
+      WHERE [a].[NormalizedName] = @__normalizedName_0
+2025-07-14 08:17:27.413 -05:00 [INF] [SeedData] Rol 'ADGRG01' ya existe.
+2025-07-14 08:17:27.417 -05:00 [INF] Executed DbCommand (1ms) [Parameters=[@__normalizedName_0='ADMTF01' (Size = 256)], CommandType='"Text"', CommandTimeout='30']
+SELECT TOP(1) [a].[Id], [a].[ConcurrencyStamp], [a].[Name], [a].[NormalizedName]
+FROM [AspNetRoles] AS [a]
+WHERE [a].[NormalizedName] = @__normalizedName_0
+2025-07-14 08:17:27.430 -05:00 [INF] info: 14/07/2025 08:17:27.429 RelationalEventId.CommandExecuted[20101] (Microsoft.EntityFrameworkCore.Database.Command) 
+      Executed DbCommand (1ms) [Parameters=[@__normalizedName_0='ADMTF01' (Size = 256)], CommandType='Text', CommandTimeout='30']
+      SELECT TOP(1) [a].[Id], [a].[ConcurrencyStamp], [a].[Name], [a].[NormalizedName]
+      FROM [AspNetRoles] AS [a]
+      WHERE [a].[NormalizedName] = @__normalizedName_0
+2025-07-14 08:17:27.433 -05:00 [INF] [SeedData] Rol 'ADMTF01' ya existe.
+2025-07-14 08:17:27.438 -05:00 [INF] Executed DbCommand (2ms) [Parameters=[@__normalizedName_0='ADSER01' (Size = 256)], CommandType='"Text"', CommandTimeout='30']
+SELECT TOP(1) [a].[Id], [a].[ConcurrencyStamp], [a].[Name], [a].[NormalizedName]
+FROM [AspNetRoles] AS [a]
+WHERE [a].[NormalizedName] = @__normalizedName_0
+2025-07-14 08:17:27.447 -05:00 [INF] info: 14/07/2025 08:17:27.447 RelationalEventId.CommandExecuted[20101] (Microsoft.EntityFrameworkCore.Database.Command) 
+      Executed DbCommand (2ms) [Parameters=[@__normalizedName_0='ADSER01' (Size = 256)], CommandType='Text', CommandTimeout='30']
+      SELECT TOP(1) [a].[Id], [a].[ConcurrencyStamp], [a].[Name], [a].[NormalizedName]
+      FROM [AspNetRoles] AS [a]
+      WHERE [a].[NormalizedName] = @__normalizedName_0
+2025-07-14 08:17:27.451 -05:00 [INF] [SeedData] Rol 'ADSER01' ya existe.
+2025-07-14 08:17:27.458 -05:00 [INF] Executed DbCommand (1ms) [Parameters=[@__normalizedName_0='ADSER02' (Size = 256)], CommandType='"Text"', CommandTimeout='30']
+SELECT TOP(1) [a].[Id], [a].[ConcurrencyStamp], [a].[Name], [a].[NormalizedName]
+FROM [AspNetRoles] AS [a]
+WHERE [a].[NormalizedName] = @__normalizedName_0
+2025-07-14 08:17:27.463 -05:00 [INF] info: 14/07/2025 08:17:27.463 RelationalEventId.CommandExecuted[20101] (Microsoft.EntityFrameworkCore.Database.Command) 
+      Executed DbCommand (1ms) [Parameters=[@__normalizedName_0='ADSER02' (Size = 256)], CommandType='Text', CommandTimeout='30']
+      SELECT TOP(1) [a].[Id], [a].[ConcurrencyStamp], [a].[Name], [a].[NormalizedName]
+      FROM [AspNetRoles] AS [a]
+      WHERE [a].[NormalizedName] = @__normalizedName_0
+2025-07-14 08:17:27.466 -05:00 [INF] [SeedData] Rol 'ADSER02' ya existe.
+2025-07-14 08:17:27.470 -05:00 [INF] Executed DbCommand (1ms) [Parameters=[@__normalizedName_0='ADTH01' (Size = 256)], CommandType='"Text"', CommandTimeout='30']
+SELECT TOP(1) [a].[Id], [a].[ConcurrencyStamp], [a].[Name], [a].[NormalizedName]
+FROM [AspNetRoles] AS [a]
+WHERE [a].[NormalizedName] = @__normalizedName_0
+2025-07-14 08:17:27.480 -05:00 [INF] info: 14/07/2025 08:17:27.480 RelationalEventId.CommandExecuted[20101] (Microsoft.EntityFrameworkCore.Database.Command) 
+      Executed DbCommand (1ms) [Parameters=[@__normalizedName_0='ADTH01' (Size = 256)], CommandType='Text', CommandTimeout='30']
+      SELECT TOP(1) [a].[Id], [a].[ConcurrencyStamp], [a].[Name], [a].[NormalizedName]
+      FROM [AspNetRoles] AS [a]
+      WHERE [a].[NormalizedName] = @__normalizedName_0
+2025-07-14 08:17:27.483 -05:00 [INF] [SeedData] Rol 'ADTH01' ya existe.
+2025-07-14 08:17:27.486 -05:00 [INF] Executed DbCommand (1ms) [Parameters=[@__normalizedName_0='ADTI01' (Size = 256)], CommandType='"Text"', CommandTimeout='30']
+SELECT TOP(1) [a].[Id], [a].[ConcurrencyStamp], [a].[Name], [a].[NormalizedName]
+FROM [AspNetRoles] AS [a]
+WHERE [a].[NormalizedName] = @__normalizedName_0
+2025-07-14 08:17:27.496 -05:00 [INF] info: 14/07/2025 08:17:27.496 RelationalEventId.CommandExecuted[20101] (Microsoft.EntityFrameworkCore.Database.Command) 
+      Executed DbCommand (1ms) [Parameters=[@__normalizedName_0='ADTI01' (Size = 256)], CommandType='Text', CommandTimeout='30']
+      SELECT TOP(1) [a].[Id], [a].[ConcurrencyStamp], [a].[Name], [a].[NormalizedName]
+      FROM [AspNetRoles] AS [a]
+      WHERE [a].[NormalizedName] = @__normalizedName_0
+2025-07-14 08:17:27.499 -05:00 [INF] [SeedData] Rol 'ADTI01' ya existe.
+2025-07-14 08:17:27.506 -05:00 [INF] Executed DbCommand (4ms) [Parameters=[@__normalizedName_0='COCEF01' (Size = 256)], CommandType='"Text"', CommandTimeout='30']
+SELECT TOP(1) [a].[Id], [a].[ConcurrencyStamp], [a].[Name], [a].[NormalizedName]
+FROM [AspNetRoles] AS [a]
+WHERE [a].[NormalizedName] = @__normalizedName_0
+2025-07-14 08:17:27.513 -05:00 [INF] info: 14/07/2025 08:17:27.513 RelationalEventId.CommandExecuted[20101] (Microsoft.EntityFrameworkCore.Database.Command) 
+      Executed DbCommand (4ms) [Parameters=[@__normalizedName_0='COCEF01' (Size = 256)], CommandType='Text', CommandTimeout='30']
+      SELECT TOP(1) [a].[Id], [a].[ConcurrencyStamp], [a].[Name], [a].[NormalizedName]
+      FROM [AspNetRoles] AS [a]
+      WHERE [a].[NormalizedName] = @__normalizedName_0
+2025-07-14 08:17:27.515 -05:00 [INF] [SeedData] Rol 'COCEF01' ya existe.
+2025-07-14 08:17:27.518 -05:00 [INF] Executed DbCommand (1ms) [Parameters=[@__normalizedName_0='COSTV01' (Size = 256)], CommandType='"Text"', CommandTimeout='30']
+SELECT TOP(1) [a].[Id], [a].[ConcurrencyStamp], [a].[Name], [a].[NormalizedName]
+FROM [AspNetRoles] AS [a]
+WHERE [a].[NormalizedName] = @__normalizedName_0
+2025-07-14 08:17:27.529 -05:00 [INF] info: 14/07/2025 08:17:27.529 RelationalEventId.CommandExecuted[20101] (Microsoft.EntityFrameworkCore.Database.Command) 
+      Executed DbCommand (1ms) [Parameters=[@__normalizedName_0='COSTV01' (Size = 256)], CommandType='Text', CommandTimeout='30']
+      SELECT TOP(1) [a].[Id], [a].[ConcurrencyStamp], [a].[Name], [a].[NormalizedName]
+      FROM [AspNetRoles] AS [a]
+      WHERE [a].[NormalizedName] = @__normalizedName_0
+2025-07-14 08:17:27.532 -05:00 [INF] [SeedData] Rol 'COSTV01' ya existe.
+2025-07-14 08:17:27.535 -05:00 [INF] Executed DbCommand (1ms) [Parameters=[@__normalizedName_0='GRSER001' (Size = 256)], CommandType='"Text"', CommandTimeout='30']
+SELECT TOP(1) [a].[Id], [a].[ConcurrencyStamp], [a].[Name], [a].[NormalizedName]
+FROM [AspNetRoles] AS [a]
+WHERE [a].[NormalizedName] = @__normalizedName_0
+2025-07-14 08:17:27.545 -05:00 [INF] info: 14/07/2025 08:17:27.545 RelationalEventId.CommandExecuted[20101] (Microsoft.EntityFrameworkCore.Database.Command) 
+      Executed DbCommand (1ms) [Parameters=[@__normalizedName_0='GRSER001' (Size = 256)], CommandType='Text', CommandTimeout='30']
+      SELECT TOP(1) [a].[Id], [a].[ConcurrencyStamp], [a].[Name], [a].[NormalizedName]
+      FROM [AspNetRoles] AS [a]
+      WHERE [a].[NormalizedName] = @__normalizedName_0
+2025-07-14 08:17:27.548 -05:00 [INF] [SeedData] Rol 'GRSER001' ya existe.
+2025-07-14 08:17:27.551 -05:00 [INF] Executed DbCommand (1ms) [Parameters=[@__normalizedName_0='SUPTV01' (Size = 256)], CommandType='"Text"', CommandTimeout='30']
+SELECT TOP(1) [a].[Id], [a].[ConcurrencyStamp], [a].[Name], [a].[NormalizedName]
+FROM [AspNetRoles] AS [a]
+WHERE [a].[NormalizedName] = @__normalizedName_0
+2025-07-14 08:17:27.562 -05:00 [INF] info: 14/07/2025 08:17:27.562 RelationalEventId.CommandExecuted[20101] (Microsoft.EntityFrameworkCore.Database.Command) 
+      Executed DbCommand (1ms) [Parameters=[@__normalizedName_0='SUPTV01' (Size = 256)], CommandType='Text', CommandTimeout='30']
+      SELECT TOP(1) [a].[Id], [a].[ConcurrencyStamp], [a].[Name], [a].[NormalizedName]
+      FROM [AspNetRoles] AS [a]
+      WHERE [a].[NormalizedName] = @__normalizedName_0
+2025-07-14 08:17:27.565 -05:00 [INF] [SeedData] Rol 'SUPTV01' ya existe.
+2025-07-14 08:17:27.569 -05:00 [INF] Executed DbCommand (2ms) [Parameters=[@__normalizedName_0='SEGURIDAD' (Size = 256)], CommandType='"Text"', CommandTimeout='30']
+SELECT TOP(1) [a].[Id], [a].[ConcurrencyStamp], [a].[Name], [a].[NormalizedName]
+FROM [AspNetRoles] AS [a]
+WHERE [a].[NormalizedName] = @__normalizedName_0
+2025-07-14 08:17:27.579 -05:00 [INF] info: 14/07/2025 08:17:27.579 RelationalEventId.CommandExecuted[20101] (Microsoft.EntityFrameworkCore.Database.Command) 
+      Executed DbCommand (2ms) [Parameters=[@__normalizedName_0='SEGURIDAD' (Size = 256)], CommandType='Text', CommandTimeout='30']
+      SELECT TOP(1) [a].[Id], [a].[ConcurrencyStamp], [a].[Name], [a].[NormalizedName]
+      FROM [AspNetRoles] AS [a]
+      WHERE [a].[NormalizedName] = @__normalizedName_0
+2025-07-14 08:17:27.581 -05:00 [INF] [SeedData] Rol 'Seguridad' ya existe.
+2025-07-14 08:17:27.600 -05:00 [INF] Executed DbCommand (2ms) [Parameters=[@__normalizedUserName_0='ADMINVCASH' (Size = 256)], CommandType='"Text"', CommandTimeout='30']
+SELECT TOP(1) [a].[Id], [a].[AccessFailedCount], [a].[ConcurrencyStamp], [a].[Email], [a].[EmailConfirmed], [a].[LockoutEnabled], [a].[LockoutEnd], [a].[NombreUsuario], [a].[NormalizedEmail], [a].[NormalizedUserName], [a].[PasswordHash], [a].[PhoneNumber], [a].[PhoneNumberConfirmed], [a].[SecurityStamp], [a].[TwoFactorEnabled], [a].[UserName]
+FROM [AspNetUsers] AS [a]
+WHERE [a].[NormalizedUserName] = @__normalizedUserName_0
+2025-07-14 08:17:27.605 -05:00 [INF] info: 14/07/2025 08:17:27.605 RelationalEventId.CommandExecuted[20101] (Microsoft.EntityFrameworkCore.Database.Command) 
+      Executed DbCommand (2ms) [Parameters=[@__normalizedUserName_0='ADMINVCASH' (Size = 256)], CommandType='Text', CommandTimeout='30']
+      SELECT TOP(1) [a].[Id], [a].[AccessFailedCount], [a].[ConcurrencyStamp], [a].[Email], [a].[EmailConfirmed], [a].[LockoutEnabled], [a].[LockoutEnd], [a].[NombreUsuario], [a].[NormalizedEmail], [a].[NormalizedUserName], [a].[PasswordHash], [a].[PhoneNumber], [a].[PhoneNumberConfirmed], [a].[SecurityStamp], [a].[TwoFactorEnabled], [a].[UserName]
+      FROM [AspNetUsers] AS [a]
+      WHERE [a].[NormalizedUserName] = @__normalizedUserName_0
+2025-07-14 08:17:27.673 -05:00 [INF] [SeedData] Usuario 'adminvcash' ya existe.
+2025-07-14 08:17:27.677 -05:00 [INF] Executed DbCommand (2ms) [Parameters=[@__normalizedUserName_0='PLANEADOR1' (Size = 256)], CommandType='"Text"', CommandTimeout='30']
+SELECT TOP(1) [a].[Id], [a].[AccessFailedCount], [a].[ConcurrencyStamp], [a].[Email], [a].[EmailConfirmed], [a].[LockoutEnabled], [a].[LockoutEnd], [a].[NombreUsuario], [a].[NormalizedEmail], [a].[NormalizedUserName], [a].[PasswordHash], [a].[PhoneNumber], [a].[PhoneNumberConfirmed], [a].[SecurityStamp], [a].[TwoFactorEnabled], [a].[UserName]
+FROM [AspNetUsers] AS [a]
+WHERE [a].[NormalizedUserName] = @__normalizedUserName_0
+2025-07-14 08:17:27.681 -05:00 [INF] info: 14/07/2025 08:17:27.681 RelationalEventId.CommandExecuted[20101] (Microsoft.EntityFrameworkCore.Database.Command) 
+      Executed DbCommand (2ms) [Parameters=[@__normalizedUserName_0='PLANEADOR1' (Size = 256)], CommandType='Text', CommandTimeout='30']
+      SELECT TOP(1) [a].[Id], [a].[AccessFailedCount], [a].[ConcurrencyStamp], [a].[Email], [a].[EmailConfirmed], [a].[LockoutEnabled], [a].[LockoutEnd], [a].[NombreUsuario], [a].[NormalizedEmail], [a].[NormalizedUserName], [a].[PasswordHash], [a].[PhoneNumber], [a].[PhoneNumberConfirmed], [a].[SecurityStamp], [a].[TwoFactorEnabled], [a].[UserName]
+      FROM [AspNetUsers] AS [a]
+      WHERE [a].[NormalizedUserName] = @__normalizedUserName_0
+2025-07-14 08:17:27.685 -05:00 [INF] [SeedData] Usuario 'planeador1' ya existe.
+2025-07-14 08:17:27.689 -05:00 [INF] Executed DbCommand (2ms) [Parameters=[@__normalizedUserName_0='PLANEADOR2' (Size = 256)], CommandType='"Text"', CommandTimeout='30']
+SELECT TOP(1) [a].[Id], [a].[AccessFailedCount], [a].[ConcurrencyStamp], [a].[Email], [a].[EmailConfirmed], [a].[LockoutEnabled], [a].[LockoutEnd], [a].[NombreUsuario], [a].[NormalizedEmail], [a].[NormalizedUserName], [a].[PasswordHash], [a].[PhoneNumber], [a].[PhoneNumberConfirmed], [a].[SecurityStamp], [a].[TwoFactorEnabled], [a].[UserName]
+FROM [AspNetUsers] AS [a]
+WHERE [a].[NormalizedUserName] = @__normalizedUserName_0
+2025-07-14 08:17:27.693 -05:00 [INF] info: 14/07/2025 08:17:27.693 RelationalEventId.CommandExecuted[20101] (Microsoft.EntityFrameworkCore.Database.Command) 
+      Executed DbCommand (2ms) [Parameters=[@__normalizedUserName_0='PLANEADOR2' (Size = 256)], CommandType='Text', CommandTimeout='30']
+      SELECT TOP(1) [a].[Id], [a].[AccessFailedCount], [a].[ConcurrencyStamp], [a].[Email], [a].[EmailConfirmed], [a].[LockoutEnabled], [a].[LockoutEnd], [a].[NombreUsuario], [a].[NormalizedEmail], [a].[NormalizedUserName], [a].[PasswordHash], [a].[PhoneNumber], [a].[PhoneNumberConfirmed], [a].[SecurityStamp], [a].[TwoFactorEnabled], [a].[UserName]
+      FROM [AspNetUsers] AS [a]
+      WHERE [a].[NormalizedUserName] = @__normalizedUserName_0
+2025-07-14 08:17:27.696 -05:00 [INF] [SeedData] Usuario 'planeador2' ya existe.
+2025-07-14 08:17:27.705 -05:00 [INF] Executed DbCommand (2ms) [Parameters=[@__normalizedUserName_0='CEF1' (Size = 256)], CommandType='"Text"', CommandTimeout='30']
+SELECT TOP(1) [a].[Id], [a].[AccessFailedCount], [a].[ConcurrencyStamp], [a].[Email], [a].[EmailConfirmed], [a].[LockoutEnabled], [a].[LockoutEnd], [a].[NombreUsuario], [a].[NormalizedEmail], [a].[NormalizedUserName], [a].[PasswordHash], [a].[PhoneNumber], [a].[PhoneNumberConfirmed], [a].[SecurityStamp], [a].[TwoFactorEnabled], [a].[UserName]
+FROM [AspNetUsers] AS [a]
+WHERE [a].[NormalizedUserName] = @__normalizedUserName_0
+2025-07-14 08:17:27.710 -05:00 [INF] info: 14/07/2025 08:17:27.710 RelationalEventId.CommandExecuted[20101] (Microsoft.EntityFrameworkCore.Database.Command) 
+      Executed DbCommand (2ms) [Parameters=[@__normalizedUserName_0='CEF1' (Size = 256)], CommandType='Text', CommandTimeout='30']
+      SELECT TOP(1) [a].[Id], [a].[AccessFailedCount], [a].[ConcurrencyStamp], [a].[Email], [a].[EmailConfirmed], [a].[LockoutEnabled], [a].[LockoutEnd], [a].[NombreUsuario], [a].[NormalizedEmail], [a].[NormalizedUserName], [a].[PasswordHash], [a].[PhoneNumber], [a].[PhoneNumberConfirmed], [a].[SecurityStamp], [a].[TwoFactorEnabled], [a].[UserName]
+      FROM [AspNetUsers] AS [a]
+      WHERE [a].[NormalizedUserName] = @__normalizedUserName_0
+2025-07-14 08:17:27.722 -05:00 [INF] [SeedData] Usuario 'cef1' ya existe.
+2025-07-14 08:17:27.727 -05:00 [INF] Executed DbCommand (2ms) [Parameters=[@__normalizedUserName_0='SUPERVISOR1' (Size = 256)], CommandType='"Text"', CommandTimeout='30']
+SELECT TOP(1) [a].[Id], [a].[AccessFailedCount], [a].[ConcurrencyStamp], [a].[Email], [a].[EmailConfirmed], [a].[LockoutEnabled], [a].[LockoutEnd], [a].[NombreUsuario], [a].[NormalizedEmail], [a].[NormalizedUserName], [a].[PasswordHash], [a].[PhoneNumber], [a].[PhoneNumberConfirmed], [a].[SecurityStamp], [a].[TwoFactorEnabled], [a].[UserName]
+FROM [AspNetUsers] AS [a]
+WHERE [a].[NormalizedUserName] = @__normalizedUserName_0
+2025-07-14 08:17:27.740 -05:00 [INF] info: 14/07/2025 08:17:27.740 RelationalEventId.CommandExecuted[20101] (Microsoft.EntityFrameworkCore.Database.Command) 
+      Executed DbCommand (2ms) [Parameters=[@__normalizedUserName_0='SUPERVISOR1' (Size = 256)], CommandType='Text', CommandTimeout='30']
+      SELECT TOP(1) [a].[Id], [a].[AccessFailedCount], [a].[ConcurrencyStamp], [a].[Email], [a].[EmailConfirmed], [a].[LockoutEnabled], [a].[LockoutEnd], [a].[NombreUsuario], [a].[NormalizedEmail], [a].[NormalizedUserName], [a].[PasswordHash], [a].[PhoneNumber], [a].[PhoneNumberConfirmed], [a].[SecurityStamp], [a].[TwoFactorEnabled], [a].[UserName]
+      FROM [AspNetUsers] AS [a]
+      WHERE [a].[NormalizedUserName] = @__normalizedUserName_0
+2025-07-14 08:17:27.754 -05:00 [INF] [SeedData] Usuario 'supervisor1' ya existe.
+2025-07-14 08:17:27.758 -05:00 [INF] Executed DbCommand (2ms) [Parameters=[@__normalizedUserName_0='SUPERVISOR2' (Size = 256)], CommandType='"Text"', CommandTimeout='30']
+SELECT TOP(1) [a].[Id], [a].[AccessFailedCount], [a].[ConcurrencyStamp], [a].[Email], [a].[EmailConfirmed], [a].[LockoutEnabled], [a].[LockoutEnd], [a].[NombreUsuario], [a].[NormalizedEmail], [a].[NormalizedUserName], [a].[PasswordHash], [a].[PhoneNumber], [a].[PhoneNumberConfirmed], [a].[SecurityStamp], [a].[TwoFactorEnabled], [a].[UserName]
+FROM [AspNetUsers] AS [a]
+WHERE [a].[NormalizedUserName] = @__normalizedUserName_0
+2025-07-14 08:17:27.772 -05:00 [INF] info: 14/07/2025 08:17:27.772 RelationalEventId.CommandExecuted[20101] (Microsoft.EntityFrameworkCore.Database.Command) 
+      Executed DbCommand (2ms) [Parameters=[@__normalizedUserName_0='SUPERVISOR2' (Size = 256)], CommandType='Text', CommandTimeout='30']
+      SELECT TOP(1) [a].[Id], [a].[AccessFailedCount], [a].[ConcurrencyStamp], [a].[Email], [a].[EmailConfirmed], [a].[LockoutEnabled], [a].[LockoutEnd], [a].[NombreUsuario], [a].[NormalizedEmail], [a].[NormalizedUserName], [a].[PasswordHash], [a].[PhoneNumber], [a].[PhoneNumberConfirmed], [a].[SecurityStamp], [a].[TwoFactorEnabled], [a].[UserName]
+      FROM [AspNetUsers] AS [a]
+      WHERE [a].[NormalizedUserName] = @__normalizedUserName_0
+2025-07-14 08:17:27.785 -05:00 [INF] [SeedData] Usuario 'supervisor2' ya existe.
+2025-07-14 08:17:27.789 -05:00 [INF] Executed DbCommand (2ms) [Parameters=[@__normalizedUserName_0='SEGURIDAD1' (Size = 256)], CommandType='"Text"', CommandTimeout='30']
+SELECT TOP(1) [a].[Id], [a].[AccessFailedCount], [a].[ConcurrencyStamp], [a].[Email], [a].[EmailConfirmed], [a].[LockoutEnabled], [a].[LockoutEnd], [a].[NombreUsuario], [a].[NormalizedEmail], [a].[NormalizedUserName], [a].[PasswordHash], [a].[PhoneNumber], [a].[PhoneNumberConfirmed], [a].[SecurityStamp], [a].[TwoFactorEnabled], [a].[UserName]
+FROM [AspNetUsers] AS [a]
+WHERE [a].[NormalizedUserName] = @__normalizedUserName_0
+2025-07-14 08:17:27.801 -05:00 [INF] info: 14/07/2025 08:17:27.801 RelationalEventId.CommandExecuted[20101] (Microsoft.EntityFrameworkCore.Database.Command) 
+      Executed DbCommand (2ms) [Parameters=[@__normalizedUserName_0='SEGURIDAD1' (Size = 256)], CommandType='Text', CommandTimeout='30']
+      SELECT TOP(1) [a].[Id], [a].[AccessFailedCount], [a].[ConcurrencyStamp], [a].[Email], [a].[EmailConfirmed], [a].[LockoutEnabled], [a].[LockoutEnd], [a].[NombreUsuario], [a].[NormalizedEmail], [a].[NormalizedUserName], [a].[PasswordHash], [a].[PhoneNumber], [a].[PhoneNumberConfirmed], [a].[SecurityStamp], [a].[TwoFactorEnabled], [a].[UserName]
+      FROM [AspNetUsers] AS [a]
+      WHERE [a].[NormalizedUserName] = @__normalizedUserName_0
+2025-07-14 08:17:27.805 -05:00 [INF] [SeedData] Usuario 'seguridad1' ya existe.
+2025-07-14 08:17:27.812 -05:00 [INF] Executed DbCommand (2ms) [Parameters=[@__normalizedUserName_0='SUPERVISORSEGURIDAD' (Size = 256)], CommandType='"Text"', CommandTimeout='30']
+SELECT TOP(1) [a].[Id], [a].[AccessFailedCount], [a].[ConcurrencyStamp], [a].[Email], [a].[EmailConfirmed], [a].[LockoutEnabled], [a].[LockoutEnd], [a].[NombreUsuario], [a].[NormalizedEmail], [a].[NormalizedUserName], [a].[PasswordHash], [a].[PhoneNumber], [a].[PhoneNumberConfirmed], [a].[SecurityStamp], [a].[TwoFactorEnabled], [a].[UserName]
+FROM [AspNetUsers] AS [a]
+WHERE [a].[NormalizedUserName] = @__normalizedUserName_0
+2025-07-14 08:17:27.820 -05:00 [INF] info: 14/07/2025 08:17:27.820 RelationalEventId.CommandExecuted[20101] (Microsoft.EntityFrameworkCore.Database.Command) 
+      Executed DbCommand (2ms) [Parameters=[@__normalizedUserName_0='SUPERVISORSEGURIDAD' (Size = 256)], CommandType='Text', CommandTimeout='30']
+      SELECT TOP(1) [a].[Id], [a].[AccessFailedCount], [a].[ConcurrencyStamp], [a].[Email], [a].[EmailConfirmed], [a].[LockoutEnabled], [a].[LockoutEnd], [a].[NombreUsuario], [a].[NormalizedEmail], [a].[NormalizedUserName], [a].[PasswordHash], [a].[PhoneNumber], [a].[PhoneNumberConfirmed], [a].[SecurityStamp], [a].[TwoFactorEnabled], [a].[UserName]
+      FROM [AspNetUsers] AS [a]
+      WHERE [a].[NormalizedUserName] = @__normalizedUserName_0
+2025-07-14 08:17:27.832 -05:00 [INF] [SeedData] Usuario 'supervisorSeguridad' ya existe.
+2025-07-14 08:17:27.838 -05:00 [INF] [SeedData] Iniciando seeding de permisos por sucursal...
+2025-07-14 08:17:27.853 -05:00 [INF] Executed DbCommand (2ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT TOP(1) [a].[CodSucursal], [a].[CoSucursal], [a].[CodBancoRepublica], [a].[Estado], [a].[LatitudSucursal], [a].[LongitudSucursal], [a].[NombreSucursal], [a].[SiglasSucursal]
+FROM [AdmSucursales] AS [a]
+WHERE [a].[CodSucursal] = 1
+2025-07-14 08:17:27.865 -05:00 [INF] info: 14/07/2025 08:17:27.865 RelationalEventId.CommandExecuted[20101] (Microsoft.EntityFrameworkCore.Database.Command) 
+      Executed DbCommand (2ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT TOP(1) [a].[CodSucursal], [a].[CoSucursal], [a].[CodBancoRepublica], [a].[Estado], [a].[LatitudSucursal], [a].[LongitudSucursal], [a].[NombreSucursal], [a].[SiglasSucursal]
+      FROM [AdmSucursales] AS [a]
+      WHERE [a].[CodSucursal] = 1
+2025-07-14 08:17:27.910 -05:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT TOP(1) [a].[CodSucursal], [a].[CoSucursal], [a].[CodBancoRepublica], [a].[Estado], [a].[LatitudSucursal], [a].[LongitudSucursal], [a].[NombreSucursal], [a].[SiglasSucursal]
+FROM [AdmSucursales] AS [a]
+WHERE [a].[CodSucursal] = 2
+2025-07-14 08:17:27.915 -05:00 [INF] info: 14/07/2025 08:17:27.915 RelationalEventId.CommandExecuted[20101] (Microsoft.EntityFrameworkCore.Database.Command) 
+      Executed DbCommand (1ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT TOP(1) [a].[CodSucursal], [a].[CoSucursal], [a].[CodBancoRepublica], [a].[Estado], [a].[LatitudSucursal], [a].[LongitudSucursal], [a].[NombreSucursal], [a].[SiglasSucursal]
+      FROM [AdmSucursales] AS [a]
+      WHERE [a].[CodSucursal] = 2
+2025-07-14 08:17:27.920 -05:00 [INF] Executed DbCommand (2ms) [Parameters=[@__normalizedUserName_0='PLANEADOR1' (Size = 256)], CommandType='"Text"', CommandTimeout='30']
+SELECT TOP(1) [a].[Id], [a].[AccessFailedCount], [a].[ConcurrencyStamp], [a].[Email], [a].[EmailConfirmed], [a].[LockoutEnabled], [a].[LockoutEnd], [a].[NombreUsuario], [a].[NormalizedEmail], [a].[NormalizedUserName], [a].[PasswordHash], [a].[PhoneNumber], [a].[PhoneNumberConfirmed], [a].[SecurityStamp], [a].[TwoFactorEnabled], [a].[UserName]
+FROM [AspNetUsers] AS [a]
+WHERE [a].[NormalizedUserName] = @__normalizedUserName_0
+2025-07-14 08:17:27.924 -05:00 [INF] info: 14/07/2025 08:17:27.924 RelationalEventId.CommandExecuted[20101] (Microsoft.EntityFrameworkCore.Database.Command) 
+      Executed DbCommand (2ms) [Parameters=[@__normalizedUserName_0='PLANEADOR1' (Size = 256)], CommandType='Text', CommandTimeout='30']
+      SELECT TOP(1) [a].[Id], [a].[AccessFailedCount], [a].[ConcurrencyStamp], [a].[Email], [a].[EmailConfirmed], [a].[LockoutEnabled], [a].[LockoutEnd], [a].[NombreUsuario], [a].[NormalizedEmail], [a].[NormalizedUserName], [a].[PasswordHash], [a].[PhoneNumber], [a].[PhoneNumberConfirmed], [a].[SecurityStamp], [a].[TwoFactorEnabled], [a].[UserName]
+      FROM [AspNetUsers] AS [a]
+      WHERE [a].[NormalizedUserName] = @__normalizedUserName_0
+2025-07-14 08:17:27.929 -05:00 [INF] Executed DbCommand (2ms) [Parameters=[@__normalizedUserName_0='CEF1' (Size = 256)], CommandType='"Text"', CommandTimeout='30']
+SELECT TOP(1) [a].[Id], [a].[AccessFailedCount], [a].[ConcurrencyStamp], [a].[Email], [a].[EmailConfirmed], [a].[LockoutEnabled], [a].[LockoutEnd], [a].[NombreUsuario], [a].[NormalizedEmail], [a].[NormalizedUserName], [a].[PasswordHash], [a].[PhoneNumber], [a].[PhoneNumberConfirmed], [a].[SecurityStamp], [a].[TwoFactorEnabled], [a].[UserName]
+FROM [AspNetUsers] AS [a]
+WHERE [a].[NormalizedUserName] = @__normalizedUserName_0
+2025-07-14 08:17:27.941 -05:00 [INF] info: 14/07/2025 08:17:27.941 RelationalEventId.CommandExecuted[20101] (Microsoft.EntityFrameworkCore.Database.Command) 
+      Executed DbCommand (2ms) [Parameters=[@__normalizedUserName_0='CEF1' (Size = 256)], CommandType='Text', CommandTimeout='30']
+      SELECT TOP(1) [a].[Id], [a].[AccessFailedCount], [a].[ConcurrencyStamp], [a].[Email], [a].[EmailConfirmed], [a].[LockoutEnabled], [a].[LockoutEnd], [a].[NombreUsuario], [a].[NormalizedEmail], [a].[NormalizedUserName], [a].[PasswordHash], [a].[PhoneNumber], [a].[PhoneNumberConfirmed], [a].[SecurityStamp], [a].[TwoFactorEnabled], [a].[UserName]
+      FROM [AspNetUsers] AS [a]
+      WHERE [a].[NormalizedUserName] = @__normalizedUserName_0
+2025-07-14 08:17:27.946 -05:00 [INF] Executed DbCommand (2ms) [Parameters=[@__normalizedUserName_0='SUPERVISOR1' (Size = 256)], CommandType='"Text"', CommandTimeout='30']
+SELECT TOP(1) [a].[Id], [a].[AccessFailedCount], [a].[ConcurrencyStamp], [a].[Email], [a].[EmailConfirmed], [a].[LockoutEnabled], [a].[LockoutEnd], [a].[NombreUsuario], [a].[NormalizedEmail], [a].[NormalizedUserName], [a].[PasswordHash], [a].[PhoneNumber], [a].[PhoneNumberConfirmed], [a].[SecurityStamp], [a].[TwoFactorEnabled], [a].[UserName]
+FROM [AspNetUsers] AS [a]
+WHERE [a].[NormalizedUserName] = @__normalizedUserName_0
+2025-07-14 08:17:27.956 -05:00 [INF] info: 14/07/2025 08:17:27.956 RelationalEventId.CommandExecuted[20101] (Microsoft.EntityFrameworkCore.Database.Command) 
+      Executed DbCommand (2ms) [Parameters=[@__normalizedUserName_0='SUPERVISOR1' (Size = 256)], CommandType='Text', CommandTimeout='30']
+      SELECT TOP(1) [a].[Id], [a].[AccessFailedCount], [a].[ConcurrencyStamp], [a].[Email], [a].[EmailConfirmed], [a].[LockoutEnabled], [a].[LockoutEnd], [a].[NombreUsuario], [a].[NormalizedEmail], [a].[NormalizedUserName], [a].[PasswordHash], [a].[PhoneNumber], [a].[PhoneNumberConfirmed], [a].[SecurityStamp], [a].[TwoFactorEnabled], [a].[UserName]
+      FROM [AspNetUsers] AS [a]
+      WHERE [a].[NormalizedUserName] = @__normalizedUserName_0
+2025-07-14 08:17:27.962 -05:00 [INF] Executed DbCommand (2ms) [Parameters=[@__normalizedUserName_0='PLANEADOR2' (Size = 256)], CommandType='"Text"', CommandTimeout='30']
+SELECT TOP(1) [a].[Id], [a].[AccessFailedCount], [a].[ConcurrencyStamp], [a].[Email], [a].[EmailConfirmed], [a].[LockoutEnabled], [a].[LockoutEnd], [a].[NombreUsuario], [a].[NormalizedEmail], [a].[NormalizedUserName], [a].[PasswordHash], [a].[PhoneNumber], [a].[PhoneNumberConfirmed], [a].[SecurityStamp], [a].[TwoFactorEnabled], [a].[UserName]
+FROM [AspNetUsers] AS [a]
+WHERE [a].[NormalizedUserName] = @__normalizedUserName_0
+2025-07-14 08:17:27.972 -05:00 [INF] info: 14/07/2025 08:17:27.972 RelationalEventId.CommandExecuted[20101] (Microsoft.EntityFrameworkCore.Database.Command) 
+      Executed DbCommand (2ms) [Parameters=[@__normalizedUserName_0='PLANEADOR2' (Size = 256)], CommandType='Text', CommandTimeout='30']
+      SELECT TOP(1) [a].[Id], [a].[AccessFailedCount], [a].[ConcurrencyStamp], [a].[Email], [a].[EmailConfirmed], [a].[LockoutEnabled], [a].[LockoutEnd], [a].[NombreUsuario], [a].[NormalizedEmail], [a].[NormalizedUserName], [a].[PasswordHash], [a].[PhoneNumber], [a].[PhoneNumberConfirmed], [a].[SecurityStamp], [a].[TwoFactorEnabled], [a].[UserName]
+      FROM [AspNetUsers] AS [a]
+      WHERE [a].[NormalizedUserName] = @__normalizedUserName_0
+2025-07-14 08:17:27.978 -05:00 [INF] Executed DbCommand (2ms) [Parameters=[@__normalizedUserName_0='SUPERVISOR2' (Size = 256)], CommandType='"Text"', CommandTimeout='30']
+SELECT TOP(1) [a].[Id], [a].[AccessFailedCount], [a].[ConcurrencyStamp], [a].[Email], [a].[EmailConfirmed], [a].[LockoutEnabled], [a].[LockoutEnd], [a].[NombreUsuario], [a].[NormalizedEmail], [a].[NormalizedUserName], [a].[PasswordHash], [a].[PhoneNumber], [a].[PhoneNumberConfirmed], [a].[SecurityStamp], [a].[TwoFactorEnabled], [a].[UserName]
+FROM [AspNetUsers] AS [a]
+WHERE [a].[NormalizedUserName] = @__normalizedUserName_0
+2025-07-14 08:17:27.987 -05:00 [INF] info: 14/07/2025 08:17:27.987 RelationalEventId.CommandExecuted[20101] (Microsoft.EntityFrameworkCore.Database.Command) 
+      Executed DbCommand (2ms) [Parameters=[@__normalizedUserName_0='SUPERVISOR2' (Size = 256)], CommandType='Text', CommandTimeout='30']
+      SELECT TOP(1) [a].[Id], [a].[AccessFailedCount], [a].[ConcurrencyStamp], [a].[Email], [a].[EmailConfirmed], [a].[LockoutEnabled], [a].[LockoutEnd], [a].[NombreUsuario], [a].[NormalizedEmail], [a].[NormalizedUserName], [a].[PasswordHash], [a].[PhoneNumber], [a].[PhoneNumberConfirmed], [a].[SecurityStamp], [a].[TwoFactorEnabled], [a].[UserName]
+      FROM [AspNetUsers] AS [a]
+      WHERE [a].[NormalizedUserName] = @__normalizedUserName_0
+2025-07-14 08:17:27.993 -05:00 [INF] Executed DbCommand (2ms) [Parameters=[@__normalizedUserName_0='SEGURIDAD1' (Size = 256)], CommandType='"Text"', CommandTimeout='30']
+SELECT TOP(1) [a].[Id], [a].[AccessFailedCount], [a].[ConcurrencyStamp], [a].[Email], [a].[EmailConfirmed], [a].[LockoutEnabled], [a].[LockoutEnd], [a].[NombreUsuario], [a].[NormalizedEmail], [a].[NormalizedUserName], [a].[PasswordHash], [a].[PhoneNumber], [a].[PhoneNumberConfirmed], [a].[SecurityStamp], [a].[TwoFactorEnabled], [a].[UserName]
+FROM [AspNetUsers] AS [a]
+WHERE [a].[NormalizedUserName] = @__normalizedUserName_0
+2025-07-14 08:17:28.004 -05:00 [INF] info: 14/07/2025 08:17:28.004 RelationalEventId.CommandExecuted[20101] (Microsoft.EntityFrameworkCore.Database.Command) 
+      Executed DbCommand (2ms) [Parameters=[@__normalizedUserName_0='SEGURIDAD1' (Size = 256)], CommandType='Text', CommandTimeout='30']
+      SELECT TOP(1) [a].[Id], [a].[AccessFailedCount], [a].[ConcurrencyStamp], [a].[Email], [a].[EmailConfirmed], [a].[LockoutEnabled], [a].[LockoutEnd], [a].[NombreUsuario], [a].[NormalizedEmail], [a].[NormalizedUserName], [a].[PasswordHash], [a].[PhoneNumber], [a].[PhoneNumberConfirmed], [a].[SecurityStamp], [a].[TwoFactorEnabled], [a].[UserName]
+      FROM [AspNetUsers] AS [a]
+      WHERE [a].[NormalizedUserName] = @__normalizedUserName_0
+2025-07-14 08:17:28.010 -05:00 [INF] Executed DbCommand (2ms) [Parameters=[@__normalizedUserName_0='SUPERVISORSEGURIDAD' (Size = 256)], CommandType='"Text"', CommandTimeout='30']
+SELECT TOP(1) [a].[Id], [a].[AccessFailedCount], [a].[ConcurrencyStamp], [a].[Email], [a].[EmailConfirmed], [a].[LockoutEnabled], [a].[LockoutEnd], [a].[NombreUsuario], [a].[NormalizedEmail], [a].[NormalizedUserName], [a].[PasswordHash], [a].[PhoneNumber], [a].[PhoneNumberConfirmed], [a].[SecurityStamp], [a].[TwoFactorEnabled], [a].[UserName]
+FROM [AspNetUsers] AS [a]
+WHERE [a].[NormalizedUserName] = @__normalizedUserName_0
+2025-07-14 08:17:28.019 -05:00 [INF] info: 14/07/2025 08:17:28.019 RelationalEventId.CommandExecuted[20101] (Microsoft.EntityFrameworkCore.Database.Command) 
+      Executed DbCommand (2ms) [Parameters=[@__normalizedUserName_0='SUPERVISORSEGURIDAD' (Size = 256)], CommandType='Text', CommandTimeout='30']
+      SELECT TOP(1) [a].[Id], [a].[AccessFailedCount], [a].[ConcurrencyStamp], [a].[Email], [a].[EmailConfirmed], [a].[LockoutEnabled], [a].[LockoutEnd], [a].[NombreUsuario], [a].[NormalizedEmail], [a].[NormalizedUserName], [a].[PasswordHash], [a].[PhoneNumber], [a].[PhoneNumberConfirmed], [a].[SecurityStamp], [a].[TwoFactorEnabled], [a].[UserName]
+      FROM [AspNetUsers] AS [a]
+      WHERE [a].[NormalizedUserName] = @__normalizedUserName_0
+2025-07-14 08:17:28.085 -05:00 [INF] Executed DbCommand (2ms) [Parameters=[@__user_Id_0='c6cbbbbd-5929-45f3-ac9e-c9fc3c706b85' (Size = 450)], CommandType='"Text"', CommandTimeout='30']
+SELECT [a].[Id], [a].[ClaimType], [a].[ClaimValue], [a].[UserId]
+FROM [AspNetUserClaims] AS [a]
+WHERE [a].[UserId] = @__user_Id_0
+2025-07-14 08:17:28.090 -05:00 [INF] info: 14/07/2025 08:17:28.090 RelationalEventId.CommandExecuted[20101] (Microsoft.EntityFrameworkCore.Database.Command) 
+      Executed DbCommand (2ms) [Parameters=[@__user_Id_0='c6cbbbbd-5929-45f3-ac9e-c9fc3c706b85' (Size = 450)], CommandType='Text', CommandTimeout='30']
+      SELECT [a].[Id], [a].[ClaimType], [a].[ClaimValue], [a].[UserId]
+      FROM [AspNetUserClaims] AS [a]
+      WHERE [a].[UserId] = @__user_Id_0
+2025-07-14 08:17:28.115 -05:00 [INF] Executed DbCommand (6ms) [Parameters=[@__user_Id_0='720c6df9-f30a-4c13-b49e-351de513c89a' (Size = 450)], CommandType='"Text"', CommandTimeout='30']
+SELECT [a].[Id], [a].[ClaimType], [a].[ClaimValue], [a].[UserId]
+FROM [AspNetUserClaims] AS [a]
+WHERE [a].[UserId] = @__user_Id_0
+2025-07-14 08:17:28.126 -05:00 [INF] info: 14/07/2025 08:17:28.126 RelationalEventId.CommandExecuted[20101] (Microsoft.EntityFrameworkCore.Database.Command) 
+      Executed DbCommand (6ms) [Parameters=[@__user_Id_0='720c6df9-f30a-4c13-b49e-351de513c89a' (Size = 450)], CommandType='Text', CommandTimeout='30']
+      SELECT [a].[Id], [a].[ClaimType], [a].[ClaimValue], [a].[UserId]
+      FROM [AspNetUserClaims] AS [a]
+      WHERE [a].[UserId] = @__user_Id_0
+2025-07-14 08:17:28.133 -05:00 [INF] Executed DbCommand (2ms) [Parameters=[@__user_Id_0='869aa39c-55e9-4223-bb6f-24159b96bc38' (Size = 450)], CommandType='"Text"', CommandTimeout='30']
+SELECT [a].[Id], [a].[ClaimType], [a].[ClaimValue], [a].[UserId]
+FROM [AspNetUserClaims] AS [a]
+WHERE [a].[UserId] = @__user_Id_0
+2025-07-14 08:17:28.144 -05:00 [INF] info: 14/07/2025 08:17:28.144 RelationalEventId.CommandExecuted[20101] (Microsoft.EntityFrameworkCore.Database.Command) 
+      Executed DbCommand (2ms) [Parameters=[@__user_Id_0='869aa39c-55e9-4223-bb6f-24159b96bc38' (Size = 450)], CommandType='Text', CommandTimeout='30']
+      SELECT [a].[Id], [a].[ClaimType], [a].[ClaimValue], [a].[UserId]
+      FROM [AspNetUserClaims] AS [a]
+      WHERE [a].[UserId] = @__user_Id_0
+2025-07-14 08:17:28.150 -05:00 [INF] Executed DbCommand (2ms) [Parameters=[@__user_Id_0='09915cda-0e40-4cc7-a4ef-16f53018aca6' (Size = 450)], CommandType='"Text"', CommandTimeout='30']
+SELECT [a].[Id], [a].[ClaimType], [a].[ClaimValue], [a].[UserId]
+FROM [AspNetUserClaims] AS [a]
+WHERE [a].[UserId] = @__user_Id_0
+2025-07-14 08:17:28.164 -05:00 [INF] info: 14/07/2025 08:17:28.164 RelationalEventId.CommandExecuted[20101] (Microsoft.EntityFrameworkCore.Database.Command) 
+      Executed DbCommand (2ms) [Parameters=[@__user_Id_0='09915cda-0e40-4cc7-a4ef-16f53018aca6' (Size = 450)], CommandType='Text', CommandTimeout='30']
+      SELECT [a].[Id], [a].[ClaimType], [a].[ClaimValue], [a].[UserId]
+      FROM [AspNetUserClaims] AS [a]
+      WHERE [a].[UserId] = @__user_Id_0
+2025-07-14 08:17:28.192 -05:00 [INF] Executed DbCommand (2ms) [Parameters=[@__user_Id_0='7c984c60-7885-436e-a946-c81a19f7cc47' (Size = 450)], CommandType='"Text"', CommandTimeout='30']
+SELECT [a].[Id], [a].[ClaimType], [a].[ClaimValue], [a].[UserId]
+FROM [AspNetUserClaims] AS [a]
+WHERE [a].[UserId] = @__user_Id_0
+2025-07-14 08:17:28.213 -05:00 [INF] info: 14/07/2025 08:17:28.213 RelationalEventId.CommandExecuted[20101] (Microsoft.EntityFrameworkCore.Database.Command) 
+      Executed DbCommand (2ms) [Parameters=[@__user_Id_0='7c984c60-7885-436e-a946-c81a19f7cc47' (Size = 450)], CommandType='Text', CommandTimeout='30']
+      SELECT [a].[Id], [a].[ClaimType], [a].[ClaimValue], [a].[UserId]
+      FROM [AspNetUserClaims] AS [a]
+      WHERE [a].[UserId] = @__user_Id_0
+2025-07-14 08:17:28.238 -05:00 [INF] Executed DbCommand (5ms) [Parameters=[@__user_Id_0='fba74432-cff7-4e66-8674-c0dd3066c528' (Size = 450)], CommandType='"Text"', CommandTimeout='30']
+SELECT [a].[Id], [a].[ClaimType], [a].[ClaimValue], [a].[UserId]
+FROM [AspNetUserClaims] AS [a]
+WHERE [a].[UserId] = @__user_Id_0
+2025-07-14 08:17:28.250 -05:00 [INF] info: 14/07/2025 08:17:28.250 RelationalEventId.CommandExecuted[20101] (Microsoft.EntityFrameworkCore.Database.Command) 
+      Executed DbCommand (5ms) [Parameters=[@__user_Id_0='fba74432-cff7-4e66-8674-c0dd3066c528' (Size = 450)], CommandType='Text', CommandTimeout='30']
+      SELECT [a].[Id], [a].[ClaimType], [a].[ClaimValue], [a].[UserId]
+      FROM [AspNetUserClaims] AS [a]
+      WHERE [a].[UserId] = @__user_Id_0
+2025-07-14 08:17:28.261 -05:00 [INF] Executed DbCommand (2ms) [Parameters=[@__user_Id_0='004377d2-d1d8-461e-94b8-1ebb5761d708' (Size = 450)], CommandType='"Text"', CommandTimeout='30']
+SELECT [a].[Id], [a].[ClaimType], [a].[ClaimValue], [a].[UserId]
+FROM [AspNetUserClaims] AS [a]
+WHERE [a].[UserId] = @__user_Id_0
+2025-07-14 08:17:28.268 -05:00 [INF] info: 14/07/2025 08:17:28.268 RelationalEventId.CommandExecuted[20101] (Microsoft.EntityFrameworkCore.Database.Command) 
+      Executed DbCommand (2ms) [Parameters=[@__user_Id_0='004377d2-d1d8-461e-94b8-1ebb5761d708' (Size = 450)], CommandType='Text', CommandTimeout='30']
+      SELECT [a].[Id], [a].[ClaimType], [a].[ClaimValue], [a].[UserId]
+      FROM [AspNetUserClaims] AS [a]
+      WHERE [a].[UserId] = @__user_Id_0
+2025-07-14 08:17:28.283 -05:00 [INF] [SeedData] Seeding de permisos por sucursal completado.
+2025-07-14 08:17:28.294 -05:00 [INF] [SeedData] Iniciando seeding de permisos de perfiles y vistas...
+2025-07-14 08:17:28.331 -05:00 [INF] Executed DbCommand (2ms) [Parameters=[@__vistaName_0='RUD' (Size = 50)], CommandType='"Text"', CommandTimeout='30']
+SELECT CASE
+    WHEN EXISTS (
+        SELECT 1
+        FROM [AdmVistas] AS [a]
+        WHERE [a].[CodVista] = @__vistaName_0) THEN CAST(1 AS bit)
+    ELSE CAST(0 AS bit)
+END
+2025-07-14 08:17:28.339 -05:00 [INF] info: 14/07/2025 08:17:28.339 RelationalEventId.CommandExecuted[20101] (Microsoft.EntityFrameworkCore.Database.Command) 
+      Executed DbCommand (2ms) [Parameters=[@__vistaName_0='RUD' (Size = 50)], CommandType='Text', CommandTimeout='30']
+      SELECT CASE
+          WHEN EXISTS (
+              SELECT 1
+              FROM [AdmVistas] AS [a]
+              WHERE [a].[CodVista] = @__vistaName_0) THEN CAST(1 AS bit)
+          ELSE CAST(0 AS bit)
+      END
+2025-07-14 08:17:28.346 -05:00 [INF] Executed DbCommand (1ms) [Parameters=[@__vistaName_0='RUDHIS' (Size = 50)], CommandType='"Text"', CommandTimeout='30']
+SELECT CASE
+    WHEN EXISTS (
+        SELECT 1
+        FROM [AdmVistas] AS [a]
+        WHERE [a].[CodVista] = @__vistaName_0) THEN CAST(1 AS bit)
+    ELSE CAST(0 AS bit)
+END
+2025-07-14 08:17:28.351 -05:00 [INF] info: 14/07/2025 08:17:28.351 RelationalEventId.CommandExecuted[20101] (Microsoft.EntityFrameworkCore.Database.Command) 
+      Executed DbCommand (1ms) [Parameters=[@__vistaName_0='RUDHIS' (Size = 50)], CommandType='Text', CommandTimeout='30']
+      SELECT CASE
+          WHEN EXISTS (
+              SELECT 1
+              FROM [AdmVistas] AS [a]
+              WHERE [a].[CodVista] = @__vistaName_0) THEN CAST(1 AS bit)
+          ELSE CAST(0 AS bit)
+      END
+2025-07-14 08:17:28.366 -05:00 [INF] Executed DbCommand (1ms) [Parameters=[@__vistaName_0='REG' (Size = 50)], CommandType='"Text"', CommandTimeout='30']
+SELECT CASE
+    WHEN EXISTS (
+        SELECT 1
+        FROM [AdmVistas] AS [a]
+        WHERE [a].[CodVista] = @__vistaName_0) THEN CAST(1 AS bit)
+    ELSE CAST(0 AS bit)
+END
+2025-07-14 08:17:28.379 -05:00 [INF] info: 14/07/2025 08:17:28.379 RelationalEventId.CommandExecuted[20101] (Microsoft.EntityFrameworkCore.Database.Command) 
+      Executed DbCommand (1ms) [Parameters=[@__vistaName_0='REG' (Size = 50)], CommandType='Text', CommandTimeout='30']
+      SELECT CASE
+          WHEN EXISTS (
+              SELECT 1
+              FROM [AdmVistas] AS [a]
+              WHERE [a].[CodVista] = @__vistaName_0) THEN CAST(1 AS bit)
+          ELSE CAST(0 AS bit)
+      END
+2025-07-14 08:17:28.384 -05:00 [INF] Executed DbCommand (1ms) [Parameters=[@__vistaName_0='CTY' (Size = 50)], CommandType='"Text"', CommandTimeout='30']
+SELECT CASE
+    WHEN EXISTS (
+        SELECT 1
+        FROM [AdmVistas] AS [a]
+        WHERE [a].[CodVista] = @__vistaName_0) THEN CAST(1 AS bit)
+    ELSE CAST(0 AS bit)
+END
+2025-07-14 08:17:28.397 -05:00 [INF] info: 14/07/2025 08:17:28.397 RelationalEventId.CommandExecuted[20101] (Microsoft.EntityFrameworkCore.Database.Command) 
+      Executed DbCommand (1ms) [Parameters=[@__vistaName_0='CTY' (Size = 50)], CommandType='Text', CommandTimeout='30']
+      SELECT CASE
+          WHEN EXISTS (
+              SELECT 1
+              FROM [AdmVistas] AS [a]
+              WHERE [a].[CodVista] = @__vistaName_0) THEN CAST(1 AS bit)
+          ELSE CAST(0 AS bit)
+      END
+2025-07-14 08:17:28.401 -05:00 [INF] Executed DbCommand (1ms) [Parameters=[@__vistaName_0='SUC' (Size = 50)], CommandType='"Text"', CommandTimeout='30']
+SELECT CASE
+    WHEN EXISTS (
+        SELECT 1
+        FROM [AdmVistas] AS [a]
+        WHERE [a].[CodVista] = @__vistaName_0) THEN CAST(1 AS bit)
+    ELSE CAST(0 AS bit)
+END
+2025-07-14 08:17:28.412 -05:00 [INF] info: 14/07/2025 08:17:28.412 RelationalEventId.CommandExecuted[20101] (Microsoft.EntityFrameworkCore.Database.Command) 
+      Executed DbCommand (1ms) [Parameters=[@__vistaName_0='SUC' (Size = 50)], CommandType='Text', CommandTimeout='30']
+      SELECT CASE
+          WHEN EXISTS (
+              SELECT 1
+              FROM [AdmVistas] AS [a]
+              WHERE [a].[CodVista] = @__vistaName_0) THEN CAST(1 AS bit)
+          ELSE CAST(0 AS bit)
+      END
+2025-07-14 08:17:28.417 -05:00 [INF] Executed DbCommand (1ms) [Parameters=[@__vistaName_0='REGHIS' (Size = 50)], CommandType='"Text"', CommandTimeout='30']
+SELECT CASE
+    WHEN EXISTS (
+        SELECT 1
+        FROM [AdmVistas] AS [a]
+        WHERE [a].[CodVista] = @__vistaName_0) THEN CAST(1 AS bit)
+    ELSE CAST(0 AS bit)
+END
+2025-07-14 08:17:28.430 -05:00 [INF] info: 14/07/2025 08:17:28.430 RelationalEventId.CommandExecuted[20101] (Microsoft.EntityFrameworkCore.Database.Command) 
+      Executed DbCommand (1ms) [Parameters=[@__vistaName_0='REGHIS' (Size = 50)], CommandType='Text', CommandTimeout='30']
+      SELECT CASE
+          WHEN EXISTS (
+              SELECT 1
+              FROM [AdmVistas] AS [a]
+              WHERE [a].[CodVista] = @__vistaName_0) THEN CAST(1 AS bit)
+          ELSE CAST(0 AS bit)
+      END
+2025-07-14 08:17:28.492 -05:00 [INF] [SeedData] Vistas creadas/actualizadas.
+2025-07-14 08:17:28.494 -05:00 [INF] Executed DbCommand (1ms) [Parameters=[@__normalizedName_0='ADMIN' (Size = 256)], CommandType='"Text"', CommandTimeout='30']
+SELECT TOP(1) [a].[Id], [a].[ConcurrencyStamp], [a].[Name], [a].[NormalizedName]
+FROM [AspNetRoles] AS [a]
+WHERE [a].[NormalizedName] = @__normalizedName_0
+2025-07-14 08:17:28.498 -05:00 [INF] info: 14/07/2025 08:17:28.498 RelationalEventId.CommandExecuted[20101] (Microsoft.EntityFrameworkCore.Database.Command) 
+      Executed DbCommand (1ms) [Parameters=[@__normalizedName_0='ADMIN' (Size = 256)], CommandType='Text', CommandTimeout='30']
+      SELECT TOP(1) [a].[Id], [a].[ConcurrencyStamp], [a].[Name], [a].[NormalizedName]
+      FROM [AspNetRoles] AS [a]
+      WHERE [a].[NormalizedName] = @__normalizedName_0
+2025-07-14 08:17:28.503 -05:00 [INF] Executed DbCommand (1ms) [Parameters=[@__normalizedName_0='PLANEADOR' (Size = 256)], CommandType='"Text"', CommandTimeout='30']
+SELECT TOP(1) [a].[Id], [a].[ConcurrencyStamp], [a].[Name], [a].[NormalizedName]
+FROM [AspNetRoles] AS [a]
+WHERE [a].[NormalizedName] = @__normalizedName_0
+2025-07-14 08:17:28.514 -05:00 [INF] info: 14/07/2025 08:17:28.514 RelationalEventId.CommandExecuted[20101] (Microsoft.EntityFrameworkCore.Database.Command) 
+      Executed DbCommand (1ms) [Parameters=[@__normalizedName_0='PLANEADOR' (Size = 256)], CommandType='Text', CommandTimeout='30']
+      SELECT TOP(1) [a].[Id], [a].[ConcurrencyStamp], [a].[Name], [a].[NormalizedName]
+      FROM [AspNetRoles] AS [a]
+      WHERE [a].[NormalizedName] = @__normalizedName_0
+2025-07-14 08:17:28.520 -05:00 [INF] Executed DbCommand (1ms) [Parameters=[@__normalizedName_0='CEF' (Size = 256)], CommandType='"Text"', CommandTimeout='30']
+SELECT TOP(1) [a].[Id], [a].[ConcurrencyStamp], [a].[Name], [a].[NormalizedName]
+FROM [AspNetRoles] AS [a]
+WHERE [a].[NormalizedName] = @__normalizedName_0
+2025-07-14 08:17:28.532 -05:00 [INF] info: 14/07/2025 08:17:28.532 RelationalEventId.CommandExecuted[20101] (Microsoft.EntityFrameworkCore.Database.Command) 
+      Executed DbCommand (1ms) [Parameters=[@__normalizedName_0='CEF' (Size = 256)], CommandType='Text', CommandTimeout='30']
+      SELECT TOP(1) [a].[Id], [a].[ConcurrencyStamp], [a].[Name], [a].[NormalizedName]
+      FROM [AspNetRoles] AS [a]
+      WHERE [a].[NormalizedName] = @__normalizedName_0
+2025-07-14 08:17:28.541 -05:00 [INF] Executed DbCommand (1ms) [Parameters=[@__normalizedName_0='SUPERVISOR' (Size = 256)], CommandType='"Text"', CommandTimeout='30']
+SELECT TOP(1) [a].[Id], [a].[ConcurrencyStamp], [a].[Name], [a].[NormalizedName]
+FROM [AspNetRoles] AS [a]
+WHERE [a].[NormalizedName] = @__normalizedName_0
+2025-07-14 08:17:28.546 -05:00 [INF] info: 14/07/2025 08:17:28.546 RelationalEventId.CommandExecuted[20101] (Microsoft.EntityFrameworkCore.Database.Command) 
+      Executed DbCommand (1ms) [Parameters=[@__normalizedName_0='SUPERVISOR' (Size = 256)], CommandType='Text', CommandTimeout='30']
+      SELECT TOP(1) [a].[Id], [a].[ConcurrencyStamp], [a].[Name], [a].[NormalizedName]
+      FROM [AspNetRoles] AS [a]
+      WHERE [a].[NormalizedName] = @__normalizedName_0
+2025-07-14 08:17:28.550 -05:00 [INF] Executed DbCommand (1ms) [Parameters=[@__normalizedName_0='SEGURIDAD' (Size = 256)], CommandType='"Text"', CommandTimeout='30']
+SELECT TOP(1) [a].[Id], [a].[ConcurrencyStamp], [a].[Name], [a].[NormalizedName]
+FROM [AspNetRoles] AS [a]
+WHERE [a].[NormalizedName] = @__normalizedName_0
+2025-07-14 08:17:28.562 -05:00 [INF] info: 14/07/2025 08:17:28.562 RelationalEventId.CommandExecuted[20101] (Microsoft.EntityFrameworkCore.Database.Command) 
+      Executed DbCommand (1ms) [Parameters=[@__normalizedName_0='SEGURIDAD' (Size = 256)], CommandType='Text', CommandTimeout='30']
+      SELECT TOP(1) [a].[Id], [a].[ConcurrencyStamp], [a].[Name], [a].[NormalizedName]
+      FROM [AspNetRoles] AS [a]
+      WHERE [a].[NormalizedName] = @__normalizedName_0
+2025-07-14 08:17:28.566 -05:00 [INF] Executed DbCommand (1ms) [Parameters=[@__normalizedName_0='SUPERVISOR SEGURIDAD' (Size = 256)], CommandType='"Text"', CommandTimeout='30']
+SELECT TOP(1) [a].[Id], [a].[ConcurrencyStamp], [a].[Name], [a].[NormalizedName]
+FROM [AspNetRoles] AS [a]
+WHERE [a].[NormalizedName] = @__normalizedName_0
+2025-07-14 08:17:28.576 -05:00 [INF] info: 14/07/2025 08:17:28.576 RelationalEventId.CommandExecuted[20101] (Microsoft.EntityFrameworkCore.Database.Command) 
+      Executed DbCommand (1ms) [Parameters=[@__normalizedName_0='SUPERVISOR SEGURIDAD' (Size = 256)], CommandType='Text', CommandTimeout='30']
+      SELECT TOP(1) [a].[Id], [a].[ConcurrencyStamp], [a].[Name], [a].[NormalizedName]
+      FROM [AspNetRoles] AS [a]
+      WHERE [a].[NormalizedName] = @__normalizedName_0
+2025-07-14 08:17:28.592 -05:00 [INF] Executed DbCommand (1ms) [Parameters=[@__roleId_0='a7f72583-4e18-4bce-829f-b538f029e95d' (Size = 450)], CommandType='"Text"', CommandTimeout='30']
+SELECT TOP(1) [p].[Id], [p].[CodPerfilId], [p].[CodVista], [p].[PerfilId], [p].[PuedeCrear], [p].[PuedeEditar], [p].[PuedeVer]
+FROM [PermisosPerfil] AS [p]
+WHERE [p].[CodPerfilId] = @__roleId_0 AND [p].[CodVista] = N'RUD'
+2025-07-14 08:17:28.604 -05:00 [INF] info: 14/07/2025 08:17:28.604 RelationalEventId.CommandExecuted[20101] (Microsoft.EntityFrameworkCore.Database.Command) 
+      Executed DbCommand (1ms) [Parameters=[@__roleId_0='a7f72583-4e18-4bce-829f-b538f029e95d' (Size = 450)], CommandType='Text', CommandTimeout='30']
+      SELECT TOP(1) [p].[Id], [p].[CodPerfilId], [p].[CodVista], [p].[PerfilId], [p].[PuedeCrear], [p].[PuedeEditar], [p].[PuedeVer]
+      FROM [PermisosPerfil] AS [p]
+      WHERE [p].[CodPerfilId] = @__roleId_0 AND [p].[CodVista] = N'RUD'
+2025-07-14 08:17:28.630 -05:00 [INF] [SeedData] Permisos RUD actualizados para rol Admin.
+2025-07-14 08:17:28.634 -05:00 [INF] Executed DbCommand (1ms) [Parameters=[@__roleId_0='c6b2ed9a-c908-4864-a2f2-d47bc48fb366' (Size = 450)], CommandType='"Text"', CommandTimeout='30']
+SELECT TOP(1) [p].[Id], [p].[CodPerfilId], [p].[CodVista], [p].[PerfilId], [p].[PuedeCrear], [p].[PuedeEditar], [p].[PuedeVer]
+FROM [PermisosPerfil] AS [p]
+WHERE [p].[CodPerfilId] = @__roleId_0 AND [p].[CodVista] = N'RUD'
+2025-07-14 08:17:28.647 -05:00 [INF] info: 14/07/2025 08:17:28.647 RelationalEventId.CommandExecuted[20101] (Microsoft.EntityFrameworkCore.Database.Command) 
+      Executed DbCommand (1ms) [Parameters=[@__roleId_0='c6b2ed9a-c908-4864-a2f2-d47bc48fb366' (Size = 450)], CommandType='Text', CommandTimeout='30']
+      SELECT TOP(1) [p].[Id], [p].[CodPerfilId], [p].[CodVista], [p].[PerfilId], [p].[PuedeCrear], [p].[PuedeEditar], [p].[PuedeVer]
+      FROM [PermisosPerfil] AS [p]
+      WHERE [p].[CodPerfilId] = @__roleId_0 AND [p].[CodVista] = N'RUD'
+2025-07-14 08:17:28.651 -05:00 [INF] [SeedData] Permisos RUD actualizados para rol Planeador.
+2025-07-14 08:17:28.657 -05:00 [INF] Executed DbCommand (1ms) [Parameters=[@__roleId_0='a27279f8-41f6-4528-8d77-9fb3ca835e2f' (Size = 450)], CommandType='"Text"', CommandTimeout='30']
+SELECT TOP(1) [p].[Id], [p].[CodPerfilId], [p].[CodVista], [p].[PerfilId], [p].[PuedeCrear], [p].[PuedeEditar], [p].[PuedeVer]
+FROM [PermisosPerfil] AS [p]
+WHERE [p].[CodPerfilId] = @__roleId_0 AND [p].[CodVista] = N'RUD'
+2025-07-14 08:17:28.663 -05:00 [INF] info: 14/07/2025 08:17:28.663 RelationalEventId.CommandExecuted[20101] (Microsoft.EntityFrameworkCore.Database.Command) 
+      Executed DbCommand (1ms) [Parameters=[@__roleId_0='a27279f8-41f6-4528-8d77-9fb3ca835e2f' (Size = 450)], CommandType='Text', CommandTimeout='30']
+      SELECT TOP(1) [p].[Id], [p].[CodPerfilId], [p].[CodVista], [p].[PerfilId], [p].[PuedeCrear], [p].[PuedeEditar], [p].[PuedeVer]
+      FROM [PermisosPerfil] AS [p]
+      WHERE [p].[CodPerfilId] = @__roleId_0 AND [p].[CodVista] = N'RUD'
+2025-07-14 08:17:28.665 -05:00 [INF] [SeedData] Permisos RUD actualizados para rol CEF.
+2025-07-14 08:17:28.668 -05:00 [INF] Executed DbCommand (1ms) [Parameters=[@__roleId_0='8781e6f7-d5ef-40ec-8a42-9d9e5b6bcc23' (Size = 450)], CommandType='"Text"', CommandTimeout='30']
+SELECT TOP(1) [p].[Id], [p].[CodPerfilId], [p].[CodVista], [p].[PerfilId], [p].[PuedeCrear], [p].[PuedeEditar], [p].[PuedeVer]
+FROM [PermisosPerfil] AS [p]
+WHERE [p].[CodPerfilId] = @__roleId_0 AND [p].[CodVista] = N'RUD'
+2025-07-14 08:17:28.680 -05:00 [INF] info: 14/07/2025 08:17:28.680 RelationalEventId.CommandExecuted[20101] (Microsoft.EntityFrameworkCore.Database.Command) 
+      Executed DbCommand (1ms) [Parameters=[@__roleId_0='8781e6f7-d5ef-40ec-8a42-9d9e5b6bcc23' (Size = 450)], CommandType='Text', CommandTimeout='30']
+      SELECT TOP(1) [p].[Id], [p].[CodPerfilId], [p].[CodVista], [p].[PerfilId], [p].[PuedeCrear], [p].[PuedeEditar], [p].[PuedeVer]
+      FROM [PermisosPerfil] AS [p]
+      WHERE [p].[CodPerfilId] = @__roleId_0 AND [p].[CodVista] = N'RUD'
+2025-07-14 08:17:28.683 -05:00 [INF] [SeedData] Permisos RUD actualizados para rol Supervisor.
+2025-07-14 08:17:28.701 -05:00 [INF] Executed DbCommand (5ms) [Parameters=[@__roleId_0='a7f72583-4e18-4bce-829f-b538f029e95d' (Size = 450)], CommandType='"Text"', CommandTimeout='30']
+SELECT TOP(1) [p].[Id], [p].[CodPerfilId], [p].[CodVista], [p].[PerfilId], [p].[PuedeCrear], [p].[PuedeEditar], [p].[PuedeVer]
+FROM [PermisosPerfil] AS [p]
+WHERE [p].[CodPerfilId] = @__roleId_0 AND [p].[CodVista] = N'RUDHIS'
+2025-07-14 08:17:28.706 -05:00 [INF] info: 14/07/2025 08:17:28.706 RelationalEventId.CommandExecuted[20101] (Microsoft.EntityFrameworkCore.Database.Command) 
+      Executed DbCommand (5ms) [Parameters=[@__roleId_0='a7f72583-4e18-4bce-829f-b538f029e95d' (Size = 450)], CommandType='Text', CommandTimeout='30']
+      SELECT TOP(1) [p].[Id], [p].[CodPerfilId], [p].[CodVista], [p].[PerfilId], [p].[PuedeCrear], [p].[PuedeEditar], [p].[PuedeVer]
+      FROM [PermisosPerfil] AS [p]
+      WHERE [p].[CodPerfilId] = @__roleId_0 AND [p].[CodVista] = N'RUDHIS'
+2025-07-14 08:17:28.709 -05:00 [INF] [SeedData] Permisos RUDHIS actualizados para rol Admin.
+2025-07-14 08:17:28.713 -05:00 [INF] Executed DbCommand (1ms) [Parameters=[@__roleId_0='c6b2ed9a-c908-4864-a2f2-d47bc48fb366' (Size = 450)], CommandType='"Text"', CommandTimeout='30']
+SELECT TOP(1) [p].[Id], [p].[CodPerfilId], [p].[CodVista], [p].[PerfilId], [p].[PuedeCrear], [p].[PuedeEditar], [p].[PuedeVer]
+FROM [PermisosPerfil] AS [p]
+WHERE [p].[CodPerfilId] = @__roleId_0 AND [p].[CodVista] = N'RUDHIS'
+2025-07-14 08:17:28.717 -05:00 [INF] info: 14/07/2025 08:17:28.717 RelationalEventId.CommandExecuted[20101] (Microsoft.EntityFrameworkCore.Database.Command) 
+      Executed DbCommand (1ms) [Parameters=[@__roleId_0='c6b2ed9a-c908-4864-a2f2-d47bc48fb366' (Size = 450)], CommandType='Text', CommandTimeout='30']
+      SELECT TOP(1) [p].[Id], [p].[CodPerfilId], [p].[CodVista], [p].[PerfilId], [p].[PuedeCrear], [p].[PuedeEditar], [p].[PuedeVer]
+      FROM [PermisosPerfil] AS [p]
+      WHERE [p].[CodPerfilId] = @__roleId_0 AND [p].[CodVista] = N'RUDHIS'
+2025-07-14 08:17:28.729 -05:00 [INF] [SeedData] Permisos RUDHIS actualizados para rol Planeador.
+2025-07-14 08:17:28.733 -05:00 [INF] Executed DbCommand (1ms) [Parameters=[@__roleId_0='a27279f8-41f6-4528-8d77-9fb3ca835e2f' (Size = 450)], CommandType='"Text"', CommandTimeout='30']
+SELECT TOP(1) [p].[Id], [p].[CodPerfilId], [p].[CodVista], [p].[PerfilId], [p].[PuedeCrear], [p].[PuedeEditar], [p].[PuedeVer]
+FROM [PermisosPerfil] AS [p]
+WHERE [p].[CodPerfilId] = @__roleId_0 AND [p].[CodVista] = N'RUDHIS'
+2025-07-14 08:17:28.743 -05:00 [INF] info: 14/07/2025 08:17:28.743 RelationalEventId.CommandExecuted[20101] (Microsoft.EntityFrameworkCore.Database.Command) 
+      Executed DbCommand (1ms) [Parameters=[@__roleId_0='a27279f8-41f6-4528-8d77-9fb3ca835e2f' (Size = 450)], CommandType='Text', CommandTimeout='30']
+      SELECT TOP(1) [p].[Id], [p].[CodPerfilId], [p].[CodVista], [p].[PerfilId], [p].[PuedeCrear], [p].[PuedeEditar], [p].[PuedeVer]
+      FROM [PermisosPerfil] AS [p]
+      WHERE [p].[CodPerfilId] = @__roleId_0 AND [p].[CodVista] = N'RUDHIS'
+2025-07-14 08:17:28.747 -05:00 [INF] [SeedData] Permisos RUDHIS actualizados para rol CEF.
+2025-07-14 08:17:28.750 -05:00 [INF] Executed DbCommand (1ms) [Parameters=[@__roleId_0='8781e6f7-d5ef-40ec-8a42-9d9e5b6bcc23' (Size = 450)], CommandType='"Text"', CommandTimeout='30']
+SELECT TOP(1) [p].[Id], [p].[CodPerfilId], [p].[CodVista], [p].[PerfilId], [p].[PuedeCrear], [p].[PuedeEditar], [p].[PuedeVer]
+FROM [PermisosPerfil] AS [p]
+WHERE [p].[CodPerfilId] = @__roleId_0 AND [p].[CodVista] = N'RUDHIS'
+2025-07-14 08:17:28.763 -05:00 [INF] info: 14/07/2025 08:17:28.763 RelationalEventId.CommandExecuted[20101] (Microsoft.EntityFrameworkCore.Database.Command) 
+      Executed DbCommand (1ms) [Parameters=[@__roleId_0='8781e6f7-d5ef-40ec-8a42-9d9e5b6bcc23' (Size = 450)], CommandType='Text', CommandTimeout='30']
+      SELECT TOP(1) [p].[Id], [p].[CodPerfilId], [p].[CodVista], [p].[PerfilId], [p].[PuedeCrear], [p].[PuedeEditar], [p].[PuedeVer]
+      FROM [PermisosPerfil] AS [p]
+      WHERE [p].[CodPerfilId] = @__roleId_0 AND [p].[CodVista] = N'RUDHIS'
+2025-07-14 08:17:28.766 -05:00 [INF] [SeedData] Permisos RUDHIS actualizados para rol Supervisor.
+2025-07-14 08:17:28.784 -05:00 [INF] Executed DbCommand (1ms) [Parameters=[@__roleId_0='a7f72583-4e18-4bce-829f-b538f029e95d' (Size = 450)], CommandType='"Text"', CommandTimeout='30']
+SELECT TOP(1) [p].[Id], [p].[CodPerfilId], [p].[CodVista], [p].[PerfilId], [p].[PuedeCrear], [p].[PuedeEditar], [p].[PuedeVer]
+FROM [PermisosPerfil] AS [p]
+WHERE [p].[CodPerfilId] = @__roleId_0 AND [p].[CodVista] = N'REG'
+2025-07-14 08:17:28.796 -05:00 [INF] info: 14/07/2025 08:17:28.796 RelationalEventId.CommandExecuted[20101] (Microsoft.EntityFrameworkCore.Database.Command) 
+      Executed DbCommand (1ms) [Parameters=[@__roleId_0='a7f72583-4e18-4bce-829f-b538f029e95d' (Size = 450)], CommandType='Text', CommandTimeout='30']
+      SELECT TOP(1) [p].[Id], [p].[CodPerfilId], [p].[CodVista], [p].[PerfilId], [p].[PuedeCrear], [p].[PuedeEditar], [p].[PuedeVer]
+      FROM [PermisosPerfil] AS [p]
+      WHERE [p].[CodPerfilId] = @__roleId_0 AND [p].[CodVista] = N'REG'
+2025-07-14 08:17:28.800 -05:00 [INF] [SeedData] Permisos REG actualizados para rol Admin.
+2025-07-14 08:17:28.804 -05:00 [INF] Executed DbCommand (2ms) [Parameters=[@__roleId_0='cb115337-c9bc-4535-8c68-960033727680' (Size = 450)], CommandType='"Text"', CommandTimeout='30']
+SELECT TOP(1) [p].[Id], [p].[CodPerfilId], [p].[CodVista], [p].[PerfilId], [p].[PuedeCrear], [p].[PuedeEditar], [p].[PuedeVer]
+FROM [PermisosPerfil] AS [p]
+WHERE [p].[CodPerfilId] = @__roleId_0 AND [p].[CodVista] = N'REG'
+2025-07-14 08:17:28.814 -05:00 [INF] info: 14/07/2025 08:17:28.814 RelationalEventId.CommandExecuted[20101] (Microsoft.EntityFrameworkCore.Database.Command) 
+      Executed DbCommand (2ms) [Parameters=[@__roleId_0='cb115337-c9bc-4535-8c68-960033727680' (Size = 450)], CommandType='Text', CommandTimeout='30']
+      SELECT TOP(1) [p].[Id], [p].[CodPerfilId], [p].[CodVista], [p].[PerfilId], [p].[PuedeCrear], [p].[PuedeEditar], [p].[PuedeVer]
+      FROM [PermisosPerfil] AS [p]
+      WHERE [p].[CodPerfilId] = @__roleId_0 AND [p].[CodVista] = N'REG'
+2025-07-14 08:17:28.818 -05:00 [INF] [SeedData] Permisos REG actualizados para rol Seguridad.
+2025-07-14 08:17:28.838 -05:00 [INF] Executed DbCommand (2ms) [Parameters=[@__roleId_0='a7f72583-4e18-4bce-829f-b538f029e95d' (Size = 450)], CommandType='"Text"', CommandTimeout='30']
+SELECT TOP(1) [p].[Id], [p].[CodPerfilId], [p].[CodVista], [p].[PerfilId], [p].[PuedeCrear], [p].[PuedeEditar], [p].[PuedeVer]
+FROM [PermisosPerfil] AS [p]
+WHERE [p].[CodPerfilId] = @__roleId_0 AND [p].[CodVista] = N'REGHIS'
+2025-07-14 08:17:28.843 -05:00 [INF] info: 14/07/2025 08:17:28.843 RelationalEventId.CommandExecuted[20101] (Microsoft.EntityFrameworkCore.Database.Command) 
+      Executed DbCommand (2ms) [Parameters=[@__roleId_0='a7f72583-4e18-4bce-829f-b538f029e95d' (Size = 450)], CommandType='Text', CommandTimeout='30']
+      SELECT TOP(1) [p].[Id], [p].[CodPerfilId], [p].[CodVista], [p].[PerfilId], [p].[PuedeCrear], [p].[PuedeEditar], [p].[PuedeVer]
+      FROM [PermisosPerfil] AS [p]
+      WHERE [p].[CodPerfilId] = @__roleId_0 AND [p].[CodVista] = N'REGHIS'
+2025-07-14 08:17:28.846 -05:00 [INF] [SeedData] Permisos REGHIS actualizados para rol Admin.
+2025-07-14 08:17:28.850 -05:00 [INF] Executed DbCommand (1ms) [Parameters=[@__roleId_0='cb115337-c9bc-4535-8c68-960033727680' (Size = 450)], CommandType='"Text"', CommandTimeout='30']
+SELECT TOP(1) [p].[Id], [p].[CodPerfilId], [p].[CodVista], [p].[PerfilId], [p].[PuedeCrear], [p].[PuedeEditar], [p].[PuedeVer]
+FROM [PermisosPerfil] AS [p]
+WHERE [p].[CodPerfilId] = @__roleId_0 AND [p].[CodVista] = N'REGHIS'
+2025-07-14 08:17:28.863 -05:00 [INF] info: 14/07/2025 08:17:28.863 RelationalEventId.CommandExecuted[20101] (Microsoft.EntityFrameworkCore.Database.Command) 
+      Executed DbCommand (1ms) [Parameters=[@__roleId_0='cb115337-c9bc-4535-8c68-960033727680' (Size = 450)], CommandType='Text', CommandTimeout='30']
+      SELECT TOP(1) [p].[Id], [p].[CodPerfilId], [p].[CodVista], [p].[PerfilId], [p].[PuedeCrear], [p].[PuedeEditar], [p].[PuedeVer]
+      FROM [PermisosPerfil] AS [p]
+      WHERE [p].[CodPerfilId] = @__roleId_0 AND [p].[CodVista] = N'REGHIS'
+2025-07-14 08:17:28.866 -05:00 [INF] [SeedData] Permisos REGHIS actualizados para rol Seguridad.
+2025-07-14 08:17:28.981 -05:00 [INF] Executed DbCommand (7ms) [Parameters=[@p6='13', @p0='a7f72583-4e18-4bce-829f-b538f029e95d' (Nullable = false) (Size = 450), @p1='RUD' (Nullable = false) (Size = 50), @p2=NULL (Size = 450), @p3='True', @p4='True', @p5='True', @p13='15', @p7='a27279f8-41f6-4528-8d77-9fb3ca835e2f' (Nullable = false) (Size = 450), @p8='RUD' (Nullable = false) (Size = 50), @p9=NULL (Size = 450), @p10='True', @p11='True', @p12='True', @p20='16', @p14='8781e6f7-d5ef-40ec-8a42-9d9e5b6bcc23' (Nullable = false) (Size = 450), @p15='RUD' (Nullable = false) (Size = 50), @p16=NULL (Size = 450), @p17='False', @p18='True', @p19='True', @p27='17', @p21='a7f72583-4e18-4bce-829f-b538f029e95d' (Nullable = false) (Size = 450), @p22='RUDHIS' (Nullable = false) (Size = 50), @p23=NULL (Size = 450), @p24='False', @p25='False', @p26='True', @p34='19', @p28='a27279f8-41f6-4528-8d77-9fb3ca835e2f' (Nullable = false) (Size = 450), @p29='RUDHIS' (Nullable = false) (Size = 50), @p30=NULL (Size = 450), @p31='False', @p32='False', @p33='True', @p41='20', @p35='8781e6f7-d5ef-40ec-8a42-9d9e5b6bcc23' (Nullable = false) (Size = 450), @p36='RUDHIS' (Nullable = false) (Size = 50), @p37=NULL (Size = 450), @p38='False', @p39='False', @p40='True', @p48='37', @p42='c6b2ed9a-c908-4864-a2f2-d47bc48fb366' (Nullable = false) (Size = 450), @p43='RUD' (Nullable = false) (Size = 50), @p44=NULL (Size = 450), @p45='True', @p46='True', @p47='True', @p55='38', @p49='c6b2ed9a-c908-4864-a2f2-d47bc48fb366' (Nullable = false) (Size = 450), @p50='RUDHIS' (Nullable = false) (Size = 50), @p51=NULL (Size = 450), @p52='False', @p53='False', @p54='True', @p62='41', @p56='a7f72583-4e18-4bce-829f-b538f029e95d' (Nullable = false) (Size = 450), @p57='REG' (Nullable = false) (Size = 50), @p58=NULL (Size = 450), @p59='True', @p60='True', @p61='True', @p69='42', @p63='cb115337-c9bc-4535-8c68-960033727680' (Nullable = false) (Size = 450), @p64='REG' (Nullable = false) (Size = 50), @p65=NULL (Size = 450), @p66='True', @p67='False', @p68='True', @p76='43', @p70='a7f72583-4e18-4bce-829f-b538f029e95d' (Nullable = false) (Size = 450), @p71='REGHIS' (Nullable = false) (Size = 50), @p72=NULL (Size = 450), @p73='True', @p74='True', @p75='True', @p83='44', @p77='cb115337-c9bc-4535-8c68-960033727680' (Nullable = false) (Size = 450), @p78='REGHIS' (Nullable = false) (Size = 50), @p79=NULL (Size = 450), @p80='True', @p81='False', @p82='True'], CommandType='"Text"', CommandTimeout='30']
+SET NOCOUNT ON;
+UPDATE [PermisosPerfil] SET [CodPerfilId] = @p0, [CodVista] = @p1, [PerfilId] = @p2, [PuedeCrear] = @p3, [PuedeEditar] = @p4, [PuedeVer] = @p5
+OUTPUT 1
+WHERE [Id] = @p6;
+UPDATE [PermisosPerfil] SET [CodPerfilId] = @p7, [CodVista] = @p8, [PerfilId] = @p9, [PuedeCrear] = @p10, [PuedeEditar] = @p11, [PuedeVer] = @p12
+OUTPUT 1
+WHERE [Id] = @p13;
+UPDATE [PermisosPerfil] SET [CodPerfilId] = @p14, [CodVista] = @p15, [PerfilId] = @p16, [PuedeCrear] = @p17, [PuedeEditar] = @p18, [PuedeVer] = @p19
+OUTPUT 1
+WHERE [Id] = @p20;
+UPDATE [PermisosPerfil] SET [CodPerfilId] = @p21, [CodVista] = @p22, [PerfilId] = @p23, [PuedeCrear] = @p24, [PuedeEditar] = @p25, [PuedeVer] = @p26
+OUTPUT 1
+WHERE [Id] = @p27;
+UPDATE [PermisosPerfil] SET [CodPerfilId] = @p28, [CodVista] = @p29, [PerfilId] = @p30, [PuedeCrear] = @p31, [PuedeEditar] = @p32, [PuedeVer] = @p33
+OUTPUT 1
+WHERE [Id] = @p34;
+UPDATE [PermisosPerfil] SET [CodPerfilId] = @p35, [CodVista] = @p36, [PerfilId] = @p37, [PuedeCrear] = @p38, [PuedeEditar] = @p39, [PuedeVer] = @p40
+OUTPUT 1
+WHERE [Id] = @p41;
+UPDATE [PermisosPerfil] SET [CodPerfilId] = @p42, [CodVista] = @p43, [PerfilId] = @p44, [PuedeCrear] = @p45, [PuedeEditar] = @p46, [PuedeVer] = @p47
+OUTPUT 1
+WHERE [Id] = @p48;
+UPDATE [PermisosPerfil] SET [CodPerfilId] = @p49, [CodVista] = @p50, [PerfilId] = @p51, [PuedeCrear] = @p52, [PuedeEditar] = @p53, [PuedeVer] = @p54
+OUTPUT 1
+WHERE [Id] = @p55;
+UPDATE [PermisosPerfil] SET [CodPerfilId] = @p56, [CodVista] = @p57, [PerfilId] = @p58, [PuedeCrear] = @p59, [PuedeEditar] = @p60, [PuedeVer] = @p61
+OUTPUT 1
+WHERE [Id] = @p62;
+UPDATE [PermisosPerfil] SET [CodPerfilId] = @p63, [CodVista] = @p64, [PerfilId] = @p65, [PuedeCrear] = @p66, [PuedeEditar] = @p67, [PuedeVer] = @p68
+OUTPUT 1
+WHERE [Id] = @p69;
+UPDATE [PermisosPerfil] SET [CodPerfilId] = @p70, [CodVista] = @p71, [PerfilId] = @p72, [PuedeCrear] = @p73, [PuedeEditar] = @p74, [PuedeVer] = @p75
+OUTPUT 1
+WHERE [Id] = @p76;
+UPDATE [PermisosPerfil] SET [CodPerfilId] = @p77, [CodVista] = @p78, [PerfilId] = @p79, [PuedeCrear] = @p80, [PuedeEditar] = @p81, [PuedeVer] = @p82
+OUTPUT 1
+WHERE [Id] = @p83;
+2025-07-14 08:17:29.000 -05:00 [INF] info: 14/07/2025 08:17:29.000 RelationalEventId.CommandExecuted[20101] (Microsoft.EntityFrameworkCore.Database.Command) 
+      Executed DbCommand (7ms) [Parameters=[@p6='13', @p0='a7f72583-4e18-4bce-829f-b538f029e95d' (Nullable = false) (Size = 450), @p1='RUD' (Nullable = false) (Size = 50), @p2=NULL (Size = 450), @p3='True', @p4='True', @p5='True', @p13='15', @p7='a27279f8-41f6-4528-8d77-9fb3ca835e2f' (Nullable = false) (Size = 450), @p8='RUD' (Nullable = false) (Size = 50), @p9=NULL (Size = 450), @p10='True', @p11='True', @p12='True', @p20='16', @p14='8781e6f7-d5ef-40ec-8a42-9d9e5b6bcc23' (Nullable = false) (Size = 450), @p15='RUD' (Nullable = false) (Size = 50), @p16=NULL (Size = 450), @p17='False', @p18='True', @p19='True', @p27='17', @p21='a7f72583-4e18-4bce-829f-b538f029e95d' (Nullable = false) (Size = 450), @p22='RUDHIS' (Nullable = false) (Size = 50), @p23=NULL (Size = 450), @p24='False', @p25='False', @p26='True', @p34='19', @p28='a27279f8-41f6-4528-8d77-9fb3ca835e2f' (Nullable = false) (Size = 450), @p29='RUDHIS' (Nullable = false) (Size = 50), @p30=NULL (Size = 450), @p31='False', @p32='False', @p33='True', @p41='20', @p35='8781e6f7-d5ef-40ec-8a42-9d9e5b6bcc23' (Nullable = false) (Size = 450), @p36='RUDHIS' (Nullable = false) (Size = 50), @p37=NULL (Size = 450), @p38='False', @p39='False', @p40='True', @p48='37', @p42='c6b2ed9a-c908-4864-a2f2-d47bc48fb366' (Nullable = false) (Size = 450), @p43='RUD' (Nullable = false) (Size = 50), @p44=NULL (Size = 450), @p45='True', @p46='True', @p47='True', @p55='38', @p49='c6b2ed9a-c908-4864-a2f2-d47bc48fb366' (Nullable = false) (Size = 450), @p50='RUDHIS' (Nullable = false) (Size = 50), @p51=NULL (Size = 450), @p52='False', @p53='False', @p54='True', @p62='41', @p56='a7f72583-4e18-4bce-829f-b538f029e95d' (Nullable = false) (Size = 450), @p57='REG' (Nullable = false) (Size = 50), @p58=NULL (Size = 450), @p59='True', @p60='True', @p61='True', @p69='42', @p63='cb115337-c9bc-4535-8c68-960033727680' (Nullable = false) (Size = 450), @p64='REG' (Nullable = false) (Size = 50), @p65=NULL (Size = 450), @p66='True', @p67='False', @p68='True', @p76='43', @p70='a7f72583-4e18-4bce-829f-b538f029e95d' (Nullable = false) (Size = 450), @p71='REGHIS' (Nullable = false) (Size = 50), @p72=NULL (Size = 450), @p73='True', @p74='True', @p75='True', @p83='44', @p77='cb115337-c9bc-4535-8c68-960033727680' (Nullable = false) (Size = 450), @p78='REGHIS' (Nullable = false) (Size = 50), @p79=NULL (Size = 450), @p80='True', @p81='False', @p82='True'], CommandType='Text', CommandTimeout='30']
+      SET NOCOUNT ON;
+      UPDATE [PermisosPerfil] SET [CodPerfilId] = @p0, [CodVista] = @p1, [PerfilId] = @p2, [PuedeCrear] = @p3, [PuedeEditar] = @p4, [PuedeVer] = @p5
+      OUTPUT 1
+      WHERE [Id] = @p6;
+      UPDATE [PermisosPerfil] SET [CodPerfilId] = @p7, [CodVista] = @p8, [PerfilId] = @p9, [PuedeCrear] = @p10, [PuedeEditar] = @p11, [PuedeVer] = @p12
+      OUTPUT 1
+      WHERE [Id] = @p13;
+      UPDATE [PermisosPerfil] SET [CodPerfilId] = @p14, [CodVista] = @p15, [PerfilId] = @p16, [PuedeCrear] = @p17, [PuedeEditar] = @p18, [PuedeVer] = @p19
+      OUTPUT 1
+      WHERE [Id] = @p20;
+      UPDATE [PermisosPerfil] SET [CodPerfilId] = @p21, [CodVista] = @p22, [PerfilId] = @p23, [PuedeCrear] = @p24, [PuedeEditar] = @p25, [PuedeVer] = @p26
+      OUTPUT 1
+      WHERE [Id] = @p27;
+      UPDATE [PermisosPerfil] SET [CodPerfilId] = @p28, [CodVista] = @p29, [PerfilId] = @p30, [PuedeCrear] = @p31, [PuedeEditar] = @p32, [PuedeVer] = @p33
+      OUTPUT 1
+      WHERE [Id] = @p34;
+      UPDATE [PermisosPerfil] SET [CodPerfilId] = @p35, [CodVista] = @p36, [PerfilId] = @p37, [PuedeCrear] = @p38, [PuedeEditar] = @p39, [PuedeVer] = @p40
+      OUTPUT 1
+      WHERE [Id] = @p41;
+      UPDATE [PermisosPerfil] SET [CodPerfilId] = @p42, [CodVista] = @p43, [PerfilId] = @p44, [PuedeCrear] = @p45, [PuedeEditar] = @p46, [PuedeVer] = @p47
+      OUTPUT 1
+      WHERE [Id] = @p48;
+      UPDATE [PermisosPerfil] SET [CodPerfilId] = @p49, [CodVista] = @p50, [PerfilId] = @p51, [PuedeCrear] = @p52, [PuedeEditar] = @p53, [PuedeVer] = @p54
+      OUTPUT 1
+      WHERE [Id] = @p55;
+      UPDATE [PermisosPerfil] SET [CodPerfilId] = @p56, [CodVista] = @p57, [PerfilId] = @p58, [PuedeCrear] = @p59, [PuedeEditar] = @p60, [PuedeVer] = @p61
+      OUTPUT 1
+      WHERE [Id] = @p62;
+      UPDATE [PermisosPerfil] SET [CodPerfilId] = @p63, [CodVista] = @p64, [PerfilId] = @p65, [PuedeCrear] = @p66, [PuedeEditar] = @p67, [PuedeVer] = @p68
+      OUTPUT 1
+      WHERE [Id] = @p69;
+      UPDATE [PermisosPerfil] SET [CodPerfilId] = @p70, [CodVista] = @p71, [PerfilId] = @p72, [PuedeCrear] = @p73, [PuedeEditar] = @p74, [PuedeVer] = @p75
+      OUTPUT 1
+      WHERE [Id] = @p76;
+      UPDATE [PermisosPerfil] SET [CodPerfilId] = @p77, [CodVista] = @p78, [PerfilId] = @p79, [PuedeCrear] = @p80, [PuedeEditar] = @p81, [PuedeVer] = @p82
+      OUTPUT 1
+      WHERE [Id] = @p83;
+2025-07-14 08:17:29.058 -05:00 [INF] [SeedData] Seeding de permisos de perfiles y vistas completado.
+2025-07-14 08:17:29.478 -05:00 [ERR] Hosting failed to start
+System.IO.IOException: Failed to bind to address https://127.0.0.1:7024: address already in use.
+ ---> Microsoft.AspNetCore.Connections.AddressInUseException: Solo se permite un uso de cada dirección de socket (protocolo/dirección de red/puerto)
+ ---> System.Net.Sockets.SocketException (10048): Solo se permite un uso de cada dirección de socket (protocolo/dirección de red/puerto)
+   at System.Net.Sockets.Socket.UpdateStatusAfterSocketErrorAndThrowException(SocketError error, Boolean disconnectOnFailure, String callerName)
+   at System.Net.Sockets.Socket.DoBind(EndPoint endPointSnapshot, SocketAddress socketAddress)
+   at System.Net.Sockets.Socket.Bind(EndPoint localEP)
+   at Microsoft.AspNetCore.Server.Kestrel.Transport.Sockets.SocketTransportOptions.CreateDefaultBoundListenSocket(EndPoint endpoint)
+   at Microsoft.AspNetCore.Server.Kestrel.Transport.Sockets.SocketConnectionListener.Bind()
+   --- End of inner exception stack trace ---
+   at Microsoft.AspNetCore.Server.Kestrel.Transport.Sockets.SocketConnectionListener.Bind()
+   at Microsoft.AspNetCore.Server.Kestrel.Transport.Sockets.SocketTransportFactory.BindAsync(EndPoint endpoint, CancellationToken cancellationToken)
+   at Microsoft.AspNetCore.Server.Kestrel.Core.Internal.Infrastructure.TransportManager.BindAsync(EndPoint endPoint, ConnectionDelegate connectionDelegate, EndpointConfig endpointConfig, CancellationToken cancellationToken)
+   at Microsoft.AspNetCore.Server.Kestrel.Core.KestrelServerImpl.<>c__DisplayClass28_0`1.<<StartAsync>g__OnBind|0>d.MoveNext()
+--- End of stack trace from previous location ---
+   at Microsoft.AspNetCore.Server.Kestrel.Core.Internal.AddressBinder.BindEndpointAsync(ListenOptions endpoint, AddressBindContext context, CancellationToken cancellationToken)
+   --- End of inner exception stack trace ---
+   at Microsoft.AspNetCore.Server.Kestrel.Core.Internal.AddressBinder.BindEndpointAsync(ListenOptions endpoint, AddressBindContext context, CancellationToken cancellationToken)
+   at Microsoft.AspNetCore.Server.Kestrel.Core.LocalhostListenOptions.BindAsync(AddressBindContext context, CancellationToken cancellationToken)
+   at Microsoft.AspNetCore.Server.Kestrel.Core.Internal.AddressBinder.AddressesStrategy.BindAsync(AddressBindContext context, CancellationToken cancellationToken)
+   at Microsoft.AspNetCore.Server.Kestrel.Core.KestrelServerImpl.BindAsync(CancellationToken cancellationToken)
+   at Microsoft.AspNetCore.Server.Kestrel.Core.KestrelServerImpl.StartAsync[TContext](IHttpApplication`1 application, CancellationToken cancellationToken)
+   at Microsoft.AspNetCore.Hosting.GenericWebHostService.StartAsync(CancellationToken cancellationToken)
+   at Microsoft.Extensions.Hosting.Internal.Host.<StartAsync>b__14_1(IHostedService service, CancellationToken token)
+   at Microsoft.Extensions.Hosting.Internal.Host.ForeachService[T](IEnumerable`1 services, CancellationToken token, Boolean concurrent, Boolean abortOnFirstException, List`1 exceptions, Func`3 operation)
+2025-07-14 08:21:46.385 -05:00 [WRN] Sensitive data logging is enabled. Log entries and exception messages may include sensitive application data; this mode should only be enabled during development.
+2025-07-14 08:21:46.441 -05:00 [INF] warn: 14/07/2025 08:21:46.440 CoreEventId.SensitiveDataLoggingEnabledWarning[10400] (Microsoft.EntityFrameworkCore.Infrastructure) 
+      Sensitive data logging is enabled. Log entries and exception messages may include sensitive application data; this mode should only be enabled during development.
+2025-07-14 08:21:48.057 -05:00 [INF] Executed DbCommand (23ms) [Parameters=[@__normalizedName_0='ADMIN' (Size = 256)], CommandType='"Text"', CommandTimeout='30']
+SELECT TOP(1) [a].[Id], [a].[ConcurrencyStamp], [a].[Name], [a].[NormalizedName]
+FROM [AspNetRoles] AS [a]
+WHERE [a].[NormalizedName] = @__normalizedName_0
+2025-07-14 08:21:48.063 -05:00 [INF] info: 14/07/2025 08:21:48.063 RelationalEventId.CommandExecuted[20101] (Microsoft.EntityFrameworkCore.Database.Command) 
+      Executed DbCommand (23ms) [Parameters=[@__normalizedName_0='ADMIN' (Size = 256)], CommandType='Text', CommandTimeout='30']
+      SELECT TOP(1) [a].[Id], [a].[ConcurrencyStamp], [a].[Name], [a].[NormalizedName]
+      FROM [AspNetRoles] AS [a]
+      WHERE [a].[NormalizedName] = @__normalizedName_0
+2025-07-14 08:21:48.139 -05:00 [INF] [SeedData] Rol 'Admin' ya existe.
+2025-07-14 08:21:48.147 -05:00 [INF] Executed DbCommand (2ms) [Parameters=[@__normalizedName_0='PLANEADOR' (Size = 256)], CommandType='"Text"', CommandTimeout='30']
+SELECT TOP(1) [a].[Id], [a].[ConcurrencyStamp], [a].[Name], [a].[NormalizedName]
+FROM [AspNetRoles] AS [a]
+WHERE [a].[NormalizedName] = @__normalizedName_0
+2025-07-14 08:21:48.150 -05:00 [INF] info: 14/07/2025 08:21:48.150 RelationalEventId.CommandExecuted[20101] (Microsoft.EntityFrameworkCore.Database.Command) 
+      Executed DbCommand (2ms) [Parameters=[@__normalizedName_0='PLANEADOR' (Size = 256)], CommandType='Text', CommandTimeout='30']
+      SELECT TOP(1) [a].[Id], [a].[ConcurrencyStamp], [a].[Name], [a].[NormalizedName]
+      FROM [AspNetRoles] AS [a]
+      WHERE [a].[NormalizedName] = @__normalizedName_0
+2025-07-14 08:21:48.151 -05:00 [INF] [SeedData] Rol 'Planeador' ya existe.
+2025-07-14 08:21:48.155 -05:00 [INF] Executed DbCommand (2ms) [Parameters=[@__normalizedName_0='CEF' (Size = 256)], CommandType='"Text"', CommandTimeout='30']
+SELECT TOP(1) [a].[Id], [a].[ConcurrencyStamp], [a].[Name], [a].[NormalizedName]
+FROM [AspNetRoles] AS [a]
+WHERE [a].[NormalizedName] = @__normalizedName_0
+2025-07-14 08:21:48.157 -05:00 [INF] info: 14/07/2025 08:21:48.157 RelationalEventId.CommandExecuted[20101] (Microsoft.EntityFrameworkCore.Database.Command) 
+      Executed DbCommand (2ms) [Parameters=[@__normalizedName_0='CEF' (Size = 256)], CommandType='Text', CommandTimeout='30']
+      SELECT TOP(1) [a].[Id], [a].[ConcurrencyStamp], [a].[Name], [a].[NormalizedName]
+      FROM [AspNetRoles] AS [a]
+      WHERE [a].[NormalizedName] = @__normalizedName_0
+2025-07-14 08:21:48.163 -05:00 [INF] [SeedData] Rol 'CEF' ya existe.
+2025-07-14 08:21:48.166 -05:00 [INF] Executed DbCommand (1ms) [Parameters=[@__normalizedName_0='SUPERVISOR' (Size = 256)], CommandType='"Text"', CommandTimeout='30']
+SELECT TOP(1) [a].[Id], [a].[ConcurrencyStamp], [a].[Name], [a].[NormalizedName]
+FROM [AspNetRoles] AS [a]
+WHERE [a].[NormalizedName] = @__normalizedName_0
+2025-07-14 08:21:48.168 -05:00 [INF] info: 14/07/2025 08:21:48.168 RelationalEventId.CommandExecuted[20101] (Microsoft.EntityFrameworkCore.Database.Command) 
+      Executed DbCommand (1ms) [Parameters=[@__normalizedName_0='SUPERVISOR' (Size = 256)], CommandType='Text', CommandTimeout='30']
+      SELECT TOP(1) [a].[Id], [a].[ConcurrencyStamp], [a].[Name], [a].[NormalizedName]
+      FROM [AspNetRoles] AS [a]
+      WHERE [a].[NormalizedName] = @__normalizedName_0
+2025-07-14 08:21:48.173 -05:00 [INF] [SeedData] Rol 'Supervisor' ya existe.
+2025-07-14 08:21:48.176 -05:00 [INF] Executed DbCommand (1ms) [Parameters=[@__normalizedName_0='ADATM01' (Size = 256)], CommandType='"Text"', CommandTimeout='30']
+SELECT TOP(1) [a].[Id], [a].[ConcurrencyStamp], [a].[Name], [a].[NormalizedName]
+FROM [AspNetRoles] AS [a]
+WHERE [a].[NormalizedName] = @__normalizedName_0
+2025-07-14 08:21:48.178 -05:00 [INF] info: 14/07/2025 08:21:48.178 RelationalEventId.CommandExecuted[20101] (Microsoft.EntityFrameworkCore.Database.Command) 
+      Executed DbCommand (1ms) [Parameters=[@__normalizedName_0='ADATM01' (Size = 256)], CommandType='Text', CommandTimeout='30']
+      SELECT TOP(1) [a].[Id], [a].[ConcurrencyStamp], [a].[Name], [a].[NormalizedName]
+      FROM [AspNetRoles] AS [a]
+      WHERE [a].[NormalizedName] = @__normalizedName_0
+2025-07-14 08:21:48.180 -05:00 [INF] [SeedData] Rol 'ADATM01' ya existe.
+2025-07-14 08:21:48.182 -05:00 [INF] Executed DbCommand (1ms) [Parameters=[@__normalizedName_0='ADCEF01' (Size = 256)], CommandType='"Text"', CommandTimeout='30']
+SELECT TOP(1) [a].[Id], [a].[ConcurrencyStamp], [a].[Name], [a].[NormalizedName]
+FROM [AspNetRoles] AS [a]
+WHERE [a].[NormalizedName] = @__normalizedName_0
+2025-07-14 08:21:48.185 -05:00 [INF] info: 14/07/2025 08:21:48.185 RelationalEventId.CommandExecuted[20101] (Microsoft.EntityFrameworkCore.Database.Command) 
+      Executed DbCommand (1ms) [Parameters=[@__normalizedName_0='ADCEF01' (Size = 256)], CommandType='Text', CommandTimeout='30']
+      SELECT TOP(1) [a].[Id], [a].[ConcurrencyStamp], [a].[Name], [a].[NormalizedName]
+      FROM [AspNetRoles] AS [a]
+      WHERE [a].[NormalizedName] = @__normalizedName_0
+2025-07-14 08:21:48.186 -05:00 [INF] [SeedData] Rol 'ADCEF01' ya existe.
+2025-07-14 08:21:48.193 -05:00 [INF] Executed DbCommand (1ms) [Parameters=[@__normalizedName_0='ADCF01' (Size = 256)], CommandType='"Text"', CommandTimeout='30']
+SELECT TOP(1) [a].[Id], [a].[ConcurrencyStamp], [a].[Name], [a].[NormalizedName]
+FROM [AspNetRoles] AS [a]
+WHERE [a].[NormalizedName] = @__normalizedName_0
+2025-07-14 08:21:48.197 -05:00 [INF] info: 14/07/2025 08:21:48.197 RelationalEventId.CommandExecuted[20101] (Microsoft.EntityFrameworkCore.Database.Command) 
+      Executed DbCommand (1ms) [Parameters=[@__normalizedName_0='ADCF01' (Size = 256)], CommandType='Text', CommandTimeout='30']
+      SELECT TOP(1) [a].[Id], [a].[ConcurrencyStamp], [a].[Name], [a].[NormalizedName]
+      FROM [AspNetRoles] AS [a]
+      WHERE [a].[NormalizedName] = @__normalizedName_0
+2025-07-14 08:21:48.200 -05:00 [INF] [SeedData] Rol 'ADCF01' ya existe.
+2025-07-14 08:21:48.211 -05:00 [INF] Executed DbCommand (2ms) [Parameters=[@__normalizedName_0='ADGRG01' (Size = 256)], CommandType='"Text"', CommandTimeout='30']
+SELECT TOP(1) [a].[Id], [a].[ConcurrencyStamp], [a].[Name], [a].[NormalizedName]
+FROM [AspNetRoles] AS [a]
+WHERE [a].[NormalizedName] = @__normalizedName_0
+2025-07-14 08:21:48.215 -05:00 [INF] info: 14/07/2025 08:21:48.215 RelationalEventId.CommandExecuted[20101] (Microsoft.EntityFrameworkCore.Database.Command) 
+      Executed DbCommand (2ms) [Parameters=[@__normalizedName_0='ADGRG01' (Size = 256)], CommandType='Text', CommandTimeout='30']
+      SELECT TOP(1) [a].[Id], [a].[ConcurrencyStamp], [a].[Name], [a].[NormalizedName]
+      FROM [AspNetRoles] AS [a]
+      WHERE [a].[NormalizedName] = @__normalizedName_0
+2025-07-14 08:21:48.219 -05:00 [INF] [SeedData] Rol 'ADGRG01' ya existe.
+2025-07-14 08:21:48.228 -05:00 [INF] Executed DbCommand (2ms) [Parameters=[@__normalizedName_0='ADMTF01' (Size = 256)], CommandType='"Text"', CommandTimeout='30']
+SELECT TOP(1) [a].[Id], [a].[ConcurrencyStamp], [a].[Name], [a].[NormalizedName]
+FROM [AspNetRoles] AS [a]
+WHERE [a].[NormalizedName] = @__normalizedName_0
+2025-07-14 08:21:48.234 -05:00 [INF] info: 14/07/2025 08:21:48.234 RelationalEventId.CommandExecuted[20101] (Microsoft.EntityFrameworkCore.Database.Command) 
+      Executed DbCommand (2ms) [Parameters=[@__normalizedName_0='ADMTF01' (Size = 256)], CommandType='Text', CommandTimeout='30']
+      SELECT TOP(1) [a].[Id], [a].[ConcurrencyStamp], [a].[Name], [a].[NormalizedName]
+      FROM [AspNetRoles] AS [a]
+      WHERE [a].[NormalizedName] = @__normalizedName_0
+2025-07-14 08:21:48.242 -05:00 [INF] [SeedData] Rol 'ADMTF01' ya existe.
+2025-07-14 08:21:48.253 -05:00 [INF] Executed DbCommand (1ms) [Parameters=[@__normalizedName_0='ADSER01' (Size = 256)], CommandType='"Text"', CommandTimeout='30']
+SELECT TOP(1) [a].[Id], [a].[ConcurrencyStamp], [a].[Name], [a].[NormalizedName]
+FROM [AspNetRoles] AS [a]
+WHERE [a].[NormalizedName] = @__normalizedName_0
+2025-07-14 08:21:48.270 -05:00 [INF] info: 14/07/2025 08:21:48.270 RelationalEventId.CommandExecuted[20101] (Microsoft.EntityFrameworkCore.Database.Command) 
+      Executed DbCommand (1ms) [Parameters=[@__normalizedName_0='ADSER01' (Size = 256)], CommandType='Text', CommandTimeout='30']
+      SELECT TOP(1) [a].[Id], [a].[ConcurrencyStamp], [a].[Name], [a].[NormalizedName]
+      FROM [AspNetRoles] AS [a]
+      WHERE [a].[NormalizedName] = @__normalizedName_0
+2025-07-14 08:21:48.284 -05:00 [INF] [SeedData] Rol 'ADSER01' ya existe.
+2025-07-14 08:21:48.290 -05:00 [INF] Executed DbCommand (2ms) [Parameters=[@__normalizedName_0='ADSER02' (Size = 256)], CommandType='"Text"', CommandTimeout='30']
+SELECT TOP(1) [a].[Id], [a].[ConcurrencyStamp], [a].[Name], [a].[NormalizedName]
+FROM [AspNetRoles] AS [a]
+WHERE [a].[NormalizedName] = @__normalizedName_0
+2025-07-14 08:21:48.298 -05:00 [INF] info: 14/07/2025 08:21:48.298 RelationalEventId.CommandExecuted[20101] (Microsoft.EntityFrameworkCore.Database.Command) 
+      Executed DbCommand (2ms) [Parameters=[@__normalizedName_0='ADSER02' (Size = 256)], CommandType='Text', CommandTimeout='30']
+      SELECT TOP(1) [a].[Id], [a].[ConcurrencyStamp], [a].[Name], [a].[NormalizedName]
+      FROM [AspNetRoles] AS [a]
+      WHERE [a].[NormalizedName] = @__normalizedName_0
+2025-07-14 08:21:48.306 -05:00 [INF] [SeedData] Rol 'ADSER02' ya existe.
+2025-07-14 08:21:48.318 -05:00 [INF] Executed DbCommand (1ms) [Parameters=[@__normalizedName_0='ADTH01' (Size = 256)], CommandType='"Text"', CommandTimeout='30']
+SELECT TOP(1) [a].[Id], [a].[ConcurrencyStamp], [a].[Name], [a].[NormalizedName]
+FROM [AspNetRoles] AS [a]
+WHERE [a].[NormalizedName] = @__normalizedName_0
+2025-07-14 08:21:48.333 -05:00 [INF] info: 14/07/2025 08:21:48.333 RelationalEventId.CommandExecuted[20101] (Microsoft.EntityFrameworkCore.Database.Command) 
+      Executed DbCommand (1ms) [Parameters=[@__normalizedName_0='ADTH01' (Size = 256)], CommandType='Text', CommandTimeout='30']
+      SELECT TOP(1) [a].[Id], [a].[ConcurrencyStamp], [a].[Name], [a].[NormalizedName]
+      FROM [AspNetRoles] AS [a]
+      WHERE [a].[NormalizedName] = @__normalizedName_0
+2025-07-14 08:21:48.342 -05:00 [INF] [SeedData] Rol 'ADTH01' ya existe.
+2025-07-14 08:21:48.347 -05:00 [INF] Executed DbCommand (2ms) [Parameters=[@__normalizedName_0='ADTI01' (Size = 256)], CommandType='"Text"', CommandTimeout='30']
+SELECT TOP(1) [a].[Id], [a].[ConcurrencyStamp], [a].[Name], [a].[NormalizedName]
+FROM [AspNetRoles] AS [a]
+WHERE [a].[NormalizedName] = @__normalizedName_0
+2025-07-14 08:21:48.382 -05:00 [INF] info: 14/07/2025 08:21:48.382 RelationalEventId.CommandExecuted[20101] (Microsoft.EntityFrameworkCore.Database.Command) 
+      Executed DbCommand (2ms) [Parameters=[@__normalizedName_0='ADTI01' (Size = 256)], CommandType='Text', CommandTimeout='30']
+      SELECT TOP(1) [a].[Id], [a].[ConcurrencyStamp], [a].[Name], [a].[NormalizedName]
+      FROM [AspNetRoles] AS [a]
+      WHERE [a].[NormalizedName] = @__normalizedName_0
+2025-07-14 08:21:48.406 -05:00 [INF] [SeedData] Rol 'ADTI01' ya existe.
+2025-07-14 08:21:48.411 -05:00 [INF] Executed DbCommand (1ms) [Parameters=[@__normalizedName_0='COCEF01' (Size = 256)], CommandType='"Text"', CommandTimeout='30']
+SELECT TOP(1) [a].[Id], [a].[ConcurrencyStamp], [a].[Name], [a].[NormalizedName]
+FROM [AspNetRoles] AS [a]
+WHERE [a].[NormalizedName] = @__normalizedName_0
+2025-07-14 08:21:48.427 -05:00 [INF] info: 14/07/2025 08:21:48.427 RelationalEventId.CommandExecuted[20101] (Microsoft.EntityFrameworkCore.Database.Command) 
+      Executed DbCommand (1ms) [Parameters=[@__normalizedName_0='COCEF01' (Size = 256)], CommandType='Text', CommandTimeout='30']
+      SELECT TOP(1) [a].[Id], [a].[ConcurrencyStamp], [a].[Name], [a].[NormalizedName]
+      FROM [AspNetRoles] AS [a]
+      WHERE [a].[NormalizedName] = @__normalizedName_0
+2025-07-14 08:21:48.435 -05:00 [INF] [SeedData] Rol 'COCEF01' ya existe.
+2025-07-14 08:21:48.439 -05:00 [INF] Executed DbCommand (2ms) [Parameters=[@__normalizedName_0='COSTV01' (Size = 256)], CommandType='"Text"', CommandTimeout='30']
+SELECT TOP(1) [a].[Id], [a].[ConcurrencyStamp], [a].[Name], [a].[NormalizedName]
+FROM [AspNetRoles] AS [a]
+WHERE [a].[NormalizedName] = @__normalizedName_0
+2025-07-14 08:21:48.450 -05:00 [INF] info: 14/07/2025 08:21:48.450 RelationalEventId.CommandExecuted[20101] (Microsoft.EntityFrameworkCore.Database.Command) 
+      Executed DbCommand (2ms) [Parameters=[@__normalizedName_0='COSTV01' (Size = 256)], CommandType='Text', CommandTimeout='30']
+      SELECT TOP(1) [a].[Id], [a].[ConcurrencyStamp], [a].[Name], [a].[NormalizedName]
+      FROM [AspNetRoles] AS [a]
+      WHERE [a].[NormalizedName] = @__normalizedName_0
+2025-07-14 08:21:48.453 -05:00 [INF] [SeedData] Rol 'COSTV01' ya existe.
+2025-07-14 08:21:48.459 -05:00 [INF] Executed DbCommand (1ms) [Parameters=[@__normalizedName_0='GRSER001' (Size = 256)], CommandType='"Text"', CommandTimeout='30']
+SELECT TOP(1) [a].[Id], [a].[ConcurrencyStamp], [a].[Name], [a].[NormalizedName]
+FROM [AspNetRoles] AS [a]
+WHERE [a].[NormalizedName] = @__normalizedName_0
+2025-07-14 08:21:48.465 -05:00 [INF] info: 14/07/2025 08:21:48.465 RelationalEventId.CommandExecuted[20101] (Microsoft.EntityFrameworkCore.Database.Command) 
+      Executed DbCommand (1ms) [Parameters=[@__normalizedName_0='GRSER001' (Size = 256)], CommandType='Text', CommandTimeout='30']
+      SELECT TOP(1) [a].[Id], [a].[ConcurrencyStamp], [a].[Name], [a].[NormalizedName]
+      FROM [AspNetRoles] AS [a]
+      WHERE [a].[NormalizedName] = @__normalizedName_0
+2025-07-14 08:21:48.467 -05:00 [INF] [SeedData] Rol 'GRSER001' ya existe.
+2025-07-14 08:21:48.471 -05:00 [INF] Executed DbCommand (2ms) [Parameters=[@__normalizedName_0='SUPTV01' (Size = 256)], CommandType='"Text"', CommandTimeout='30']
+SELECT TOP(1) [a].[Id], [a].[ConcurrencyStamp], [a].[Name], [a].[NormalizedName]
+FROM [AspNetRoles] AS [a]
+WHERE [a].[NormalizedName] = @__normalizedName_0
+2025-07-14 08:21:48.480 -05:00 [INF] info: 14/07/2025 08:21:48.480 RelationalEventId.CommandExecuted[20101] (Microsoft.EntityFrameworkCore.Database.Command) 
+      Executed DbCommand (2ms) [Parameters=[@__normalizedName_0='SUPTV01' (Size = 256)], CommandType='Text', CommandTimeout='30']
+      SELECT TOP(1) [a].[Id], [a].[ConcurrencyStamp], [a].[Name], [a].[NormalizedName]
+      FROM [AspNetRoles] AS [a]
+      WHERE [a].[NormalizedName] = @__normalizedName_0
+2025-07-14 08:21:48.483 -05:00 [INF] [SeedData] Rol 'SUPTV01' ya existe.
+2025-07-14 08:21:48.487 -05:00 [INF] Executed DbCommand (2ms) [Parameters=[@__normalizedName_0='SEGURIDAD' (Size = 256)], CommandType='"Text"', CommandTimeout='30']
+SELECT TOP(1) [a].[Id], [a].[ConcurrencyStamp], [a].[Name], [a].[NormalizedName]
+FROM [AspNetRoles] AS [a]
+WHERE [a].[NormalizedName] = @__normalizedName_0
+2025-07-14 08:21:48.497 -05:00 [INF] info: 14/07/2025 08:21:48.497 RelationalEventId.CommandExecuted[20101] (Microsoft.EntityFrameworkCore.Database.Command) 
+      Executed DbCommand (2ms) [Parameters=[@__normalizedName_0='SEGURIDAD' (Size = 256)], CommandType='Text', CommandTimeout='30']
+      SELECT TOP(1) [a].[Id], [a].[ConcurrencyStamp], [a].[Name], [a].[NormalizedName]
+      FROM [AspNetRoles] AS [a]
+      WHERE [a].[NormalizedName] = @__normalizedName_0
+2025-07-14 08:21:48.502 -05:00 [INF] [SeedData] Rol 'Seguridad' ya existe.
+2025-07-14 08:21:48.527 -05:00 [INF] Executed DbCommand (1ms) [Parameters=[@__normalizedUserName_0='ADMINVCASH' (Size = 256)], CommandType='"Text"', CommandTimeout='30']
+SELECT TOP(1) [a].[Id], [a].[AccessFailedCount], [a].[ConcurrencyStamp], [a].[Email], [a].[EmailConfirmed], [a].[LockoutEnabled], [a].[LockoutEnd], [a].[NombreUsuario], [a].[NormalizedEmail], [a].[NormalizedUserName], [a].[PasswordHash], [a].[PhoneNumber], [a].[PhoneNumberConfirmed], [a].[SecurityStamp], [a].[TwoFactorEnabled], [a].[UserName]
+FROM [AspNetUsers] AS [a]
+WHERE [a].[NormalizedUserName] = @__normalizedUserName_0
+2025-07-14 08:21:48.532 -05:00 [INF] info: 14/07/2025 08:21:48.532 RelationalEventId.CommandExecuted[20101] (Microsoft.EntityFrameworkCore.Database.Command) 
+      Executed DbCommand (1ms) [Parameters=[@__normalizedUserName_0='ADMINVCASH' (Size = 256)], CommandType='Text', CommandTimeout='30']
+      SELECT TOP(1) [a].[Id], [a].[AccessFailedCount], [a].[ConcurrencyStamp], [a].[Email], [a].[EmailConfirmed], [a].[LockoutEnabled], [a].[LockoutEnd], [a].[NombreUsuario], [a].[NormalizedEmail], [a].[NormalizedUserName], [a].[PasswordHash], [a].[PhoneNumber], [a].[PhoneNumberConfirmed], [a].[SecurityStamp], [a].[TwoFactorEnabled], [a].[UserName]
+      FROM [AspNetUsers] AS [a]
+      WHERE [a].[NormalizedUserName] = @__normalizedUserName_0
+2025-07-14 08:21:48.605 -05:00 [INF] [SeedData] Usuario 'adminvcash' ya existe.
+2025-07-14 08:21:48.609 -05:00 [INF] Executed DbCommand (2ms) [Parameters=[@__normalizedUserName_0='PLANEADOR1' (Size = 256)], CommandType='"Text"', CommandTimeout='30']
+SELECT TOP(1) [a].[Id], [a].[AccessFailedCount], [a].[ConcurrencyStamp], [a].[Email], [a].[EmailConfirmed], [a].[LockoutEnabled], [a].[LockoutEnd], [a].[NombreUsuario], [a].[NormalizedEmail], [a].[NormalizedUserName], [a].[PasswordHash], [a].[PhoneNumber], [a].[PhoneNumberConfirmed], [a].[SecurityStamp], [a].[TwoFactorEnabled], [a].[UserName]
+FROM [AspNetUsers] AS [a]
+WHERE [a].[NormalizedUserName] = @__normalizedUserName_0
+2025-07-14 08:21:48.614 -05:00 [INF] info: 14/07/2025 08:21:48.614 RelationalEventId.CommandExecuted[20101] (Microsoft.EntityFrameworkCore.Database.Command) 
+      Executed DbCommand (2ms) [Parameters=[@__normalizedUserName_0='PLANEADOR1' (Size = 256)], CommandType='Text', CommandTimeout='30']
+      SELECT TOP(1) [a].[Id], [a].[AccessFailedCount], [a].[ConcurrencyStamp], [a].[Email], [a].[EmailConfirmed], [a].[LockoutEnabled], [a].[LockoutEnd], [a].[NombreUsuario], [a].[NormalizedEmail], [a].[NormalizedUserName], [a].[PasswordHash], [a].[PhoneNumber], [a].[PhoneNumberConfirmed], [a].[SecurityStamp], [a].[TwoFactorEnabled], [a].[UserName]
+      FROM [AspNetUsers] AS [a]
+      WHERE [a].[NormalizedUserName] = @__normalizedUserName_0
+2025-07-14 08:21:48.617 -05:00 [INF] [SeedData] Usuario 'planeador1' ya existe.
+2025-07-14 08:21:48.620 -05:00 [INF] Executed DbCommand (2ms) [Parameters=[@__normalizedUserName_0='PLANEADOR2' (Size = 256)], CommandType='"Text"', CommandTimeout='30']
+SELECT TOP(1) [a].[Id], [a].[AccessFailedCount], [a].[ConcurrencyStamp], [a].[Email], [a].[EmailConfirmed], [a].[LockoutEnabled], [a].[LockoutEnd], [a].[NombreUsuario], [a].[NormalizedEmail], [a].[NormalizedUserName], [a].[PasswordHash], [a].[PhoneNumber], [a].[PhoneNumberConfirmed], [a].[SecurityStamp], [a].[TwoFactorEnabled], [a].[UserName]
+FROM [AspNetUsers] AS [a]
+WHERE [a].[NormalizedUserName] = @__normalizedUserName_0
+2025-07-14 08:21:48.630 -05:00 [INF] info: 14/07/2025 08:21:48.630 RelationalEventId.CommandExecuted[20101] (Microsoft.EntityFrameworkCore.Database.Command) 
+      Executed DbCommand (2ms) [Parameters=[@__normalizedUserName_0='PLANEADOR2' (Size = 256)], CommandType='Text', CommandTimeout='30']
+      SELECT TOP(1) [a].[Id], [a].[AccessFailedCount], [a].[ConcurrencyStamp], [a].[Email], [a].[EmailConfirmed], [a].[LockoutEnabled], [a].[LockoutEnd], [a].[NombreUsuario], [a].[NormalizedEmail], [a].[NormalizedUserName], [a].[PasswordHash], [a].[PhoneNumber], [a].[PhoneNumberConfirmed], [a].[SecurityStamp], [a].[TwoFactorEnabled], [a].[UserName]
+      FROM [AspNetUsers] AS [a]
+      WHERE [a].[NormalizedUserName] = @__normalizedUserName_0
+2025-07-14 08:21:48.633 -05:00 [INF] [SeedData] Usuario 'planeador2' ya existe.
+2025-07-14 08:21:48.645 -05:00 [INF] Executed DbCommand (2ms) [Parameters=[@__normalizedUserName_0='CEF1' (Size = 256)], CommandType='"Text"', CommandTimeout='30']
+SELECT TOP(1) [a].[Id], [a].[AccessFailedCount], [a].[ConcurrencyStamp], [a].[Email], [a].[EmailConfirmed], [a].[LockoutEnabled], [a].[LockoutEnd], [a].[NombreUsuario], [a].[NormalizedEmail], [a].[NormalizedUserName], [a].[PasswordHash], [a].[PhoneNumber], [a].[PhoneNumberConfirmed], [a].[SecurityStamp], [a].[TwoFactorEnabled], [a].[UserName]
+FROM [AspNetUsers] AS [a]
+WHERE [a].[NormalizedUserName] = @__normalizedUserName_0
+2025-07-14 08:21:48.650 -05:00 [INF] info: 14/07/2025 08:21:48.650 RelationalEventId.CommandExecuted[20101] (Microsoft.EntityFrameworkCore.Database.Command) 
+      Executed DbCommand (2ms) [Parameters=[@__normalizedUserName_0='CEF1' (Size = 256)], CommandType='Text', CommandTimeout='30']
+      SELECT TOP(1) [a].[Id], [a].[AccessFailedCount], [a].[ConcurrencyStamp], [a].[Email], [a].[EmailConfirmed], [a].[LockoutEnabled], [a].[LockoutEnd], [a].[NombreUsuario], [a].[NormalizedEmail], [a].[NormalizedUserName], [a].[PasswordHash], [a].[PhoneNumber], [a].[PhoneNumberConfirmed], [a].[SecurityStamp], [a].[TwoFactorEnabled], [a].[UserName]
+      FROM [AspNetUsers] AS [a]
+      WHERE [a].[NormalizedUserName] = @__normalizedUserName_0
+2025-07-14 08:21:48.657 -05:00 [INF] [SeedData] Usuario 'cef1' ya existe.
+2025-07-14 08:21:48.667 -05:00 [INF] Executed DbCommand (2ms) [Parameters=[@__normalizedUserName_0='SUPERVISOR1' (Size = 256)], CommandType='"Text"', CommandTimeout='30']
+SELECT TOP(1) [a].[Id], [a].[AccessFailedCount], [a].[ConcurrencyStamp], [a].[Email], [a].[EmailConfirmed], [a].[LockoutEnabled], [a].[LockoutEnd], [a].[NombreUsuario], [a].[NormalizedEmail], [a].[NormalizedUserName], [a].[PasswordHash], [a].[PhoneNumber], [a].[PhoneNumberConfirmed], [a].[SecurityStamp], [a].[TwoFactorEnabled], [a].[UserName]
+FROM [AspNetUsers] AS [a]
+WHERE [a].[NormalizedUserName] = @__normalizedUserName_0
+2025-07-14 08:21:48.680 -05:00 [INF] info: 14/07/2025 08:21:48.680 RelationalEventId.CommandExecuted[20101] (Microsoft.EntityFrameworkCore.Database.Command) 
+      Executed DbCommand (2ms) [Parameters=[@__normalizedUserName_0='SUPERVISOR1' (Size = 256)], CommandType='Text', CommandTimeout='30']
+      SELECT TOP(1) [a].[Id], [a].[AccessFailedCount], [a].[ConcurrencyStamp], [a].[Email], [a].[EmailConfirmed], [a].[LockoutEnabled], [a].[LockoutEnd], [a].[NombreUsuario], [a].[NormalizedEmail], [a].[NormalizedUserName], [a].[PasswordHash], [a].[PhoneNumber], [a].[PhoneNumberConfirmed], [a].[SecurityStamp], [a].[TwoFactorEnabled], [a].[UserName]
+      FROM [AspNetUsers] AS [a]
+      WHERE [a].[NormalizedUserName] = @__normalizedUserName_0
+2025-07-14 08:21:48.684 -05:00 [INF] [SeedData] Usuario 'supervisor1' ya existe.
+2025-07-14 08:21:48.687 -05:00 [INF] Executed DbCommand (2ms) [Parameters=[@__normalizedUserName_0='SUPERVISOR2' (Size = 256)], CommandType='"Text"', CommandTimeout='30']
+SELECT TOP(1) [a].[Id], [a].[AccessFailedCount], [a].[ConcurrencyStamp], [a].[Email], [a].[EmailConfirmed], [a].[LockoutEnabled], [a].[LockoutEnd], [a].[NombreUsuario], [a].[NormalizedEmail], [a].[NormalizedUserName], [a].[PasswordHash], [a].[PhoneNumber], [a].[PhoneNumberConfirmed], [a].[SecurityStamp], [a].[TwoFactorEnabled], [a].[UserName]
+FROM [AspNetUsers] AS [a]
+WHERE [a].[NormalizedUserName] = @__normalizedUserName_0
+2025-07-14 08:21:48.698 -05:00 [INF] info: 14/07/2025 08:21:48.698 RelationalEventId.CommandExecuted[20101] (Microsoft.EntityFrameworkCore.Database.Command) 
+      Executed DbCommand (2ms) [Parameters=[@__normalizedUserName_0='SUPERVISOR2' (Size = 256)], CommandType='Text', CommandTimeout='30']
+      SELECT TOP(1) [a].[Id], [a].[AccessFailedCount], [a].[ConcurrencyStamp], [a].[Email], [a].[EmailConfirmed], [a].[LockoutEnabled], [a].[LockoutEnd], [a].[NombreUsuario], [a].[NormalizedEmail], [a].[NormalizedUserName], [a].[PasswordHash], [a].[PhoneNumber], [a].[PhoneNumberConfirmed], [a].[SecurityStamp], [a].[TwoFactorEnabled], [a].[UserName]
+      FROM [AspNetUsers] AS [a]
+      WHERE [a].[NormalizedUserName] = @__normalizedUserName_0
+2025-07-14 08:21:48.710 -05:00 [INF] [SeedData] Usuario 'supervisor2' ya existe.
+2025-07-14 08:21:48.713 -05:00 [INF] Executed DbCommand (2ms) [Parameters=[@__normalizedUserName_0='SEGURIDAD1' (Size = 256)], CommandType='"Text"', CommandTimeout='30']
+SELECT TOP(1) [a].[Id], [a].[AccessFailedCount], [a].[ConcurrencyStamp], [a].[Email], [a].[EmailConfirmed], [a].[LockoutEnabled], [a].[LockoutEnd], [a].[NombreUsuario], [a].[NormalizedEmail], [a].[NormalizedUserName], [a].[PasswordHash], [a].[PhoneNumber], [a].[PhoneNumberConfirmed], [a].[SecurityStamp], [a].[TwoFactorEnabled], [a].[UserName]
+FROM [AspNetUsers] AS [a]
+WHERE [a].[NormalizedUserName] = @__normalizedUserName_0
+2025-07-14 08:21:48.717 -05:00 [INF] info: 14/07/2025 08:21:48.717 RelationalEventId.CommandExecuted[20101] (Microsoft.EntityFrameworkCore.Database.Command) 
+      Executed DbCommand (2ms) [Parameters=[@__normalizedUserName_0='SEGURIDAD1' (Size = 256)], CommandType='Text', CommandTimeout='30']
+      SELECT TOP(1) [a].[Id], [a].[AccessFailedCount], [a].[ConcurrencyStamp], [a].[Email], [a].[EmailConfirmed], [a].[LockoutEnabled], [a].[LockoutEnd], [a].[NombreUsuario], [a].[NormalizedEmail], [a].[NormalizedUserName], [a].[PasswordHash], [a].[PhoneNumber], [a].[PhoneNumberConfirmed], [a].[SecurityStamp], [a].[TwoFactorEnabled], [a].[UserName]
+      FROM [AspNetUsers] AS [a]
+      WHERE [a].[NormalizedUserName] = @__normalizedUserName_0
+2025-07-14 08:21:48.730 -05:00 [INF] [SeedData] Usuario 'seguridad1' ya existe.
+2025-07-14 08:21:48.734 -05:00 [INF] Executed DbCommand (2ms) [Parameters=[@__normalizedUserName_0='SUPERVISORSEGURIDAD' (Size = 256)], CommandType='"Text"', CommandTimeout='30']
+SELECT TOP(1) [a].[Id], [a].[AccessFailedCount], [a].[ConcurrencyStamp], [a].[Email], [a].[EmailConfirmed], [a].[LockoutEnabled], [a].[LockoutEnd], [a].[NombreUsuario], [a].[NormalizedEmail], [a].[NormalizedUserName], [a].[PasswordHash], [a].[PhoneNumber], [a].[PhoneNumberConfirmed], [a].[SecurityStamp], [a].[TwoFactorEnabled], [a].[UserName]
+FROM [AspNetUsers] AS [a]
+WHERE [a].[NormalizedUserName] = @__normalizedUserName_0
+2025-07-14 08:21:48.741 -05:00 [INF] info: 14/07/2025 08:21:48.741 RelationalEventId.CommandExecuted[20101] (Microsoft.EntityFrameworkCore.Database.Command) 
+      Executed DbCommand (2ms) [Parameters=[@__normalizedUserName_0='SUPERVISORSEGURIDAD' (Size = 256)], CommandType='Text', CommandTimeout='30']
+      SELECT TOP(1) [a].[Id], [a].[AccessFailedCount], [a].[ConcurrencyStamp], [a].[Email], [a].[EmailConfirmed], [a].[LockoutEnabled], [a].[LockoutEnd], [a].[NombreUsuario], [a].[NormalizedEmail], [a].[NormalizedUserName], [a].[PasswordHash], [a].[PhoneNumber], [a].[PhoneNumberConfirmed], [a].[SecurityStamp], [a].[TwoFactorEnabled], [a].[UserName]
+      FROM [AspNetUsers] AS [a]
+      WHERE [a].[NormalizedUserName] = @__normalizedUserName_0
+2025-07-14 08:21:48.750 -05:00 [INF] [SeedData] Usuario 'supervisorSeguridad' ya existe.
+2025-07-14 08:21:48.756 -05:00 [INF] [SeedData] Iniciando seeding de permisos por sucursal...
+2025-07-14 08:21:48.772 -05:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT TOP(1) [a].[CodSucursal], [a].[CoSucursal], [a].[CodBancoRepublica], [a].[Estado], [a].[LatitudSucursal], [a].[LongitudSucursal], [a].[NombreSucursal], [a].[SiglasSucursal]
+FROM [AdmSucursales] AS [a]
+WHERE [a].[CodSucursal] = 1
+2025-07-14 08:21:48.784 -05:00 [INF] info: 14/07/2025 08:21:48.784 RelationalEventId.CommandExecuted[20101] (Microsoft.EntityFrameworkCore.Database.Command) 
+      Executed DbCommand (1ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT TOP(1) [a].[CodSucursal], [a].[CoSucursal], [a].[CodBancoRepublica], [a].[Estado], [a].[LatitudSucursal], [a].[LongitudSucursal], [a].[NombreSucursal], [a].[SiglasSucursal]
+      FROM [AdmSucursales] AS [a]
+      WHERE [a].[CodSucursal] = 1
+2025-07-14 08:21:48.845 -05:00 [INF] Executed DbCommand (1ms) [Parameters=[], CommandType='"Text"', CommandTimeout='30']
+SELECT TOP(1) [a].[CodSucursal], [a].[CoSucursal], [a].[CodBancoRepublica], [a].[Estado], [a].[LatitudSucursal], [a].[LongitudSucursal], [a].[NombreSucursal], [a].[SiglasSucursal]
+FROM [AdmSucursales] AS [a]
+WHERE [a].[CodSucursal] = 2
+2025-07-14 08:21:48.850 -05:00 [INF] info: 14/07/2025 08:21:48.850 RelationalEventId.CommandExecuted[20101] (Microsoft.EntityFrameworkCore.Database.Command) 
+      Executed DbCommand (1ms) [Parameters=[], CommandType='Text', CommandTimeout='30']
+      SELECT TOP(1) [a].[CodSucursal], [a].[CoSucursal], [a].[CodBancoRepublica], [a].[Estado], [a].[LatitudSucursal], [a].[LongitudSucursal], [a].[NombreSucursal], [a].[SiglasSucursal]
+      FROM [AdmSucursales] AS [a]
+      WHERE [a].[CodSucursal] = 2
+2025-07-14 08:21:48.857 -05:00 [INF] Executed DbCommand (2ms) [Parameters=[@__normalizedUserName_0='PLANEADOR1' (Size = 256)], CommandType='"Text"', CommandTimeout='30']
+SELECT TOP(1) [a].[Id], [a].[AccessFailedCount], [a].[ConcurrencyStamp], [a].[Email], [a].[EmailConfirmed], [a].[LockoutEnabled], [a].[LockoutEnd], [a].[NombreUsuario], [a].[NormalizedEmail], [a].[NormalizedUserName], [a].[PasswordHash], [a].[PhoneNumber], [a].[PhoneNumberConfirmed], [a].[SecurityStamp], [a].[TwoFactorEnabled], [a].[UserName]
+FROM [AspNetUsers] AS [a]
+WHERE [a].[NormalizedUserName] = @__normalizedUserName_0
+2025-07-14 08:21:48.860 -05:00 [INF] info: 14/07/2025 08:21:48.860 RelationalEventId.CommandExecuted[20101] (Microsoft.EntityFrameworkCore.Database.Command) 
+      Executed DbCommand (2ms) [Parameters=[@__normalizedUserName_0='PLANEADOR1' (Size = 256)], CommandType='Text', CommandTimeout='30']
+      SELECT TOP(1) [a].[Id], [a].[AccessFailedCount], [a].[ConcurrencyStamp], [a].[Email], [a].[EmailConfirmed], [a].[LockoutEnabled], [a].[LockoutEnd], [a].[NombreUsuario], [a].[NormalizedEmail], [a].[NormalizedUserName], [a].[PasswordHash], [a].[PhoneNumber], [a].[PhoneNumberConfirmed], [a].[SecurityStamp], [a].[TwoFactorEnabled], [a].[UserName]
+      FROM [AspNetUsers] AS [a]
+      WHERE [a].[NormalizedUserName] = @__normalizedUserName_0
+2025-07-14 08:21:48.867 -05:00 [INF] Executed DbCommand (2ms) [Parameters=[@__normalizedUserName_0='CEF1' (Size = 256)], CommandType='"Text"', CommandTimeout='30']
+SELECT TOP(1) [a].[Id], [a].[AccessFailedCount], [a].[ConcurrencyStamp], [a].[Email], [a].[EmailConfirmed], [a].[LockoutEnabled], [a].[LockoutEnd], [a].[NombreUsuario], [a].[NormalizedEmail], [a].[NormalizedUserName], [a].[PasswordHash], [a].[PhoneNumber], [a].[PhoneNumberConfirmed], [a].[SecurityStamp], [a].[TwoFactorEnabled], [a].[UserName]
+FROM [AspNetUsers] AS [a]
+WHERE [a].[NormalizedUserName] = @__normalizedUserName_0
+2025-07-14 08:21:48.878 -05:00 [INF] info: 14/07/2025 08:21:48.878 RelationalEventId.CommandExecuted[20101] (Microsoft.EntityFrameworkCore.Database.Command) 
+      Executed DbCommand (2ms) [Parameters=[@__normalizedUserName_0='CEF1' (Size = 256)], CommandType='Text', CommandTimeout='30']
+      SELECT TOP(1) [a].[Id], [a].[AccessFailedCount], [a].[ConcurrencyStamp], [a].[Email], [a].[EmailConfirmed], [a].[LockoutEnabled], [a].[LockoutEnd], [a].[NombreUsuario], [a].[NormalizedEmail], [a].[NormalizedUserName], [a].[PasswordHash], [a].[PhoneNumber], [a].[PhoneNumberConfirmed], [a].[SecurityStamp], [a].[TwoFactorEnabled], [a].[UserName]
+      FROM [AspNetUsers] AS [a]
+      WHERE [a].[NormalizedUserName] = @__normalizedUserName_0
+2025-07-14 08:21:48.885 -05:00 [INF] Executed DbCommand (2ms) [Parameters=[@__normalizedUserName_0='SUPERVISOR1' (Size = 256)], CommandType='"Text"', CommandTimeout='30']
+SELECT TOP(1) [a].[Id], [a].[AccessFailedCount], [a].[ConcurrencyStamp], [a].[Email], [a].[EmailConfirmed], [a].[LockoutEnabled], [a].[LockoutEnd], [a].[NombreUsuario], [a].[NormalizedEmail], [a].[NormalizedUserName], [a].[PasswordHash], [a].[PhoneNumber], [a].[PhoneNumberConfirmed], [a].[SecurityStamp], [a].[TwoFactorEnabled], [a].[UserName]
+FROM [AspNetUsers] AS [a]
+WHERE [a].[NormalizedUserName] = @__normalizedUserName_0
+2025-07-14 08:21:48.889 -05:00 [INF] info: 14/07/2025 08:21:48.889 RelationalEventId.CommandExecuted[20101] (Microsoft.EntityFrameworkCore.Database.Command) 
+      Executed DbCommand (2ms) [Parameters=[@__normalizedUserName_0='SUPERVISOR1' (Size = 256)], CommandType='Text', CommandTimeout='30']
+      SELECT TOP(1) [a].[Id], [a].[AccessFailedCount], [a].[ConcurrencyStamp], [a].[Email], [a].[EmailConfirmed], [a].[LockoutEnabled], [a].[LockoutEnd], [a].[NombreUsuario], [a].[NormalizedEmail], [a].[NormalizedUserName], [a].[PasswordHash], [a].[PhoneNumber], [a].[PhoneNumberConfirmed], [a].[SecurityStamp], [a].[TwoFactorEnabled], [a].[UserName]
+      FROM [AspNetUsers] AS [a]
+      WHERE [a].[NormalizedUserName] = @__normalizedUserName_0
+2025-07-14 08:21:48.896 -05:00 [INF] Executed DbCommand (2ms) [Parameters=[@__normalizedUserName_0='PLANEADOR2' (Size = 256)], CommandType='"Text"', CommandTimeout='30']
+SELECT TOP(1) [a].[Id], [a].[AccessFailedCount], [a].[ConcurrencyStamp], [a].[Email], [a].[EmailConfirmed], [a].[LockoutEnabled], [a].[LockoutEnd], [a].[NombreUsuario], [a].[NormalizedEmail], [a].[NormalizedUserName], [a].[PasswordHash], [a].[PhoneNumber], [a].[PhoneNumberConfirmed], [a].[SecurityStamp], [a].[TwoFactorEnabled], [a].[UserName]
+FROM [AspNetUsers] AS [a]
+WHERE [a].[NormalizedUserName] = @__normalizedUserName_0
+2025-07-14 08:21:48.908 -05:00 [INF] info: 14/07/2025 08:21:48.908 RelationalEventId.CommandExecuted[20101] (Microsoft.EntityFrameworkCore.Database.Command) 
+      Executed DbCommand (2ms) [Parameters=[@__normalizedUserName_0='PLANEADOR2' (Size = 256)], CommandType='Text', CommandTimeout='30']
+      SELECT TOP(1) [a].[Id], [a].[AccessFailedCount], [a].[ConcurrencyStamp], [a].[Email], [a].[EmailConfirmed], [a].[LockoutEnabled], [a].[LockoutEnd], [a].[NombreUsuario], [a].[NormalizedEmail], [a].[NormalizedUserName], [a].[PasswordHash], [a].[PhoneNumber], [a].[PhoneNumberConfirmed], [a].[SecurityStamp], [a].[TwoFactorEnabled], [a].[UserName]
+      FROM [AspNetUsers] AS [a]
+      WHERE [a].[NormalizedUserName] = @__normalizedUserName_0
+2025-07-14 08:21:48.918 -05:00 [INF] Executed DbCommand (2ms) [Parameters=[@__normalizedUserName_0='SUPERVISOR2' (Size = 256)], CommandType='"Text"', CommandTimeout='30']
+SELECT TOP(1) [a].[Id], [a].[AccessFailedCount], [a].[ConcurrencyStamp], [a].[Email], [a].[EmailConfirmed], [a].[LockoutEnabled], [a].[LockoutEnd], [a].[NombreUsuario], [a].[NormalizedEmail], [a].[NormalizedUserName], [a].[PasswordHash], [a].[PhoneNumber], [a].[PhoneNumberConfirmed], [a].[SecurityStamp], [a].[TwoFactorEnabled], [a].[UserName]
+FROM [AspNetUsers] AS [a]
+WHERE [a].[NormalizedUserName] = @__normalizedUserName_0
+2025-07-14 08:21:48.926 -05:00 [INF] info: 14/07/2025 08:21:48.926 RelationalEventId.CommandExecuted[20101] (Microsoft.EntityFrameworkCore.Database.Command) 
+      Executed DbCommand (2ms) [Parameters=[@__normalizedUserName_0='SUPERVISOR2' (Size = 256)], CommandType='Text', CommandTimeout='30']
+      SELECT TOP(1) [a].[Id], [a].[AccessFailedCount], [a].[ConcurrencyStamp], [a].[Email], [a].[EmailConfirmed], [a].[LockoutEnabled], [a].[LockoutEnd], [a].[NombreUsuario], [a].[NormalizedEmail], [a].[NormalizedUserName], [a].[PasswordHash], [a].[PhoneNumber], [a].[PhoneNumberConfirmed], [a].[SecurityStamp], [a].[TwoFactorEnabled], [a].[UserName]
+      FROM [AspNetUsers] AS [a]
+      WHERE [a].[NormalizedUserName] = @__normalizedUserName_0
+2025-07-14 08:21:48.940 -05:00 [INF] Executed DbCommand (2ms) [Parameters=[@__normalizedUserName_0='SEGURIDAD1' (Size = 256)], CommandType='"Text"', CommandTimeout='30']
+SELECT TOP(1) [a].[Id], [a].[AccessFailedCount], [a].[ConcurrencyStamp], [a].[Email], [a].[EmailConfirmed], [a].[LockoutEnabled], [a].[LockoutEnd], [a].[NombreUsuario], [a].[NormalizedEmail], [a].[NormalizedUserName], [a].[PasswordHash], [a].[PhoneNumber], [a].[PhoneNumberConfirmed], [a].[SecurityStamp], [a].[TwoFactorEnabled], [a].[UserName]
+FROM [AspNetUsers] AS [a]
+WHERE [a].[NormalizedUserName] = @__normalizedUserName_0
+2025-07-14 08:21:48.955 -05:00 [INF] info: 14/07/2025 08:21:48.955 RelationalEventId.CommandExecuted[20101] (Microsoft.EntityFrameworkCore.Database.Command) 
+      Executed DbCommand (2ms) [Parameters=[@__normalizedUserName_0='SEGURIDAD1' (Size = 256)], CommandType='Text', CommandTimeout='30']
+      SELECT TOP(1) [a].[Id], [a].[AccessFailedCount], [a].[ConcurrencyStamp], [a].[Email], [a].[EmailConfirmed], [a].[LockoutEnabled], [a].[LockoutEnd], [a].[NombreUsuario], [a].[NormalizedEmail], [a].[NormalizedUserName], [a].[PasswordHash], [a].[PhoneNumber], [a].[PhoneNumberConfirmed], [a].[SecurityStamp], [a].[TwoFactorEnabled], [a].[UserName]
+      FROM [AspNetUsers] AS [a]
+      WHERE [a].[NormalizedUserName] = @__normalizedUserName_0
+2025-07-14 08:21:48.966 -05:00 [INF] Executed DbCommand (2ms) [Parameters=[@__normalizedUserName_0='SUPERVISORSEGURIDAD' (Size = 256)], CommandType='"Text"', CommandTimeout='30']
+SELECT TOP(1) [a].[Id], [a].[AccessFailedCount], [a].[ConcurrencyStamp], [a].[Email], [a].[EmailConfirmed], [a].[LockoutEnabled], [a].[LockoutEnd], [a].[NombreUsuario], [a].[NormalizedEmail], [a].[NormalizedUserName], [a].[PasswordHash], [a].[PhoneNumber], [a].[PhoneNumberConfirmed], [a].[SecurityStamp], [a].[TwoFactorEnabled], [a].[UserName]
+FROM [AspNetUsers] AS [a]
+WHERE [a].[NormalizedUserName] = @__normalizedUserName_0
+2025-07-14 08:21:48.970 -05:00 [INF] info: 14/07/2025 08:21:48.970 RelationalEventId.CommandExecuted[20101] (Microsoft.EntityFrameworkCore.Database.Command) 
+      Executed DbCommand (2ms) [Parameters=[@__normalizedUserName_0='SUPERVISORSEGURIDAD' (Size = 256)], CommandType='Text', CommandTimeout='30']
+      SELECT TOP(1) [a].[Id], [a].[AccessFailedCount], [a].[ConcurrencyStamp], [a].[Email], [a].[EmailConfirmed], [a].[LockoutEnabled], [a].[LockoutEnd], [a].[NombreUsuario], [a].[NormalizedEmail], [a].[NormalizedUserName], [a].[PasswordHash], [a].[PhoneNumber], [a].[PhoneNumberConfirmed], [a].[SecurityStamp], [a].[TwoFactorEnabled], [a].[UserName]
+      FROM [AspNetUsers] AS [a]
+      WHERE [a].[NormalizedUserName] = @__normalizedUserName_0
+2025-07-14 08:21:49.034 -05:00 [INF] Executed DbCommand (1ms) [Parameters=[@__user_Id_0='c6cbbbbd-5929-45f3-ac9e-c9fc3c706b85' (Size = 450)], CommandType='"Text"', CommandTimeout='30']
+SELECT [a].[Id], [a].[ClaimType], [a].[ClaimValue], [a].[UserId]
+FROM [AspNetUserClaims] AS [a]
+WHERE [a].[UserId] = @__user_Id_0
+2025-07-14 08:21:49.039 -05:00 [INF] info: 14/07/2025 08:21:49.039 RelationalEventId.CommandExecuted[20101] (Microsoft.EntityFrameworkCore.Database.Command) 
+      Executed DbCommand (1ms) [Parameters=[@__user_Id_0='c6cbbbbd-5929-45f3-ac9e-c9fc3c706b85' (Size = 450)], CommandType='Text', CommandTimeout='30']
+      SELECT [a].[Id], [a].[ClaimType], [a].[ClaimValue], [a].[UserId]
+      FROM [AspNetUserClaims] AS [a]
+      WHERE [a].[UserId] = @__user_Id_0
+2025-07-14 08:21:49.058 -05:00 [INF] Executed DbCommand (3ms) [Parameters=[@__user_Id_0='720c6df9-f30a-4c13-b49e-351de513c89a' (Size = 450)], CommandType='"Text"', CommandTimeout='30']
+SELECT [a].[Id], [a].[ClaimType], [a].[ClaimValue], [a].[UserId]
+FROM [AspNetUserClaims] AS [a]
+WHERE [a].[UserId] = @__user_Id_0
+2025-07-14 08:21:49.064 -05:00 [INF] info: 14/07/2025 08:21:49.064 RelationalEventId.CommandExecuted[20101] (Microsoft.EntityFrameworkCore.Database.Command) 
+      Executed DbCommand (3ms) [Parameters=[@__user_Id_0='720c6df9-f30a-4c13-b49e-351de513c89a' (Size = 450)], CommandType='Text', CommandTimeout='30']
+      SELECT [a].[Id], [a].[ClaimType], [a].[ClaimValue], [a].[UserId]
+      FROM [AspNetUserClaims] AS [a]
+      WHERE [a].[UserId] = @__user_Id_0
+2025-07-14 08:21:49.075 -05:00 [INF] Executed DbCommand (2ms) [Parameters=[@__user_Id_0='869aa39c-55e9-4223-bb6f-24159b96bc38' (Size = 450)], CommandType='"Text"', CommandTimeout='30']
+SELECT [a].[Id], [a].[ClaimType], [a].[ClaimValue], [a].[UserId]
+FROM [AspNetUserClaims] AS [a]
+WHERE [a].[UserId] = @__user_Id_0
+2025-07-14 08:21:49.078 -05:00 [INF] info: 14/07/2025 08:21:49.078 RelationalEventId.CommandExecuted[20101] (Microsoft.EntityFrameworkCore.Database.Command) 
+      Executed DbCommand (2ms) [Parameters=[@__user_Id_0='869aa39c-55e9-4223-bb6f-24159b96bc38' (Size = 450)], CommandType='Text', CommandTimeout='30']
+      SELECT [a].[Id], [a].[ClaimType], [a].[ClaimValue], [a].[UserId]
+      FROM [AspNetUserClaims] AS [a]
+      WHERE [a].[UserId] = @__user_Id_0
+2025-07-14 08:21:49.083 -05:00 [INF] Executed DbCommand (1ms) [Parameters=[@__user_Id_0='09915cda-0e40-4cc7-a4ef-16f53018aca6' (Size = 450)], CommandType='"Text"', CommandTimeout='30']
+SELECT [a].[Id], [a].[ClaimType], [a].[ClaimValue], [a].[UserId]
+FROM [AspNetUserClaims] AS [a]
+WHERE [a].[UserId] = @__user_Id_0
+2025-07-14 08:21:49.092 -05:00 [INF] info: 14/07/2025 08:21:49.092 RelationalEventId.CommandExecuted[20101] (Microsoft.EntityFrameworkCore.Database.Command) 
+      Executed DbCommand (1ms) [Parameters=[@__user_Id_0='09915cda-0e40-4cc7-a4ef-16f53018aca6' (Size = 450)], CommandType='Text', CommandTimeout='30']
+      SELECT [a].[Id], [a].[ClaimType], [a].[ClaimValue], [a].[UserId]
+      FROM [AspNetUserClaims] AS [a]
+      WHERE [a].[UserId] = @__user_Id_0
+2025-07-14 08:21:49.097 -05:00 [INF] Executed DbCommand (2ms) [Parameters=[@__user_Id_0='7c984c60-7885-436e-a946-c81a19f7cc47' (Size = 450)], CommandType='"Text"', CommandTimeout='30']
+SELECT [a].[Id], [a].[ClaimType], [a].[ClaimValue], [a].[UserId]
+FROM [AspNetUserClaims] AS [a]
+WHERE [a].[UserId] = @__user_Id_0
+2025-07-14 08:21:49.101 -05:00 [INF] info: 14/07/2025 08:21:49.101 RelationalEventId.CommandExecuted[20101] (Microsoft.EntityFrameworkCore.Database.Command) 
+      Executed DbCommand (2ms) [Parameters=[@__user_Id_0='7c984c60-7885-436e-a946-c81a19f7cc47' (Size = 450)], CommandType='Text', CommandTimeout='30']
+      SELECT [a].[Id], [a].[ClaimType], [a].[ClaimValue], [a].[UserId]
+      FROM [AspNetUserClaims] AS [a]
+      WHERE [a].[UserId] = @__user_Id_0
+2025-07-14 08:21:49.112 -05:00 [INF] Executed DbCommand (1ms) [Parameters=[@__user_Id_0='fba74432-cff7-4e66-8674-c0dd3066c528' (Size = 450)], CommandType='"Text"', CommandTimeout='30']
+SELECT [a].[Id], [a].[ClaimType], [a].[ClaimValue], [a].[UserId]
+FROM [AspNetUserClaims] AS [a]
+WHERE [a].[UserId] = @__user_Id_0
+2025-07-14 08:21:49.116 -05:00 [INF] info: 14/07/2025 08:21:49.116 RelationalEventId.CommandExecuted[20101] (Microsoft.EntityFrameworkCore.Database.Command) 
+      Executed DbCommand (1ms) [Parameters=[@__user_Id_0='fba74432-cff7-4e66-8674-c0dd3066c528' (Size = 450)], CommandType='Text', CommandTimeout='30']
+      SELECT [a].[Id], [a].[ClaimType], [a].[ClaimValue], [a].[UserId]
+      FROM [AspNetUserClaims] AS [a]
+      WHERE [a].[UserId] = @__user_Id_0
+2025-07-14 08:21:49.132 -05:00 [INF] Executed DbCommand (3ms) [Parameters=[@__user_Id_0='004377d2-d1d8-461e-94b8-1ebb5761d708' (Size = 450)], CommandType='"Text"', CommandTimeout='30']
+SELECT [a].[Id], [a].[ClaimType], [a].[ClaimValue], [a].[UserId]
+FROM [AspNetUserClaims] AS [a]
+WHERE [a].[UserId] = @__user_Id_0
+2025-07-14 08:21:49.136 -05:00 [INF] info: 14/07/2025 08:21:49.136 RelationalEventId.CommandExecuted[20101] (Microsoft.EntityFrameworkCore.Database.Command) 
+      Executed DbCommand (3ms) [Parameters=[@__user_Id_0='004377d2-d1d8-461e-94b8-1ebb5761d708' (Size = 450)], CommandType='Text', CommandTimeout='30']
+      SELECT [a].[Id], [a].[ClaimType], [a].[ClaimValue], [a].[UserId]
+      FROM [AspNetUserClaims] AS [a]
+      WHERE [a].[UserId] = @__user_Id_0
+2025-07-14 08:21:49.147 -05:00 [INF] [SeedData] Seeding de permisos por sucursal completado.
+2025-07-14 08:21:49.154 -05:00 [INF] [SeedData] Iniciando seeding de permisos de perfiles y vistas...
+2025-07-14 08:21:49.176 -05:00 [INF] Executed DbCommand (2ms) [Parameters=[@__vistaName_0='RUD' (Size = 50)], CommandType='"Text"', CommandTimeout='30']
+SELECT CASE
+    WHEN EXISTS (
+        SELECT 1
+        FROM [AdmVistas] AS [a]
+        WHERE [a].[CodVista] = @__vistaName_0) THEN CAST(1 AS bit)
+    ELSE CAST(0 AS bit)
+END
+2025-07-14 08:21:49.180 -05:00 [INF] info: 14/07/2025 08:21:49.180 RelationalEventId.CommandExecuted[20101] (Microsoft.EntityFrameworkCore.Database.Command) 
+      Executed DbCommand (2ms) [Parameters=[@__vistaName_0='RUD' (Size = 50)], CommandType='Text', CommandTimeout='30']
+      SELECT CASE
+          WHEN EXISTS (
+              SELECT 1
+              FROM [AdmVistas] AS [a]
+              WHERE [a].[CodVista] = @__vistaName_0) THEN CAST(1 AS bit)
+          ELSE CAST(0 AS bit)
+      END
+2025-07-14 08:21:49.187 -05:00 [INF] Executed DbCommand (2ms) [Parameters=[@__vistaName_0='RUDHIS' (Size = 50)], CommandType='"Text"', CommandTimeout='30']
+SELECT CASE
+    WHEN EXISTS (
+        SELECT 1
+        FROM [AdmVistas] AS [a]
+        WHERE [a].[CodVista] = @__vistaName_0) THEN CAST(1 AS bit)
+    ELSE CAST(0 AS bit)
+END
+2025-07-14 08:21:49.195 -05:00 [INF] info: 14/07/2025 08:21:49.195 RelationalEventId.CommandExecuted[20101] (Microsoft.EntityFrameworkCore.Database.Command) 
+      Executed DbCommand (2ms) [Parameters=[@__vistaName_0='RUDHIS' (Size = 50)], CommandType='Text', CommandTimeout='30']
+      SELECT CASE
+          WHEN EXISTS (
+              SELECT 1
+              FROM [AdmVistas] AS [a]
+              WHERE [a].[CodVista] = @__vistaName_0) THEN CAST(1 AS bit)
+          ELSE CAST(0 AS bit)
+      END
+2025-07-14 08:21:49.201 -05:00 [INF] Executed DbCommand (2ms) [Parameters=[@__vistaName_0='REG' (Size = 50)], CommandType='"Text"', CommandTimeout='30']
+SELECT CASE
+    WHEN EXISTS (
+        SELECT 1
+        FROM [AdmVistas] AS [a]
+        WHERE [a].[CodVista] = @__vistaName_0) THEN CAST(1 AS bit)
+    ELSE CAST(0 AS bit)
+END
+2025-07-14 08:21:49.212 -05:00 [INF] info: 14/07/2025 08:21:49.212 RelationalEventId.CommandExecuted[20101] (Microsoft.EntityFrameworkCore.Database.Command) 
+      Executed DbCommand (2ms) [Parameters=[@__vistaName_0='REG' (Size = 50)], CommandType='Text', CommandTimeout='30']
+      SELECT CASE
+          WHEN EXISTS (
+              SELECT 1
+              FROM [AdmVistas] AS [a]
+              WHERE [a].[CodVista] = @__vistaName_0) THEN CAST(1 AS bit)
+          ELSE CAST(0 AS bit)
+      END
+2025-07-14 08:21:49.217 -05:00 [INF] Executed DbCommand (1ms) [Parameters=[@__vistaName_0='CTY' (Size = 50)], CommandType='"Text"', CommandTimeout='30']
+SELECT CASE
+    WHEN EXISTS (
+        SELECT 1
+        FROM [AdmVistas] AS [a]
+        WHERE [a].[CodVista] = @__vistaName_0) THEN CAST(1 AS bit)
+    ELSE CAST(0 AS bit)
+END
+2025-07-14 08:21:49.221 -05:00 [INF] info: 14/07/2025 08:21:49.221 RelationalEventId.CommandExecuted[20101] (Microsoft.EntityFrameworkCore.Database.Command) 
+      Executed DbCommand (1ms) [Parameters=[@__vistaName_0='CTY' (Size = 50)], CommandType='Text', CommandTimeout='30']
+      SELECT CASE
+          WHEN EXISTS (
+              SELECT 1
+              FROM [AdmVistas] AS [a]
+              WHERE [a].[CodVista] = @__vistaName_0) THEN CAST(1 AS bit)
+          ELSE CAST(0 AS bit)
+      END
+2025-07-14 08:21:49.227 -05:00 [INF] Executed DbCommand (2ms) [Parameters=[@__vistaName_0='SUC' (Size = 50)], CommandType='"Text"', CommandTimeout='30']
+SELECT CASE
+    WHEN EXISTS (
+        SELECT 1
+        FROM [AdmVistas] AS [a]
+        WHERE [a].[CodVista] = @__vistaName_0) THEN CAST(1 AS bit)
+    ELSE CAST(0 AS bit)
+END
+2025-07-14 08:21:49.231 -05:00 [INF] info: 14/07/2025 08:21:49.231 RelationalEventId.CommandExecuted[20101] (Microsoft.EntityFrameworkCore.Database.Command) 
+      Executed DbCommand (2ms) [Parameters=[@__vistaName_0='SUC' (Size = 50)], CommandType='Text', CommandTimeout='30']
+      SELECT CASE
+          WHEN EXISTS (
+              SELECT 1
+              FROM [AdmVistas] AS [a]
+              WHERE [a].[CodVista] = @__vistaName_0) THEN CAST(1 AS bit)
+          ELSE CAST(0 AS bit)
+      END
+2025-07-14 08:21:49.243 -05:00 [INF] Executed DbCommand (2ms) [Parameters=[@__vistaName_0='REGHIS' (Size = 50)], CommandType='"Text"', CommandTimeout='30']
+SELECT CASE
+    WHEN EXISTS (
+        SELECT 1
+        FROM [AdmVistas] AS [a]
+        WHERE [a].[CodVista] = @__vistaName_0) THEN CAST(1 AS bit)
+    ELSE CAST(0 AS bit)
+END
+2025-07-14 08:21:49.246 -05:00 [INF] info: 14/07/2025 08:21:49.246 RelationalEventId.CommandExecuted[20101] (Microsoft.EntityFrameworkCore.Database.Command) 
+      Executed DbCommand (2ms) [Parameters=[@__vistaName_0='REGHIS' (Size = 50)], CommandType='Text', CommandTimeout='30']
+      SELECT CASE
+          WHEN EXISTS (
+              SELECT 1
+              FROM [AdmVistas] AS [a]
+              WHERE [a].[CodVista] = @__vistaName_0) THEN CAST(1 AS bit)
+          ELSE CAST(0 AS bit)
+      END
+2025-07-14 08:21:49.314 -05:00 [INF] [SeedData] Vistas creadas/actualizadas.
+2025-07-14 08:21:49.319 -05:00 [INF] Executed DbCommand (2ms) [Parameters=[@__normalizedName_0='ADMIN' (Size = 256)], CommandType='"Text"', CommandTimeout='30']
+SELECT TOP(1) [a].[Id], [a].[ConcurrencyStamp], [a].[Name], [a].[NormalizedName]
+FROM [AspNetRoles] AS [a]
+WHERE [a].[NormalizedName] = @__normalizedName_0
+2025-07-14 08:21:49.325 -05:00 [INF] info: 14/07/2025 08:21:49.325 RelationalEventId.CommandExecuted[20101] (Microsoft.EntityFrameworkCore.Database.Command) 
+      Executed DbCommand (2ms) [Parameters=[@__normalizedName_0='ADMIN' (Size = 256)], CommandType='Text', CommandTimeout='30']
+      SELECT TOP(1) [a].[Id], [a].[ConcurrencyStamp], [a].[Name], [a].[NormalizedName]
+      FROM [AspNetRoles] AS [a]
+      WHERE [a].[NormalizedName] = @__normalizedName_0
+2025-07-14 08:21:49.354 -05:00 [INF] Executed DbCommand (2ms) [Parameters=[@__normalizedName_0='PLANEADOR' (Size = 256)], CommandType='"Text"', CommandTimeout='30']
+SELECT TOP(1) [a].[Id], [a].[ConcurrencyStamp], [a].[Name], [a].[NormalizedName]
+FROM [AspNetRoles] AS [a]
+WHERE [a].[NormalizedName] = @__normalizedName_0
+2025-07-14 08:21:49.360 -05:00 [INF] info: 14/07/2025 08:21:49.360 RelationalEventId.CommandExecuted[20101] (Microsoft.EntityFrameworkCore.Database.Command) 
+      Executed DbCommand (2ms) [Parameters=[@__normalizedName_0='PLANEADOR' (Size = 256)], CommandType='Text', CommandTimeout='30']
+      SELECT TOP(1) [a].[Id], [a].[ConcurrencyStamp], [a].[Name], [a].[NormalizedName]
+      FROM [AspNetRoles] AS [a]
+      WHERE [a].[NormalizedName] = @__normalizedName_0
+2025-07-14 08:21:49.366 -05:00 [INF] Executed DbCommand (2ms) [Parameters=[@__normalizedName_0='CEF' (Size = 256)], CommandType='"Text"', CommandTimeout='30']
+SELECT TOP(1) [a].[Id], [a].[ConcurrencyStamp], [a].[Name], [a].[NormalizedName]
+FROM [AspNetRoles] AS [a]
+WHERE [a].[NormalizedName] = @__normalizedName_0
+2025-07-14 08:21:49.380 -05:00 [INF] info: 14/07/2025 08:21:49.380 RelationalEventId.CommandExecuted[20101] (Microsoft.EntityFrameworkCore.Database.Command) 
+      Executed DbCommand (2ms) [Parameters=[@__normalizedName_0='CEF' (Size = 256)], CommandType='Text', CommandTimeout='30']
+      SELECT TOP(1) [a].[Id], [a].[ConcurrencyStamp], [a].[Name], [a].[NormalizedName]
+      FROM [AspNetRoles] AS [a]
+      WHERE [a].[NormalizedName] = @__normalizedName_0
+2025-07-14 08:21:49.386 -05:00 [INF] Executed DbCommand (2ms) [Parameters=[@__normalizedName_0='SUPERVISOR' (Size = 256)], CommandType='"Text"', CommandTimeout='30']
+SELECT TOP(1) [a].[Id], [a].[ConcurrencyStamp], [a].[Name], [a].[NormalizedName]
+FROM [AspNetRoles] AS [a]
+WHERE [a].[NormalizedName] = @__normalizedName_0
+2025-07-14 08:21:49.398 -05:00 [INF] info: 14/07/2025 08:21:49.398 RelationalEventId.CommandExecuted[20101] (Microsoft.EntityFrameworkCore.Database.Command) 
+      Executed DbCommand (2ms) [Parameters=[@__normalizedName_0='SUPERVISOR' (Size = 256)], CommandType='Text', CommandTimeout='30']
+      SELECT TOP(1) [a].[Id], [a].[ConcurrencyStamp], [a].[Name], [a].[NormalizedName]
+      FROM [AspNetRoles] AS [a]
+      WHERE [a].[NormalizedName] = @__normalizedName_0
+2025-07-14 08:21:49.402 -05:00 [INF] Executed DbCommand (2ms) [Parameters=[@__normalizedName_0='SEGURIDAD' (Size = 256)], CommandType='"Text"', CommandTimeout='30']
+SELECT TOP(1) [a].[Id], [a].[ConcurrencyStamp], [a].[Name], [a].[NormalizedName]
+FROM [AspNetRoles] AS [a]
+WHERE [a].[NormalizedName] = @__normalizedName_0
+2025-07-14 08:21:49.410 -05:00 [INF] info: 14/07/2025 08:21:49.410 RelationalEventId.CommandExecuted[20101] (Microsoft.EntityFrameworkCore.Database.Command) 
+      Executed DbCommand (2ms) [Parameters=[@__normalizedName_0='SEGURIDAD' (Size = 256)], CommandType='Text', CommandTimeout='30']
+      SELECT TOP(1) [a].[Id], [a].[ConcurrencyStamp], [a].[Name], [a].[NormalizedName]
+      FROM [AspNetRoles] AS [a]
+      WHERE [a].[NormalizedName] = @__normalizedName_0
+2025-07-14 08:21:49.414 -05:00 [INF] Executed DbCommand (2ms) [Parameters=[@__normalizedName_0='SUPERVISOR SEGURIDAD' (Size = 256)], CommandType='"Text"', CommandTimeout='30']
+SELECT TOP(1) [a].[Id], [a].[ConcurrencyStamp], [a].[Name], [a].[NormalizedName]
+FROM [AspNetRoles] AS [a]
+WHERE [a].[NormalizedName] = @__normalizedName_0
+2025-07-14 08:21:49.418 -05:00 [INF] info: 14/07/2025 08:21:49.418 RelationalEventId.CommandExecuted[20101] (Microsoft.EntityFrameworkCore.Database.Command) 
+      Executed DbCommand (2ms) [Parameters=[@__normalizedName_0='SUPERVISOR SEGURIDAD' (Size = 256)], CommandType='Text', CommandTimeout='30']
+      SELECT TOP(1) [a].[Id], [a].[ConcurrencyStamp], [a].[Name], [a].[NormalizedName]
+      FROM [AspNetRoles] AS [a]
+      WHERE [a].[NormalizedName] = @__normalizedName_0
+2025-07-14 08:21:49.447 -05:00 [INF] Executed DbCommand (2ms) [Parameters=[@__roleId_0='a7f72583-4e18-4bce-829f-b538f029e95d' (Size = 450)], CommandType='"Text"', CommandTimeout='30']
+SELECT TOP(1) [p].[Id], [p].[CodPerfilId], [p].[CodVista], [p].[PerfilId], [p].[PuedeCrear], [p].[PuedeEditar], [p].[PuedeVer]
+FROM [PermisosPerfil] AS [p]
+WHERE [p].[CodPerfilId] = @__roleId_0 AND [p].[CodVista] = N'RUD'
+2025-07-14 08:21:49.450 -05:00 [INF] info: 14/07/2025 08:21:49.450 RelationalEventId.CommandExecuted[20101] (Microsoft.EntityFrameworkCore.Database.Command) 
+      Executed DbCommand (2ms) [Parameters=[@__roleId_0='a7f72583-4e18-4bce-829f-b538f029e95d' (Size = 450)], CommandType='Text', CommandTimeout='30']
+      SELECT TOP(1) [p].[Id], [p].[CodPerfilId], [p].[CodVista], [p].[PerfilId], [p].[PuedeCrear], [p].[PuedeEditar], [p].[PuedeVer]
+      FROM [PermisosPerfil] AS [p]
+      WHERE [p].[CodPerfilId] = @__roleId_0 AND [p].[CodVista] = N'RUD'
+2025-07-14 08:21:49.478 -05:00 [INF] [SeedData] Permisos RUD actualizados para rol Admin.
+2025-07-14 08:21:49.481 -05:00 [INF] Executed DbCommand (1ms) [Parameters=[@__roleId_0='c6b2ed9a-c908-4864-a2f2-d47bc48fb366' (Size = 450)], CommandType='"Text"', CommandTimeout='30']
+SELECT TOP(1) [p].[Id], [p].[CodPerfilId], [p].[CodVista], [p].[PerfilId], [p].[PuedeCrear], [p].[PuedeEditar], [p].[PuedeVer]
+FROM [PermisosPerfil] AS [p]
+WHERE [p].[CodPerfilId] = @__roleId_0 AND [p].[CodVista] = N'RUD'
+2025-07-14 08:21:49.485 -05:00 [INF] info: 14/07/2025 08:21:49.485 RelationalEventId.CommandExecuted[20101] (Microsoft.EntityFrameworkCore.Database.Command) 
+      Executed DbCommand (1ms) [Parameters=[@__roleId_0='c6b2ed9a-c908-4864-a2f2-d47bc48fb366' (Size = 450)], CommandType='Text', CommandTimeout='30']
+      SELECT TOP(1) [p].[Id], [p].[CodPerfilId], [p].[CodVista], [p].[PerfilId], [p].[PuedeCrear], [p].[PuedeEditar], [p].[PuedeVer]
+      FROM [PermisosPerfil] AS [p]
+      WHERE [p].[CodPerfilId] = @__roleId_0 AND [p].[CodVista] = N'RUD'
+2025-07-14 08:21:49.497 -05:00 [INF] [SeedData] Permisos RUD actualizados para rol Planeador.
+2025-07-14 08:21:49.501 -05:00 [INF] Executed DbCommand (1ms) [Parameters=[@__roleId_0='a27279f8-41f6-4528-8d77-9fb3ca835e2f' (Size = 450)], CommandType='"Text"', CommandTimeout='30']
+SELECT TOP(1) [p].[Id], [p].[CodPerfilId], [p].[CodVista], [p].[PerfilId], [p].[PuedeCrear], [p].[PuedeEditar], [p].[PuedeVer]
+FROM [PermisosPerfil] AS [p]
+WHERE [p].[CodPerfilId] = @__roleId_0 AND [p].[CodVista] = N'RUD'
+2025-07-14 08:21:49.511 -05:00 [INF] info: 14/07/2025 08:21:49.511 RelationalEventId.CommandExecuted[20101] (Microsoft.EntityFrameworkCore.Database.Command) 
+      Executed DbCommand (1ms) [Parameters=[@__roleId_0='a27279f8-41f6-4528-8d77-9fb3ca835e2f' (Size = 450)], CommandType='Text', CommandTimeout='30']
+      SELECT TOP(1) [p].[Id], [p].[CodPerfilId], [p].[CodVista], [p].[PerfilId], [p].[PuedeCrear], [p].[PuedeEditar], [p].[PuedeVer]
+      FROM [PermisosPerfil] AS [p]
+      WHERE [p].[CodPerfilId] = @__roleId_0 AND [p].[CodVista] = N'RUD'
+2025-07-14 08:21:49.514 -05:00 [INF] [SeedData] Permisos RUD actualizados para rol CEF.
+2025-07-14 08:21:49.518 -05:00 [INF] Executed DbCommand (2ms) [Parameters=[@__roleId_0='8781e6f7-d5ef-40ec-8a42-9d9e5b6bcc23' (Size = 450)], CommandType='"Text"', CommandTimeout='30']
+SELECT TOP(1) [p].[Id], [p].[CodPerfilId], [p].[CodVista], [p].[PerfilId], [p].[PuedeCrear], [p].[PuedeEditar], [p].[PuedeVer]
+FROM [PermisosPerfil] AS [p]
+WHERE [p].[CodPerfilId] = @__roleId_0 AND [p].[CodVista] = N'RUD'
+2025-07-14 08:21:49.529 -05:00 [INF] info: 14/07/2025 08:21:49.529 RelationalEventId.CommandExecuted[20101] (Microsoft.EntityFrameworkCore.Database.Command) 
+      Executed DbCommand (2ms) [Parameters=[@__roleId_0='8781e6f7-d5ef-40ec-8a42-9d9e5b6bcc23' (Size = 450)], CommandType='Text', CommandTimeout='30']
+      SELECT TOP(1) [p].[Id], [p].[CodPerfilId], [p].[CodVista], [p].[PerfilId], [p].[PuedeCrear], [p].[PuedeEditar], [p].[PuedeVer]
+      FROM [PermisosPerfil] AS [p]
+      WHERE [p].[CodPerfilId] = @__roleId_0 AND [p].[CodVista] = N'RUD'
+2025-07-14 08:21:49.532 -05:00 [INF] [SeedData] Permisos RUD actualizados para rol Supervisor.
+2025-07-14 08:21:49.546 -05:00 [INF] Executed DbCommand (2ms) [Parameters=[@__roleId_0='a7f72583-4e18-4bce-829f-b538f029e95d' (Size = 450)], CommandType='"Text"', CommandTimeout='30']
+SELECT TOP(1) [p].[Id], [p].[CodPerfilId], [p].[CodVista], [p].[PerfilId], [p].[PuedeCrear], [p].[PuedeEditar], [p].[PuedeVer]
+FROM [PermisosPerfil] AS [p]
+WHERE [p].[CodPerfilId] = @__roleId_0 AND [p].[CodVista] = N'RUDHIS'
+2025-07-14 08:21:49.549 -05:00 [INF] info: 14/07/2025 08:21:49.549 RelationalEventId.CommandExecuted[20101] (Microsoft.EntityFrameworkCore.Database.Command) 
+      Executed DbCommand (2ms) [Parameters=[@__roleId_0='a7f72583-4e18-4bce-829f-b538f029e95d' (Size = 450)], CommandType='Text', CommandTimeout='30']
+      SELECT TOP(1) [p].[Id], [p].[CodPerfilId], [p].[CodVista], [p].[PerfilId], [p].[PuedeCrear], [p].[PuedeEditar], [p].[PuedeVer]
+      FROM [PermisosPerfil] AS [p]
+      WHERE [p].[CodPerfilId] = @__roleId_0 AND [p].[CodVista] = N'RUDHIS'
+2025-07-14 08:21:49.552 -05:00 [INF] [SeedData] Permisos RUDHIS actualizados para rol Admin.
+2025-07-14 08:21:49.558 -05:00 [INF] Executed DbCommand (1ms) [Parameters=[@__roleId_0='c6b2ed9a-c908-4864-a2f2-d47bc48fb366' (Size = 450)], CommandType='"Text"', CommandTimeout='30']
+SELECT TOP(1) [p].[Id], [p].[CodPerfilId], [p].[CodVista], [p].[PerfilId], [p].[PuedeCrear], [p].[PuedeEditar], [p].[PuedeVer]
+FROM [PermisosPerfil] AS [p]
+WHERE [p].[CodPerfilId] = @__roleId_0 AND [p].[CodVista] = N'RUDHIS'
+2025-07-14 08:21:49.564 -05:00 [INF] info: 14/07/2025 08:21:49.564 RelationalEventId.CommandExecuted[20101] (Microsoft.EntityFrameworkCore.Database.Command) 
+      Executed DbCommand (1ms) [Parameters=[@__roleId_0='c6b2ed9a-c908-4864-a2f2-d47bc48fb366' (Size = 450)], CommandType='Text', CommandTimeout='30']
+      SELECT TOP(1) [p].[Id], [p].[CodPerfilId], [p].[CodVista], [p].[PerfilId], [p].[PuedeCrear], [p].[PuedeEditar], [p].[PuedeVer]
+      FROM [PermisosPerfil] AS [p]
+      WHERE [p].[CodPerfilId] = @__roleId_0 AND [p].[CodVista] = N'RUDHIS'
+2025-07-14 08:21:49.566 -05:00 [INF] [SeedData] Permisos RUDHIS actualizados para rol Planeador.
+2025-07-14 08:21:49.570 -05:00 [INF] Executed DbCommand (1ms) [Parameters=[@__roleId_0='a27279f8-41f6-4528-8d77-9fb3ca835e2f' (Size = 450)], CommandType='"Text"', CommandTimeout='30']
+SELECT TOP(1) [p].[Id], [p].[CodPerfilId], [p].[CodVista], [p].[PerfilId], [p].[PuedeCrear], [p].[PuedeEditar], [p].[PuedeVer]
+FROM [PermisosPerfil] AS [p]
+WHERE [p].[CodPerfilId] = @__roleId_0 AND [p].[CodVista] = N'RUDHIS'
+2025-07-14 08:21:49.579 -05:00 [INF] info: 14/07/2025 08:21:49.579 RelationalEventId.CommandExecuted[20101] (Microsoft.EntityFrameworkCore.Database.Command) 
+      Executed DbCommand (1ms) [Parameters=[@__roleId_0='a27279f8-41f6-4528-8d77-9fb3ca835e2f' (Size = 450)], CommandType='Text', CommandTimeout='30']
+      SELECT TOP(1) [p].[Id], [p].[CodPerfilId], [p].[CodVista], [p].[PerfilId], [p].[PuedeCrear], [p].[PuedeEditar], [p].[PuedeVer]
+      FROM [PermisosPerfil] AS [p]
+      WHERE [p].[CodPerfilId] = @__roleId_0 AND [p].[CodVista] = N'RUDHIS'
+2025-07-14 08:21:49.582 -05:00 [INF] [SeedData] Permisos RUDHIS actualizados para rol CEF.
+2025-07-14 08:21:49.585 -05:00 [INF] Executed DbCommand (1ms) [Parameters=[@__roleId_0='8781e6f7-d5ef-40ec-8a42-9d9e5b6bcc23' (Size = 450)], CommandType='"Text"', CommandTimeout='30']
+SELECT TOP(1) [p].[Id], [p].[CodPerfilId], [p].[CodVista], [p].[PerfilId], [p].[PuedeCrear], [p].[PuedeEditar], [p].[PuedeVer]
+FROM [PermisosPerfil] AS [p]
+WHERE [p].[CodPerfilId] = @__roleId_0 AND [p].[CodVista] = N'RUDHIS'
+2025-07-14 08:21:49.599 -05:00 [INF] info: 14/07/2025 08:21:49.599 RelationalEventId.CommandExecuted[20101] (Microsoft.EntityFrameworkCore.Database.Command) 
+      Executed DbCommand (1ms) [Parameters=[@__roleId_0='8781e6f7-d5ef-40ec-8a42-9d9e5b6bcc23' (Size = 450)], CommandType='Text', CommandTimeout='30']
+      SELECT TOP(1) [p].[Id], [p].[CodPerfilId], [p].[CodVista], [p].[PerfilId], [p].[PuedeCrear], [p].[PuedeEditar], [p].[PuedeVer]
+      FROM [PermisosPerfil] AS [p]
+      WHERE [p].[CodPerfilId] = @__roleId_0 AND [p].[CodVista] = N'RUDHIS'
+2025-07-14 08:21:49.603 -05:00 [INF] [SeedData] Permisos RUDHIS actualizados para rol Supervisor.
+2025-07-14 08:21:49.614 -05:00 [INF] Executed DbCommand (1ms) [Parameters=[@__roleId_0='a7f72583-4e18-4bce-829f-b538f029e95d' (Size = 450)], CommandType='"Text"', CommandTimeout='30']
+SELECT TOP(1) [p].[Id], [p].[CodPerfilId], [p].[CodVista], [p].[PerfilId], [p].[PuedeCrear], [p].[PuedeEditar], [p].[PuedeVer]
+FROM [PermisosPerfil] AS [p]
+WHERE [p].[CodPerfilId] = @__roleId_0 AND [p].[CodVista] = N'REG'
+2025-07-14 08:21:49.619 -05:00 [INF] info: 14/07/2025 08:21:49.619 RelationalEventId.CommandExecuted[20101] (Microsoft.EntityFrameworkCore.Database.Command) 
+      Executed DbCommand (1ms) [Parameters=[@__roleId_0='a7f72583-4e18-4bce-829f-b538f029e95d' (Size = 450)], CommandType='Text', CommandTimeout='30']
+      SELECT TOP(1) [p].[Id], [p].[CodPerfilId], [p].[CodVista], [p].[PerfilId], [p].[PuedeCrear], [p].[PuedeEditar], [p].[PuedeVer]
+      FROM [PermisosPerfil] AS [p]
+      WHERE [p].[CodPerfilId] = @__roleId_0 AND [p].[CodVista] = N'REG'
+2025-07-14 08:21:49.629 -05:00 [INF] [SeedData] Permisos REG actualizados para rol Admin.
+2025-07-14 08:21:49.633 -05:00 [INF] Executed DbCommand (2ms) [Parameters=[@__roleId_0='cb115337-c9bc-4535-8c68-960033727680' (Size = 450)], CommandType='"Text"', CommandTimeout='30']
+SELECT TOP(1) [p].[Id], [p].[CodPerfilId], [p].[CodVista], [p].[PerfilId], [p].[PuedeCrear], [p].[PuedeEditar], [p].[PuedeVer]
+FROM [PermisosPerfil] AS [p]
+WHERE [p].[CodPerfilId] = @__roleId_0 AND [p].[CodVista] = N'REG'
+2025-07-14 08:21:49.644 -05:00 [INF] info: 14/07/2025 08:21:49.643 RelationalEventId.CommandExecuted[20101] (Microsoft.EntityFrameworkCore.Database.Command) 
+      Executed DbCommand (2ms) [Parameters=[@__roleId_0='cb115337-c9bc-4535-8c68-960033727680' (Size = 450)], CommandType='Text', CommandTimeout='30']
+      SELECT TOP(1) [p].[Id], [p].[CodPerfilId], [p].[CodVista], [p].[PerfilId], [p].[PuedeCrear], [p].[PuedeEditar], [p].[PuedeVer]
+      FROM [PermisosPerfil] AS [p]
+      WHERE [p].[CodPerfilId] = @__roleId_0 AND [p].[CodVista] = N'REG'
+2025-07-14 08:21:49.646 -05:00 [INF] [SeedData] Permisos REG actualizados para rol Seguridad.
+2025-07-14 08:21:49.655 -05:00 [INF] Executed DbCommand (1ms) [Parameters=[@__roleId_0='a7f72583-4e18-4bce-829f-b538f029e95d' (Size = 450)], CommandType='"Text"', CommandTimeout='30']
+SELECT TOP(1) [p].[Id], [p].[CodPerfilId], [p].[CodVista], [p].[PerfilId], [p].[PuedeCrear], [p].[PuedeEditar], [p].[PuedeVer]
+FROM [PermisosPerfil] AS [p]
+WHERE [p].[CodPerfilId] = @__roleId_0 AND [p].[CodVista] = N'REGHIS'
+2025-07-14 08:21:49.662 -05:00 [INF] info: 14/07/2025 08:21:49.662 RelationalEventId.CommandExecuted[20101] (Microsoft.EntityFrameworkCore.Database.Command) 
+      Executed DbCommand (1ms) [Parameters=[@__roleId_0='a7f72583-4e18-4bce-829f-b538f029e95d' (Size = 450)], CommandType='Text', CommandTimeout='30']
+      SELECT TOP(1) [p].[Id], [p].[CodPerfilId], [p].[CodVista], [p].[PerfilId], [p].[PuedeCrear], [p].[PuedeEditar], [p].[PuedeVer]
+      FROM [PermisosPerfil] AS [p]
+      WHERE [p].[CodPerfilId] = @__roleId_0 AND [p].[CodVista] = N'REGHIS'
+2025-07-14 08:21:49.666 -05:00 [INF] [SeedData] Permisos REGHIS actualizados para rol Admin.
+2025-07-14 08:21:49.668 -05:00 [INF] Executed DbCommand (1ms) [Parameters=[@__roleId_0='cb115337-c9bc-4535-8c68-960033727680' (Size = 450)], CommandType='"Text"', CommandTimeout='30']
+SELECT TOP(1) [p].[Id], [p].[CodPerfilId], [p].[CodVista], [p].[PerfilId], [p].[PuedeCrear], [p].[PuedeEditar], [p].[PuedeVer]
+FROM [PermisosPerfil] AS [p]
+WHERE [p].[CodPerfilId] = @__roleId_0 AND [p].[CodVista] = N'REGHIS'
+2025-07-14 08:21:49.679 -05:00 [INF] info: 14/07/2025 08:21:49.679 RelationalEventId.CommandExecuted[20101] (Microsoft.EntityFrameworkCore.Database.Command) 
+      Executed DbCommand (1ms) [Parameters=[@__roleId_0='cb115337-c9bc-4535-8c68-960033727680' (Size = 450)], CommandType='Text', CommandTimeout='30']
+      SELECT TOP(1) [p].[Id], [p].[CodPerfilId], [p].[CodVista], [p].[PerfilId], [p].[PuedeCrear], [p].[PuedeEditar], [p].[PuedeVer]
+      FROM [PermisosPerfil] AS [p]
+      WHERE [p].[CodPerfilId] = @__roleId_0 AND [p].[CodVista] = N'REGHIS'
+2025-07-14 08:21:49.683 -05:00 [INF] [SeedData] Permisos REGHIS actualizados para rol Seguridad.
+2025-07-14 08:21:49.767 -05:00 [INF] Executed DbCommand (4ms) [Parameters=[@p6='13', @p0='a7f72583-4e18-4bce-829f-b538f029e95d' (Nullable = false) (Size = 450), @p1='RUD' (Nullable = false) (Size = 50), @p2=NULL (Size = 450), @p3='True', @p4='True', @p5='True', @p13='15', @p7='a27279f8-41f6-4528-8d77-9fb3ca835e2f' (Nullable = false) (Size = 450), @p8='RUD' (Nullable = false) (Size = 50), @p9=NULL (Size = 450), @p10='True', @p11='True', @p12='True', @p20='16', @p14='8781e6f7-d5ef-40ec-8a42-9d9e5b6bcc23' (Nullable = false) (Size = 450), @p15='RUD' (Nullable = false) (Size = 50), @p16=NULL (Size = 450), @p17='False', @p18='True', @p19='True', @p27='17', @p21='a7f72583-4e18-4bce-829f-b538f029e95d' (Nullable = false) (Size = 450), @p22='RUDHIS' (Nullable = false) (Size = 50), @p23=NULL (Size = 450), @p24='False', @p25='False', @p26='True', @p34='19', @p28='a27279f8-41f6-4528-8d77-9fb3ca835e2f' (Nullable = false) (Size = 450), @p29='RUDHIS' (Nullable = false) (Size = 50), @p30=NULL (Size = 450), @p31='False', @p32='False', @p33='True', @p41='20', @p35='8781e6f7-d5ef-40ec-8a42-9d9e5b6bcc23' (Nullable = false) (Size = 450), @p36='RUDHIS' (Nullable = false) (Size = 50), @p37=NULL (Size = 450), @p38='False', @p39='False', @p40='True', @p48='37', @p42='c6b2ed9a-c908-4864-a2f2-d47bc48fb366' (Nullable = false) (Size = 450), @p43='RUD' (Nullable = false) (Size = 50), @p44=NULL (Size = 450), @p45='True', @p46='True', @p47='True', @p55='38', @p49='c6b2ed9a-c908-4864-a2f2-d47bc48fb366' (Nullable = false) (Size = 450), @p50='RUDHIS' (Nullable = false) (Size = 50), @p51=NULL (Size = 450), @p52='False', @p53='False', @p54='True', @p62='41', @p56='a7f72583-4e18-4bce-829f-b538f029e95d' (Nullable = false) (Size = 450), @p57='REG' (Nullable = false) (Size = 50), @p58=NULL (Size = 450), @p59='True', @p60='True', @p61='True', @p69='42', @p63='cb115337-c9bc-4535-8c68-960033727680' (Nullable = false) (Size = 450), @p64='REG' (Nullable = false) (Size = 50), @p65=NULL (Size = 450), @p66='True', @p67='False', @p68='True', @p76='43', @p70='a7f72583-4e18-4bce-829f-b538f029e95d' (Nullable = false) (Size = 450), @p71='REGHIS' (Nullable = false) (Size = 50), @p72=NULL (Size = 450), @p73='True', @p74='True', @p75='True', @p83='44', @p77='cb115337-c9bc-4535-8c68-960033727680' (Nullable = false) (Size = 450), @p78='REGHIS' (Nullable = false) (Size = 50), @p79=NULL (Size = 450), @p80='True', @p81='False', @p82='True'], CommandType='"Text"', CommandTimeout='30']
+SET NOCOUNT ON;
+UPDATE [PermisosPerfil] SET [CodPerfilId] = @p0, [CodVista] = @p1, [PerfilId] = @p2, [PuedeCrear] = @p3, [PuedeEditar] = @p4, [PuedeVer] = @p5
+OUTPUT 1
+WHERE [Id] = @p6;
+UPDATE [PermisosPerfil] SET [CodPerfilId] = @p7, [CodVista] = @p8, [PerfilId] = @p9, [PuedeCrear] = @p10, [PuedeEditar] = @p11, [PuedeVer] = @p12
+OUTPUT 1
+WHERE [Id] = @p13;
+UPDATE [PermisosPerfil] SET [CodPerfilId] = @p14, [CodVista] = @p15, [PerfilId] = @p16, [PuedeCrear] = @p17, [PuedeEditar] = @p18, [PuedeVer] = @p19
+OUTPUT 1
+WHERE [Id] = @p20;
+UPDATE [PermisosPerfil] SET [CodPerfilId] = @p21, [CodVista] = @p22, [PerfilId] = @p23, [PuedeCrear] = @p24, [PuedeEditar] = @p25, [PuedeVer] = @p26
+OUTPUT 1
+WHERE [Id] = @p27;
+UPDATE [PermisosPerfil] SET [CodPerfilId] = @p28, [CodVista] = @p29, [PerfilId] = @p30, [PuedeCrear] = @p31, [PuedeEditar] = @p32, [PuedeVer] = @p33
+OUTPUT 1
+WHERE [Id] = @p34;
+UPDATE [PermisosPerfil] SET [CodPerfilId] = @p35, [CodVista] = @p36, [PerfilId] = @p37, [PuedeCrear] = @p38, [PuedeEditar] = @p39, [PuedeVer] = @p40
+OUTPUT 1
+WHERE [Id] = @p41;
+UPDATE [PermisosPerfil] SET [CodPerfilId] = @p42, [CodVista] = @p43, [PerfilId] = @p44, [PuedeCrear] = @p45, [PuedeEditar] = @p46, [PuedeVer] = @p47
+OUTPUT 1
+WHERE [Id] = @p48;
+UPDATE [PermisosPerfil] SET [CodPerfilId] = @p49, [CodVista] = @p50, [PerfilId] = @p51, [PuedeCrear] = @p52, [PuedeEditar] = @p53, [PuedeVer] = @p54
+OUTPUT 1
+WHERE [Id] = @p55;
+UPDATE [PermisosPerfil] SET [CodPerfilId] = @p56, [CodVista] = @p57, [PerfilId] = @p58, [PuedeCrear] = @p59, [PuedeEditar] = @p60, [PuedeVer] = @p61
+OUTPUT 1
+WHERE [Id] = @p62;
+UPDATE [PermisosPerfil] SET [CodPerfilId] = @p63, [CodVista] = @p64, [PerfilId] = @p65, [PuedeCrear] = @p66, [PuedeEditar] = @p67, [PuedeVer] = @p68
+OUTPUT 1
+WHERE [Id] = @p69;
+UPDATE [PermisosPerfil] SET [CodPerfilId] = @p70, [CodVista] = @p71, [PerfilId] = @p72, [PuedeCrear] = @p73, [PuedeEditar] = @p74, [PuedeVer] = @p75
+OUTPUT 1
+WHERE [Id] = @p76;
+UPDATE [PermisosPerfil] SET [CodPerfilId] = @p77, [CodVista] = @p78, [PerfilId] = @p79, [PuedeCrear] = @p80, [PuedeEditar] = @p81, [PuedeVer] = @p82
+OUTPUT 1
+WHERE [Id] = @p83;
+2025-07-14 08:21:49.791 -05:00 [INF] info: 14/07/2025 08:21:49.791 RelationalEventId.CommandExecuted[20101] (Microsoft.EntityFrameworkCore.Database.Command) 
+      Executed DbCommand (4ms) [Parameters=[@p6='13', @p0='a7f72583-4e18-4bce-829f-b538f029e95d' (Nullable = false) (Size = 450), @p1='RUD' (Nullable = false) (Size = 50), @p2=NULL (Size = 450), @p3='True', @p4='True', @p5='True', @p13='15', @p7='a27279f8-41f6-4528-8d77-9fb3ca835e2f' (Nullable = false) (Size = 450), @p8='RUD' (Nullable = false) (Size = 50), @p9=NULL (Size = 450), @p10='True', @p11='True', @p12='True', @p20='16', @p14='8781e6f7-d5ef-40ec-8a42-9d9e5b6bcc23' (Nullable = false) (Size = 450), @p15='RUD' (Nullable = false) (Size = 50), @p16=NULL (Size = 450), @p17='False', @p18='True', @p19='True', @p27='17', @p21='a7f72583-4e18-4bce-829f-b538f029e95d' (Nullable = false) (Size = 450), @p22='RUDHIS' (Nullable = false) (Size = 50), @p23=NULL (Size = 450), @p24='False', @p25='False', @p26='True', @p34='19', @p28='a27279f8-41f6-4528-8d77-9fb3ca835e2f' (Nullable = false) (Size = 450), @p29='RUDHIS' (Nullable = false) (Size = 50), @p30=NULL (Size = 450), @p31='False', @p32='False', @p33='True', @p41='20', @p35='8781e6f7-d5ef-40ec-8a42-9d9e5b6bcc23' (Nullable = false) (Size = 450), @p36='RUDHIS' (Nullable = false) (Size = 50), @p37=NULL (Size = 450), @p38='False', @p39='False', @p40='True', @p48='37', @p42='c6b2ed9a-c908-4864-a2f2-d47bc48fb366' (Nullable = false) (Size = 450), @p43='RUD' (Nullable = false) (Size = 50), @p44=NULL (Size = 450), @p45='True', @p46='True', @p47='True', @p55='38', @p49='c6b2ed9a-c908-4864-a2f2-d47bc48fb366' (Nullable = false) (Size = 450), @p50='RUDHIS' (Nullable = false) (Size = 50), @p51=NULL (Size = 450), @p52='False', @p53='False', @p54='True', @p62='41', @p56='a7f72583-4e18-4bce-829f-b538f029e95d' (Nullable = false) (Size = 450), @p57='REG' (Nullable = false) (Size = 50), @p58=NULL (Size = 450), @p59='True', @p60='True', @p61='True', @p69='42', @p63='cb115337-c9bc-4535-8c68-960033727680' (Nullable = false) (Size = 450), @p64='REG' (Nullable = false) (Size = 50), @p65=NULL (Size = 450), @p66='True', @p67='False', @p68='True', @p76='43', @p70='a7f72583-4e18-4bce-829f-b538f029e95d' (Nullable = false) (Size = 450), @p71='REGHIS' (Nullable = false) (Size = 50), @p72=NULL (Size = 450), @p73='True', @p74='True', @p75='True', @p83='44', @p77='cb115337-c9bc-4535-8c68-960033727680' (Nullable = false) (Size = 450), @p78='REGHIS' (Nullable = false) (Size = 50), @p79=NULL (Size = 450), @p80='True', @p81='False', @p82='True'], CommandType='Text', CommandTimeout='30']
+      SET NOCOUNT ON;
+      UPDATE [PermisosPerfil] SET [CodPerfilId] = @p0, [CodVista] = @p1, [PerfilId] = @p2, [PuedeCrear] = @p3, [PuedeEditar] = @p4, [PuedeVer] = @p5
+      OUTPUT 1
+      WHERE [Id] = @p6;
+      UPDATE [PermisosPerfil] SET [CodPerfilId] = @p7, [CodVista] = @p8, [PerfilId] = @p9, [PuedeCrear] = @p10, [PuedeEditar] = @p11, [PuedeVer] = @p12
+      OUTPUT 1
+      WHERE [Id] = @p13;
+      UPDATE [PermisosPerfil] SET [CodPerfilId] = @p14, [CodVista] = @p15, [PerfilId] = @p16, [PuedeCrear] = @p17, [PuedeEditar] = @p18, [PuedeVer] = @p19
+      OUTPUT 1
+      WHERE [Id] = @p20;
+      UPDATE [PermisosPerfil] SET [CodPerfilId] = @p21, [CodVista] = @p22, [PerfilId] = @p23, [PuedeCrear] = @p24, [PuedeEditar] = @p25, [PuedeVer] = @p26
+      OUTPUT 1
+      WHERE [Id] = @p27;
+      UPDATE [PermisosPerfil] SET [CodPerfilId] = @p28, [CodVista] = @p29, [PerfilId] = @p30, [PuedeCrear] = @p31, [PuedeEditar] = @p32, [PuedeVer] = @p33
+      OUTPUT 1
+      WHERE [Id] = @p34;
+      UPDATE [PermisosPerfil] SET [CodPerfilId] = @p35, [CodVista] = @p36, [PerfilId] = @p37, [PuedeCrear] = @p38, [PuedeEditar] = @p39, [PuedeVer] = @p40
+      OUTPUT 1
+      WHERE [Id] = @p41;
+      UPDATE [PermisosPerfil] SET [CodPerfilId] = @p42, [CodVista] = @p43, [PerfilId] = @p44, [PuedeCrear] = @p45, [PuedeEditar] = @p46, [PuedeVer] = @p47
+      OUTPUT 1
+      WHERE [Id] = @p48;
+      UPDATE [PermisosPerfil] SET [CodPerfilId] = @p49, [CodVista] = @p50, [PerfilId] = @p51, [PuedeCrear] = @p52, [PuedeEditar] = @p53, [PuedeVer] = @p54
+      OUTPUT 1
+      WHERE [Id] = @p55;
+      UPDATE [PermisosPerfil] SET [CodPerfilId] = @p56, [CodVista] = @p57, [PerfilId] = @p58, [PuedeCrear] = @p59, [PuedeEditar] = @p60, [PuedeVer] = @p61
+      OUTPUT 1
+      WHERE [Id] = @p62;
+      UPDATE [PermisosPerfil] SET [CodPerfilId] = @p63, [CodVista] = @p64, [PerfilId] = @p65, [PuedeCrear] = @p66, [PuedeEditar] = @p67, [PuedeVer] = @p68
+      OUTPUT 1
+      WHERE [Id] = @p69;
+      UPDATE [PermisosPerfil] SET [CodPerfilId] = @p70, [CodVista] = @p71, [PerfilId] = @p72, [PuedeCrear] = @p73, [PuedeEditar] = @p74, [PuedeVer] = @p75
+      OUTPUT 1
+      WHERE [Id] = @p76;
+      UPDATE [PermisosPerfil] SET [CodPerfilId] = @p77, [CodVista] = @p78, [PerfilId] = @p79, [PuedeCrear] = @p80, [PuedeEditar] = @p81, [PuedeVer] = @p82
+      OUTPUT 1
+      WHERE [Id] = @p83;
+2025-07-14 08:21:49.833 -05:00 [INF] [SeedData] Seeding de permisos de perfiles y vistas completado.
+2025-07-14 08:21:50.111 -05:00 [ERR] Hosting failed to start
+System.IO.IOException: Failed to bind to address https://127.0.0.1:7024: address already in use.
+ ---> Microsoft.AspNetCore.Connections.AddressInUseException: Solo se permite un uso de cada dirección de socket (protocolo/dirección de red/puerto)
+ ---> System.Net.Sockets.SocketException (10048): Solo se permite un uso de cada dirección de socket (protocolo/dirección de red/puerto)
+   at System.Net.Sockets.Socket.UpdateStatusAfterSocketErrorAndThrowException(SocketError error, Boolean disconnectOnFailure, String callerName)
+   at System.Net.Sockets.Socket.DoBind(EndPoint endPointSnapshot, SocketAddress socketAddress)
+   at System.Net.Sockets.Socket.Bind(EndPoint localEP)
+   at Microsoft.AspNetCore.Server.Kestrel.Transport.Sockets.SocketTransportOptions.CreateDefaultBoundListenSocket(EndPoint endpoint)
+   at Microsoft.AspNetCore.Server.Kestrel.Transport.Sockets.SocketConnectionListener.Bind()
+   --- End of inner exception stack trace ---
+   at Microsoft.AspNetCore.Server.Kestrel.Transport.Sockets.SocketConnectionListener.Bind()
+   at Microsoft.AspNetCore.Server.Kestrel.Transport.Sockets.SocketTransportFactory.BindAsync(EndPoint endpoint, CancellationToken cancellationToken)
+   at Microsoft.AspNetCore.Server.Kestrel.Core.Internal.Infrastructure.TransportManager.BindAsync(EndPoint endPoint, ConnectionDelegate connectionDelegate, EndpointConfig endpointConfig, CancellationToken cancellationToken)
+   at Microsoft.AspNetCore.Server.Kestrel.Core.KestrelServerImpl.<>c__DisplayClass28_0`1.<<StartAsync>g__OnBind|0>d.MoveNext()
+--- End of stack trace from previous location ---
+   at Microsoft.AspNetCore.Server.Kestrel.Core.Internal.AddressBinder.BindEndpointAsync(ListenOptions endpoint, AddressBindContext context, CancellationToken cancellationToken)
+   --- End of inner exception stack trace ---
+   at Microsoft.AspNetCore.Server.Kestrel.Core.Internal.AddressBinder.BindEndpointAsync(ListenOptions endpoint, AddressBindContext context, CancellationToken cancellationToken)
+   at Microsoft.AspNetCore.Server.Kestrel.Core.LocalhostListenOptions.BindAsync(AddressBindContext context, CancellationToken cancellationToken)
+   at Microsoft.AspNetCore.Server.Kestrel.Core.Internal.AddressBinder.AddressesStrategy.BindAsync(AddressBindContext context, CancellationToken cancellationToken)
+   at Microsoft.AspNetCore.Server.Kestrel.Core.KestrelServerImpl.BindAsync(CancellationToken cancellationToken)
+   at Microsoft.AspNetCore.Server.Kestrel.Core.KestrelServerImpl.StartAsync[TContext](IHttpApplication`1 application, CancellationToken cancellationToken)
+   at Microsoft.AspNetCore.Hosting.GenericWebHostService.StartAsync(CancellationToken cancellationToken)
+   at Microsoft.Extensions.Hosting.Internal.Host.<StartAsync>b__14_1(IHostedService service, CancellationToken token)
+   at Microsoft.Extensions.Hosting.Internal.Host.ForeachService[T](IEnumerable`1 services, CancellationToken token, Boolean concurrent, Boolean abortOnFirstException, List`1 exceptions, Func`3 operation)

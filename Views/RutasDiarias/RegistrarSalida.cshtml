@@ -1,0 +1,167 @@
+﻿@model VCashApp.Models.Entities.TdvRutaDiaria
+@using VCashApp.Enums
+@using Microsoft.AspNetCore.Mvc.Rendering
+
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewData["Title"] = "Loading ";
+}
+
+<div class="form-container">
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success">@TempData["SuccessMessage"]</div>
+    }
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger">@TempData["ErrorMessage"]</div>
+    }
+    <div class="card col-md-12">
+        <div class="card-body">
+            <form asp-action="RegistrarSalida" asp-route-id="@Model.Id" method="post">
+                @Html.AntiForgeryToken()
+
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                
+                <input type="hidden" asp-for="Id" />
+                <input type="hidden" asp-for="CodRutaSuc"/>
+                <input type="hidden" asp-for="NombreRuta" />
+                <input type="hidden" asp-for="NombreSucursal" />
+                <input type="hidden" asp-for="TipoRuta" />
+                <input type="hidden" asp-for="TipoVehiculo" />
+                <input type="hidden" asp-for="UsuarioPlaneacion" />
+                <input type="hidden" asp-for="CodRutaSuc" />
+                <input type="hidden" asp-for="CodSucursal" />
+                
+                <input type="hidden" asp-for="CedulaJT" />
+                <input type="hidden" asp-for="NombreJT" />
+                <input type="hidden" asp-for="CodCargoJT" />
+                <input type="hidden" asp-for="FechaIngresoJT" />
+                <input type="hidden" asp-for="HoraIngresoJT" />
+                <input type="hidden" asp-for="FechaSalidaJT" />
+                <input type="hidden" asp-for="HoraSalidaJT" />
+                <input type="hidden" asp-for="CedulaConductor" />
+                <input type="hidden" asp-for="NombreConductor" />
+                <input type="hidden" asp-for="CodCargoConductor" />
+                <input type="hidden" asp-for="CedulaTripulante" />
+                <input type="hidden" asp-for="NombreTripulante" />
+                <input type="hidden" asp-for="CodCargoTripulante" />
+                
+                <input type="hidden" asp-for="FechaCargue" />
+                <input type="hidden" asp-for="HoraCargue" />
+                <input type="hidden" asp-for="CantBolsaBilleteEntrega" />
+                <input type="hidden" asp-for="CantBolsaMonedaEntrega" />
+                <input type="hidden" asp-for="UsuarioCEFCargue" />
+
+                <input type="hidden" asp-for="FechaDescargue" />
+                <input type="hidden" asp-for="HoraDescargue" />
+                <input type="hidden" asp-for="CantBolsaBilleteRecibe" />
+                <input type="hidden" asp-for="CantBolsaMonedaRecibe" />
+                <input type="hidden" asp-for="UsuarioCEFDescargue" />
+                
+                <input type="hidden" asp-for="UsuarioSupervisorApertura" />
+                <input type="hidden" asp-for="KmFinal" />
+                <input type="hidden" asp-for="FechaEntradaRuta" />
+                <input type="hidden" asp-for="HoraEntradaRuta" />
+                <input type="hidden" asp-for="UsuarioSupervisorCierre" />
+                <input type="hidden" asp-for="Estado" />
+
+
+                <fieldset disabled>
+                    <legend>Información General de la Ruta</legend>
+                    <div class="row">
+                        <div class="form-group col-12 col-md-2">
+                            <label asp-for="Id" class="control-label"></label>
+                            <input asp-for="Id" class="form-control form-control-sm" readonly />
+                        </div>
+                        <div class="form-group col-12 col-md-4">
+                            <label asp-for="NombreRuta" class="control-label">Ruta</label>
+                            <input asp-for="NombreRuta" class="form-control form-control-sm" readonly />
+                        </div>
+                        <div class="form-group col-12 col-md-3">
+                            <label asp-for="NombreSucursal" class="control-label">Sucursal</label>
+                            <input asp-for="NombreSucursal" class="form-control form-control-sm" readonly />
+                        </div>
+                        <div class="form-group col-12 col-md-3">
+                            <label asp-for="FechaEjecucion" class="control-label">Programación</label>
+                            <input asp-for="FechaEjecucion" type="date" class="form-control form-control-sm" readonly />
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="form-group col-12 col-md-3">
+                            <label asp-for="NombreJT" class="control-label">Jefe de Tripulación</label>
+                            <input asp-for="NombreJT" class="form-control form-control-sm" readonly />
+                        </div>
+                        <div class="form-group col-12 col-md-3">
+                            <label asp-for="NombreConductor" class="control-label">Conductor</label>
+                            <input asp-for="NombreConductor" class="form-control form-control-sm" readonly />
+                        </div>
+                        <div class="form-group col-12 col-md-3">
+                            <label asp-for="NombreTripulante" class="control-label">Tripulante</label>
+                            <input asp-for="NombreTripulante" class="form-control form-control-sm" readonly />
+                        </div>
+                        <div class="form-group col-12 col-md-3">
+                            <label asp-for="CodVehiculo" class="control-label">Vehículo</label>
+                            <input asp-for="CodVehiculo" class="form-control form-control-sm" readonly />
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="form-group col-12 col-md-3">
+                            <label asp-for="FechaCargue" class="control-label">Fecha Cargue CEF</label>
+                            <input asp-for="FechaCargue" type="date" class="form-control form-control-sm"
+                                   value="@(Model.FechaCargue?.ToString("yyyy-MM-dd"))" readonly />
+                        </div>
+                        <div class="form-group col-12 col-md-3">
+                            <label asp-for="HoraCargue" class="control-label">Hora Cargue CEF</label>
+                            <input asp-for="HoraCargue" type="time" step="1" class="form-control form-control-sm"
+                                   value="@(Model.HoraCargue?.ToString("HH:mm"))" readonly />
+                        </div>
+                        <div class="form-group col-12 col-md-3">
+                            <label asp-for="CantBolsaBilleteEntrega" class="control-label">Bolsas Billete</label>
+                            <input asp-for="CantBolsaBilleteEntrega" type="number" class="form-control form-control-sm" readonly />
+                        </div>
+                        <div class="form-group col-12 col-md-3">
+                            <label asp-for="CantBolsaMonedaEntrega" class="control-label">Bolsas Moneda</label>
+                            <input asp-for="CantBolsaMonedaEntrega" type="number" class="form-control form-control-sm" readonly />
+                        </div>
+                    </div>
+                </fieldset>
+
+                <hr />
+
+                <div class="title-container">
+                    <h5>Registro de Salida del Vehículo</h5>
+                </div>
+                
+                <div class="row">
+                    <div class="form-group col-12 col-md-6">
+                        <label asp-for="KmInicial" class="control-label">Kilometraje Inicial</label>
+                        <input asp-for="KmInicial" type="number" min="0" class="form-control form-control-sm" />
+                        <span asp-validation-for="KmInicial" class="text-danger"></span>
+                    </div>
+                    <div class="form-group col-12 col-md-3">
+                        <label asp-for="FechaSalidaRuta" class="control-label">Fecha de Salida</label>
+                        <input asp-for="FechaSalidaRuta" type="date" class="form-control form-control-sm" readonly/>
+                        <span asp-validation-for="FechaSalidaRuta" class="text-danger"></span>
+                    </div>
+                    <div class="form-group col-12 col-md-3">
+                        <label asp-for="HoraSalidaRuta" class="control-label">Hora de Salida</label>
+                        <input asp-for="HoraSalidaRuta" type="time" step="1" class="form-control form-control-sm" readonly/>
+                        <span asp-validation-for="HoraSalidaRuta" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="submit-container form-group col-md-12 mt-4">
+                    <button type="submit" class="btn btn-primary">Guardar</button>
+                    <button type="button" class="btn btn-danger" onclick="window.location.href='@Url.Action("ListGenerated", "RutasDiarias")'">Cancelar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

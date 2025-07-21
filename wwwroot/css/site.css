@@ -1,0 +1,1390 @@
+/*=============== GOOGLE FONTS & VARIABLES ===============*/
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800;900&display=swap');
+
+:root {
+    /* Base colors and fonts from your main.css */
+    --first-color: #235286;
+    --second-color: #F8E04B;
+    --third-color: #ce2c26;
+    --status-color: #5ccb5f;
+    --black1: #222;
+    --black2: #999;
+    --Grey1: #717d7e;
+    --grey2: #bdbdbd;
+    --grey3: #dcdcdc;
+    --service: #d3d3d3;
+    --body-font: "Poppins", sans-serif;
+    --normal-font-size: .838rem;
+    --smaller-font-size: .65rem;
+    --tiny-font-size: .65rem;
+    --title-font-size: .938rem;
+    --font-regular: 400;
+    --font-semi-bold: 600;
+    --z-fixed: 100;
+
+    /* Custom variables for sidebar */
+    --compact-sidebar-width: 80px;
+    --expanded-sidebar-width: 280px;
+    --transition-duration: 0.3s;
+    --transition-timing-function: ease-in-out;
+    --toggle-button-size: 40px;
+    --sidebar-padding-x: 1.5rem; /* ~24px */
+    --sidebar-vertical-padding: 20px; /* Top/bottom padding for the entire sidebar */
+
+    /* Theme Variables (Default/Light Theme Values) */
+    --body-bg: linear-gradient(90deg, #e2e2e2, #c9d6ff); /* Used by html, body, app-wrapper */
+    --div-bg: #fff; /* Used by sidebar, main-content, toggle-button, submenu */
+    --text-color-main: hsl(228, 8%, 56%); /* Main text color */
+    --title-color-main: hsl(228, 18%, 16%); /* Main title color */
+    --shadow-color-main: hsla(228, 80%, 4%, .1); /* Main shadow color */
+    --hover-bg: #f0f2f5; /* Color de fondo al pasar el ratón - PARA TEMA CLARO */
+    --active-bg: var(--first-color); /* Color de fondo del elemento activo - PARA TEMA CLARO */
+    --active-text: #fff; /* Color del texto del elemento activo - PARA TEMA CLARO */
+    --border-color: #eee; /* Color de los bordes - PARA TEMA CLARO */
+    --red-badge: #ce2c26; /* Color del badge rojo - PARA TEMA CLARO */
+    --button-bg-color: #f0f2f5; /* Color de fondo para botones de control */
+    --button-text-color: var(--text-color-main); /* Color de texto para botones de control */
+    --table-header-bg: #e9ecef; /* Fondo de encabezado de tabla */
+    --table-header-text: var(--title-color-main);
+    --toggle-slider-bg: #ccc; /* Fondo del slider del toggle (off) */
+    --toggle-slider-checked-bg: #2196F3; /* Fondo del slider del toggle (on) */
+}
+
+/* Dark Theme */
+body.dark-theme {
+    --body-bg: #2b2b2b; /* Darker background */
+    --div-bg: #3a3a3a; /* Darker div background */
+    --text-color-main: #c0c0c0; /* Lighter text for contrast */
+    --title-color-main: #f5f5f5; /* Lighter titles */
+    --shadow-color-main: hsla(228, 80%, 4%, .3); /* More pronounced shadow */
+    --hover-bg: #4a4a4a; /* Darker hover background */
+    --active-bg: var(--first-color); /* Keep primary color for active */
+    --active-text: #fff;
+    --border-color: #555;
+    --red-badge: #e04b4b; /* Slightly adjusted red for dark theme */
+
+    --button-bg-color: #555;
+    --button-text-color: #fff;
+    --table-header-bg: #4a4a4a;
+    --table-header-text: #f5f5f5;
+
+    --toggle-slider-bg: #777;
+    --toggle-slider-checked-bg: #4CAF50; /* Un verde para el modo oscuro */
+}
+
+/*========== Responsive typography ==========*/
+@media screen and (min-width: 1150px) {
+    :root {
+        --normal-font-size: 0.9rem;
+        --smaller-font-size: .713rem;
+        --title-font-size: 1.3rem;
+        --expanded-sidebar-width: 316px;
+    }
+}
+@media screen and (min-width: 768px) {
+    :root {
+        --normal-font-size: 0.9rem;
+        --smaller-font-size: .753rem;
+        --title-font-size: 1.3rem;
+    }
+}
+
+/*=============== BASE ===============*/
+* {
+    box-sizing: border-box;
+    padding: 0;
+    margin: 0;
+}
+
+html, body {
+    height: 100%;
+    margin: 0;
+    font-family: var(--body-font);
+    background: var(--body-bg); /* Use _main variable */
+    color: var(--text-color-main); /* Use _main variable */
+    overflow: hidden;
+}
+
+a {
+    text-decoration: none;
+}
+
+img {
+    display: block;
+    max-width: 100%;
+    height: auto;
+}
+
+button {
+    all: unset;
+    cursor: pointer;
+}
+
+.app-wrapper {
+    display: flex;
+    height: 100vh;
+    width: 100vw;
+    background: var(--body-bg);
+    box-sizing: border-box;
+    position: relative;
+    overflow: hidden;
+}
+
+/*=============== SIDEBAR ===============*/
+.sidebar {
+    width: var(--expanded-sidebar-width);
+    padding: var(--sidebar-vertical-padding) var(--sidebar-padding-x);
+    background-color: var(--div-bg); /* Use _main variable */
+    border-radius: 12px;
+    box-shadow: 0 4px 20px var(--shadow-color-main); /* Use _main variable */
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+    overflow: hidden;
+    height: 100%;
+    z-index: 1000;
+    transition: width var(--transition-duration) var(--transition-timing-function), padding var(--transition-duration) var(--transition-timing-function), left var(--transition-duration) var(--transition-timing-function), /* Added for mobile transition */
+    box-shadow var(--transition-duration) var(--transition-timing-function); /* Added for mobile transition */
+}
+
+/* Expanded state (default for larger screens) */
+.sidebar.expanded {
+    width: var(--expanded-sidebar-width);
+    padding: var(--sidebar-vertical-padding) var(--sidebar-padding-x);
+}
+
+/* Compact state */
+.sidebar.compact {
+    width: var(--compact-sidebar-width);
+    padding: var(--sidebar-vertical-padding) 0;
+}
+
+/* Sidebar Sections Layout */
+.sidebar-header {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 15px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid var(--border-color);
+    flex-shrink: 0;
+    transition: all var(--transition-duration) var(--transition-timing-function);
+}
+
+.navigation-main {
+    flex-grow: 1;
+    transition: all var(--transition-duration) var(--transition-timing-function);
+    overflow-y: auto;
+    min-height: 0;
+    padding-right: 10px;
+}
+
+/* Custom Scrollbar Styles for .navigation-main */
+.navigation-main::-webkit-scrollbar {
+    width: .4rem;
+    background-color: hsl(228, 8%, 85%);
+    border-radius: 8px;
+}
+
+.navigation-main::-webkit-scrollbar-thumb {
+    background-color: hsl(228, 8%, 75%);
+    border-radius: 8px;
+    border: 2px solid hsl(228, 8%, 85%);
+}
+
+.navigation-main::-webkit-scrollbar-thumb:hover {
+    background-color: hsl(228, 8%, 65%);
+}
+
+/* Para navegadores Firefox (soporte limitado) */
+.navigation-main {
+    scrollbar-width: thin;
+    scrollbar-color: hsl(228, 8%, 75%) hsl(228, 8%, 85%);
+}
+
+.other-links {
+    margin-top: auto;
+    padding-top: 15px;
+    border-top: 1px solid var(--border-color);
+    flex-shrink: 0;
+    transition: all var(--transition-duration) var(--transition-timing-function);
+}
+
+/* User Profile (Expanded vs. Compact) */
+.user-profile-expanded {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    opacity: 1;
+    transition: opacity var(--transition-duration) var(--transition-timing-function);
+}
+
+.user-profile-compact {
+    display: flex;
+    opacity: 0;
+    justify-content: center;
+    align-items: center;
+    height: 45px;
+    transition: opacity var(--transition-duration) var(--transition-timing-function);
+}
+.sidebar.compact .user-profile-compact {
+    opacity: 1;
+    justify-content: center;
+}
+
+.avatar {
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    object-fit: cover;
+    flex-shrink: 0;
+}
+
+.user-details {
+    display: flex;
+    flex-direction: column;
+    white-space: nowrap;
+    overflow: hidden;
+    transition: opacity var(--transition-duration) var(--transition-timing-function);
+}
+    .user-details h3 {
+        margin: 0;
+        font-size: 16px;
+        color: var(--title-color-main); /* Use _main variable */
+        font-weight: 600;
+    }
+    .user-details p {
+        font-size: 12px;
+        color: var(--text-color-main); /* Use _main variable */
+        margin: 0;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+    .user-details small {
+        font-size: 12px;
+        color: var(--text-color-main); /* Use _main variable */
+        margin: 0;
+        padding-top: 2px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        transition: opacity var(--transition-duration) var(--transition-timing-function),
+                    height var(--transition-duration) var(--transition-timing-function);
+    }
+    .user-details .user-name { color: var(--Grey1); }
+    .user-details .area-name { color: var(--text-color-main); } /* Use _main variable */
+    .user-details .branch-info {
+        color: var(--third-color);
+        font-weight: var(--font-semi-bold);
+    }
+
+/* Section Titles */
+.section-title {
+    font-size: 13px;
+    color: var(--text-color-main); /* Use _main variable */
+    margin-top: 15px;
+    margin-bottom: 10px;
+    padding-left: 15px;
+    font-weight: 500;
+    white-space: nowrap;
+    opacity: 1;
+    transition: opacity var(--transition-duration) var(--transition-timing-function),
+                padding-left var(--transition-duration) var(--transition-timing-function);
+}
+.navigation-main .section-title:first-child {
+    margin-top: 0;
+}
+
+
+/* Navigation List Items */
+.navigation-main ul, .other-links ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    row-gap: 5px;
+}
+.navigation-main li, .other-links li {
+    margin-bottom: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.sidebar__link {
+    display: flex;
+    align-items: center;
+    column-gap: 12px;
+    padding: 10px 15px;
+    text-decoration: none;
+    color: var(--text-color-main); /* Use _main variable */
+    font-size: 14px;
+    border-radius: 8px;
+    position: relative;
+    overflow: hidden;
+    transition: background-color 0.2s ease, color 0.2s ease,
+                column-gap var(--transition-duration) var(--transition-timing-function),
+                padding var(--transition-duration) var(--transition-timing-function),
+                justify-content var(--transition-duration) var(--transition-timing-function),
+                width var(--transition-duration) var(--transition-timing-function);
+    justify-content: flex-start;
+    width: 100%;
+    height: auto;
+}
+    .sidebar__link:hover {
+        background-color: var(--hover-bg);
+        color: var(--text-color-main); /* Use _main variable */
+    }
+
+    .sidebar__link.active {
+        background-color: var(--active-bg);
+        color: var(--active-text);
+        font-weight: 500;
+    }
+    .sidebar__link.active i {
+        color: var(--active-text);
+    }
+
+.sidebar__link i {
+    font-size: 18px;
+    color: var(--text-color-main); /* Use _main variable */
+    flex-shrink: 0;
+}
+
+.nav-text {
+    white-space: nowrap;
+    opacity: 1;
+    width: auto;
+    overflow: hidden;
+    transition: opacity var(--transition-duration) var(--transition-timing-function),
+                width var(--transition-duration) var(--transition-timing-function);
+}
+
+.logout-btn {
+    background-color: var(--first-color);
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 18px;
+    transition: background-color 0.2s ease;
+    flex-shrink: 0;
+}
+
+.logout-btn:hover {
+    background-color: #43A047;
+}
+
+.sidebar__link.logout-link button.logout-button-content {
+    background: none;
+    border: none;
+    padding: 0;
+    margin: 0;
+    cursor: pointer;
+    width: 100%;
+    text-align: left;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    color: var(--text-color-primary);
+    transition: all 0.3s ease;
+}
+
+.sidebar.compact .sidebar__link.logout-link button.logout-button-content {
+    justify-content: center;
+    padding: 0;
+    gap: 0;
+    text-align: center;
+}
+
+    .sidebar.compact .sidebar__link.logout-link button.logout-button-content i {
+        margin: 0;
+    }
+
+.sidebar.compact .nav-text,
+.sidebar.compact .session-info-inline {
+    opacity: 0;
+    pointer-events: none;
+    display: none;
+}
+
+    .sidebar__link.logout-link button.logout-button-content .nav-text {
+        flex-grow: 1;
+    }
+
+    .sidebar__link.logout-link button.logout-button-content:hover {
+        background-color: var(--sidebar-link-hover-bg); /* O el color de hover que uses */
+        color: var(--sidebar-link-hover-color);
+        /* ... otros efectos de hover ... */
+    }
+
+.session-info-counter {
+    font-size: 12px;
+}
+
+/*=============== DROPDOWN STYLES ===============*/
+.sidebar__dropdown {
+    margin-top: 8px;
+    margin-bottom: 0;
+}
+.navigation-main .sidebar__dropdown:first-of-type {
+    margin-top: 0;
+}
+
+.sidebar__link.dropdown-btn {
+    position: relative;
+    cursor: pointer;
+    padding-right: 30px;
+}
+
+.dropdown-arrow {
+    position: absolute;
+    right: 15px;
+    font-size: 1rem;
+    color: var(--text-color-main); /* Use _main variable */
+    transition: transform var(--transition-duration) var(--transition-timing-function);
+}
+
+.sidebar__link.dropdown-btn.active-dropdown .dropdown-arrow {
+    transform: rotate(180deg);
+}
+
+.sidebar__submenu {
+    background-color: var(--div-bg); /* Use _main variable */
+    overflow: hidden;
+    max-height: 0;
+    transition: max-height var(--transition-duration) ease-out;
+    padding-left: 0;
+}
+
+.sidebar__submenu ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    row-gap: 5px;
+    padding-top: 5px;
+    padding-bottom: 5px;
+}
+
+    .sidebar__submenu .sidebar__link.sub-link {
+        padding: 8px 15px 8px 35px;
+        font-size: 13px;
+        column-gap: 8px;
+        border-bottom: solid 1px var(--border-color); /* Default border for sub-links */
+    }
+
+.sidebar__submenu .sidebar__link.sub-link.active {
+    background-color: var(--active-bg);
+    color: var(--active-text);
+}
+.sidebar__submenu .sidebar__link.sub-link.active i {
+    color: var(--active-text);
+}
+
+
+/* Show Submenu */
+.sidebar__dropdown.show-submenu .sidebar__submenu {
+    max-height: 200px;
+}
+
+
+/* Compact Mode Styles (apply when sidebar has 'compact' class) */
+.sidebar.compact .user-profile-expanded {
+    opacity: 0;
+    pointer-events: none;
+    display: none;
+}
+.sidebar.compact .user-profile-compact {
+    opacity: 1;
+    justify-content: center;
+    align-items: center;
+    height: 45px;
+    transition: opacity var(--transition-duration) var(--transition-timing-function);
+}
+
+.sidebar.compact .sidebar-header {
+    padding-bottom: 10px;
+    border-bottom: none;
+    margin-bottom: 10px;
+    align-items: center;
+    justify-content: center;
+}
+
+.sidebar.compact .user-details {
+    opacity: 0;
+    pointer-events: none;
+    height: 0;
+    margin: 0;
+    padding: 0;
+}
+
+.sidebar.compact .section-title {
+    opacity: 0;
+    pointer-events: none;
+    height: 0;
+    margin: 0;
+    padding: 0;
+}
+
+/* Apply universal compact link styling to ALL sidebar__link elements */
+.sidebar.compact .sidebar__link {
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    column-gap: 0;
+    justify-content: center;
+    align-items: center;
+    border-radius: 8px;
+    background-color: transparent;
+    margin: 0 auto;
+}
+
+.sidebar.compact .sidebar__link:hover {
+    background-color: var(--hover-bg);
+}
+.sidebar.compact .sidebar__link.active {
+    background-color: var(--active-bg);
+}
+
+.sidebar.compact .sidebar__link i {
+    margin: 0;
+}
+
+.sidebar.compact .nav-text,
+.sidebar.compact .badge {
+    opacity: 0;
+    width: 0;
+    pointer-events: none;
+    transition: opacity var(--transition-duration) var(--transition-timing-function),
+                width var(--transition-duration) var(--transition-timing-function);
+}
+
+/* Hide dropdown arrow in compact mode */
+.sidebar.compact .dropdown-arrow {
+    opacity: 0;
+    pointer-events: none;
+}
+
+/* Important: When compact, submenus should auto-close and not expand */
+.sidebar.compact .sidebar__submenu {
+    max-height: 0 !important;
+    transition: max-height 0s !important;
+}
+/* Ensure arrows reset if sidebar is compact */
+.sidebar.compact .dropdown-arrow {
+    transform: rotate(0deg) !important;
+}
+
+/* Styles for the logout link and inline session info */
+.sidebar__link.logout-link {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    column-gap: 12px;
+    padding-right: 15px;
+}
+
+.session-info-inline {
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 10px;
+    color: var(--text-color-main); /* Use _main variable */
+    opacity: 1;
+    transition: opacity var(--transition-duration) var(--transition-timing-function);
+}
+
+.session-info-inline i {
+    font-size: 11px;
+    color: var(--text-color-main); /* Use _main variable */
+    flex-shrink: 0;
+}
+
+/* Specific compact styles for the logout link's nav-text */
+.sidebar.compact .sidebar__link.logout-link .nav-text,
+.sidebar.compact .sidebar__link.logout-link .session-info-inline {
+    opacity: 0;
+    pointer-events: none;
+    width: 0;
+    height: 0;
+    overflow: hidden;
+}
+
+.toggle-button {
+    position: absolute;
+    top: var(--sidebar-vertical-padding);
+    left: calc(var(--expanded-sidebar-width) + 20px);
+    background-color: var(--div-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 50%;
+    width: var(--toggle-button-size);
+    height: var(--toggle-button-size);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 1.25rem;
+    color: var(--text-color-main); /* Use _main variable */
+    box-shadow: 0 2px 5px var(--shadow-color-main); /* Use _main variable */
+    transition: left var(--transition-duration) var(--transition-timing-function),
+                background-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease;
+    z-index: var(--z-fixed) + 1;
+}
+.toggle-button:hover {
+    background-color: var(--hover-bg);
+    color: var(--title-color-main); /* Use _main variable */
+    box-shadow: 0 4px 10px var(--shadow-color-main); /* Use _main variable */
+}
+
+/* Adjust toggle button position when sidebar is compact (desktop) */
+.sidebar.compact + .toggle-button {
+    left: calc(var(--compact-sidebar-width) + 20px);
+}
+
+/* Main Content Area */
+.main-content {
+    flex-grow: 1;
+    background-color: var(--div-bg); /* Use _main variable */
+    border-radius: 12px;
+    box-shadow: 0 4px 20px var(--shadow-color-main); /* Use _main variable */
+    overflow-y: auto;
+    padding: 10px 20px;
+    margin-left: 20px; /* Default desktop margin */
+    transition: margin-left var(--transition-duration) var(--transition-timing-function);
+    display: flex;
+    flex-direction: column;
+}
+
+.sidebar.compact ~ .main-content {
+    margin-left: 20px;
+}
+
+.main-header {
+    display: flex;
+    justify-content: space-between; /* Alinea los elementos a los extremos */
+    align-items: center; /* Centra verticalmente */
+    padding-bottom: 10px;
+    margin-bottom: 20px; /* Espacio antes del contenido */
+    border-bottom: 1px solid var(--border-color); /* Separador visual */
+    font-size: var(--title-font-size); /* Tamaño de fuente para el título de la vista */
+    color: var(--title-color-main); /* Color del título */
+    font-weight: var(--font-semi-bold);
+}
+
+.main-header h1 {
+    margin: 0; /* Elimina el margen por defecto del h1 */
+    font-size: inherit; /* Hereda el tamaño de fuente del .main-header */
+    color: inherit; /* Hereda el color del .main-header */
+}
+
+.main-header-logo {
+    width: 150px;
+    object-fit: cover; /* Asegura que la imagen cubra el área sin distorsionarse */
+    flex-shrink: 0; /* Evita que se encoja en pantallas pequeñas */
+}
+
+/* Estilos para los botones de control (como el botón de filtro) */
+.control-button-icon {
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.3s ease;
+    width: 40px; /* Tamaño base para los iconos */
+    height: 40px;
+}
+
+    .control-button-icon:hover {
+        transform: scale(1.02);
+        box-shadow: 0 4px 10px rgba(194, 214, 255, 0.7), 0 2px 5px rgba(226, 226, 226, 0.7);
+    }
+
+/* Estilos del sidebar de filtros */
+.filter-sidebar {
+    position: fixed; /* Posicionamiento fijo respecto al viewport */
+    top: 0;
+    right: -400px; /* Inicialmente oculto a la derecha (ajusta este valor si cambias el ancho) */
+    width: 400px; /* Ancho del sidebar */
+    height: 100%; /* Ocupa toda la altura de la ventana */
+    background-color: var(--div-color); /* Usa tu variable de color */
+    box-shadow: -2px 0px 10px rgba(0, 0, 0, 0.2); /* Sombra para destacarlo */
+    transition: right 0.3s ease; /* Transición suave al abrir/cerrar */
+    z-index: 9999; /* Asegura que esté por encima de otros elementos */
+}
+
+    .filter-sidebar.show {
+        right: 0; /* Muestra el sidebar moviéndolo a la posición 0 desde la derecha */
+    }
+
+.filter-sidebar-content {
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: 100%;
+    box-sizing: border-box;
+    background: var(--div-bg);
+}
+
+.filter-sidebar h3 {
+    font-size: var(--title-font-size);
+    margin-bottom: 20px;
+}
+
+.filter-sidebar .form-group {
+    margin-bottom: 15px;
+}
+
+    .filter-sidebar .form-group label {
+        font-weight: bold;
+        display: block; /* Asegura que la etiqueta esté en su propia línea */
+        margin-bottom: 5px;
+    }
+
+.filter-sidebar .input-control {
+    width: 100%;
+    padding: 8px;
+    box-sizing: border-box;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+.filter-sidebar .filter-buttons {
+    margin-top: auto; /* Empuja los botones al final del contenido si hay espacio */
+    display: flex;
+    justify-content: space-between;
+    padding-top: 20px;
+    border-top: 1px solid #eee; /* Línea divisoria opcional */
+}
+
+.table-section {
+    flex-grow: 1; /* Permite que la sección de la tabla ocupe el espacio disponible */
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.filter-sidebar .filter-buttons {
+    margin-top: auto;
+    display: flex;
+    justify-content: end;
+}
+
+.filter-sidebar .apply-filter-btn,
+.filter-sidebar .cancel-filter-btn {
+    padding: 5px 10px;
+    cursor: pointer;
+}
+
+    .filter-sidebar .apply-filter-btn img {
+        width: 40px;
+        height: 40px;
+    }
+
+    .filter-sidebar .cancel-filter-btn img {
+        width: 40px;
+        height: 40px;
+    }
+
+    .filter-sidebar .apply-filter-btn:hover,
+    .filter-sidebar .cancel-filter-btn:hover {
+        transform: scale(1.05);
+        transition: transform 0.2s;
+    }
+
+/* Estilos para la fila de búsqueda y botones */
+.table-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px; /* Más espacio debajo de los controles */
+    flex-wrap: wrap; /* Permite que los elementos se envuelvan en pantallas pequeñas */
+    gap: 10px; /* Espacio entre los elementos al envolver */
+}
+
+#tableSearch {
+    flex-grow: 1;
+    max-width: 300px;
+    padding: 10px;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    font-size: var(--normal-font-size);
+    background-color: var(--div-bg);
+    color: var(--text-color-main);
+}
+
+.table-buttons {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.control-button-wrapper {
+    width: 40px;
+    height: 40px;
+    flex-shrink: 0;
+    flex-grow: 0;
+    cursor: pointer;
+    border-radius: 5px;
+    padding: 0;
+    background-color: var(--button-bg-color);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+    transition: background-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+    .control-button-wrapper > img.control-button-icon {
+        width: 100%; 
+        height: 100%;
+        display: block;
+        object-fit: contain;
+    }
+
+    .control-button-wrapper button.control-button-icon {
+        border: none; 
+        background: none;
+        padding: 0;
+        margin: 0;
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+    }
+
+        .control-button-wrapper button.control-button-icon img {
+            width: 100%; 
+            height: 100%;
+            display: block;
+            object-fit: contain;
+        }
+
+    .control-button-wrapper:hover {
+        background-color: var(--hover-bg); 
+        box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        transform: scale(1.01);
+    }
+
+/* Estilos para la tabla */
+.table-container {
+    overflow-x: auto;
+    margin-bottom: 15px;
+    border-radius: 5px;
+    border: 1px solid var(--border-color);
+}
+
+
+#dataTable {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 600px;
+    background-color: transparent;
+    color: var(--text-color-primary);
+    border: none;
+}
+
+    #dataTable th, #dataTable td {
+        padding: 0 0.5rem;
+        border-bottom: 1px solid var(--border-color);
+        white-space: nowrap;
+        font-size: 14px;
+        background: var(--div-bg);
+        color: var(--text-color-secondary);
+        word-break: break-word;
+    }
+
+    #dataTable th {
+        background-color: var(--table-header-bg);
+        color: var(--table-header-text);
+        font-weight: var(--font-semi-bold);
+        text-transform: uppercase;
+        padding: 8px 5px;
+        vertical-align: middle;
+    }
+
+        #dataTable th.status-column-header {
+            text-align: center;
+            min-height: 40px;
+        }
+
+        #dataTable td.status-column {
+            text-align: center;
+            min-height: 40px;
+        }
+
+.table .badge {
+    position: static !important;
+    display: inline-block;
+    padding: 0.35em 0.65em;
+    font-size: 0.75em;
+    font-weight: 700;
+    line-height: 1;
+    text-align: center;
+    white-space: nowrap;
+    vertical-align: baseline;
+    border-radius: 0.25rem;
+}
+
+.badge-success {
+    background-color: #28a745;
+    color: #fff;
+}
+
+.badge-warning {
+    background-color: #ffc107;
+    color: #212529;
+}
+
+.badge-danger {
+    background-color: #dc3545;
+    color: #fff;
+}
+
+.badge-secondary {
+    background-color: #6c757d;
+    color: #fff;
+}
+
+#dataTable th:last-child {
+    text-align: center;
+    width: 1%;
+    white-space: nowrap; /* Evitar saltos de línea */
+}
+
+#dataTable td:last-child {
+    text-align: center;
+    width: 1%; /* Intentar que la columna ocupe solo el ancho de su contenido */
+    white-space: nowrap; /* Asegura que no se rompa el contenido */
+    vertical-align: middle; /* Alineación vertical */
+}
+
+#dataTable td:last-child > .action-icon,
+#dataTable td:last-child > .switch {
+    display: inline-block; /* Asegura que se comporten como bloques en línea */
+    vertical-align: middle; /* Alinea los elementos verticalmente */
+    margin-right: 5px; /* Espacio entre los elementos (ajusta si es necesario) */
+}
+
+.table-section .table-container table tbody td a i {
+    font-size: 1.3em;
+}
+
+.table-section .table-container table tbody td a.btn-edit i {
+    color: var(--second-color);
+}
+
+.table-section .table-container table tbody td a.btn-detail i {
+    color: var(--first-color);
+}
+
+.table-section .table-container table tbody td a.btn-exit i {
+    color: var(--third-color);
+}
+
+.table-section .table-container table tbody td a.btn-cancel i {
+    color: #db3210;
+}
+
+.table-section .table-container table tbody td a {
+    min-width: 24px;
+    min-height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+}
+
+.table-section .table-container table tbody td a.btn-load-cash img,
+.table-section .table-container table tbody td a.btn-register-departure img,
+.table-section .table-container table tbody td a.btn-unload-cash img,
+.table-section .table-container table tbody td a.btn-register-arrival img {
+    width: 17px;
+    padding: 0;
+}
+
+/* Estilos para el Toggle Switch */
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 38px; /* Ancho del switch */
+    height: 20px; /* Altura del switch */
+    vertical-align: middle; /* Alinea con los iconos */
+    margin-left: 5px; /* Espacio a la izquierda */
+}
+
+.switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: var(--toggle-slider-bg);
+    transition: .4s;
+    border-radius: 20px; /* Hace el slider redondo */
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 14px; /* Tamaño del círculo */
+    width: 14px;
+    left: 3px; /* Posición inicial del círculo */
+    bottom: 3px;
+    background-color: white;
+    transition: .4s;
+    border-radius: 50%; /* Hace el círculo redondo */
+}
+
+input:checked + .slider {
+    background-color: var(--toggle-slider-checked-bg);
+}
+
+input:focus + .slider {
+    box-shadow: 0 0 1px var(--toggle-slider-checked-bg);
+}
+
+input:checked + .slider:before {
+    transform: translateX(18px); /* Mueve el círculo cuando está 'checked' */
+}
+
+/* Estilos generales para el pie de tabla */
+.table-footer {
+    display: flex;
+    justify-content: space-between; /* Para que el mensaje y la paginación se separen */
+    align-items: center;
+    padding: 15px 0;
+    border-top: 1px solid var(--border-color); /* Línea divisoria, usa tu variable de color */
+    flex-wrap: wrap; /* Permite que los elementos se envuelvan en pantallas pequeñas */
+    gap: 10px; /* Espacio entre los elementos cuando se envuelven */
+}
+
+/* Estilos para el mensaje de paginación */
+.page-message {
+    font-size: 0.9rem;
+    color: var(--text-color-secondary); /* Un color de texto más suave */
+    white-space: nowrap; /* Evita que el texto se rompa en varias líneas */
+}
+
+/* Contenedor principal de los botones de paginación */
+.pagination {
+    display: flex;
+    gap: 5px; /* Espacio entre los botones de paginación */
+    flex-wrap: wrap; /* Permite que los botones se envuelvan si hay muchos */
+    justify-content: flex-end; /* Alinea los botones a la derecha */
+}
+
+    /* Estilos para cada botón de paginación */
+    .pagination .page-link {
+        background-color: var(--card-bg-color); /* Color de fondo del botón, usa tu variable */
+        color: var(--text-color-primary); /* Color del texto/icono del botón */
+        border: 1px solid var(--border-color); /* Borde del botón */
+        padding: 8px 12px; /* Relleno para que los botones tengan buen tamaño */
+        border-radius: 5px; /* Bordes redondeados */
+        cursor: pointer;
+        font-size: 0.9rem;
+        min-width: 35px; /* Ancho mínimo para mantener uniformidad */
+        text-align: center;
+        transition: all 0.3s ease; /* Transición suave para hover y estado activo */
+        display: flex; /* Para centrar el contenido (texto o icono) */
+        align-items: center;
+        justify-content: center;
+    }
+
+        /* Estilos para el botón de página actual */
+        .pagination .page-link.active-page {
+            background-color: var(--primary-color); /* Color de fondo para la página activa */
+            color: var(--white-color); /* Color de texto blanco para la página activa */
+            border-color: var(--primary-color);
+            font-weight: bold;
+        }
+
+        /* Estilos al pasar el ratón por encima de los botones */
+        .pagination .page-link:not(.active-page):not(:disabled):hover {
+            background-color: var(--hover-color); /* Color de fondo al pasar el ratón, usa tu variable */
+            color: var(--primary-color); /* Color de texto al pasar el ratón */
+            border-color: var(--primary-color);
+        }
+
+        /* Estilos para botones deshabilitados */
+        .pagination .page-link:disabled {
+            opacity: 0.5; /* Reduce la opacidad para indicar que está deshabilitado */
+            cursor: not-allowed; /* Cambia el cursor */
+            background-color: var(--disabled-bg-color); /* Opcional: un color de fondo para deshabilitado */
+            color: var(--disabled-text-color); /* Opcional: un color de texto para deshabilitado */
+        }
+
+/* ------------------------------- */
+/* BREAKPOINTS / RESPONSIVE DESIGN */
+/* ------------------------------- */
+
+/* Desktop (Large screens, >= 1150px) */
+@media screen and (min-width: 1150px) {
+    .app-wrapper {
+        padding: 1rem;
+    }
+
+    .sidebar {
+        position: relative; /* Ensure it's not fixed on desktop */
+        left: auto; /* Reset left for desktop */
+        width: var(--expanded-sidebar-width); /* Default to expanded */
+        box-shadow: 0 4px 20px var(--shadow-color-main);
+    }
+    .sidebar.compact { /* Allow compact state for desktop via toggle */
+        width: var(--compact-sidebar-width);
+    }
+
+    .toggle-button {
+        top: var(--sidebar-vertical-padding);
+        left: calc(var(--expanded-sidebar-width) + 1rem); /* Position relative to expanded sidebar */
+    }
+    .sidebar.compact + .toggle-button {
+        left: calc(var(--compact-sidebar-width) + 1rem); /* Position relative to compact sidebar */
+    }
+
+    .main-content {
+        margin-left: 1rem;
+        padding: 20px;
+    }
+}
+
+/* Tablet (Medium screens, 768px to 1149px) */
+@media screen and (min-width: 768px) and (max-width: 1149px) {
+    .app-wrapper {
+        padding: 15px; /* Slightly less padding than large desktop */
+    }
+
+    .sidebar {
+        position: relative; /* Ensure it's not fixed */
+        left: auto; /* Reset left */
+        width: var(--compact-sidebar-width); /* Default to compact on tablet */
+        padding: var(--sidebar-vertical-padding) 0; /* Compact padding */
+        box-shadow: 0 4px 20px var(--shadow-color-main);
+    }
+    .sidebar.expanded { /* Allow expanded state via toggle */
+        width: var(--expanded-sidebar-width);
+        padding: var(--sidebar-vertical-padding) var(--sidebar-padding-x);
+    }
+
+    .toggle-button {
+        top: var(--sidebar-vertical-padding);
+        left: calc(var(--compact-sidebar-width) + 15px); /* Position relative to compact sidebar */
+    }
+    .sidebar.expanded + .toggle-button { /* Adjust if expanded */
+        left: calc(var(--expanded-sidebar-width) + 15px);
+    }
+
+    .main-content {
+        margin-left: 15px; /* Match app-wrapper padding */
+        padding: 30px; /* Slightly less padding */
+    }
+
+    .pagination .page-link {
+        padding: 7px 11px;
+        font-size: 0.88rem;
+    }
+}
+
+
+/* Mobile (Small screens, max-width: 767px) */
+@media screen and (max-width: 767px) {
+    .app-wrapper {
+        padding: 10px;
+        overflow-x: hidden; /* Asegura que no haya scroll horizontal cuando el sidebar está fuera */
+    }
+
+    .sidebar {
+        position: fixed; /* Fijo en la pantalla */
+        top: 0;
+        left: calc(-1 * var(--expanded-sidebar-width)); /* Oculto por defecto */
+        width: var(--expanded-sidebar-width); /* Ancho completo del sidebar expandido */
+        height: 100vh; /* Altura completa de la ventana */
+        margin: 0;
+        border-radius: 0; /* Sin bordes redondeados cuando cubre toda la altura */
+        box-shadow: none; /* Sin sombra cuando está oculto */
+        z-index: var(--z-fixed) + 10;
+        transition: left var(--transition-duration) var(--transition-timing-function); /* Transición para que se deslice */
+    }
+
+    .sidebar.expanded { /* Cuando el sidebar se abre en móvil */
+        left: 0; /* Se desliza a la vista */
+        box-shadow: 2px 0 24px var(--shadow-color-main); /* Añade sombra al abrirse */
+        z-index: var(--z-fixed) + 500; /* ¡Aumenta es   te valor drásticamente! Por ejemplo, +500 o +1000 */
+    }
+
+    .sidebar:not(.expanded) .user-profile-expanded,
+    .sidebar:not(.expanded) .section-title,
+    .sidebar:not(.expanded) .nav-text,
+    .sidebar:not(.expanded) .badge,
+    .sidebar:not(.expanded) .dropdown-arrow,
+    .sidebar:not(.expanded) .sidebar__submenu, /* Asegura que el submenú esté oculto cuando el sidebar está cerrado */
+    .sidebar:not(.expanded) .session-info-inline {
+        opacity: 0;
+        pointer-events: none;
+        display: none; /* Usa display: none para sacarlos del flujo y evitar problemas */
+    }
+
+    /* Gestionar el perfil de usuario en móvil: siempre mostrar la versión compacta en la cabecera */
+    .user-profile-expanded { /* Ocultar la versión expandida en móvil */
+        display: none;
+    }
+    .user-profile-compact { /* Siempre mostrar la versión compacta en móvil */
+        display: flex;
+        justify-content: center;
+        opacity: 1;
+    }
+    .sidebar .sidebar-header {
+        padding-bottom: 10px;
+        border-bottom: none;
+        justify-content: center; /* Centrar el avatar compacto */
+    }
+
+    /* Estilo general para los enlaces del sidebar en móvil cuando está ABIERTO */
+    .sidebar .sidebar__link {
+        justify-content: flex-start; /* Los enlaces se alinean a la izquierda cuando el sidebar está abierto */
+        padding: 10px 15px; /* Padding estándar para enlaces expandidos */
+        column-gap: 12px; /* Espacio estándar entre icono y texto */
+    }
+    .sidebar .sidebar__link i {
+        margin: 0; /* Elimina márgenes extra de iconos */
+    }
+
+    /* Asegura que los submenús funcionen cuando el sidebar está ABIERTO */
+    .sidebar__submenu {
+        max-height: 0; /* Por defecto, los submenús están cerrados */
+        transition: max-height var(--transition-duration) ease-out; /* Habilita transición para abrir/cerrar */
+    }
+    .sidebar__dropdown.show-submenu .sidebar__submenu { /* Al hacer clic, el submenú se abre */
+        max-height: 200px; /* Asegura que se abra correctamente */
+    }
+
+
+    .toggle-button {
+        position: fixed; /* Fijo en la pantalla */
+        top: 10px;
+        left: 10px;
+        z-index: var(--z-fixed) + 20; /* Por encima de todo */
+    }
+
+    /* Ajusta la posición del botón de alternar cuando el sidebar está ABIERTO en móvil */
+    .sidebar.expanded ~ .toggle-button {
+        left: calc(var(--expanded-sidebar-width) + 10px); /* Se mueve con el sidebar */
+    }
+
+    .sidebar.compact + .toggle-button {
+        left: calc(var(--compact-sidebar-width) + 1px);
+    }
+
+    .main-content {
+        margin-left: 0; /* Sin margen izquierdo en móvil */
+        padding: 20px;
+        width: 100%;
+        border-radius: 12px; /* Mantiene el border-radius del contenido principal */
+    }
+
+        .main-header {
+        padding-bottom: 15px;
+        margin-bottom: 15px;
+        font-size: 1.1rem; /* Ajusta el tamaño de fuente para móviles */
+    }
+
+    .main-header-logo {
+        width: 75px;
+    }
+
+        .table-controls {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    #tableSearch {
+        width: 100%;
+        max-width: none;
+        margin-bottom: 10px;
+    }
+
+    .table-buttons {
+        flex-direction: row;
+        width: 100%;
+        justify-content: space-around;
+        gap: 5px;
+    }
+
+    .control-button-wrapper {
+        width: 35px; height: 35px;
+    }
+
+    .control-button-icon {
+        width: 35px;
+        height: 35px;
+    }
+
+    .control-button-icon {
+        width: 35px; /* Ligeramente más pequeños en móvil */
+        height: 35px;
+    }
+    #dataTable {
+        min-width: unset; /* Permite que la tabla se encoja más */
+        /* overflow-x: auto en .table-container ya lo hace scrollable */
+    }
+    #dataTable th, #dataTable td {
+        padding: 8px 5px; /* Menos padding en celdas para ahorrar espacio */
+        font-size: var(--smaller-font-size);
+    }
+    .action-icon {
+        font-size: 0.9rem;
+        margin-right: 5px;
+    }
+    .switch {
+        width: 30px;
+        height: 16px;
+    }
+    .slider:before {
+        height: 10px;
+        width: 10px;
+        left: 3px;
+        bottom: 3px;
+    }
+    input:checked + .slider:before {
+        transform: translateX(14px);
+    }
+
+    /* Estilos de paginación para móvil */
+    .table-footer {
+        flex-direction: column; /* Apila el mensaje y el paginador */
+        align-items: center;
+        gap: 10px; /* Espacio entre ellos */
+        padding-top: 10px;
+    }
+
+    .pagination {
+        justify-content: center; /* Centra los botones de paginación */
+        width: 100%; /* Ocupa todo el ancho disponible */
+        margin-top: 10px; /* Espacio entre el mensaje y los botones */
+        gap: 3px; /* Reduce el espacio entre botones */
+    }
+
+        .pagination .page-link {
+            font-size: 0.8rem; /* Reduce el tamaño de fuente */
+            padding: 5px 8px; /* Reduce el padding */
+            min-width: unset; /* Quita el min-width para que se ajusten mejor */
+        }
+}

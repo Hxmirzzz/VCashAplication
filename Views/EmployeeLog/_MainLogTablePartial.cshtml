@@ -1,0 +1,157 @@
+﻿@model IEnumerable<VCashApp.Models.Entities.SegRegistroEmpleado>
+@using VCashApp.Enums
+@using System.Globalization
+
+@{
+    int currentPage = ViewBag.CurrentPage ?? 1;
+    int totalPages = ViewBag.TotalPages ?? 1;
+    int totalData = ViewBag.TotalData ?? 0;
+    int pageSize = ViewBag.PageSize ?? 15;
+
+    bool canEditLog = ViewBag.CanEditLog ?? false;
+    bool canCreateLog = ViewBag.CanCreateLog ?? false;
+    const int maxPagesToShow = 5;
+    int halfPagesToShow = (maxPagesToShow - 1) / 2;
+
+    int startPage = Math.Max(1, currentPage - halfPagesToShow);
+    int endPage = Math.Min(totalPages, currentPage + halfPagesToShow);
+
+    if (endPage - startPage + 1 < maxPagesToShow)
+    {
+        if (startPage == 1)
+        {
+            endPage = Math.Min(totalPages, startPage + maxPagesToShow - 1);
+        }
+        else if (endPage == totalPages)
+        {
+            startPage = Math.Max(1, endPage - maxPagesToShow + 1);
+        }
+    }
+}
+
+<div class="table-section">
+    <div class="table-container">
+        <div class="table-wrapper">
+            <table class="table" id="dataTable">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Empleado</th>
+                        <th>Cedula</th>
+                        <th>Sucursal</th>
+                        <th>Cargo</th>
+                        <th>Unidad</th>
+                        <th>Entrada</th>
+                        <th>Salida</th>
+                        <th class="status-column-header">Estado</th>
+                        <th><i class="ri-list-settings-fill"></i></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model != null && Model.Any())
+                    {
+                        @foreach (var item in Model)
+                        {
+                            <tr>
+                                <td>@item.Id</td>
+                                <td>@item.PrimerNombreEmpleado @item.PrimerApellidoEmpleado</td>
+                                <td>@item.CodCedula</td>
+                                <td>@item.NombreSucursalEmpleado</td>
+                                <td>@item.NombreCargoEmpleado</td>
+                                <td>@item.NombreUnidadEmpleado</td>
+                                <td>@item.FechaEntrada.ToString("yyyy-MM-dd") @item.HoraEntrada.ToString("HH:mm")</td>
+                                <td>
+                                    @if (item.FechaSalida.HasValue && item.HoraSalida.HasValue)
+                                    {
+                                        @($"{item.FechaSalida.Value.ToString("yyyy-MM-dd")} {item.HoraSalida.Value.ToString("HH:mm")}")
+                                    }
+                                    else
+                                    {
+                                        @:N/A
+                                    }
+                                </td>
+                                <td class="status-column">
+                                    @{
+                                        string statusText = "";
+                                        string badgeClass = "";
+
+                                        if (item.IndicadorEntrada && item.IndicadorSalida)
+                                        {
+                                            statusText = "COMPLETO";
+                                            badgeClass = "badge-success";
+                                        }
+                                        else if (item.IndicadorEntrada && !item.IndicadorSalida)
+                                        {
+                                            statusText = "EN PROGRESO";
+                                            badgeClass = "badge-warning";
+                                        }
+                                        else
+                                        {
+                                            statusText = "UNKNOWN";
+                                            badgeClass = "badge-danger";
+                                        }
+                                    }
+                                    <span class="badge @badgeClass">@statusText</span>
+                                </td>
+                                <td>
+                                    <div class="action-buttons d-flex align-items-center justify-content-center">
+                                        <a href="@Url.Action("LogDetails", "EmployeeLog", new { id = item.Id })" class="btn-detail" title="View Details">
+                                            <i class="ri-eye-fill"></i>
+                                        </a>
+
+                                        @if (canCreateLog && item.IndicadorEntrada && !item.IndicadorSalida)
+                                        {
+                                            <a href="@Url.Action("RecordManualExit", "EmployeeLog", new { id = item.Id })" class="btn-exit ml-1" title="Record Manual Exit">
+                                                <i class="ri-arrow-left-box-fill"></i>
+                                            </a>
+                                        }
+
+                                        @if (canEditLog)
+                                        {
+                                            <a href="@Url.Action("EditLog", "EmployeeLog", new { id = item.Id })" class="btn-edit ml-1" title="Edit Log">
+                                                <i class="ri-pencil-fill"></i>
+                                            </a>
+                                        }
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="9" class="text-center">No se encontraron registros de empleados para los criterios seleccionados.</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="table-footer">
+        <div class="page-message">Página @currentPage de @totalPages (Total: @totalData registros)</div>
+        <div class="pagination">
+            <button class="page-link" data-page="1" @(currentPage == 1 ? "disabled" : "")>&laquo;</button>
+
+            <button class="page-link" data-page="@(currentPage - 1)" @(currentPage == 1 ? "disabled" : "")>&lt;</button>
+
+            @if (startPage > 1)
+            {
+                <button class="page-link" data-page="@(startPage - 1)">...</button>
+            }
+
+            @for (int i = startPage; i <= endPage; i++)
+            {
+                <button class="page-link @(currentPage == i ? "active-page" : "")" data-page="@i">@i</button>
+            }
+
+            @if (endPage < totalPages)
+            {
+                <button class="page-link" data-page="@(endPage + 1)">...</button>
+            }
+
+            <button class="page-link" data-page="@(currentPage + 1)" @(currentPage == totalPages ? "disabled" : "")>&gt;</button>
+
+            <button class="page-link" data-page="@totalPages" @(currentPage == totalPages ? "disabled" : "")>&raquo;</button>
+        </div>
+    </div>
+</div>

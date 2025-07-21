@@ -1,0 +1,151 @@
+﻿@using Microsoft.AspNetCore.Identity;
+@using VCashApp.Models;
+@using Microsoft.AspNetCore.Authentication;
+@using System.Linq;
+
+@inject SignInManager<ApplicationUser> SignInManager
+@inject UserManager<ApplicationUser> UserManager
+@inject Microsoft.AspNetCore.Http.IHttpContextAccessor HttpContextAccessor
+
+<li class="nav-item">
+    @if (SignInManager.IsSignedIn(User))
+    {
+        VCashApp.Models.ApplicationUser currentUser = null;
+        string currentUserName = "N/A";
+        TimeSpan? sessionRemainingTime = null;
+
+        // Intentar obtener el usuario actual y el tiempo restante de sesión
+        if (User.Identity.IsAuthenticated)
+        {
+            currentUser = await UserManager.GetUserAsync(User);
+            if (currentUser != null)
+            {
+                currentUserName = currentUser.UserName ?? "N/A";
+
+                var authResult = await HttpContextAccessor.HttpContext.AuthenticateAsync(IdentityConstants.ApplicationScheme);
+                if (authResult?.Properties?.ExpiresUtc.HasValue == true)
+                {
+                    sessionRemainingTime = authResult.Properties.ExpiresUtc.Value - DateTimeOffset.UtcNow;
+                }
+            }
+        }
+
+        <form id="logoutForm" class="sidebar__link logout-link" asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="/Identity/Account/Login">
+            <button type="submit" class="logout-button-content">
+                <i class="fas fa-power-off"></i>
+                <span class="nav-text">Cerrar Sesión</span>
+                @if (sessionRemainingTime.HasValue)
+                {
+                    <span class="session-info-inline">
+                        <i class="fas fa-info-circle"></i>
+                        <span class="session-info-counter text" id="sessionTimer">@sessionRemainingTime.Value.ToString(@"mm\:ss")</span>
+                    </span>
+                }
+                else
+                {
+                    <span class="session-info-inline">
+                        <i class="fas fa-info-circle"></i>
+                        <span class="text">N/A</span>
+                    </span>
+                }
+            </button>
+        </form>
+    }
+    else
+    {
+        <a class="sidebar__link" asp-area="Identity" asp-page="/Account/Login">
+            <i class="fas fa-sign-in-alt"></i> <span class="nav-text">Iniciar Sesión</span>
+        </a>
+    }
+</li>
+
+@* Script para actualizar el contador de sesión *@
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const sessionTimerElement = document.getElementById('sessionTimer');
+        const loginPageUrl = "@Url.Page("/Account/Login", new { Area = "Identity" })"; // URL de la página de login
+
+        if (sessionTimerElement) {
+            let durationString = sessionTimerElement.textContent;
+            let parts = durationString.split(':');
+            let duration = parseInt(parts[0]) * 60 + parseInt(parts[1]); // Tiempo en segundos
+
+            function updateTimer() {
+                if (duration <= 0) {
+                    sessionTimerElement.textContent = "00:00";
+                    clearInterval(sessionTimerInterval); // Detener el contador
+
+                    // --- NUEVA LÓGICA: Preguntar al usuario si desea extender la sesión ---
+                    showConfirmationModal(
+                        "Su sesión está a punto de expirar. ¿Desea extenderla?",
+                        function () { // onConfirmCallback (usuario hace clic en "Confirmar")
+                            // Hacer una llamada AJAX al servidor para extender la sesión
+                            $.ajax({
+                                url: '/Account/ExtendSession', // Nueva acción que vamos a crear
+                                type: 'POST',
+                                headers: {
+                                    'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
+                                },
+                                success: function (response) {
+                                    if (response.success) {
+                                        // Sesión extendida, recargamos la página para que el contador se actualice
+                                        // O, si la respuesta incluye el nuevo tiempo, actualizamos el contador directamente
+                                        alert(response.message); // O una notificación más bonita
+                                        window.location.reload(true); // Recarga forzada para obtener el nuevo tiempo
+                                    } else {
+                                        alert("Error al extender la sesión: " + response.message);
+                                        window.location.href = loginPageUrl; // Si no se puede extender, redirigir al login
+                                    }
+                                },
+                                error: function (xhr, status, error) {
+                                    console.error("Error al comunicarse con el servidor para extender sesión:", error);
+                                    alert("No se pudo extender la sesión. Redirigiendo al login.");
+                                    window.location.href = loginPageUrl; // Redirigir al login en caso de error de red
+                                }
+                            });
+                        },
+                        "Extender Sesión", // Título del modal
+                        "Extender", // Texto del botón de confirmar
+                        "btn-primary" // Clase del botón
+                    );
+                    // --- FIN NUEVA LÓGICA ---
+
+                    return;
+                }
+
+                let minutes = Math.floor(duration / 60);
+                let seconds = Math.floor(duration % 60);
+
+                minutes = minutes < 10 ? "0" + minutes : minutes;
+                seconds = seconds < 10 ? "0" + seconds : seconds;
+
+                sessionTimerElement.textContent = minutes + ":" + seconds;
+                duration--;
+            }
+
+            if (duration > 0) {
+                // Si el tiempo es muy corto (ej. <1 minuto), podemos pedir la extensión antes de que llegue a 0
+                // Esto es solo una sugerencia si quieres avisar ANTES de 0.
+                if (duration <= 60 && duration > 0) { // Si queda 1 minuto o menos
+                    // Puedes decidir si muestras el modal solo cuando llegue a 0,
+                    // o aquí si quieres un aviso temprano. Para esta implementación, lo haremos en 0.
+                }
+
+                updateTimer();
+                let sessionTimerInterval = setInterval(updateTimer, 1000); // Inicia el temporizador
+            } else {
+                sessionTimerElement.textContent = "00:00";
+                // Si ya está en 0 al cargar, mostramos el modal inmediatamente si está logueado
+                if (sessionTimerElement.offsetParent !== null) { // Verifica si el elemento es visible
+                    // Llama a la lógica de extensión si la sesión ya expiró al cargar la página
+                    // (Esto es raro si la autenticación ya redirigió, pero cubre el caso)
+                    showConfirmationModal(
+                        "Su sesión ha expirado. Por favor, vuelva a iniciar sesión.",
+                        function() { window.location.href = loginPageUrl; },
+                        "Sesión Expirada", "Aceptar", "btn-danger"
+                    );
+                }
+            }
+        }
+    });
+</script>

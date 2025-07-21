@@ -1,0 +1,188 @@
+﻿@using Microsoft.AspNetCore.Identity
+@using VCashApp.Models
+@using Microsoft.AspNetCore.Authentication
+@using System.Linq
+@using System.Threading.Tasks
+
+@{
+    @inject SignInManager<VCashApp.Models.ApplicationUser> SignInManager
+    @inject UserManager<VCashApp.Models.ApplicationUser> UserManager
+    @inject Microsoft.AspNetCore.Http.IHttpContextAccessor HttpContextAccessor
+
+    VCashApp.Models.ApplicationUser currentUser = null;
+    string currentUserName = "Invitado";
+    string currentFullName = "Invitado";
+    string currentCodPerfil = "N/A";
+    string currentIpAddress = "N/A";
+    TimeSpan? sessionRemainingTime = null;
+
+    if (SignInManager.IsSignedIn(User))
+    {
+        currentUser = await UserManager.GetUserAsync(User);
+        if (currentUser != null)
+        {
+            currentUserName = currentUser.UserName ?? "N/A";
+            currentFullName = currentUser.NombreUsuario ?? currentUser.UserName ?? "N/A";
+            var roles = await UserManager.GetRolesAsync(currentUser);
+            currentCodPerfil = roles.FirstOrDefault() ?? "N/A";
+            currentIpAddress = HttpContextAccessor.HttpContext?.Connection.RemoteIpAddress?.MapToIPv4().ToString() ?? "Desconocida";
+
+            // Necesita using Microsoft.AspNetCore.Authentication;
+            var authResult = await HttpContextAccessor.HttpContext.AuthenticateAsync(IdentityConstants.ApplicationScheme);
+            if (authResult?.Properties?.ExpiresUtc.HasValue == true)
+            {
+                sessionRemainingTime = authResult.Properties.ExpiresUtc.Value - DateTimeOffset.UtcNow;
+            }
+        }
+    }
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>VCashApp - @ViewData["Title"]</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/form.css" asp-append-version="true" />
+
+    <link href="https://cdn.jsdelivr.net/npm/remixicon@4.5.0/fonts/remixicon.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11.12.0/dist/sweetalert2.min.css">
+</head>
+<body>
+    <div class="app-wrapper">
+        <aside class="sidebar expanded">
+            <div class="sidebar-header">
+                <div class="user-profile-expanded">
+                    <img src="~/assets/profile.jpg" alt="User Avatar" class="avatar">
+                    <div class="user-details">
+                        <h3>@currentFullName</h3>
+                        <small class="user-name">Usuario: @currentUserName</small>
+                        <small class="area-name">Perfil: @currentCodPerfil</small>
+                        <small class="branch-info">IP: @currentIpAddress</small>
+                    </div>
+                </div>
+                <div class="user-profile-compact">
+                    <img src="~/assets/profile.jpg" alt="User Avatar" class="avatar">
+                </div>
+            </div>
+
+            <nav class="navigation-main">
+                <div class="section-title">Main</div>
+                <div class="sidebar__dropdown" id="dashboard-dropdown">
+                    <a href="#" class="sidebar__link dropdown-btn">
+                        <i class="ri-map-pin-line"></i>
+                        <span class="nav-text">Estructura Geográfica</span>
+                        <i class="ri-arrow-down-s-line dropdown-arrow"></i>
+                    </a>
+                    <div class="sidebar__submenu">
+                        <ul>
+                            <li><a asp-controller="Ciudades" asp-action="Index" class="sidebar__link sub-link"><span class="nav-text">Ciudades</span></a></li>
+                            <li><a asp-controller="Sucursales" asp-action="Index" class="sidebar__link sub-link"><span class="nav-text">Sucursales</span></a></li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="sidebar__dropdown" id="dashboard-dropdown">
+                    <a href="#" class="sidebar__link dropdown-btn">
+                        <i class="ri-lock-2-fill"></i>
+                        <span class="nav-text">Seguridad</span>
+                        <i class="ri-arrow-down-s-line dropdown-arrow"></i>
+                    </a>
+                    <div class="sidebar__submenu">
+                        <ul>
+                            <li><a asp-controller="EmployeeLog" asp-action="EmployeeLog" class="sidebar__link sub-link"><span class="nav-text">Registro de Empleados</span></a></li>
+                        </ul>
+                        <ul>
+                            <li><a asp-controller="EmployeeLog" asp-action="EmployeeLogHistory" class="sidebar__link sub-link"><span class="nav-text">Historial</span></a></li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="sidebar__dropdown" id="dashboard-dropdown">
+                    <a href="#" class="sidebar__link dropdown-btn">
+                        <i class="ri-route-fill"></i>
+                        <span class="nav-text">Gestion de Rutas</span>
+                        <i class="ri-arrow-down-s-line dropdown-arrow"></i>
+                    </a>
+                    <div class="sidebar__submenu">
+                        <ul>
+                            <li><a asp-controller="RutasDiarias" asp-action="ListGenerated" class="sidebar__link sub-link"><span class="nav-text">Rutas Diarias</span></a></li>
+                            <li><a asp-controller="RutasDiarias" asp-action="HistorialRutas" class="sidebar__link sub-link"><span class="nav-text">Historial de Rutas</span></a></li>
+                        </ul>
+                    </div>
+                </div>
+
+                <div class="sidebar__dropdown">
+                    <a href="#" class="sidebar__link dropdown-btn">
+                        <i class="fas fa-tools"></i>
+                        <span class="nav-text">Services</span>
+                        <i class="ri-arrow-down-s-line dropdown-arrow"></i>
+                    </a>
+                    <div class="sidebar__submenu">
+                        <ul>
+                            <li><a href="#" class="sidebar__link sub-link"><i class="fas fa-envelope"></i> <span class="nav-text">Messages</span> <span class="badge">9</span></a></li>
+                            <li><a href="#" class="sidebar__link sub-link"><i class="fas fa-file-alt"></i> <span class="nav-text">Documents</span></a></li>
+                            <li><a href="#" class="sidebar__link sub-link"><i class="fas fa-th-large"></i> <span class="nav-text">Products</span></a></li>
+                        </ul>
+                    </div>
+                </div>
+            </nav>
+
+            <div class="other-links">
+                <div class="section-title">Settings</div>
+                <ul>
+                    <li><a href="#" class="sidebar__link"><i class="fas fa-cog"></i> <span class="nav-text">Settings</span></a></li>
+                    <li>
+                        <button id="theme-button" class="sidebar__link theme-toggle-btn">
+                            <i class="ri-moon-line"></i> <span class="nav-text">Theme</span>
+                        </button>
+                    </li>
+                    <li>
+                        @await Html.PartialAsync("_LoginPartial")
+                    </li>
+                </ul>
+            </div>
+        </aside>
+
+        <button id="sidebarToggle" class="toggle-button">
+            <i class="ri-arrow-left-s-line"></i>
+        </button>
+
+        <main class="main-content">
+            <header class="main-header">
+                <h1 id="viewTitle">@ViewData["Title"]</h1>
+                <img src="~/assets/vcash-logo.png" alt="VCash Logo" class="main-header-logo">
+            </header>
+
+            @RenderBody()
+        </main>
+    </div>
+
+    <div class="modal fade" id="confirmationModal" tabindex="-1" aria-labelledby="confirmationModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="confirmationModalLabel">Confirmar Acción</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p id="confirmationMessage"></p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-exit" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" id="confirmActionButton">Confirmar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js" integrity="sha384-ndDqU0Gzau9qJ1lfW4pNLlhNTkCfHzAVBReH9diLvGRem5+R9g2FzA8ZGN954O5Q" crossorigin="anonymous"></script>
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.12.0/dist/sweetalert2.all.min.js"></script>
+    <script src="~/js/table-pagination-filters.js"></script>
+    <script src="~/js/modals.js"></script>
+    <script src="~/js/site.js" asp-append-version="true"></script>
+
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

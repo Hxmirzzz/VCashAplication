@@ -1,0 +1,1447 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>VCashApp</name>
+    </assembly>
+    <members>
+        <member name="T:VCashApp.Areas.Identity.Pages.Account.AccessDeniedModel">
+            <summary>
+                This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
+                directly from your code. This API may change or be removed in future releases.
+            </summary>
+        </member>
+        <member name="M:VCashApp.Areas.Identity.Pages.Account.AccessDeniedModel.OnGet">
+            <summary>
+                This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
+                directly from your code. This API may change or be removed in future releases.
+            </summary>
+        </member>
+        <member name="P:VCashApp.Areas.Identity.Pages.Account.ConfirmEmailModel.StatusMessage">
+            <summary>
+                This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
+                directly from your code. This API may change or be removed in future releases.
+            </summary>
+        </member>
+        <member name="P:VCashApp.Areas.Identity.Pages.Account.ConfirmEmailChangeModel.StatusMessage">
+            <summary>
+                This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
+                directly from your code. This API may change or be removed in future releases.
+            </summary>
+        </member>
+        <member name="P:VCashApp.Areas.Identity.Pages.Account.ExternalLoginModel.Input">
+            <summary>
+                This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
+                directly from your code. This API may change or be removed in future releases.
+            </summary>
+        </member>
+        <member name="P:VCashApp.Areas.Identity.Pages.Account.ExternalLoginModel.ProviderDisplayName">
+            <summary>
+                This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
+                directly from your code. This API may change or be removed in future releases.
+            </summary>
+        </member>
+        <member name="P:VCashApp.Areas.Identity.Pages.Account.ExternalLoginModel.ReturnUrl">
+            <summary>
+                This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
+                directly from your code. This API may change or be removed in future releases.
+            </summary>
+        </member>
+        <member name="P:VCashApp.Areas.Identity.Pages.Account.ExternalLoginModel.ErrorMessage">
+            <summary>
+                This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
+                directly from your code. This API may change or be removed in future releases.
+            </summary>
+        </member>
+        <member name="T:VCashApp.Areas.Identity.Pages.Account.ExternalLoginModel.InputModel">
+            <summary>
+                This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
+                directly from your code. This API may change or be removed in future releases.
+            </summary>
+        </member>
+        <member name="P:VCashApp.Areas.Identity.Pages.Account.ExternalLoginModel.InputModel.Email">
+            <summary>
+                This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
+                directly from your code. This API may change or be removed in future releases.
+            </summary>
+        </member>
+        <member name="P:VCashApp.Areas.Identity.Pages.Account.ForgotPasswordModel.Input">
+            <summary>
+                This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
+                directly from your code. This API may change or be removed in future releases.
+            </summary>
+        </member>
+        <member name="T:VCashApp.Areas.Identity.Pages.Account.ForgotPasswordModel.InputModel">
+            <summary>
+                This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
+                directly from your code. This API may change or be removed in future releases.
+            </summary>
+        </member>
+        <member name="P:VCashApp.Areas.Identity.Pages.Account.ForgotPasswordModel.InputModel.Email">
+            <summary>
+                This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
+                directly from your code. This API may change or be removed in future releases.
+            </summary>
+        </member>
+        <member name="T:VCashApp.Areas.Identity.Pages.Account.ForgotPasswordConfirmation">
+            <summary>
+                This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
+                directly from your code. This API may change or be removed in future releases.
+            </summary>
+        </member>
+        <member name="M:VCashApp.Areas.Identity.Pages.Account.ForgotPasswordConfirmation.OnGet">
+            <summary>
+                This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
+                directly from your code. This API may change or be removed in future releases.
+            </summary>
+        </member>
+        <member name="T:VCashApp.Areas.Identity.Pages.Account.LockoutModel">
+            <summary>
+                This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
+                directly from your code. This API may change or be removed in future releases.
+            </summary>
+        </member>
+        <member name="M:VCashApp.Areas.Identity.Pages.Account.LockoutModel.OnGet">
+            <summary>
+                This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
+                directly from your code. This API may change or be removed in future releases.
+            </summary>
+        </member>
+        <member name="P:VCashApp.Areas.Identity.Pages.Account.LoginModel.Input">
+            <summary>
+                This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
+                directly from your code. This API may change or be removed in future releases.
+            </summary>
+        </member>
+        <member name="P:VCashApp.Areas.Identity.Pages.Account.LoginModel.ExternalLogins">
+            <summary>
+                This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
+                directly from your code. This API may change or be removed in future releases.
+            </summary>
+        </member>
+        <member name="P:VCashApp.Areas.Identity.Pages.Account.LoginModel.ReturnUrl">
+            <summary>
+                This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
+                directly from your code. This API may change or be removed in future releases.
+            </summary>
+        </member>
+        <member name="P:VCashApp.Areas.Identity.Pages.Account.LoginModel.ErrorMessage">
+            <summary>
+                This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
+                directly from your code. This API may change or be removed in future releases.
+            </summary>
+        </member>
+        <member name="T:VCashApp.Areas.Identity.Pages.Account.LoginModel.InputModel">
+            <summary>
+                This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
+                directly from your code. This API may change or be removed in future releases.
+            </summary>
+        </member>
+        <member name="P:VCashApp.Areas.Identity.Pages.Account.LoginModel.InputModel.UserName">
+            <summary>
+                This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
+                directly from your code. This API may change or be removed in future releases.
+            </summary>
+        </member>
+        <member name="P:VCashApp.Areas.Identity.Pages.Account.LoginModel.InputModel.Password">
+            <summary>
+                This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
+                directly from your code. This API may change or be removed in future releases.
+            </summary>
+        </member>
+        <member name="P:VCashApp.Areas.Identity.Pages.Account.LoginModel.InputModel.RememberMe">
+            <summary>
+                This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
+                directly from your code. This API may change or be removed in future releases.
+            </summary>
+        </member>
+        <member name="P:VCashApp.Areas.Identity.Pages.Account.LoginWith2faModel.Input">
+            <summary>
+                This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
+                directly from your code. This API may change or be removed in future releases.
+            </summary>
+        </member>
+        <member name="P:VCashApp.Areas.Identity.Pages.Account.LoginWith2faModel.RememberMe">
+            <summary>
+                This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
+                directly from your code. This API may change or be removed in future releases.
+            </summary>
+        </member>
+        <member name="P:VCashApp.Areas.Identity.Pages.Account.LoginWith2faModel.ReturnUrl">
+            <summary>
+                This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
+                directly from your code. This API may change or be removed in future releases.
+            </summary>
+        </member>
+        <member name="T:VCashApp.Areas.Identity.Pages.Account.LoginWith2faModel.InputModel">
+            <summary>
+                This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
+                directly from your code. This API may change or be removed in future releases.
+            </summary>
+        </member>
+        <member name="P:VCashApp.Areas.Identity.Pages.Account.LoginWith2faModel.InputModel.TwoFactorCode">
+            <summary>
+                This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
+                directly from your code. This API may change or be removed in future releases.
+            </summary>
+        </member>
+        <member name="P:VCashApp.Areas.Identity.Pages.Account.LoginWith2faModel.InputModel.RememberMachine">
+            <summary>
+                This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
+                directly from your code. This API may change or be removed in future releases.
+            </summary>
+        </member>
+        <member name="P:VCashApp.Areas.Identity.Pages.Account.LoginWithRecoveryCodeModel.Input">
+            <summary>
+                This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
+                directly from your code. This API may change or be removed in future releases.
+            </summary>
+        </member>
+        <member name="P:VCashApp.Areas.Identity.Pages.Account.LoginWithRecoveryCodeModel.ReturnUrl">
+            <summary>
+                This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
+                directly from your code. This API may change or be removed in future releases.
+            </summary>
+        </member>
+        <member name="T:VCashApp.Areas.Identity.Pages.Account.LoginWithRecoveryCodeModel.InputModel">
+            <summary>
+                This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
+                directly from your code. This API may change or be removed in future releases.
+            </summary>
+        </member>
+        <member name="P:VCashApp.Areas.Identity.Pages.Account.LoginWithRecoveryCodeModel.InputModel.RecoveryCode">
+            <summary>
+                This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
+                directly from your code. This API may change or be removed in future releases.
+            </summary>
+        </member>
+        <member name="P:VCashApp.Areas.Identity.Pages.Account.Manage.ChangePasswordModel.Input">
+            <summary>
+                This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
+                directly from your code. This API may change or be removed in future releases.
+            </summary>
+        </member>
+        <member name="P:VCashApp.Areas.Identity.Pages.Account.Manage.ChangePasswordModel.StatusMessage">
+            <summary>
+                This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
+                directly from your code. This API may change or be removed in future releases.
+            </summary>
+        </member>
+        <member name="T:VCashApp.Areas.Identity.Pages.Account.Manage.ChangePasswordModel.InputModel">
+            <summary>
+                This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
+                directly from your code. This API may change or be removed in future releases.
+            </summary>
+        </member>
+        <member name="P:VCashApp.Areas.Identity.Pages.Account.Manage.ChangePasswordModel.InputModel.OldPassword">
+            <summary>
+                This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
+                directly from your code. This API may change or be removed in future releases.
+            </summary>
+        </member>
+        <member name="P:VCashApp.Areas.Identity.Pages.Account.Manage.ChangePasswordModel.InputModel.NewPassword">
+            <summary>
+                This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
+                directly from your code. This API may change or be removed in future releases.
+            </summary>
+        </member>
+        <member name="P:VCashApp.Areas.Identity.Pages.Account.Manage.ChangePasswordModel.InputModel.ConfirmPassword">
+            <summary>
+                This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
+                directly from your code. This API may change or be removed in future releases.
+            </summary>
+        </member>
+        <member name="P:VCashApp.Areas.Identity.Pages.Account.Manage.DeletePersonalDataModel.Input">
+            <summary>
+                This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
+                directly from your code. This API may change or be removed in future releases.
+            </summary>
+        </member>
+        <member name="T:VCashApp.Areas.Identity.Pages.Account.Manage.DeletePersonalDataModel.InputModel">
+            <summary>
+                This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
+                directly from your code. This API may change or be removed in future releases.
+            </summary>
+        </member>
+        <member name="P:VCashApp.Areas.Identity.Pages.Account.Manage.DeletePersonalDataModel.InputModel.Password">
+            <summary>
+                This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
+                directly from your code. This API may change or be removed in future releases.
+            </summary>
+        </member>
+        <member name="P:VCashApp.Areas.Identity.Pages.Account.Manage.DeletePersonalDataModel.RequirePassword">
+            <summary>
+                This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
+                directly from your code. This API may change or be removed in future releases.
+            </summary>
+        </member>
+        <member name="P:VCashApp.Areas.Identity.Pages.Account.Manage.Disable2faModel.StatusMessage">
+            <summary>
+                This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
+                directly from your code. This API may change or be removed in future releases.
+            </summary>
+        </member>
+        <member name="P:VCashApp.Areas.Identity.Pages.Account.Manage.EmailModel.Email">
+            <summary>
+                This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
+                directly from your code. This API may change or be removed in future releases.
+            </summary>
+        </member>
+        <member name="P:VCashApp.Areas.Identity.Pages.Account.Manage.EmailModel.IsEmailConfirmed">
+            <summary>
+                This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
+                directly from your code. This API may change or be removed in future releases.
+            </summary>
+        </member>
+        <member name="P:VCashApp.Areas.Identity.Pages.Account.Manage.EmailModel.StatusMessage">
+            <summary>
+                This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
+                directly from your code. This API may change or be removed in future releases.
+            </summary>
+        </member>
+        <member name="P:VCashApp.Areas.Identity.Pages.Account.Manage.EmailModel.Input">
+            <summary>
+                This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
+                directly from your code. This API may change or be removed in future releases.
+            </summary>
+        </member>
+        <member name="T:VCashApp.Areas.Identity.Pages.Account.Manage.EmailModel.InputModel">
+            <summary>
+                This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
+                directly from your code. This API may change or be removed in future releases.
+            </summary>
+        </member>
+        <member name="P:VCashApp.Areas.Identity.Pages.Account.Manage.EmailModel.InputModel.NewEmail">
+            <summary>
+                This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
+                directly from your code. This API may change or be removed in future releases.
+            </summary>
+        </member>
+        <member name="P:VCashApp.Areas.Identity.Pages.Account.Manage.EnableAuthenticatorModel.SharedKey">
+            <summary>
+                This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
+                directly from your code. This API may change or be removed in future releases.
+            </summary>
+        </member>
+        <member name="P:VCashApp.Areas.Identity.Pages.Account.Manage.EnableAuthenticatorModel.AuthenticatorUri">
+            <summary>
+                This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
+                directly from your code. This API may change or be removed in future releases.
+            </summary>
+        </member>
+        <member name="P:VCashApp.Areas.Identity.Pages.Account.Manage.EnableAuthenticatorModel.RecoveryCodes">
+            <summary>
+                This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
+                directly from your code. This API may change or be removed in future releases.
+            </summary>
+        </member>
+        <member name="P:VCashApp.Areas.Identity.Pages.Account.Manage.EnableAuthenticatorModel.StatusMessage">
+            <summary>
+                This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
+                directly from your code. This API may change or be removed in future releases.
+            </summary>
+        </member>
+        <member name="P:VCashApp.Areas.Identity.Pages.Account.Manage.EnableAuthenticatorModel.Input">
+            <summary>
+                This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
+                directly from your code. This API may change or be removed in future releases.
+            </summary>
+        </member>
+        <member name="T:VCashApp.Areas.Identity.Pages.Account.Manage.EnableAuthenticatorModel.InputModel">
+            <summary>
+                This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
+                directly from your code. This API may change or be removed in future releases.
+            </summary>
+        </member>
+        <member name="P:VCashApp.Areas.Identity.Pages.Account.Manage.EnableAuthenticatorModel.InputModel.Code">
+            <summary>
+                This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
+                directly from your code. This API may change or be removed in future releases.
+            </summary>
+        </member>
+        <member name="P:VCashApp.Areas.Identity.Pages.Account.Manage.ExternalLoginsModel.CurrentLogins">
+            <summary>
+                This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
+                directly from your code. This API may change or be removed in future releases.
+            </summary>
+        </member>
+        <member name="P:VCashApp.Areas.Identity.Pages.Account.Manage.ExternalLoginsModel.OtherLogins">
+            <summary>
+                This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
+                directly from your code. This API may change or be removed in future releases.
+            </summary>
+        </member>
+        <member name="P:VCashApp.Areas.Identity.Pages.Account.Manage.ExternalLoginsModel.ShowRemoveButton">
+            <summary>
+                This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
+                directly from your code. This API may change or be removed in future releases.
+            </summary>
+        </member>
+        <member name="P:VCashApp.Areas.Identity.Pages.Account.Manage.ExternalLoginsModel.StatusMessage">
+            <summary>
+                This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
+                directly from your code. This API may change or be removed in future releases.
+            </summary>
+        </member>
+        <member name="P:VCashApp.Areas.Identity.Pages.Account.Manage.GenerateRecoveryCodesModel.RecoveryCodes">
+            <summary>
+                This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
+                directly from your code. This API may change or be removed in future releases.
+            </summary>
+        </member>
+        <member name="P:VCashApp.Areas.Identity.Pages.Account.Manage.GenerateRecoveryCodesModel.StatusMessage">
+            <summary>
+                This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
+                directly from your code. This API may change or be removed in future releases.
+            </summary>
+        </member>
+        <member name="P:VCashApp.Areas.Identity.Pages.Account.Manage.IndexModel.Username">
+            <summary>
+                This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
+                directly from your code. This API may change or be removed in future releases.
+            </summary>
+        </member>
+        <member name="P:VCashApp.Areas.Identity.Pages.Account.Manage.IndexModel.StatusMessage">
+            <summary>
+                This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
+                directly from your code. This API may change or be removed in future releases.
+            </summary>
+        </member>
+        <member name="P:VCashApp.Areas.Identity.Pages.Account.Manage.IndexModel.Input">
+            <summary>
+                This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
+                directly from your code. This API may change or be removed in future releases.
+            </summary>
+        </member>
+        <member name="T:VCashApp.Areas.Identity.Pages.Account.Manage.IndexModel.InputModel">
+            <summary>
+                This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
+                directly from your code. This API may change or be removed in future releases.
+            </summary>
+        </member>
+        <member name="P:VCashApp.Areas.Identity.Pages.Account.Manage.IndexModel.InputModel.PhoneNumber">
+            <summary>
+                This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
+                directly from your code. This API may change or be removed in future releases.
+            </summary>
+        </member>
+        <member name="T:VCashApp.Areas.Identity.Pages.Account.Manage.ManageNavPages">
+            <summary>
+                This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
+                directly from your code. This API may change or be removed in future releases.
+            </summary>
+        </member>
+        <member name="P:VCashApp.Areas.Identity.Pages.Account.Manage.ManageNavPages.Index">
+            <summary>
+                This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
+                directly from your code. This API may change or be removed in future releases.
+            </summary>
+        </member>
+        <member name="P:VCashApp.Areas.Identity.Pages.Account.Manage.ManageNavPages.Email">
+            <summary>
+                This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
+                directly from your code. This API may change or be removed in future releases.
+            </summary>
+        </member>
+        <member name="P:VCashApp.Areas.Identity.Pages.Account.Manage.ManageNavPages.ChangePassword">
+            <summary>
+                This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
+                directly from your code. This API may change or be removed in future releases.
+            </summary>
+        </member>
+        <member name="P:VCashApp.Areas.Identity.Pages.Account.Manage.ManageNavPages.DownloadPersonalData">
+            <summary>
+                This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
+                directly from your code. This API may change or be removed in future releases.
+            </summary>
+        </member>
+        <member name="P:VCashApp.Areas.Identity.Pages.Account.Manage.ManageNavPages.DeletePersonalData">
+            <summary>
+                This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
+                directly from your code. This API may change or be removed in future releases.
+            </summary>
+        </member>
+        <member name="P:VCashApp.Areas.Identity.Pages.Account.Manage.ManageNavPages.ExternalLogins">
+            <summary>
+                This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
+                directly from your code. This API may change or be removed in future releases.
+            </summary>
+        </member>
+        <member name="P:VCashApp.Areas.Identity.Pages.Account.Manage.ManageNavPages.PersonalData">
+            <summary>
+                This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
+                directly from your code. This API may change or be removed in future releases.
+            </summary>
+        </member>
+        <member name="P:VCashApp.Areas.Identity.Pages.Account.Manage.ManageNavPages.TwoFactorAuthentication">
+            <summary>
+                This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
+                directly from your code. This API may change or be removed in future releases.
+            </summary>
+        </member>
+        <member name="M:VCashApp.Areas.Identity.Pages.Account.Manage.ManageNavPages.IndexNavClass(Microsoft.AspNetCore.Mvc.Rendering.ViewContext)">
+            <summary>
+                This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
+                directly from your code. This API may change or be removed in future releases.
+            </summary>
+        </member>
+        <member name="M:VCashApp.Areas.Identity.Pages.Account.Manage.ManageNavPages.EmailNavClass(Microsoft.AspNetCore.Mvc.Rendering.ViewContext)">
+            <summary>
+                This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
+                directly from your code. This API may change or be removed in future releases.
+            </summary>
+        </member>
+        <member name="M:VCashApp.Areas.Identity.Pages.Account.Manage.ManageNavPages.ChangePasswordNavClass(Microsoft.AspNetCore.Mvc.Rendering.ViewContext)">
+            <summary>
+                This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
+                directly from your code. This API may change or be removed in future releases.
+            </summary>
+        </member>
+        <member name="M:VCashApp.Areas.Identity.Pages.Account.Manage.ManageNavPages.DownloadPersonalDataNavClass(Microsoft.AspNetCore.Mvc.Rendering.ViewContext)">
+            <summary>
+                This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
+                directly from your code. This API may change or be removed in future releases.
+            </summary>
+        </member>
+        <member name="M:VCashApp.Areas.Identity.Pages.Account.Manage.ManageNavPages.DeletePersonalDataNavClass(Microsoft.AspNetCore.Mvc.Rendering.ViewContext)">
+            <summary>
+                This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
+                directly from your code. This API may change or be removed in future releases.
+            </summary>
+        </member>
+        <member name="M:VCashApp.Areas.Identity.Pages.Account.Manage.ManageNavPages.ExternalLoginsNavClass(Microsoft.AspNetCore.Mvc.Rendering.ViewContext)">
+            <summary>
+                This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
+                directly from your code. This API may change or be removed in future releases.
+            </summary>
+        </member>
+        <member name="M:VCashApp.Areas.Identity.Pages.Account.Manage.ManageNavPages.PersonalDataNavClass(Microsoft.AspNetCore.Mvc.Rendering.ViewContext)">
+            <summary>
+                This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
+                directly from your code. This API may change or be removed in future releases.
+            </summary>
+        </member>
+        <member name="M:VCashApp.Areas.Identity.Pages.Account.Manage.ManageNavPages.TwoFactorAuthenticationNavClass(Microsoft.AspNetCore.Mvc.Rendering.ViewContext)">
+            <summary>
+                This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
+                directly from your code. This API may change or be removed in future releases.
+            </summary>
+        </member>
+        <member name="M:VCashApp.Areas.Identity.Pages.Account.Manage.ManageNavPages.PageNavClass(Microsoft.AspNetCore.Mvc.Rendering.ViewContext,System.String)">
+            <summary>
+                This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
+                directly from your code. This API may change or be removed in future releases.
+            </summary>
+        </member>
+        <member name="P:VCashApp.Areas.Identity.Pages.Account.Manage.ResetAuthenticatorModel.StatusMessage">
+            <summary>
+                This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
+                directly from your code. This API may change or be removed in future releases.
+            </summary>
+        </member>
+        <member name="P:VCashApp.Areas.Identity.Pages.Account.Manage.SetPasswordModel.Input">
+            <summary>
+                This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
+                directly from your code. This API may change or be removed in future releases.
+            </summary>
+        </member>
+        <member name="P:VCashApp.Areas.Identity.Pages.Account.Manage.SetPasswordModel.StatusMessage">
+            <summary>
+                This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
+                directly from your code. This API may change or be removed in future releases.
+            </summary>
+        </member>
+        <member name="T:VCashApp.Areas.Identity.Pages.Account.Manage.SetPasswordModel.InputModel">
+            <summary>
+                This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
+                directly from your code. This API may change or be removed in future releases.
+            </summary>
+        </member>
+        <member name="P:VCashApp.Areas.Identity.Pages.Account.Manage.SetPasswordModel.InputModel.NewPassword">
+            <summary>
+                This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
+                directly from your code. This API may change or be removed in future releases.
+            </summary>
+        </member>
+        <member name="P:VCashApp.Areas.Identity.Pages.Account.Manage.SetPasswordModel.InputModel.ConfirmPassword">
+            <summary>
+                This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
+                directly from your code. This API may change or be removed in future releases.
+            </summary>
+        </member>
+        <member name="T:VCashApp.Areas.Identity.Pages.Account.Manage.ShowRecoveryCodesModel">
+            <summary>
+                This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
+                directly from your code. This API may change or be removed in future releases.
+            </summary>
+        </member>
+        <member name="P:VCashApp.Areas.Identity.Pages.Account.Manage.ShowRecoveryCodesModel.RecoveryCodes">
+            <summary>
+                This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
+                directly from your code. This API may change or be removed in future releases.
+            </summary>
+        </member>
+        <member name="P:VCashApp.Areas.Identity.Pages.Account.Manage.ShowRecoveryCodesModel.StatusMessage">
+            <summary>
+                This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
+                directly from your code. This API may change or be removed in future releases.
+            </summary>
+        </member>
+        <member name="M:VCashApp.Areas.Identity.Pages.Account.Manage.ShowRecoveryCodesModel.OnGet">
+            <summary>
+                This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
+                directly from your code. This API may change or be removed in future releases.
+            </summary>
+        </member>
+        <member name="P:VCashApp.Areas.Identity.Pages.Account.Manage.TwoFactorAuthenticationModel.HasAuthenticator">
+            <summary>
+                This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
+                directly from your code. This API may change or be removed in future releases.
+            </summary>
+        </member>
+        <member name="P:VCashApp.Areas.Identity.Pages.Account.Manage.TwoFactorAuthenticationModel.RecoveryCodesLeft">
+            <summary>
+                This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
+                directly from your code. This API may change or be removed in future releases.
+            </summary>
+        </member>
+        <member name="P:VCashApp.Areas.Identity.Pages.Account.Manage.TwoFactorAuthenticationModel.Is2faEnabled">
+            <summary>
+                This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
+                directly from your code. This API may change or be removed in future releases.
+            </summary>
+        </member>
+        <member name="P:VCashApp.Areas.Identity.Pages.Account.Manage.TwoFactorAuthenticationModel.IsMachineRemembered">
+            <summary>
+                This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
+                directly from your code. This API may change or be removed in future releases.
+            </summary>
+        </member>
+        <member name="P:VCashApp.Areas.Identity.Pages.Account.Manage.TwoFactorAuthenticationModel.StatusMessage">
+            <summary>
+                This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
+                directly from your code. This API may change or be removed in future releases.
+            </summary>
+        </member>
+        <member name="P:VCashApp.Areas.Identity.Pages.Account.RegisterModel.Input">
+            <summary>
+                This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
+                directly from your code. This API may change or be removed in future releases.
+            </summary>
+        </member>
+        <member name="P:VCashApp.Areas.Identity.Pages.Account.RegisterModel.ReturnUrl">
+            <summary>
+                This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
+                directly from your code. This API may change or be removed in future releases.
+            </summary>
+        </member>
+        <member name="P:VCashApp.Areas.Identity.Pages.Account.RegisterModel.ExternalLogins">
+            <summary>
+                This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
+                directly from your code. This API may change or be removed in future releases.
+            </summary>
+        </member>
+        <member name="T:VCashApp.Areas.Identity.Pages.Account.RegisterModel.InputModel">
+            <summary>
+                This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
+                directly from your code. This API may change or be removed in future releases.
+            </summary>
+        </member>
+        <member name="P:VCashApp.Areas.Identity.Pages.Account.RegisterModel.InputModel.Email">
+            <summary>
+                This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
+                directly from your code. This API may change or be removed in future releases.
+            </summary>
+        </member>
+        <member name="P:VCashApp.Areas.Identity.Pages.Account.RegisterModel.InputModel.Password">
+            <summary>
+                This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
+                directly from your code. This API may change or be removed in future releases.
+            </summary>
+        </member>
+        <member name="P:VCashApp.Areas.Identity.Pages.Account.RegisterModel.InputModel.ConfirmPassword">
+            <summary>
+                This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
+                directly from your code. This API may change or be removed in future releases.
+            </summary>
+        </member>
+        <member name="P:VCashApp.Areas.Identity.Pages.Account.RegisterConfirmationModel.Email">
+            <summary>
+                This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
+                directly from your code. This API may change or be removed in future releases.
+            </summary>
+        </member>
+        <member name="P:VCashApp.Areas.Identity.Pages.Account.RegisterConfirmationModel.DisplayConfirmAccountLink">
+            <summary>
+                This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
+                directly from your code. This API may change or be removed in future releases.
+            </summary>
+        </member>
+        <member name="P:VCashApp.Areas.Identity.Pages.Account.RegisterConfirmationModel.EmailConfirmationUrl">
+            <summary>
+                This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
+                directly from your code. This API may change or be removed in future releases.
+            </summary>
+        </member>
+        <member name="P:VCashApp.Areas.Identity.Pages.Account.ResendEmailConfirmationModel.Input">
+            <summary>
+                This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
+                directly from your code. This API may change or be removed in future releases.
+            </summary>
+        </member>
+        <member name="T:VCashApp.Areas.Identity.Pages.Account.ResendEmailConfirmationModel.InputModel">
+            <summary>
+                This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
+                directly from your code. This API may change or be removed in future releases.
+            </summary>
+        </member>
+        <member name="P:VCashApp.Areas.Identity.Pages.Account.ResendEmailConfirmationModel.InputModel.Email">
+            <summary>
+                This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
+                directly from your code. This API may change or be removed in future releases.
+            </summary>
+        </member>
+        <member name="P:VCashApp.Areas.Identity.Pages.Account.ResetPasswordModel.Input">
+            <summary>
+                This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
+                directly from your code. This API may change or be removed in future releases.
+            </summary>
+        </member>
+        <member name="T:VCashApp.Areas.Identity.Pages.Account.ResetPasswordModel.InputModel">
+            <summary>
+                This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
+                directly from your code. This API may change or be removed in future releases.
+            </summary>
+        </member>
+        <member name="P:VCashApp.Areas.Identity.Pages.Account.ResetPasswordModel.InputModel.Email">
+            <summary>
+                This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
+                directly from your code. This API may change or be removed in future releases.
+            </summary>
+        </member>
+        <member name="P:VCashApp.Areas.Identity.Pages.Account.ResetPasswordModel.InputModel.Password">
+            <summary>
+                This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
+                directly from your code. This API may change or be removed in future releases.
+            </summary>
+        </member>
+        <member name="P:VCashApp.Areas.Identity.Pages.Account.ResetPasswordModel.InputModel.ConfirmPassword">
+            <summary>
+                This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
+                directly from your code. This API may change or be removed in future releases.
+            </summary>
+        </member>
+        <member name="P:VCashApp.Areas.Identity.Pages.Account.ResetPasswordModel.InputModel.Code">
+            <summary>
+                This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
+                directly from your code. This API may change or be removed in future releases.
+            </summary>
+        </member>
+        <member name="T:VCashApp.Areas.Identity.Pages.Account.ResetPasswordConfirmationModel">
+            <summary>
+                This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
+                directly from your code. This API may change or be removed in future releases.
+            </summary>
+        </member>
+        <member name="M:VCashApp.Areas.Identity.Pages.Account.ResetPasswordConfirmationModel.OnGet">
+            <summary>
+                This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
+                directly from your code. This API may change or be removed in future releases.
+            </summary>
+        </member>
+        <member name="T:VCashApp.Areas.Identity.Pages.ErrorModel">
+            <summary>
+                This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
+                directly from your code. This API may change or be removed in future releases.
+            </summary>
+        </member>
+        <member name="P:VCashApp.Areas.Identity.Pages.ErrorModel.RequestId">
+            <summary>
+                This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
+                directly from your code. This API may change or be removed in future releases.
+            </summary>
+        </member>
+        <member name="P:VCashApp.Areas.Identity.Pages.ErrorModel.ShowRequestId">
+            <summary>
+                This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
+                directly from your code. This API may change or be removed in future releases.
+            </summary>
+        </member>
+        <member name="M:VCashApp.Areas.Identity.Pages.ErrorModel.OnGet">
+            <summary>
+                This API supports the ASP.NET Core Identity default UI infrastructure and is not intended to be used
+                directly from your code. This API may change or be removed in future releases.
+            </summary>
+        </member>
+        <member name="T:VCashApp.Controllers.EmployeeLogController">
+            <summary>
+            Controlador para la gestión de registros de entrada y salida de empleados.
+            Incluye funcionalidades de registro, actualización, historial y búsqueda de empleados.
+            </summary>
+        </member>
+        <member name="M:VCashApp.Controllers.EmployeeLogController.LogEntry">
+            <summary>
+            Muestra el formulario para registrar la entrada o salida de un empleado.
+            </summary>
+            <remarks>
+            Requiere el permiso de 'Create' para la vista 'REG'.
+            </remarks>
+            <returns>La vista del formulario de registro de empleados.</returns>
+        </member>
+        <member name="M:VCashApp.Controllers.EmployeeLogController.GetEmployeeInfo(System.String)">
+            <summary>
+            Busca empleados por cédula o nombre para la funcionalidad de autocompletado en el formulario de registro.
+            </summary>
+            <remarks>
+            Esta es una llamada AJAX que devuelve una lista de empleados activos que coinciden con el término de búsqueda,
+            filtrados por las sucursales permitidas del usuario.
+            </remarks>
+            <param name="searchInput">Término de búsqueda (puede ser cédula parcial o nombre/apellido).</param>
+            <returns>Un JSON con una lista de objetos anónimos que representan la información de los empleados.</returns>
+        </member>
+        <member name="M:VCashApp.Controllers.EmployeeLogController.GetEmployeeLogStatus(System.Int32)">
+            <summary>
+            Obtiene el estado actual de registro de un empleado (entrada abierta, salida completada, etc.).
+            </summary>
+            <param name="employeeId">La cédula del empleado.</param>
+            <returns>Un objeto EmployeeLogStateDto que describe el estado del log.</returns>
+        </member>
+        <member name="M:VCashApp.Controllers.EmployeeLogController.RecordEntryExit(VCashApp.Services.EmployeeLogDto,System.String)">
+            <summary>
+            Registra una nueva entrada de empleado o una entrada/salida combinada.
+            </summary>
+            <remarks>
+            Requiere el permiso de 'Create' para la vista 'REG'.
+            Si se detectan condiciones que requieren confirmación (ej. horas trabajadas inusuales), se devuelve una solicitud de confirmación.
+            </remarks>
+            <param name="logDto">Objeto EmployeeLogDto con los datos del registro.</param>
+            <param name="confirmedValidation">Parámetro opcional para indicar que una validación previa ha sido confirmada por el usuario (ej. "minHours").</param>
+            <returns>Un ServiceResult indicando el éxito, fallo o necesidad de confirmación.</returns>
+        </member>
+        <member name="M:VCashApp.Controllers.EmployeeLogController.EditLog(System.Int32)">
+            <summary>
+            Muestra el formulario para editar un registro de log de empleado existente.
+            </summary>
+            <remarks>
+            Requiere el permiso de 'Edit' para la vista 'REG'.
+            </remarks>
+            <param name="id">El ID del registro de log a editar.</param>
+            <returns>La vista del formulario de edición con los datos del log.</returns>
+        </member>
+        <member name="M:VCashApp.Controllers.EmployeeLogController.UpdateLog(System.Int32,VCashApp.Services.EmployeeLogDto,System.String)">
+            <summary>
+            Actualiza un registro de log de empleado existente, utilizado para registrar salidas o modificar detalles.
+            </summary>
+            <remarks>
+            Requiere el permiso de 'Create' para la vista 'REG' (para completar el registro).
+            </remarks>
+            <param name="id">El ID del registro de log a actualizar.</param>
+            <param name="logDto">Objeto EmployeeLogDto con los datos actualizados.</param>
+            <param name="confirmedValidation">Tipo de validación confirmada, si aplica.</param>
+            <returns>Un ServiceResult indicando el éxito o fallo de la actualización.</returns>
+        </member>
+        <member name="M:VCashApp.Controllers.EmployeeLogController.RecordManualExit(System.Int32)">
+            <summary>
+            Muestra el formulario para registrar la salida manual de un vehículo asociado a un log.
+            </summary>
+            <param name="id">El ID del registro de log.</param>
+            <returns>La vista del formulario de salida manual.</returns>
+        </member>
+        <member name="M:VCashApp.Controllers.EmployeeLogController.RecordManualExit(System.Int32,VCashApp.Services.EmployeeLogDto)">
+            <summary>
+            Registra la salida manual de un vehículo.
+            </summary>
+            <param name="id">El ID del registro de log a actualizar.</param>
+            <param name="logDto">Objeto EmployeeLogDto con la fecha y hora de salida.</param>
+            <returns>Un ServiceResult indicando el éxito o fallo.</returns>
+        </member>
+        <member name="M:VCashApp.Controllers.EmployeeLogController.EmployeeLog(System.Nullable{System.Int32},System.String,System.Nullable{System.Int32},System.Nullable{System.DateOnly},System.Nullable{System.DateOnly},System.Nullable{System.Int32},System.String,System.Int32,System.Int32)">
+            <summary>
+            Muestra el registros de empleados entre un dia actual y un dia anterior al actual, con opciones de filtrado y paginación.
+            </summary>
+            <param name="cargoId">Filtro por ID de cargo.</param>
+            <param name="unitId">Filtro por ID de unidad.</param>
+            <param name="branchId">Filtro por ID de sucursal.</param>
+            <param name="startDate">Fecha de inicio para el filtro de rango.</param>
+            <param name="endDate">Fecha de fin para el filtro de rango.</param>
+            <param name="logStatus">Estado del log (0: abierto, 1: cerrado).</param>
+            <param name="searchTerm">Término de búsqueda por cédula o nombre.</param>
+            <param name="page">Número de página actual.</param>
+            <param name="pageSize">Número de elementos por página.</param>
+            <returns>La vista de logs del registro de empleados, con datos paginados.</returns>
+        </member>
+        <member name="M:VCashApp.Controllers.EmployeeLogController.EmployeeLogHistory(System.Nullable{System.Int32},System.String,System.Nullable{System.Int32},System.Nullable{System.DateOnly},System.Nullable{System.DateOnly},System.Nullable{System.Int32},System.String,System.Int32,System.Int32)">
+            <summary>
+            Muestra el historial de registros de empleados, con opciones de filtrado y paginación.
+            </summary>
+            <param name="cargoId">Filtro por ID de cargo.</param>
+            <param name="unitId">Filtro por ID de unidad.</param>
+            <param name="branchId">Filtro por ID de sucursal.</param>
+            <param name="startDate">Fecha de inicio para el filtro de rango.</param>
+            <param name="endDate">Fecha de fin para el filtro de rango.</param>
+            <param name="logStatus">Estado del log (0: abierto, 1: cerrado).</param>
+            <param name="searchTerm">Término de búsqueda por cédula o nombre.</param>
+            <param name="page">Número de página actual.</param>
+            <param name="pageSize">Número de elementos por página.</param>
+            <returns>La vista del historial de logs de empleados, con datos paginados.</returns>
+        </member>
+        <member name="M:VCashApp.Controllers.EmployeeLogController.LogDetails(System.Int32)">
+            <summary>
+            Muestra los detalles de un registro de log de empleado específico.
+            </summary>
+            <param name="id">El ID del registro de log a mostrar.</param>
+            <returns>La vista de detalles del log.</returns>
+        </member>
+        <member name="T:VCashApp.Controllers.RutasDiariasController">
+            <summary>
+            Controlador para la gestión de rutas diarias.
+            Incluye funcionalidades de generacion de rutas, creacion de ruta indivual, gestion de cada ruta por medio de flujos e historial.
+            </summary>
+        </member>
+        <member name="M:VCashApp.Controllers.RutasDiariasController.ListGenerated(System.Nullable{System.Int32},System.Int32,System.String,System.Nullable{System.DateOnly},System.Nullable{System.Int32},System.Nullable{System.Int32})">
+            <summary>
+            Metodo de redireccion segun el rol del usuario Planeador/CEF/SupervisorDeRutas.
+            </summary>
+            <remarks>
+            Requiere el permiso de 'View' para la vista 'RUD'.
+            </remarks>
+            <returns>Redireccion hacia Planner/Operations.</returns>
+            
+        </member>
+        <member name="M:VCashApp.Controllers.RutasDiariasController.PlannerDashboard(System.Nullable{System.Int32},System.Int32,System.String,System.Nullable{System.DateOnly},System.Nullable{System.Int32},System.Nullable{System.Int32})">
+            <summary>
+            Muestra el registros de rutas del dia actual para el Planeador, con opciones de filtrado y paginación. 
+            </summary>
+            <param name="fechaEjecucion">Filtro por una fecha seleccionada (valor por defecto dia actual).</param>
+            <param name="codSuc">Filtro por ID de sucursal.</param>
+            <param name="estado">Estado de la ruta generada.</param>
+            <param name="search">Término de búsqueda por nombre de la ruta.</param>
+            <param name="page">Número de página actual.</param>
+            <param name="pageSize">Número de elementos por página.</param>
+            <returns>La vista de las rutas, con datos paginados.</returns>
+        </member>
+        <member name="M:VCashApp.Controllers.RutasDiariasController.OperationsDashboard(System.Nullable{System.Int32},System.Int32,System.String,System.Nullable{System.DateOnly},System.Nullable{System.Int32},System.Nullable{System.Int32})">
+            <summary>
+            Muestra el registros de rutas del dia actual para el CEF y SupervisorRutas, con opciones de filtrado y paginación. 
+            </summary>
+            <param name="fechaEjecucion">Filtro por una fecha seleccionada (valor por defecto dia actual).</param>
+            <param name="codSuc">Filtro por ID de sucursal.</param>
+            <param name="estado">Estado de la ruta generada.</param>
+            <param name="search">Término de búsqueda por nombre de la ruta.</param>
+            <param name="page">Número de página actual.</param>
+            <param name="pageSize">Número de elementos por página.</param>
+            <returns>La vista de las rutas, con datos paginados.</returns>
+        </member>
+        <member name="M:VCashApp.Controllers.RutasDiariasController.HistorialRutas(System.Nullable{System.Int32},System.Int32,System.String,System.Nullable{System.DateOnly},System.Nullable{System.Int32},System.Nullable{System.Int32})">
+            <summary>
+            Muestra el historial de rutas, con opciones de filtrado y paginación. 
+            </summary>
+            <param name="fechaEjecucion">Filtro por una fecha seleccionada (valor por defecto dia actual).</param>
+            <param name="codSuc">Filtro por ID de sucursal.</param>
+            <param name="estado">Estado de la ruta generada.</param>
+            <param name="search">Término de búsqueda por nombre de la ruta.</param>
+            <param name="page">Número de página actual.</param>
+            <param name="pageSize">Número de elementos por página.</param>
+            <returns>La vista del historial de rutas, con datos paginados.</returns>
+        </member>
+        <member name="M:VCashApp.Controllers.RutasDiariasController.GenerateRoutesForTomorrow">
+            <summary>
+            Generador de rutas por estado activo y por sucursal/les asignada/s al usuario.
+            </summary>
+        </member>
+        <member name="M:VCashApp.Controllers.RutasDiariasController.Create">
+            <summary>
+            Muestra el formulario para crear una nueva ruta diaria individualmente.
+            </summary>
+            <remarks>
+            Requiere el permiso de 'Create' para la vista 'RUD'.
+            </remarks>
+            <returns>La vista del formulario de creación.</returns>
+        </member>
+        <member name="M:VCashApp.Controllers.RutasDiariasController.Create(VCashApp.Services.DTOs.RutaDiariaCreationDto)">
+            <summary>
+            Procesa la creación de una nueva ruta diaria individual.
+            </summary>
+            <param name="dto">El objeto RutaDiariaCreationDto con los datos del formulario.</param>
+            <returns>Redirección a la lista de rutas generadas o la misma vista con errores.</returns>
+        </member>
+        <member name="M:VCashApp.Controllers.RutasDiariasController.Edit(System.String)">
+            <summary>   
+            Muestra el formulario para que el planeador pueda asignar un vehiculo, JT, Conductor y tripulante a la ruta.
+            </summary>
+            <param name="id">El ID del registro de la ruta.</param>
+            <returns>La vista del formulario de asignacion de vehiculo y tripulacion.</returns>
+        </member>
+        <member name="M:VCashApp.Controllers.RutasDiariasController.Edit(System.String,VCashApp.Models.Entities.TdvRutaDiaria)">
+            <summary>
+            Registra los datos del vehiculo y tripulantes a la ruta.
+            </summary>
+            <param name="id">El ID del registro de la ruta.</param>
+        </member>
+        <member name="M:VCashApp.Controllers.RutasDiariasController.DetailRUD(System.String)">
+            <summary>
+            Metodo de redireccion segun el rol del usuario Planeador/CEF/SupervisorDeRutas.
+            </summary>
+            <remarks>
+            Requiere el permiso de 'View' para la vista 'RUD'.
+            </remarks>
+            <returns>Redireccion hacia Planner/Operations.</returns>
+            
+        </member>
+        <member name="M:VCashApp.Controllers.RutasDiariasController.DetailRUDHIS(System.String)">
+            <summary>
+            Metodo de redireccion segun el rol del usuario Planeador/CEF/SupervisorDeRutas.
+            </summary>
+            <remarks>
+            Requiere el permiso de 'View' para la vista 'RUDHIS'.
+            </remarks>
+            <returns>Redireccion hacia HistorialRutas.</returns>
+            
+        </member>
+        <member name="M:VCashApp.Controllers.RutasDiariasController.CargarEfectivo(System.String)">
+            <summary>
+            Muestra el formulario para cargar el efectivo de la ruta.
+            </summary>
+            <remarks>
+            Requiere el permiso de 'Edit' para la vista 'RUD'.
+            La ruta debe estar en estado 'PLANEADO' para edición por el CEF.
+            </remarks>
+            <param name="id">El ID del registro de log a editar.</param>
+            <returns>La vista del formulario de edición con los datos de la ruta.</returns>
+        </member>
+        <member name="M:VCashApp.Controllers.RutasDiariasController.CargarEfectivo(System.String,VCashApp.Models.Entities.TdvRutaDiaria)">
+            <summary>
+            Actualiza un registro de la ruta existente, utilizado para insertar bolsas de billetes y/o monedas.
+            </summary>
+            <remarks>
+            Requiere el permiso de 'Edit' para la vista 'RUD' (para completar el registro).
+            </remarks>
+            <param name="id">El ID del registro de la ruta a actualizar.</param>
+        </member>
+        <member name="M:VCashApp.Controllers.RutasDiariasController.RegistrarSalida(System.String)">
+            <summary>
+            Muestra el formulario para registrar la salida del vehiculo a la ruta.
+            </summary>
+            <remarks>
+            Requiere el permiso de 'Edit' para la vista 'RUD'.
+            La ruta debe estar en estado 'CARGUE_REGISTRADO' para edición por el SupervisorRuta.
+            </remarks>
+            <param name="id">El ID del registro de log a editar.</param>
+            <returns>La vista del formulario de edición con los datos de la ruta.</returns>
+        </member>
+        <member name="M:VCashApp.Controllers.RutasDiariasController.RegistrarSalida(System.String,VCashApp.Models.Entities.TdvRutaDiaria)">
+            <summary>
+            Actualiza un registro de la ruta existente, utilizado para insertar KM inicial del vehiculo.
+            </summary>
+            <remarks>
+            Requiere el permiso de 'Edit' para la vista 'RUD' (para completar el registro).
+            </remarks>
+            <param name="id">El ID del registro de la ruta a actualizar.</param>
+        </member>
+        <member name="M:VCashApp.Controllers.RutasDiariasController.DescargarEfectivo(System.String)">
+            <summary>
+            Muestra el formulario para descargar el efectivo de la ruta.
+            </summary>
+            <remarks>
+            Requiere el permiso de 'Edit' para la vista 'RUD'.
+            La ruta debe estar en estado 'SALIDA_REGISTRADA' para edición por el CEF.
+            </remarks>
+            <param name="id">El ID del registro de log a editar.</param>
+            <returns>La vista del formulario de edición con los datos de la ruta.</returns>
+        </member>
+        <member name="M:VCashApp.Controllers.RutasDiariasController.DescargarEfectivo(System.String,VCashApp.Models.Entities.TdvRutaDiaria)">
+            <summary>
+            Actualiza un registro de la ruta existente, utilizado para insertar bolsas de billetes y/o monedas.
+            </summary>
+            <remarks>
+            Requiere el permiso de 'Edit' para la vista 'RUD' (para completar el registro).
+            </remarks>
+            <param name="id">El ID del registro de la ruta a actualizar.</param>
+        </member>
+        <member name="M:VCashApp.Controllers.RutasDiariasController.RegistrarEntrada(System.String)">
+            <summary>
+            Muestra el formulario para registrar la entrada del vehiculo a la empresa.
+            </summary>
+            <remarks>
+            Requiere el permiso de 'Edit' para la vista 'RUD'.
+            La ruta debe estar en estado 'DESCARGUE_REGISTRADO' para edición por el SupervisorRuta.
+            </remarks>
+            <param name="id">El ID del registro de log a editar.</param>
+            <returns>La vista del formulario de edición con los datos de la ruta.</returns>
+        </member>
+        <member name="M:VCashApp.Controllers.RutasDiariasController.RegistrarEntrada(System.String,VCashApp.Models.Entities.TdvRutaDiaria)">
+            <summary>
+            Actualiza un registro de la ruta existente, utilizado para insertar KM final del vehiculo y cerrar la ruta.
+            </summary>
+            <remarks>
+            Requiere el permiso de 'Edit' para la vista 'RUD' (para completar el registro).
+            </remarks>
+            <param name="id">El ID del registro de la ruta a actualizar.</param>
+        </member>
+        <member name="M:VCashApp.Controllers.RutasDiariasController.ExportRutasDiarias(System.String,System.String,System.Nullable{System.DateOnly},System.Nullable{System.Int32},System.Nullable{System.Int32})">
+            <summary>
+            Metodo para exportar las rutas diarias (Excel, CSV, PDF y JSON).
+            </summary>
+            <param name="exportFormat">El tipo de formato de exportacion.</param>
+            <param name="search">Valor buscado en la tabla de rutas.</param>
+            <param name="fechaEjecucion">Fecha de ejecucion de la ruta (opcional).</param>
+            /// <param name="codSuc">El código de la sucursal para filtrar las rutas (opcional).</param>
+            <param name="estado">Estado de la ruta (opcional).</param>
+        </member>
+        <member name="M:VCashApp.Controllers.RutasDiariasController.GetJefesTurnoBySucursal(System.Nullable{System.Int32})">
+            <summary>
+            Obtener el jefe de tripulacion por medio de la sucursal de la ruta.
+            </summary>
+            <param name="codSuc">Valor de la sucursal.</param>
+        </member>
+        <member name="M:VCashApp.Controllers.RutasDiariasController.GetConductoresBySucursal(System.Nullable{System.Int32})">
+            <summary>
+            Obtener el conductor por medio de la sucursal de la ruta.
+            </summary>
+            <param name="codSuc">Valor de la sucursal.</param>
+        </member>
+        <member name="M:VCashApp.Controllers.RutasDiariasController.GetTripulantesBySucursal(System.Nullable{System.Int32})">
+            <summary>
+            Obtener el conductor por medio de la sucursal de la ruta.
+            </summary>
+            <param name="codSuc">Valor de la sucursal.</param>
+        </member>
+        <member name="M:VCashApp.Controllers.RutasDiariasController.GetEmployeeDetails(System.Int32)">
+            <summary>
+            Obtener los datos de los tripulanes selecciondos (Nombre, Cargo, Sucursal).
+            </summary>
+            <param name="cedula">Cedula del empleado.</param>
+        </member>
+        <member name="M:VCashApp.Controllers.RutasDiariasController.GetVehiclesBySucursal(System.Nullable{System.Int32})">
+            <summary>
+            Obtener los vehiculos por la sucursal de la ruta.
+            </summary>
+            <param name="codSuc">Valor de la sucursal.</param>
+        </member>
+        <member name="M:VCashApp.Controllers.RutasDiariasController.GetRutasMaestrasBySucursal(System.Nullable{System.Int32})">
+            <summary>
+            Obtener las rutas maestras por la sucursal.
+            </summary>
+            <param name="codSuc">Código de la sucursal.</param>
+        </member>
+        <member name="M:VCashApp.Controllers.RutasDiariasController.GetRutaDetails(System.String)">
+            <summary>
+            Obtener los detalles de una ruta maestra.
+            </summary>
+            <param name="codRutaSuc">Código de la ruta maestra de sucursal.</param>
+        </member>
+        <member name="M:VCashApp.Controllers.RutasDiariasController.GetSucursalDetails(System.Nullable{System.Int32})">
+            <summary>
+            Obtener los detalles de una sucursal.
+            </summary>
+            <param name="codSuc">Código de la sucursal.</param>
+        </member>
+        <member name="T:VCashApp.Migrations.InitialFullCleanSchemaFinal">
+            <inheritdoc />
+        </member>
+        <member name="M:VCashApp.Migrations.InitialFullCleanSchemaFinal.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:VCashApp.Migrations.InitialFullCleanSchemaFinal.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:VCashApp.Migrations.InitialFullCleanSchemaFinal.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="T:VCashApp.Migrations.AddDataProtectionKeysTable">
+            <inheritdoc />
+        </member>
+        <member name="M:VCashApp.Migrations.AddDataProtectionKeysTable.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:VCashApp.Migrations.AddDataProtectionKeysTable.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:VCashApp.Migrations.AddDataProtectionKeysTable.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="T:VCashApp.Migrations.RemoveConcatenadoRangoFromAdmRuta">
+            <inheritdoc />
+        </member>
+        <member name="M:VCashApp.Migrations.RemoveConcatenadoRangoFromAdmRuta.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:VCashApp.Migrations.RemoveConcatenadoRangoFromAdmRuta.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:VCashApp.Migrations.RemoveConcatenadoRangoFromAdmRuta.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="T:VCashApp.Migrations.DropColumnUsuarioRegistroId">
+            <inheritdoc />
+        </member>
+        <member name="M:VCashApp.Migrations.DropColumnUsuarioRegistroId.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:VCashApp.Migrations.DropColumnUsuarioRegistroId.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:VCashApp.Migrations.DropColumnUsuarioRegistroId.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="T:VCashApp.Migrations.ReconcileSegRegistroEmpleadoMapping">
+            <inheritdoc />
+        </member>
+        <member name="M:VCashApp.Migrations.ReconcileSegRegistroEmpleadoMapping.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:VCashApp.Migrations.ReconcileSegRegistroEmpleadoMapping.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:VCashApp.Migrations.ReconcileSegRegistroEmpleadoMapping.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="T:VCashApp.Migrations.MakeAdmEmpleadoBoolsNullable">
+            <inheritdoc />
+        </member>
+        <member name="M:VCashApp.Migrations.MakeAdmEmpleadoBoolsNullable.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:VCashApp.Migrations.MakeAdmEmpleadoBoolsNullable.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:VCashApp.Migrations.MakeAdmEmpleadoBoolsNullable.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="T:VCashApp.Migrations.AddDailySheetsColumnsToDailyRoutes">
+            <inheritdoc />
+        </member>
+        <member name="M:VCashApp.Migrations.AddDailySheetsColumnsToDailyRoutes.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:VCashApp.Migrations.AddDailySheetsColumnsToDailyRoutes.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:VCashApp.Migrations.AddDailySheetsColumnsToDailyRoutes.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="T:VCashApp.Services.IEmployeeLogService">
+            <summary>
+            Interfaz para los servicios de lógica de negocio relacionados con los registros de empleados (entrada y salida).
+            </summary>
+        </member>
+        <member name="M:VCashApp.Services.IEmployeeLogService.GetEmployeeLogStatusAsync(System.Int32)">
+            <summary>
+            Recupera el estado actual de registro de un empleado, indicando si está actualmente dentro o fuera.
+            </summary>
+            <param name="employeeId">La cédula del empleado para la cual se desea consultar el estado.</param>
+            <returns>
+            Un objeto <see cref="T:VCashApp.Services.EmployeeLogStateDto"/> que describe el estado actual del registro del empleado,
+            incluyendo información sobre el último registro abierto si existe.
+            </returns>
+        </member>
+        <member name="M:VCashApp.Services.IEmployeeLogService.RecordEmployeeEntryExitAsync(VCashApp.Services.EmployeeLogDto,System.String,System.String)">
+            <summary>
+            Registra la entrada o salida de un empleado, creando un nuevo registro o actualizando uno existente.
+            Este método es utilizado para registros automáticos o basados en la acción del usuario.
+            </summary>
+            <param name="logDto">Objeto <see cref="T:VCashApp.Services.EmployeeLogDto"/> que contiene los datos del registro (cédula del empleado, fecha, hora, etc.).</param>
+            <param name="currentUserId">El ID del usuario que está realizando la operación de registro (supervisor, sistema, etc.).</param>
+            <param name="confirmedValidation">Parámetro opcional para validaciones adicionales o confirmaciones (e.g., código de supervisor).</param>
+            <returns>
+            Un objeto <see cref="T:VCashApp.Services.ServiceResult"/> que indica el éxito o fracaso de la operación,
+            junto con mensajes de error o información adicional.
+            </returns>
+        </member>
+        <member name="M:VCashApp.Services.IEmployeeLogService.UpdateEmployeeLogAsync(System.Int32,VCashApp.Services.EmployeeLogDto,System.String,System.String)">
+            <summary>
+            Actualiza un registro de empleado existente, típicamente para registrar una salida,
+            modificar detalles de un registro ya creado o corregir una entrada previa.
+            </summary>
+            <param name="logId">El ID del registro de empleado a actualizar.</param>
+            <param name="logDto">Objeto <see cref="T:VCashApp.Services.EmployeeLogDto"/> con los datos actualizados para el registro.</param>
+            <param name="currentUserId">El ID del usuario que está realizando la actualización.</param>
+            <param name="confirmedValidation">Parámetro opcional para validaciones o confirmaciones adicionales.</param>
+            <returns>
+            Un objeto <see cref="T:VCashApp.Services.ServiceResult"/> que indica el éxito o fracaso de la operación,
+            junto con mensajes de error o información adicional.
+            </returns>
+        </member>
+        <member name="M:VCashApp.Services.IEmployeeLogService.RecordManualEmployeeExitAsync(System.Int32,System.DateOnly,System.TimeOnly,System.String,System.String)">
+            <summary>
+            Registra una salida manual para un registro de empleado existente que aún se encuentra abierto (sin salida registrada).
+            Este método permite cerrar un turno que no fue cerrado automáticamente.
+            </summary>
+            <param name="logId">El ID del registro de empleado a cerrar manualmente.</param>
+            <param name="exitDate">La fecha de la salida manual.</param>
+            <param name="exitTime">La hora de la salida manual.</param>
+            <param name="currentUserId">El ID del usuario (ej. supervisor) que está registrando la salida manual.</param>
+            <param name="confirmedValidation">Parámetro opcional para validaciones o confirmaciones adicionales.</param>
+            <returns>
+            Un objeto <see cref="T:VCashApp.Services.ServiceResult"/> que indica el éxito o fracaso de la operación.
+            </returns>
+        </member>
+        <member name="M:VCashApp.Services.IEmployeeLogService.GetFilteredEmployeeLogsAsync(System.String,System.Nullable{System.Int32},System.String,System.Nullable{System.Int32},System.Nullable{System.DateOnly},System.Nullable{System.DateOnly},System.Nullable{System.Int32},System.String,System.Int32,System.Int32,System.Boolean)">
+            <summary>
+            Recupera una lista de registros de empleados filtrados y paginados.
+            Este método es utilizado para mostrar el historial o reportes de registros.
+            </summary>
+            <param name="currentUserId">El ID del usuario actual que realiza la consulta (para aplicar filtros de permiso por sucursal/unidad si aplica).</param>
+            <param name="cargoId">Filtro opcional por el ID del cargo del empleado.</param>
+            <param name="unitId">Filtro opcional por el ID de la unidad del empleado.</param>
+            <param name="branchId">Filtro opcional por el ID de la sucursal del empleado.</param>
+            <param name="startDate">Filtro opcional para la fecha de inicio del período de búsqueda.</param>
+            <param name="endDate">Filtro opcional para la fecha de fin del período de búsqueda.</param>
+            <param name="logStatus">Filtro opcional por el estado del registro (ej., abierto, cerrado).</param>
+            <param name="searchTerm">Término de búsqueda opcional para campos como nombre de empleado, cédula, etc.</param>
+            <param name="page">El número de página a recuperar (usado para paginación).</param>
+            <param name="pageSize">El número de registros por página (usado para paginación).</param>
+            <param name="isAdmin">Indica si el usuario actual tiene rol de administrador (afecta los permisos de filtrado).</param>
+            <returns>
+            Un <see cref="T:System.Tuple`2"/> donde T1 es una <see cref="T:System.Collections.Generic.List`1"/> con los registros encontrados
+            y T2 es el número total de registros que cumplen los criterios de filtro (antes de la paginación).
+            </returns>
+        </member>
+        <member name="T:VCashApp.Services.IExportService">
+            <summary>
+            Interfaz para un servicio que maneja la exportación de datos a diferentes formatos de archivo.
+            </summary>
+        </member>
+        <member name="M:VCashApp.Services.IExportService.ExportDataAsync``1(System.Collections.Generic.IEnumerable{``0},System.String,System.String,System.Collections.Generic.Dictionary{System.String,System.String})">
+            <summary>
+            Exporta una colección de datos a un formato de archivo específico (ej. Excel, CSV, PDF, JSON).
+            </summary>
+            <typeparam name="T">El tipo de los objetos en la colección de datos a exportar.</typeparam>
+            <param name="data">La colección de datos a exportar.</param>
+            <param name="exportFormat">El formato de exportación deseado (ej., "xlsx", "csv", "pdf", "json").</param>
+            <param name="fileNamePrefix">El prefijo para el nombre del archivo de salida (ej., "Reporte_").</param>
+            <param name="columnDisplayNames">
+            Un diccionario opcional que mapea los nombres de las propiedades de 'T' a los nombres de columna deseados en la salida.
+            Si es nulo o una propiedad no está mapeada, se usará el nombre de la propiedad.
+            </param>
+            <returns>
+            Un <see cref="T:Microsoft.AspNetCore.Mvc.FileContentResult"/> que contiene el contenido del archivo a descargar,
+            o lanza una <see cref="T:System.NotImplementedException"/> si el formato no está soportado.
+            </returns>
+        </member>
+        <member name="T:VCashApp.Services.IRutaDiariaService">
+            <summary>
+            Interfaz para los servicios de lógica de negocio relacionados con la gestión de Rutas Diarias.
+            Define las operaciones disponibles para las diferentes fases de una ruta,
+            desde la planeación hasta el cierre, y es consumida por los controladores.
+            </summary>
+        </member>
+        <member name="M:VCashApp.Services.IRutaDiariaService.CrearRutaDiariaInicialAsync(VCashApp.Models.Entities.TdvRutaDiaria)">
+            <summary>
+            Crea un nuevo registro de Ruta Diaria en su estado inicial (GENERADO).
+            Este método es utilizado para la creación manual de rutas.
+            </summary>
+            <param name="nuevaRuta">El objeto <see cref="T:VCashApp.Models.Entities.TdvRutaDiaria"/> con los datos iniciales de la ruta.</param>
+            <returns>La instancia de <see cref="T:VCashApp.Models.Entities.TdvRutaDiaria"/> recién creada con su ID asignado.</returns>
+        </member>
+        <member name="M:VCashApp.Services.IRutaDiariaService.ObtenerRutasGeneradasParaPlaneacionAsync(System.DateOnly,System.Int32)">
+            <summary>
+            Obtiene una lista de rutas diarias que se encuentran en estado 'GENERADO' para una fecha y sucursal específicas,
+            adecuadas para que el planeador realice la asignación de recursos.
+            </summary>
+            <param name="fechaEjecucion">La fecha de ejecución de las rutas a buscar.</param>
+            <param name="codSucursal">El código de la sucursal a la que pertenecen las rutas.</param>
+            <returns>Una lista de objetos <see cref="T:VCashApp.Models.Entities.TdvRutaDiaria"/>.</returns>
+        </member>
+        <member name="M:VCashApp.Services.IRutaDiariaService.ActualizarRutaDiariaPlaneadorAsync(VCashApp.Models.Entities.TdvRutaDiaria)">
+            <summary>
+            Actualiza los detalles de una ruta diaria por parte del planeador,
+            incluyendo la asignación de vehículo y tripulación.
+            </summary>
+            <param name="rutaActualizada">El objeto <see cref="T:VCashApp.Models.Entities.TdvRutaDiaria"/> con los datos actualizados.</param>
+            <returns>
+            <c>true</c> si la actualización fue exitosa y la ruta pasó a estado 'PLANEADO';
+            <c>false</c> si la ruta no existe o hubo un conflicto de concurrencia.
+            Lanza <see cref="T:System.InvalidOperationException"/> si la ruta no está en estado 'GENERADO'
+            o si el vehículo ya está asignado a otra ruta para la misma fecha.
+            </returns>
+        </member>
+        <member name="M:VCashApp.Services.IRutaDiariaService.ObtenerRutaDiariaPorIdAsync(System.String)">
+            <summary>
+            Obtiene un registro de Ruta Diaria por su identificador único.
+            </summary>
+            <param name="id">El ID de la ruta diaria a buscar.</param>
+            <returns>El objeto <see cref="T:VCashApp.Models.Entities.TdvRutaDiaria"/> si se encuentra, de lo contrario, <c>null</c>.</returns>
+        </member>
+        <member name="M:VCashApp.Services.IRutaDiariaService.GenerarRutasDiariasInicialesPorSucursalAsync(System.Int32,System.DateOnly,System.String,System.String)">
+            <summary>
+            Genera rutas diarias iniciales (estado GENERADO) a partir de las rutas maestras activas
+            para una sucursal y fecha de ejecución dadas.
+            </summary>
+            <param name="codSucursal">El código de la sucursal para la cual se generarán las rutas.</param>
+            <param name="fechaEjecucion">La fecha para la cual se están generando las rutas.</param>
+            <param name="usuarioPlaneacionId">El ID del usuario que está realizando la generación de rutas.</param>
+            <param name="usuarioPlaneacionNombre">El nombre del usuario que está realizando la generación de rutas.</param>
+            <returns>Un objeto <see cref="T:VCashApp.Services.DTOs.GeneracionRutasDiariasResult"/> que contiene el número de rutas creadas y un mensaje.</returns>
+        </member>
+        <member name="M:VCashApp.Services.IRutaDiariaService.RegistrarCargueCEFAsync(System.String,System.DateOnly,System.TimeOnly,System.Int32,System.Int32,System.Int32,System.String)">
+            <summary>
+            Registra la información de cargue de efectivo para una ruta diaria por parte del personal CEF.
+            La ruta debe estar en estado 'PLANEADO' para poder registrar el cargue.
+            </summary>
+            <param name="rutaId">El ID de la ruta a la que se le registrará el cargue.</param>
+            <param name="fechaCargue">La fecha en que se realizó el cargue.</param>
+            <param name="horaCargue">La hora en que se realizó el cargue.</param>
+            <param name="cantBolsaBilleteEntrega">Cantidad de bolsas de billete entregadas.</param>
+            <param name="cantBolsaMonedaEntrega">Cantidad de bolsas de moneda entregadas.</param>
+            <param name="cantPlanillaEntrega">Cantidad de planillas entregadas.</param>
+            <param name="usuarioCefCargue">El ID del usuario CEF que registra el cargue.</param>
+            <returns>
+            <c>true</c> si el cargue fue registrado exitosamente y la ruta pasó a estado 'CARGUE_REGISTRADO';
+            <c>false</c> si la ruta no existe o hubo un conflicto de concurrencia.
+            Lanza <see cref="T:System.InvalidOperationException"/> si la ruta no está en estado 'PLANEADO'.
+            </returns>
+        </member>
+        <member name="M:VCashApp.Services.IRutaDiariaService.RegistrarDescargueCEFAsync(System.String,System.DateOnly,System.TimeOnly,System.Int32,System.Int32,System.Int32,System.String)">
+            <summary>
+            Registra la información de descargue de efectivo para una ruta diaria por parte del personal CEF.
+            La ruta debe estar en estado 'SALIDA_REGISTRADA' y tener una salida registrada previamente.
+            </summary>
+            <param name="rutaId">El ID de la ruta a la que se le registrará el descargue.</param>
+            <param name="fechaDescargue">La fecha en que se realizó el descargue.</param>
+            <param name="horaDescargue">La hora en que se realizó el descargue.</param>
+            <param name="cantBolsaBilleteRecibe">Cantidad de bolsas de billete recibidas.</param>
+            <param name="cantBolsaMonedaRecibe">Cantidad de bolsas de moneda recibidas.</param>
+            <param name="cantPlanillaRecibe">Cantidad de planillas recibidas.</param>
+            <param name="usuarioCefDescargue">El ID del usuario CEF que registra el descargue.</param>
+            <returns>
+            <c>true</c> si el descargue fue registrado exitosamente y la ruta pasó a estado 'DESCARGUE_REGISTRADO';
+            <c>false</c> si la ruta no existe o hubo un conflicto de concurrencia.
+            Lanza <see cref="T:System.InvalidOperationException"/> si la ruta no está en estado 'SALIDA_REGISTRADA' o si la salida del vehículo no está registrada.
+            </returns>
+        </member>
+        <member name="M:VCashApp.Services.IRutaDiariaService.RegistrarSalidaVehiculoAsync(System.String,System.Decimal,System.Nullable{System.DateOnly},System.Nullable{System.TimeOnly},System.String)">
+            <summary>
+            Registra el kilometraje inicial y la hora de salida del vehículo para una ruta diaria por parte del supervisor.
+            La ruta debe estar en estado 'CARGUE_REGISTRADO'.
+            </summary>
+            <param name="rutaId">El ID de la ruta a la que se le registrará la salida.</param>
+            <param name="kmInicial">El kilometraje del vehículo al iniciar la ruta.</param>
+            <param name="fechaSalidaRuta">La fecha de salida del vehículo de la sucursal.</param>
+            <param name="horaSalidaRuta">La hora de salida del vehículo de la sucursal.</param>
+            <param name="usuarioSupervisorApertura">El ID del supervisor que registra la salida.</param>
+            <returns>
+            <c>true</c> si la salida fue registrada exitosamente y la ruta pasó a estado 'SALIDA_REGISTRADA';
+            <c>false</c> si la ruta no existe o hubo un conflicto de concurrencia.
+            Lanza <see cref="T:System.InvalidOperationException"/> si la ruta no está en estado 'CARGUE_REGISTRADO'
+            o si los datos de kilometraje/fecha/hora son inválidos.
+            </returns>
+        </member>
+        <member name="M:VCashApp.Services.IRutaDiariaService.RegistrarEntradaVehiculoAsync(System.String,System.Decimal,System.Nullable{System.DateOnly},System.Nullable{System.TimeOnly},System.String)">
+            <summary>
+            Registra el kilometraje final y la hora de entrada del vehículo para una ruta diaria por parte del supervisor,
+            marcando la ruta como 'CERRADA'.
+            </summary>
+            <param name="rutaId">El ID de la ruta a la que se le registrará la entrada.</param>
+            <param name="kmFinal">El kilometraje del vehículo al finalizar la ruta.</param>
+            <param name="fechaEntradaRuta">La fecha de entrada del vehículo a la sucursal.</param>
+            <param name="horaEntradaRuta">La hora de entrada del vehículo a la sucursal.</param>
+            <param name="usuarioSupervisorCierre">El ID del supervisor que registra la entrada y cierra la ruta.</param>
+            <returns>
+            <c>true</c> si la entrada fue registrada exitosamente y la ruta pasó a estado 'CERRADO';
+            <c>false</c> si la ruta no existe o hubo un conflicto de concurrencia.
+            Lanza <see cref="T:System.InvalidOperationException"/> si la ruta no está en estado 'DESCARGUE_REGISTRADO',
+            si los datos de kilometraje/fecha/hora son inválidos, o si la fecha/hora de entrada es anterior a la de salida.
+            </returns>
+        </member>
+    </members>
+</doc>
