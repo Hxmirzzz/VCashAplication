@@ -18,7 +18,7 @@ namespace VCashApp.Data.Seed
                 "Admin", "Planeador", "CEF", "Supervisor",
                 "ADATM01", "ADCEF01", "ADCF01", "ADGRG01", "ADMTF01",
                 "ADSER01", "ADSER02", "ADTH01", "ADTI01",
-                "COCEF01", "COSTV01", "GRSER001", "SUPTV01", "Seguridad", "SupervisorSeguridad"
+                "COCEF01", "COSTV01", "GRSER001", "SUPTV01", "Seguridad", "SupervisorSeguridad", "TalentoHumano"
             };
 
             foreach (var roleName in roleNames)
@@ -124,6 +124,15 @@ namespace VCashApp.Data.Seed
                 Log.Information("[SeedData] Usuario 'supervisorSeguridad' creado y asignado al rol 'SupervisorSeguridad'.");
             }
             else { Log.Information("[SeedData] Usuario 'supervisorSeguridad' ya existe."); }
+
+            var talentoHumanoUser = await userManager.FindByNameAsync("talentohumano1");
+            if (talentoHumanoUser == null)
+            {
+                talentoHumanoUser = new ApplicationUser { UserName = "talentohumano1", Email = "talentohumano@vcash.com", NombreUsuario = "Talento Humano", EmailConfirmed = true, PhoneNumberConfirmed = true };
+                var result = await userManager.CreateAsync(talentoHumanoUser, "Password123!");
+                if (result.Succeeded) await userManager.AddToRoleAsync(talentoHumanoUser, "TalentoHumano");
+            }
+            else { Log.Information("[SeedData] Usuario 'talentohumano1' ya existe."); }
         }
 
         public static async Task SeedBranchPermissionsAsync(AppDbContext context, UserManager<ApplicationUser> userManager)
@@ -141,6 +150,7 @@ namespace VCashApp.Data.Seed
                 var supervisorBogota = await userManager.FindByNameAsync("supervisor2");
                 var seguridadUser = await userManager.FindByNameAsync("seguridad1");
                 var supervisorSeguridad = await userManager.FindByNameAsync("supervisorseguridad1");
+                var talentoHumanoUser = await userManager.FindByNameAsync("talentohumano1");
 
                 if (planeadorUser != null && bogotaSucursal != null)
                 {
@@ -209,6 +219,26 @@ namespace VCashApp.Data.Seed
                     }
                 }
 
+                if (talentoHumanoUser != null && bogotaSucursal != null)
+                {
+                    var existingClaims = await userManager.GetClaimsAsync(talentoHumanoUser);
+                    if (!existingClaims.Any(c => c.Type == "SucursalId" && c.Value == bogotaSucursal.CodSucursal.ToString()))
+                    {
+                        await userManager.AddClaimAsync(talentoHumanoUser, new Claim("SucursalId", bogotaSucursal.CodSucursal.ToString()));
+                        Log.Information("[SeedData] Claim 'SucursalId:{SucursalId}' añadido a usuario '{UserName}'.", bogotaSucursal.CodSucursal, talentoHumanoUser.UserName);
+                    }
+                }
+
+                if (talentoHumanoUser != null && medellinSucursal != null)
+                {
+                    var existingClaims = await userManager.GetClaimsAsync(talentoHumanoUser);
+                    if (!existingClaims.Any(c => c.Type == "SucursalId" && c.Value == medellinSucursal.CodSucursal.ToString()))
+                    {
+                        await userManager.AddClaimAsync(talentoHumanoUser, new Claim("SucursalId", medellinSucursal.CodSucursal.ToString()));
+                        Log.Information("[SeedData] Claim 'SucursalId:{SucursalId}' añadido a usuario '{UserName}'.", medellinSucursal.CodSucursal, talentoHumanoUser.UserName);
+                    }
+                }
+
                 Log.Information("[SeedData] Seeding de permisos por sucursal completado.");
             }
             catch (Exception ex)
@@ -223,7 +253,7 @@ namespace VCashApp.Data.Seed
             try
             {
                 // --- 1. Crear Vistas (si no existen) ---
-                string[] vistaNames = { "RUD", "RUDHIS", "REG", "CTY", "SUC", "REGHIS" };
+                string[] vistaNames = { "RUD", "RUDHIS", "REG", "CTY", "SUC", "REGHIS", "EMP" };
                 foreach (var vistaName in vistaNames)
                 {
                     if (!await context.AdmVistas.AnyAsync(v => v.CodVista == vistaName))
@@ -236,6 +266,7 @@ namespace VCashApp.Data.Seed
                             "REGHIS" => "Historial de Registro de Empleados",
                             "CTY" => "Ciudades",
                             "SUC" => "Sucursales",
+                            "EMP" => "Empleados",
                             _ => $"Vista {vistaName}"
                         };
                         context.AdmVistas.Add(new AdmVista { CodVista = vistaName, NombreVista = nombreVistaDisplay });
@@ -252,6 +283,7 @@ namespace VCashApp.Data.Seed
                 var supervisorRoleId = (await roleManager.FindByNameAsync("Supervisor"))?.Id;
                 var seguridadRoleId = (await roleManager.FindByNameAsync("Seguridad"))?.Id;
                 var supervisorSeguridadRoleId = (await roleManager.FindByNameAsync("SupervisorSeguridad"))?.Id;
+                var talentoHumanoRoleId = (await roleManager.FindByNameAsync("TalentoHumano"))?.Id;
 
                 var rolesConIds = new Dictionary<string, string?>
                 {
@@ -260,7 +292,8 @@ namespace VCashApp.Data.Seed
                     { "CEF", cefRoleId },
                     { "Supervisor", supervisorRoleId },
                     { "Seguridad", seguridadRoleId },
-                    { "SupervisorSeguridad", supervisorSeguridadRoleId  }
+                    { "SupervisorSeguridad", supervisorSeguridadRoleId },
+                    { "TalentoHumano", talentoHumanoRoleId }
                 };
 
                 // Permisos para RUD
@@ -403,6 +436,40 @@ namespace VCashApp.Data.Seed
                             permiso.PuedeEditar = perm.CanEdit;
                             context.PermisosPerfil.Update(permiso);
                             Log.Information("[SeedData] Permisos REGHIS actualizados para rol {RoleName}.", perm.RoleName);
+                        }
+                    }
+                }
+
+                var empPermissions = new List<(string RoleName, bool CanView, bool CanCreate, bool CanEdit)>
+                {
+                    ( "Admin", true, true, true ),
+                    ( "TalentoHumano", true, true, true )
+                };
+
+                foreach (var perm in empPermissions)
+                {
+                    if (rolesConIds.TryGetValue(perm.RoleName, out string? roleId) && roleId != null)
+                    {
+                        var permiso = await context.PermisosPerfil.FirstOrDefaultAsync(p => p.CodPerfilId == roleId && p.CodVista == "EMP");
+                        if (permiso == null)
+                        {
+                            context.PermisosPerfil.Add(new PermisoPerfil
+                            {
+                                CodPerfilId = roleId,
+                                CodVista = "EMP",
+                                PuedeVer = perm.CanView,
+                                PuedeCrear = perm.CanCreate,
+                                PuedeEditar = perm.CanEdit
+                            });
+                            Log.Information("[SeedData] Permisos EMP asignados al rol {RoleName}.", perm.RoleName);
+                        }
+                        else
+                        {
+                            permiso.PuedeVer = perm.CanView;
+                            permiso.PuedeCrear = perm.CanCreate;
+                            permiso.PuedeEditar = perm.CanEdit;
+                            context.PermisosPerfil.Update(permiso);
+                            Log.Information("[SeedData] Permisos EMP actualizados para rol {RoleName}.", perm.RoleName);
                         }
                     }
                 }

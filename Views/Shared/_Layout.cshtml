@@ -85,6 +85,21 @@
                 </div>
                 <div class="sidebar__dropdown" id="dashboard-dropdown">
                     <a href="#" class="sidebar__link dropdown-btn">
+                        <i class="ri-collage-fill"></i>
+                        <span class="nav-text">Gestión de Recursos</span>
+                        <i class="ri-arrow-down-s-line dropdown-arrow"></i>
+                    </a>
+                    <div class="sidebar__submenu">
+                        <ul>
+                            <li><a asp-controller="Employee" asp-action="Index" class="sidebar__link sub-link"><span class="nav-text">Empleados</span></a></li>
+                            <li><a asp-controller="Vehiculos" asp-action="Index" class="sidebar__link sub-link"><span class="nav-text">Vehículos</span></a></li>
+                            <li><a asp-controller="Cargos" asp-action="Index" class="sidebar__link sub-link"><span class="nav-text">Cargos</span></a></li>
+                            <li><a asp-controller="Unidades" asp-action="Index" class="sidebar__link sub-link"><span class="nav-text">Unidades</span></a></li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="sidebar__dropdown" id="dashboard-dropdown">
+                    <a href="#" class="sidebar__link dropdown-btn">
                         <i class="ri-lock-2-fill"></i>
                         <span class="nav-text">Seguridad</span>
                         <i class="ri-arrow-down-s-line dropdown-arrow"></i>
@@ -150,7 +165,7 @@
 
         <main class="main-content">
             <header class="main-header">
-                <h1 id="viewTitle">@ViewData["Title"]</h1>
+                <h1>@ViewData["Title"]</h1>
                 <img src="~/assets/vcash-logo.png" alt="VCash Logo" class="main-header-logo">
             </header>
 

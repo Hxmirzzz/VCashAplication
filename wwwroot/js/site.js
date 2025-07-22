@@ -4,14 +4,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const toggleIcon = toggleButton.querySelector('i');
     const themeButton = document.getElementById('theme-button');
     const themeIcon = themeButton.querySelector('i');
-    const viewTitle = document.getElementById('viewTitle');
-
-    // Helper function to update the view title
-    const updateViewTitle = (titleText) => {
-        if (viewTitle) {
-            viewTitle.textContent = titleText;
-        }
-    };
 
     // --- Sidebar Toggle Logic ---
     if (sidebar.classList.contains('expanded')) {
@@ -111,11 +103,6 @@ document.addEventListener('DOMContentLoaded', () => {
             allSidebarLinks.forEach(item => item.classList.remove('active'));
             this.classList.add('active');
 
-            const linkText = this.querySelector('.nav-text')?.textContent.trim();
-            if (linkText) {
-                updateViewTitle(linkText);
-            }
-
             const linkId = this.getAttribute('id') || this.querySelector('.nav-text')?.textContent.trim();
             if (linkId) {
                 localStorage.setItem('activeSidebarLink', linkId);
@@ -135,7 +122,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // --- Restore Active State and View Title on Page Load ---
+    // --- Restore Active State on Page Load ---
     const savedActiveLinkId = localStorage.getItem('activeSidebarLink');
     const savedActiveDropdownId = localStorage.getItem('activeSidebarDropdown');
 
@@ -158,17 +145,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 parentDropdown.classList.add('show-submenu');
                 parentDropdown.querySelector('.dropdown-btn')?.classList.add('active-dropdown');
             }
-            const linkText = activeLinkToRestore.querySelector('.nav-text')?.textContent.trim();
-            if (linkText) {
-                updateViewTitle(linkText);
-            }
         } else {
             localStorage.removeItem('activeSidebarLink');
             localStorage.removeItem('activeSidebarDropdown');
-            updateViewTitle("Dashboard");
         }
-    } else {
-        updateViewTitle("Dashboard");
     }
 
     const filterButton = document.getElementById('filterButton');
@@ -207,7 +187,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Optional: Prevent clicks inside the sidebar (that are not action buttons) from closing it
     if (filterSidebar) {
-        filterSidebar.addEventListener('click', function(event) {
+        filterSidebar.addEventListener('click', function (event) {
             event.stopPropagation();
         });
     }

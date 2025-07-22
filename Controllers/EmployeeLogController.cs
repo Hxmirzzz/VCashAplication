@@ -14,6 +14,7 @@ using VCashApp.Filters;
 using VCashApp.Models;
 using VCashApp.Models.Entities;
 using VCashApp.Services;
+using VCashApp.Services.DTOs;
 
 namespace VCashApp.Controllers
 {

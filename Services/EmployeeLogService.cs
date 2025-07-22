@@ -12,6 +12,7 @@ using System.Linq.Expressions;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Identity;
 using System.Globalization;
+using VCashApp.Services.DTOs;
 
 namespace VCashApp.Services
 {

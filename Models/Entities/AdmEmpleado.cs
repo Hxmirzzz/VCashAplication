@@ -40,9 +40,9 @@ namespace VCashApp.Models.Entities
         public DateOnly? FecVinculacion { get; set; }
         public DateOnly? FecRetiro { get; set; }
 
-        public bool? IndicadorCatalogo { get; set; }
-        public bool? IngresoRepublica { get; set; }
-        public bool? IngresoAeropuerto { get; set; }
+        public bool IndicadorCatalogo { get; set; }
+        public bool IngresoRepublica { get; set; }
+        public bool IngresoAeropuerto { get; set; }
 
         public string? FotoUrl { get; set; }
         public string? FirmaUrl { get; set; }

@@ -772,6 +772,47 @@
                 directly from your code. This API may change or be removed in future releases.
             </summary>
         </member>
+        <member name="T:VCashApp.Controllers.EmployeeController">
+            <summary>
+            Controlador para la gestión de empleados. Sigue un patrón de servicio para la lógica de negocio.
+            Proporciona funcionalidades para listar, crear, editar y visualizar información de empleados.
+            </summary>
+        </member>
+        <member name="M:VCashApp.Controllers.EmployeeController.#ctor(VCashApp.Services.IEmployeeService,VCashApp.Services.IExportService,VCashApp.Data.AppDbContext,Microsoft.AspNetCore.Identity.UserManager{VCashApp.Models.ApplicationUser})">
+            <summary>
+            Constructor del controlador EmployeeController.
+            </summary>
+        </member>
+        <member name="M:VCashApp.Controllers.EmployeeController.Index(System.Nullable{System.Int32},System.Nullable{System.Int32},System.Nullable{System.Int32},System.String,System.String,System.Int32,System.Int32)">
+            <summary>
+            Muestra una lista paginada y filtrada de empleados.
+            </summary>
+        </member>
+        <member name="M:VCashApp.Controllers.EmployeeController.Create">
+            <summary>
+            Muestra el formulario para crear un nuevo empleado.
+            </summary>
+        </member>
+        <member name="M:VCashApp.Controllers.EmployeeController.Create(VCashApp.Models.ViewModels.EmpleadoViewModel)">
+            <summary>
+            Procesa la creación de un nuevo empleado.
+            </summary>
+        </member>
+        <member name="M:VCashApp.Controllers.EmployeeController.Edit(System.Int32)">
+            <summary>
+            Muestra el formulario para editar un empleado existente.
+            </summary>
+        </member>
+        <member name="M:VCashApp.Controllers.EmployeeController.Edit(VCashApp.Models.ViewModels.EmpleadoViewModel)">
+            <summary>
+            Procesa la actualización de un empleado existente.
+            </summary>
+        </member>
+        <member name="M:VCashApp.Controllers.EmployeeController.GetImage(System.String)">
+            <summary>
+            Sirve archivos de imagen (fotos o firmas) de empleados desde el repositorio.
+            </summary>
+        </member>
         <member name="T:VCashApp.Controllers.EmployeeLogController">
             <summary>
             Controlador para la gestión de registros de entrada y salida de empleados.
@@ -805,7 +846,7 @@
             <param name="employeeId">La cédula del empleado.</param>
             <returns>Un objeto EmployeeLogStateDto que describe el estado del log.</returns>
         </member>
-        <member name="M:VCashApp.Controllers.EmployeeLogController.RecordEntryExit(VCashApp.Services.EmployeeLogDto,System.String)">
+        <member name="M:VCashApp.Controllers.EmployeeLogController.RecordEntryExit(VCashApp.Services.DTOs.EmployeeLogDto,System.String)">
             <summary>
             Registra una nueva entrada de empleado o una entrada/salida combinada.
             </summary>
@@ -827,7 +868,7 @@
             <param name="id">El ID del registro de log a editar.</param>
             <returns>La vista del formulario de edición con los datos del log.</returns>
         </member>
-        <member name="M:VCashApp.Controllers.EmployeeLogController.UpdateLog(System.Int32,VCashApp.Services.EmployeeLogDto,System.String)">
+        <member name="M:VCashApp.Controllers.EmployeeLogController.UpdateLog(System.Int32,VCashApp.Services.DTOs.EmployeeLogDto,System.String)">
             <summary>
             Actualiza un registro de log de empleado existente, utilizado para registrar salidas o modificar detalles.
             </summary>
@@ -846,7 +887,7 @@
             <param name="id">El ID del registro de log.</param>
             <returns>La vista del formulario de salida manual.</returns>
         </member>
-        <member name="M:VCashApp.Controllers.EmployeeLogController.RecordManualExit(System.Int32,VCashApp.Services.EmployeeLogDto)">
+        <member name="M:VCashApp.Controllers.EmployeeLogController.RecordManualExit(System.Int32,VCashApp.Services.DTOs.EmployeeLogDto)">
             <summary>
             Registra la salida manual de un vehículo.
             </summary>
@@ -1219,6 +1260,11 @@
         <member name="M:VCashApp.Migrations.AddDailySheetsColumnsToDailyRoutes.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
             <inheritdoc />
         </member>
+        <member name="T:VCashApp.Services.EmployeeService">
+            <summary>
+            Servicio para manejar la lógica de negocio relacionada con los empleados.
+            </summary>
+        </member>
         <member name="T:VCashApp.Services.IEmployeeLogService">
             <summary>
             Interfaz para los servicios de lógica de negocio relacionados con los registros de empleados (entrada y salida).
@@ -1230,34 +1276,34 @@
             </summary>
             <param name="employeeId">La cédula del empleado para la cual se desea consultar el estado.</param>
             <returns>
-            Un objeto <see cref="T:VCashApp.Services.EmployeeLogStateDto"/> que describe el estado actual del registro del empleado,
+            Un objeto <see cref="T:VCashApp.Services.DTOs.EmployeeLogStateDto"/> que describe el estado actual del registro del empleado,
             incluyendo información sobre el último registro abierto si existe.
             </returns>
         </member>
-        <member name="M:VCashApp.Services.IEmployeeLogService.RecordEmployeeEntryExitAsync(VCashApp.Services.EmployeeLogDto,System.String,System.String)">
+        <member name="M:VCashApp.Services.IEmployeeLogService.RecordEmployeeEntryExitAsync(VCashApp.Services.DTOs.EmployeeLogDto,System.String,System.String)">
             <summary>
             Registra la entrada o salida de un empleado, creando un nuevo registro o actualizando uno existente.
             Este método es utilizado para registros automáticos o basados en la acción del usuario.
             </summary>
-            <param name="logDto">Objeto <see cref="T:VCashApp.Services.EmployeeLogDto"/> que contiene los datos del registro (cédula del empleado, fecha, hora, etc.).</param>
+            <param name="logDto">Objeto <see cref="T:VCashApp.Services.DTOs.EmployeeLogDto"/> que contiene los datos del registro (cédula del empleado, fecha, hora, etc.).</param>
             <param name="currentUserId">El ID del usuario que está realizando la operación de registro (supervisor, sistema, etc.).</param>
             <param name="confirmedValidation">Parámetro opcional para validaciones adicionales o confirmaciones (e.g., código de supervisor).</param>
             <returns>
-            Un objeto <see cref="T:VCashApp.Services.ServiceResult"/> que indica el éxito o fracaso de la operación,
+            Un objeto <see cref="T:VCashApp.Services.DTOs.ServiceResult"/> que indica el éxito o fracaso de la operación,
             junto con mensajes de error o información adicional.
             </returns>
         </member>
-        <member name="M:VCashApp.Services.IEmployeeLogService.UpdateEmployeeLogAsync(System.Int32,VCashApp.Services.EmployeeLogDto,System.String,System.String)">
+        <member name="M:VCashApp.Services.IEmployeeLogService.UpdateEmployeeLogAsync(System.Int32,VCashApp.Services.DTOs.EmployeeLogDto,System.String,System.String)">
             <summary>
             Actualiza un registro de empleado existente, típicamente para registrar una salida,
             modificar detalles de un registro ya creado o corregir una entrada previa.
             </summary>
             <param name="logId">El ID del registro de empleado a actualizar.</param>
-            <param name="logDto">Objeto <see cref="T:VCashApp.Services.EmployeeLogDto"/> con los datos actualizados para el registro.</param>
+            <param name="logDto">Objeto <see cref="T:VCashApp.Services.DTOs.EmployeeLogDto"/> con los datos actualizados para el registro.</param>
             <param name="currentUserId">El ID del usuario que está realizando la actualización.</param>
             <param name="confirmedValidation">Parámetro opcional para validaciones o confirmaciones adicionales.</param>
             <returns>
-            Un objeto <see cref="T:VCashApp.Services.ServiceResult"/> que indica el éxito o fracaso de la operación,
+            Un objeto <see cref="T:VCashApp.Services.DTOs.ServiceResult"/> que indica el éxito o fracaso de la operación,
             junto con mensajes de error o información adicional.
             </returns>
         </member>
@@ -1272,7 +1318,7 @@
             <param name="currentUserId">El ID del usuario (ej. supervisor) que está registrando la salida manual.</param>
             <param name="confirmedValidation">Parámetro opcional para validaciones o confirmaciones adicionales.</param>
             <returns>
-            Un objeto <see cref="T:VCashApp.Services.ServiceResult"/> que indica el éxito o fracaso de la operación.
+            Un objeto <see cref="T:VCashApp.Services.DTOs.ServiceResult"/> que indica el éxito o fracaso de la operación.
             </returns>
         </member>
         <member name="M:VCashApp.Services.IEmployeeLogService.GetFilteredEmployeeLogsAsync(System.String,System.Nullable{System.Int32},System.String,System.Nullable{System.Int32},System.Nullable{System.DateOnly},System.Nullable{System.DateOnly},System.Nullable{System.Int32},System.String,System.Int32,System.Int32,System.Boolean)">
@@ -1295,6 +1341,55 @@
             Un <see cref="T:System.Tuple`2"/> donde T1 es una <see cref="T:System.Collections.Generic.List`1"/> con los registros encontrados
             y T2 es el número total de registros que cumplen los criterios de filtro (antes de la paginación).
             </returns>
+        </member>
+        <member name="T:VCashApp.Services.IEmployeeService">
+            <summary>
+            Define el contrato para el servicio de gestión de empleados.
+            </summary>
+        </member>
+        <member name="M:VCashApp.Services.IEmployeeService.GetDropdownListsAsync(System.String,System.Boolean)">
+            <summary>
+            Obtiene las listas necesarias para los dropdowns en las vistas de empleado.
+            </summary>
+            <returns>Una tupla con listas para Cargos, Sucursales y Ciudades.</returns>
+        </member>
+        <member name="M:VCashApp.Services.IEmployeeService.GetFilteredEmployeesAsync(System.String,System.Nullable{System.Int32},System.Nullable{System.Int32},System.Nullable{System.Int32},System.String,System.String,System.Int32,System.Int32,System.Boolean)">
+            <summary>
+            Obtiene una lista paginada y filtrada de empleados como ViewModels.
+            </summary>
+            <returns>Una tupla que contiene la lista de empleados para la página actual y el conteo total de registros filtrados.</returns>
+        </member>
+        <member name="M:VCashApp.Services.IEmployeeService.GetEmployeeForEditAsync(System.Int32,System.String,System.Boolean)">
+            <summary>
+            Obtiene los datos de un empleado específico para el formulario de edición.
+            </summary>
+            <param name="employeeId">El ID (cédula) del empleado.</param>
+            <param name="currentUserId">El ID del usuario que realiza la solicitud.</param>
+            <param name="isAdmin">Indica si el usuario es administrador.</param>
+            <returns>Un EmpleadoViewModel con los datos del empleado, o null si no se encuentra o no hay permiso.</returns>
+        </member>
+        <member name="M:VCashApp.Services.IEmployeeService.CreateEmployeeAsync(VCashApp.Models.ViewModels.EmpleadoViewModel,System.String)">
+            <summary>
+            Crea un nuevo registro de empleado en la base de datos.
+            </summary>
+            <param name="model">El ViewModel con los datos del nuevo empleado.</param>
+            <param name="currentUserId">El ID del usuario que crea el registro.</param>
+            <returns>Un ServiceResult indicando el resultado de la operación.</returns>
+        </member>
+        <member name="M:VCashApp.Services.IEmployeeService.UpdateEmployeeAsync(VCashApp.Models.ViewModels.EmpleadoViewModel,System.String)">
+            <summary>
+            Actualiza un registro de empleado existente.
+            </summary>
+            <param name="model">El ViewModel con los datos actualizados del empleado.</param>
+            <param name="currentUserId">El ID del usuario que actualiza el registro.</param>
+            <returns>Un ServiceResult indicando el resultado de la operación.</returns>
+        </member>
+        <member name="M:VCashApp.Services.IEmployeeService.GetEmployeeImageStreamAsync(System.String)">
+            <summary>
+            Obtiene el stream de un archivo de imagen (foto/firma) de un empleado.
+            </summary>
+            <param name="filePath">La ruta relativa del archivo (ej. "Fotos/12345P.jpg").</param>
+            <returns>Un FileStream de la imagen, o null si no se encuentra.</returns>
         </member>
         <member name="T:VCashApp.Services.IExportService">
             <summary>

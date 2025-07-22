@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using VCashApp.Models.Entities;
+using VCashApp.Services.DTOs;
 
 namespace VCashApp.Services
 {
