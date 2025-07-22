@@ -21,7 +21,6 @@
     --font-regular: 400;
     --font-semi-bold: 600;
     --z-fixed: 100;
-
     /* Custom variables for sidebar */
     --compact-sidebar-width: 80px;
     --expanded-sidebar-width: 280px;
@@ -30,7 +29,6 @@
     --toggle-button-size: 40px;
     --sidebar-padding-x: 1.5rem; /* ~24px */
     --sidebar-vertical-padding: 20px; /* Top/bottom padding for the entire sidebar */
-
     /* Theme Variables (Default/Light Theme Values) */
     --body-bg: linear-gradient(90deg, #e2e2e2, #c9d6ff); /* Used by html, body, app-wrapper */
     --div-bg: #fff; /* Used by sidebar, main-content, toggle-button, submenu */
@@ -46,8 +44,8 @@
     --button-text-color: var(--text-color-main); /* Color de texto para botones de control */
     --table-header-bg: #e9ecef; /* Fondo de encabezado de tabla */
     --table-header-text: var(--title-color-main);
-    --toggle-slider-bg: #ccc; /* Fondo del slider del toggle (off) */
-    --toggle-slider-checked-bg: #2196F3; /* Fondo del slider del toggle (on) */
+    --toggle-slider-bg: #ce2c26;
+    --toggle-slider-checked-bg: #5ccb5f;
 }
 
 /* Dark Theme */
@@ -1019,10 +1017,10 @@ button {
 .switch {
     position: relative;
     display: inline-block;
-    width: 38px; /* Ancho del switch */
-    height: 20px; /* Altura del switch */
-    vertical-align: middle; /* Alinea con los iconos */
-    margin-left: 5px; /* Espacio a la izquierda */
+    width: 35px;
+    height: 16px;
+    vertical-align: middle;
+    margin-left: 5px;
 }
 
 .switch input {
@@ -1040,19 +1038,19 @@ button {
     bottom: 0;
     background-color: var(--toggle-slider-bg);
     transition: .4s;
-    border-radius: 20px; /* Hace el slider redondo */
+    border-radius: 20px;
 }
 
 .slider:before {
     position: absolute;
     content: "";
-    height: 14px; /* Tamaño del círculo */
-    width: 14px;
-    left: 3px; /* Posición inicial del círculo */
-    bottom: 3px;
+    height: 10px;
+    width: 10px;
+    left: 4px;
+    bottom: 3.5px;
     background-color: white;
     transition: .4s;
-    border-radius: 50%; /* Hace el círculo redondo */
+    border-radius: 50%;
 }
 
 input:checked + .slider {
@@ -1064,7 +1062,7 @@ input:focus + .slider {
 }
 
 input:checked + .slider:before {
-    transform: translateX(18px); /* Mueve el círculo cuando está 'checked' */
+    transform: translateX(18px);
 }
 
 /* Estilos generales para el pie de tabla */

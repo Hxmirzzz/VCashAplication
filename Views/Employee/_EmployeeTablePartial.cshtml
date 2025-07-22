@@ -97,6 +97,28 @@
                                                 <i class="ri-pencil-fill"></i>
                                             </a>
                                         }
+                                        @if (canEdit)
+                                        {
+                                            <form class="employee-status-form ml-1" method="post"
+                                                  asp-action="ChangeStatus" asp-controller="Employee"
+                                                  asp-route-id="@item.CodCedula">
+                                                @Html.AntiForgeryToken()
+
+                                                <input type="hidden" name="EmployeeId" value="@item.CodCedula" />
+                                                <input type="hidden" name="NewStatus" value="@((item.EmployeeStatus == (int)EstadoEmpleado.Activo ? (int)EstadoEmpleado.Inactivo : (int)EstadoEmpleado.Activo))" class="hidden-new-status" />
+                                                <input type="hidden" name="ReasonForChange" value="Cambio desde la tabla." />
+
+                                                <label class="switch">
+                                                    <input type="checkbox" class="employee-status-toggle"
+                                                           data-id="@item.CodCedula"
+                                                           data-next-status-on="@((int)EstadoEmpleado.Activo)"
+                                                           data-next-status-off="@((int)EstadoEmpleado.Inactivo)"
+                                                           @(item.EmployeeStatus == (int)EstadoEmpleado.Activo ? "checked" : "")
+                                                           onchange="confirmStatusChange(this)">
+                                                    <span class="slider round"></span>
+                                                </label>
+                                            </form>
+                                        }
                                     </div>
                                 </td>
                             </tr>

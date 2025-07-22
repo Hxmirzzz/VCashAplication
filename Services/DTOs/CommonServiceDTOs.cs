@@ -85,4 +85,14 @@ namespace VCashApp.Services.DTOs
         public bool ExitoParcial { get; set; }
         public string Mensaje { get; set; }
     }
+
+    public class StatusChangeRequestDTO
+    {
+        [Required]
+        public int EmployeeId { get; set; } // Para asegurarse de que el ID es enviado en el cuerpo
+        [Required(ErrorMessage = "El nuevo estado es obligatorio.")]
+        public int NewStatus { get; set; } // El valor numérico del enum
+        [StringLength(500, ErrorMessage = "La razón no debe exceder los 500 caracteres.")]
+        public string? ReasonForChange { get; set; } // Razón del cambio (opcional)
+    }
 }

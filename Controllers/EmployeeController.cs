@@ -128,7 +128,9 @@ namespace VCashApp.Controllers
                 Ciudades = ciudades,
                 IndicadorCatalogo = false,
                 IngresoRepublica = false,
-                IngresoAeropuerto = false
+                IngresoAeropuerto = false,
+                FechaVinculacion = DateOnly.FromDateTime(DateTime.Now),
+                EmployeeStatus = (int)EstadoEmpleado.Activo
             };
 
             Log.Information("| User: {User} | IP: {Ip} | Action: Accessing Create Employee Form | Result: Access Granted |", currentUser.UserName, ViewBag.Ip);
@@ -199,13 +201,18 @@ namespace VCashApp.Controllers
         /// <summary>
         /// Procesa la actualización de un empleado existente.
         /// </summary>
-        [HttpPost("Edit")]
+        [HttpPost("Edit/{id}")]
         [ValidateAntiForgeryToken]
         [RequiredPermission(PermissionType.Edit, "EMP")]
-        public async Task<IActionResult> Edit(EmpleadoViewModel model)
+        public async Task<IActionResult> Edit(int id, [FromForm] EmpleadoViewModel model)
         {
             var currentUser = await GetCurrentApplicationUserAsync();
             if (currentUser == null) return Unauthorized();
+
+            if (id != model.CodCedula)
+            {
+                return BadRequest(ServiceResult.FailureResult("El ID del empleado en la URL no coincide con el ID del formulario."));
+            }
 
             if (!ModelState.IsValid)
             {
@@ -218,7 +225,6 @@ namespace VCashApp.Controllers
                 return Json(ServiceResult.FailureResult("Hay errores en el formulario.", errors: fieldErrors));
             }
 
-            // Llamada al servicio para actualizar el empleado
             var result = await _employeeService.UpdateEmployeeAsync(model, currentUser.Id);
 
             if (result.Success)
@@ -231,6 +237,69 @@ namespace VCashApp.Controllers
             }
 
             return Json(result);
+        }
+
+        /// <summary>
+        /// Endpoint para cambiar el estado de un empleado.
+        /// </summary>
+        /// <param name="id">El ID del empleado (CodCedula).</param>
+        /// <param name="statusChangeRequest">Un DTO que contiene el nuevo estado y la razón.</param>
+        /// <returns>Un JSON ServiceResult.</returns>
+        [HttpPost("ChangeStatus/{id}")]
+        [ValidateAntiForgeryToken] // Aunque se envía por JS, es buena práctica mantenerlo para seguridad
+        [RequiredPermission(PermissionType.Edit, "EMP")] // Asumo que el permiso para editar también aplica para cambiar estado
+        public async Task<IActionResult> ChangeStatus(int id, [FromBody] StatusChangeRequestDTO statusChangeRequest)
+        {
+            var currentUser = await GetCurrentApplicationUserAsync();
+            if (currentUser == null) return Unauthorized();
+
+            if (id != statusChangeRequest.EmployeeId)
+            {
+                return BadRequest(ServiceResult.FailureResult("El ID del empleado en la URL no coincide con el ID del cuerpo de la solicitud."));
+            }
+
+            // Puedes añadir validaciones adicionales aquí si el nuevo estado es restrictivo.
+            // Por ejemplo, no permitir cambiar a "Activo" desde "Despedido" sin un proceso específico.
+
+            var result = await _employeeService.ChangeEmployeeStatusAsync(
+                id,
+                statusChangeRequest.NewStatus,
+                statusChangeRequest.ReasonForChange,
+                currentUser.Id
+            );
+
+            return Json(result);
+        }
+
+        ///<summary>
+        ///Muestra un formulario para ver los detalles de un empleado.
+        ///</summary>
+        [HttpGet("Detail/{id}")]
+        [RequiredPermission(PermissionType.View, "EMP")]
+        public async Task<IActionResult> Detail(int id)
+        {
+            var currentUser = await GetCurrentApplicationUserAsync();
+            if (currentUser == null) return RedirectToPage("/Account/Login", new { area = "Identity" });
+
+            await SetCommonViewBagsBaseAsync(currentUser, "Detalles del Empleado");
+            bool isAdmin = (bool)ViewBag.IsAdmin;
+
+            var employeeModel = await _employeeService.GetEmployeeForDetailsAsync(id, currentUser.Id, isAdmin);
+
+            if (employeeModel == null)
+            {
+                Log.Warning("| User: {User} | IP: {Ip} | Action: Accessing Employee Details | EmployeeId: {EmployeeId} | Result: Not Found or Forbidden |", currentUser.UserName, ViewBag.Ip, id);
+                TempData["ErrorMessage"] = "Empleado no encontrado o no tiene permiso para verlo.";
+                return RedirectToAction(nameof(Index));
+            }
+
+            var (cargos, sucursales, ciudades) = await _employeeService.GetDropdownListsAsync(currentUser.Id, isAdmin);
+            employeeModel.Cargos = cargos;
+            employeeModel.Sucursales = sucursales;
+            employeeModel.Ciudades = ciudades;
+
+            Log.Information("| User: {User} | IP: {Ip} | Action: Accessing Employee Details | EmployeeId: {EmployeeId} | Result: Access Granted |", currentUser.UserName, ViewBag.Ip, id);
+            return View(employeeModel);
         }
 
         /// <summary>

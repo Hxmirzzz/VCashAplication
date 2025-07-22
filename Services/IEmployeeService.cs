@@ -57,5 +57,25 @@ namespace VCashApp.Services
         /// <param name="filePath">La ruta relativa del archivo (ej. "Fotos/12345P.jpg").</param>
         /// <returns>Un FileStream de la imagen, o null si no se encuentra.</returns>
         Task<Stream> GetEmployeeImageStreamAsync(string filePath);
+
+        /// <summary>
+        /// Obtiene los detalles de un empleado específico para visualización.
+        /// Aplica la lógica de permisos basada en el usuario actual y si es administrador.
+        /// </summary>
+        /// <param name="employeeId">El ID del empleado a buscar (CodCedula).</param>
+        /// <param name="currentUserId">El ID del usuario actual para validación de permisos.</param>
+        /// <param name="isAdmin">Indica si el usuario actual tiene rol de administrador.</param>
+        /// <returns>Un EmpleadoViewModel con los datos del empleado, o null si no se encuentra o el usuario no tiene permisos.</returns>
+        Task<EmpleadoViewModel?> GetEmployeeForDetailsAsync(int employeeId, string currentUserId, bool isAdmin);
+
+        /// <summary>
+        /// Cambia el estado de un empleado específico.
+        /// </summary>
+        /// <param name="employeeId">El ID del empleado (CodCedula).</param>
+        /// <param name="newStatus">El nuevo estado deseado (valor numérico de EstadoEmpleado).</param>
+        /// <param name="reasonForChange">Una razón para el cambio de estado (opcional, para historial).</param>
+        /// <param name="currentUserId">ID del usuario que realiza el cambio.</param>
+        /// <returns>Un ServiceResult indicando éxito o fallo.</returns>
+        Task<ServiceResult> ChangeEmployeeStatusAsync(int employeeId, int newStatus, string reasonForChange, string currentUserId);
     }
 }

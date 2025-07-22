@@ -2,7 +2,7 @@
 
 @{
     Layout = "_Layout";
-    ViewData["Title"] = "Employee";
+    ViewData["Title"] = "Empleados";
 
     string currentSearchTerm = ViewBag.SearchTerm ?? "";
     int currentPage = ViewBag.CurrentPage ?? 1;
@@ -93,6 +93,7 @@
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
+    <script src="/js/form-control/employee-form-handler.js"></script>
     <script>
         $(document).ready(function () {
             setupTablePaginationAndFilters({

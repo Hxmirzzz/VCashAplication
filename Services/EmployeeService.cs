@@ -213,6 +213,52 @@ namespace VCashApp.Services
             };
         }
 
+        public async Task<EmpleadoViewModel> GetEmployeeForDetailsAsync(int employeeId, string currentUserId, bool isAdmin)
+        {
+            var employee = await _context.AdmEmpleados.FindAsync(employeeId);
+            if (employee == null) return null;
+            if (!isAdmin)
+            {
+                var permittedBranches = await GetUserPermittedBranchIdsAsync(currentUserId);
+                if (!employee.CodSucursal.HasValue || !permittedBranches.Contains(employee.CodSucursal.Value))
+                {
+                    _logger.Warning("User {UserId} attempted to access employee {EmployeeId} without permission.", currentUserId, employeeId);
+                    return null; // Acceso no permitido
+                }
+            }
+            // Mapear a ViewModel
+            return new EmpleadoViewModel
+            {
+                CodCedula = employee.CodCedula,
+                TipoDocumento = employee.TipoDocumento,
+                FirstName = employee.PrimerNombre,
+                MiddleName = employee.SegundoNombre,
+                FirstLastName = employee.PrimerApellido,
+                SecondLastName = employee.SegundoApellido,
+                NombreCompleto = employee.NombreCompleto,
+                NumeroCarnet = employee.NumeroCarnet,
+                FechaNacimiento = employee.FechaNacimiento,
+                FechaExpedicion = employee.FechaExpedicion,
+                CiudadExpedicion = employee.CiudadExpedicion,
+                CargoCode = employee.CodCargo,
+                BranchCode = employee.CodSucursal,
+                Celular = employee.Celular,
+                Direccion = employee.Direccion,
+                Correo = employee.Correo,
+                BloodType = employee.RH,
+                Genero = employee.Genero,
+                OtroGenero = employee.OtroGenero,
+                FechaVinculacion = employee.FecVinculacion,
+                FechaRetiro = employee.FecRetiro,
+                IndicadorCatalogo = employee.IndicadorCatalogo,
+                IngresoRepublica = employee.IngresoRepublica,
+                IngresoAeropuerto = employee.IngresoAeropuerto,
+                EmployeeStatus = (int)employee.EmpleadoEstado,
+                PhotoPath = employee.FotoUrl,
+                SignaturePath = employee.FirmaUrl
+            };
+        }
+
         public async Task<ServiceResult> CreateEmployeeAsync(EmpleadoViewModel model, string currentUserId)
         {
             if (await _context.AdmEmpleados.AnyAsync(e => e.CodCedula == model.CodCedula))
@@ -280,7 +326,6 @@ namespace VCashApp.Services
             {
                 var (photoPath, signaturePath) = await ProcessEmployeeFilesAsync(model);
 
-                // Actualizar propiedades
                 employee.PrimerApellido = FormatText(model.FirstLastName);
                 employee.SegundoApellido = FormatText(model.SecondLastName);
                 employee.PrimerNombre = FormatText(model.FirstName);
@@ -288,6 +333,9 @@ namespace VCashApp.Services
                 employee.NombreCompleto = string.Join(" ", new[] { FormatText(model.FirstName), FormatText(model.MiddleName), FormatText(model.FirstLastName), FormatText(model.SecondLastName) }.Where(x => !string.IsNullOrWhiteSpace(x))).Trim();
                 employee.CodCargo = model.CargoCode;
                 employee.CodSucursal = model.BranchCode;
+                employee.FechaNacimiento = model.FechaNacimiento;
+                employee.FechaExpedicion = model.FechaExpedicion;
+                employee.CiudadExpedicion = model.CiudadExpedicion;
                 employee.Celular = model.Celular;
                 employee.EmpleadoEstado = (EstadoEmpleado)model.EmployeeStatus;
                 if (photoPath != null) employee.FotoUrl = photoPath;
@@ -306,14 +354,24 @@ namespace VCashApp.Services
             }
         }
 
-        public async Task<Stream> GetEmployeeImageStreamAsync(string relativePath)
+        public async Task<Stream?> GetEmployeeImageStreamAsync(string relativePath) 
         {
             string fullPath = Path.Combine(REPO_BASE_PATH, relativePath);
             if (!File.Exists(fullPath))
             {
+                _logger.Warning("Image file not found at path: {FullPath}", fullPath);
                 return null;
             }
-            return await Task.FromResult(new FileStream(fullPath, FileMode.Open, FileAccess.Read));
+
+            try
+            {
+                return new FileStream(fullPath, FileMode.Open, FileAccess.Read, FileShare.Read);
+            }
+            catch (Exception ex)
+            {
+                _logger.Error(ex, "Error al abrir el stream de la imagen: {FullPath}", fullPath);
+                return null;
+            }
         }
 
         // --- MÉTODOS PRIVADOS AUXILIARES ---
@@ -330,37 +388,120 @@ namespace VCashApp.Services
         {
             string photosPath = Path.Combine(REPO_BASE_PATH, "Fotos");
             string signaturesPath = Path.Combine(REPO_BASE_PATH, "Firmas");
-            Directory.CreateDirectory(photosPath);
-            Directory.CreateDirectory(signaturesPath);
+            Directory.CreateDirectory(photosPath); // Asegurar que el directorio exista
+            Directory.CreateDirectory(signaturesPath); // Asegurar que el directorio exista
 
             string? relativePhotoPath = model.PhotoPath;
             string? relativeSignaturePath = model.SignaturePath;
 
-            // Procesar foto
+            // Procesar foto con recorte/redimensionamiento
             if (model.PhotoFile != null && model.PhotoFile.Length > 0)
             {
                 string photoFileName = $"{model.CodCedula}P{Path.GetExtension(model.PhotoFile.FileName)}";
                 string fullPhotoPath = Path.Combine(photosPath, photoFileName);
-                using (var stream = new FileStream(fullPhotoPath, FileMode.Create))
-                {
-                    await model.PhotoFile.CopyToAsync(stream);
-                }
-                relativePhotoPath = Path.Combine("Fotos", photoFileName).Replace('\\', '/');
-            }
 
-            // Procesar firma
+                try
+                {
+                    using (var imageStream = model.PhotoFile.OpenReadStream())
+                    {
+                        using (var originalImage = Image.FromStream(imageStream))
+                        {
+                            // Lógica para el recorte cuadrado
+                            int size = Math.Min(originalImage.Width, originalImage.Height);
+                            int startX = (originalImage.Width - size) / 2;
+                            int startY = (originalImage.Height - size) / 2;
+
+                            using (var croppedImage = new Bitmap(size, size))
+                            using (var graphics = Graphics.FromImage(croppedImage))
+                            {
+                                graphics.CompositingQuality = CompositingQuality.HighQuality;
+                                graphics.InterpolationMode = InterpolationMode.HighQualityBicubic;
+                                graphics.SmoothingMode = SmoothingMode.HighQuality;
+
+                                graphics.DrawImage(originalImage, new Rectangle(0, 0, size, size),
+                                                   new Rectangle(startX, startY, size, size),
+                                                   GraphicsUnit.Pixel);
+
+                                // Guardar la imagen recortada. Usa Jpeg o Png según la necesidad, o determina desde el original.
+                                // Para simplificar, guardemos como JPEG.
+                                croppedImage.Save(fullPhotoPath, System.Drawing.Imaging.ImageFormat.Jpeg);
+                            }
+                        }
+                    }
+                    relativePhotoPath = Path.Combine("Fotos", photoFileName).Replace('\\', '/');
+                }
+                catch (Exception ex)
+                {
+                    _logger.Error(ex, "Error al procesar y guardar la foto del empleado {CodCedula}.", model.CodCedula);
+                    relativePhotoPath = model.PhotoPath;
+                }
+            }
             if (model.SignatureFile != null && model.SignatureFile.Length > 0)
             {
                 string signatureFileName = $"{model.CodCedula}F{Path.GetExtension(model.SignatureFile.FileName)}";
                 string fullSignaturePath = Path.Combine(signaturesPath, signatureFileName);
-                using (var stream = new FileStream(fullSignaturePath, FileMode.Create))
+                try
                 {
-                    await model.SignatureFile.CopyToAsync(stream);
+                    using (var stream = new FileStream(fullSignaturePath, FileMode.Create))
+                    {
+                        await model.SignatureFile.CopyToAsync(stream);
+                    }
+                    relativeSignaturePath = Path.Combine("Firmas", signatureFileName).Replace('\\', '/');
                 }
-                relativeSignaturePath = Path.Combine("Firmas", signatureFileName).Replace('\\', '/');
+                catch (Exception ex)
+                {
+                    _logger.Error(ex, "Error al procesar y guardar la firma del empleado {CodCedula}.", model.CodCedula);
+                    relativeSignaturePath = model.SignaturePath;
+                }
             }
 
             return (relativePhotoPath, relativeSignaturePath);
+        }
+
+        public async Task<ServiceResult> ChangeEmployeeStatusAsync(int employeeId, int newStatus, string reasonForChange, string currentUserId)
+        {
+            var employee = await _context.AdmEmpleados.FindAsync(employeeId);
+            if (employee == null)
+            {
+                _logger.Warning("Employee with ID {EmployeeId} not found for status change.", employeeId);
+                return ServiceResult.FailureResult("Empleado no encontrado.");
+            }
+
+            // Validar que el nuevo estado sea un valor válido de tu enum EstadoEmpleado
+            if (!Enum.IsDefined(typeof(EstadoEmpleado), newStatus))
+            {
+                return ServiceResult.FailureResult("Estado no válido proporcionado.");
+            }
+
+            try
+            {
+                var oldStatus = employee.EmpleadoEstado;
+                employee.EmpleadoEstado = (EstadoEmpleado)newStatus; // Castear al enum
+
+                // Opcional: Podrías querer guardar un historial de cambios de estado
+                // var history = new HistorialCambioEstado
+                // {
+                //     CodCedula = employeeId,
+                //     EstadoAnterior = oldStatus.ToString(),
+                //     EstadoNuevo = employee.EmpleadoEstado.ToString(),
+                //     RazonCambio = reasonForChange,
+                //     FechaCambio = DateTime.Now,
+                //     UsuarioId = currentUserId
+                // };
+                // _context.HistorialCambioEstado.Add(history);
+
+                await _context.SaveChangesAsync();
+
+                _logger.Information("Employee {EmployeeId} status changed from {OldStatus} to {NewStatus} by user {UserId}. Reason: {Reason}",
+                    employeeId, oldStatus, employee.EmpleadoEstado, currentUserId, reasonForChange);
+
+                return ServiceResult.SuccessResult($"Estado del empleado cambiado exitosamente a {employee.EmpleadoEstado}.");
+            }
+            catch (Exception ex)
+            {
+                _logger.Error(ex, "Error changing status for employee {EmployeeId} to {NewStatus}.", employeeId, newStatus);
+                return ServiceResult.FailureResult("Ocurrió un error al cambiar el estado del empleado.");
+            }
         }
 
         private string? FormatText(string? text)
