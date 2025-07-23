@@ -139,10 +139,8 @@ namespace VCashApp.Services
                         totalCount = reader.GetInt32(0);
                     }
 
-                    // Moverse al segundo resultado: los datos de los empleados
                     await reader.NextResultAsync();
 
-                    // Mapear los resultados al ViewModel
                     while (await reader.ReadAsync())
                     {
                         employees.Add(new EmpleadoViewModel
@@ -337,10 +335,19 @@ namespace VCashApp.Services
                 employee.FechaExpedicion = model.FechaExpedicion;
                 employee.CiudadExpedicion = model.CiudadExpedicion;
                 employee.Celular = model.Celular;
+                employee.Correo = model.Correo;
+                employee.Direccion = model.Direccion;
+                employee.RH = model.BloodType;
+                employee.Genero = model.Genero;
+                employee.OtroGenero = model.OtroGenero;
+                employee.FecVinculacion = model.FechaVinculacion;
+                employee.FecRetiro = model.FechaRetiro;
+                employee.IndicadorCatalogo = model.IndicadorCatalogo;
+                employee.IngresoRepublica = model.IngresoRepublica;
+                employee.IngresoAeropuerto = model.IngresoAeropuerto;
                 employee.EmpleadoEstado = (EstadoEmpleado)model.EmployeeStatus;
                 if (photoPath != null) employee.FotoUrl = photoPath;
                 if (signaturePath != null) employee.FirmaUrl = signaturePath;
-                // ... resto de las propiedades
 
                 await _context.SaveChangesAsync();
 
@@ -502,6 +509,108 @@ namespace VCashApp.Services
                 _logger.Error(ex, "Error changing status for employee {EmployeeId} to {NewStatus}.", employeeId, newStatus);
                 return ServiceResult.FailureResult("Ocurrió un error al cambiar el estado del empleado.");
             }
+        }
+
+        public async Task<IEnumerable<EmpleadoViewModel>> GetExportableEmployeesAsync(
+            string currentUserId,
+            int? cargoId,
+            int? branchId,
+            int? employeeStatus,
+            string? search,
+            string? gender,
+            bool isAdmin)
+        {
+            IQueryable<AdmEmpleado> query = _context.AdmEmpleados;
+
+            // Lógica de permisos de sucursales (copiada de GetFilteredEmployeesAsync)
+            if (!isAdmin)
+            {
+                var permittedBranchIds = await GetUserPermittedBranchIdsAsync(currentUserId);
+                if (!permittedBranchIds.Any())
+                {
+                    return new List<EmpleadoViewModel>(); // Si no tiene acceso a ninguna sucursal, devuelve vacío
+                }
+                query = query.Where(e => e.CodSucursal.HasValue && permittedBranchIds.Contains(e.CodSucursal.Value));
+            }
+
+            // Aplicar filtros (copiados de GetFilteredEmployeesAsync)
+            if (!string.IsNullOrEmpty(search))
+            {
+                string trimmedSearch = search.Trim().ToLower();
+                if (int.TryParse(trimmedSearch, out int cedulaNumber))
+                {
+                    query = query.Where(e => e.CodCedula.ToString().StartsWith(cedulaNumber.ToString()));
+                }
+                else
+                {
+                    var searchWords = trimmedSearch.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+                    foreach (var word in searchWords)
+                    {
+                        string tempWord = word; // Capturar para cierre de LINQ
+                        query = query.Where(e => (e.NombreCompleto != null && e.NombreCompleto.ToLower().Contains(tempWord)) ||
+                                                 (e.PrimerNombre != null && e.PrimerNombre.ToLower().Contains(tempWord)) ||
+                                                 (e.SegundoNombre != null && e.SegundoNombre.ToLower().Contains(tempWord)) ||
+                                                 (e.PrimerApellido != null && e.PrimerApellido.ToLower().Contains(tempWord)) ||
+                                                 (e.SegundoApellido != null && e.SegundoApellido.ToLower().Contains(tempWord)));
+                    }
+                }
+            }
+
+            if (!string.IsNullOrEmpty(gender))
+                query = query.Where(e => e.Genero == gender);
+
+            if (branchId.HasValue)
+                query = query.Where(e => e.CodSucursal == branchId.Value);
+
+            if (cargoId.HasValue)
+                query = query.Where(e => e.CodCargo == cargoId.Value);
+
+            if (employeeStatus.HasValue)
+                query = query.Where(e => (int)e.EmpleadoEstado == employeeStatus.Value);
+
+            query = query
+                .Include(e => e.Cargo)
+                    .ThenInclude(c => c.Unidad)
+                .Include(e => e.Sucursal);
+
+            var employeesToExport = await query
+                .Select(e => new EmpleadoViewModel
+                {
+                    CodCedula = e.CodCedula,
+                    TipoDocumento = e.TipoDocumento,
+                    FirstName = e.PrimerNombre,
+                    MiddleName = e.SegundoNombre,
+                    FirstLastName = e.PrimerApellido,
+                    SecondLastName = e.SegundoApellido,
+                    NombreCompleto = e.NombreCompleto,
+                    NumeroCarnet = e.NumeroCarnet,
+                    FechaNacimiento = e.FechaNacimiento,
+                    FechaExpedicion = e.FechaExpedicion,
+                    CiudadExpedicion = e.CiudadExpedicion,
+                    CargoCode = e.CodCargo,
+                    NombreCargo = e.Cargo != null ? e.Cargo.NombreCargo : null,
+                    NombreUnidad = e.Cargo != null && e.Cargo.Unidad != null ? e.Cargo.Unidad.NombreUnidad : null,
+
+                    BranchCode = e.CodSucursal,
+                    NombreSucursal = e.Sucursal != null ? e.Sucursal.NombreSucursal : null,
+
+                    Celular = e.Celular,
+                    Direccion = e.Direccion,
+                    Correo = e.Correo,
+                    BloodType = e.RH,
+                    Genero = e.Genero,
+                    OtroGenero = e.OtroGenero,
+                    FechaVinculacion = e.FecVinculacion,
+                    FechaRetiro = e.FecRetiro,
+                    IndicadorCatalogo = e.IndicadorCatalogo,
+                    IngresoRepublica = e.IngresoRepublica,
+                    IngresoAeropuerto = e.IngresoAeropuerto,
+                    EmployeeStatus = (int)e.EmpleadoEstado,
+                    PhotoPath = e.FotoUrl,
+                    SignaturePath = e.FirmaUrl
+                }).ToListAsync();
+
+            return employeesToExport;
         }
 
         private string? FormatText(string? text)

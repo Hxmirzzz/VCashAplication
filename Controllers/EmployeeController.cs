@@ -303,6 +303,127 @@ namespace VCashApp.Controllers
         }
 
         /// <summary>
+        /// Exporta una lista filtrada de empleados en el formato especificado.
+        /// Este método es invocado mediante una solicitud HTTP GET y genera un archivo para descarga.
+        /// </summary>
+        /// <remarks>
+        /// Los datos se filtran según los parámetros proporcionados y los permisos de sucursal del usuario actual.
+        /// Se obtiene la totalidad de los registros que coinciden con los filtros para la exportación.
+        /// Requiere el permiso 'View' para "EMP".
+        /// </remarks>
+        /// <param name="exportFormat">
+        /// El formato de archivo deseado para la exportación (ej. "excel", "csv", "pdf", "json").
+        /// </param>
+        /// <param name="cargoId">
+        /// Opcional. El código del cargo por el cual filtrar los empleados.
+        /// </param>
+        /// <param name="branchId">
+        /// Opcional. El código de la sucursal por la cual filtrar los empleados.
+        /// </param>
+        /// <param name="employeeStatus">
+        /// Opcional. El estado del empleado por el cual filtrar (valor numérico del enum EstadoEmpleado).
+        /// </param>
+        /// <param name="search">
+        /// Opcional. Término de búsqueda para filtrar por cédula, nombre o apellido.
+        /// </param>
+        /// <param name="gender">
+        /// Opcional. Género por el cual filtrar (ej. "M", "F", "O").
+        /// </param>
+        /// <returns>
+        /// Un <see cref="IActionResult"/> que devuelve un archivo para descarga en caso de éxito.
+        /// Retorna <see cref="UnauthorizedResult"/> si el usuario no está autenticado.
+        /// Retorna <see cref="NotFoundObjectResult"/> si no se encuentran empleados con los filtros.
+        /// Retorna <see cref="BadRequestObjectResult"/> si el formato de exportación no es soportado o no está implementado.
+        /// Retorna <see cref="StatusCodeResult"/> (500) en caso de un error interno del servidor.
+        /// </returns>
+        [HttpGet("ExportEmployee")]
+        [RequiredPermission(PermissionType.View, "EMP")]
+        public async Task<IActionResult> ExportEmployee(
+            string exportFormat,
+            int? cargoId,
+            int? branchId,
+            int? employeeStatus,
+            string? search,
+            string? gender)
+        {
+            try
+            {
+                var currentUser = await GetCurrentApplicationUserAsync();
+                if (currentUser == null) return Unauthorized();
+
+                bool isAdmin = await _userManager.IsInRoleAsync(currentUser, "Admin");
+
+                var employeesToExport = await _employeeService.GetExportableEmployeesAsync(
+                    currentUser.Id,
+                    cargoId,
+                    branchId,
+                    employeeStatus,
+                    search,
+                    gender,
+                    isAdmin
+                );
+
+                if (employeesToExport == null || !employeesToExport.Any())
+                {
+                    Log.Information("User {User} attempted to export employees, but no data found with current filters.", currentUser.UserName);
+                    return NotFound("No se encontraron empleados con los filtros especificados para exportar.");
+                }
+
+                var columnDisplayNames = new Dictionary<string, string>
+                {
+                    {"CodCedula", "Cédula"},
+                    {"TipoDocumento", "Tipo Documento"},
+                    {"NumeroCarnet", "Número Carnet"},
+                    {"FirstName", "Primer Nombre"},
+                    {"MiddleName", "Segundo Nombre"},
+                    {"FirstLastName", "Primer Apellido"},
+                    {"SecondLastName", "Segundo Apellido"},
+                    {"NombreCompleto", "Nombre Completo"},
+                    {"FechaNacimiento", "Fecha Nacimiento"},
+                    {"FechaExpedicion", "Fecha Expedición"},
+                    {"NombreCiudadExpedicion", "Ciudad Expedición"}, 
+                    {"NombreCargo", "Cargo"},
+                    {"NombreUnidad", "Unidad"},
+                    {"NombreSucursal", "Sucursal"},
+                    {"Celular", "Celular"},
+                    {"Direccion", "Dirección"},
+                    {"Correo", "Correo"},
+                    {"BloodType", "RH"},
+                    {"Genero", "Género"},
+                    {"OtroGenero", "Otro Género"},
+                    {"FechaVinculacion", "Fecha Vinculación"},
+                    {"FechaRetiro", "Fecha Retiro"},
+                    {"IndicadorCatalogo", "Indicador Catálogo"},
+                    {"IngresoRepublica", "Ingreso República"},
+                    {"IngresoAeropuerto", "Ingreso Aeropuerto"},
+                    {"EmployeeStatus", "Estado"}
+                };
+
+                return await _exportService.ExportDataAsync(
+                    employeesToExport.ToList(),
+                    exportFormat,
+                    "EMPLEADOS",
+                    columnDisplayNames
+                );
+            }
+            catch (NotImplementedException ex)
+            {
+                Log.Warning(ex, "Formato de exportación '{ExportFormat}' no implementado.", exportFormat);
+                return BadRequest($"El formato de exportación '{exportFormat}' no está implementado.");
+            }
+            catch (ArgumentException ex)
+            {
+                Log.Warning(ex, "Formato de exportación inválido: {ExportFormat}", exportFormat);
+                return BadRequest(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                Log.Error(ex, "Error general al exportar datos de empleados.");
+                return StatusCode(500, "Ocurrió un error interno del servidor al exportar los datos.");
+            }
+        }
+
+        /// <summary>
         /// Sirve archivos de imagen (fotos o firmas) de empleados desde el repositorio.
         /// </summary>
         [HttpGet("images/{*filePath}")]

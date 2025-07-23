@@ -77,5 +77,26 @@ namespace VCashApp.Services
         /// <param name="currentUserId">ID del usuario que realiza el cambio.</param>
         /// <returns>Un ServiceResult indicando éxito o fallo.</returns>
         Task<ServiceResult> ChangeEmployeeStatusAsync(int employeeId, int newStatus, string reasonForChange, string currentUserId);
+
+        /// <summary>
+        /// Obtiene una colección COMPLETA de empleados filtrados para propósitos de exportación, sin paginación.
+        /// </summary>
+        /// <param name="currentUserId">El ID del usuario actual para validación de permisos.</param>
+        /// <param name="cargoId">Filtro por ID de cargo.</param>
+        /// <param name="branchId">Filtro por ID de sucursal.</param>
+        /// <param name="employeeStatus">Filtro por estado del empleado.</param>
+        /// <param name="search">Término de búsqueda.</param>
+        /// <param name="gender">Filtro por género.</param>
+        /// <param name="isAdmin">Indica si el usuario actual tiene rol de administrador.</param>
+        /// <returns>Una colección de EmpleadoViewModel con todos los datos necesarios para la exportación.</returns>
+        Task<IEnumerable<EmpleadoViewModel>> GetExportableEmployeesAsync(
+            string currentUserId,
+            int? cargoId,
+            int? branchId,
+            int? employeeStatus,
+            string? search,
+            string? gender,
+            bool isAdmin
+        );
     }
 }

@@ -127,15 +127,14 @@ namespace VCashApp.Models.ViewModels
         [Display(Name = "URL Firma")]
         public string? SignaturePath { get; set; }
 
-        [Display(Name = "Archivo Foto")] // Renombrado
+        [Display(Name = "Archivo Foto")]
         public IFormFile? PhotoFile { get; set; }
 
-        [Display(Name = "Archivo Firma")] // Renombrado
+        [Display(Name = "Archivo Firma")]
         public IFormFile? SignatureFile { get; set; }
 
-        // Propiedades para SelectLists en la vista (no son del modelo de empleado directamente)
         public List<SelectListItem>? Cargos { get; set; }
-        public List<SelectListItem>? Sucursales { get; set; } // Mantener si se usa el nombre en español en la vista
-        public List<SelectListItem>? Ciudades { get; set; } // Mantener si se usa el nombre en español en la vista
+        public List<SelectListItem>? Sucursales { get; set; }
+        public List<SelectListItem>? Ciudades { get; set; }
     }
 }

@@ -1068,7 +1068,7 @@ input:checked + .slider:before {
 /* Estilos generales para el pie de tabla */
 .table-footer {
     display: flex;
-    justify-content: space-between; /* Para que el mensaje y la paginación se separen */
+    justify-content: space-between;
     align-items: center;
     padding: 15px 0;
     border-top: 1px solid var(--border-color); /* Línea divisoria, usa tu variable de color */

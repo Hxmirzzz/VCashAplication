@@ -821,6 +821,42 @@
             Muestra un formulario para ver los detalles de un empleado.
             </summary>
         </member>
+        <member name="M:VCashApp.Controllers.EmployeeController.ExportEmployee(System.String,System.Nullable{System.Int32},System.Nullable{System.Int32},System.Nullable{System.Int32},System.String,System.String)">
+            <summary>
+            Exporta una lista filtrada de empleados en el formato especificado.
+            Este método es invocado mediante una solicitud HTTP GET y genera un archivo para descarga.
+            </summary>
+            <remarks>
+            Los datos se filtran según los parámetros proporcionados y los permisos de sucursal del usuario actual.
+            Se obtiene la totalidad de los registros que coinciden con los filtros para la exportación.
+            Requiere el permiso 'View' para "EMP".
+            </remarks>
+            <param name="exportFormat">
+            El formato de archivo deseado para la exportación (ej. "excel", "csv", "pdf", "json").
+            </param>
+            <param name="cargoId">
+            Opcional. El código del cargo por el cual filtrar los empleados.
+            </param>
+            <param name="branchId">
+            Opcional. El código de la sucursal por la cual filtrar los empleados.
+            </param>
+            <param name="employeeStatus">
+            Opcional. El estado del empleado por el cual filtrar (valor numérico del enum EstadoEmpleado).
+            </param>
+            <param name="search">
+            Opcional. Término de búsqueda para filtrar por cédula, nombre o apellido.
+            </param>
+            <param name="gender">
+            Opcional. Género por el cual filtrar (ej. "M", "F", "O").
+            </param>
+            <returns>
+            Un <see cref="T:Microsoft.AspNetCore.Mvc.IActionResult"/> que devuelve un archivo para descarga en caso de éxito.
+            Retorna <see cref="T:Microsoft.AspNetCore.Mvc.UnauthorizedResult"/> si el usuario no está autenticado.
+            Retorna <see cref="T:Microsoft.AspNetCore.Mvc.NotFoundObjectResult"/> si no se encuentran empleados con los filtros.
+            Retorna <see cref="T:Microsoft.AspNetCore.Mvc.BadRequestObjectResult"/> si el formato de exportación no es soportado o no está implementado.
+            Retorna <see cref="T:Microsoft.AspNetCore.Mvc.StatusCodeResult"/> (500) en caso de un error interno del servidor.
+            </returns>
+        </member>
         <member name="M:VCashApp.Controllers.EmployeeController.GetImage(System.String)">
             <summary>
             Sirve archivos de imagen (fotos o firmas) de empleados desde el repositorio.
@@ -1423,6 +1459,19 @@
             <param name="reasonForChange">Una razón para el cambio de estado (opcional, para historial).</param>
             <param name="currentUserId">ID del usuario que realiza el cambio.</param>
             <returns>Un ServiceResult indicando éxito o fallo.</returns>
+        </member>
+        <member name="M:VCashApp.Services.IEmployeeService.GetExportableEmployeesAsync(System.String,System.Nullable{System.Int32},System.Nullable{System.Int32},System.Nullable{System.Int32},System.String,System.String,System.Boolean)">
+            <summary>
+            Obtiene una colección COMPLETA de empleados filtrados para propósitos de exportación, sin paginación.
+            </summary>
+            <param name="currentUserId">El ID del usuario actual para validación de permisos.</param>
+            <param name="cargoId">Filtro por ID de cargo.</param>
+            <param name="branchId">Filtro por ID de sucursal.</param>
+            <param name="employeeStatus">Filtro por estado del empleado.</param>
+            <param name="search">Término de búsqueda.</param>
+            <param name="gender">Filtro por género.</param>
+            <param name="isAdmin">Indica si el usuario actual tiene rol de administrador.</param>
+            <returns>Una colección de EmpleadoViewModel con todos los datos necesarios para la exportación.</returns>
         </member>
         <member name="T:VCashApp.Services.IExportService">
             <summary>
