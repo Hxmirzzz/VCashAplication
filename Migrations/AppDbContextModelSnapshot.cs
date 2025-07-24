@@ -472,13 +472,13 @@ namespace VCashApp.Migrations
                     b.Property<string>("Genero")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<bool?>("IndicadorCatalogo")
+                    b.Property<bool>("IndicadorCatalogo")
                         .HasColumnType("bit");
 
-                    b.Property<bool?>("IngresoAeropuerto")
+                    b.Property<bool>("IngresoAeropuerto")
                         .HasColumnType("bit");
 
-                    b.Property<bool?>("IngresoRepublica")
+                    b.Property<bool>("IngresoRepublica")
                         .HasColumnType("bit");
 
                     b.Property<string>("NombreCompleto")
@@ -1310,7 +1310,7 @@ namespace VCashApp.Migrations
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityUserClaim<string>", b =>
                 {
                     b.HasOne("VCashApp.Models.ApplicationUser", null)
-                        .WithMany()
+                        .WithMany("Claims")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -1334,7 +1334,7 @@ namespace VCashApp.Migrations
                         .IsRequired();
 
                     b.HasOne("VCashApp.Models.ApplicationUser", null)
-                        .WithMany()
+                        .WithMany("UserRoles")
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -1614,6 +1614,13 @@ namespace VCashApp.Migrations
                     b.Navigation("UsuarioSupervisorCierreObj");
 
                     b.Navigation("Vehiculo");
+                });
+
+            modelBuilder.Entity("VCashApp.Models.ApplicationUser", b =>
+                {
+                    b.Navigation("Claims");
+
+                    b.Navigation("UserRoles");
                 });
 #pragma warning restore 612, 618
         }

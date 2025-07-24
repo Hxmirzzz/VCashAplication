@@ -1,0 +1,111 @@
+﻿@model IEnumerable<VCashApp.Models.ViewModels.UserViewModel>
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = "Usuarios";
+    string currentSearchTerm = ViewBag.SearchTerm ?? "";
+    int currentPage = ViewBag.CurrentPage ?? 1;
+    int pageSize = ViewBag.PageSize ?? 15;
+    bool canCreate = ViewBag.HasCreatePermission ?? false;
+}
+
+<div class="search-container">
+    <div class="table-controls">
+        <input type="text" id="tableSearch" placeholder="Buscar...">
+        <div class="table-buttons">
+            @if (canCreate)
+            {
+                <div class="control-button-wrapper">
+                    <a href="@Url.Action("Create", "User")" class="control-button-icon" id="addUserButton" title="Crear Usuario">
+                        <img src="/assets/icon-img/add.png" alt="Add User">
+                    </a>
+                </div>
+            }
+            <div class="control-button-wrapper">
+                <img src="/assets/icon-img/download.png" alt="Download" class="control-button-icon" id="downloadButton">
+            </div>
+            <div class="control-button-wrapper">
+                <img src="/assets/icon-img/filter-on.png" alt="Filter" class="control-button-icon" id="filterButton">
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="filter-sidebar" id="filterSidebar">
+    <div class="filter-sidebar-content">
+        <h3>Filtros Avanzados</h3>
+
+        <div class="form-group">
+            <label for="filterRoleId">Rol:</label>
+            @Html.DropDownList("selectedRoleFilter", ViewBag.RolesList, "Seleccione un Rol", new { @class = "form-control", @id = "filterRoleId" })
+        </div>
+
+        <div class="form-group">
+            <label for="filterBranch">Sucursal:</label>
+            @Html.DropDownList("selectedBranchFilter", ViewBag.AvailableBranchesList, "Seleccione una Sucursal", new { @class = "form-control", @id = "filterBranchId" })
+        </div>
+
+        <div class="filter-buttons">
+            <div class="cancel-filter-btn" id="clearFilters">
+                <img src="~/assets/icon-img/filter-off.png" alt="OffFilterImage" title="Limpiar Filtros" id="clearFilters" />
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="dataTablePartial">
+    @Html.Partial("_UserTablePartial", Model)
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    <script>
+        $(document).ready(function () {
+            setupTablePaginationAndFilters({
+                tableContainerId: 'dataTablePartial',
+                controllerName: 'User',
+                actionName: 'Index',
+                searchInputId: 'tableSearch',
+                filterInputsSelector: '#filterRoleId, #filterBranchId',
+                clearFiltersButtonId: 'clearFilters',
+                defaultPageSize: @pageSize
+            });
+
+            $('#downloadButton').on('click', function () {
+                showConfirmationModal(
+                    "Seleccione el formato de exportación deseado:",
+                    function (format) {
+                        if (!format) {
+                            alert("No se seleccionó un formato de exportación.");
+                            return;
+                        }
+
+                        var form = $('<form>', {
+                            'action': '@Url.Action("ExportUser", "User")',
+                            'method': 'GET',
+                            'target': '_blank',
+                            'style': 'display:none;'
+                        }).appendTo('body');
+
+                        var search = $("#tableSearch").val();
+                        var selectedRoleFilter = $("#filterRoleId").val();
+                        var selectedBranchFilter = $("#filterBranchId").val();
+
+                        form.append($('<input>', { name: 'search', value: search }));
+                        form.append($('<input>', { name: 'selectedRoleFilter', value: selectedRoleFilter }));
+                        form.append($('<input>', { name: 'selectedBranchFilter', value: selectedBranchFilter }));
+                        form.append($('<input>', { name: 'exportFormat', value: format }));
+
+                        form.submit();
+                        form.remove();
+                    },
+                    "Exportar Datos",
+                    null,
+                    "btn-primary",
+                    true
+                );
+            });
+        });
+    </script>
+}

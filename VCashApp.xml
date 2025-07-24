@@ -1225,6 +1225,107 @@
             </summary>
             <param name="codSuc">Código de la sucursal.</param>
         </member>
+        <member name="T:VCashApp.Controllers.UserController">
+            <summary>
+            Controlador para la gestión de usuarios.
+            Proporciona funcionalidades para listar, crear, editar y visualizar información de usuarios.
+            </summary>
+        </member>
+        <member name="M:VCashApp.Controllers.UserController.#ctor(VCashApp.Services.IUserService,VCashApp.Services.IExportService,VCashApp.Data.AppDbContext,Microsoft.AspNetCore.Identity.UserManager{VCashApp.Models.ApplicationUser},Microsoft.Extensions.Logging.ILogger{VCashApp.Controllers.UserController})">
+            <summary>
+            Constructor del controlador UserController.
+            </summary>
+            <param name="userService">Servicio para la lógica de negocio de usuarios.</param>
+            <param name="exportService">Servicio para funcionalidades de exportación.</param>
+            <param name="context">Contexto de la base de datos de la aplicación.</param>
+            <param name="userManager">Administrador de usuarios para gestionar ApplicationUser.</param>
+        </member>
+        <member name="M:VCashApp.Controllers.UserController.Index(System.Int32,System.Int32,System.String,System.String,System.Nullable{System.Int32})">
+            <summary>
+            Muestra una lista paginada y filtrada de usuarios.
+            </summary>
+            <remarks>
+            Esta acción sirve la página principal de listado de usuarios y puede devolver una vista parcial para solicitudes AJAX.
+            Requiere permiso 'View' para "USER".
+            </remarks>
+            <param name="page">Número de página actual (default 1).</param>
+            <param name="pageSize">Número de usuarios por página (default 15).</param>
+            <param name="search">Término de búsqueda (nombre de usuario, email).</param>
+            <param name="selectedRoleFilter">Filtro por nombre de rol.</param>
+            <param name="selectedBranchFilter">Filtro por ID de sucursal.</param>
+            <returns>La vista con la tabla de usuarios paginada.</returns>
+        </member>
+        <member name="M:VCashApp.Controllers.UserController.Create">
+            <summary>
+            Muestra el formulario para crear un nuevo usuario.
+            </summary>
+        </member>
+        <member name="M:VCashApp.Controllers.UserController.GetViewsForRole(System.String)">
+            <summary>
+            Obtiene la lista de vistas y sus permisos asociados a un rol específico.
+            Este endpoint es llamado vía AJAX desde el formulario de creación/edición de usuario.
+            </summary>
+            <param name="roleName">El nombre del rol seleccionado.</param>
+            <returns>Un JSON con una lista de ViewPermissionViewModel.</returns>
+        </member>
+        <member name="M:VCashApp.Controllers.UserController.Create(VCashApp.Models.ViewModels.UserCreateViewModel)">
+            <summary>
+            Procesa la creación de un nuevo usuario enviado desde el formulario.
+            </summary>
+            <remarks>
+            Este endpoint es llamado vía AJAX. Realiza validaciones del modelo y la lógica de creación.
+            Requiere permiso 'Create' para "USER".
+            </remarks>
+            <param name="model">El UserViewModel con los datos del nuevo usuario.</param>
+            <returns>Un JSON ServiceResult indicando éxito, fracaso o errores de validación.</returns>
+        </member>
+        <member name="M:VCashApp.Controllers.UserController.Edit(System.String)">
+            <summary>
+            Muestra el formulario para editar un usuario existente.
+            </summary>
+            <remarks>
+            Requiere permiso 'Edit' para "USER".
+            </remarks>
+            <param name="id">El ID del usuario a editar.</param>
+            <returns>La vista para el formulario de edición de usuario.</returns>
+        </member>
+        <member name="M:VCashApp.Controllers.UserController.Edit(System.String,VCashApp.Models.ViewModels.UserEditViewModel)">
+            <summary>
+            Procesa la actualización de un usuario existente enviado desde el formulario.
+            </summary>
+            <remarks>
+            Este endpoint es llamado vía AJAX. Realiza validaciones del modelo y la lógica de actualización.
+            Requiere permiso 'Edit' para "USER".
+            </remarks>
+            <param name="id">El ID del usuario (desde la URL, para verificación).</param>
+            <param name="model">El UserViewModel con los datos actualizados del usuario.</param>
+            <returns>Un JSON ServiceResult indicando éxito, fracaso o errores de validación.</returns>
+        </member>
+        <member name="M:VCashApp.Controllers.UserController.Detail(System.String)">
+            <summary>
+            Muestra los detalles de un usuario específico.
+            </summary>
+            <remarks>
+            Requiere permiso 'View' para "USER".
+            </remarks>
+            <param name="id">El ID del usuario a visualizar.</param>
+            <returns>La vista con los detalles del usuario.</returns>
+        </member>
+        <member name="M:VCashApp.Controllers.UserController.ExportUser(System.String,System.String,System.String,System.Nullable{System.Int32})">
+            <summary>
+            Exporta una lista filtrada de usuarios en el formato especificado.
+            Este método es invocado mediante una solicitud HTTP GET y genera un archivo para descarga.
+            </summary>
+            <remarks>
+            Los datos se filtran según los parámetros proporcionados.
+            Requiere el permiso 'View' para "USER".
+            </remarks>
+            <param name="exportFormat">El formato de archivo deseado (ej. "excel", "csv", "pdf", "json").</param>
+            <param name="searchTerm">Opcional. Término de búsqueda.</param>
+            <param name="selectedRoleFilter">Opcional. Filtro por nombre de rol.</param>
+            <param name="selectedBranchFilter">Opcional. Filtro por ID de sucursal.</param>
+            <returns>Un <see cref="T:Microsoft.AspNetCore.Mvc.IActionResult"/> que devuelve un archivo para descarga en caso de éxito.</returns>
+        </member>
         <member name="T:VCashApp.Migrations.InitialFullCleanSchemaFinal">
             <inheritdoc />
         </member>
@@ -1307,6 +1408,30 @@
             <inheritdoc />
         </member>
         <member name="M:VCashApp.Migrations.AddDailySheetsColumnsToDailyRoutes.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="T:VCashApp.Migrations.SetNotNullToBoolsAdmEmpleados">
+            <inheritdoc />
+        </member>
+        <member name="M:VCashApp.Migrations.SetNotNullToBoolsAdmEmpleados.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:VCashApp.Migrations.SetNotNullToBoolsAdmEmpleados.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:VCashApp.Migrations.SetNotNullToBoolsAdmEmpleados.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="T:VCashApp.Migrations.AddUserNavigationCollections">
+            <inheritdoc />
+        </member>
+        <member name="M:VCashApp.Migrations.AddUserNavigationCollections.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:VCashApp.Migrations.AddUserNavigationCollections.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:VCashApp.Migrations.AddUserNavigationCollections.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
             <inheritdoc />
         </member>
         <member name="T:VCashApp.Services.EmployeeService">
@@ -1619,6 +1744,125 @@
             Lanza <see cref="T:System.InvalidOperationException"/> si la ruta no está en estado 'DESCARGUE_REGISTRADO',
             si los datos de kilometraje/fecha/hora son inválidos, o si la fecha/hora de entrada es anterior a la de salida.
             </returns>
+        </member>
+        <member name="T:VCashApp.Services.IUserService">
+            <summary>
+            Interfaz para el servicio que maneja la lógica de negocio relacionada con los usuarios.
+            </summary>
+        </member>
+        <member name="M:VCashApp.Services.IUserService.GetFilteredUsersAsync(System.String,System.String,System.Nullable{System.Int32},System.Int32,System.Int32)">
+            <summary>
+            Obtiene una lista paginada y filtrada de usuarios para la visualización en tablas.
+            </summary>
+            <param name="search">Término de búsqueda (nombre de usuario, email).</param>
+            <param name="selectedRoleFilter">Filtro por nombre de rol.</param>
+            <param name="selectedBranchFilter">Filtro por ID de sucursal.</param>
+            <param name="page">Número de página actual.</param>
+            <param name="pageSize">Tamaño de página.</param>
+            <returns>Una tupla que contiene una colección de UserViewModel y el conteo total.</returns>
+        </member>
+        <member name="M:VCashApp.Services.IUserService.GetUserForCreateAsync">
+            <summary>
+            Obtiene un UserViewModel pre-populado con listas para la creación de un nuevo usuario (roles, sucursales disponibles).
+            </summary>
+            <returns>Un UserViewModel.</returns>
+        </member>
+        <member name="M:VCashApp.Services.IUserService.GetViewsAndPermissionsForRoleAsync(System.String)">
+            <summary>
+            Obtiene la lista de vistas del sistema y los permisos (ver, crear, editar) asociados a un rol específico.
+            </summary>
+            <param name="roleName">El nombre del rol para el cual obtener los permisos.</param>
+            <returns>Una lista de ViewPermissionViewModel con los detalles de la vista y los permisos para el rol.</returns>
+        </member>
+        <member name="M:VCashApp.Services.IUserService.CreateUserAsync(VCashApp.Models.ViewModels.UserCreateViewModel)">
+            <summary>
+            Crea un nuevo usuario en el sistema.
+            </summary>
+            <param name="model">El UserViewModel con los datos del nuevo usuario.</param>
+            <returns>Un ServiceResult indicando el éxito o fracaso de la operación.</returns>
+        </member>
+        <member name="M:VCashApp.Services.IUserService.GetUserForEditAsync(System.String)">
+            <summary>
+            Obtiene un UserViewModel con los datos de un usuario existente para edición.
+            Incluye los roles y sucursales asignadas, así como las disponibles.
+            </summary>
+            <param name="userId">El ID del usuario a editar.</param>
+            <returns>Un UserViewModel si el usuario es encontrado, de lo contrario null.</returns>
+        </member>
+        <member name="M:VCashApp.Services.IUserService.UpdateUserAsync(VCashApp.Models.ViewModels.UserEditViewModel)">
+            <summary>
+            Actualiza un usuario existente en el sistema.
+            </summary>
+            <param name="model">El UserViewModel con los datos actualizados del usuario.</param>
+            <returns>Un ServiceResult indicando el éxito o fracaso de la operación.</returns>
+        </member>
+        <member name="M:VCashApp.Services.IUserService.GetUserForDetailsAsync(System.String)">
+            <summary>
+            Obtiene los detalles de un usuario específico para visualización de solo lectura.
+            </summary>
+            <param name="userId">El ID del usuario a buscar.</param>
+            <returns>Un UserViewModel con los datos del usuario, o null si no se encuentra.</returns>
+        </member>
+        <!-- Badly formed XML comment ignored for member "M:VCashApp.Services.IUserService.GetDropdownListsAsync" -->
+        <member name="M:VCashApp.Services.IUserService.GetExportableUsersAsync(System.String,System.String,System.Nullable{System.Int32})">
+            <summary>
+            Obtiene una colección COMPLETA de usuarios filtrados para propósitos de exportación, sin paginación.
+            </summary>
+            <param name="searchTerm">Término de búsqueda (nombre de usuario, email).</param>
+            <param name="selectedRoleFilter">Filtro por nombre de rol.</param>
+            <param name="selectedBranchFilter">Filtro por ID de sucursal.</param>
+            <returns>Una colección de UserViewModel con todos los datos necesarios para la exportación.</returns>
+        </member>
+        <member name="T:VCashApp.Services.UserService">
+            <summary>
+            Servicio que maneja la lógica de negocio relacionada con la gestión de usuarios.
+            </summary>
+        </member>
+        <member name="M:VCashApp.Services.UserService.GetFilteredUsersAsync(System.String,System.String,System.Nullable{System.Int32},System.Int32,System.Int32)">
+            <summary>
+            Obtiene una lista paginada y filtrada de usuarios para la visualización en tablas.
+            </summary>
+        </member>
+        <member name="M:VCashApp.Services.UserService.GetUserForCreateAsync">
+            <summary>
+            Obtiene un UserViewModel pre-populado con listas para la creación de un nuevo usuario (roles, sucursales disponibles).
+            </summary>
+        </member>
+        <member name="M:VCashApp.Services.UserService.GetViewsAndPermissionsForRoleAsync(System.String)">
+            <summary>
+            Obtiene la lista de vistas del sistema y los permisos (ver, crear, editar) asociados a un rol específico.
+            </summary>
+        </member>
+        <member name="M:VCashApp.Services.UserService.CreateUserAsync(VCashApp.Models.ViewModels.UserCreateViewModel)">
+            <summary>
+            Crea un nuevo usuario en el sistema.
+            </summary>
+        </member>
+        <member name="M:VCashApp.Services.UserService.GetUserForEditAsync(System.String)">
+            <summary>
+            Obtiene un UserViewModel con los datos de un usuario existente para edición.
+            Incluye los roles y sucursales asignadas, así como las disponibles.
+            </summary>
+        </member>
+        <member name="M:VCashApp.Services.UserService.UpdateUserAsync(VCashApp.Models.ViewModels.UserEditViewModel)">
+            <summary>
+            Actualiza un usuario existente en el sistema.
+            </summary>
+        </member>
+        <member name="M:VCashApp.Services.UserService.GetUserForDetailsAsync(System.String)">
+            <summary>
+            Obtiene los detalles de un usuario específico para visualización de solo lectura.
+            </summary>
+        </member>
+        <member name="M:VCashApp.Services.UserService.GetDropdownListsAsync">
+            <summary>
+            Obtiene las listas de roles y sucursales para dropdowns/multiselección.
+            </summary>
+        </member>
+        <member name="M:VCashApp.Services.UserService.GetExportableUsersAsync(System.String,System.String,System.Nullable{System.Int32})">
+            <summary>
+            Obtiene una colección COMPLETA de usuarios filtrados para propósitos de exportación, sin paginación.
+            </summary>
         </member>
     </members>
 </doc>

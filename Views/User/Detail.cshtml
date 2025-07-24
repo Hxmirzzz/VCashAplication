@@ -1,0 +1,70 @@
+﻿@model VCashApp.Models.ViewModels.UserViewModel
+@using Microsoft.AspNetCore.Mvc.Rendering
+
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = "Detalle";
+}
+
+<div class="form-container">
+    <div class="card">
+        <div class="card-header">
+            <h4 class="mb-0">Detalles de: @Model.NombreUsuario</h4>
+        </div>
+        <div class="card-body">
+            <fieldset disabled>
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label class="control-label">@Html.DisplayNameFor(model => model.Id)</label>
+                            <input value="@Html.DisplayFor(model => model.Id)" class="form-control form-control-sm" readonly />
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label class="control-label">@Html.DisplayNameFor(model => model.UserName)</label>
+                            <input value="@Html.DisplayFor(model => model.UserName)" class="form-control form-control-sm" readonly />
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label class="control-label">@Html.DisplayNameFor(model => model.NombreUsuario)</label>
+                            <input value="@Html.DisplayFor(model => model.NombreUsuario)" class="form-control form-control-sm" readonly />
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label class="control-label">@Html.DisplayNameFor(model => model.Email)</label>
+                            <input value="@Html.DisplayFor(model => model.Email)" class="form-control form-control-sm" readonly />
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label class="control-label">@Html.DisplayNameFor(model => model.SelectedRole)</label>
+                            <input value="@Html.DisplayFor(model => model.SelectedRole)" class="form-control form-control-sm" readonly />
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="form-group">
+                            <label class="control-label">@Html.DisplayNameFor(model => model.AssignedBranchesNames)</label>
+                            <input value="@Html.DisplayFor(model => model.AssignedBranchesNames)" class="form-control form-control-sm" readonly />
+                        </div>
+                    </div>
+                </div>
+            </fieldset>
+
+            <hr />
+
+            <div class="submit-container form-group col-md-12">
+                <a asp-action="Edit" asp-controller="User" asp-route-id="@Model.Id" class="btn btn-primary">Editar</a>
+                <a asp-action="Index" asp-controller="User" class="btn btn-danger">Cancelar</a>
+            </div>
+        </div>
+    </div>
+</div>

@@ -8,5 +8,7 @@ namespace VCashApp.Models
     {
         [PersonalData]
         public string? NombreUsuario { get; set; }
+        public virtual ICollection<IdentityUserClaim<string>> Claims { get; set; } = new List<IdentityUserClaim<string>>();
+        public virtual ICollection<IdentityUserRole<string>> UserRoles { get; set; } = new List<IdentityUserRole<string>>();
     }
 }

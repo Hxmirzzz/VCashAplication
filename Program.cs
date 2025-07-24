@@ -132,6 +132,7 @@ builder.Services.AddResponseCompression(options =>
         new[] { "application/json", "text/plain", "application/javascript", "text/css", "application/x-font-woff", "application/font-sfnt", "application/font-ttf", "application/font-otf", "image/svg+xml" });
 });
 
+builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IEmployeeService, EmployeeService>();
 builder.Services.AddScoped<IEmployeeLogService, EmployeeLogService>();
 builder.Services.AddScoped<IRutaDiariaService, RutaDiariaService>();

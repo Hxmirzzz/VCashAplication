@@ -48,24 +48,31 @@ namespace VCashApp.Data
             {
                 entity.Property(e => e.NombreUsuario).HasColumnName("NombreUsuario").HasColumnType("VARCHAR(50)");
                 entity.HasIndex(e => e.NombreUsuario).IsUnique();
+
+                entity.HasMany(u => u.Claims)
+                      .WithOne()
+                      .HasForeignKey(uc => uc.UserId)
+                      .IsRequired();
+
+                entity.HasMany(u => u.UserRoles)
+                      .WithOne()
+                      .HasForeignKey(ur => ur.UserId)
+                      .IsRequired();
             });
 
-            // Mapeo para PermisoPerfil
             builder.Entity<PermisoPerfil>(entity => {
                 entity.HasKey(p => p.Id);
-                entity.Property(p => p.Id).ValueGeneratedOnAdd(); // Id autoincremental
+                entity.Property(p => p.Id).ValueGeneratedOnAdd();
 
-                entity.Property(p => p.CodPerfilId).IsRequired().HasMaxLength(450); // FK a AspNetRoles.Id (string GUID)
-                entity.Property(p => p.CodVista).IsRequired().HasMaxLength(50); // FK a AdmVista.CodVista
+                entity.Property(p => p.CodPerfilId).IsRequired().HasMaxLength(450);
+                entity.Property(p => p.CodVista).IsRequired().HasMaxLength(50);
 
-                // Relación con AspNetRoles (el perfil de Identity)
-                entity.HasOne<IdentityRole>() // Apunta a IdentityRole
+                entity.HasOne<IdentityRole>()
                       .WithMany()
-                      .HasForeignKey(p => p.CodPerfilId) // La FK en PermisoPerfil
-                      .HasPrincipalKey(r => r.Id) // La PK en AspNetRoles
-                      .OnDelete(DeleteBehavior.Restrict); // No borrar en cascada
+                      .HasForeignKey(p => p.CodPerfilId)
+                      .HasPrincipalKey(r => r.Id)
+                      .OnDelete(DeleteBehavior.Restrict);
 
-                // Relación con AdmVista
                 entity.HasOne(p => p.Vista).WithMany().HasForeignKey(p => p.CodVista).IsRequired(false).OnDelete(DeleteBehavior.Restrict);
             });
 

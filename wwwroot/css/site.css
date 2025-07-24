@@ -964,16 +964,23 @@ button {
 
 #dataTable td:last-child {
     text-align: center;
-    width: 1%; /* Intentar que la columna ocupe solo el ancho de su contenido */
-    white-space: nowrap; /* Asegura que no se rompa el contenido */
-    vertical-align: middle; /* Alineación vertical */
+    width: 1%;
+    white-space: nowrap;
+    vertical-align: middle;
 }
 
 #dataTable td:last-child > .action-icon,
 #dataTable td:last-child > .switch {
-    display: inline-block; /* Asegura que se comporten como bloques en línea */
-    vertical-align: middle; /* Alinea los elementos verticalmente */
-    margin-right: 5px; /* Espacio entre los elementos (ajusta si es necesario) */
+    display: inline-block;
+    vertical-align: middle;
+    margin-right: 5px;
+}
+
+#dataTable tr th:nth-last-child(1),
+#dataTable tbody td:nth-last-child(1) {
+    position: sticky;
+    right: 0;
+    z-index: 1;
 }
 
 .table-section .table-container table tbody td a i {

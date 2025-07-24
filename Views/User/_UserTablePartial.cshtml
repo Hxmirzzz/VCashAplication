@@ -1,0 +1,111 @@
+﻿@model IEnumerable<VCashApp.Models.ViewModels.UserViewModel>
+@using VCashApp.Enums
+@using System.Globalization
+
+@{
+    int currentPage = ViewBag.CurrentPage ?? 1;
+    int totalPages = ViewBag.TotalPages ?? 1;
+    int totalData = ViewBag.TotalData ?? 0;
+    int pageSize = ViewBag.PageSize ?? 15;
+
+    bool canEdit = ViewBag.HasEditPermission ?? false;
+    const int maxPagesToShow = 5;
+    int halfPagesToShow = (maxPagesToShow - 1) / 2;
+
+    int startPage = Math.Max(1, currentPage - halfPagesToShow);
+    int endPage = Math.Min(totalPages, currentPage + halfPagesToShow);
+
+    if (endPage - startPage + 1 < maxPagesToShow)
+    {
+        if (startPage == 1)
+        {
+            endPage = Math.Min(totalPages, startPage + maxPagesToShow - 1);
+        }
+        else if (endPage == totalPages)
+        {
+            startPage = Math.Max(1, endPage - maxPagesToShow + 1);
+        }
+    }
+}
+
+<div class="table-section">
+    <div class="table-container">
+        <div class="table-wrapper">
+            <table class="table" id="dataTable">
+                <thead>
+                    <tr>
+                        <th>Id</th>
+                        <th>Usuario</th>
+                        <th>Nombre</th>
+                        <th>Email</th>
+                        <th>Rol</th>
+                        <th>Sucursales</th>
+                        <th><i class="ri-list-settings-fill"></i></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model != null && Model.Any())
+                    {
+                        @foreach (var item in Model)
+                        {
+                            <tr>
+                                <td>@item.Id</td>
+                                <td>@item.UserName</td>
+                                <td>@item.NombreUsuario</td>
+                                <td>@item.Email</td>
+                                <td>@item.SelectedRole</td>
+                                <td>@item.AssignedBranchesNames</td>
+                                <td>
+                                    <div class="action-buttons d-flex align-items-center justify-content-center">
+                                        <a href="@Url.Action("Detail", "User", new { id = item.Id })" class="btn-detail" title="View Details">
+                                            <i class="ri-eye-fill"></i>
+                                        </a>
+                                        @if (canEdit)
+                                        {
+                                            <a href="@Url.Action("Edit", "User", new { id = item.Id })" class="btn-edit ml-1" title="Edit">
+                                                <i class="ri-pencil-fill"></i>
+                                            </a>
+                                        }
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="9" class="text-center">No se encontraron registros de usuarios.</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="table-footer">
+        <div class="page-message">Página @currentPage de @totalPages (Total: @totalData registros)</div>
+        <div class="pagination">
+            <button class="page-link" data-page="1" @(currentPage == 1 ? "disabled" : "")>&laquo;</button>
+
+            <button class="page-link" data-page="@(currentPage - 1)" @(currentPage == 1 ? "disabled" : "")>&lt;</button>
+
+            @if (startPage > 1)
+            {
+                <button class="page-link" data-page="@(startPage - 1)">...</button>
+            }
+
+            @for (int i = startPage; i <= endPage; i++)
+            {
+                <button class="page-link @(currentPage == i ? "active-page" : "")" data-page="@i">@i</button>
+            }
+
+            @if (endPage < totalPages)
+            {
+                <button class="page-link" data-page="@(endPage + 1)">...</button>
+            }
+
+            <button class="page-link" data-page="@(currentPage + 1)" @(currentPage == totalPages ? "disabled" : "")>&gt;</button>
+
+            <button class="page-link" data-page="@totalPages" @(currentPage == totalPages ? "disabled" : "")>&raquo;</button>
+        </div>
+    </div>
+</div>

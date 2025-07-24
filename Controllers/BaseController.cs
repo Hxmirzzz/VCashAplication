@@ -10,7 +10,7 @@ using System.Linq;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 using VCashApp.Filters;
-
+using Microsoft.Extensions.Logging;
 
 namespace VCashApp.Controllers
 {
@@ -18,6 +18,7 @@ namespace VCashApp.Controllers
     {
         protected readonly AppDbContext _context;
         protected readonly UserManager<ApplicationUser> _userManager;
+        protected string IpAddressForLogging { get; private set; } = "Desconocida";
 
         public BaseController(AppDbContext context, UserManager<ApplicationUser> userManager)
         {
@@ -113,6 +114,9 @@ namespace VCashApp.Controllers
         protected async Task SetCommonViewBagsBaseAsync(ApplicationUser currentUser, string pageName)
         {
             var ipAddress = HttpContext.Connection.RemoteIpAddress?.MapToIPv4().ToString() ?? "Desconocida";
+            IpAddressForLogging = ipAddress;
+            ViewBag.Ip = ipAddress;
+
             bool isAdmin = await _userManager.IsInRoleAsync(currentUser, "Admin");
             string? currentCodPerfil = (await _userManager.GetRolesAsync(currentUser)).FirstOrDefault();
 
@@ -120,7 +124,6 @@ namespace VCashApp.Controllers
             ViewBag.UnidadName = "N/A";
             ViewBag.PageName = pageName;
             ViewBag.SucursalName = "N/A";
-            ViewBag.Ip = ipAddress;
             ViewBag.NombreCompleto = currentUser.NombreUsuario ?? currentUser.UserName ?? "N/A";
             ViewBag.IsAdmin = isAdmin;
             ViewBag.CurrentCodPerfil = currentCodPerfil;

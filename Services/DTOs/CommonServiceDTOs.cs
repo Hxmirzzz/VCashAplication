@@ -53,10 +53,12 @@ namespace VCashApp.Services.DTOs
         public string? ValidationType { get; set; }
         public double? HoursWorked { get; set; }
         public int? Id { get; set; }
+        public string? UserId { get; set; }
+
 
         public Dictionary<string, string[]>? Errors { get; set; } // Propiedad Errors
 
-        public static ServiceResult SuccessResult(string message, int? id = null) => new ServiceResult { Success = true, Message = message, Id = id };
+        public static ServiceResult SuccessResult(string message, int? id = null, string? userId = null) => new ServiceResult { Success = true, Message = message, Id = id, UserId = userId };
         public static ServiceResult FailureResult(string message) => new ServiceResult { Success = false, Message = message };
         public static ServiceResult FailureResult(string message, Dictionary<string, string[]>? errors) => // Sobrecarga con Errors
             new ServiceResult { Success = false, Message = message, Errors = errors };

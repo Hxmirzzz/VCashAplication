@@ -1,0 +1,111 @@
+﻿@model VCashApp.Models.ViewModels.UserCreateViewModel
+@using Microsoft.AspNetCore.Mvc.Rendering
+
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = "Crear";
+}
+
+<div class="form-container">
+    <div class="row mt-3">
+        <div class="col-12">
+            <div class="alert alert-info" id="statusMessage" style="display:none;"></div>
+            <div class="alert alert-warning" id="confirmationMessage" style="display:none;"></div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <h4 class="mb-0">Crear Nuevo Usuario</h4>
+        </div>
+        <div class="card-body">
+            <form id="createUserForm" asp-action="Create" asp-controller="User" method="post">
+                @Html.AntiForgeryToken()
+
+                <div class="row">
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label asp-for="UserName" class="control-label">Usuario</label>
+                            <input asp-for="UserName" class="form-control form-control-sm" />
+                            <span asp-validation-for="UserName" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label asp-for="NombreUsuario" class="control-label">Nombre Usuario</label>
+                            <input asp-for="NombreUsuario" class="form-control form-control-sm" />
+                            <span asp-validation-for="NombreUsuario" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-group">
+                            <label asp-for="Email" class="control-label"></label>
+                            <input asp-for="Email" type="email" class="form-control form-control-sm" />
+                            <span asp-validation-for="Email" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label asp-for="Password" class="control-label"></label>
+                            <input asp-for="Password" type="password" class="form-control form-control-sm" />
+                            <span asp-validation-for="Password" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label asp-for="ConfirmPassword" class="control-label"></label>
+                            <input asp-for="ConfirmPassword" type="password" class="form-control form-control-sm" />
+                            <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label asp-for="SelectedRole" class="control-label"></label>
+                            <select asp-for="SelectedRole" class="form-control form-control-sm" asp-items="@(new SelectList(Model.RolesList, "Value", "Text"))" id="roleSelect">
+                                <option value="">-- Seleccione un Rol --</option>
+                            </select>
+                            <span asp-validation-for="SelectedRole" class="text-danger"></span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="form-group">
+                            <label asp-for="AssignedBranchIds" class="control-label">Asignar Sucursales</label>
+                            <select asp-for="AssignedBranchIds" class="form-control form-control-sm" multiple="multiple" size="5" asp-items="@(new SelectList(Model.AvailableBranchesList, "Value", "Text"))">
+                            </select>
+                            <span asp-validation-for="AssignedBranchIds" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row mt-3">
+                    <div class="col-md-12">
+                        <h5 class="mb-2">Permisos por Vistas del Rol Seleccionado</h5>
+                        <div id="viewPermissionsContainer" class="border p-3 rounded bg-light" style="min-height: 100px;">
+                            <p class="text-muted">Seleccione un rol para ver sus permisos de vistas.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <hr />
+
+                <div class="submit-container form-group col-md-12">
+                    <button type="submit" class="btn btn-primary">Registrar</button>
+                    <a asp-action="Index" asp-controller="User" class="btn btn-danger">Cancelar</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    <script src="~/js/form-control/user-main-handler.js"></script>
+}

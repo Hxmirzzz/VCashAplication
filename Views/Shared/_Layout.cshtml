@@ -41,7 +41,7 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>VCashApp - @ViewData["Title"]</title>
+    <title>VCash - @ViewData["Title"]</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/css/form.css" asp-append-version="true" />
@@ -70,6 +70,19 @@
 
             <nav class="navigation-main">
                 <div class="section-title">Main</div>
+
+                <div class="sidebar__dropdown" id="dashboard-dropdown">
+                    <a href="#" class="sidebar__link dropdown-btn">
+                        <i class="ri-group-fill"></i>
+                        <span class="nav-text">Gestión de Usuarios</span>
+                        <i class="ri-arrow-down-s-line dropdown-arrow"></i>
+                    </a>
+                    <div class="sidebar__submenu">
+                        <ul>
+                            <li><a asp-controller="User" asp-action="Index" class="sidebar__link sub-link"><span class="nav-text">Usuarios</span></a></li>
+                        </ul>
+                    </div>
+                </div>
                 <div class="sidebar__dropdown" id="dashboard-dropdown">
                     <a href="#" class="sidebar__link dropdown-btn">
                         <i class="ri-map-pin-line"></i>
