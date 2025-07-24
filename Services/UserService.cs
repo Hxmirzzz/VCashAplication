@@ -387,6 +387,13 @@ namespace VCashApp.Services
                             .Select(s => s.NombreSucursal)
                             .ToList();
 
+            List<ViewPermissionViewModel> roleViewPermissions = new List<ViewPermissionViewModel>();
+            string primaryRole = userRoles.FirstOrDefault();
+            if (!string.IsNullOrEmpty(primaryRole))
+            {
+                roleViewPermissions = await GetViewsAndPermissionsForRoleAsync(primaryRole);
+            }
+
             return new UserViewModel
             {
                 Id = user.Id,
@@ -396,6 +403,7 @@ namespace VCashApp.Services
                 SelectedRole = userRoles.FirstOrDefault() ?? "Sin Rol",
                 AssignedBranchIds = assignedBranchIds,
                 AssignedBranchesNames = string.Join(", ", assignedBranchNames),
+                ViewPermissions = roleViewPermissions
             };
         }
 
@@ -477,20 +485,6 @@ namespace VCashApp.Services
                 });
             }
             return userViewModels;
-        }
-
-
-        // Métodos auxiliares privados
-        private async Task<List<int>> GetUserPermittedBranchIdsAsync(string userId)
-        {
-            // Este método podría no ser necesario en UserService si los usuarios no tienen "permisos" de sucursal
-            // como los empleados. Si los usuarios admin pueden ver todas las sucursales, y otros solo las asignadas
-            // a ellos mismos (o si se requiere una lógica de claims diferente), esto podría necesitar ajustes.
-            // Por ahora, se mantendrá si se usa en algún lado.
-            return await _context.UserClaims
-                .Where(uc => uc.UserId == userId && uc.ClaimType == "SucursalId")
-                .Select(uc => int.Parse(uc.ClaimValue))
-                .ToListAsync();
         }
     }
 }

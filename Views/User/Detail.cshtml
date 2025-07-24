@@ -57,6 +57,42 @@
                         </div>
                     </div>
                 </div>
+
+                <div class="row mt-3">
+                    <div class="col-md-12">
+                        <h5 class="mb-2">Permisos por Vistas del Rol (@Model.SelectedRole)</h5>
+                        <div id="viewPermissionsDisplayContainer" class="border p-3 rounded bg-light" style="min-height: 100px;">
+                            @if (Model.ViewPermissions != null && Model.ViewPermissions.Any())
+                            {
+                                <table class="table table-sm table-bordered">
+                                    <thead>
+                                        <tr>
+                                            <th>Vista</th>
+                                            <th>Ver</th>
+                                            <th>Crear</th>
+                                            <th>Editar</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @foreach (var viewPerm in Model.ViewPermissions)
+                                        {
+                                            <tr>
+                                                <td>@viewPerm.NombreVista</td>
+                                                <td><input type="checkbox" @(viewPerm.PuedeVer ? "checked" : "") disabled></td>
+                                                <td><input type="checkbox" @(viewPerm.PuedeCrear ? "checked" : "") disabled></td>
+                                                <td><input type="checkbox" @(viewPerm.PuedeEditar ? "checked" : "") disabled></td>
+                                            </tr>
+                                        }
+                                    </tbody>
+                                </table>
+                            }
+                            else
+                            {
+                                <p class="text-muted">No hay permisos de vistas definidos para este rol o no se encontraron vistas.</p>
+                            }
+                        </div>
+                    </div>
+                </div>
             </fieldset>
 
             <hr />

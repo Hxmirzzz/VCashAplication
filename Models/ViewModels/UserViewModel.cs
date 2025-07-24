@@ -27,6 +27,9 @@ namespace VCashApp.Models.ViewModels
         public string? SearchTerm { get; set; }
         public string? SelectedRoleFilter { get; set; }
         public int? SelectedBranchFilter { get; set; }
+
+        public List<ViewPermissionViewModel> ViewPermissions { get; set; } = new List<ViewPermissionViewModel>();
+
     }
 
     public class ViewPermissionViewModel

@@ -2,7 +2,8 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
-using Serilog;
+using Microsoft.Extensions.Logging;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -27,6 +28,7 @@ namespace VCashApp.Controllers
     {
         private readonly IEmployeeService _employeeService;
         private readonly IExportService _exportService;
+        private readonly ILogger<EmployeeController> _logger;
 
         /// <summary>
         /// Constructor del controlador EmployeeController.
@@ -35,11 +37,13 @@ namespace VCashApp.Controllers
             IEmployeeService employeeService,
             IExportService exportService,
             AppDbContext context,
-            UserManager<ApplicationUser> userManager)
+            UserManager<ApplicationUser> userManager,
+            ILogger<EmployeeController> logger)
             : base(context, userManager)
         {
             _employeeService = employeeService;
             _exportService = exportService;
+            _logger = logger;
         }
 
         // Método auxiliar para configurar ViewBags comunes
@@ -96,7 +100,7 @@ namespace VCashApp.Controllers
             ViewBag.CurrentEmployeeStatus = employeeStatus;
             ViewBag.CurrentGender = gender;
 
-            Log.Information("| User: {User} | IP: {Ip} | Action: Accessing Employee List | Count: {Count} | Result: Access Granted |", currentUser.UserName, ViewBag.Ip, data.Count());
+            _logger.LogInformation("| User: {User} | IP: {Ip} | Action: Accessing Employee List | Count: {Count} | Result: Access Granted |", currentUser.UserName, IpAddressForLogging, data.Count());
 
             if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
             {
@@ -133,7 +137,7 @@ namespace VCashApp.Controllers
                 EmployeeStatus = (int)EstadoEmpleado.Activo
             };
 
-            Log.Information("| User: {User} | IP: {Ip} | Action: Accessing Create Employee Form | Result: Access Granted |", currentUser.UserName, ViewBag.Ip);
+            _logger.LogInformation("| User: {User} | IP: {Ip} | Action: Accessing Create Employee Form | Result: Access Granted |", currentUser.UserName, IpAddressForLogging);
 
             return View(model); // Retorna el ViewModel con las listas
         }
@@ -159,6 +163,7 @@ namespace VCashApp.Controllers
                         kvp => kvp.Key,
                         kvp => kvp.Value.Errors.Select(e => e.ErrorMessage).ToArray()
                     );
+                _logger.LogWarning("| User: {User} | IP: {Ip} | Action: Create Employee - Model Invalid | Errors: {@Errors} |", currentUser.UserName, IpAddressForLogging, fieldErrors);
                 return Json(ServiceResult.FailureResult("Hay errores en el formulario.", errors: fieldErrors));
             }
 
@@ -179,12 +184,11 @@ namespace VCashApp.Controllers
             await SetCommonViewBagsBaseAsync(currentUser, "Editar Empleado");
             bool isAdmin = (bool)ViewBag.IsAdmin;
 
-            // Obtener los datos del empleado desde el servicio
             var employeeModel = await _employeeService.GetEmployeeForEditAsync(id, currentUser.Id, isAdmin);
 
             if (employeeModel == null)
             {
-                Log.Warning("| User: {User} | IP: {Ip} | Action: Accessing Edit Employee Form | EmployeeId: {EmployeeId} | Result: Not Found or Forbidden |", currentUser.UserName, ViewBag.Ip, id);
+                _logger.LogWarning("| User: {User} | IP: {Ip} | Action: Access Edit Employee Form - Not Found or Forbidden | EmployeeId: {EmployeeId} |", currentUser.UserName, IpAddressForLogging, id);
                 TempData["ErrorMessage"] = "Empleado no encontrado o no tiene permiso para verlo.";
                 return RedirectToAction(nameof(Index));
             }
@@ -194,7 +198,7 @@ namespace VCashApp.Controllers
             employeeModel.Sucursales = sucursales;
             employeeModel.Ciudades = ciudades;
 
-            Log.Information("| User: {User} | IP: {Ip} | Action: Accessing Edit Employee Form | EmployeeId: {EmployeeId} | Result: Access Granted |", currentUser.UserName, ViewBag.Ip, id);
+            _logger.LogInformation("| User: {User} | IP: {Ip} | Action: Accessing Edit Employee Form | EmployeeId: {EmployeeId} | Result: Access Granted |", currentUser.UserName, IpAddressForLogging, id);
             return View(employeeModel);
         }
 
@@ -209,6 +213,8 @@ namespace VCashApp.Controllers
             var currentUser = await GetCurrentApplicationUserAsync();
             if (currentUser == null) return Unauthorized();
 
+            await SetCommonViewBagsEmployeeAsync(currentUser, "Procesando Edición de Empleado");
+
             if (id != model.CodCedula)
             {
                 return BadRequest(ServiceResult.FailureResult("El ID del empleado en la URL no coincide con el ID del formulario."));
@@ -222,6 +228,7 @@ namespace VCashApp.Controllers
                         kvp => kvp.Key,
                         kvp => kvp.Value.Errors.Select(e => e.ErrorMessage).ToArray()
                     );
+                _logger.LogWarning("| User: {User} | IP: {Ip} | Action: Edit Employee - Model Invalid | Errors: {@Errors} |", currentUser.UserName, IpAddressForLogging, fieldErrors);
                 return Json(ServiceResult.FailureResult("Hay errores en el formulario.", errors: fieldErrors));
             }
 
@@ -229,11 +236,11 @@ namespace VCashApp.Controllers
 
             if (result.Success)
             {
-                Log.Information("| User: {User} | IP: {Ip} | Action: Employee Updated | EmployeeId: {EmployeeId} | Result: Success |", currentUser.UserName, ViewBag.Ip, model.CodCedula);
+                _logger.LogInformation("| User: {User} | IP: {Ip} | Action: Employee Updated | EmployeeId: {EmployeeId} | Result: Success |", currentUser.UserName, IpAddressForLogging, model.CodCedula);
             }
             else
             {
-                Log.Warning("| User: {User} | IP: {Ip} | Action: Employee Update Failed | EmployeeId: {EmployeeId} | Result: {Message} |", currentUser.UserName, ViewBag.Ip, model.CodCedula, result.Message);
+                _logger.LogError("| User: {User} | IP: {Ip} | Action: Employee Update Failed | EmployeeId: {EmployeeId} | Result: {Message} |", currentUser.UserName, IpAddressForLogging, model.CodCedula, result.Message);
             }
 
             return Json(result);
@@ -253,13 +260,12 @@ namespace VCashApp.Controllers
             var currentUser = await GetCurrentApplicationUserAsync();
             if (currentUser == null) return Unauthorized();
 
+            await SetCommonViewBagsEmployeeAsync(currentUser, "Procesando Cambio de Estado de Empleado");
+
             if (id != statusChangeRequest.EmployeeId)
             {
                 return BadRequest(ServiceResult.FailureResult("El ID del empleado en la URL no coincide con el ID del cuerpo de la solicitud."));
             }
-
-            // Puedes añadir validaciones adicionales aquí si el nuevo estado es restrictivo.
-            // Por ejemplo, no permitir cambiar a "Activo" desde "Despedido" sin un proceso específico.
 
             var result = await _employeeService.ChangeEmployeeStatusAsync(
                 id,
@@ -267,6 +273,15 @@ namespace VCashApp.Controllers
                 statusChangeRequest.ReasonForChange,
                 currentUser.Id
             );
+
+            if (result.Success)
+            {
+                _logger.LogInformation("| User: {User} | IP: {Ip} | Action: Employee Status Changed | EmployeeId: {EmployeeId} | Result: Success |", currentUser.UserName, IpAddressForLogging, id);
+            }
+            else
+            {
+                _logger.LogError("| User: {User} | IP: {Ip} | Action: Employee Status Change Failed | EmployeeId: {EmployeeId} | Reason: {Message} |", currentUser.UserName, IpAddressForLogging, id, result.Message);
+            }
 
             return Json(result);
         }
@@ -288,7 +303,7 @@ namespace VCashApp.Controllers
 
             if (employeeModel == null)
             {
-                Log.Warning("| User: {User} | IP: {Ip} | Action: Accessing Employee Details | EmployeeId: {EmployeeId} | Result: Not Found or Forbidden |", currentUser.UserName, ViewBag.Ip, id);
+                _logger.LogWarning("| User: {User} | IP: {Ip} | Action: Access Employee Details - Not Found or Forbidden | EmployeeId: {EmployeeId} |", currentUser.UserName, IpAddressForLogging, id);
                 TempData["ErrorMessage"] = "Empleado no encontrado o no tiene permiso para verlo.";
                 return RedirectToAction(nameof(Index));
             }
@@ -298,7 +313,7 @@ namespace VCashApp.Controllers
             employeeModel.Sucursales = sucursales;
             employeeModel.Ciudades = ciudades;
 
-            Log.Information("| User: {User} | IP: {Ip} | Action: Accessing Employee Details | EmployeeId: {EmployeeId} | Result: Access Granted |", currentUser.UserName, ViewBag.Ip, id);
+            _logger.LogInformation("| User: {User} | IP: {Ip} | Action: Accessing Employee Details | EmployeeId: {EmployeeId} | Result: Access Granted |", currentUser.UserName, IpAddressForLogging, id);
             return View(employeeModel);
         }
 
@@ -346,10 +361,12 @@ namespace VCashApp.Controllers
             string? search,
             string? gender)
         {
+            var currentUser = await GetCurrentApplicationUserAsync();
+            if (currentUser == null) return Unauthorized();
+
             try
             {
-                var currentUser = await GetCurrentApplicationUserAsync();
-                if (currentUser == null) return Unauthorized();
+                await SetCommonViewBagsEmployeeAsync(currentUser, "Procesando Exportación de Empleados");
 
                 bool isAdmin = await _userManager.IsInRoleAsync(currentUser, "Admin");
 
@@ -365,7 +382,7 @@ namespace VCashApp.Controllers
 
                 if (employeesToExport == null || !employeesToExport.Any())
                 {
-                    Log.Information("User {User} attempted to export employees, but no data found with current filters.", currentUser.UserName);
+                    _logger.LogInformation("| User: {User} | IP: {Ip} | Action: Export Employees - No Data Found |", currentUser.UserName, IpAddressForLogging);
                     return NotFound("No se encontraron empleados con los filtros especificados para exportar.");
                 }
 
@@ -408,17 +425,17 @@ namespace VCashApp.Controllers
             }
             catch (NotImplementedException ex)
             {
-                Log.Warning(ex, "Formato de exportación '{ExportFormat}' no implementado.", exportFormat);
+                _logger.LogWarning(ex, "| User: {User} | IP: {Ip} | Action: Export Employees - Format Not Implemented | Format: {ExportFormat} |", currentUser.UserName, IpAddressForLogging, exportFormat);
                 return BadRequest($"El formato de exportación '{exportFormat}' no está implementado.");
             }
             catch (ArgumentException ex)
             {
-                Log.Warning(ex, "Formato de exportación inválido: {ExportFormat}", exportFormat);
+                _logger.LogWarning(ex, "| User: {User} | IP: {Ip} | Action: Export Employees - Invalid Format | Format: {ExportFormat} |", currentUser.UserName, IpAddressForLogging, exportFormat);
                 return BadRequest(ex.Message);
             }
             catch (Exception ex)
             {
-                Log.Error(ex, "Error general al exportar datos de empleados.");
+                _logger.LogError(ex, "| User: {User} | IP: {Ip} | Action: Export Employees - General Error |", currentUser.UserName, IpAddressForLogging);
                 return StatusCode(500, "Ocurrió un error interno del servidor al exportar los datos.");
             }
         }
@@ -429,14 +446,13 @@ namespace VCashApp.Controllers
         [HttpGet("images/{*filePath}")]
         public async Task<IActionResult> GetImage(string filePath)
         {
-            // La lógica para obtener el archivo ahora puede estar en el servicio
             var fileStream = await _employeeService.GetEmployeeImageStreamAsync(filePath);
             if (fileStream == null)
             {
                 return NotFound();
             }
 
-            string mimeType = "image/jpeg"; // O determinar el tipo de contenido dinámicamente
+            string mimeType = "image/jpeg";
             return File(fileStream, mimeType);
         }
     }
