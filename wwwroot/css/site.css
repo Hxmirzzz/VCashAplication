@@ -834,7 +834,6 @@ button {
     cursor: pointer;
     border-radius: 5px;
     padding: 0;
-    background-color: var(--button-bg-color);
     box-shadow: 0 1px 3px rgba(0,0,0,0.1);
     transition: background-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
     display: flex;

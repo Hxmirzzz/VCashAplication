@@ -1,0 +1,68 @@
+﻿using System;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+
+namespace VCashApp.Models.Entities
+{
+    [Table("CefDetallesValores")]
+    public class CefValueDetail
+    {
+        [Key]
+        [Column("Id")]
+        public int Id { get; set; }
+
+        [Required]
+        [Column("IdContenedorCef")]
+        [ForeignKey("CefContainer")]
+        public int CefContainerId { get; set; }
+        public virtual CefContainer CefContainer { get; set; } = null!;
+
+        [Required]
+        [StringLength(50)]
+        [Column("TipoValor")]
+        public string ValueType { get; set; } // Tipo de valor: 'Bill', 'Coin', 'Check', 'Document'
+
+        [Column("Denominacion", TypeName = "DECIMAL(18,0)")]
+        public decimal? Denomination { get; set; } // Valor de la denominación (para billetes/monedas)
+
+        [Column("Cantidad")]
+        public int? Quantity { get; set; } // Cantidad de unidades (para billetes/monedas)
+
+        [Column("CantidadFajos")]
+        public int? BundlesCount { get; set; }
+
+        [Column("CantidadPicos")]
+        public int? LoosePiecesCount { get; set; } // Cantidad de picos (para billetes/monedas)
+
+        [Column("ValorUnitario", TypeName = "DECIMAL(18,2)")]
+        public decimal? UnitValue { get; set; } // Valor unitario (para cheques/documentos)
+
+        [Required]
+        [Column("MontoCalculado", TypeName = "DECIMAL(18,0)")]
+        public decimal? CalculatedAmount { get; set; } // Denomination * Quantity o UnitValue
+
+        [Column("EsAltaDenominacion")]
+        public bool? IsHighDenomination { get; set; } // Indica si es billete de alta denominación
+
+        [StringLength(100)]
+        [Column("NumeroIdentificador")]
+        public string? IdentifierNumber { get; set; }
+
+        [StringLength(100)]
+        [Column("Banco")]
+        public string? BankName { get; set; }
+
+        [Column("FechaEmision", TypeName = "DATE")]
+        public DateOnly? IssueDate { get; set; }
+
+        [StringLength(255)]
+        [Column("Emisor")]
+        public string? Issuer { get; set; } // Emisor (para cheques/documentos)
+
+        [StringLength(255)]
+        [Column("Observaciones")]
+        public string? Observations { get; set; } // Observaciones específicas del detalle
+
+        public virtual ICollection<CefIncident> Incidents { get; set; } = new List<CefIncident>(); // Novedades relacionadas con este detalle
+    }
+}

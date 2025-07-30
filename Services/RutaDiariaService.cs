@@ -1,12 +1,14 @@
-﻿using Microsoft.EntityFrameworkCore;
-using VCashApp.Data;
-using VCashApp.Models.Entities;
-using VCashApp.Services.DTOs;
-using VCashApp.Enums;
+﻿using Microsoft.Data.SqlClient;
+using Microsoft.EntityFrameworkCore;
+using Serilog;
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
-using Serilog;
+using VCashApp.Data;
+using VCashApp.Enums;
+using VCashApp.Models.Entities;
+using VCashApp.Services.DTOs;
 
 namespace VCashApp.Services
 {
@@ -17,6 +19,83 @@ namespace VCashApp.Services
         public RutaDiariaService(AppDbContext context)
         {
             _context = context;
+        }
+
+        public async Task<(List<TdvRutaDiaria> Rutas, int TotalCount)> GetFilteredRutasAsync(
+            string userId, int? codSuc, DateOnly? fechaEjecucion, int? estado, string? search,
+            int page, int pageSize, bool isAdmin)
+        {
+            var permittedBranches = new List<int>();
+            if (!isAdmin)
+            {
+                permittedBranches = await GetUserPermittedSucursalesAsync(userId);
+            }
+
+            DataTable tvpTable = new DataTable();
+            tvpTable.Columns.Add("Value", typeof(int));
+            foreach (int id in permittedBranches) { tvpTable.Rows.Add(id); }
+
+            var pPermittedBranchIds = new SqlParameter("@PermittedBranchIds", tvpTable) { TypeName = "dbo.IntListType", SqlDbType = SqlDbType.Structured };
+            var pCodSuc = new SqlParameter("@codSuc", codSuc ?? (object)DBNull.Value);
+            var pFechaEjecucion = new SqlParameter("@fechaEjecucion", fechaEjecucion.HasValue ? (object)fechaEjecucion.Value.ToDateTime(TimeOnly.MinValue) : DBNull.Value);
+            var pEstado = new SqlParameter("@estado", estado ?? (object)DBNull.Value);
+            var pSearch = new SqlParameter("@search", string.IsNullOrEmpty(search) ? (object)DBNull.Value : search);
+            var pIsAdmin = new SqlParameter("@IsAdmin", isAdmin);
+            var pPage = new SqlParameter("@Page", page);
+            var pPageSize = new SqlParameter("@PageSize", pageSize);
+
+            var rutas = new List<TdvRutaDiaria>();
+            int totalCount = 0;
+
+            using (var command = _context.Database.GetDbConnection().CreateCommand())
+            {
+                command.CommandText = "dbo.GetFilteredRutasDiarias";
+                command.CommandType = CommandType.StoredProcedure;
+                command.Parameters.AddRange(new[] { pPermittedBranchIds, pCodSuc, pFechaEjecucion, pEstado, pSearch, pIsAdmin, pPage, pPageSize });
+
+                await _context.Database.OpenConnectionAsync();
+
+                using (var reader = await command.ExecuteReaderAsync())
+                {
+                    if (await reader.ReadAsync() && !reader.IsDBNull(0))
+                    {
+                        totalCount = reader.GetInt32(0);
+                    }
+
+                    await reader.NextResultAsync();
+
+                    while (await reader.ReadAsync())
+                    {
+                        var ruta = new TdvRutaDiaria
+                        {
+                            Id = reader["Id"].ToString(),
+                            CodRutaSuc = reader["CodRutaMaster"].ToString(),
+                            NombreRuta = reader["NombreRuta"].ToString(),
+                            CodSucursal = (int)reader["CodSucursal"],
+                            FechaEjecucion = DateOnly.FromDateTime((DateTime)reader["FechaEjecucion"]),
+                            UsuarioPlaneacion = reader["UsuarioPlaneacion"].ToString(),
+                            TipoRuta = reader["TipoRuta"].ToString(),
+                            TipoVehiculo = reader["TipoVehiculo"].ToString(),
+                            Estado = (int)reader["Estado"],
+                            CedulaJT = reader["JefeTripulacion"] as int?,
+                            CedulaConductor = reader["Conductor"] as int?,
+                            CedulaTripulante = reader["Tripulante"] as int?,
+                            CodVehiculo = reader["CodVehiculo"] as string,
+                            KmInicial = reader["KmInicial"] as decimal?,
+                            KmFinal = reader["KmFinal"] as decimal?,
+                            // ... Mapear el resto de las propiedades directas de TdvRutaDiaria ...
+
+                            // Poblar objetos de navegación
+                            Sucursal = new AdmSucursal { NombreSucursal = reader["Sucursal_NombreSucursal"].ToString() },
+                            JT = !reader.IsDBNull(reader.GetOrdinal("JT_CodCedula")) ? new AdmEmpleado { NombreCompleto = reader["JT_NombreCompleto"].ToString() } : null,
+                            Conductor = !reader.IsDBNull(reader.GetOrdinal("Conductor_CodCedula")) ? new AdmEmpleado { NombreCompleto = reader["Conductor_NombreCompleto"].ToString() } : null,
+                            Tripulante = !reader.IsDBNull(reader.GetOrdinal("Tripulante_CodCedula")) ? new AdmEmpleado { NombreCompleto = reader["Tripulante_NombreCompleto"].ToString() } : null
+                        };
+                        rutas.Add(ruta);
+                    }
+                }
+            }
+            return (rutas, totalCount);
         }
 
         public async Task<TdvRutaDiaria> CrearRutaDiariaInicialAsync(TdvRutaDiaria nuevaRuta)
@@ -422,6 +501,62 @@ namespace VCashApp.Services
             try { _context.TdvRutasDiarias.Update(rutaExistente); await _context.SaveChangesAsync(); return true; }
             catch (DbUpdateConcurrencyException) { return false; }
             catch (Exception ex) { Console.WriteLine($"Error al registrar entrada del vehículo: {ex.Message}"); throw; }
+        }
+
+        private async Task<List<int>> GetUserPermittedSucursalesAsync(string userId)
+        {
+            var permittedBranchClaims = await _context.UserClaims
+                .Where(uc => uc.UserId == userId && uc.ClaimType == "SucursalId")
+                .Select(uc => uc.ClaimValue)
+                .ToListAsync();
+
+            return permittedBranchClaims
+                .Where(s => int.TryParse(s, out _))
+                .Select(s => int.Parse(s))
+                .ToList();
+        }
+
+        // Dentro de tu clase RutaDiariaService
+        public async Task<List<TdvRutaDiaria>> GetFilteredRutasForExportAsync(
+            string userId,
+            int? codSuc,
+            DateOnly? fechaEjecucion,
+            int? estado,
+            string? search,
+            bool isAdmin)
+        {
+            var permittedBranches = new List<int>();
+            if (!isAdmin)
+            {
+                permittedBranches = await GetUserPermittedSucursalesAsync(userId);
+            }
+
+            DataTable tvpTable = new DataTable();
+            tvpTable.Columns.Add("Value", typeof(int));
+            foreach (int id in permittedBranches)
+            {
+                tvpTable.Rows.Add(id);
+            }
+
+
+            var pPermittedBranchIds = new SqlParameter("@PermittedBranchIds", tvpTable)
+            {
+                TypeName = "dbo.IntListType",
+                SqlDbType = SqlDbType.Structured
+            };
+
+            var pCodSuc = new SqlParameter("@codSuc", codSuc ?? (object)DBNull.Value);
+            var pFechaEjecucion = new SqlParameter("@fechaEjecucion", fechaEjecucion.HasValue ? (object)fechaEjecucion.Value.ToDateTime(TimeOnly.MinValue) : DBNull.Value);
+            var pEstado = new SqlParameter("@estado", estado ?? (object)DBNull.Value);
+            var pSearch = new SqlParameter("@search", string.IsNullOrEmpty(search) ? (object)DBNull.Value : search);
+            var pIsAdmin = new SqlParameter("@IsAdmin", isAdmin);
+
+            var rutas = await _context.TdvRutasDiarias
+                .FromSqlRaw("EXEC dbo.GetFilteredDailyRoutes @PermittedBranchIds, @codSuc, @fechaEjecucion, @estado, @search, @IsAdmin",
+                    pPermittedBranchIds, pCodSuc, pFechaEjecucion, pEstado, pSearch, pIsAdmin)
+                .ToListAsync();
+
+            return rutas;
         }
     }
 }

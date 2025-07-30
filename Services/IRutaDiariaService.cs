@@ -10,7 +10,9 @@ namespace VCashApp.Services
     /// </summary>
     public interface IRutaDiariaService
     {
-        // PLANEADOR
+        Task<(List<TdvRutaDiaria> Rutas, int TotalCount)> GetFilteredRutasAsync(
+            string userId, int? codSuc, DateOnly? fechaEjecucion, int? estado, string? search,
+            int page, int pageSize, bool isAdmin);
 
         /// <summary>
         /// Crea un nuevo registro de Ruta Diaria en su estado inicial (GENERADO).
@@ -135,5 +137,24 @@ namespace VCashApp.Services
         /// si los datos de kilometraje/fecha/hora son inválidos, o si la fecha/hora de entrada es anterior a la de salida.
         /// </returns>
         Task<bool> RegistrarEntradaVehiculoAsync(string rutaId, decimal kmFinal, DateOnly? fechaEntradaRuta, TimeOnly? horaEntradaRuta, string usuarioSupervisorCierre);
+
+        /// <summary>
+        /// Obtiene una lista filtrada de rutas diarias para exportación, utilizando un Stored Procedure.
+        /// Este método es ideal para consultas complejas que pueden causar problemas de traducción en LINQ.
+        /// </summary>
+        /// <param name="userId">El ID del usuario que realiza la solicitud para filtrar por permisos.</param>
+        /// <param name="codSuc">El código de la sucursal para filtrar.</param>
+        /// <param name="fechaEjecucion">La fecha de ejecución para filtrar.</param>
+        /// <param name="estado">El estado de la ruta para filtrar.</param>
+        /// <param name="search">El término de búsqueda a aplicar.</param>
+        /// <param name="isAdmin">Indica si el usuario es administrador para omitir el filtro de permisos.</param>
+        /// <returns>Una lista de entidades <see cref="TdvRutaDiaria"/> que coinciden con los filtros.</returns>
+        Task<List<TdvRutaDiaria>> GetFilteredRutasForExportAsync(
+            string userId,
+            int? codSuc,
+            DateOnly? fechaEjecucion,
+            int? estado,
+            string? search,
+            bool isAdmin);
     }
 }

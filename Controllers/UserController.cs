@@ -37,6 +37,7 @@ namespace VCashApp.Controllers
         /// <param name="exportService">Servicio para funcionalidades de exportación.</param>
         /// <param name="context">Contexto de la base de datos de la aplicación.</param>
         /// <param name="userManager">Administrador de usuarios para gestionar ApplicationUser.</param>
+        /// <param name="logger">Servicio de logging para el controlador.</param>
         public UserController(
             IUserService userService,
             IExportService exportService,
@@ -101,7 +102,12 @@ namespace VCashApp.Controllers
             ViewBag.SelectedRoleFilter = selectedRoleFilter;
             ViewBag.SelectedBranchFilter = selectedBranchFilter;
 
-            _logger.LogInformation("| User: {User} | IP: {Ip} | Action: Accessing User List | Count: {Count} | Result: Access Granted |", currentUser.UserName, IpAddressForLogging, users.Count());
+            _logger.LogInformation("Usuario: {Usuario} | IP: {IP} | Accion: {Accion} | Conteo: {Conteo} | Resultado: {Resultado}",
+                currentUser.UserName,
+                IpAddressForLogging,
+                "Accediendo a la lista de Usuarios",
+                users.Count(),
+                "Acceso concedido");
 
             if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
             {
@@ -124,7 +130,9 @@ namespace VCashApp.Controllers
             await SetCommonViewBagsUserAsync(currentUser, "Crear Usuario");
 
             var model = await _userService.GetUserForCreateAsync();
-            _logger.LogInformation("| User: {User} | IP: {Ip} | Action: Accessing Create User Form | Result: Access Granted |", currentUser.UserName, IpAddressForLogging);
+
+            _logger.LogInformation("Usuario: {Usuario} | IP: {IP} | Acción: Accediendo al formulario de Creación de Usuario | Resultado: {Resultado} |",
+                currentUser.UserName, IpAddressForLogging, "Acceso concedido");
 
             return View(model);
         }
@@ -139,14 +147,18 @@ namespace VCashApp.Controllers
         [RequiredPermission(PermissionType.View, "USER")]
         public async Task<IActionResult> GetViewsForRole(string roleName)
         {
+            var currentUser = await GetCurrentApplicationUserAsync();
+
+            _logger.LogInformation("Usuario: {Usuario} | IP: {IP} | Acción: Obteniendo Vistas para Rol: {RolNombre} |",
+                currentUser?.UserName ?? "N/A", IpAddressForLogging, roleName);
             if (string.IsNullOrWhiteSpace(roleName))
             {
-                _logger.LogWarning("Attempt to fetch views with empty roleName. IP: {Ip}", IpAddressForLogging);
-                return BadRequest("El nombre del rol no puede ser nulo o vacío.");
+                _logger.LogWarning("Usuario: {Usuario} | IP: {IP} | Acción: Intento de obtener vistas con nombre de rol vacío |",
+                    currentUser?.UserName ?? "N/A", IpAddressForLogging); return BadRequest("El nombre del rol no puede ser nulo o vacío.");
             }
 
             var views = await _userService.GetViewsAndPermissionsForRoleAsync(roleName);
-            return Json(views); // Devuelve la lista de vistas y permisos como JSON
+            return Json(views);
         }
 
         /// <summary>
@@ -176,7 +188,8 @@ namespace VCashApp.Controllers
                         kvp => kvp.Key,
                         kvp => kvp.Value.Errors.Select(e => e.ErrorMessage).ToArray()
                     );
-                _logger.LogWarning("Model state invalid for user creation: {@Errors}", fieldErrors);
+                _logger.LogWarning("Usuario: {Usuario} | IP: {IP} | Acción: Creación de Usuario - Modelo Inválido | TipoEntidad: Usuario | Resultado: {Resultado} | Errores: {@Errores} |",
+                    currentUser.UserName, IpAddressForLogging, "Validación Fallida", fieldErrors);
                 return Json(ServiceResult.FailureResult("Hay errores en el formulario.", errors: fieldErrors));
             }
 
@@ -184,12 +197,14 @@ namespace VCashApp.Controllers
 
             if (result.Success)
             {
-                _logger.LogInformation("User {UserName} created successfully by user {CurrentUserName}. New UserId: {NewUserId}", model.UserName, currentUser.UserName, result.UserId);
+                _logger.LogInformation("Usuario: {Usuario} | IP: {IP} | Acción: Usuario Creado Exitosamente | TipoEntidad: Usuario | ID_Entidad: {ID_Entidad} | Resultado: {Resultado} |",
+                    model.UserName, IpAddressForLogging, result.UserId, "Éxito");
                 return Json(new { success = true, message = "Usuario creado exitosamente." });
             }
             else
             {
-                _logger.LogError("Failed to create user {UserName} by {CurrentUserName}: {Message}", model.UserName, currentUser.UserName, result.Message);
+                _logger.LogError("Usuario: {Usuario} | IP: {IP} | Acción: Creación de Usuario Fallida | TipoEntidad: Usuario | ID_Entidad: {ID_Entidad} | Razón: {Mensaje} |",
+                    model.UserName, IpAddressForLogging, result.UserId, result.Message);
                 return Json(new { success = false, message = result.Message });
             }
         }
@@ -204,23 +219,25 @@ namespace VCashApp.Controllers
         /// <returns>La vista para el formulario de edición de usuario.</returns>
         [HttpGet("Edit/{id}")]
         [RequiredPermission(PermissionType.Edit, "USER")]
-        public async Task<IActionResult> Edit(string id) // El ID de usuario es un string
+        public async Task<IActionResult> Edit(string id)
         {
             var currentUser = await GetCurrentApplicationUserAsync();
             if (currentUser == null) return RedirectToPage("/Account/Login", new { area = "Identity" });
 
-            await SetCommonViewBagsUserAsync(currentUser, "Editar Usuario"); // Configura ViewBags comunes y permisos
+            await SetCommonViewBagsUserAsync(currentUser, "Editar Usuario");
 
             var userModel = await _userService.GetUserForEditAsync(id);
 
             if (userModel == null)
             {
-                _logger.LogWarning("| User: {User} | IP: {Ip} | Action: Access Edit Form - User Not Found or Forbidden | Target UserId: {UserId} |", currentUser.UserName, IpAddressForLogging, id);
+                _logger.LogWarning("Usuario: {Usuario} | IP: {IP} | Acción: Accediendo a formulario de Edición - No encontrado o Prohibido | TipoEntidad: Usuario | ID_Entidad: {ID_Entidad} |",
+                    currentUser.UserName, IpAddressForLogging, id);
                 TempData["ErrorMessage"] = "Usuario no encontrado.";
                 return RedirectToAction(nameof(Index));
             }
 
-            _logger.LogInformation("| User: {User} | IP: {Ip} | Action: Access Edit Form | Target UserId: {UserId} |", currentUser.UserName, IpAddressForLogging, id);
+            _logger.LogInformation("Usuario: {Usuario} | IP: {IP} | Acción: Accediendo a formulario de Edición | TipoEntidad: Usuario | ID_Entidad: {ID_Entidad} | Resultado: {Resultado} |",
+                currentUser.UserName, IpAddressForLogging, id, "Acceso concedido");
             return View(userModel);
         }
 
@@ -237,16 +254,17 @@ namespace VCashApp.Controllers
         [HttpPost("Edit/{id}")] // La ruta espera un ID
         [ValidateAntiForgeryToken]
         [RequiredPermission(PermissionType.Edit, "USER")]
-        public async Task<IActionResult> Edit(string id, [FromForm] UserEditViewModel model) // El ID de usuario es string
+        public async Task<IActionResult> Edit(string id, [FromForm] UserEditViewModel model)
         {
             var currentUser = await GetCurrentApplicationUserAsync();
             if (currentUser == null) return Unauthorized();
 
             await SetCommonViewBagsUserAsync(currentUser, "Procesando Edición de Usuario");
 
-            if (id != model.Id) // Verificar consistencia entre ID de URL y ID del modelo
+            if (id != model.Id)
             {
-                _logger.LogWarning("| User: {User} | IP: {Ip} | Action: Edit User - Mismatched IDs | URL Id: {UrlId}, Model Id: {ModelId} |", currentUser.UserName, IpAddressForLogging, id, model.Id);
+                _logger.LogWarning("Usuario: {Usuario} | IP: {IP} | Acción: Edición de Usuario - IDs No Coinciden | TipoEntidad: Usuario | ID_URL: {ID_URL} | ID_Modelo: {ID_Modelo} |",
+                    currentUser.UserName, IpAddressForLogging, id, model.Id);
                 return BadRequest(ServiceResult.FailureResult("El ID del usuario en la URL no coincide con el ID del formulario."));
             }
 
@@ -258,7 +276,8 @@ namespace VCashApp.Controllers
                         kvp => kvp.Key,
                         kvp => kvp.Value.Errors.Select(e => e.ErrorMessage).ToArray()
                     );
-                _logger.LogWarning("| User: {User} | IP: {Ip} | Action: Edit User - Model Invalid | Errors: {@Errors} |", currentUser.UserName, IpAddressForLogging, fieldErrors);
+                _logger.LogWarning("Usuario: {Usuario} | IP: {IP} | Acción: Edición de Usuario - Modelo Inválido | TipoEntidad: Usuario | ID_Entidad: {ID_Entidad} | Resultado: {Resultado} | Errores: {@Errores} |",
+                    currentUser.UserName, IpAddressForLogging, model.Id, "Validación Fallida", fieldErrors);
                 return Json(ServiceResult.FailureResult("Hay errores en el formulario.", errors: fieldErrors));
             }
 
@@ -266,14 +285,15 @@ namespace VCashApp.Controllers
 
             if (result.Success)
             {
-                _logger.LogInformation("| User: {User} | IP: {Ip} | Action: User Updated Successfully | Target UserId: {UserId} |", model.UserName, IpAddressForLogging, model.Id);
-            }
+                _logger.LogInformation("Usuario: {Usuario} | IP: {IP} | Acción: Usuario Actualizado Exitosamente | TipoEntidad: Usuario | ID_Entidad: {ID_Entidad} | Resultado: {Resultado} |",
+                    currentUser.UserName, IpAddressForLogging, model.Id, "Éxito");            }
             else
-            {
-                _logger.LogError("| User: {User} | IP: {Ip} | Action: Edit User Failed | Target UserId: {UserId}, Reason: {Message} |", model.UserName, IpAddressForLogging, model.Id, result.Message);
+                {
+                _logger.LogError("Usuario: {Usuario} | IP: {IP} | Acción: Edición de Usuario Fallida | TipoEntidad: Usuario | ID_Entidad: {ID_Entidad} | Razón: {Mensaje} |",
+                    currentUser.UserName, IpAddressForLogging, model.Id, result.Message);
             }
 
-            return Json(result);
+                return Json(result);
         }
 
         /// <summary>
@@ -297,12 +317,14 @@ namespace VCashApp.Controllers
 
             if (userModel == null)
             {
-                _logger.LogWarning("| User: {User} | IP: {Ip} | Action: Access Details - User Not Found | Target UserId: {UserId} |", currentUser.UserName, IpAddressForLogging, id);
+                _logger.LogWarning("Usuario: {Usuario} | IP: {IP} | Acción: Accediendo a Detalles de Usuario - No Encontrado | TipoEntidad: Usuario | ID_Entidad: {ID_Entidad} |",
+                    currentUser.UserName, IpAddressForLogging, id);
                 TempData["ErrorMessage"] = "Usuario no encontrado.";
                 return RedirectToAction(nameof(Index));
             }
 
-            _logger.LogInformation("| User: {User} | IP: {Ip} | Action: Access Details | Target UserId: {UserId} |", currentUser.UserName, IpAddressForLogging, id);
+            _logger.LogInformation("Usuario: {Usuario} | IP: {IP} | Acción: Accediendo a Detalles de Usuario | TipoEntidad: Usuario | ID_Entidad: {ID_Entidad} | Resultado: {Resultado} |",
+                currentUser.UserName, IpAddressForLogging, id, "Acceso concedido");
             return View(userModel);
         }
 
@@ -338,7 +360,8 @@ namespace VCashApp.Controllers
 
                 if (usersToExport == null || !usersToExport.Any())
                 {
-                    _logger.LogInformation("| User: {User} | IP: {Ip} | Action: Export Users - No Data Found |", currentUser.UserName, IpAddressForLogging);
+                    _logger.LogInformation("Usuario: {Usuario} | IP: {IP} | Acción: Exportación de Usuarios - No se encontraron Datos | TipoEntidad: Usuario |",
+                        currentUser.UserName, IpAddressForLogging);
                     return NotFound("No se encontraron usuarios con los filtros especificados para exportar.");
                 }
 
@@ -361,17 +384,20 @@ namespace VCashApp.Controllers
             }
             catch (NotImplementedException ex)
             {
-                _logger.LogWarning(ex, "| User: {User} | IP: {Ip} | Action: Export Users - Format Not Implemented | Format: {ExportFormat} |", currentUser.UserName, IpAddressForLogging, exportFormat);
+                _logger.LogWarning(ex, "Usuario: {Usuario} | IP: {IP} | Acción: Exportación de Usuarios - Formato No Implementado | TipoEntidad: Usuario | Formato: {FormatoExportacion} |",
+                    currentUser?.UserName ?? "N/A", IpAddressForLogging, exportFormat);
                 return BadRequest($"El formato de exportación '{exportFormat}' no está implementado.");
             }
             catch (ArgumentException ex)
             {
-                _logger.LogWarning(ex, "| User: {User} | IP: {Ip} | Action: Export Users - Invalid Format | Format: {ExportFormat} |", currentUser.UserName, IpAddressForLogging, exportFormat);
+                _logger.LogWarning(ex, "Usuario: {Usuario} | IP: {IP} | Acción: Exportación de Usuarios - Formato Inválido | TipoEntidad: Usuario | Formato: {FormatoExportacion} |",
+                    currentUser?.UserName ?? "N/A", IpAddressForLogging, exportFormat);
                 return BadRequest(ex.Message);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "| User: {User} | IP: {Ip} | Action: Export Users - General Error |", currentUser.UserName, IpAddressForLogging);
+                _logger.LogError(ex, "Usuario: {Usuario} | IP: {IP} | Acción: Exportación de Usuarios - Error General | TipoEntidad: Usuario |",
+                    currentUser?.UserName ?? "N/A", IpAddressForLogging);
                 return StatusCode(500, "Ocurrió un error interno del servidor al exportar los datos.");
             }
         }

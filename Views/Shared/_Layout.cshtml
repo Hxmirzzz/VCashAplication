@@ -134,8 +134,23 @@
                     </a>
                     <div class="sidebar__submenu">
                         <ul>
-                            <li><a asp-controller="RutasDiarias" asp-action="ListGenerated" class="sidebar__link sub-link"><span class="nav-text">Rutas Diarias</span></a></li>
+                            <li><a asp-controller="RutasDiarias" asp-action="PlannerDashboard" class="sidebar__link sub-link"><span class="nav-text">Planeación de Rutas</span></a></li>
+                            <li><a asp-controller="RutasDiarias" asp-action="CefDashboard" class="sidebar__link sub-link"><span class="nav-text">Operación CEF</span></a></li>
+                            <li><a asp-controller="RutasDiarias" asp-action="OperationsDashboard" class="sidebar__link sub-link"><span class="nav-text">Operación Supervisión</span></a></li>
                             <li><a asp-controller="RutasDiarias" asp-action="HistorialRutas" class="sidebar__link sub-link"><span class="nav-text">Historial de Rutas</span></a></li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="sidebar__dropdown" id="centro-efectivo-dropdown">
+                    <a href="#" class="sidebar__link dropdown-btn">
+                        <i class="ri-bank-card-line"></i>
+                        <span class="nav-text">Centro de Efectivo</span>
+                        <i class="ri-arrow-down-s-line dropdown-arrow"></i>
+                    </a>
+                    <div class="sidebar__submenu">
+                        <ul>
+                            <li><a asp-controller="Cef" asp-action="Index" class="sidebar__link sub-link"><span class="nav-text">Dashboard CEF</span></a></li>
+                            <li><a asp-controller="Cef" asp-action="Checkin" class="sidebar__link sub-link"><span class="nav-text">Registro Check-in</span></a></li>
                         </ul>
                     </div>
                 </div>

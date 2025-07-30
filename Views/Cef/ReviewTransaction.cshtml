@@ -1,0 +1,236 @@
+﻿@model VCashApp.Models.ViewModels.CentroEfectivo.CefTransactionReviewViewModel
+@{
+    ViewData["Title"] = "Revisión Transacción CEF";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="main-content-container">
+    <div class="section-header">
+        <h1>Revisión de Transacción de Efectivo - Planilla: @Model.SlipNumber</h1>
+        <p>Orden de Servicio: @Model.ServiceOrderId</p>
+        <p>Estado Actual: <span class="badge bg-info">@Model.CurrentStatus.ToString().Replace("_", " ")</span></p>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <h4 class="mb-0">Resumen de la Planilla</h4>
+        </div>
+        <div class="card-body">
+            <form id="reviewForm" asp-action="ReviewTransaction" asp-controller="Cef" method="post">
+                @Html.AntiForgeryToken()
+                <input type="hidden" asp-for="Id" />
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                <div class="form-section">
+                    <h3>Detalles Generales</h3>
+                    <hr />
+                    <dl class="row">
+                        <dt class="col-sm-4">@Html.DisplayNameFor(model => model.Currency)</dt>
+                        <dd class="col-sm-8">@Model.Currency</dd>
+
+                        <dt class="col-sm-4">@Html.DisplayNameFor(model => model.TransactionType)</dt>
+                        <dd class="col-sm-8">@Model.TransactionType.ToString().Replace("_", " ")</dd>
+
+                        <dt class="col-sm-4">@Html.DisplayNameFor(model => model.TotalDeclaredValue)</dt>
+                        <dd class="col-sm-8">@Model.TotalDeclaredValue.ToString("N0")</dd>
+
+                        <dt class="col-sm-4">@Html.DisplayNameFor(model => model.TotalCountedValue)</dt>
+                        <dd class="col-sm-8">@Model.TotalCountedValue.ToString("N0")</dd>
+
+                        <dt class="col-sm-4">@Html.DisplayNameFor(model => model.ValueDifference)</dt>
+                        <dd class="col-sm-8 @(Model.ValueDifference != 0 ? "text-danger" : "")">
+                            @Model.ValueDifference.ToString("N0")
+                        </dd>
+                    </dl>
+                </div>
+
+                <div class="form-section mt-4">
+                    <h3>Resumen de Contenedores y Contenido</h3>
+                    <hr />
+                    @if (Model.ContainerSummaries != null && Model.ContainerSummaries.Any())
+                    {
+                        @foreach (var container in Model.ContainerSummaries)
+                        {
+                            <div class="card mb-3">
+                                <div class="card-header bg-light">
+                                    <strong>@container.ContainerType.ToString().Replace("_", " "): @container.ContainerType</strong>
+                                    <span class="float-end">Valor Contado: @container.CountedValue.ToString("N0") | Estado: @container.ContainerStatus.ToString().Replace("_", " ")</span>
+                                </div>
+                                <div class="card-body">
+                                    <h6>Detalles de Valores:</h6>
+                                    <ul class="list-group list-group-flush">
+                                        @foreach (var vd in container.ValueDetailSummaries)
+                                        {
+                                            <li class="list-group-item">@vd.DetailDescription - @vd.CalculatedAmount.ToString("N0") (@vd.IncidentCount Novedades)</li>
+                                        }
+                                    </ul>
+
+                                    @if (container.IncidentList != null && container.IncidentList.Any())
+                                    {
+                                        <h6 class="mt-3 text-danger">Novedades del Contenedor:</h6>
+                                        <ul class="list-group list-group-flush">
+                                            @foreach (var inc in container.IncidentList)
+                                            {
+                                                <li class="list-group-item text-danger">@inc.IncidentType.ToString().Replace("_", " "): @inc.Description (Monto: @inc.AffectedAmount.ToString("N0"))</li>
+                                            }
+                                        </ul>
+                                    }
+
+                                    @if (container.ChildContainers != null && container.ChildContainers.Any())
+                                    {
+                                        <h6 class="mt-3">Sobres dentro de esta Bolsa:</h6>
+                                        @foreach (var childContainer in container.ChildContainers)
+                                        {
+                                            <div class="card mb-2 ms-4 border-secondary">
+                                                <div class="card-header bg-light">
+                                                    <strong>@childContainer.ContainerType.ToString().Replace("_", " "): @childContainer.ContainerCode</strong>
+                                                    <span class="float-end">Valor Contado: @childContainer.CountedValue.ToString("N0")</span>
+                                                </div>
+                                                <div class="card-body">
+                                                    <h6>Detalles del Sobre:</h6>
+                                                    <ul class="list-group list-group-flush">
+                                                        @foreach (var childVd in childContainer.ValueDetailSummaries)
+                                                        {
+                                                            <li class="list-group-item">@childVd.DetailDescription - @childVd.CalculatedAmount.ToString("N0") (@childVd.IncidentCount Novedades)</li>
+                                                        }
+                                                    </ul>
+                                                    @if (childContainer.IncidentList != null && childContainer.IncidentList.Any())
+                                                    {
+                                                        <h6 class="mt-3 text-danger">Novedades del Sobre:</h6>
+                                                        <ul class="list-group list-group-flush">
+                                                            @foreach (var childInc in childContainer.IncidentList)
+                                                            {
+                                                                <li class="list-group-item text-danger">@childInc.IncidentType.ToString().Replace("_", " "): @childInc.Description (Monto: @childInc.AffectedAmount.ToString("N0"))</li>
+                                                            }
+                                                        </ul>
+                                                    }
+                                                </div>
+                                            </div>
+                                        }
+                                    }
+                                </div>
+                            </div>
+                        }
+                    }
+                    else
+                    {
+                        <p>No se han procesado contenedores para esta transacción.</p>
+                    }
+                </div>
+
+                <div class="form-section mt-4">
+                    <h3>Novedades Generales de la Planilla</h3>
+                    <hr />
+                    @if (Model.IncidentSummaries != null && Model.IncidentSummaries.Any())
+                    {
+                        <ul class="list-group">
+                            @foreach (var inc in Model.IncidentSummaries)
+                            {
+                                <li class="list-group-item text-danger">
+                                    <strong>@inc.IncidentType.ToString().Replace("_", " "):</strong> @inc.Description (Monto: @inc.AffectedAmount.ToString("N0")) - Reportado por: @inc.ReportingUserName
+                                </li>
+                            }
+                        </ul>
+                    }
+                    else
+                    {
+                        <p>No se han registrado novedades generales para esta planilla.</p>
+                    }
+                </div>
+
+                <div class="form-section mt-4">
+                    <h3>Decisión de Revisión</h3>
+                    <hr />
+                    @if (Model.CurrentStatus == VCashApp.Enums.CefTransactionStatusEnum.PendingReview)
+                    {
+                        <div class="form-group">
+                            <label asp-for="NewStatus" class="control-label"></label>
+                            <select asp-for="NewStatus" asp-items="Model.AvailableStatuses" class="form-control form-control-sm">
+                                <option value="">-- Seleccionar Estado Final --</option>
+                            </select>
+                            <span asp-validation-for="NewStatus" class="text-danger"></span>
+                        </div>
+                        <div class="form-group">
+                            <label asp-for="FinalObservations" class="control-label"></label>
+                            <textarea asp-for="FinalObservations" class="form-control form-control-sm"></textarea>
+                            <span asp-validation-for="FinalObservations" class="text-danger"></span>
+                        </div>
+                    }
+                    else
+                    {
+                        <p class="text-info">Esta transacción ya ha sido revisada y está en estado: <strong>@Model.CurrentStatus.ToString().Replace("_", " ")</strong>.</p>
+                        @if (!string.IsNullOrEmpty(Model.FinalObservations))
+                        {
+                            <div class="form-group">
+                                <label class="control-label">Observaciones del Revisor:</label>
+                                <textarea class="form-control form-control-sm" readonly>@Model.FinalObservations</textarea>
+                            </div>
+                        }
+                    }
+                </div>
+
+                <div class="submit-container form-group col-md-12 mt-4">
+                    @if (ViewBag.CanReview != null && (bool)ViewBag.CanReview && Model.CurrentStatus == VCashApp.Enums.CefTransactionStatusEnum.PendingReview)
+                    {
+                        <button type="submit" class="btn btn-primary">Procesar Revisión</button>
+                    }
+                    else
+                    {
+                        <button type="button" class="btn btn-primary" disabled>No tiene permiso para procesar revisión</button>
+                    }
+                    <a asp-action="Index" class="btn btn-danger">Volver al Dashboard</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    <script src="/js/form-control/modals.js"></script>
+    <script>
+        $(document).ready(function () {
+            $('#reviewForm').on('submit', function(e) {
+                e.preventDefault();
+
+                if (!$(this).valid()) {
+                    return;
+                }
+
+                var formData = $(this).serialize();
+
+                $.ajax({
+                    url: '@Url.Action("ReviewTransaction", "Cef")',
+                    type: 'POST',
+                    data: formData,
+                    success: function(response) {
+                        if (response.success) {
+                            alert(response.message);
+                            window.location.href = '@Url.Action("Index", "Cef")';
+                        } else {
+                            alert('Error: ' + response.message);
+                            if (response.errors) {
+                                $('.field-validation-error').text('').hide();
+                                $.each(response.errors, function(key, value) {
+                                    var fieldName = key;
+                                    var errorSpan = $('[data-valmsg-for="' + fieldName + '"]');
+                                    if (errorSpan.length === 0) {
+                                        errorSpan = $('<span>').addClass('text-danger field-validation-error').attr('data-valmsg-for', fieldName);
+                                        $('[name="' + fieldName + '"]').after(errorSpan);
+                                    }
+                                    errorSpan.text(value.join(' ')).show();
+                                });
+                            }
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        alert('Error al conectar con el servidor: ' + error);
+                        console.error(xhr.responseText);
+                    }
+                });
+            });
+        });
+    </script>
+}

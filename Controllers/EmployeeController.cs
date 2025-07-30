@@ -21,7 +21,6 @@ namespace VCashApp.Controllers
     /// Controlador para la gestión de empleados. Sigue un patrón de servicio para la lógica de negocio.
     /// Proporciona funcionalidades para listar, crear, editar y visualizar información de empleados.
     /// </summary>
-    [ApiController]
     [Authorize]
     [Route("/Employee")]
     public class EmployeeController : BaseController
@@ -33,6 +32,11 @@ namespace VCashApp.Controllers
         /// <summary>
         /// Constructor del controlador EmployeeController.
         /// </summary>
+        /// <param name="employeeService">Servicio para la lógica de negocio de empleados.</param>
+        /// <param name="exportService">Servicio para funcionalidades de exportación.</param>
+        /// <param name="context">Contexto de la base de datos de la aplicación.</param>
+        /// <param name="userManager">Administrador de usuarios para gestionar ApplicationUser.</param>
+        /// <param name="logger">Servicio de logging para el controlador.</param>
         public EmployeeController(
             IEmployeeService employeeService,
             IExportService exportService,
@@ -68,6 +72,18 @@ namespace VCashApp.Controllers
         /// <summary>
         /// Muestra una lista paginada y filtrada de empleados.
         /// </summary>
+        /// <remarks>
+        /// Esta acción sirve la página principal de listado de empleados y puede devolver una vista parcial para solicitudes AJAX.
+        /// Requiere permiso 'View' para "EMP".
+        /// </remarks>
+        /// <param name="page">Número de página actual (default 1).</param>
+        /// <param name="pageSize">Número de empleados por página (default 15).</param>
+        /// <param name="cargoId">Opcional. Código del cargo por el cual filtrar.</param>
+        /// <param name="branchId">Opcional. Código de la sucursal por la cual filtrar.</param>
+        /// <param name="employeeStatus">Opcional. Estado del empleado por el cual filtrar.</param>
+        /// <param name="search">Opcional. Término de búsqueda (cédula o nombre).</param>
+        /// <param name="gender">Opcional. Género por el cual filtrar.</param>
+        /// <returns>La vista con la tabla de empleados paginada.</returns>
         [HttpGet("Index")]
         [RequiredPermission(PermissionType.View, "EMP")]
         public async Task<IActionResult> Index(int? cargoId, int? branchId, int? employeeStatus, string? search, string? gender, int page = 1, int pageSize = 15)
@@ -100,7 +116,8 @@ namespace VCashApp.Controllers
             ViewBag.CurrentEmployeeStatus = employeeStatus;
             ViewBag.CurrentGender = gender;
 
-            _logger.LogInformation("| User: {User} | IP: {Ip} | Action: Accessing Employee List | Count: {Count} | Result: Access Granted |", currentUser.UserName, IpAddressForLogging, data.Count());
+            _logger.LogInformation("Usuario: {Usuario} | IP: {IP} | Acción: Accediendo a la lista de Empleados | Conteo: {Conteo} | Resultado: {Resultado} |",
+                currentUser.UserName, IpAddressForLogging, data.Count(), "Acceso concedido");
 
             if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
             {
@@ -113,6 +130,10 @@ namespace VCashApp.Controllers
         /// <summary>
         /// Muestra el formulario para crear un nuevo empleado.
         /// </summary>
+        /// <remarks>
+        /// Requiere permiso 'Create' para "EMP".
+        /// </remarks>
+        /// <returns>La vista para el formulario de creación de empleado.</returns>
         [HttpGet("Create")]
         [RequiredPermission(PermissionType.Create, "EMP")]
         public async Task<IActionResult> Create()
@@ -137,16 +158,21 @@ namespace VCashApp.Controllers
                 EmployeeStatus = (int)EstadoEmpleado.Activo
             };
 
-            _logger.LogInformation("| User: {User} | IP: {Ip} | Action: Accessing Create Employee Form | Result: Access Granted |", currentUser.UserName, IpAddressForLogging);
+            _logger.LogInformation("Usuario: {Usuario} | IP: {IP} | Acción: Accediendo al formulario de Creación de Empleado | Resultado: {Resultado} |",
+                currentUser.UserName, IpAddressForLogging, "Acceso concedido");
 
-            return View(model); // Retorna el ViewModel con las listas
+            return View(model);
         }
 
         /// <summary>
         /// Procesa la creación de un nuevo empleado.
         /// </summary>
-        // En EmployeeController.cs
-
+        /// <remarks>
+        /// Este endpoint es llamado vía AJAX. Realiza validaciones del modelo y la lógica de creación.
+        /// Requiere permiso 'Create' para "EMP".
+        /// </remarks>
+        /// <param name="model">El EmpleadoViewModel con los datos del nuevo empleado.</param>
+        /// <returns>Un JSON ServiceResult indicando éxito, fracaso o errores de validación.</returns>
         [HttpPost("Create")]
         [ValidateAntiForgeryToken]
         [RequiredPermission(PermissionType.Create, "EMP")]
@@ -154,6 +180,8 @@ namespace VCashApp.Controllers
         {
             var currentUser = await GetCurrentApplicationUserAsync();
             if (currentUser == null) return Unauthorized();
+
+            await SetCommonViewBagsEmployeeAsync(currentUser, "Procesando Creación de Empleado");
 
             if (!ModelState.IsValid)
             {
@@ -163,17 +191,35 @@ namespace VCashApp.Controllers
                         kvp => kvp.Key,
                         kvp => kvp.Value.Errors.Select(e => e.ErrorMessage).ToArray()
                     );
-                _logger.LogWarning("| User: {User} | IP: {Ip} | Action: Create Employee - Model Invalid | Errors: {@Errors} |", currentUser.UserName, IpAddressForLogging, fieldErrors);
+                _logger.LogWarning("Usuario: {Usuario} | IP: {IP} | Acción: Creación de Empleado - Modelo Inválido | TipoEntidad: Empleado | Resultado: {Resultado} | Errores: {@Errores} |",
+                    currentUser.UserName, IpAddressForLogging, "Validación Fallida", fieldErrors);
                 return Json(ServiceResult.FailureResult("Hay errores en el formulario.", errors: fieldErrors));
             }
 
             var result = await _employeeService.CreateEmployeeAsync(model, currentUser.Id);
-            return Json(result);
+
+            if (result.Success)
+            {
+                _logger.LogInformation("Usuario: {Usuario} | IP: {IP} | Acción: Empleado Creado Exitosamente | TipoEntidad: Empleado | ID_Entidad: {ID_Entidad} | Resultado: {Resultado} |",
+                    currentUser.UserName, IpAddressForLogging, model.CodCedula, "Éxito");
+            }
+            else
+                {
+                _logger.LogError("Usuario: {Usuario} | IP: {IP} | Acción: Creación de Empleado Fallida | TipoEntidad: Empleado | ID_Entidad: {ID_Entidad} | Razón: {Mensaje} |",
+                    currentUser.UserName, IpAddressForLogging, model.CodCedula, result.Message);
+            }
+
+                return Json(result);
         }
 
         /// <summary>
         /// Muestra el formulario para editar un empleado existente.
         /// </summary>
+        /// <remarks>
+        /// Requiere permiso 'Edit' para "EMP".
+        /// </remarks>
+        /// <param name="id">El ID del empleado a editar.</param>
+        /// <returns>La vista para el formulario de edición de empleado.</returns>
         [HttpGet("Edit/{id}")]
         [RequiredPermission(PermissionType.Edit, "EMP")]
         public async Task<IActionResult> Edit(int id)
@@ -188,7 +234,8 @@ namespace VCashApp.Controllers
 
             if (employeeModel == null)
             {
-                _logger.LogWarning("| User: {User} | IP: {Ip} | Action: Access Edit Employee Form - Not Found or Forbidden | EmployeeId: {EmployeeId} |", currentUser.UserName, IpAddressForLogging, id);
+                _logger.LogWarning("Usuario: {Usuario} | IP: {IP} | Acción: Accediendo a formulario de Edición - No encontrado o Prohibido | TipoEntidad: Empleado | ID_Entidad: {ID_Entidad} |",
+                    currentUser.UserName, IpAddressForLogging, id);
                 TempData["ErrorMessage"] = "Empleado no encontrado o no tiene permiso para verlo.";
                 return RedirectToAction(nameof(Index));
             }
@@ -198,13 +245,21 @@ namespace VCashApp.Controllers
             employeeModel.Sucursales = sucursales;
             employeeModel.Ciudades = ciudades;
 
-            _logger.LogInformation("| User: {User} | IP: {Ip} | Action: Accessing Edit Employee Form | EmployeeId: {EmployeeId} | Result: Access Granted |", currentUser.UserName, IpAddressForLogging, id);
+            _logger.LogInformation("Usuario: {Usuario} | IP: {IP} | Acción: Accediendo a formulario de Edición | TipoEntidad: Empleado | ID_Entidad: {ID_Entidad} | Resultado: {Resultado} |",
+                currentUser.UserName, IpAddressForLogging, id, "Acceso concedido");
             return View(employeeModel);
         }
 
         /// <summary>
         /// Procesa la actualización de un empleado existente.
         /// </summary>
+        /// <remarks>
+        /// Este endpoint es llamado vía AJAX. Realiza validaciones del modelo y la lógica de actualización.
+        /// Requiere permiso 'Edit' para "EMP".
+        /// </remarks>
+        /// <param name="id">El ID del empleado (desde la URL, para verificación).</param>
+        /// <param name="model">El EmpleadoViewModel con los datos actualizados del empleado.</param>
+        /// <returns>Un JSON ServiceResult indicando éxito, fracaso o errores de validación.</returns>
         [HttpPost("Edit/{id}")]
         [ValidateAntiForgeryToken]
         [RequiredPermission(PermissionType.Edit, "EMP")]
@@ -217,6 +272,8 @@ namespace VCashApp.Controllers
 
             if (id != model.CodCedula)
             {
+                _logger.LogWarning("Usuario: {Usuario} | IP: {IP} | Acción: Edición de Empleado - IDs No Coinciden | TipoEntidad: Empleado | ID_URL: {ID_URL}, ID_Modelo: {ID_Modelo} |",
+                    currentUser.UserName, IpAddressForLogging, id, model.CodCedula);
                 return BadRequest(ServiceResult.FailureResult("El ID del empleado en la URL no coincide con el ID del formulario."));
             }
 
@@ -228,7 +285,8 @@ namespace VCashApp.Controllers
                         kvp => kvp.Key,
                         kvp => kvp.Value.Errors.Select(e => e.ErrorMessage).ToArray()
                     );
-                _logger.LogWarning("| User: {User} | IP: {Ip} | Action: Edit Employee - Model Invalid | Errors: {@Errors} |", currentUser.UserName, IpAddressForLogging, fieldErrors);
+                _logger.LogWarning("Usuario: {Usuario} | IP: {IP} | Acción: Edición de Empleado - Modelo Inválido | TipoEntidad: Empleado | ID_Entidad: {ID_Entidad} | Resultado: {Resultado} | Errores: {@Errores} |",
+                    currentUser.UserName, IpAddressForLogging, model.CodCedula, "Validación Fallida", fieldErrors);
                 return Json(ServiceResult.FailureResult("Hay errores en el formulario.", errors: fieldErrors));
             }
 
@@ -236,14 +294,16 @@ namespace VCashApp.Controllers
 
             if (result.Success)
             {
-                _logger.LogInformation("| User: {User} | IP: {Ip} | Action: Employee Updated | EmployeeId: {EmployeeId} | Result: Success |", currentUser.UserName, IpAddressForLogging, model.CodCedula);
+                _logger.LogInformation("Usuario: {Usuario} | IP: {IP} | Acción: Empleado Actualizado Exitosamente | TipoEntidad: Empleado | ID_Entidad: {ID_Entidad} | Resultado: {Resultado} |",
+                    currentUser.UserName, IpAddressForLogging, model.CodCedula, "Éxito");
             }
             else
-            {
-                _logger.LogError("| User: {User} | IP: {Ip} | Action: Employee Update Failed | EmployeeId: {EmployeeId} | Result: {Message} |", currentUser.UserName, IpAddressForLogging, model.CodCedula, result.Message);
+                {
+                _logger.LogError("Usuario: {Usuario} | IP: {IP} | Acción: Edición de Empleado Fallida | TipoEntidad: Empleado | ID_Entidad: {ID_Entidad} | Razón: {Mensaje} |",
+                    currentUser.UserName, IpAddressForLogging, model.CodCedula, result.Message);
             }
 
-            return Json(result);
+                return Json(result);
         }
 
         /// <summary>
@@ -253,8 +313,8 @@ namespace VCashApp.Controllers
         /// <param name="statusChangeRequest">Un DTO que contiene el nuevo estado y la razón.</param>
         /// <returns>Un JSON ServiceResult.</returns>
         [HttpPost("ChangeStatus/{id}")]
-        [ValidateAntiForgeryToken] // Aunque se envía por JS, es buena práctica mantenerlo para seguridad
-        [RequiredPermission(PermissionType.Edit, "EMP")] // Asumo que el permiso para editar también aplica para cambiar estado
+        [ValidateAntiForgeryToken]
+        [RequiredPermission(PermissionType.Edit, "EMP")]
         public async Task<IActionResult> ChangeStatus(int id, [FromBody] StatusChangeRequestDTO statusChangeRequest)
         {
             var currentUser = await GetCurrentApplicationUserAsync();
@@ -276,19 +336,26 @@ namespace VCashApp.Controllers
 
             if (result.Success)
             {
-                _logger.LogInformation("| User: {User} | IP: {Ip} | Action: Employee Status Changed | EmployeeId: {EmployeeId} | Result: Success |", currentUser.UserName, IpAddressForLogging, id);
+                _logger.LogInformation("Usuario: {Usuario} | IP: {IP} | Acción: Estado de Empleado Cambiado | TipoEntidad: Empleado | ID_Entidad: {ID_Entidad} | Resultado: {Resultado} |",
+                    currentUser.UserName, IpAddressForLogging, id, "Éxito");
             }
             else
             {
-                _logger.LogError("| User: {User} | IP: {Ip} | Action: Employee Status Change Failed | EmployeeId: {EmployeeId} | Reason: {Message} |", currentUser.UserName, IpAddressForLogging, id, result.Message);
+                _logger.LogError("Usuario: {Usuario} | IP: {IP} | Acción: Cambio de Estado de Empleado Fallido | TipoEntidad: Empleado | ID_Entidad: {ID_Entidad} | Razón: {Mensaje} |",
+                    currentUser.UserName, IpAddressForLogging, id, result.Message);
             }
 
-            return Json(result);
+                return Json(result);
         }
 
         ///<summary>
         ///Muestra un formulario para ver los detalles de un empleado.
         ///</summary>
+        /// <remarks>
+        /// Requiere permiso 'View' para "EMP".
+        /// </remarks>
+        /// <param name="id">El ID del empleado a visualizar.</param>
+        /// <returns>La vista con los detalles del empleado.</returns>
         [HttpGet("Detail/{id}")]
         [RequiredPermission(PermissionType.View, "EMP")]
         public async Task<IActionResult> Detail(int id)
@@ -303,7 +370,8 @@ namespace VCashApp.Controllers
 
             if (employeeModel == null)
             {
-                _logger.LogWarning("| User: {User} | IP: {Ip} | Action: Access Employee Details - Not Found or Forbidden | EmployeeId: {EmployeeId} |", currentUser.UserName, IpAddressForLogging, id);
+                _logger.LogWarning("Usuario: {Usuario} | IP: {IP} | Acción: Acceso a Detalles de Empleado - No encontrado o Prohibido | TipoEntidad: Empleado | ID_Entidad: {ID_Entidad} |",
+                    currentUser.UserName, IpAddressForLogging, id);
                 TempData["ErrorMessage"] = "Empleado no encontrado o no tiene permiso para verlo.";
                 return RedirectToAction(nameof(Index));
             }
@@ -313,7 +381,8 @@ namespace VCashApp.Controllers
             employeeModel.Sucursales = sucursales;
             employeeModel.Ciudades = ciudades;
 
-            _logger.LogInformation("| User: {User} | IP: {Ip} | Action: Accessing Employee Details | EmployeeId: {EmployeeId} | Result: Access Granted |", currentUser.UserName, IpAddressForLogging, id);
+            _logger.LogInformation("Usuario: {Usuario} | IP: {IP} | Acción: Accediendo a Detalles de Empleado | TipoEntidad: Empleado | ID_Entidad: {ID_Entidad} | Resultado: {Resultado} |",
+                currentUser.UserName, IpAddressForLogging, id, "Acceso concedido");
             return View(employeeModel);
         }
 
@@ -382,7 +451,8 @@ namespace VCashApp.Controllers
 
                 if (employeesToExport == null || !employeesToExport.Any())
                 {
-                    _logger.LogInformation("| User: {User} | IP: {Ip} | Action: Export Employees - No Data Found |", currentUser.UserName, IpAddressForLogging);
+                    _logger.LogInformation("Usuario: {Usuario} | IP: {IP} | Acción: Exportación de Empleados - No se encontraron Datos | TipoEntidad: Empleado |",
+                        currentUser.UserName, IpAddressForLogging);
                     return NotFound("No se encontraron empleados con los filtros especificados para exportar.");
                 }
 
@@ -425,17 +495,20 @@ namespace VCashApp.Controllers
             }
             catch (NotImplementedException ex)
             {
-                _logger.LogWarning(ex, "| User: {User} | IP: {Ip} | Action: Export Employees - Format Not Implemented | Format: {ExportFormat} |", currentUser.UserName, IpAddressForLogging, exportFormat);
+                _logger.LogWarning(ex, "Usuario: {Usuario} | IP: {IP} | Acción: Exportación de Empleados - Formato No Implementado | TipoEntidad: Empleado | Formato: {FormatoExportacion} |",
+                    currentUser?.UserName ?? "N/A", IpAddressForLogging, exportFormat);
                 return BadRequest($"El formato de exportación '{exportFormat}' no está implementado.");
             }
             catch (ArgumentException ex)
             {
-                _logger.LogWarning(ex, "| User: {User} | IP: {Ip} | Action: Export Employees - Invalid Format | Format: {ExportFormat} |", currentUser.UserName, IpAddressForLogging, exportFormat);
+                _logger.LogWarning(ex, "Usuario: {Usuario} | IP: {IP} | Acción: Exportación de Empleados - Formato Inválido | TipoEntidad: Empleado | Formato: {FormatoExportacion} |",
+                    currentUser?.UserName ?? "N/A", IpAddressForLogging, exportFormat);
                 return BadRequest(ex.Message);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "| User: {User} | IP: {Ip} | Action: Export Employees - General Error |", currentUser.UserName, IpAddressForLogging);
+                _logger.LogError(ex, "Usuario: {Usuario} | IP: {IP} | Acción: Exportación de Empleados - Error General | TipoEntidad: Empleado |",
+                    currentUser?.UserName ?? "N/A", IpAddressForLogging);
                 return StatusCode(500, "Ocurrió un error interno del servidor al exportar los datos.");
             }
         }

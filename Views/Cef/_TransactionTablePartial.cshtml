@@ -1,0 +1,100 @@
+﻿@model IEnumerable<VCashApp.Models.ViewModels.CentroEfectivo.CefTransactionSummaryViewModel>
+@{
+    bool canEdit = ViewBag.CanEdit ?? false; 
+}
+
+<div class="table-section">
+    <div class="table-container">
+        <div class="table-wrapper">
+            <table class="table" id="dataTable">
+                <thead>
+                    <tr>
+                        <th>Orden Servicio</th>
+                        <th>Planilla</th>
+                        <th>Divisa</th>
+                        <th>Tipo Transacción</th>
+                        <th>Valor Declarado</th>
+                        <th>Valor Contado</th>
+                        <th>Diferencia</th>
+                        <th class="status-column-header">Estado</th>
+                        <th>Fecha Registro</th>
+                        <th><i class="ri-list-settings-fill"></i></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model != null && Model.Any())
+                    {
+                        @foreach (var transaction in Model)
+                        {
+                            <tr>
+                                <td>@transaction.ServiceOrderId</td>
+                                <td>@transaction.SlipNumber</td>
+                                <td>@transaction.Currency</td>
+                                <td>@transaction.TransactionType.Replace("_", " ")</td>
+                                <td>@transaction.TotalDeclaredValue.ToString("N0")</td>
+                                <td>@transaction.TotalCountedValue.ToString("N0")</td> 
+                                <td class="@(transaction.ValueDifference != 0 ? "text-danger" : "")">@transaction.ValueDifference.ToString("N0")</td>
+                                <td class="status-column">
+                                    @{
+                                        string statusText = transaction.TransactionStatus.Replace("_", " ");
+                                        string badgeClass = "badge"; 
+                                        switch (transaction.TransactionStatus)
+                                        {
+                                            case nameof(VCashApp.Enums.CefTransactionStatusEnum.Checkin): badgeClass += " bg-primary"; break;
+                                            case nameof(VCashApp.Enums.CefTransactionStatusEnum.EnqueuedForCounting): badgeClass += " bg-secondary"; break;
+                                            case nameof(VCashApp.Enums.CefTransactionStatusEnum.BillCounting):
+                                            case nameof(VCashApp.Enums.CefTransactionStatusEnum.CoinCounting):
+                                            case nameof(VCashApp.Enums.CefTransactionStatusEnum.CheckCounting):
+                                            case nameof(VCashApp.Enums.CefTransactionStatusEnum.DocumentCounting): badgeClass += " bg-info"; break;
+                                            case nameof(VCashApp.Enums.CefTransactionStatusEnum.PendingReview): badgeClass += " bg-warning text-dark"; break;
+                                            case nameof(VCashApp.Enums.CefTransactionStatusEnum.Approved): badgeClass += " bg-success"; break;
+                                            case nameof(VCashApp.Enums.CefTransactionStatusEnum.Rejected): badgeClass += " bg-danger"; break;
+                                            case nameof(VCashApp.Enums.CefTransactionStatusEnum.Cancelled): badgeClass += " bg-dark"; break;
+                                            default: badgeClass += " bg-secondary"; break;
+                                        }
+                                    }
+                                    <span class="badge @badgeClass">@statusText</span>
+                                </td>
+                                <td>@transaction.RegistrationDate.ToShortDateString() @transaction.RegistrationDate.ToShortTimeString()</td>
+                                <td>
+                                    <div class="action-buttons d-flex align-items-center justify-content-center">
+                                        <a href="@Url.Action("Detail", "Cef", new { transactionId = transaction.Id })" class="btn-detail" title="Ver Detalles">
+                                            <i class="ri-eye-fill"></i>
+                                        </a>
+
+                                        @if (canEdit)
+                                        {
+                                            @if (transaction.TransactionStatus == nameof(VCashApp.Enums.CefTransactionStatusEnum.Checkin) || 
+                                                 transaction.TransactionStatus == nameof(VCashApp.Enums.CefTransactionStatusEnum.EnqueuedForCounting) ||
+                                                 transaction.TransactionStatus == nameof(VCashApp.Enums.CefTransactionStatusEnum.BillCounting) ||
+                                                 transaction.TransactionStatus == nameof(VCashApp.Enums.CefTransactionStatusEnum.CoinCounting) ||
+                                                 transaction.TransactionStatus == nameof(VCashApp.Enums.CefTransactionStatusEnum.CheckCounting) ||
+                                                 transaction.TransactionStatus == nameof(VCashApp.Enums.CefTransactionStatusEnum.DocumentCounting))
+                                            {
+                                                <a asp-action="ProcessContainers" asp-route-transactionId="@transaction.Id" class="btn-edit ml-1" title="Procesar Contenedores">
+                                                    <i class="ri-pencil-fill"></i>
+                                                </a>
+                                            }
+                                            @if (transaction.TransactionStatus == nameof(VCashApp.Enums.CefTransactionStatusEnum.PendingReview))
+                                            {
+                                                <a asp-action="ReviewTransaction" asp-route-transactionId="@transaction.Id" class="btn-edit ml-1" title="Revisar Transacción">
+                                                    <i class="ri-check-double-line"></i>
+                                                </a>
+                                            }
+                                        }
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="10" class="text-center">No se encontraron transacciones de Centro de Efectivo.</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

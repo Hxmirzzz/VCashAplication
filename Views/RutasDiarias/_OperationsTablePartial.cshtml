@@ -4,7 +4,9 @@
 @using Microsoft.AspNetCore.Mvc.Rendering
 
 @{
-    bool canEditPlaneador = ViewBag.canEditPlaneador ?? false;
+    bool canDescargarEfectivoCef = ViewBag.canDescargarEfectivoCef ?? false;
+    bool canRegistrarSalidaSupervisor = ViewBag.canRegistrarSalidaSupervisor ?? false;
+    bool canRegistrarEntradaSupervisor = ViewBag.canRegistrarEntradaSupervisor ?? false;
 
     int currentPage = ViewBag.CurrentPage ?? 1;
     int totalPages = ViewBag.TotalPages ?? 1;
@@ -75,13 +77,27 @@
                                 <td>@((EstadoRuta)item.Estado)</td>
                                 <td>
                                     <div class="action-buttons d-flex align-items-center justify-content-center">
-                                        @if (item.Estado == (int)EstadoRuta.GENERADO && canEditPlaneador)
+                                        @if (item.Estado == (int)EstadoRuta.CARGUE_REGISTRADO && canRegistrarSalidaSupervisor && !item.FechaSalidaRuta.HasValue)
                                         {
-                                            <a href="@Url.Action("Edit", "RutasDiarias", new { id = item.Id })" class="btn-edit">
-                                                <i class="ri-pencil-fill"></i>
+                                            <a href="@Url.Action("RegistrarSalida", "RutasDiarias", new { id = item.Id })" class="btn-register-departure">
+                                                <img src="~/assets/icon-img/rout_exit.png" />
                                             </a>
                                         }
-                                        <a href="@Url.Action("Detail", "RutasDiarias", new { id = item.Id })" class="btn-detail">
+
+                                        @if (item.Estado == (int)EstadoRuta.SALIDA_REGISTRADA && item.FechaSalidaRuta.HasValue && canDescargarEfectivoCef && !item.FechaDescargue.HasValue)
+                                        {
+                                            <a href="@Url.Action("DescargarEfectivo", "RutasDiarias", new { id = item.Id })" class="btn-unload-cash">
+                                                <img src="~/assets/icon-img/unloading.png" />
+                                            </a>
+                                        }
+
+                                        @if (item.Estado == (int)EstadoRuta.DESCARGUE_REGISTRADO && item.FechaDescargue.HasValue && canRegistrarEntradaSupervisor && item.FechaSalidaRuta.HasValue)
+                                        {
+                                            <a href="@Url.Action("RegistrarEntrada", "RutasDiarias", new { id = item.Id })" class="btn-register-arrival">
+                                                <img src="~/assets/icon-img/rout_entry.png" />
+                                            </a>
+                                        }
+                                        <a href="@Url.Action("DetailRUD", "RutasDiarias", new { id = item.Id })" class="btn-detail">
                                             <i class="ri-eye-fill"></i>
                                         </a>
                                     </div>

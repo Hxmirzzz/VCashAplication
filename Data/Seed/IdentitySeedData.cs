@@ -269,7 +269,6 @@ namespace VCashApp.Data.Seed
                     {
                         string nombreVistaDisplay = vistaName switch
                         {
-                            "RUD" => "Rutas Diarias Operativas",
                             "RUDHIS" => "Historial de Rutas Diarias",
                             "REG" => "Registro de Empleados",
                             "REGHIS" => "Historial de Registro de Empleados",
@@ -307,43 +306,6 @@ namespace VCashApp.Data.Seed
                     { "TalentoHumano", talentoHumanoRoleId },
                     { "ADTI01", tiRoleId }
                 };
-
-                // Permisos para RUD
-                var rudPermissions = new List<(string RoleName, bool CanView, bool CanCreate, bool CanEdit)>
-                {
-                    ( "Admin", true, true, true ),
-                    ( "Planeador", true, true, true ),
-                    ( "CEF", true, true, true ),
-                    ( "Supervisor", true, false, true )
-                };
-
-                foreach (var perm in rudPermissions)
-                {
-                    if (rolesConIds.TryGetValue(perm.RoleName, out string? roleId) && roleId != null)
-                    {
-                        var permiso = await context.PermisosPerfil.FirstOrDefaultAsync(p => p.CodPerfilId == roleId && p.CodVista == "RUD");
-                        if (permiso == null)
-                        {
-                            context.PermisosPerfil.Add(new PermisoPerfil
-                            {
-                                CodPerfilId = roleId,
-                                CodVista = "RUD",
-                                PuedeVer = perm.CanView,
-                                PuedeCrear = perm.CanCreate,
-                                PuedeEditar = perm.CanEdit
-                            });
-                            Log.Information("[SeedData] Permisos RUD asignados al rol {RoleName}.", perm.RoleName);
-                        }
-                        else
-                        {
-                            permiso.PuedeVer = perm.CanView;
-                            permiso.PuedeCrear = perm.CanCreate;
-                            permiso.PuedeEditar = perm.CanEdit;
-                            context.PermisosPerfil.Update(permiso);
-                            Log.Information("[SeedData] Permisos RUD actualizados para rol {RoleName}.", perm.RoleName);
-                        }
-                    }
-                }
 
                 // Permisos para RUDHIS (Historial de Rutas Diarias)
                 var rudhisPermissions = new List<(string RoleName, bool CanView, bool CanCreate, bool CanEdit)>

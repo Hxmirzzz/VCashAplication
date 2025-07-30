@@ -53,20 +53,22 @@ namespace VCashApp.Controllers
             bool isAdminFromBase = (bool)ViewBag.IsAdmin;
             string? currentCodPerfilFromBase = ViewBag.CurrentCodPerfil as string;
 
-
             var userRoles = await _userManager.GetRolesAsync(currentUser);
-            bool hasRUDView = await HasPermisionForView(userRoles, "RUD", PermissionType.View);
-            bool hasRUDCreate = await HasPermisionForView(userRoles, "RUD", PermissionType.Create);
-            bool hasRUDEdit = await HasPermisionForView(userRoles, "RUD", PermissionType.Edit);
-            bool userIsPlaneador = userRoles.Contains("Planeador");
+            bool hasRUDPLView = await HasPermisionForView(userRoles, "RUDPL", PermissionType.View);
+            bool hasRUDOPView = await HasPermisionForView(userRoles, "RUDOP", PermissionType.View);
+            bool hasRUDCEView = await HasPermisionForView(userRoles, "RUDCE", PermissionType.View);
+            bool hasRUDHISView = await HasPermisionForView(userRoles, "RUDHIS", PermissionType.View);
+            bool hasRUDCreate = await HasPermisionForView(userRoles, "RUDPL", PermissionType.Create);
+            bool hasRUDEdit = await HasPermisionForView(userRoles, "RUDPL", PermissionType.Edit);
+            bool hasRUDOPEdit = await HasPermisionForView(userRoles, "RUDOP", PermissionType.Edit);
+            bool hasRUDCEEdit = await HasPermisionForView(userRoles, "RUDCE", PermissionType.Edit);
 
-            ViewBag.canCreate = (bool)ViewBag.IsAdmin || (userRoles.Contains("Planeador") && hasRUDCreate);
-            ViewBag.canEditPlaneador = (bool)ViewBag.IsAdmin || (userRoles.Contains("Planeador") && hasRUDEdit);
-
-            ViewBag.canCargarEfectivoCef = (bool)ViewBag.IsAdmin || (userRoles.Contains("CEF") && hasRUDEdit); 
-            ViewBag.canDescargarEfectivoCef = (bool)ViewBag.IsAdmin || (userRoles.Contains("CEF") && hasRUDEdit);
-            ViewBag.canRegistrarSalidaSupervisor = (bool)ViewBag.IsAdmin || (userRoles.Contains("Supervisor") && hasRUDEdit);
-            ViewBag.canRegistrarEntradaSupervisor = (bool)ViewBag.IsAdmin || (userRoles.Contains("Supervisor") && hasRUDEdit);
+            ViewBag.canCreate = (bool)ViewBag.IsAdmin || (hasRUDCreate);
+            ViewBag.canEditPlaneador = (bool)ViewBag.IsAdmin || (hasRUDEdit);
+            ViewBag.canCargarEfectivoCef = (bool)ViewBag.IsAdmin || (hasRUDCEEdit); 
+            ViewBag.canDescargarEfectivoCef = (bool)ViewBag.IsAdmin || (hasRUDCEEdit);
+            ViewBag.canRegistrarSalidaSupervisor = (bool)ViewBag.IsAdmin || (hasRUDOPEdit);
+            ViewBag.canRegistrarEntradaSupervisor = (bool)ViewBag.IsAdmin || (hasRUDOPEdit);
         }
 
         // Método para limpiar ModelState (reutilizado del proyecto anterior)
@@ -145,7 +147,7 @@ namespace VCashApp.Controllers
         /// <param name="pageSize">Número de elementos por página.</param>
         /// <returns>La vista de las rutas, con datos paginados.</returns>
         [HttpGet("PlannerDashboard")]
-        [RequiredPermission(PermissionType.View, "RUD")]
+        [RequiredPermission(PermissionType.View, "RUDPL")]
         public async Task<IActionResult> PlannerDashboard(int? page, int pageSize = 15, string search = "", DateOnly? fechaEjecucion = null, int? codSuc = null, int? estado = null)
         {
             var ipAddress = HttpContext.Connection.RemoteIpAddress?.MapToIPv4().ToString() ?? "Desconocida";
@@ -223,7 +225,7 @@ namespace VCashApp.Controllers
 
                 ViewBag.DefaultFechaEjecucionBasedOnRole = defaultFechaEjecucionForPlanner.ToString("yyyy-MM-dd");
 
-                IQueryable<TdvRutaDiaria> query = _context.TdvRutasDiarias.AsQueryable();
+                IQueryable<TdvRutaDiaria> query = _context.TdvRutasDiarias.Include(rd => rd.RutaMaster).AsQueryable();
 
                 if (!isAdmin && permittedSucursalIds.Any())
                 {
@@ -293,10 +295,6 @@ namespace VCashApp.Controllers
 
                 ViewBag.canCreate = (bool)ViewBag.IsAdmin || ((bool)ViewBag.canCreate);
                 ViewBag.canEditPlaneador = (bool)ViewBag.IsAdmin || ((bool)ViewBag.canEditPlaneador);
-                ViewBag.canCargarEfectivoCef = (bool)ViewBag.IsAdmin || ((bool)ViewBag.canCargarEfectivoCef);
-                ViewBag.canDescargarEfectivoCef = (bool)ViewBag.IsAdmin || ((bool)ViewBag.canDescargarEfectivoCef);
-                ViewBag.canRegistrarSalidaSupervisor = (bool)ViewBag.IsAdmin || ((bool)ViewBag.canRegistrarSalidaSupervisor);
-                ViewBag.canRegistrarEntradaSupervisor = (bool)ViewBag.IsAdmin || ((bool)ViewBag.canRegistrarEntradaSupervisor);
 
                 Log.Information("| Usuario: {User} | Ip: {Ip} | Acción: Acceso a Planner Dashboard | Cantidad de rutas: {Count} | Respuesta: Acceso permitido | ", currentUser.UserName, ipAddress, data.Count);
 
@@ -306,7 +304,181 @@ namespace VCashApp.Controllers
         }
 
         /// <summary>
-        /// Muestra el registros de rutas del dia actual para el CEF y SupervisorRutas, con opciones de filtrado y paginación. 
+        /// Muestra el registros de rutas del dia actual para el CEF, con opciones de filtrado y paginación. 
+        /// </summary>
+        /// <param name="fechaEjecucion">Filtro por una fecha seleccionada (valor por defecto dia actual).</param>
+        /// <param name="codSuc">Filtro por ID de sucursal.</param>
+        /// <param name="estado">Estado de la ruta generada.</param>
+        /// <param name="search">Término de búsqueda por nombre de la ruta.</param>
+        /// <param name="page">Número de página actual.</param>
+        /// <param name="pageSize">Número de elementos por página.</param>
+        /// <returns>La vista de las rutas, con datos paginados.</returns>
+        [HttpGet("CefDashboard")]
+        [RequiredPermission(PermissionType.View, "RUDCE")]
+        public async Task<IActionResult> CefDashboard(int? page, int pageSize = 15, string search = "", DateOnly? fechaEjecucion = null, int? codSuc = null, int? estado = null)
+        {
+            var ipAddress = HttpContext.Connection.RemoteIpAddress?.MapToIPv4().ToString() ?? "Desconocida";
+            using (LogContext.PushProperty("IpAddress", ipAddress))
+            {
+                var currentUser = await GetCurrentApplicationUserAsync();
+                if (currentUser == null) return RedirectToAction("Login", "Account", new { Area = "Identity" });
+
+                await SetCommonViewBagsAsync(currentUser, "Operations");
+                var isAdmin = (bool)ViewBag.IsAdmin;
+
+                DateOnly defaultFechaEjecucionForOperations = DateOnly.FromDateTime(DateTime.Today);
+                DateOnly filterFechaEjecucion = fechaEjecucion ?? defaultFechaEjecucionForOperations;
+
+                List<int> permittedSucursalIds = new List<int>();
+                if (!isAdmin)
+                {
+                    permittedSucursalIds = await GetUserPermittedSucursalesAsync(currentUser.Id);
+                    if (!permittedSucursalIds.Any())
+                    {
+                        TempData["ErrorMessage"] = "No tiene sucursales asignadas para ver rutas.";
+                        return RedirectToAction("Index", "Home");
+                    }
+                }
+
+                IQueryable<AdmSucursal> sucursalesQuery = _context.AdmSucursales.Where(s => s.Estado == true);
+
+                if (!isAdmin && permittedSucursalIds.Any())
+                {
+                    Expression<Func<AdmSucursal, bool>> combinedPredicateSucursal = null;
+
+                    foreach (var sucursalId in permittedSucursalIds)
+                    {
+                        Expression<Func<AdmSucursal, bool>> currentPredicate = s => s.CodSucursal == sucursalId;
+
+                        if (combinedPredicateSucursal == null)
+                        {
+                            combinedPredicateSucursal = currentPredicate;
+                        }
+                        else
+                        {
+                            var parameter = Expression.Parameter(typeof(AdmSucursal), "s");
+                            var body = Expression.OrElse(
+                                Expression.Invoke(combinedPredicateSucursal, parameter),
+                                Expression.Invoke(currentPredicate, parameter)
+                            );
+                            combinedPredicateSucursal = Expression.Lambda<Func<AdmSucursal, bool>>(body, parameter);
+                        }
+                    }
+                    if (combinedPredicateSucursal != null)
+                    {
+                        sucursalesQuery = sucursalesQuery.Where(combinedPredicateSucursal);
+                    }
+                }
+                else if (!isAdmin && !permittedSucursalIds.Any())
+                {
+                    sucursalesQuery = sucursalesQuery.Where(s => false);
+                }
+
+                var sucursalesForFilter = await sucursalesQuery.ToListAsync();
+
+                ViewBag.SucursalesFilter = new SelectList(sucursalesForFilter, "CodSucursal", "NombreSucursal", codSuc);
+                ViewBag.FechaEjecucionFilter = filterFechaEjecucion;
+                ViewBag.EstadoFilter = estado;
+
+                var estadosSelectItems = Enum.GetValues(typeof(EstadoRuta))
+                    .Cast<EstadoRuta>()
+                    .Select(e => new SelectListItem
+                    {
+                        Value = ((int)e).ToString(),
+                        Text = e.ToString().Replace("_", " ")
+                    }).ToList();
+                estadosSelectItems.Insert(0, new SelectListItem { Value = "", Text = "-- Selecciona --" });
+                ViewBag.EstadosFilterList = new SelectList(estadosSelectItems, "Value", "Text", estado);
+                ViewBag.DefaultFechaEjecucionBasedOnRole = defaultFechaEjecucionForOperations.ToString("yyyy-MM-dd");
+
+                IQueryable<TdvRutaDiaria> query = _context.TdvRutasDiarias
+                                        .Include(r => r.UsuarioPlaneacionObj)
+                                        .Include(r => r.RutaMaster)
+                                        .AsQueryable();
+
+                if (!isAdmin && permittedSucursalIds.Any())
+                {
+                    Expression<Func<TdvRutaDiaria, bool>> combinedPredicateRutas = null;
+
+                    foreach (var sucursalId in permittedSucursalIds)
+                    {
+                        Expression<Func<TdvRutaDiaria, bool>> currentPredicate = r => r.CodSucursal == sucursalId;
+
+                        if (combinedPredicateRutas == null)
+                        {
+                            combinedPredicateRutas = currentPredicate;
+                        }
+                        else
+                        {
+                            var parameter = Expression.Parameter(typeof(TdvRutaDiaria), "r");
+                            var body = Expression.OrElse(
+                                Expression.Invoke(combinedPredicateRutas, parameter),
+                                Expression.Invoke(currentPredicate, parameter)
+                            );
+                            combinedPredicateRutas = Expression.Lambda<Func<TdvRutaDiaria, bool>>(body, parameter);
+                        }
+                    }
+                    if (combinedPredicateRutas != null)
+                    {
+                        query = query.Where(combinedPredicateRutas);
+                    }
+                }
+                else if (!isAdmin && !permittedSucursalIds.Any())
+                {
+                    query = query.Where(r => false);
+                }
+
+                if (codSuc.HasValue && codSuc.Value != 0) { query = query.Where(r => r.CodSucursal == codSuc.Value); }
+
+                query = query.Where(r => r.FechaEjecucion == filterFechaEjecucion);
+
+                if (!estado.HasValue && string.IsNullOrEmpty(search))
+                {
+                    query = query.Where(r => r.Estado == (int)EstadoRuta.PLANEADO || r.Estado == (int)EstadoRuta.CARGUE_REGISTRADO ||
+                                            r.Estado == (int)EstadoRuta.SALIDA_REGISTRADA || r.Estado == (int)EstadoRuta.DESCARGUE_REGISTRADO ||
+                                            r.Estado == (int)EstadoRuta.CERRADO);
+                }
+                else if (estado.HasValue && estado.Value != 0)
+                {
+                    query = query.Where(r => r.Estado == estado.Value);
+                }
+
+                if (!string.IsNullOrEmpty(search))
+                {
+                    string trimmedSearch = search.Trim().ToLower();
+                    query = query.Where(r => r.NombreRuta.ToLower().Contains(trimmedSearch) ||
+                                             r.Id.ToLower().Contains(trimmedSearch) ||
+                                             r.NombreSucursal.ToLower().Contains(trimmedSearch) ||
+                                             (r.NombreJT != null && r.NombreJT.ToLower().Contains(trimmedSearch)) ||
+                                             (r.NombreConductor != null && r.NombreConductor.ToLower().Contains(trimmedSearch)));
+                }
+                query = query.OrderByDescending(r => r.FechaEjecucion).ThenBy(r => r.Id);
+
+                var totalData = await query.CountAsync();
+                page = Math.Max(page ?? 1, 1); pageSize = 15;
+                int totalPages = (int)Math.Ceiling((double)totalData / pageSize);
+                page = Math.Min(page.Value, Math.Max(1, totalPages));
+                var data = await query.Skip((page.Value - 1) * pageSize).Take(pageSize).ToListAsync();
+
+                ViewBag.CurrentPage = page.Value; ViewBag.TotalPages = totalPages; ViewBag.TotalData = totalData;
+                ViewBag.SearchTerm = search; ViewBag.PageSize = pageSize; ViewBag.CurrentFechaEjecucion = filterFechaEjecucion.ToString("yyyy-MM-dd");
+                ViewBag.CurrentCodSuc = codSuc; ViewBag.CurrentEstado = estado;
+
+                ViewBag.canEditPlaneador = (bool)ViewBag.IsAdmin || ((bool)ViewBag.canEditPlaneador);
+                ViewBag.canCargarEfectivoCef = (bool)ViewBag.IsAdmin || ((bool)ViewBag.canCargarEfectivoCef);
+                ViewBag.canDescargarEfectivoCef = (bool)ViewBag.IsAdmin || ((bool)ViewBag.canDescargarEfectivoCef);
+                ViewBag.canRegistrarSalidaSupervisor = (bool)ViewBag.IsAdmin || ((bool)ViewBag.canRegistrarSalidaSupervisor);
+                ViewBag.canRegistrarEntradaSupervisor = (bool)ViewBag.IsAdmin || ((bool)ViewBag.canRegistrarEntradaSupervisor);
+
+                Log.Information("| Usuario: {User} | Ip: {Ip} | Acción: Acceso a CEF Dashboard | Cantidad de rutas: {Count} | Respuesta: Acceso permitido | ", currentUser.UserName, ipAddress, data.Count);
+
+                if (Request.Headers["X-Requested-With"] == "XMLHttpRequest") return PartialView("~/Views/RutasDiarias/_OperationsTablePartial.cshtml", data);
+                return View(data);
+            }
+        }
+
+        /// <summary>
+        /// Muestra el registros de rutas del dia actual para el SupervisorRutas, con opciones de filtrado y paginación. 
         /// </summary>
         /// <param name="fechaEjecucion">Filtro por una fecha seleccionada (valor por defecto dia actual).</param>
         /// <param name="codSuc">Filtro por ID de sucursal.</param>
@@ -316,7 +488,7 @@ namespace VCashApp.Controllers
         /// <param name="pageSize">Número de elementos por página.</param>
         /// <returns>La vista de las rutas, con datos paginados.</returns>
         [HttpGet("OperationsDashboard")]
-        [RequiredPermission(PermissionType.View, "RUD")]
+        [RequiredPermission(PermissionType.View, "RUDOP")]
         public async Task<IActionResult> OperationsDashboard(int? page, int pageSize = 15, string search = "", DateOnly? fechaEjecucion = null, int? codSuc = null, int? estado = null)
         {
             var ipAddress = HttpContext.Connection.RemoteIpAddress?.MapToIPv4().ToString() ?? "Desconocida";
@@ -474,7 +646,7 @@ namespace VCashApp.Controllers
 
                 Log.Information("| Usuario: {User} | Ip: {Ip} | Acción: Acceso a Operations Dashboard | Cantidad de rutas: {Count} | Respuesta: Acceso permitido | ", currentUser.UserName, ipAddress, data.Count);
 
-                if (Request.Headers["X-Requested-With"] == "XMLHttpRequest") return PartialView("~/Views/RutasDiarias/_RoutesTablePartial.cshtml", data);
+                if (Request.Headers["X-Requested-With"] == "XMLHttpRequest") return PartialView("~/Views/RutasDiarias/_OperationsTablePartial.cshtml", data);
                 return View(data);
             }
         }
@@ -632,7 +804,7 @@ namespace VCashApp.Controllers
         /// Generador de rutas por estado activo y por sucursal/les asignada/s al usuario.
         /// </summary>
         [HttpPost("GenerateRoutesForTomorrow")]
-        [RequiredPermission(PermissionType.Create, "RUD")]
+        [RequiredPermission(PermissionType.Create, "RUDPL")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> GenerateRoutesForTomorrow()
         {
@@ -688,7 +860,6 @@ namespace VCashApp.Controllers
                 {
                     foreach (var codSuc in permittedSucursalIds)
                     {
-                        // Llama al servicio, que ahora devuelve el DTO de resultado
                         GeneracionRutasDiariasResult resultadoSucursal = await _rutaDiariaService.GenerarRutasDiariasInicialesPorSucursalAsync(
                             codSuc,
                             fechaEjecucion,
@@ -713,15 +884,15 @@ namespace VCashApp.Controllers
                     if (totalRutasCreadas == 0 && totalRutasOmitidas == 0)
                     {
                         mensajeFinal = "No se encontraron rutas maestras activas para generar o no hay sucursales asignadas al usuario para esa fecha.";
-                        TempData["ErrorMessage"] = mensajeFinal; // Error si no se pudo hacer nada
+                        TempData["ErrorMessage"] = mensajeFinal;
                     }
                     else if (totalRutasCreadas > 0 && totalRutasOmitidas > 0)
                     {
-                        TempData["InfoMessage"] = mensajeFinal; // Mensaje de información si hay una mezcla
+                        TempData["InfoMessage"] = mensajeFinal;
                     }
                     else
                     {
-                        TempData["SuccessMessage"] = mensajeFinal; // Mensaje de éxito si solo se crearon nuevas
+                        TempData["SuccessMessage"] = mensajeFinal;
                     }
 
                     Log.Information("| Usuario: {User} | Ip: {Ip} | Acción: Generar Rutas Completada | Creadas: {Creadas} | Omitidas: {Omitidas} | Fecha: {Fecha} |", currentUser.UserName, ipAddress, totalRutasCreadas, totalRutasOmitidas, fechaEjecucion);
@@ -782,7 +953,7 @@ namespace VCashApp.Controllers
         /// </remarks>
         /// <returns>La vista del formulario de creación.</returns>
         [HttpGet("Create")]
-        [RequiredPermission(PermissionType.Create, "RUD")]
+        [RequiredPermission(PermissionType.Create, "RUDPL")]
         public async Task<IActionResult> Create()
         {
             var ipAddress = HttpContext.Connection.RemoteIpAddress?.MapToIPv4().ToString() ?? "Desconocida";
@@ -821,7 +992,7 @@ namespace VCashApp.Controllers
         /// <returns>Redirección a la lista de rutas generadas o la misma vista con errores.</returns>
         [HttpPost("Create")]
         [ValidateAntiForgeryToken]
-        [RequiredPermission(PermissionType.Create, "RUD")]
+        [RequiredPermission(PermissionType.Create, "RUDPL")]
         public async Task<IActionResult> Create([FromForm] RutaDiariaCreationDto dto) // Aceptamos el DTO
         {
             var ipAddress = HttpContext.Connection.RemoteIpAddress?.MapToIPv4().ToString() ?? "Desconocida";
@@ -985,7 +1156,7 @@ namespace VCashApp.Controllers
         /// <param name="id">El ID del registro de la ruta.</param>
         /// <returns>La vista del formulario de asignacion de vehiculo y tripulacion.</returns>
         [HttpGet("Edit/{id}")]
-        [RequiredPermission(PermissionType.Edit, "RUD")]
+        [RequiredPermission(PermissionType.Edit, "RUDPL")]
         public async Task<IActionResult> Edit(string id)
         {
             var ipAddress = HttpContext.Connection.RemoteIpAddress?.MapToIPv4().ToString() ?? "Desconocida";
@@ -1026,7 +1197,7 @@ namespace VCashApp.Controllers
                 {
                     Log.Warning("| Usuario: {User} | Ip: {Ip} | Acción: Acceso a Editar Ruta Diaria ({Id}) | Respuesta: Ruta no encontrada o no en estado GENERADO (Estado Actual: {EstadoActual}) | ", currentUser.UserName, ipAddress, id, rutaDiaria?.Estado.ToString() ?? "NULL");
                     TempData["ErrorMessage"] = "Ruta no encontrada o no está en el estado correcto para edición por el planeador.";
-                    return RedirectToAction(nameof(ListGenerated));
+                    return RedirectToAction(nameof(PlannerDashboard));
                 }
 
                 var permittedSucursales = await GetUserPermittedSucursalesAsync(currentUser.Id);
@@ -1131,7 +1302,7 @@ namespace VCashApp.Controllers
         /// <param name="id">El ID del registro de la ruta.</param>
         [HttpPost("Edit/{id}")]
         [ValidateAntiForgeryToken]
-        [RequiredPermission(PermissionType.Edit, "RUD")]
+        [RequiredPermission(PermissionType.Edit, "RUDPL")]
         public async Task<IActionResult> Edit(string id, [FromForm] TdvRutaDiaria model)
         {
             var ipAddress = HttpContext.Connection.RemoteIpAddress?.MapToIPv4().ToString() ?? "Desconocida";
@@ -1279,7 +1450,7 @@ namespace VCashApp.Controllers
                     {
                         TempData["SuccessMessage"] = "Ruta diaria actualizada a estado PLANEADO exitosamente.";
                         Log.Information("| Usuario: {User} | Ip: {Ip} | Acción: Ruta diaria actualizada por Planeador | RutaId: {RutaId} | Estado: PLANEADO | ", currentUser.UserName, ipAddress, model.Id);
-                        return RedirectToAction(nameof(ListGenerated));
+                        return RedirectToAction(nameof(PlannerDashboard));
                     }
                     else
                     {
@@ -1398,13 +1569,13 @@ namespace VCashApp.Controllers
         /// Muestra el formulario para cargar el efectivo de la ruta.
         /// </summary>
         /// <remarks>
-        /// Requiere el permiso de 'Edit' para la vista 'RUD'.
+        /// Requiere el permiso de 'Edit' para la vista 'RUDCE'.
         /// La ruta debe estar en estado 'PLANEADO' para edición por el CEF.
         /// </remarks>
         /// <param name="id">El ID del registro de log a editar.</param>
         /// <returns>La vista del formulario de edición con los datos de la ruta.</returns>
         [HttpGet("CargarEfectivo/{id}")]
-        [RequiredPermission(PermissionType.Edit, "RUD")]
+        [RequiredPermission(PermissionType.Edit, "RUDCE")]
         public async Task<IActionResult> CargarEfectivo(string id)
         {
             var ipAddress = HttpContext.Connection.RemoteIpAddress?.MapToIPv4().ToString() ?? "Desconocida";
@@ -1421,13 +1592,6 @@ namespace VCashApp.Controllers
                 var isAdmin = (bool)ViewBag.IsAdmin;
                 var currentCodPerfil = ViewBag.CurrentCodPerfil as string; 
 
-                if (!isAdmin && currentCodPerfil != "CEF")
-                {
-                    Log.Warning("| Usuario: {User} | Ip: {Ip} | Acción: Intento de acceso a Cargar Efectivo ({Id}) | Respuesta: Acceso denegado (no Admin o no CEF) | ", currentUser.UserName, ipAddress, id);
-                    TempData["ErrorMessage"] = "No tiene permiso para registrar el cargue de efectivo. Solo usuarios CEF pueden hacerlo.";
-                    return RedirectToAction(nameof(ListGenerated)); // Redirigir a la lista general
-                }
-
                 if (string.IsNullOrEmpty(id))
                 {
                     Log.Warning("| Usuario: {User} | Ip: {Ip} | Acción: Acceso a Cargar Efectivo | Respuesta: ID de ruta nulo o vacío | ", currentUser.UserName, ipAddress);
@@ -1440,7 +1604,7 @@ namespace VCashApp.Controllers
                 {
                     Log.Warning("| Usuario: {User} | Ip: {Ip} | Acción: Acceso a Cargar Efectivo ({Id}) | Respuesta: Ruta no encontrada o no en estado PLANEADO (Estado Actual: {EstadoActual}) | ", currentUser.UserName, ipAddress, id, rutaDiaria?.Estado.ToString() ?? "NULL");
                     TempData["ErrorMessage"] = "Ruta no encontrada o no está en el estado 'PLANEADO' para registrar el cargue de efectivo.";
-                    return RedirectToAction(nameof(ListGenerated));
+                    return RedirectToAction(nameof(CefDashboard));
                 }
 
                 rutaDiaria.FechaCargue = DateOnly.FromDateTime(DateTime.Now);
@@ -1455,12 +1619,12 @@ namespace VCashApp.Controllers
         /// Actualiza un registro de la ruta existente, utilizado para insertar bolsas de billetes y/o monedas.
         /// </summary>
         /// <remarks>
-        /// Requiere el permiso de 'Edit' para la vista 'RUD' (para completar el registro).
+        /// Requiere el permiso de 'Edit' para la vista 'RUDCE' (para completar el registro).
         /// </remarks>
         /// <param name="id">El ID del registro de la ruta a actualizar.</param>
         [HttpPost("CargarEfectivo/{id}")]
         [ValidateAntiForgeryToken]
-        [RequiredPermission(PermissionType.Edit, "RUD")]
+        [RequiredPermission(PermissionType.Edit, "RUDCE")]
         public async Task<IActionResult> CargarEfectivo(string id, [FromForm] TdvRutaDiaria model)
         {
             var ipAddress = HttpContext.Connection.RemoteIpAddress?.MapToIPv4().ToString() ?? "Desconocida";
@@ -1476,13 +1640,6 @@ namespace VCashApp.Controllers
                 await SetCommonViewBagsAsync(currentUser, "Cargar Efectivo");
                 var isAdmin = (bool)ViewBag.IsAdmin;
                 var currentCodPerfil = ViewBag.CurrentCodPerfil as string;
-
-                if (!isAdmin && currentCodPerfil != "CEF")
-                {
-                    Log.Warning("| Usuario: {User} | Ip: {Ip} | Acción: Intento de POST Cargar Efectivo ({Id}) | Respuesta: Acceso denegado (no Admin o no CEF) | ", currentUser.UserName, ipAddress, id);
-                    TempData["ErrorMessage"] = "No tiene permiso para registrar el cargue de efectivo. Solo usuarios CEF pueden hacerlo.";
-                    return RedirectToAction(nameof(ListGenerated));
-                }
 
                 if (id != model.Id)
                 {
@@ -1571,7 +1728,7 @@ namespace VCashApp.Controllers
                     {
                         TempData["SuccessMessage"] = "Cargue de efectivo registrado exitosamente.";
                         Log.Information("| Usuario: {User} | Ip: {Ip} | Acción: Cargue CEF registrado | RutaId: {RutaId} | Estado: EN_PROCESO | ", currentUser.UserName, ipAddress, model.Id);
-                        return RedirectToAction(nameof(OperationsDashboard));
+                        return RedirectToAction(nameof(CefDashboard));
                     }
                     else
                     {
@@ -1598,13 +1755,13 @@ namespace VCashApp.Controllers
         /// Muestra el formulario para registrar la salida del vehiculo a la ruta.
         /// </summary>
         /// <remarks>
-        /// Requiere el permiso de 'Edit' para la vista 'RUD'.
+        /// Requiere el permiso de 'Edit' para la vista 'RUDOP'.
         /// La ruta debe estar en estado 'CARGUE_REGISTRADO' para edición por el SupervisorRuta.
         /// </remarks>
         /// <param name="id">El ID del registro de log a editar.</param>
         /// <returns>La vista del formulario de edición con los datos de la ruta.</returns>
         [HttpGet("RegistrarSalida/{id}")]
-        [RequiredPermission(PermissionType.Edit, "RUD")] 
+        [RequiredPermission(PermissionType.Edit, "RUDOP")] 
         public async Task<IActionResult> RegistrarSalida(string id)
         {
             var ipAddress = HttpContext.Connection.RemoteIpAddress?.MapToIPv4().ToString() ?? "Desconocida";
@@ -1620,13 +1777,6 @@ namespace VCashApp.Controllers
                 await SetCommonViewBagsAsync(currentUser, "Registrar Salida");
                 var isAdmin = (bool)ViewBag.IsAdmin;
                 var currentCodPerfil = ViewBag.CurrentCodPerfil as string;
-
-                if (!isAdmin && currentCodPerfil != "Supervisor")
-                {
-                    Log.Warning("| Usuario: {User} | Ip: {Ip} | Acción: Intento de acceso a Registrar Salida ({Id}) | Respuesta: Acceso denegado (no Admin o no Supervisor) | ", currentUser.UserName, ipAddress, id);
-                    TempData["ErrorMessage"] = "No tiene permiso para registrar la salida del vehículo. Solo usuarios Supervisor pueden hacerlo.";
-                    return RedirectToAction(nameof(ListGenerated));
-                }
 
                 if (string.IsNullOrEmpty(id))
                 {
@@ -1651,7 +1801,7 @@ namespace VCashApp.Controllers
                 {
                     Log.Warning("| Usuario: {User} | Ip: {Ip} | Acción: Acceso a Registrar Salida ({Id}) | Respuesta: Ruta no encontrada o no en estado CARGUE REGISTRADO (Estado Actual: {EstadoActual}) | ", currentUser.UserName, ipAddress, id, rutaDiaria?.Estado.ToString() ?? "NULL");
                     TempData["ErrorMessage"] = "Ruta no encontrada o no está en el estado 'CARGUE REGISTRADO' para registrar la salida del vehículo.";
-                    return RedirectToAction(nameof(ListGenerated));
+                    return RedirectToAction(nameof(OperationsDashboard));
                 }
 
                 rutaDiaria.FechaSalidaRuta = DateOnly.FromDateTime(DateTime.Now);
@@ -1666,12 +1816,12 @@ namespace VCashApp.Controllers
         /// Actualiza un registro de la ruta existente, utilizado para insertar KM inicial del vehiculo.
         /// </summary>
         /// <remarks>
-        /// Requiere el permiso de 'Edit' para la vista 'RUD' (para completar el registro).
+        /// Requiere el permiso de 'Edit' para la vista 'RUDOP' (para completar el registro).
         /// </remarks>
         /// <param name="id">El ID del registro de la ruta a actualizar.</param>
         [HttpPost("RegistrarSalida/{id}")]
         [ValidateAntiForgeryToken]
-        [RequiredPermission(PermissionType.Edit, "RUD")]
+        [RequiredPermission(PermissionType.Edit, "RUDOP")]
         public async Task<IActionResult> RegistrarSalida(string id, [FromForm] TdvRutaDiaria model)
         {
             var ipAddress = HttpContext.Connection.RemoteIpAddress?.MapToIPv4().ToString() ?? "Desconocida";
@@ -1687,13 +1837,6 @@ namespace VCashApp.Controllers
                 await SetCommonViewBagsAsync(currentUser, "Registrar Salida");
                 var isAdmin = (bool)ViewBag.IsAdmin;
                 var currentCodPerfil = ViewBag.CurrentCodPerfil as string;
-
-                if (!isAdmin && currentCodPerfil != "Supervisor")
-                {
-                    Log.Warning("| Usuario: {User} | Ip: {Ip} | Acción: Intento de POST Registrar Salida ({Id}) | Respuesta: Acceso denegado (no Admin o no Supervisor) | ", currentUser.UserName, ipAddress, id);
-                    TempData["ErrorMessage"] = "No tiene permiso para registrar la salida del vehículo. Solo usuarios Supervisor pueden hacerlo.";
-                    return RedirectToAction(nameof(OperationsDashboard));
-                }
 
                 if (id != model.Id)
                 {
@@ -1805,13 +1948,13 @@ namespace VCashApp.Controllers
         /// Muestra el formulario para descargar el efectivo de la ruta.
         /// </summary>
         /// <remarks>
-        /// Requiere el permiso de 'Edit' para la vista 'RUD'.
+        /// Requiere el permiso de 'Edit' para la vista 'RUDCE'.
         /// La ruta debe estar en estado 'SALIDA_REGISTRADA' para edición por el CEF.
         /// </remarks>
         /// <param name="id">El ID del registro de log a editar.</param>
         /// <returns>La vista del formulario de edición con los datos de la ruta.</returns>
         [HttpGet("DescargarEfectivo/{id}")]
-        [RequiredPermission(PermissionType.Edit, "RUD")]
+        [RequiredPermission(PermissionType.Edit, "RUDCE")]
         public async Task<IActionResult> DescargarEfectivo(string id)
         {
             var ipAddress = HttpContext.Connection.RemoteIpAddress?.MapToIPv4().ToString() ?? "Desconocida";
@@ -1827,13 +1970,6 @@ namespace VCashApp.Controllers
                 await SetCommonViewBagsAsync(currentUser, "Descargar Efectivo");
                 var isAdmin = (bool)ViewBag.IsAdmin;
                 var currentCodPerfil = ViewBag.CurrentCodPerfil as string;
-
-                if (!isAdmin && currentCodPerfil != "CEF")
-                {
-                    Log.Warning("| Usuario: {User} | Ip: {Ip} | Acción: Intento de acceso a Descargar Efectivo ({Id}) | Respuesta: Acceso denegado (no Admin o no CEF) | ", currentUser.UserName, ipAddress, id);
-                    TempData["ErrorMessage"] = "No tiene permiso para registrar el descargue de efectivo. Solo usuarios CEF pueden hacerlo.";
-                    return RedirectToAction(nameof(OperationsDashboard));
-                }
 
                 if (string.IsNullOrEmpty(id))
                 {
@@ -1874,12 +2010,12 @@ namespace VCashApp.Controllers
         /// Actualiza un registro de la ruta existente, utilizado para insertar bolsas de billetes y/o monedas.
         /// </summary>
         /// <remarks>
-        /// Requiere el permiso de 'Edit' para la vista 'RUD' (para completar el registro).
+        /// Requiere el permiso de 'Edit' para la vista 'RUDCE' (para completar el registro).
         /// </remarks>
         /// <param name="id">El ID del registro de la ruta a actualizar.</param>
         [HttpPost("DescargarEfectivo/{id}")]
         [ValidateAntiForgeryToken]
-        [RequiredPermission(PermissionType.Edit, "RUD")]
+        [RequiredPermission(PermissionType.Edit, "RUDCE")]
         public async Task<IActionResult> DescargarEfectivo(string id, [FromForm] TdvRutaDiaria model)
         {
             var ipAddress = HttpContext.Connection.RemoteIpAddress?.MapToIPv4().ToString() ?? "Desconocida";
@@ -1895,13 +2031,6 @@ namespace VCashApp.Controllers
                 await SetCommonViewBagsAsync(currentUser, "Descargar Efectivo");
                 var isAdmin = (bool)ViewBag.IsAdmin;
                 var currentCodPerfil = ViewBag.CurrentCodPerfil as string;
-
-                if (!isAdmin && currentCodPerfil != "CEF")
-                {
-                    Log.Warning("| Usuario: {User} | Ip: {Ip} | Acción: Intento de POST Descargar Efectivo ({Id}) | Respuesta: Acceso denegado (no Admin o no CEF) | ", currentUser.UserName, ipAddress, id);
-                    TempData["ErrorMessage"] = "No tiene permiso para registrar el descargue de efectivo. Solo usuarios CEF pueden hacerlo.";
-                    return RedirectToAction(nameof(OperationsDashboard));
-                }
 
                 if (id != model.Id)
                 {
@@ -2001,7 +2130,7 @@ namespace VCashApp.Controllers
                     {
                         TempData["SuccessMessage"] = "Descargue de efectivo registrado exitosamente.";
                         Log.Information("| Usuario: {User} | Ip: {Ip} | Acción: Descargue CEF registrado | RutaId: {RutaId} | Estado: EN_PROCESO | ", currentUser.UserName, ipAddress, model.Id);
-                        return RedirectToAction(nameof(OperationsDashboard));
+                        return RedirectToAction(nameof(CefDashboard));
                     }
                     else
                     {
@@ -2027,13 +2156,13 @@ namespace VCashApp.Controllers
         /// Muestra el formulario para registrar la entrada del vehiculo a la empresa.
         /// </summary>
         /// <remarks>
-        /// Requiere el permiso de 'Edit' para la vista 'RUD'.
+        /// Requiere el permiso de 'Edit' para la vista 'RUDOP'.
         /// La ruta debe estar en estado 'DESCARGUE_REGISTRADO' para edición por el SupervisorRuta.
         /// </remarks>
         /// <param name="id">El ID del registro de log a editar.</param>
         /// <returns>La vista del formulario de edición con los datos de la ruta.</returns>
         [HttpGet("RegistrarEntrada/{id}")]
-        [RequiredPermission(PermissionType.Edit, "RUD")]
+        [RequiredPermission(PermissionType.Edit, "RUDOP")]
         public async Task<IActionResult> RegistrarEntrada(string id)
         {
             var ipAddress = HttpContext.Connection.RemoteIpAddress?.MapToIPv4().ToString() ?? "Desconocida";
@@ -2049,13 +2178,6 @@ namespace VCashApp.Controllers
                 await SetCommonViewBagsAsync(currentUser, "Unloading");
                 var isAdmin = (bool)ViewBag.IsAdmin;
                 var currentCodPerfil = ViewBag.CurrentCodPerfil as string;
-
-                if (!isAdmin && currentCodPerfil != "Supervisor")
-                {
-                    Log.Warning("| Usuario: {User} | Ip: {Ip} | Acción: Intento de acceso a Registrar Entrada ({Id}) | Respuesta: Acceso denegado (no Admin o no Supervisor) | ", currentUser.UserName, ipAddress, id);
-                    TempData["ErrorMessage"] = "No tiene permiso para registrar la entrada del vehículo. Solo usuarios Supervisor pueden hacerlo.";
-                    return RedirectToAction(nameof(OperationsDashboard));
-                }
 
                 if (string.IsNullOrEmpty(id))
                 {
@@ -2096,12 +2218,12 @@ namespace VCashApp.Controllers
         /// Actualiza un registro de la ruta existente, utilizado para insertar KM final del vehiculo y cerrar la ruta.
         /// </summary>
         /// <remarks>
-        /// Requiere el permiso de 'Edit' para la vista 'RUD' (para completar el registro).
+        /// Requiere el permiso de 'Edit' para la vista 'RUDOP' (para completar el registro).
         /// </remarks>
         /// <param name="id">El ID del registro de la ruta a actualizar.</param>
         [HttpPost("RegistrarEntrada/{id}")]
         [ValidateAntiForgeryToken]
-        [RequiredPermission(PermissionType.Edit, "RUD")]
+        [RequiredPermission(PermissionType.Edit, "RUDOP")]
         public async Task<IActionResult> RegistrarEntrada(string id, [FromForm] TdvRutaDiaria model)
         {
             var ipAddress = HttpContext.Connection.RemoteIpAddress?.MapToIPv4().ToString() ?? "Desconocida";
@@ -2113,13 +2235,6 @@ namespace VCashApp.Controllers
                 await SetCommonViewBagsAsync(currentUser, "Registrar Entrada");
                 var isAdmin = (bool)ViewBag.IsAdmin;
                 var currentCodPerfil = ViewBag.CurrentCodPerfil as string;
-
-                if (!isAdmin && currentCodPerfil != "Supervisor")
-                {
-                    Log.Warning("| Usuario: {User} | Ip: {Ip} | Acción: Intento de POST Registrar Entrada ({Id}) | Respuesta: Acceso denegado (no Admin o no Supervisor) | ", currentUser.UserName, ipAddress, id);
-                    TempData["ErrorMessage"] = "No tiene permiso para registrar la entrada del vehículo. Solo usuarios Supervisor pueden hacerlo.";
-                    return RedirectToAction(nameof(OperationsDashboard));
-                }
 
                 if (id != model.Id)
                 {
@@ -2254,14 +2369,13 @@ namespace VCashApp.Controllers
         /// <param name="fechaEjecucion">Fecha de ejecucion de la ruta (opcional).</param>
         /// /// <param name="codSuc">El código de la sucursal para filtrar las rutas (opcional).</param>
         /// <param name="estado">Estado de la ruta (opcional).</param>
-        [HttpGet ("ExportRutasDiarias")]
-        [RequiredPermission(PermissionType.View, "RUD")]
+        [HttpGet("ExportRutasDiarias")]
         public async Task<IActionResult> ExportRutasDiarias(
-            string exportFormat,
-            string search = "",
-            DateOnly? fechaEjecucion = null,
-            int? codSuc = null,
-            int? estado = null)
+           string exportFormat,
+           string search = "",
+           DateOnly? fechaEjecucion = null,
+           int? codSuc = null,
+           int? estado = null)
         {
             var ipAddress = HttpContext.Connection.RemoteIpAddress?.MapToIPv4().ToString() ?? "Desconocida";
             using (LogContext.PushProperty("IpAddress", ipAddress))
@@ -2269,37 +2383,17 @@ namespace VCashApp.Controllers
                 var currentUser = await GetCurrentApplicationUserAsync();
                 if (currentUser == null) return Unauthorized();
 
-                IQueryable<TdvRutaDiaria> query = _context.TdvRutasDiarias
-                                                    .Include(r => r.UsuarioPlaneacionObj)
-                                                    .Include(r => r.RutaMaster)
-                                                    .Include(r => r.Sucursal)
-                                                    .Include(r => r.JT)
-                                                    .Include(r => r.Conductor)
-                                                    .Include(r => r.Tripulante)
-                                                    .Include(r => r.CargoJTObj)
-                                                    .Include(r => r.CargoConductorObj)
-                                                    .Include(r => r.CargoTripulanteObj)
-                                                    .AsQueryable();
-
                 var isAdmin = await _userManager.IsInRoleAsync(currentUser, "Admin");
-                List<int> permittedSucursalIds = new List<int>();
-                if (!isAdmin) { permittedSucursalIds = await GetUserPermittedSucursalesAsync(currentUser.Id); }
 
-                if (!isAdmin && permittedSucursalIds.Any())
-                { /* ... predicado OR para sucursales ... */ }
-                else if (!isAdmin && !permittedSucursalIds.Any()) { query = query.Where(r => false); }
-
-                if (codSuc.HasValue && codSuc.Value != 0) { query = query.Where(r => r.CodSucursal == codSuc.Value); }
-                if (fechaEjecucion.HasValue) { query = query.Where(r => r.FechaEjecucion == fechaEjecucion.Value); }
-
-                if (estado.HasValue) { query = query.Where(r => r.Estado == estado.Value); }
-                else if (string.IsNullOrEmpty(search)) { query = query.Where(r => r.Estado == (int)EstadoRuta.GENERADO || r.Estado == (int)EstadoRuta.PLANEADO); }
-
-                if (!string.IsNullOrEmpty(search))
-                { /* ... lógica de búsqueda ... */ }
-                query = query.OrderByDescending(r => r.FechaEjecucion).ThenBy(r => r.Id);
-
-                var rawData = await query.ToListAsync();
+                var rawData = await _rutaDiariaService.GetFilteredRutasForExportAsync(
+                    currentUser.Id,
+                    codSuc,
+                    fechaEjecucion,
+                    estado,
+                    search,
+                    isAdmin
+                );
+                // --- FIN DE LA MODIFICACIÓN ---
 
                 var dataToExport = rawData.Select(r => new TdvRutaDiariaExportViewModel
                 {
@@ -2308,7 +2402,6 @@ namespace VCashApp.Controllers
                     NombreSucursal = r.Sucursal != null ? r.Sucursal.NombreSucursal : "N/A",
                     FechaEjecucion = r.FechaEjecucion,
                     UsuarioPlaneacion = r.UsuarioPlaneacionObj != null ? r.UsuarioPlaneacionObj.NombreUsuario : "N/A",
-
                     TipoRuta = r.TipoRuta switch
                     {
                         "T" => "TRADICIONAL",
@@ -2326,16 +2419,13 @@ namespace VCashApp.Controllers
                         _ => "Otro"
                     },
                     EstadoRuta = ((EstadoRuta)r.Estado).ToString().Replace("_", " "),
-
                     NombreJT = r.JT != null ? r.JT.NombreCompleto : "N/A",
                     NombreConductor = r.Conductor != null ? r.Conductor.NombreCompleto : "N/A",
                     NombreTripulante = r.Tripulante != null ? r.Tripulante.NombreCompleto : "N/A",
-                    NombreVehiculo = r.CodVehiculo ?? "N/A", // <--- ¡CAMBIO A CodVehiculo directamente!
-
+                    NombreVehiculo = r.CodVehiculo ?? "N/A",
                     NombreCargoJT = r.CargoJTObj != null ? r.CargoJTObj.NombreCargo : "N/A",
                     NombreCargoConductor = r.CargoConductorObj != null ? r.CargoConductorObj.NombreCargo : "N/A",
                     NombreCargoTripulante = r.CargoTripulanteObj != null ? r.CargoTripulanteObj.NombreCargo : "N/A",
-
                     KmInicial = r.KmInicial,
                     KmFinal = r.KmFinal,
                     FechaSalidaRuta = r.FechaSalidaRuta,
@@ -2353,37 +2443,21 @@ namespace VCashApp.Controllers
                 }).ToList();
 
                 var columnDisplayNames = new Dictionary<string, string>
-                {
-                    { "IdRuta", "ID de Ruta" },
-                    { "NombreRuta", "Ruta" },
-                    { "NombreSucursal", "Sucursal" },
-                    { "FechaEjecucion", "Fecha de Programación" },
-                    { "UsuarioPlaneacion", "Planeador" },
-                    { "TipoRuta", "Tipo de Ruta" },
-                    { "TipoVehiculo", "Tipo de Vehículo" },
-                    { "EstadoRuta", "Estado" },
-                    { "NombreJT", "Jefe de Tripulación" },
-                    { "NombreCargoJT", "Cargo JT" },
-                    { "NombreConductor", "Conductor" },
-                    { "NombreCargoConductor", "Cargo Conductor" },
-                    { "NombreTripulante", "Tripulante" },
-                    { "NombreCargoTripulante", "Cargo Tripulante" },
-                    { "NombreVehiculo", "Vehículo" },
-                    { "KmInicial", "KM Inicial" },
-                    { "KmFinal", "KM Final" },
-                    { "FechaSalidaRuta", "Fecha Salida" },
-                    { "HoraSalidaRuta", "Hora Salida" },
-                    { "FechaEntradaRuta", "Fecha Entrada" },
-                    { "HoraEntradaRuta", "Hora Entrada" },
-                    { "FechaCargue", "Fecha Cargue CEF" },
-                    { "HoraCargue", "Hora Cargue CEF" },
-                    { "CantBolsaBilleteEntrega", "Bolsas Billetes Entrega" },
-                    { "CantBolsaMonedaEntrega", "Bolsas Monedas Entrega" },
-                    { "FechaDescargue", "Fecha Descargue CEF" },
-                    { "HoraDescargue", "Hora Descargue CEF" },
-                    { "CantBolsaBilleteRecibe", "Bolsas Billetes Recibe" },
-                    { "CantBolsaMonedaRecibe", "Bolsas Monedas Recibe" }
-                };
+        {
+            { "IdRuta", "ID de Ruta" }, { "NombreRuta", "Ruta" }, { "NombreSucursal", "Sucursal" },
+            { "FechaEjecucion", "Fecha de Programación" }, { "UsuarioPlaneacion", "Planeador" },
+            { "TipoRuta", "Tipo de Ruta" }, { "TipoVehiculo", "Tipo de Vehículo" }, { "EstadoRuta", "Estado" },
+            { "NombreJT", "Jefe de Tripulación" }, { "NombreCargoJT", "Cargo JT" },
+            { "NombreConductor", "Conductor" }, { "NombreCargoConductor", "Cargo Conductor" },
+            { "NombreTripulante", "Tripulante" }, { "NombreCargoTripulante", "Cargo Tripulante" },
+            { "NombreVehiculo", "Vehículo" }, { "KmInicial", "KM Inicial" }, { "KmFinal", "KM Final" },
+            { "FechaSalidaRuta", "Fecha Salida" }, { "HoraSalidaRuta", "Hora Salida" },
+            { "FechaEntradaRuta", "Fecha Entrada" }, { "HoraEntradaRuta", "Hora Entrada" },
+            { "FechaCargue", "Fecha Cargue CEF" }, { "HoraCargue", "Hora Cargue CEF" },
+            { "CantBolsaBilleteEntrega", "Bolsas Billetes Entrega" }, { "CantBolsaMonedaEntrega", "Bolsas Monedas Entrega" },
+            { "FechaDescargue", "Fecha Descargue CEF" }, { "HoraDescargue", "Hora Descargue CEF" },
+            { "CantBolsaBilleteRecibe", "Bolsas Billetes Recibe" }, { "CantBolsaMonedaRecibe", "Bolsas Monedas Recibe" }
+        };
 
                 Log.Information("| Usuario: {User} | Ip: {Ip} | Acción: Exportar Rutas Diarias | Formato: {Format} | Cantidad: {Count} |",
                                 currentUser.UserName, ipAddress, exportFormat, dataToExport.Count);

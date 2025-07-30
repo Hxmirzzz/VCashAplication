@@ -772,41 +772,197 @@
                 directly from your code. This API may change or be removed in future releases.
             </summary>
         </member>
+        <member name="T:VCashApp.Controllers.CefController">
+            <summary>
+            Controlador para la gestión de operaciones de Centro de Efectivo (CEF).
+            Maneja el flujo de Check-in, conteo de contenedores y revisión de transacciones.
+            </summary>
+        </member>
+        <member name="M:VCashApp.Controllers.CefController.#ctor(VCashApp.Services.ICefTransactionService,VCashApp.Services.ICefContainerService,VCashApp.Services.ICefIncidentService,VCashApp.Data.AppDbContext,Microsoft.AspNetCore.Identity.UserManager{VCashApp.Models.ApplicationUser},Microsoft.Extensions.Logging.ILogger{VCashApp.Controllers.CefController})">
+            <summary>
+            Constructor del controlador CefController.
+            </summary>
+            <param name="cefTransactionService">Servicio para la lógica de transacciones CEF.</param>
+            <param name="cefContainerService">Servicio para la lógica de contenedores CEF.</param>
+            <param name="cefIncidentService">Servicio para la lógica de novedades CEF.</param>
+            <param name="context">Contexto de la base de datos de la aplicación.</param>
+            <param name="userManager">Administrador de usuarios de Identity.</param>
+            <param name="logger">Servicio de logging para el controlador.</param>
+        </member>
+        <member name="M:VCashApp.Controllers.CefController.SetCommonViewBagsCefAsync(VCashApp.Models.ApplicationUser,System.String)">
+            <summary>
+            Método auxiliar para configurar ViewBags comunes específicos de CEF.
+            Hereda y extiende el SetCommonViewBagsBaseAsync del BaseController.
+            </summary>
+            <param name="currentUser">El usuario actual autenticado.</param>
+            <param name="pageName">El nombre de la página para el ViewBag.</param>
+            <returns>Tarea asíncrona completada.</returns>
+        </member>
+        <member name="M:VCashApp.Controllers.CefController.Index(System.Nullable{System.Int32},System.Nullable{System.DateOnly},System.Nullable{System.DateOnly},System.Nullable{VCashApp.Enums.CefTransactionStatusEnum},System.String,System.Int32,System.Int32)">
+            <summary>
+            Muestra el dashboard principal del Centro de Efectivo, permitiendo filtrar y ver las transacciones.
+            </summary>
+            <remarks>
+            Requiere permiso 'View' para el módulo "CEF".
+            </remarks>
+            <param name="branchId">ID de la sucursal para filtrar.</param>
+            <param name="startDate">Fecha de inicio para el filtro de registro.</param>
+            <param name="endDate">Fecha de fin para el filtro de registro.</param>
+            <param name="status">Estado de la transacción para filtrar.</param>
+            <param name="searchTerm">Término de búsqueda.</param>
+            <param name="pageNumber">Número de página para paginación.</param>
+            <param name="pageSize">Cantidad de registros por página.</param>
+            <returns>Una vista con la lista de transacciones de CEF o un parcial si es una petición AJAX.</returns>
+        </member>
+        <member name="M:VCashApp.Controllers.CefController.Checkin(System.String,System.String)">
+            <summary>
+            Muestra el formulario para iniciar una nueva transacción de Centro de Efectivo (Check-in).
+            </summary>
+            <remarks>
+            Requiere permiso 'Create' para el módulo "CEF".
+            </remarks>
+            <param name="serviceOrderId">Orden de Servicio opcional para precargar datos.</param>
+            <param name="routeId">ID de Ruta Diaria opcional para precargar datos.</param>
+            <returns>Vista del formulario de Check-in.</returns>
+        </member>
+        <member name="M:VCashApp.Controllers.CefController.Checkin(VCashApp.Models.ViewModels.CentroEfectivo.CefTransactionCheckinViewModel)">
+            <summary>
+            Procesa el envío del formulario de Check-in y crea la transacción de CEF.
+            </summary>
+            <remarks>
+            Este endpoint es llamado vía HTTP POST.
+            Requiere permiso 'Create' para el módulo "CEF".
+            </remarks>
+            <param name="viewModel">ViewModel con los datos del formulario.</param>
+            <returns>Redirección al dashboard o a la vista de procesamiento de contenedores.</returns>
+        </member>
+        <member name="M:VCashApp.Controllers.CefController.ProcessContainers(System.Int32,System.Nullable{System.Int32})">
+            <summary>
+            Muestra la vista para procesar (contar) los contenedores de una transacción de CEF.
+            </summary>
+            <remarks>
+            Requiere permiso 'Edit' para el módulo "CEF".
+            </remarks>
+            <param name="transactionId">ID de la transacción CEF a procesar.</param>
+            <param name="containerId">ID opcional de un contenedor específico a editar/continuar.</param>
+            <returns>Vista de procesamiento de contenedores.</returns>
+        </member>
+        <member name="M:VCashApp.Controllers.CefController.ProcessContainers(VCashApp.Models.ViewModels.CentroEfectivo.CefContainerProcessingViewModel)">
+            <summary>
+            Procesa el envío del formulario de procesamiento de contenedores (guardar detalles y novedades).
+            </summary>
+            <remarks>
+            Este endpoint es llamado vía HTTP POST.
+            Requiere permiso 'Edit' para el módulo "CEF".
+            </remarks>
+            <param name="viewModel">ViewModel con los datos del contenedor, detalles y novedades.</param>
+            <returns>Un JSON ServiceResult o redirección a la misma vista para continuar o al dashboard.</returns>
+        </member>
+        <member name="M:VCashApp.Controllers.CefController.FinalizeCounting(System.Int32)">
+            <summary>
+            Finaliza el conteo de todos los contenedores de una transacción y la prepara para revisión.
+            </summary>
+            <remarks>
+            Requiere permiso 'Edit' para el módulo "CEF".
+            </remarks>
+            <param name="transactionId">ID de la transacción a finalizar.</param>
+            <returns>Redirección al dashboard de revisión.</returns>
+        </member>
+        <member name="M:VCashApp.Controllers.CefController.ReviewTransaction(System.Int32)">
+            <summary>
+            Muestra la vista de revisión final de una transacción de Centro de Efectivo.
+            Permite al supervisor aprobar o rechazar la planilla.
+            </summary>
+            <remarks>
+            Requiere permiso 'View' para el módulo "CEF" y 'Edit' para aprobar/rechazar.
+            </remarks>
+            <param name="transactionId">ID de la transacción a revisar.</param>
+            <returns>Vista de revisión de transacción.</returns>
+        </member>
+        <member name="M:VCashApp.Controllers.CefController.ReviewTransaction(VCashApp.Models.ViewModels.CentroEfectivo.CefTransactionReviewViewModel)">
+            <summary>
+            Procesa la aprobación o rechazo final de una transacción de Centro de Efectivo.
+            </summary>
+            <remarks>
+            Requiere permiso 'Edit' para el módulo "CEF".
+            </remarks>
+            <param name="viewModel">ViewModel con el ID de la transacción y el nuevo estado (Aprobada/Rechazada).</param>
+            <returns>Redirección al dashboard de CEF.</returns>
+        </member>
         <member name="T:VCashApp.Controllers.EmployeeController">
             <summary>
             Controlador para la gestión de empleados. Sigue un patrón de servicio para la lógica de negocio.
             Proporciona funcionalidades para listar, crear, editar y visualizar información de empleados.
             </summary>
         </member>
-        <member name="M:VCashApp.Controllers.EmployeeController.#ctor(VCashApp.Services.IEmployeeService,VCashApp.Services.IExportService,VCashApp.Data.AppDbContext,Microsoft.AspNetCore.Identity.UserManager{VCashApp.Models.ApplicationUser})">
+        <member name="M:VCashApp.Controllers.EmployeeController.#ctor(VCashApp.Services.IEmployeeService,VCashApp.Services.IExportService,VCashApp.Data.AppDbContext,Microsoft.AspNetCore.Identity.UserManager{VCashApp.Models.ApplicationUser},Microsoft.Extensions.Logging.ILogger{VCashApp.Controllers.EmployeeController})">
             <summary>
             Constructor del controlador EmployeeController.
             </summary>
+            <param name="employeeService">Servicio para la lógica de negocio de empleados.</param>
+            <param name="exportService">Servicio para funcionalidades de exportación.</param>
+            <param name="context">Contexto de la base de datos de la aplicación.</param>
+            <param name="userManager">Administrador de usuarios para gestionar ApplicationUser.</param>
+            <param name="logger">Servicio de logging para el controlador.</param>
         </member>
         <member name="M:VCashApp.Controllers.EmployeeController.Index(System.Nullable{System.Int32},System.Nullable{System.Int32},System.Nullable{System.Int32},System.String,System.String,System.Int32,System.Int32)">
             <summary>
             Muestra una lista paginada y filtrada de empleados.
             </summary>
+            <remarks>
+            Esta acción sirve la página principal de listado de empleados y puede devolver una vista parcial para solicitudes AJAX.
+            Requiere permiso 'View' para "EMP".
+            </remarks>
+            <param name="page">Número de página actual (default 1).</param>
+            <param name="pageSize">Número de empleados por página (default 15).</param>
+            <param name="cargoId">Opcional. Código del cargo por el cual filtrar.</param>
+            <param name="branchId">Opcional. Código de la sucursal por la cual filtrar.</param>
+            <param name="employeeStatus">Opcional. Estado del empleado por el cual filtrar.</param>
+            <param name="search">Opcional. Término de búsqueda (cédula o nombre).</param>
+            <param name="gender">Opcional. Género por el cual filtrar.</param>
+            <returns>La vista con la tabla de empleados paginada.</returns>
         </member>
         <member name="M:VCashApp.Controllers.EmployeeController.Create">
             <summary>
             Muestra el formulario para crear un nuevo empleado.
             </summary>
+            <remarks>
+            Requiere permiso 'Create' para "EMP".
+            </remarks>
+            <returns>La vista para el formulario de creación de empleado.</returns>
         </member>
         <member name="M:VCashApp.Controllers.EmployeeController.Create(VCashApp.Models.ViewModels.EmpleadoViewModel)">
             <summary>
             Procesa la creación de un nuevo empleado.
             </summary>
+            <remarks>
+            Este endpoint es llamado vía AJAX. Realiza validaciones del modelo y la lógica de creación.
+            Requiere permiso 'Create' para "EMP".
+            </remarks>
+            <param name="model">El EmpleadoViewModel con los datos del nuevo empleado.</param>
+            <returns>Un JSON ServiceResult indicando éxito, fracaso o errores de validación.</returns>
         </member>
         <member name="M:VCashApp.Controllers.EmployeeController.Edit(System.Int32)">
             <summary>
             Muestra el formulario para editar un empleado existente.
             </summary>
+            <remarks>
+            Requiere permiso 'Edit' para "EMP".
+            </remarks>
+            <param name="id">El ID del empleado a editar.</param>
+            <returns>La vista para el formulario de edición de empleado.</returns>
         </member>
         <member name="M:VCashApp.Controllers.EmployeeController.Edit(System.Int32,VCashApp.Models.ViewModels.EmpleadoViewModel)">
             <summary>
             Procesa la actualización de un empleado existente.
             </summary>
+            <remarks>
+            Este endpoint es llamado vía AJAX. Realiza validaciones del modelo y la lógica de actualización.
+            Requiere permiso 'Edit' para "EMP".
+            </remarks>
+            <param name="id">El ID del empleado (desde la URL, para verificación).</param>
+            <param name="model">El EmpleadoViewModel con los datos actualizados del empleado.</param>
+            <returns>Un JSON ServiceResult indicando éxito, fracaso o errores de validación.</returns>
         </member>
         <member name="M:VCashApp.Controllers.EmployeeController.ChangeStatus(System.Int32,VCashApp.Services.DTOs.StatusChangeRequestDTO)">
             <summary>
@@ -820,6 +976,11 @@
             <summary>
             Muestra un formulario para ver los detalles de un empleado.
             </summary>
+             <remarks>
+             Requiere permiso 'View' para "EMP".
+             </remarks>
+             <param name="id">El ID del empleado a visualizar.</param>
+             <returns>La vista con los detalles del empleado.</returns>
         </member>
         <member name="M:VCashApp.Controllers.EmployeeController.ExportEmployee(System.String,System.Nullable{System.Int32},System.Nullable{System.Int32},System.Nullable{System.Int32},System.String,System.String)">
             <summary>
@@ -1009,9 +1170,21 @@
             <param name="pageSize">Número de elementos por página.</param>
             <returns>La vista de las rutas, con datos paginados.</returns>
         </member>
+        <member name="M:VCashApp.Controllers.RutasDiariasController.CefDashboard(System.Nullable{System.Int32},System.Int32,System.String,System.Nullable{System.DateOnly},System.Nullable{System.Int32},System.Nullable{System.Int32})">
+            <summary>
+            Muestra el registros de rutas del dia actual para el CEF, con opciones de filtrado y paginación. 
+            </summary>
+            <param name="fechaEjecucion">Filtro por una fecha seleccionada (valor por defecto dia actual).</param>
+            <param name="codSuc">Filtro por ID de sucursal.</param>
+            <param name="estado">Estado de la ruta generada.</param>
+            <param name="search">Término de búsqueda por nombre de la ruta.</param>
+            <param name="page">Número de página actual.</param>
+            <param name="pageSize">Número de elementos por página.</param>
+            <returns>La vista de las rutas, con datos paginados.</returns>
+        </member>
         <member name="M:VCashApp.Controllers.RutasDiariasController.OperationsDashboard(System.Nullable{System.Int32},System.Int32,System.String,System.Nullable{System.DateOnly},System.Nullable{System.Int32},System.Nullable{System.Int32})">
             <summary>
-            Muestra el registros de rutas del dia actual para el CEF y SupervisorRutas, con opciones de filtrado y paginación. 
+            Muestra el registros de rutas del dia actual para el SupervisorRutas, con opciones de filtrado y paginación. 
             </summary>
             <param name="fechaEjecucion">Filtro por una fecha seleccionada (valor por defecto dia actual).</param>
             <param name="codSuc">Filtro por ID de sucursal.</param>
@@ -1092,7 +1265,7 @@
             Muestra el formulario para cargar el efectivo de la ruta.
             </summary>
             <remarks>
-            Requiere el permiso de 'Edit' para la vista 'RUD'.
+            Requiere el permiso de 'Edit' para la vista 'RUDCE'.
             La ruta debe estar en estado 'PLANEADO' para edición por el CEF.
             </remarks>
             <param name="id">El ID del registro de log a editar.</param>
@@ -1103,7 +1276,7 @@
             Actualiza un registro de la ruta existente, utilizado para insertar bolsas de billetes y/o monedas.
             </summary>
             <remarks>
-            Requiere el permiso de 'Edit' para la vista 'RUD' (para completar el registro).
+            Requiere el permiso de 'Edit' para la vista 'RUDCE' (para completar el registro).
             </remarks>
             <param name="id">El ID del registro de la ruta a actualizar.</param>
         </member>
@@ -1112,7 +1285,7 @@
             Muestra el formulario para registrar la salida del vehiculo a la ruta.
             </summary>
             <remarks>
-            Requiere el permiso de 'Edit' para la vista 'RUD'.
+            Requiere el permiso de 'Edit' para la vista 'RUDOP'.
             La ruta debe estar en estado 'CARGUE_REGISTRADO' para edición por el SupervisorRuta.
             </remarks>
             <param name="id">El ID del registro de log a editar.</param>
@@ -1123,7 +1296,7 @@
             Actualiza un registro de la ruta existente, utilizado para insertar KM inicial del vehiculo.
             </summary>
             <remarks>
-            Requiere el permiso de 'Edit' para la vista 'RUD' (para completar el registro).
+            Requiere el permiso de 'Edit' para la vista 'RUDOP' (para completar el registro).
             </remarks>
             <param name="id">El ID del registro de la ruta a actualizar.</param>
         </member>
@@ -1132,7 +1305,7 @@
             Muestra el formulario para descargar el efectivo de la ruta.
             </summary>
             <remarks>
-            Requiere el permiso de 'Edit' para la vista 'RUD'.
+            Requiere el permiso de 'Edit' para la vista 'RUDCE'.
             La ruta debe estar en estado 'SALIDA_REGISTRADA' para edición por el CEF.
             </remarks>
             <param name="id">El ID del registro de log a editar.</param>
@@ -1143,7 +1316,7 @@
             Actualiza un registro de la ruta existente, utilizado para insertar bolsas de billetes y/o monedas.
             </summary>
             <remarks>
-            Requiere el permiso de 'Edit' para la vista 'RUD' (para completar el registro).
+            Requiere el permiso de 'Edit' para la vista 'RUDCE' (para completar el registro).
             </remarks>
             <param name="id">El ID del registro de la ruta a actualizar.</param>
         </member>
@@ -1152,7 +1325,7 @@
             Muestra el formulario para registrar la entrada del vehiculo a la empresa.
             </summary>
             <remarks>
-            Requiere el permiso de 'Edit' para la vista 'RUD'.
+            Requiere el permiso de 'Edit' para la vista 'RUDOP'.
             La ruta debe estar en estado 'DESCARGUE_REGISTRADO' para edición por el SupervisorRuta.
             </remarks>
             <param name="id">El ID del registro de log a editar.</param>
@@ -1163,7 +1336,7 @@
             Actualiza un registro de la ruta existente, utilizado para insertar KM final del vehiculo y cerrar la ruta.
             </summary>
             <remarks>
-            Requiere el permiso de 'Edit' para la vista 'RUD' (para completar el registro).
+            Requiere el permiso de 'Edit' para la vista 'RUDOP' (para completar el registro).
             </remarks>
             <param name="id">El ID del registro de la ruta a actualizar.</param>
         </member>
@@ -1239,6 +1412,7 @@
             <param name="exportService">Servicio para funcionalidades de exportación.</param>
             <param name="context">Contexto de la base de datos de la aplicación.</param>
             <param name="userManager">Administrador de usuarios para gestionar ApplicationUser.</param>
+            <param name="logger">Servicio de logging para el controlador.</param>
         </member>
         <member name="M:VCashApp.Controllers.UserController.Index(System.Int32,System.Int32,System.String,System.String,System.Nullable{System.Int32})">
             <summary>
@@ -1434,10 +1608,300 @@
         <member name="M:VCashApp.Migrations.AddUserNavigationCollections.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
             <inheritdoc />
         </member>
+        <member name="T:VCashApp.Migrations.AddCefModuleTables">
+            <inheritdoc />
+        </member>
+        <member name="M:VCashApp.Migrations.AddCefModuleTables.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:VCashApp.Migrations.AddCefModuleTables.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:VCashApp.Migrations.AddCefModuleTables.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="T:VCashApp.Models.ViewModels.CentroEfectivo.CefContainerProcessingViewModel">
+            <summary>
+            ViewModel for data entry during the processing (counting) of a cash container.
+            ViewModel para la entrada de datos durante el conteo de un contenedor de efectivo.
+            </summary>
+        </member>
+        <member name="T:VCashApp.Models.ViewModels.CentroEfectivo.CefValueDetailViewModel">
+            <summary>
+            ViewModel for data entry of a value detail (bill, coin, check, document) within a container.
+            ViewModel para la entrada de datos de un detalle de valor (billete, moneda, cheque, documento) dentro de un contenedor.
+            </summary>
+        </member>
+        <member name="T:VCashApp.Models.ViewModels.CentroEfectivo.CefIncidentViewModel">
+            <summary>
+            ViewModel for data entry of an incident associated with a container or value detail.
+            ViewModel para la entrada de datos de una novedad asociada a un contenedor o detalle de valor.
+            </summary>
+        </member>
+        <member name="T:VCashApp.Models.ViewModels.CentroEfectivo.CefDashboardViewModel">
+            <summary>
+            ViewModel for filters and pagination of the Cash Center dashboard.
+            ViewModel para los filtros y paginación del dashboard de Centro de Efectivo.
+            </summary>
+        </member>
+        <member name="T:VCashApp.Models.ViewModels.CentroEfectivo.CefTransactionCheckinViewModel">
+            <summary>
+            ViewModel for input data during the Check-in process of a new Cash Center Transaction.
+            ViewModel para la entrada de datos durante el proceso de Check-in de una nueva Transacción de Centro de Efectivo.
+            </summary>
+        </member>
+        <member name="T:VCashApp.Models.ViewModels.CentroEfectivo.CefTransactionReviewViewModel">
+            <summary>
+            ViewModel for displaying and processing the final review of a Cash Center transaction.
+            ViewModel para la visualización y procesamiento de la revisión final de una transacción de Centro de Efectivo.
+            </summary>
+        </member>
+        <member name="T:VCashApp.Models.ViewModels.CentroEfectivo.CefContainerSummaryViewModel">
+            <summary>
+            ViewModel for displaying a container summary in the review view.
+            ViewModel para el resumen de un contenedor en la vista de revisión.
+            </summary>
+        </member>
+        <member name="T:VCashApp.Models.ViewModels.CentroEfectivo.CefValueDetailSummaryViewModel">
+            <summary>
+            ViewModel for displaying a value detail summary in the review view.
+            ViewModel para el resumen de un detalle de valor en la vista de revisión.
+            </summary>
+        </member>
+        <member name="T:VCashApp.Models.ViewModels.CentroEfectivo.CefIncidentSummaryViewModel">
+            <summary>
+            ViewModel for displaying an incident summary in the review view.
+            ViewModel para el resumen de una novedad en la vista de revisión.
+            </summary>
+        </member>
+        <member name="T:VCashApp.Models.ViewModels.CentroEfectivo.CefTransactionSummaryViewModel">
+            <summary>
+            ViewModel for displaying a summary of a Cash Center transaction in listings.
+            ViewModel para la visualización resumida de una transacción de Centro de Efectivo en listados.
+            </summary>
+        </member>
+        <member name="T:VCashApp.Services.Cef.CefContainerService">
+            <summary>
+            Implementación del servicio para la gestión de Contenedores de Efectivo (Bolsas, Sobres).
+            </summary>
+        </member>
+        <member name="M:VCashApp.Services.Cef.CefContainerService.PrepareContainerProcessingViewModelAsync(System.Nullable{System.Int32},System.Int32)">
+            <inheritdoc/>
+        </member>
+        <member name="M:VCashApp.Services.Cef.CefContainerService.SaveContainerAndDetailsAsync(VCashApp.Models.ViewModels.CentroEfectivo.CefContainerProcessingViewModel,System.String)">
+            <inheritdoc/>
+        </member>
+        <member name="M:VCashApp.Services.Cef.CefContainerService.GetContainerWithDetailsAsync(System.Int32)">
+            <inheritdoc/>
+        </member>
+        <member name="M:VCashApp.Services.Cef.CefContainerService.GetContainersByTransactionIdAsync(System.Int32)">
+            <inheritdoc/>
+        </member>
+        <member name="T:VCashApp.Services.Cef.CefIncidentService">
+            <summary>
+            Implementación del servicio para la gestión de Novedades de Centro de Efectivo.
+            </summary>
+        </member>
+        <member name="M:VCashApp.Services.Cef.CefIncidentService.RegisterIncidentAsync(VCashApp.Models.ViewModels.CentroEfectivo.CefIncidentViewModel,System.String)">
+            <inheritdoc/>
+        </member>
+        <member name="M:VCashApp.Services.Cef.CefIncidentService.ResolveIncidentAsync(System.Int32,System.String)">
+            <inheritdoc/>
+        </member>
+        <member name="M:VCashApp.Services.Cef.CefIncidentService.GetIncidentsAsync(System.Nullable{System.Int32},System.Nullable{System.Int32},System.Nullable{System.Int32})">
+            <inheritdoc/>
+        </member>
+        <member name="M:VCashApp.Services.Cef.CefIncidentService.GetIncidentByIdAsync(System.Int32)">
+            <inheritdoc/>
+        </member>
+        <member name="M:VCashApp.Services.Cef.CefIncidentService.GetAllIncidentTypesAsync">
+            <inheritdoc/>
+        </member>
+        <member name="T:VCashApp.Services.Cef.CefTransactionService">
+            <summary>
+            Implementación del servicio para la gestión de Transacciones de Centro de Efectivo.
+            </summary>
+        </member>
+        <member name="M:VCashApp.Services.Cef.CefTransactionService.PrepareCheckinViewModelAsync(System.String,System.String,System.String,System.String)">
+            <inheritdoc/>
+        </member>
+        <member name="M:VCashApp.Services.Cef.CefTransactionService.ProcessCheckinViewModelAsync(VCashApp.Models.ViewModels.CentroEfectivo.CefTransactionCheckinViewModel,System.String,System.String)">
+            <inheritdoc/>
+        </member>
+        <member name="M:VCashApp.Services.Cef.CefTransactionService.GetCefTransactionByIdAsync(System.Int32)">
+            <inheritdoc/>
+        </member>
+        <member name="M:VCashApp.Services.Cef.CefTransactionService.GetFilteredCefTransactionsAsync(System.Nullable{System.Int32},System.Nullable{System.DateOnly},System.Nullable{System.DateOnly},System.Nullable{VCashApp.Enums.CefTransactionStatusEnum},System.String,System.Int32,System.Int32)">
+            <inheritdoc/>
+        </member>
+        <member name="M:VCashApp.Services.Cef.CefTransactionService.UpdateTransactionStatusAsync(System.Int32,VCashApp.Enums.CefTransactionStatusEnum,System.String)">
+            <inheritdoc/>
+        </member>
+        <member name="M:VCashApp.Services.Cef.CefTransactionService.PrepareReviewViewModelAsync(System.Int32)">
+            <inheritdoc/>
+        </member>
+        <member name="M:VCashApp.Services.Cef.CefTransactionService.ProcessReviewApprovalAsync(VCashApp.Models.ViewModels.CentroEfectivo.CefTransactionReviewViewModel,System.String)">
+            <inheritdoc/>
+        </member>
+        <member name="M:VCashApp.Services.Cef.CefTransactionService.GetValueDetailDescription(VCashApp.Models.Entities.CefValueDetail)">
+            <summary>
+            Helper para obtener una descripción legible de un detalle de valor.
+            </summary>
+        </member>
         <member name="T:VCashApp.Services.EmployeeService">
             <summary>
             Servicio para manejar la lógica de negocio relacionada con los empleados.
             </summary>
+        </member>
+        <member name="T:VCashApp.Services.ICefContainerService">
+            <summary>
+            Define las operaciones de servicio para la gestión de Contenedores de Efectivo (Bolsas, Sobres).
+            </summary>
+        </member>
+        <member name="M:VCashApp.Services.ICefContainerService.PrepareContainerProcessingViewModelAsync(System.Nullable{System.Int32},System.Int32)">
+            <summary>
+            Prepara un ViewModel para el procesamiento de un contenedor, sea nuevo o existente.
+            </summary>
+            <param name="containerId">ID del contenedor existente (opcional, para edición/continuar conteo).</param>
+            <param name="cefTransactionId">ID de la transacción CEF a la que pertenece (requerido para nuevos contenedores).</param>
+            <returns>Un ViewModel listo para la vista de procesamiento del contenedor.</returns>
+        </member>
+        <member name="M:VCashApp.Services.ICefContainerService.SaveContainerAndDetailsAsync(VCashApp.Models.ViewModels.CentroEfectivo.CefContainerProcessingViewModel,System.String)">
+            <summary>
+            Crea o actualiza un contenedor de efectivo (bolsa/sobre) y sus detalles de valores.
+            </summary>
+            <param name="viewModel">ViewModel con los datos del contenedor y sus detalles.</param>
+            <param name="processingUserId">ID del usuario que procesa el contenedor (cajero).</param>
+            <returns>El contenedor de CEF creado o actualizado.</returns>
+            <exception cref="T:System.InvalidOperationException">Se lanza si la transacción no es válida o hay errores de guardado.</exception>
+        </member>
+        <member name="M:VCashApp.Services.ICefContainerService.GetContainerWithDetailsAsync(System.Int32)">
+            <summary>
+            Obtiene un contenedor de efectivo por su ID, incluyendo sus detalles de valores y novedades.
+            </summary>
+            <param name="containerId">ID del contenedor.</param>
+            <returns>El contenedor de CEF si se encuentra, de lo contrario, null.</returns>
+        </member>
+        <member name="M:VCashApp.Services.ICefContainerService.GetContainersByTransactionIdAsync(System.Int32)">
+            <summary>
+            Obtiene una lista de contenedores para una transacción específica, incluyendo su jerarquía.
+            </summary>
+            <param name="transactionId">ID de la transacción CEF.</param>
+            <returns>Lista de contenedores.</returns>
+        </member>
+        <member name="T:VCashApp.Services.ICefIncidentService">
+            <summary>
+            Define las operaciones de servicio para la gestión de Novedades de Centro de Efectivo.
+            </summary>
+        </member>
+        <member name="M:VCashApp.Services.ICefIncidentService.RegisterIncidentAsync(VCashApp.Models.ViewModels.CentroEfectivo.CefIncidentViewModel,System.String)">
+            <summary>
+            Registra una nueva novedad asociada a una transacción, contenedor o detalle de valor.
+            </summary>
+            <param name="incidentViewModel">ViewModel con los datos de la novedad.</param>
+            <param name="reportedUserId">ID del usuario que reporta la novedad.</param>
+            <returns>La novedad creada.</returns>
+            <exception cref="T:System.InvalidOperationException">Se lanza si la novedad no puede ser registrada debido a IDs inválidos.</exception>
+        </member>
+        <member name="M:VCashApp.Services.ICefIncidentService.ResolveIncidentAsync(System.Int32,System.String)">
+            <summary>
+            Resuelve el estado de una novedad.
+            </summary>
+            <param name="incidentId">ID de la novedad a resolver.</param>
+            <param name="newStatus">El nuevo estado de la novedad (ej: 'Resuelta', 'Ajustada').</param>
+            <returns>Verdadero si la novedad fue resuelta exitosamente, de lo contrario, falso.</returns>
+        </member>
+        <member name="M:VCashApp.Services.ICefIncidentService.GetIncidentsAsync(System.Nullable{System.Int32},System.Nullable{System.Int32},System.Nullable{System.Int32})">
+            <summary>
+            Obtiene una lista de novedades filtradas por transacción o contenedor.
+            </summary>
+            <param name="transactionId">ID de la transacción (opcional).</param>
+            <param name="containerId">ID del contenedor (opcional).</param>
+            <param name="valueDetailId">ID del detalle de valor (opcional).</param>
+            <returns>Lista de novedades.</returns>
+        </member>
+        <member name="M:VCashApp.Services.ICefIncidentService.GetIncidentByIdAsync(System.Int32)">
+            <summary>
+            Obtiene una novedad específica por su ID.
+            </summary>
+            <param name="incidentId">ID de la novedad.</param>
+            <returns>La novedad si se encuentra, de lo contrario, null.</returns>
+        </member>
+        <member name="M:VCashApp.Services.ICefIncidentService.GetAllIncidentTypesAsync">
+            <summary>
+            Obtiene todos los tipos de novedad disponibles desde la tabla maestra `Adm_TiposNovedad`.
+            </summary>
+            <returns>Lista de entidades AdmTipoNovedad.</returns>
+        </member>
+        <member name="T:VCashApp.Services.ICefTransactionService">
+            <summary>
+            Define las operaciones de servicio para la gestión de Transacciones de Centro de Efectivo.
+            </summary>
+        </member>
+        <member name="M:VCashApp.Services.ICefTransactionService.PrepareCheckinViewModelAsync(System.String,System.String,System.String,System.String)">
+            <summary>
+            Prepara el ViewModel para la vista de Check-in de una nueva transacción.
+            </summary>
+            <param name="serviceOrderId">La Orden de Servicio para la que se prepara el check-in.</param>
+            <param name="routeId">La ID de la Ruta Diaria asociada (opcional).</param>
+            <param name="currentUserId">La ID del usuario actual.</param>
+            <param name="currentIP">La dirección IP del usuario actual.</param>
+            <returns>Un ViewModel listo para la vista de Check-in.</returns>
+        </member>
+        <member name="M:VCashApp.Services.ICefTransactionService.ProcessCheckinViewModelAsync(VCashApp.Models.ViewModels.CentroEfectivo.CefTransactionCheckinViewModel,System.String,System.String)">
+            <summary>
+            Procesa los datos del Check-in y crea una nueva transacción de Centro de Efectivo.
+            </summary>
+            <param name="viewModel">El ViewModel con los datos de Check-in ingresados.</param>
+            <param name="currentUserId">ID del usuario que realiza la operación.</param>
+            <param name="currentIP">Dirección IP desde donde se realiza la operación.</param>
+            <returns>La entidad CefTransaccion creada.</returns>
+            <exception cref="T:System.InvalidOperationException">Se lanza si la Orden de Servicio no es válida o ya tiene una transacción CEF.</exception>
+        </member>
+        <member name="M:VCashApp.Services.ICefTransactionService.GetCefTransactionByIdAsync(System.Int32)">
+            <summary>
+            Obtiene una transacción de Centro de Efectivo por su ID, incluyendo detalles necesarios para el procesamiento.
+            </summary>
+            <param name="transactionId">ID de la transacción de CEF.</param>
+            <returns>La transacción de CEF si se encuentra, de lo contrario, null.</returns>
+        </member>
+        <member name="M:VCashApp.Services.ICefTransactionService.GetFilteredCefTransactionsAsync(System.Nullable{System.Int32},System.Nullable{System.DateOnly},System.Nullable{System.DateOnly},System.Nullable{VCashApp.Enums.CefTransactionStatusEnum},System.String,System.Int32,System.Int32)">
+            <summary>
+            Obtiene una lista paginada y filtrada de transacciones de Centro de Efectivo para el dashboard de Check-in o revisión.
+            </summary>
+            <param name="branchId">Filtro por ID de sucursal.</param>
+            <param name="startDate">Fecha de inicio para el filtro.</param>
+            <param name="endDate">Fecha de fin para el filtro.</param>
+            <param name="status">Estado de la transacción para el filtro.</param>
+            <param name="searchTerm">Término de búsqueda.</param>
+            <param name="pageNumber">Número de página.</param>
+            <param name="pageSize">Tamaño de la página.</param>
+            <returns>Una tupla que contiene la lista de transacciones y el total de registros.</returns>
+        </member>
+        <member name="M:VCashApp.Services.ICefTransactionService.UpdateTransactionStatusAsync(System.Int32,VCashApp.Enums.CefTransactionStatusEnum,System.String)">
+            <summary>
+            Actualiza el estado de una transacción de Centro de Efectivo.
+            </summary>
+            <param name="transactionId">ID de la transacción a actualizar.</param>
+            <param name="newStatus">El nuevo estado de la transacción (enum CefTransactionStatusEnum).</param>
+            <param name="reviewerUserId">ID del usuario que realiza la actualización.</param>
+            <returns>Verdadero si la actualización fue exitosa, de lo contrario, falso.</returns>
+            <exception cref="T:System.InvalidOperationException">Se lanza si la transacción no se encuentra o no está en un estado válido para la actualización.</exception>
+        </member>
+        <member name="M:VCashApp.Services.ICefTransactionService.PrepareReviewViewModelAsync(System.Int32)">
+            <summary>
+            Prepara el ViewModel para la revisión de una transacción de Centro de Efectivo.
+            </summary>
+            <param name="transactionId">ID de la transacción a revisar.</param>
+            <returns>Un ViewModel con los datos de revisión de la transacción.</returns>
+        </member>
+        <member name="M:VCashApp.Services.ICefTransactionService.ProcessReviewApprovalAsync(VCashApp.Models.ViewModels.CentroEfectivo.CefTransactionReviewViewModel,System.String)">
+            <summary>
+            Procesa la aprobación o rechazo final de una transacción por parte del supervisor revisor.
+            </summary>
+            <param name="viewModel">El ViewModel con los datos de revisión y el nuevo estado.</param>
+            <param name="reviewerUserId">ID del usuario revisor.</param>
+            <returns>Verdadero si el proceso fue exitoso, de lo contrario, falso.</returns>
         </member>
         <member name="T:VCashApp.Services.IEmployeeLogService">
             <summary>
@@ -1744,6 +2208,19 @@
             Lanza <see cref="T:System.InvalidOperationException"/> si la ruta no está en estado 'DESCARGUE_REGISTRADO',
             si los datos de kilometraje/fecha/hora son inválidos, o si la fecha/hora de entrada es anterior a la de salida.
             </returns>
+        </member>
+        <member name="M:VCashApp.Services.IRutaDiariaService.GetFilteredRutasForExportAsync(System.String,System.Nullable{System.Int32},System.Nullable{System.DateOnly},System.Nullable{System.Int32},System.String,System.Boolean)">
+            <summary>
+            Obtiene una lista filtrada de rutas diarias para exportación, utilizando un Stored Procedure.
+            Este método es ideal para consultas complejas que pueden causar problemas de traducción en LINQ.
+            </summary>
+            <param name="userId">El ID del usuario que realiza la solicitud para filtrar por permisos.</param>
+            <param name="codSuc">El código de la sucursal para filtrar.</param>
+            <param name="fechaEjecucion">La fecha de ejecución para filtrar.</param>
+            <param name="estado">El estado de la ruta para filtrar.</param>
+            <param name="search">El término de búsqueda a aplicar.</param>
+            <param name="isAdmin">Indica si el usuario es administrador para omitir el filtro de permisos.</param>
+            <returns>Una lista de entidades <see cref="T:VCashApp.Models.Entities.TdvRutaDiaria"/> que coinciden con los filtros.</returns>
         </member>
         <member name="T:VCashApp.Services.IUserService">
             <summary>

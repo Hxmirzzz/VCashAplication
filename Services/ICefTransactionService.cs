@@ -1,0 +1,79 @@
+﻿using VCashApp.Models.Entities;
+using VCashApp.Models.ViewModels.CentroEfectivo;
+using VCashApp.Enums;
+
+namespace VCashApp.Services
+{
+    /// <summary>
+    /// Define las operaciones de servicio para la gestión de Transacciones de Centro de Efectivo.
+    /// </summary>
+    public interface ICefTransactionService
+    {
+        /// <summary>
+        /// Prepara el ViewModel para la vista de Check-in de una nueva transacción.
+        /// </summary>
+        /// <param name="serviceOrderId">La Orden de Servicio para la que se prepara el check-in.</param>
+        /// <param name="routeId">La ID de la Ruta Diaria asociada (opcional).</param>
+        /// <param name="currentUserId">La ID del usuario actual.</param>
+        /// <param name="currentIP">La dirección IP del usuario actual.</param>
+        /// <returns>Un ViewModel listo para la vista de Check-in.</returns>
+        Task<CefTransactionCheckinViewModel> PrepareCheckinViewModelAsync(string serviceOrderId, string? routeId, string currentUserId, string currentIP);
+
+        /// <summary>
+        /// Procesa los datos del Check-in y crea una nueva transacción de Centro de Efectivo.
+        /// </summary>
+        /// <param name="viewModel">El ViewModel con los datos de Check-in ingresados.</param>
+        /// <param name="currentUserId">ID del usuario que realiza la operación.</param>
+        /// <param name="currentIP">Dirección IP desde donde se realiza la operación.</param>
+        /// <returns>La entidad CefTransaccion creada.</returns>
+        /// <exception cref="InvalidOperationException">Se lanza si la Orden de Servicio no es válida o ya tiene una transacción CEF.</exception>
+        Task<CefTransaction> ProcessCheckinViewModelAsync(CefTransactionCheckinViewModel viewModel, string currentUserId, string currentIP);
+
+        /// <summary>
+        /// Obtiene una transacción de Centro de Efectivo por su ID, incluyendo detalles necesarios para el procesamiento.
+        /// </summary>
+        /// <param name="transactionId">ID de la transacción de CEF.</param>
+        /// <returns>La transacción de CEF si se encuentra, de lo contrario, null.</returns>
+        Task<CefTransaction?> GetCefTransactionByIdAsync(int transactionId);
+
+        /// <summary>
+        /// Obtiene una lista paginada y filtrada de transacciones de Centro de Efectivo para el dashboard de Check-in o revisión.
+        /// </summary>
+        /// <param name="branchId">Filtro por ID de sucursal.</param>
+        /// <param name="startDate">Fecha de inicio para el filtro.</param>
+        /// <param name="endDate">Fecha de fin para el filtro.</param>
+        /// <param name="status">Estado de la transacción para el filtro.</param>
+        /// <param name="searchTerm">Término de búsqueda.</param>
+        /// <param name="pageNumber">Número de página.</param>
+        /// <param name="pageSize">Tamaño de la página.</param>
+        /// <returns>Una tupla que contiene la lista de transacciones y el total de registros.</returns>
+        Task<Tuple<List<CefTransactionSummaryViewModel>, int>> GetFilteredCefTransactionsAsync(
+            int? branchId, DateOnly? startDate, DateOnly? endDate, CefTransactionStatusEnum? status,
+            string? searchTerm, int pageNumber, int pageSize);
+
+        /// <summary>
+        /// Actualiza el estado de una transacción de Centro de Efectivo.
+        /// </summary>
+        /// <param name="transactionId">ID de la transacción a actualizar.</param>
+        /// <param name="newStatus">El nuevo estado de la transacción (enum CefTransactionStatusEnum).</param>
+        /// <param name="reviewerUserId">ID del usuario que realiza la actualización.</param>
+        /// <returns>Verdadero si la actualización fue exitosa, de lo contrario, falso.</returns>
+        /// <exception cref="InvalidOperationException">Se lanza si la transacción no se encuentra o no está en un estado válido para la actualización.</exception>
+        Task<bool> UpdateTransactionStatusAsync(int transactionId, CefTransactionStatusEnum newStatus, string reviewerUserId);
+
+        /// <summary>
+        /// Prepara el ViewModel para la revisión de una transacción de Centro de Efectivo.
+        /// </summary>
+        /// <param name="transactionId">ID de la transacción a revisar.</param>
+        /// <returns>Un ViewModel con los datos de revisión de la transacción.</returns>
+        Task<CefTransactionReviewViewModel?> PrepareReviewViewModelAsync(int transactionId);
+
+        /// <summary>
+        /// Procesa la aprobación o rechazo final de una transacción por parte del supervisor revisor.
+        /// </summary>
+        /// <param name="viewModel">El ViewModel con los datos de revisión y el nuevo estado.</param>
+        /// <param name="reviewerUserId">ID del usuario revisor.</param>
+        /// <returns>Verdadero si el proceso fue exitoso, de lo contrario, falso.</returns>
+        Task<bool> ProcessReviewApprovalAsync(CefTransactionReviewViewModel viewModel, string reviewerUserId);
+    }
+}

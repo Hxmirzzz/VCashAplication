@@ -27,6 +27,7 @@ namespace VCashApp.Data
         public DbSet<AdmPais> AdmPaises { get; set; }
         public DbSet<AdmDepartamento> AdmDepartamentos { get; set; }
         public DbSet<AdmCiudad> AdmCiudades { get; set; }
+        public DbSet<AdmCliente> AdmClientes { get; set; }
         public DbSet<AdmEmpleado> AdmEmpleados { get; set; }
         public DbSet<AdmVehiculo> AdmVehiculos { get; set; }
         public DbSet<AdmSucursal> AdmSucursales { get; set; }
@@ -36,6 +37,12 @@ namespace VCashApp.Data
         public DbSet<AdmConcepto> AdmConceptos { get; set; }
         public DbSet<AdmConsecutivo> AdmConsecutivos { get; set; }
         public DbSet<AdmServicio> AdmServicios { get; set; }
+        public DbSet<CgsLocationType> CgsLocationTypes { get; set; }
+        public DbSet<CefTransaction> CefTransactions { get; set; }
+        public DbSet<CefContainer> CefContainers { get; set; }
+        public DbSet<CefValueDetail> CefValueDetails { get; set; }
+        public DbSet<CefIncident> CefIncidents { get; set; }
+        public DbSet<CefIncidentType> CefIncidentTypes { get; set; }
         public DbSet<TdvRutaDiaria> TdvRutasDiarias { get; set; }
         // public DbSet<TdvRutaDetallePunto> TdvRutaDetallePuntos { get; set; }
 
@@ -76,12 +83,31 @@ namespace VCashApp.Data
                 entity.HasOne(p => p.Vista).WithMany().HasForeignKey(p => p.CodVista).IsRequired(false).OnDelete(DeleteBehavior.Restrict);
             });
 
-            // Mapeo para AdmVista
             builder.Entity<AdmVista>(entity => {
                 entity.HasKey(v => v.CodVista);
                 entity.Property(v => v.CodVista).IsRequired().HasMaxLength(50); // Ajusta la longitud si es necesario
                 entity.Property(v => v.NombreVista).HasMaxLength(100);
                 entity.Property(v => v.RolAsociado).HasMaxLength(50); // El campo 'rol' que describes
+            });
+
+            builder.Entity<AdmCliente>(entity =>{
+                entity.HasKey(c => c.CodigoCliente);
+                entity.Property(c => c.CodigoCliente).ValueGeneratedOnAdd();
+
+                entity.Property(c => c.NombreCliente).IsRequired().HasMaxLength(255);
+                entity.Property(c => c.RazonSocial).IsRequired().HasMaxLength(255);
+                entity.Property(c => c.SiglasCliente).IsRequired().HasMaxLength(5);
+                entity.Property(c => c.TipoDocumento).IsRequired();
+                entity.Property(c => c.NumeroDocumento).IsRequired();
+                entity.Property(c => c.Contacto1).HasMaxLength(255);
+                entity.Property(c => c.CargoContacto1).HasMaxLength(255);
+                entity.Property(c => c.Contacto2).HasMaxLength(255);
+                entity.Property(c => c.CargoContacto2).HasMaxLength(255);
+                entity.Property(c => c.PaginaWeb).HasMaxLength(255);
+                entity.Property(c => c.Telefono).HasMaxLength(50);
+                entity.Property(c => c.Direccion).HasMaxLength(255);
+
+                entity.HasOne(c => c.Ciudad).WithMany().HasForeignKey(c => c.CodCiudad).IsRequired().OnDelete(DeleteBehavior.Restrict);
             });
 
             builder.Entity<AdmUnidad>(entity => {
@@ -233,6 +259,156 @@ namespace VCashApp.Data
                 entity.HasOne(s => s.Sucursal).WithMany().HasForeignKey(s => s.CodSucursal).IsRequired(false);
                 entity.HasOne(s => s.Concepto).WithMany().HasForeignKey(s => s.CodConcepto).IsRequired(false);
                 entity.HasOne(s => s.Estado).WithMany().HasForeignKey(s => s.CodEstado).IsRequired(false);
+            });
+
+
+            builder.Entity<CgsLocationType>(entity => {
+                entity.ToTable("CgsTiposUbicacion");
+                entity.HasKey(l => l.Id);
+                entity.Property(l => l.Id).IsRequired();
+                entity.Property(l => l.TypeName).IsRequired().HasMaxLength(50);
+            });
+
+            builder.Entity<CefTransaction>(entity => {
+                entity.ToTable("CefTransacciones");
+                entity.HasKey(t => t.Id);
+                entity.Property(t => t.Id).ValueGeneratedOnAdd();
+
+                entity.Property(t => t.ServiceOrderId).IsRequired().HasColumnType("NVARCHAR(450)");
+                entity.Property(t => t.RouteId).IsRequired().HasColumnType("VARCHAR(12)");
+                entity.Property(t => t.SlipNumber).IsRequired();
+                entity.Property(t => t.Currency).IsRequired().HasMaxLength(3);
+                entity.Property(t => t.TransactionType).IsRequired().HasMaxLength(50);
+                entity.Property(t => t.DeclaredBagCount).IsRequired();
+                entity.Property(t => t.DeclaredEnvelopeCount).IsRequired();
+                entity.Property(t => t.DeclaredCheckCount).IsRequired();
+                entity.Property(t => t.DeclaredDocumentCount).IsRequired();
+                entity.Property(t => t.DeclaredBillValue).IsRequired().HasColumnType("DECIMAL(18,0)");
+                entity.Property(t => t.DeclaredCoinValue).IsRequired().HasColumnType("DECIMAL(18,0)");
+                entity.Property(t => t.DeclaredDocumentValue).IsRequired().HasColumnType("DECIMAL(18,0)");
+                entity.Property(t => t.TotalDeclaredValue).IsRequired().HasColumnType("DECIMAL(18,0)");
+                entity.Property(t => t.TotalDeclaredValueInWords).HasMaxLength(255);
+                entity.Property(t => t.TotalCountedValue).HasColumnType("DECIMAL(18,0)");
+                // .HasComputedColumnSql("ISNULL((SELECT SUM(CVD.CalculatedAmount) FROM Cef_ValueDetails CVD JOIN Cef_Containers CC ON CVD.CefContainerId = CC.Id WHERE CC.CefTransactionId = Cef_Transactions.Id), 0)");
+                entity.Property(t => t.TotalCountedValueInWords).HasMaxLength(255);
+                entity.Property(t => t.ValueDifference).HasColumnType("DECIMAL(18,0)");
+                // .HasComputedColumnSql("Cef_Transactions.TotalCountedValue - Cef_Transactions.TotalDeclaredValue");
+                entity.Property(t => t.InformativeIncident).HasMaxLength(255);
+                entity.Property(t => t.IsCustody).IsRequired();
+                entity.Property(t => t.IsPointToPoint).IsRequired();
+                entity.Property(t => t.TransactionStatus).IsRequired().HasMaxLength(50);
+                entity.Property(t => t.RegistrationDate).IsRequired().HasColumnType("DATETIME");
+                entity.Property(t => t.RegistrationUser).IsRequired().HasMaxLength(450);
+                entity.Property(t => t.CountingStartDate).HasColumnType("DATETIME");
+                entity.Property(t => t.CountingEndDate).HasColumnType("DATETIME");
+                entity.Property(t => t.LastUpdateDate).HasColumnType("DATETIME");
+                entity.Property(t => t.LastUpdateUser).HasMaxLength(450);
+                entity.Property(t => t.RegistrationIP).HasMaxLength(50);
+
+                // Relaciones
+                entity.HasOne<AdmServicio>().WithMany().HasForeignKey(t => t.ServiceOrderId).HasPrincipalKey(s => s.OrdenServicio).OnDelete(DeleteBehavior.Restrict);
+                entity.HasOne<TdvRutaDiaria>().WithMany().HasForeignKey(t => t.RouteId).HasPrincipalKey(r => r.Id).IsRequired(false).OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasOne<ApplicationUser>().WithMany().HasForeignKey(t => t.RegistrationUser).HasPrincipalKey(u => u.Id).OnDelete(DeleteBehavior.Restrict);
+                entity.HasOne<ApplicationUser>().WithMany().HasForeignKey(t => t.CountingUserBillId).HasPrincipalKey(u => u.Id).IsRequired(false).OnDelete(DeleteBehavior.Restrict);
+                entity.HasOne<ApplicationUser>().WithMany().HasForeignKey(t => t.CountingUserCoinId).HasPrincipalKey(u => u.Id).IsRequired(false).OnDelete(DeleteBehavior.Restrict);
+                entity.HasOne<ApplicationUser>().WithMany().HasForeignKey(t => t.ReviewerUserId).HasPrincipalKey(u => u.Id).IsRequired(false).OnDelete(DeleteBehavior.Restrict);
+                entity.HasOne<ApplicationUser>().WithMany().HasForeignKey(t => t.VaultUserId).HasPrincipalKey(u => u.Id).IsRequired(false).OnDelete(DeleteBehavior.Restrict);
+                entity.HasOne<ApplicationUser>().WithMany().HasForeignKey(t => t.LastUpdateUser).HasPrincipalKey(u => u.Id).IsRequired(false).OnDelete(DeleteBehavior.Restrict);
+            });
+
+            builder.Entity<CefContainer>(entity =>
+            {
+                entity.ToTable("CefContenedores");
+                entity.HasKey(c => c.Id);
+                entity.Property(c => c.Id).ValueGeneratedOnAdd();
+
+                entity.Property(c => c.CefTransactionId).IsRequired();
+                entity.Property(c => c.ContainerType).IsRequired().HasMaxLength(50);
+                entity.Property(c => c.ContainerCode).IsRequired().HasMaxLength(100);
+                entity.Property(c => c.DeclaredValue).HasColumnType("DECIMAL(18,0)");
+                entity.Property(c => c.CountedValue).HasColumnType("DECIMAL(18,0)");
+                // .HasComputedColumnSql("ISNULL((SELECT SUM(CVD.CalculatedAmount) FROM Cef_ValueDetails CVD WHERE CVD.CefContainerId = Cef_Containers.Id), 0)");
+                entity.Property(c => c.ContainerStatus).IsRequired().HasMaxLength(50);
+                entity.Property(c => c.Observations).HasMaxLength(255);
+                entity.Property(c => c.ProcessingUserId).HasMaxLength(450);
+                entity.Property(c => c.ProcessingDate).HasColumnType("DATETIME");
+                entity.Property(c => c.ClientCashierId).HasColumnType("INT");
+                entity.Property(c => c.ClientCashierName).HasMaxLength(255);
+                entity.Property(c => c.ClientEnvelopeDate).HasColumnType("DATE");
+
+                // Relaciones
+                entity.HasOne(c => c.CefTransaction).WithMany(t => t.Containers).HasForeignKey(c => c.CefTransactionId).OnDelete(DeleteBehavior.Cascade);
+                entity.HasOne(c => c.ParentContainer).WithMany(p => p.ChildContainers).HasForeignKey(c => c.ParentContainerId).IsRequired(false).OnDelete(DeleteBehavior.Restrict);
+                entity.HasOne<ApplicationUser>().WithMany().HasForeignKey(c => c.ProcessingUserId).HasPrincipalKey(u => u.Id).OnDelete(DeleteBehavior.Restrict);
+
+                entity.Property(c => c.ContainerType).HasConversion<string>();
+                entity.Property(c => c.ContainerStatus).HasConversion<string>();
+            });
+
+            builder.Entity<CefValueDetail>(entity =>
+            {
+                entity.ToTable("CefDetallesValores");
+                entity.HasKey(v => v.Id);
+                entity.Property(v => v.Id).ValueGeneratedOnAdd();
+
+                entity.Property(v => v.CefContainerId).IsRequired();
+                entity.Property(v => v.ValueType).IsRequired().HasMaxLength(50);
+                entity.Property(v => v.Denomination).IsRequired().HasColumnType("DECIMAL(18,0)");
+                entity.Property(v => v.Quantity).IsRequired();
+                entity.Property(v => v.BundlesCount).IsRequired(false);
+                entity.Property(v => v.LoosePiecesCount).IsRequired(false);
+                entity.Property(v => v.UnitValue).HasColumnType("DECIMAL(18,0)");
+                entity.Property(v => v.CalculatedAmount).HasColumnType("DECIMAL(18,0)");
+                // .HasComputedColumnSql("ISNULL(d.Denomination, d.UnitValue) * d.Quantity", stored: true); // Almacenado para consistencia
+                entity.Property(v =>v.IsHighDenomination).IsRequired(false);
+                entity.Property(v => v.IdentifierNumber).HasMaxLength(100);
+                entity.Property(v => v.BankName).HasMaxLength(100);
+                entity.Property(v => v.IssueDate).HasColumnType("DATE");
+                entity.Property(v => v.Issuer).HasMaxLength(255);
+                entity.Property(v => v.Observations).HasMaxLength(255);
+
+                // Relaciones
+                entity.HasOne(c => c.CefContainer).WithMany(t => t.ValueDetails).HasForeignKey(c => c.CefContainerId).OnDelete(DeleteBehavior.Cascade);
+                entity.Property(v => v.ValueType).HasConversion<string>();
+            });
+
+            builder.Entity<CefIncident>(entity =>
+            {
+                entity.ToTable("CefNovedades");
+                entity.HasKey(i => i.Id);
+                entity.Property(i => i.Id).ValueGeneratedOnAdd();
+
+                entity.Property(i => i.IncidentTypeId).IsRequired();
+                entity.Property(i => i.AffectedAmount).IsRequired().HasColumnType("DECIMAL(18,0)");
+                entity.Property(i => i.AffectedDenomination).IsRequired().HasColumnType("DECIMAL(18,0)");
+                entity.Property(i => i.AffectedQuantity).IsRequired(false);
+                entity.Property(i => i.Description).IsRequired().HasMaxLength(255);
+                entity.Property(i => i.ReportedUserId).IsRequired().HasMaxLength(450);
+                entity.Property(i => i.IncidentDate).IsRequired().HasColumnType("DATETIME");
+                entity.Property(i => i.IncidentStatus).IsRequired().HasMaxLength(50);
+
+                // Relaciones
+                entity.HasOne(i => i.CefTransaction).WithMany(t => t.Incidents).HasForeignKey(i => i.CefTransactionId).IsRequired(false).OnDelete(DeleteBehavior.Restrict);
+                entity.HasOne(i => i.CefContainer).WithMany(c => c.Incidents).HasForeignKey(i => i.CefContainerId).IsRequired(false).OnDelete(DeleteBehavior.Restrict);
+                entity.HasOne(i => i.CefValueDetail).WithMany(vd => vd.Incidents).HasForeignKey(i => i.CefValueDetailId).IsRequired(false).OnDelete(DeleteBehavior.Restrict);
+                entity.HasOne(i => i.IncidentType).WithMany().HasForeignKey(i => i.IncidentTypeId).OnDelete(DeleteBehavior.Restrict);
+                entity.HasOne<ApplicationUser>().WithMany().HasForeignKey(i => i.ReportedUserId).HasPrincipalKey(u => u.Id).OnDelete(DeleteBehavior.Restrict);
+                entity.Property(i => i.IncidentStatus).HasConversion<string>();
+            });
+
+
+            builder.Entity<CefIncidentType>(entity =>
+            {
+                entity.ToTable("CefTiposNovedad");
+                entity.HasKey(it => it.Id);
+                entity.Property(it => it.Id).ValueGeneratedOnAdd();
+
+                entity.Property(it => it.Code).IsRequired().HasMaxLength(50);
+                entity.Property(it => it.Description).HasMaxLength(255);
+                entity.Property(it => it.AppliesTo).IsRequired().HasMaxLength(50); // 'Container', 'ValueDetail', 'Transaction'
+
+                entity.Property(it => it.AppliesTo).HasConversion<string>();
             });
 
             // Mapeo para TdvRutasDiarias (definido en Models/Entities/TdvRutasDiarias.cs)

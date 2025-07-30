@@ -1,0 +1,347 @@
+﻿@model VCashApp.Models.ViewModels.CentroEfectivo.CefContainerProcessingViewModel
+@{
+    ViewData["Title"] = "Procesar Contenedores CEF";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="main-content-container">
+    <div class="section-header">
+        <h1>Procesar Contenedores - Planilla: @ViewBag.TransactionNumber</h1>
+        <p>Estado de la Transacción: <span class="badge bg-info">@ViewBag.TransactionStatus</span></p>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <h4 class="mb-0">Detalles del Contenedor</h4>
+        </div>
+        <div class="card-body">
+            <form id="containerProcessingForm" asp-action="ProcessContainers" asp-controller="Cef" method="post">
+                @Html.AntiForgeryToken()
+                <input type="hidden" asp-for="CefTransactionId" />
+                <input type="hidden" asp-for="Id" />
+
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                <div class="form-section">
+                    <h3>Selección y Datos Generales</h3>
+                    <hr />
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label for="selectContainer" class="control-label">Seleccionar Contenedor Existente:</label>
+                                <select id="selectContainer" class="form-control form-control-sm" onchange="loadContainerDetails()">
+                                    <option value="0">-- Nuevo Contenedor --</option>
+                                    @foreach (var containerItem in ViewBag.AvailableContainers)
+                                    {
+                                        <option value="@containerItem.Value" selected="@(Model.Id.ToString() == containerItem.Value.ToString())">@containerItem.Text</option>
+                                    }
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label asp-for="ParentContainerId" class="control-label"></label>
+                                <input asp-for="ParentContainerId" type="number" class="form-control form-control-sm" placeholder="Si es sobre, ID de la bolsa" />
+                                <span asp-validation-for="ParentContainerId" class="text-danger"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label asp-for="ContainerType" class="control-label"></label>
+                                <select asp-for="ContainerType" asp-items="Html.GetEnumSelectList<VCashApp.Enums.CefContainerTypeEnum>()" class="form-control form-control-sm">
+                                    <option value="">-- Seleccionar --</option>
+                                </select>
+                                <span asp-validation-for="ContainerType" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label asp-for="ContainerCode" class="control-label"></label>
+                                <input asp-for="ContainerCode" class="form-control form-control-sm" />
+                                <span asp-validation-for="ContainerCode" class="text-danger"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label asp-for="DeclaredValue" class="control-label"></label>
+                                <input asp-for="DeclaredValue" type="number" step="1" class="form-control form-control-sm" />
+                                <span asp-validation-for="DeclaredValue" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label asp-for="CurrentCountedValue" class="control-label"></label>
+                                <input asp-for="CurrentCountedValue" type="number" step="1" class="form-control form-control-sm" readonly />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label asp-for="Observations" class="control-label"></label>
+                        <textarea asp-for="Observations" class="form-control form-control-sm"></textarea>
+                        <span asp-validation-for="Observations" class="text-danger"></span>
+                    </div>
+                </div>
+
+                <div class="form-section mt-4">
+                    <h3>Detalles de Valores Contados</h3>
+                    <hr />
+                    <table class="table table-bordered table-sm" id="valueDetailsTable">
+                        <thead>
+                            <tr>
+                                <th>Tipo Valor</th>
+                                <th>Denominación/Valor Unitario</th>
+                                <th>Cantidad</th>
+                                <th>Fajos</th>
+                                <th>Picos</th>
+                                <th>Monto Calculado</th>
+                                <th>Identificador (Cheque/Doc)</th>
+                                <th>Banco</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (Model.ValueDetails != null)
+                            {
+                                for (int i = 0; i < Model.ValueDetails.Count; i++)
+                                {
+                                    @Html.Partial("_CefValueDetailRowPartial", Model.ValueDetails[i], new ViewDataDictionary(ViewData) { { "index", i } })
+                                }
+                            }
+                        </tbody>
+                    </table>
+                    <button type="button" class="btn btn-primary btn-sm" onclick="addValueDetailRow()">Añadir Detalle de Valor</button>
+                </div>
+
+                <div class="form-section mt-4">
+                    <h3>Novedades del Contenedor</h3>
+                    <hr />
+                    <table class="table table-bordered table-sm" id="incidentsTable">
+                        <thead>
+                            <tr>
+                                <th>Tipo Novedad</th>
+                                <th>Monto Afectado</th>
+                                <th>Denominación Afectada</th>
+                                <th>Cantidad Afectada</th>
+                                <th>Descripción</th>
+                                <th>Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (Model.Incidents != null)
+                            {
+                                for (int i = 0; i < Model.Incidents.Count; i++)
+                                {
+                                    @Html.Partial("_CefIncidentRowPartial", Model.Incidents[i], new ViewDataDictionary(ViewData) { { "index", i } })
+                                }
+                            }
+                        </tbody>
+                    </table>
+                    <button type="button" class="btn btn-warning btn-sm" onclick="addIncidentRow()">Añadir Novedad</button>
+                </div>
+
+                <div class="submit-container form-group col-md-12 mt-4">
+                    <button type="submit" class="btn btn-primary">Guardar Contenedor</button>
+                    <a asp-action="Index" class="btn btn-danger">Volver al Dashboard</a>
+                    <button type="button" class="btn btn-success" onclick="finalizeCounting(@ViewBag.TransactionId)">Finalizar Conteo y Enviar a Revisión</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    <script src="/js/form-control/modals.js"></script>
+    <script>
+        var valueDetailIndex = @(Model.ValueDetails?.Count ?? 0);
+        var incidentIndex = @(Model.Incidents?.Count ?? 0);
+
+        function addValueDetailRow() {
+            var template = $('#valueDetailTemplate').html();
+            var newRow = template.replace(/\[0\]/g, '[' + valueDetailIndex + ']');
+            $('#valueDetailsTable tbody').append(newRow);
+            $.validator.unobtrusive.parse('#valueDetailsTable tbody tr:last-child'); // Re-parsear validación para elementos nuevos
+            valueDetailIndex++;
+            updateCalculatedAmounts();
+            $(document).find('select[name$="[' + (valueDetailIndex - 1) + '].TipoValor"]').trigger('change'); // Disparar change para mostrar/ocultar campos
+        }
+
+        function addIncidentRow() {
+            var template = $('#incidentTemplate').html();
+            var newRow = template.replace(/\[0\]/g, '[' + incidentIndex + ']');
+            $('#incidentsTable tbody').append(newRow);
+            $.validator.unobtrusive.parse('#incidentsTable tbody tr:last-child');
+            incidentIndex++;
+        }
+
+        function removeRow(button) {
+            $(button).closest('tr').remove();
+            updateCalculatedAmounts();
+        }
+
+        function updateCalculatedAmounts() {
+            let totalContadoActual = 0;
+            $('#valueDetailsTable tbody tr').each(function () {
+                var tipoValor = $(this).find('select[name$=".TipoValor"]').val();
+                var cantidad = parseFloat($(this).find('input[name$=".Cantidad"]').val()) || 0;
+                var denominacion = parseFloat($(this).find('input[name$=".Denominacion"]').val()) || 0;
+                var valorUnitario = parseFloat($(this).find('input[name$=".ValorUnitario"]').val()) || 0;
+                var montoCalculado = 0;
+
+                // Usar nombres de enum en C# para comparar, que son los strings guardados en DB
+                if (tipoValor === '@(nameof(VCashApp.Enums.CefValueTypeEnum.Bill))' || tipoValor === '@(nameof(VCashApp.Enums.CefValueTypeEnum.Coin))') {
+                    montoCalculado = cantidad * denominacion;
+                } else if (tipoValor === '@(nameof(VCashApp.Enums.CefValueTypeEnum.Check))' || tipoValor === '@(nameof(VCashApp.Enums.CefValueTypeEnum.Document))') {
+                    montoCalculado = valorUnitario;
+                }
+                $(this).find('input[name$=".MontoCalculado"]').val(montoCalculado.toFixed(0)); // Ajustado a N0
+                totalContadoActual += montoCalculado;
+            });
+            $('#ValorContadoActual').val(totalContadoActual.toFixed(0)); // Ajustado a N0
+        }
+
+        $(document).on('change', 'select[name$=".TipoValor"]', function() {
+            var row = $(this).closest('tr');
+            var tipoValor = $(this).val();
+
+            // Selectores más específicos para los inputs
+            var denominacionInput = row.find('input[name$=".Denominacion"]');
+            var cantidadInput = row.find('input[name$=".Cantidad"]');
+            var fajosInput = row.find('input[name$=".CantidadFajos"]');
+            var picosInput = row.find('input[name$=".CantidadPicos"]');
+            var esAltaDenominacionCheckbox = row.find('input[name$=".EsAltaDenominacion"]');
+
+            var valorUnitarioInput = row.find('input[name$=".ValorUnitario"]');
+            var numeroIdentificadorInput = row.find('input[name$=".NumeroIdentificador"]');
+            var bancoInput = row.find('input[name$=".Banco"]');
+            var fechaEmisionInput = row.find('input[name$=".FechaEmision"]');
+            var emisorInput = row.find('input[name$=".Emisor"]');
+
+            var isBillOrCoin = (tipoValor === '@(nameof(VCashApp.Enums.CefValueTypeEnum.Bill))' || tipoValor === '@(nameof(VCashApp.Enums.CefValueTypeEnum.Coin))');
+            var isCheckOrDocument = (tipoValor === '@(nameof(VCashApp.Enums.CefValueTypeEnum.Check))' || tipoValor === '@(nameof(VCashApp.Enums.CefValueTypeEnum.Document))');
+
+            // Mostrar/ocultar y limpiar campos de billetes/monedas
+            denominacionInput.closest('td').toggle(isBillOrCoin);
+            cantidadInput.closest('td').toggle(isBillOrCoin);
+            fajosInput.closest('td').toggle(isBillOrCoin);
+            picosInput.closest('td').toggle(isBillOrCoin);
+            esAltaDenominacionCheckbox.closest('td').toggle(isBillOrCoin); // Si está en la misma celda
+
+            if (!isBillOrCoin) {
+                denominacionInput.val('');
+                cantidadInput.val('');
+                fajosInput.val('');
+                picosInput.val('');
+                esAltaDenominacionCheckbox.prop('checked', false);
+            }
+
+            // Mostrar/ocultar y limpiar campos de cheques/documentos
+            valorUnitarioInput.closest('td').toggle(isCheckOrDocument);
+            numeroIdentificadorInput.closest('td').toggle(isCheckOrDocument);
+            bancoInput.closest('td').toggle(isCheckOrDocument);
+            fechaEmisionInput.closest('td').toggle(isCheckOrDocument);
+            emisorInput.closest('td').toggle(isCheckOrDocument);
+
+            if (!isCheckOrDocument) {
+                valorUnitarioInput.val('');
+                numeroIdentificadorInput.val('');
+                bancoInput.val('');
+                fechaEmisionInput.val(''); // Considera establecer a null o DateOnly.MinValue si es DateTime
+                emisorInput.val('');
+            }
+
+            updateCalculatedAmounts();
+        }).trigger('change'); // Disparar en la carga inicial para filas existentes
+
+        // Eventos para recalcular el monto cuando cambian cantidad, denominación o valor unitario
+        $(document).on('input', 'input[name$=".Denominacion"], input[name$=".Cantidad"], input[name$=".ValorUnitario"]', updateCalculatedAmounts);
+
+        // Lógica para cargar detalles de un contenedor existente al seleccionar en el dropdown
+        function loadContainerDetails() {
+            var selectedContainerId = $('#selectContainer').val();
+            // Redirigir a la misma acción con el containerId para que el controlador cargue el ViewModel
+            // ViewBag.TransactionId viene del controlador
+            window.location.href = '@Url.Action("ProcessContainers", "Cef")?transactionId=' + @ViewBag.TransactionId + '&containerId=' + selectedContainerId;
+        }
+
+        // Script para submit AJAX del formulario (similar a Checkin)
+        $('#containerProcessingForm').on('submit', function(e) {
+            e.preventDefault();
+
+            if (!$(this).valid()) {
+                return;
+            }
+
+            var formData = $(this).serialize();
+
+            $.ajax({
+                url: '@Url.Action("ProcessContainers", "Cef")',
+                type: 'POST',
+                data: formData,
+                success: function(response) {
+                    if (response.success) {
+                        alert(response.message);
+                        // Redireccionar al siguiente paso (la misma vista con el contenedor recién guardado/actualizado)
+                        // response.data contendrá { containerId: X, transactionId: Y }
+                        window.location.href = '@Url.Action("ProcessContainers", "Cef")?transactionId=' + response.data.transactionId + '&containerId=' + response.data.containerId;
+                    } else {
+                        alert('Error: ' + response.message);
+                        if (response.errors) {
+                            $('.field-validation-error').text('').hide();
+                            $.each(response.errors, function(key, value) {
+                                var fieldName = key;
+                                var errorSpan = $('[data-valmsg-for="' + fieldName + '"]');
+                                if (errorSpan.length === 0) {
+                                    errorSpan = $('<span>').addClass('text-danger field-validation-error').attr('data-valmsg-for', fieldName);
+                                    $('[name="' + fieldName + '"]').after(errorSpan);
+                                }
+                                errorSpan.text(value.join(' ')).show();
+                            });
+                        }
+                    }
+                },
+                error: function(xhr, status, error) {
+                    alert('Error al conectar con el servidor: ' + error);
+                    console.error(xhr.responseText);
+                }
+            });
+        });
+
+        // Función para finalizar el conteo completo de la transacción
+        function finalizeCounting(transactionId) {
+            showConfirmationModal(
+                "¿Está seguro de finalizar el conteo de esta transacción y enviarla a revisión? Una vez finalizado, no podrá editar los contenedores.",
+                function (confirm) {
+                    if (confirm) {
+                        $.ajax({
+                            url: '@Url.Action("FinalizeCounting", "Cef")/' + transactionId,
+                            type: 'POST',
+                            headers: { 'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val() },
+                            success: function(response) {
+                                if (response.success) {
+                                    alert(response.message);
+                                    window.location.href = '@Url.Action("ReviewTransaction", "Cef")?transactionId=' + transactionId;
+                                } else {
+                                    alert('Error: ' + response.message);
+                                }
+                            },
+                            error: function(xhr, status, error) {
+                                alert('Error al finalizar el conteo: ' + error);
+                            }
+                        });
+                    }
+                },
+                "Confirmar Finalización",
+                null,
+                "btn-success",
+                false
+            );
+        }
+    </script>
+}

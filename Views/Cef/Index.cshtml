@@ -1,0 +1,192 @@
+﻿@model VCashApp.Models.ViewModels.CentroEfectivo.CefDashboardViewModel
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = "Centro de Efectivo";
+
+    string currentSearchTerm = Model.SearchTerm ?? "";
+    int currentPage = Model.CurrentPage;
+    int pageSize = Model.PageSize;
+    int totalPages = Model.TotalPages;
+    int totalData = Model.TotalData;
+
+    const int maxPagesToShow = 5;
+    int halfPagesToShow = (maxPagesToShow - 1) / 2;
+
+    int startPage = Math.Max(1, currentPage - halfPagesToShow);
+    int endPage = Math.Min(totalPages, currentPage + halfPagesToShow);
+
+    if (endPage - startPage + 1 < maxPagesToShow)
+    {
+        if (startPage == 1)
+        {
+            endPage = Math.Min(totalPages, startPage + maxPagesToShow - 1);
+        }
+        else if (endPage == totalPages)
+        {
+            startPage = Math.Max(1, endPage - maxPagesToShow + 1);
+        }
+    }
+}
+
+<div class="main-content-container">
+    <div class="section-header">
+        <div class="alert-container">
+            @if (TempData["SuccessMessage"] != null)
+            {
+                <div class="alert alert-success mt-2" role="alert">@TempData["SuccessMessage"]</div>
+            }
+            @if (TempData["ErrorMessage"] != null)
+            {
+                <div class="alert alert-danger mt-2" role="alert">@TempData["ErrorMessage"]</div>
+            }
+        </div>
+    </div>
+
+    <div class="search-container">
+        <div class="table-controls">
+            <input type="text" id="tableSearch" class="form-control form-control-sm" placeholder="Buscar por Orden, Planilla, Divisa..." value="@currentSearchTerm">
+            <div class="table-buttons">
+                    <div class="control-button-wrapper">
+                        <a href="@Url.Action("Checkin", "Cef")" class="control-button-icon" id="addCefTransactionButton" title="Registrar Nuevo Check-in">
+                            <img src="/assets/icon-img/add.png" alt="Registrar Check-in">
+                        </a>
+                    </div>
+                <div class="control-button-wrapper">
+                    <img src="/assets/icon-img/download.png" alt="Descargar" class="control-button-icon" id="downloadButton">
+                </div>
+                <div class="control-button-wrapper">
+                    <img src="/assets/icon-img/filter-on.png" alt="Filtros" class="control-button-icon" id="filterButton">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="filter-sidebar" id="filterSidebar">
+        <div class="filter-sidebar-content">
+            <h3>Filtros Avanzados</h3>
+
+            <div class="form-group">
+                <label for="filterBranchId">Sucursal:</label>
+                <select name="branchId" id="filterBranchId" class="form-control form-control-sm" asp-items="Model.AvailableBranches">
+                    <option value="">Todas</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="filterStartDate">Fecha Inicio:</label>
+                <input type="date" name="startDate" id="filterStartDate" class="form-control form-control-sm" value="@Model.CurrentStartDate?.ToString("yyyy-MM-dd")" />
+            </div>
+
+            <div class="form-group">
+                <label for="filterEndDate">Fecha Fin:</label>
+                <input type="date" name="endDate" id="filterEndDate" class="form-control form-control-sm" value="@Model.CurrentEndDate?.ToString("yyyy-MM-dd")" />
+            </div>
+
+            <div class="form-group">
+                <label for="filterStatus">Estado:</label>
+                <select name="status" id="filterStatus" class="form-control form-control-sm" asp-items="Model.TransactionStatuses">
+                    @* Las opciones ya incluyen "-- Seleccionar Estado --" desde el controlador *@
+                </select>
+            </div>
+
+            <div class="filter-buttons">
+                <div class="cancel-filter-btn" id="clearFilters">
+                    <img src="~/assets/icon-img/filter-off.png" alt="Limpiar Filtros" title="Limpiar Filtros" />
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="dataTablePartial">
+        @await Html.PartialAsync("_TransactionTablePartial", Model.Transactions, new ViewDataDictionary(ViewData))
+    </div>
+
+    <div class="table-footer">
+        <div class="page-message">Página @currentPage de @totalPages (Total: @totalData registros)</div>
+        <div class="pagination">
+            <button class="page-link" data-page="1" @(currentPage == 1 ? "disabled" : "")>&laquo;</button>
+
+            <button class="page-link" data-page="@(currentPage - 1)" @(currentPage == 1 ? "disabled" : "")>&lt;</button>
+
+            @if (startPage > 1)
+            {
+                <button class="page-link" data-page="@(startPage - 1)">...</button>
+            }
+
+            @for (int i = startPage; i <= endPage; i++)
+            {
+                <button class="page-link @(currentPage == i ? "active-page" : "")" data-page="@i">@i</button>
+            }
+
+            @if (endPage < totalPages)
+            {
+                <button class="page-link" data-page="@(endPage + 1)">...</button>
+            }
+
+            <button class="page-link" data-page="@(currentPage + 1)" @(currentPage == totalPages ? "disabled" : "")>&gt;</button>
+
+            <button class="page-link" data-page="@totalPages" @(currentPage == totalPages ? "disabled" : "")>&raquo;</button>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    <script src="/js/form-control/modals.js"></script>
+    <script src="/js/form-control/table-pagination-filters.js"></script>
+    <script>
+        $(document).ready(function () {
+            setupTablePaginationAndFilters({
+                tableContainerId: 'dataTablePartial',
+                controllerName: 'Cef',
+                actionName: 'Index',
+                searchInputId: 'tableSearch',
+                filterInputsSelector: '#filterBranchId, #filterStartDate, #filterEndDate, #filterStatus',
+                clearFiltersButtonId: 'clearFilters',
+                defaultPageSize: @pageSize
+            });
+
+            $('#downloadButton').on('click', function () {
+                showConfirmationModal(
+                    "Seleccione el formato de exportación deseado:",
+                    function (format) {
+                        if (!format) {
+                            alert("No se seleccionó un formato de exportación.");
+                            return;
+                        }
+
+                        var form = $('<form>', {
+                            'action': '@Url.Action("ExportTransactions", "Cef")',
+                            'method': 'GET',
+                            'target': '_blank', // Abrir en nueva pestaña
+                            'style': 'display:none;'
+                        }).appendTo('body');
+
+                        // Recolectar los filtros actuales
+                        var search = $("#tableSearch").val();
+                        var branchId = $("#filterBranchId").val();
+                        var startDate = $("#filterStartDate").val();
+                        var endDate = $("#filterEndDate").val();
+                        var status = $("#filterStatus").val();
+
+                        form.append($('<input>', { name: 'search', value: search }));
+                        form.append($('<input>', { name: 'branchId', value: branchId }));
+                        form.append($('<input>', { name: 'startDate', value: startDate }));
+                        form.append($('<input>', { name: 'endDate', value: endDate }));
+                        form.append($('<input>', { name: 'status', value: status }));
+                        form.append($('<input>', { name: 'exportFormat', value: format }));
+
+                        form.submit();
+                        form.remove();
+                    },
+                    "Exportar Datos CEF", // Título del modal
+                    null, // Aquí irían las opciones de formato si no son fijas (Excel, CSV, PDF)
+                    "btn-primary", // Clase del botón de acción
+                    true // Mostrar input de selección de formato (si tu modal lo soporta)
+                );
+            });
+        });
+    </script>
+}

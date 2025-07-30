@@ -48,7 +48,6 @@
                         </div>
                     </div>
 
-                    @* Campos de información base que se mostrarán como solo lectura o se rellenarán automáticamente *@
                     <div class="row mt-3">
                         <div class="form-group col-12 col-md-3">
                             <label class="control-label">Tipo de Ruta</label>
@@ -69,7 +68,7 @@
 
                 <div class="submit-container form-group col-md-12">
                     <button type="submit" class="btn btn-primary">Registrar</button>
-                    <button type="button" class="btn btn-danger" onclick="window.location.href='@Url.Action("ListGenerated", "RutasDiarias")'">Cancelar</button>
+                    <button type="button" class="btn btn-danger" onclick="window.location.href='@Url.Action("PlannerDashboard", "RutasDiarias")'">Cancelar</button>
                 </div>
             </form>
         </div>
