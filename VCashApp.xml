@@ -1620,63 +1620,65 @@
         <member name="M:VCashApp.Migrations.AddCefModuleTables.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
             <inheritdoc />
         </member>
+        <member name="T:VCashApp.Migrations.AddClientPointAndFoundModuleTables">
+            <inheritdoc />
+        </member>
+        <member name="M:VCashApp.Migrations.AddClientPointAndFoundModuleTables.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:VCashApp.Migrations.AddClientPointAndFoundModuleTables.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:VCashApp.Migrations.AddClientPointAndFoundModuleTables.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
         <member name="T:VCashApp.Models.ViewModels.CentroEfectivo.CefContainerProcessingViewModel">
             <summary>
-            ViewModel for data entry during the processing (counting) of a cash container.
             ViewModel para la entrada de datos durante el conteo de un contenedor de efectivo.
             </summary>
         </member>
         <member name="T:VCashApp.Models.ViewModels.CentroEfectivo.CefValueDetailViewModel">
             <summary>
-            ViewModel for data entry of a value detail (bill, coin, check, document) within a container.
             ViewModel para la entrada de datos de un detalle de valor (billete, moneda, cheque, documento) dentro de un contenedor.
             </summary>
         </member>
         <member name="T:VCashApp.Models.ViewModels.CentroEfectivo.CefIncidentViewModel">
             <summary>
-            ViewModel for data entry of an incident associated with a container or value detail.
             ViewModel para la entrada de datos de una novedad asociada a un contenedor o detalle de valor.
             </summary>
         </member>
         <member name="T:VCashApp.Models.ViewModels.CentroEfectivo.CefDashboardViewModel">
             <summary>
-            ViewModel for filters and pagination of the Cash Center dashboard.
             ViewModel para los filtros y paginación del dashboard de Centro de Efectivo.
             </summary>
         </member>
         <member name="T:VCashApp.Models.ViewModels.CentroEfectivo.CefTransactionCheckinViewModel">
             <summary>
-            ViewModel for input data during the Check-in process of a new Cash Center Transaction.
             ViewModel para la entrada de datos durante el proceso de Check-in de una nueva Transacción de Centro de Efectivo.
             </summary>
         </member>
         <member name="T:VCashApp.Models.ViewModels.CentroEfectivo.CefTransactionReviewViewModel">
             <summary>
-            ViewModel for displaying and processing the final review of a Cash Center transaction.
             ViewModel para la visualización y procesamiento de la revisión final de una transacción de Centro de Efectivo.
             </summary>
         </member>
         <member name="T:VCashApp.Models.ViewModels.CentroEfectivo.CefContainerSummaryViewModel">
             <summary>
-            ViewModel for displaying a container summary in the review view.
             ViewModel para el resumen de un contenedor en la vista de revisión.
             </summary>
         </member>
         <member name="T:VCashApp.Models.ViewModels.CentroEfectivo.CefValueDetailSummaryViewModel">
             <summary>
-            ViewModel for displaying a value detail summary in the review view.
             ViewModel para el resumen de un detalle de valor en la vista de revisión.
             </summary>
         </member>
         <member name="T:VCashApp.Models.ViewModels.CentroEfectivo.CefIncidentSummaryViewModel">
             <summary>
-            ViewModel for displaying an incident summary in the review view.
             ViewModel para el resumen de una novedad en la vista de revisión.
             </summary>
         </member>
         <member name="T:VCashApp.Models.ViewModels.CentroEfectivo.CefTransactionSummaryViewModel">
             <summary>
-            ViewModel for displaying a summary of a Cash Center transaction in listings.
             ViewModel para la visualización resumida de una transacción de Centro de Efectivo en listados.
             </summary>
         </member>

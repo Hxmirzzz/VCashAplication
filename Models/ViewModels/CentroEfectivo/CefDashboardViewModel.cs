@@ -1,12 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using VCashApp.Enums;
 
 namespace VCashApp.Models.ViewModels.CentroEfectivo
 {
     /// <summary>
-    /// ViewModel for filters and pagination of the Cash Center dashboard.
     /// ViewModel para los filtros y paginación del dashboard de Centro de Efectivo.
     /// </summary>
     public class CefDashboardViewModel
@@ -26,7 +23,6 @@ namespace VCashApp.Models.ViewModels.CentroEfectivo
         [Display(Name = "Estado Actual")]
         public CefTransactionStatusEnum? CurrentStatus { get; set; }
 
-        // Properties for SelectLists (dropdowns)
         public List<Microsoft.AspNetCore.Mvc.Rendering.SelectListItem>? AvailableBranches { get; set; }
         public List<Microsoft.AspNetCore.Mvc.Rendering.SelectListItem>? TransactionStatuses { get; set; }
     }

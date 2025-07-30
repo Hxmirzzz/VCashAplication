@@ -1,18 +1,13 @@
 ﻿@model VCashApp.Models.ViewModels.CentroEfectivo.CefTransactionCheckinViewModel
 @{
-    ViewData["Title"] = "Registro Check-in CEF";
+    ViewData["Title"] = "Tesoreria";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<div class="main-content-container">
-    <div class="section-header">
-        <h1>Registro de Check-in de Transacción de Efectivo</h1>
-        <p>Complete los detalles para iniciar una nueva transacción de Centro de Efectivo.</p>
-    </div>
-
+<div class="form-container">
     <div class="card">
         <div class="card-header">
-            <h4 class="mb-0">Nuevo Check-in</h4>
+            <h4 class="mb-0">Nuevo</h4>
         </div>
         <div class="card-body">
             <form id="checkinForm" asp-action="Checkin" asp-controller="Cef" method="post">
@@ -20,7 +15,7 @@
                 <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
                 <div class="form-section">
-                    <h3>Datos Generales de la Transacción</h3>
+                    <h4 class="pt-3">Datos Generales de la Transacción</h4>
                     <hr />
                     <div class="row">
                         <div class="col-md-6">
@@ -75,7 +70,7 @@
                 </div>
 
                 <div class="form-section mt-4">
-                    <h3>Cantidades y Valores Declarados</h3>
+                    <h4>Cantidades y Valores Declarados</h4>
                     <hr />
                     <div class="row">
                         <div class="col-md-3">
@@ -146,7 +141,7 @@
                 </div>
 
                 <div class="form-section mt-4">
-                    <h3>Datos del Operador (Automático)</h3>
+                    <h4>Datos del Operador (Automático)</h4>
                     <hr />
                     <div class="row">
                         <div class="col-md-4">
@@ -171,7 +166,7 @@
                 </div>
 
                 <div class="submit-container form-group col-md-12 mt-4">
-                    <button type="submit" class="btn btn-primary">Registrar Check-in</button>
+                    <button type="submit" class="btn btn-primary">Registrar</button>
                     <a asp-action="Index" class="btn btn-danger">Cancelar</a>
                 </div>
             </form>
@@ -183,7 +178,6 @@
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
-    <script src="/js/form-control/modals.js"></script>
     <script>
         $(document).ready(function () {
             $('#OrdenServicio').on('change', function () {

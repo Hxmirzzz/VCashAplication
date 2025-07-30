@@ -6,12 +6,10 @@ using VCashApp.Enums; // Asegúrate de que este namespace apunte a tus enums
 namespace VCashApp.Models.ViewModels.CentroEfectivo
 {
     /// <summary>
-    /// ViewModel for input data during the Check-in process of a new Cash Center Transaction.
     /// ViewModel para la entrada de datos durante el proceso de Check-in de una nueva Transacción de Centro de Efectivo.
     /// </summary>
     public class CefTransactionCheckinViewModel
     {
-        // Fields selected or coming from other modules (references to POCOs)
         [Display(Name = "Orden de Servicio")]
         [Required(ErrorMessage = "La Orden de Servicio es requerida.")]
         [StringLength(20, ErrorMessage = "La Orden de Servicio no puede exceder los 20 caracteres.")]

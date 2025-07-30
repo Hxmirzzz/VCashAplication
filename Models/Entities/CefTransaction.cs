@@ -1,7 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using System;
-using System.Collections.Generic;
 
 namespace VCashApp.Models.Entities
 {
@@ -15,16 +13,17 @@ namespace VCashApp.Models.Entities
         [Required]
         [StringLength(450)]
         [Column("OrdenServicio")]
-        [ForeignKey("AdmServicio")]
+        [ForeignKey("CgsService")]
         public string ServiceOrderId { get; set; }
-        // Propiedad de navegación (opcional, para cargar el objeto Servicio completo si lo necesitas en el backend)
-        // public virtual Servicio Service { get; set; } // Descomentar si tienes un modelo 'Servicio' mapeado
+        [NotMapped]
+        public virtual CgsService Service { get; set; }
 
         [StringLength(12)]
         [Column("CodRuta")]
         [ForeignKey("TdvRutaDiaria")]
         public string? RouteId { get; set; }
-        // public virtual TdvRutaDiaria TdvRutaDiaria { get; set; } // Descomentar si tienes un modelo 'TdvRutaDiaria' mapeado
+        [NotMapped]
+        public virtual TdvRutaDiaria TdvRutaDiaria { get; set; }
 
         [Required]
         [Column("NumeroPlanilla")]
@@ -115,7 +114,8 @@ namespace VCashApp.Models.Entities
         [Column("UsuarioRegistroId")]
         [ForeignKey("User")]
         public string RegistrationUser { get; set; }
-        // public virtual Usuario RegistrationUserObj { get; set; } // Propiedad de navegación
+        [NotMapped]
+        public virtual ApplicationUser RegistrationUserObj { get; set; }
 
         [Column("FechaInicioConteo", TypeName = "DATETIME")]
         public DateTime? CountingStartDate { get; set; } // Fecha de inicio del conteo
@@ -126,26 +126,30 @@ namespace VCashApp.Models.Entities
         [StringLength(450)]
         [Column("UsuarioConteoBilletesId")]
         [ForeignKey("User")]
-        public string? CountingUserBillId { get; set; } // Usuario que hizo el conteo de billetes (Cajero)
-        // public virtual Usuario CountingUserBillObj { get; set; }
+        public string? CountingUserBillId { get; set; }
+        [NotMapped]
+        public virtual ApplicationUser CountingUserBillObj { get; set; }
 
         [StringLength(450)]
         [Column("UsuarioConteoMonedasId")]
         [ForeignKey("User")]
-        public string? CountingUserCoinId { get; set; } // Usuario que hizo el conteo de moneda (Cajero)
-        // public virtual Usuario CountingUserCoinObj { get; set; }
+        public string? CountingUserCoinId { get; set; }
+        [NotMapped]
+        public virtual ApplicationUser CountingUserCoinObj { get; set; }
 
         [StringLength(450)]
         [Column("UsuarioRevisorId")]
         [ForeignKey("User")]
-        public string? ReviewerUserId { get; set; } // Usuario que hizo la revisión/aprobación (Supervisor)
-        // public virtual Usuario ReviewerUserObj { get; set; }
+        public string? ReviewerUserId { get; set; }
+        [NotMapped]
+        public virtual ApplicationUser ReviewerUserObj { get; set; }
 
         [StringLength(450)]
         [Column("UsuarioBovedaId")]
         [ForeignKey("User")]
-        public string? VaultUserId { get; set; } // Usuario que gestionó en bóveda (si aplica)
-        // public virtual Usuario VaultUserObj { get; set; }
+        public string? VaultUserId { get; set; }
+        [NotMapped]
+        public virtual ApplicationUser VaultUserObj { get; set; }
 
         [Column("FechaUltimaActualizacion", TypeName = "DATETIME")]
         public DateTime? LastUpdateDate { get; set; }
@@ -154,7 +158,8 @@ namespace VCashApp.Models.Entities
         [Column("UsuarioUltimaActualizacionId")]
         [ForeignKey("User")]
         public string? LastUpdateUser { get; set; }
-        // public virtual Usuario LastUpdateUserObj { get; set; }
+        [NotMapped]
+        public virtual ApplicationUser LastUpdateUserObj { get; set; }
 
         [StringLength(50)]
         [Column("IPRegistro")]

@@ -1,29 +1,57 @@
-﻿using System;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace VCashApp.Models.Entities
 {
+    [Table("AdmFondos")]
     public class AdmFondo
     {
         [Key]
+        [Column("CodigoFondo")]
         [DatabaseGenerated(DatabaseGeneratedOption.None)]
-        public string CodigoFondo { get; set; } = null!;
-        public int? CodigoFondoVatco { get; set; }
-        public int? CodigoCliente { get; set; }
-        [ForeignKey("CodigoCliente")]
-        //public virtual AdmCliente? Cliente { get; set; }
-        public string? NombreFondo { get; set; }
-        public int? CodigoSucurusal { get; set; }
-        [ForeignKey("CodigoSucursal")]
-        public virtual AdmSucursal? Sucursal { get; set; }
-        public int? CodigoCiudad { get; set; }
-        [ForeignKey("CodigoCiudad")]
-        public virtual AdmCiudad? Ciudad { get; set; }
-        public DateOnly? FechaCreacion { get; set; }
-        public DateOnly? FechaRetiro { get; set; }
-        public string? CodCas4u { get; set; }
-        public string? DivisaFondo { get; set; }
-        public bool Fondo { get; set; }
+        [StringLength(450)]
+        public string FundCode { get; set; } = null!;
+
+        [Column("CodigoFondoVatco")]
+        public int? VatcoFundCode { get; set; }
+
+        [Column("CodigoCliente")]
+        public int? ClientCode { get; set; }
+        [ForeignKey("ClientCode")]
+        public virtual AdmCliente? Client { get; set; }
+
+        [Column("NombreFondo")]
+        [StringLength(255)]
+        public string? FundName { get; set; }
+
+        [Column("CodigoSucursal")]
+        public int? BranchCode { get; set; }
+        [ForeignKey("BranchCode")]
+        public virtual AdmSucursal? Branch { get; set; }
+
+        [Column("CodigoCiudad")]
+        public int? CityCode { get; set; }
+        [ForeignKey("CityCode")]
+        public virtual AdmCiudad? City { get; set; }
+
+        [Column("FechaCreacion", TypeName = "DATE")]
+        public DateOnly? CreationDate { get; set; }
+
+        [Column("FechaRetiro", TypeName = "DATE")]
+        public DateOnly? WithdrawalDate { get; set; }
+
+        [Column("CodCas4u")]
+        [StringLength(255)]
+        public string? Cas4uCode { get; set; }
+
+        [Column("DivisaFondo")]
+        [StringLength(50)]
+        public string? FundCurrency { get; set; }
+
+        [Column("TipoFondo")]
+        public int? FundType { get; set; }
+
+        [Column("EstadoFondo")]
+        public bool FundStatus { get; set; }
     }
 }

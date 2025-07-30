@@ -79,7 +79,6 @@ namespace VCashApp.Controllers
             // ViewBag.HasDeletePermission = await HasPermisionForView(userRoles, "CEF", PermissionType.Delete);
         }
 
-
         /// <summary>
         /// Muestra el dashboard principal del Centro de Efectivo, permitiendo filtrar y ver las transacciones.
         /// </summary>

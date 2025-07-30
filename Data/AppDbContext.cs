@@ -31,12 +31,14 @@ namespace VCashApp.Data
         public DbSet<AdmEmpleado> AdmEmpleados { get; set; }
         public DbSet<AdmVehiculo> AdmVehiculos { get; set; }
         public DbSet<AdmSucursal> AdmSucursales { get; set; }
+        public DbSet<AdmFondo> AdmFondos { get; set; }
+        public DbSet<AdmPunto> AdmPuntos { get; set; }
         public DbSet<AdmRuta> AdmRutas { get; set; }
         public DbSet<SegRegistroEmpleado> SegRegistroEmpleados { get; set; }
         public DbSet<AdmEstado> AdmEstados { get; set; }
         public DbSet<AdmConcepto> AdmConceptos { get; set; }
         public DbSet<AdmConsecutivo> AdmConsecutivos { get; set; }
-        public DbSet<AdmServicio> AdmServicios { get; set; }
+        public DbSet<CgsService> CgsServicios { get; set; }
         public DbSet<CgsLocationType> CgsLocationTypes { get; set; }
         public DbSet<CefTransaction> CefTransactions { get; set; }
         public DbSet<CefContainer> CefContainers { get; set; }
@@ -91,23 +93,24 @@ namespace VCashApp.Data
             });
 
             builder.Entity<AdmCliente>(entity =>{
-                entity.HasKey(c => c.CodigoCliente);
-                entity.Property(c => c.CodigoCliente).ValueGeneratedOnAdd();
+                entity.ToTable("AdmClientes");
+                entity.HasKey(c => c.ClientCode);
+                entity.Property(c => c.ClientCode).ValueGeneratedOnAdd();
 
-                entity.Property(c => c.NombreCliente).IsRequired().HasMaxLength(255);
-                entity.Property(c => c.RazonSocial).IsRequired().HasMaxLength(255);
-                entity.Property(c => c.SiglasCliente).IsRequired().HasMaxLength(5);
-                entity.Property(c => c.TipoDocumento).IsRequired();
-                entity.Property(c => c.NumeroDocumento).IsRequired();
-                entity.Property(c => c.Contacto1).HasMaxLength(255);
-                entity.Property(c => c.CargoContacto1).HasMaxLength(255);
-                entity.Property(c => c.Contacto2).HasMaxLength(255);
-                entity.Property(c => c.CargoContacto2).HasMaxLength(255);
-                entity.Property(c => c.PaginaWeb).HasMaxLength(255);
-                entity.Property(c => c.Telefono).HasMaxLength(50);
-                entity.Property(c => c.Direccion).HasMaxLength(255);
+                entity.Property(c => c.ClientName).IsRequired().HasMaxLength(255);
+                entity.Property(c => c.BusinessName).IsRequired().HasMaxLength(255);
+                entity.Property(c => c.ClientAcronym).IsRequired().HasMaxLength(5);
+                entity.Property(c => c.DocumentType).IsRequired();
+                entity.Property(c => c.DocumentNumber).IsRequired();
+                entity.Property(c => c.Contact1).HasMaxLength(255);
+                entity.Property(c => c.PositionContact1).HasMaxLength(255);
+                entity.Property(c => c.Contact2).HasMaxLength(255);
+                entity.Property(c => c.PositionContact2).HasMaxLength(255);
+                entity.Property(c => c.Website).HasMaxLength(255);
+                entity.Property(c => c.PhoneNumber).HasMaxLength(50);
+                entity.Property(c => c.Address).HasMaxLength(255);
 
-                entity.HasOne(c => c.Ciudad).WithMany().HasForeignKey(c => c.CodCiudad).IsRequired().OnDelete(DeleteBehavior.Restrict);
+                entity.HasOne(c => c.City).WithMany().HasForeignKey(c => c.CityCode).IsRequired().OnDelete(DeleteBehavior.Restrict);
             });
 
             builder.Entity<AdmUnidad>(entity => {
@@ -164,6 +167,53 @@ namespace VCashApp.Data
                 entity.HasOne(v => v.Conductor).WithMany().HasForeignKey(v => v.ConductorCedula).IsRequired(false);
             });
 
+            builder.Entity<AdmFondo>(entity => {
+                entity.ToTable("AdmFondos");
+                entity.HasKey(f => f.FundCode);
+                entity.Property(f => f.FundCode).IsRequired().HasMaxLength(450).ValueGeneratedNever();
+
+                entity.Property(f => f.VatcoFundCode);
+                entity.Property(f => f.ClientCode);
+                entity.Property(f => f.FundName).HasMaxLength(255);
+                entity.Property(f => f.BranchCode);
+                entity.Property(f => f.CityCode);
+                entity.Property(f => f.CreationDate).HasColumnType("DATE");
+                entity.Property(f => f.WithdrawalDate).HasColumnType("DATE");
+                entity.Property(f => f.Cas4uCode).HasMaxLength(255);
+                entity.Property(f => f.FundCurrency).HasMaxLength(50);
+                entity.Property(f => f.FundType);
+
+                entity.HasOne(f => f.Client).WithMany().HasForeignKey(f => f.ClientCode).IsRequired(false).OnDelete(DeleteBehavior.Restrict);
+                entity.HasOne(f => f.Branch).WithMany().HasForeignKey(f => f.BranchCode).IsRequired(false).OnDelete(DeleteBehavior.Restrict);
+                entity.HasOne(f => f.City).WithMany().HasForeignKey(f => f.CityCode).IsRequired(false).OnDelete(DeleteBehavior.Restrict);
+            });
+
+            builder.Entity<AdmPunto>(entity =>
+            {
+                entity.ToTable("AdmPuntos");
+                entity.HasKey(p => p.PointCode);
+                entity.Property(p => p.PointCode).IsRequired().HasMaxLength(450);
+
+                entity.Property(p => p.VatcoPointCode).HasMaxLength(255);
+                entity.Property(p => p.ClientCode).IsRequired(false);
+                entity.Property(p => p.ClientPointCode).HasMaxLength(255);
+                entity.Property(p => p.MainClientCode).IsRequired(false);
+                entity.Property(p => p.PointName).HasMaxLength(255);
+                entity.Property(p => p.ShortName).HasMaxLength(255);
+                entity.Property(p => p.BillingPoint).HasMaxLength(255);
+                entity.Property(p => p.Address).HasMaxLength(255);
+                entity.Property(p => p.PhoneNumber).HasMaxLength(50);
+                entity.Property(p => p.Responsible).HasMaxLength(255);
+                entity.Property(p => p.ResponsiblePosition).HasMaxLength(255);
+                entity.Property(p => p.ResponsibleEmail).HasMaxLength(255);
+
+                entity.HasOne(p => p.Client).WithMany().HasForeignKey(p => p.ClientCode).OnDelete(DeleteBehavior.Restrict);
+                entity.HasOne(p => p.Branch).WithMany().HasForeignKey(p => p.BranchCode).OnDelete(DeleteBehavior.Restrict);
+                entity.HasOne(p => p.City).WithMany().HasForeignKey(p => p.CityCode).OnDelete(DeleteBehavior.Restrict);
+                entity.HasOne(p => p.Fund).WithMany().HasForeignKey(p => p.FundCode).IsRequired(false).OnDelete(DeleteBehavior.Restrict);
+                entity.HasOne(p => p.Route).WithMany().HasForeignKey(p => p.RouteBranchCode).IsRequired().OnDelete(DeleteBehavior.Restrict);
+            });
+
             builder.Entity<AdmRuta>(entity => {
                 entity.HasKey(r => r.CodRutaSuc);
                 entity.Property(r => r.CodRutaSuc).IsRequired();
@@ -184,6 +234,7 @@ namespace VCashApp.Data
                 entity.Property(r => r.DomingoHoraFin).HasColumnType("TIME(0)");
                 entity.Property(r => r.FestivoHoraInicio).HasColumnType("TIME(0)");
                 entity.Property(r => r.FestivoHoraFin).HasColumnType("TIME(0)");
+
                 entity.HasOne(r => r.Sucursal).WithMany().HasForeignKey(r => r.CodSucursal).IsRequired(false);
             });
 
@@ -234,31 +285,65 @@ namespace VCashApp.Data
                 entity.Property(d => d.ValorDenominacion).HasColumnType("DECIMAL(18,0)");
             });
 
-            builder.Entity<AdmServicio>(entity => {
-                entity.HasKey(s => s.OrdenServicio);
-                entity.Property(s => s.OrdenServicio).IsRequired();
-                entity.Property(s => s.FechaSolicitud).HasColumnType("DATE"); // Tipo SQL explícito
-                entity.Property(s => s.HoraSolicitud).HasColumnType("TIME(0)"); // Tipo SQL explícito
-                entity.Property(s => s.FechaAceptacion).HasColumnType("DATE");
-                entity.Property(s => s.HoraAceptacion).HasColumnType("TIME(0)");
-                entity.Property(s => s.FechaProgramacion).HasColumnType("DATE");
-                entity.Property(s => s.HoraProgramacion).HasColumnType("TIME(0)");
-                entity.Property(s => s.FechaAtencionInicial).HasColumnType("DATE");
-                entity.Property(s => s.HoraAtencionInicial).HasColumnType("TIME(0)");
-                entity.Property(s => s.FechaAtencionFinal).HasColumnType("DATE");
-                entity.Property(s => s.HoraAtencionFinal).HasColumnType("TIME(0)");
-                entity.Property(s => s.FechaCancelacion).HasColumnType("DATE");
-                entity.Property(s => s.HoraCancelacion).HasColumnType("TIME(0)");
-                entity.Property(s => s.FechaRechazo).HasColumnType("DATE");
-                entity.Property(s => s.HoraRechazo).HasColumnType("TIME(0)");
-                entity.Property(s => s.ValorServicio).HasColumnType("DECIMAL(18,0)");
-                entity.Property(s => s.ValorBillete).HasColumnType("DECIMAL(18,0)");
-                entity.Property(s => s.ValorMoneda).HasColumnType("DECIMAL(18,0)");
+            builder.Entity<CgsService>(entity =>
+            {
+                entity.ToTable("CgsServicios");
+                entity.HasKey(s => s.ServiceOrderId);
+                entity.Property(s => s.ServiceOrderId).IsRequired().ValueGeneratedNever();
 
-                //entity.HasOne(s => s.Cliente).WithMany().HasForeignKey(s => s.CodCliente).IsRequired(false);
-                entity.HasOne(s => s.Sucursal).WithMany().HasForeignKey(s => s.CodSucursal).IsRequired(false);
-                entity.HasOne(s => s.Concepto).WithMany().HasForeignKey(s => s.CodConcepto).IsRequired(false);
-                entity.HasOne(s => s.Estado).WithMany().HasForeignKey(s => s.CodEstado).IsRequired(false);
+                entity.Property(s => s.RequestNumber).HasMaxLength(255);
+                entity.Property(s => s.ClientCode);
+                entity.Property(s => s.ClientServiceOrderCode).HasMaxLength(255);
+                entity.Property(s => s.BranchCode);
+                entity.Property(s => s.RequestDate).HasColumnType("DATE").IsRequired();
+                entity.Property(s => s.RequestTime).HasColumnType("TIME(0)").IsRequired();
+                entity.Property(s => s.ConceptCode);
+                entity.Property(s => s.TransferType).HasMaxLength(1);
+                entity.Property(s => s.StatusCode);
+                entity.Property(s => s.FlowCode);
+                entity.Property(s => s.OriginClientCode);
+                entity.Property(s => s.OriginPointCode).HasMaxLength(25).IsRequired();
+                entity.Property(s => s.OriginIndicatorType).HasMaxLength(1).IsRequired();
+                entity.Property(s => s.DestinationClientCode);
+                entity.Property(s => s.DestinationPointCode).HasMaxLength(255).IsRequired();
+                entity.Property(s => s.DestinationIndicatorType).HasMaxLength(1).IsRequired();
+                entity.Property(s => s.AcceptanceDate).HasColumnType("DATE");
+                entity.Property(s => s.AcceptanceTime).HasColumnType("TIME(0)");
+                entity.Property(s => s.ProgrammingDate).HasColumnType("DATE");
+                entity.Property(s => s.ProgrammingTime).HasColumnType("TIME(0)");
+                entity.Property(s => s.InitialAttentionDate).HasColumnType("DATE");
+                entity.Property(s => s.InitialAttentionTime).HasColumnType("TIME(0)");
+                entity.Property(s => s.FinalAttentionDate).HasColumnType("DATE");
+                entity.Property(s => s.FinalAttentionTime).HasColumnType("TIME(0)");
+                entity.Property(s => s.CancellationDate).HasColumnType("DATE");
+                entity.Property(s => s.CancellationTime).HasColumnType("TIME(0)");
+                entity.Property(s => s.RejectionDate).HasColumnType("DATE");
+                entity.Property(s => s.RejectionTime).HasColumnType("TIME(0)");
+                entity.Property(s => s.IsFailed).IsRequired();
+                entity.Property(s => s.FailedResponsible).HasMaxLength(255);
+                entity.Property(s => s.CancellationPerson).HasMaxLength(255);
+                entity.Property(s => s.CancellationOperator).HasMaxLength(255);
+                entity.Property(s => s.ServiceModality).HasMaxLength(1);
+                entity.Property(s => s.Observations).HasMaxLength(255);
+                entity.Property(s => s.KeyValue).HasColumnType("INT");
+                entity.Property(s => s.CgsOperatorId).HasMaxLength(450);
+                entity.Property(s => s.CgsBranchName).HasMaxLength(255);
+                entity.Property(s => s.OperatorIpAddress).HasMaxLength(50);
+                entity.Property(s => s.BillValue).HasColumnType("DECIMAL(18,0)");
+                entity.Property(s => s.CoinValue).HasColumnType("DECIMAL(18,0)");
+                entity.Property(s => s.ServiceValue).HasColumnType("DECIMAL(18,0)");
+                entity.Property(s => s.NumberOfChangeKits);
+                entity.Property(s => s.NumberOfCoinBags);
+                entity.Property(s => s.CancellationReason).HasMaxLength(450);
+                entity.Property(s => s.DetailFile).HasMaxLength(450);
+
+                entity.HasOne(s => s.Client).WithMany().HasForeignKey(s => s.ClientCode).IsRequired(false);
+                entity.HasOne(s => s.Branch).WithMany().HasForeignKey(s => s.BranchCode).IsRequired(false);
+                entity.HasOne(s => s.Concept).WithMany().HasForeignKey(s => s.ConceptCode).IsRequired(false);
+                entity.HasOne(s => s.Status).WithMany().HasForeignKey(s => s.StatusCode).IsRequired(false);
+                entity.HasOne(s => s.OriginClient).WithMany().HasForeignKey(s => s.OriginClientCode).IsRequired(false);
+                entity.HasOne(s => s.DestinationClient).WithMany().HasForeignKey(s => s.DestinationClientCode).IsRequired(false);
+                entity.HasOne(s => s.CgsOperator).WithMany().HasForeignKey(s => s.CgsOperatorId).IsRequired(false).OnDelete(DeleteBehavior.Restrict);
             });
 
 
@@ -306,7 +391,7 @@ namespace VCashApp.Data
                 entity.Property(t => t.RegistrationIP).HasMaxLength(50);
 
                 // Relaciones
-                entity.HasOne<AdmServicio>().WithMany().HasForeignKey(t => t.ServiceOrderId).HasPrincipalKey(s => s.OrdenServicio).OnDelete(DeleteBehavior.Restrict);
+                entity.HasOne<CgsService>().WithMany().HasForeignKey(t => t.ServiceOrderId).HasPrincipalKey(s => s.ServiceOrderId).OnDelete(DeleteBehavior.Restrict);
                 entity.HasOne<TdvRutaDiaria>().WithMany().HasForeignKey(t => t.RouteId).HasPrincipalKey(r => r.Id).IsRequired(false).OnDelete(DeleteBehavior.Restrict);
 
                 entity.HasOne<ApplicationUser>().WithMany().HasForeignKey(t => t.RegistrationUser).HasPrincipalKey(u => u.Id).OnDelete(DeleteBehavior.Restrict);

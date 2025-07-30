@@ -24,11 +24,10 @@ namespace VCashApp.Services.Cef
         /// <inheritdoc/>
         public async Task<CefTransactionCheckinViewModel> PrepareCheckinViewModelAsync(string serviceOrderId, string? routeId, string currentUserId, string currentIP)
         {
-            // Cargar servicio y sus propiedades de navegación necesarias
-            var service = await _context.AdmServicios
-                                        //.Include(s => s.Cliente)
-                                        .Include(s => s.Sucursal)
-                                        .FirstOrDefaultAsync(s => s.OrdenServicio == serviceOrderId);
+            var service = await _context.CgsServicios
+                                        .Include(s => s.Client)
+                                        .Include(s => s.Branch)
+                                        .FirstOrDefaultAsync(s => s.ServiceOrderId == serviceOrderId);
 
             if (service == null)
             {
@@ -49,49 +48,48 @@ namespace VCashApp.Services.Cef
                                         .FirstOrDefaultAsync(r => r.Id == routeId);
             }
 
-            // Cargar el nombre del usuario actual
             var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == currentUserId);
             string userName = user?.NombreUsuario ?? "Desconocido";
 
             string clientName = "N/A";
-            if (service.CodCliente.HasValue)
+            if (service.ClientCode != 0)
             {
-                var clientEntity = await _context.AdmClientes.FirstOrDefaultAsync(c => c.CodigoCliente == service.CodCliente.Value);
-                clientName = clientEntity?.NombreCliente ?? "N/A";
+                var clientEntity = await _context.AdmClientes.FirstOrDefaultAsync(c => c.ClientCode == service.ClientCode);
+                clientName = clientEntity?.ClientName ?? "N/A";
             }
-            else if (!string.IsNullOrEmpty(service.ClienteOrigen))
+            else if (service.OriginClientCode != 0)
             {
-                clientName = service.ClienteOrigen;
+                clientName = service.OriginClient.ClientName;
             }
 
             var viewModel = new CefTransactionCheckinViewModel
             {
-                ServiceOrderId = service.OrdenServicio,
+                ServiceOrderId = service.ServiceOrderId,
                 RouteId = route?.Id,
                 SlipNumber = 0,
                 Currency = "COP", 
-                TransactionType = Enum.TryParse<CefTransactionTypeEnum>(service.TipoConcepto, out var type) ? type : CefTransactionTypeEnum.Collection,
-                DeclaredBagCount = service.NumeroBolsasMoneda ?? 0,
+                TransactionType = Enum.TryParse<CefTransactionTypeEnum>(service.Concept.TipoConcepto, out var type) ? type : CefTransactionTypeEnum.Collection,
+                DeclaredBagCount = service.NumberOfCoinBags ?? 0,
                 DeclaredEnvelopeCount = 0,
                 DeclaredCheckCount = 0,
                 DeclaredDocumentCount = 0,
-                DeclaredBillValue = service.ValorBillete ?? 0,
-                DeclaredCoinValue = service.ValorMoneda ?? 0,
+                DeclaredBillValue = service.BillValue ?? 0,
+                DeclaredCoinValue = service.CoinValue ?? 0,
                 DeclaredDocumentValue = 0,
-                TotalDeclaredValue = (service.ValorBillete ?? 0) + (service.ValorMoneda ?? 0) + (service.ValorServicio ?? 0),
+                TotalDeclaredValue = (service.BillValue ?? 0) + (service.CoinValue ?? 0) + (service.ServiceValue ?? 0),
 
                 IsCustody = false,
                 IsPointToPoint = false,
-                InformativeIncident = service.Observaciones,
+                InformativeIncident = service.Observations,
 
                 RegistrationDate = DateTime.Now,
                 RegistrationUserName = userName,
                 IPAddress = currentIP,
 
                 ClientName = clientName,
-                BranchName = service.Sucursal?.NombreSucursal ?? "N/A", // Acceso a través de la propiedad de navegación
-                OriginLocationName = service.PuntoOrigen ?? "N/A",
-                DestinationLocationName = service.PuntoDestino ?? "N/A",
+                BranchName = service.Branch?.NombreSucursal ?? "N/A",
+                OriginLocationName = service.OriginPointCode ?? "N/A",
+                DestinationLocationName = service.DestinationPointCode ?? "N/A",
                 HeadOfShiftName = route?.JT?.NombreCompleto ?? "N/A",
                 VehicleCode = route?.CodVehiculo ?? "N/A"
             };
@@ -116,7 +114,7 @@ namespace VCashApp.Services.Cef
         /// <inheritdoc/>
         public async Task<CefTransaction> ProcessCheckinViewModelAsync(CefTransactionCheckinViewModel viewModel, string currentUserId, string currentIP)
         {
-            var existingService = await _context.AdmServicios.FirstOrDefaultAsync(s => s.OrdenServicio == viewModel.ServiceOrderId);
+            var existingService = await _context.CgsServicios.FirstOrDefaultAsync(s => s.ServiceOrderId == viewModel.ServiceOrderId);
             if (existingService == null)
             {
                 throw new InvalidOperationException($"La Orden de Servicio '{viewModel.ServiceOrderId}' no existe.");
@@ -180,7 +178,6 @@ namespace VCashApp.Services.Cef
         }
 
         /// <inheritdoc/>
-        // El método GetFilteredCefTransactionsAsync ahora devuelve una tupla con CefTransactionSummaryViewModel
         public async Task<Tuple<List<CefTransactionSummaryViewModel>, int>> GetFilteredCefTransactionsAsync(
             int? branchId, DateOnly? startDate, DateOnly? endDate, CefTransactionStatusEnum? status,
             string? searchTerm, int pageNumber, int pageSize)
@@ -190,11 +187,11 @@ namespace VCashApp.Services.Cef
 
             if (branchId.HasValue)
             {
-                query = query.Join(_context.AdmServicios,
+                query = query.Join(_context.CgsServicios,
                                    cefTrans => cefTrans.ServiceOrderId,
-                                   admServ => admServ.OrdenServicio,
+                                   admServ => admServ.ServiceOrderId,
                                    (cefTrans, admServ) => new { CefTrans = cefTrans, AdmServ = admServ })
-                             .Where(joined => joined.AdmServ.CodSucursal == branchId.Value)
+                             .Where(joined => joined.AdmServ.BranchCode == branchId.Value)
                              .Select(joined => joined.CefTrans);
             }
 
@@ -239,8 +236,8 @@ namespace VCashApp.Services.Cef
                     TransactionStatus = t.TransactionStatus,
                     RegistrationDate = t.RegistrationDate,
 
-                    BranchName = _context.AdmServicios.Where(s => s.OrdenServicio == t.ServiceOrderId)
-                                                      .Select(s => s.Sucursal.NombreSucursal)
+                    BranchName = _context.CgsServicios.Where(s => s.ServiceOrderId == t.ServiceOrderId)
+                                                      .Select(s => s.Branch.NombreSucursal)
                                                       .FirstOrDefault() ?? "N/A",
                     HeadOfShiftName = _context.TdvRutasDiarias.Where(r => r.Id == t.RouteId)
                                                              .Select(r => r.JT.NombreCompleto)
@@ -295,7 +292,7 @@ namespace VCashApp.Services.Cef
 
             if (transaction == null) return null;
 
-            var service = await _context.AdmServicios.FirstOrDefaultAsync(s => s.OrdenServicio == transaction.ServiceOrderId);
+            var service = await _context.CgsServicios.FirstOrDefaultAsync(s => s.ServiceOrderId == transaction.ServiceOrderId);
             var userRegistro = await _context.Users.FirstOrDefaultAsync(u => u.Id == transaction.RegistrationUser);
             var userRevisor = await _context.Users.FirstOrDefaultAsync(u => u.Id == transaction.ReviewerUserId);
 
@@ -397,7 +394,6 @@ namespace VCashApp.Services.Cef
             var transaction = await _context.CefTransactions.FirstOrDefaultAsync(t => t.Id == viewModel.Id);
             if (transaction == null) return false;
 
-            // Validar que el estado actual sea "PendienteRevision"
             if (transaction.TransactionStatus == CefTransactionStatusEnum.PendingReview.ToString())
             {
                 throw new InvalidOperationException($"La transacción {transaction.Id} no está en estado 'Pendiente de Revisión' para ser aprobada o rechazada.");

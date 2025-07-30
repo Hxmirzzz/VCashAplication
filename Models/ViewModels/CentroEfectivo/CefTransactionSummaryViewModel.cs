@@ -1,12 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using VCashApp.Enums; // Asegúrate de que este namespace apunte a tus enums
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace VCashApp.Models.ViewModels.CentroEfectivo
 {
     /// <summary>
-    /// ViewModel for displaying a summary of a Cash Center transaction in listings.
     /// ViewModel para la visualización resumida de una transacción de Centro de Efectivo en listados.
     /// </summary>
     public class CefTransactionSummaryViewModel
