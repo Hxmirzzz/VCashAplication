@@ -10,6 +10,10 @@ namespace VCashApp.Models.ViewModels.CentroEfectivo
     /// </summary>
     public class CefServiceCreationViewModel
     {
+        [Display(Name = "Numero de Planilla")]
+        [Required(ErrorMessage = "El número de planilla es requerido.")]
+        [Range(1, int.MaxValue, ErrorMessage = "El número de planilla debe ser un número positivo.")]
+        public int SlipNumber { get; set; }
 
         [Display(Name = "Tipo de Servicio")]
         [Required(ErrorMessage = "El tipo de servicio es requerido.")]

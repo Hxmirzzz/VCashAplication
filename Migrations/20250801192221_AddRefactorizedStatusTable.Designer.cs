@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using VCashApp.Data;
 
@@ -11,9 +12,11 @@ using VCashApp.Data;
 namespace VCashApp.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250801192221_AddRefactorizedStatusTable")]
+    partial class AddRefactorizedStatusTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1550,6 +1553,7 @@ namespace VCashApp.Migrations
                         .HasColumnName("UsuarioRevisorId");
 
                     b.Property<string>("RouteId")
+                        .IsRequired()
                         .HasMaxLength(12)
                         .HasColumnType("VARCHAR(12)")
                         .HasColumnName("CodRuta");

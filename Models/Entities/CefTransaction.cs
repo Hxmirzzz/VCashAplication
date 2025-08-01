@@ -23,7 +23,7 @@ namespace VCashApp.Models.Entities
         [ForeignKey("TdvRutaDiaria")]
         public string? RouteId { get; set; }
         [NotMapped]
-        public virtual TdvRutaDiaria TdvRutaDiaria { get; set; }
+        public virtual TdvRutaDiaria? TdvRutaDiaria { get; set; }
 
         [Required]
         [Column("NumeroPlanilla")]

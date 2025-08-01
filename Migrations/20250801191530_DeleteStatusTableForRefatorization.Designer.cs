@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using VCashApp.Data;
 
@@ -11,9 +12,11 @@ using VCashApp.Data;
 namespace VCashApp.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250801191530_DeleteStatusTableForRefatorization")]
+    partial class DeleteStatusTableForRefatorization
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1087,23 +1090,6 @@ namespace VCashApp.Migrations
                     b.ToTable("AdmRutas");
                 });
 
-            modelBuilder.Entity("VCashApp.Models.Entities.AdmState", b =>
-                {
-                    b.Property<int>("StateCode")
-                        .HasColumnType("int")
-                        .HasColumnName("CodigoEstado");
-
-                    b.Property<string>("StateName")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)")
-                        .HasColumnName("NombreEstado");
-
-                    b.HasKey("StateCode");
-
-                    b.ToTable("AdmEstados");
-                });
-
             modelBuilder.Entity("VCashApp.Models.Entities.AdmSucursal", b =>
                 {
                     b.Property<int>("CodSucursal")
@@ -1550,6 +1536,7 @@ namespace VCashApp.Migrations
                         .HasColumnName("UsuarioRevisorId");
 
                     b.Property<string>("RouteId")
+                        .IsRequired()
                         .HasMaxLength(12)
                         .HasColumnType("VARCHAR(12)")
                         .HasColumnName("CodRuta");
@@ -1943,8 +1930,6 @@ namespace VCashApp.Migrations
                     b.HasIndex("DestinationClientCode");
 
                     b.HasIndex("OriginClientCode");
-
-                    b.HasIndex("StatusCode");
 
                     b.ToTable("CgsServicios", (string)null);
                 });
@@ -2602,10 +2587,6 @@ namespace VCashApp.Migrations
                         .WithMany()
                         .HasForeignKey("OriginClientCode");
 
-                    b.HasOne("VCashApp.Models.Entities.AdmState", "Status")
-                        .WithMany()
-                        .HasForeignKey("StatusCode");
-
                     b.Navigation("Branch");
 
                     b.Navigation("CgsOperator");
@@ -2617,8 +2598,6 @@ namespace VCashApp.Migrations
                     b.Navigation("DestinationClient");
 
                     b.Navigation("OriginClient");
-
-                    b.Navigation("Status");
                 });
 
             modelBuilder.Entity("VCashApp.Models.Entities.PermisoPerfil", b =>

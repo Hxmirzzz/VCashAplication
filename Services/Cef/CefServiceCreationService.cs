@@ -72,6 +72,8 @@ namespace VCashApp.Services.Cef
             return viewModel;
         }
 
+        // Reemplaza el método existente en CefServiceCreationService.cs
+
         /// <inheritdoc/>
         public async Task<string> ProcessCefServiceCreationAsync(CefServiceCreationViewModel viewModel, string currentUserId, string currentIP)
         {
@@ -80,108 +82,98 @@ namespace VCashApp.Services.Cef
                 throw new InvalidOperationException("El punto de origen y el de destino no pueden ser el mismo.");
             }
 
-            var resultList = await _context.Database
-                                            .SqlQueryRaw<string>("EXEC GenerarNuevoOrdenServicioId @prefijo = 'S';")
-                                            .AsNoTracking()
-                                            .ToListAsync();
-            var newServiceOrderId = resultList.FirstOrDefault();
+            var serviceConcept = await _context.AdmConceptos.AsNoTracking().FirstOrDefaultAsync(c => c.TipoConcepto == viewModel.ServiceConceptCode);
+            if (serviceConcept == null)
+            {
+                throw new InvalidOperationException("Código de concepto de servicio no válido.");
+            }
+
+            var parameters = new List<SqlParameter>
+            {
+                // Parámetros para CgsServicios
+                new SqlParameter("@NumeroPedido", (object)viewModel.ClientOrderNumber ?? DBNull.Value),
+                new SqlParameter("@CodCliente", viewModel.OriginClientId),
+                new SqlParameter("@CodOsCliente", (object)viewModel.ClientServiceOrderCode ?? DBNull.Value),
+                new SqlParameter("@CodSucursal", viewModel.BranchId),
+                new SqlParameter("@FechaSolicitud", viewModel.RequestDate),
+                new SqlParameter("@HoraSolicitud", viewModel.RequestTime),
+                new SqlParameter("@CodConcepto", serviceConcept.CodConcepto),
+                new SqlParameter("@TipoTraslado", (object)viewModel.ServiceModality ?? DBNull.Value),
+                new SqlParameter("@CodEstado", '0'), 
+                new SqlParameter("@CodFlujo", 1),
+                new SqlParameter("@CodClienteOrigen", viewModel.OriginClientId),
+                new SqlParameter("@CodPuntoOrigen", viewModel.OriginCode),
+                new SqlParameter("@IndicadorTipoOrigen", viewModel.OriginType.ToString().Substring(0, 1)),
+                new SqlParameter("@CodClienteDestino", viewModel.DestinationClientId),
+                new SqlParameter("@CodPuntoDestino", viewModel.DestinationCode),
+                new SqlParameter("@IndicadorTipoDestino", viewModel.DestinationType.ToString().Substring(0, 1)),
+                new SqlParameter("@FechaAceptacion", DBNull.Value),
+                new SqlParameter("@HoraAceptacion", DBNull.Value),
+                new SqlParameter("@FechaProgramacion", DBNull.Value),
+                new SqlParameter("@HoraProgramacion", DBNull.Value),
+                new SqlParameter("@FechaAtencionInicial", DBNull.Value),
+                new SqlParameter("@HoraAtencionInicial", DBNull.Value),
+                new SqlParameter("@FechaAtencionFinal", DBNull.Value),
+                new SqlParameter("@HoraAtencionFinal", DBNull.Value),
+                new SqlParameter("@FechaCancelacion", DBNull.Value),
+                new SqlParameter("@HoraCancelacion", DBNull.Value),
+                new SqlParameter("@FechaRechazo", DBNull.Value),
+                new SqlParameter("@HoraRechazo", DBNull.Value),
+                new SqlParameter("@Fallido", false),
+                new SqlParameter("@ResponsableFallido", DBNull.Value),
+                new SqlParameter("@PersonaCancelacion", DBNull.Value),
+                new SqlParameter("@OperadorCancelacion", DBNull.Value),
+                new SqlParameter("@MotivoCancelacion", DBNull.Value),
+                new SqlParameter("@ModalidadServicio", (object)viewModel.ServiceModality ?? DBNull.Value),
+                new SqlParameter("@Observaciones", (object)viewModel.ServiceObservations ?? DBNull.Value),
+                new SqlParameter("@Clave", DBNull.Value),
+                new SqlParameter("@OperadorCgsId", currentUserId),
+                new SqlParameter("@SucursalCgs", DBNull.Value),
+                new SqlParameter("@IpOperador", (object)currentIP ?? DBNull.Value),
+                new SqlParameter("@ValorBillete", (object)viewModel.DeclaredBillValue),
+                new SqlParameter("@ValorMoneda", (object)viewModel.DeclaredCoinValue),
+                new SqlParameter("@ValorServicio", (object)viewModel.ServiceValue ?? DBNull.Value),
+                new SqlParameter("@NumeroKitsCambio", (object)viewModel.ExchangeKitCount ?? DBNull.Value),
+                new SqlParameter("@NumeroBolsasMoneda", (object)viewModel.DeclaredBagCount),
+                new SqlParameter("@ArchivoDetalle", DBNull.Value),
+
+                // Parámetros para CefTransacciones
+                new SqlParameter("@CefCodRuta", DBNull.Value),
+                new SqlParameter("@CefNumeroPlanilla", viewModel.SlipNumber),
+                new SqlParameter("@CefDivisa", "COP"),
+                new SqlParameter("@CefTipoTransaccion", viewModel.ServiceConceptCode),
+                new SqlParameter("@CefNumeroMesaConteo", DBNull.Value),
+                new SqlParameter("@CefCantidadBolsasDeclaradas", viewModel.DeclaredBagCount),
+                new SqlParameter("@CefCantidadSobresDeclarados", viewModel.DeclaredEnvelopeCount),
+                new SqlParameter("@CefCantidadChequesDeclarados", viewModel.DeclaredCheckCount),
+                new SqlParameter("@CefCantidadDocumentosDeclarados", viewModel.DeclaredDocumentCount),
+                new SqlParameter("@CefValorBilletesDeclarado", viewModel.DeclaredBillValue),
+                new SqlParameter("@CefValorMonedasDeclarado", viewModel.DeclaredCoinValue),
+                new SqlParameter("@CefValorDocumentosDeclarado", viewModel.DeclaredDocumentValue),
+                new SqlParameter("@CefValorTotalDeclarado", viewModel.DeclaredBillValue + viewModel.DeclaredCoinValue + viewModel.DeclaredDocumentValue),
+                new SqlParameter("@CefValorTotalDeclaradoLetras", DBNull.Value),
+                new SqlParameter("@CefNovedadInformativa", (object)viewModel.InformativeIncident ?? DBNull.Value),
+                new SqlParameter("@CefEsCustodia", viewModel.IsCustody),
+                new SqlParameter("@CefEsPuntoAPunto", viewModel.IsPointToPoint),
+                new SqlParameter("@CefEstadoTransaccion", CefTransactionStatusEnum.Checkin.ToString()),
+                new SqlParameter("@CefFechaRegistro", DateTime.Now),
+                new SqlParameter("@CefUsuarioRegistroId", currentUserId),
+                new SqlParameter("@CefIPRegistro", (object)currentIP ?? DBNull.Value)
+            };
+
+            var parameterNames = string.Join(", ", parameters.Select(p => p.ParameterName));
+            var sql = $"EXEC [dbo].[AddServicioAndCefTransaction] {parameterNames}";
+
+            var result = await _context.Database
+                                       .SqlQueryRaw<string>(sql, parameters.ToArray())
+                                       .ToListAsync();
+
+            var newServiceOrderId = result.FirstOrDefault();
 
             if (string.IsNullOrEmpty(newServiceOrderId))
             {
-                throw new InvalidOperationException("No se pudo generar un nuevo ID de Orden de Servicio.");
+                throw new InvalidOperationException("La ejecución del procedimiento almacenado no devolvió un ID de Orden de Servicio.");
             }
-
-            var serviceConcept = await _context.AdmConceptos.FirstOrDefaultAsync(c => c.TipoConcepto == viewModel.ServiceConceptCode);
-            if (serviceConcept == null) throw new InvalidOperationException("Código de concepto de servicio no válido.");
-
-            int statusCode = 0;
-
-            var cgsService = new CgsService
-            {
-                ServiceOrderId = newServiceOrderId,
-                RequestNumber = viewModel.ClientOrderNumber,
-                ClientCode = viewModel.OriginClientId,
-                ClientServiceOrderCode = viewModel.ClientServiceOrderCode,
-                BranchCode = viewModel.BranchId,
-                RequestDate = viewModel.RequestDate,
-                RequestTime = viewModel.RequestTime,
-                ConceptCode = serviceConcept.CodConcepto,
-                TransferType = viewModel.ServiceModality,
-                StatusCode = statusCode,
-                FlowCode = 1,
-
-                OriginClientCode = viewModel.OriginClientId,
-                OriginPointCode = viewModel.OriginCode,
-                OriginIndicatorType = viewModel.OriginType.ToString().Substring(0, 1), // "P" o "F" de LocationTypeEnum
-
-                DestinationClientCode = viewModel.DestinationClientId,
-                DestinationPointCode = viewModel.DestinationCode,
-                DestinationIndicatorType = viewModel.DestinationType.ToString().Substring(0, 1),
-
-                AcceptanceDate = DateOnly.FromDateTime(DateTime.Now),
-                AcceptanceTime = TimeOnly.FromDateTime(DateTime.Now),
-                ProgrammingDate = viewModel.ProgrammingDate,
-                ProgrammingTime = viewModel.ProgrammingTime,
-                InitialAttentionDate = null,
-                InitialAttentionTime = null,
-                FinalAttentionDate = null,
-                FinalAttentionTime = null,
-                CancellationDate = null,
-                CancellationTime = null,
-                RejectionDate = null,
-                RejectionTime = null,
-
-                IsFailed = false,
-                FailedResponsible = null,
-                CancellationPerson = null,
-                CancellationOperator = null,
-                CancellationReason = null,
-                ServiceModality = viewModel.ServiceModality,
-                Observations = viewModel.ServiceObservations,
-                KeyValue = (statusCode == 0) ? new Random().Next(1000, 9999) : 0,
-                CgsOperatorId = currentUserId,
-                CgsBranchName = _context.AdmSucursales.FirstOrDefault(s => s.CodSucursal == viewModel.BranchId)?.NombreSucursal,
-                OperatorIpAddress = currentIP,
-                BillValue = viewModel.DeclaredBillValue,
-                CoinValue = viewModel.DeclaredCoinValue,
-                ServiceValue = viewModel.ServiceValue,
-                NumberOfChangeKits = viewModel.ExchangeKitCount,
-                NumberOfCoinBags = viewModel.DeclaredBagCount,
-                DetailFile = null,
-            };
-
-            await _context.CgsServicios.AddAsync(cgsService);
-
-            var cefTransaction = new CefTransaction
-            {
-                ServiceOrderId = newServiceOrderId,
-                RouteId = null,
-                TransactionType = viewModel.ServiceConceptCode,
-                SlipNumber = 0,
-                CountingTableNumber = null,
-                DeclaredBagCount = viewModel.DeclaredBagCount,
-                DeclaredEnvelopeCount = viewModel.DeclaredEnvelopeCount,
-                DeclaredCheckCount = viewModel.DeclaredCheckCount,
-                DeclaredDocumentCount = viewModel.DeclaredDocumentCount,
-                DeclaredBillValue = viewModel.DeclaredBillValue,
-                DeclaredCoinValue = viewModel.DeclaredCoinValue,
-                DeclaredDocumentValue = viewModel.DeclaredDocumentValue,
-                TotalDeclaredValue = viewModel.TotalDeclaredValue,
-                TotalDeclaredValueInWords = "Pendiente de implementar",
-                IsCustody = viewModel.IsCustody,
-                IsPointToPoint = viewModel.IsPointToPoint,
-                InformativeIncident = viewModel.InformativeIncident,
-                TransactionStatus = CefTransactionStatusEnum.Checkin.ToString(),
-                RegistrationDate = DateTime.Now,
-                RegistrationUser = currentUserId,
-                RegistrationIP = currentIP,
-                TotalCountedValue = 0,
-                ValueDifference = 0,
-            };
-
-            await _context.CefTransactions.AddAsync(cefTransaction);
-
-            await _context.SaveChangesAsync();
 
             return newServiceOrderId;
         }

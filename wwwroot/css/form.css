@@ -47,7 +47,7 @@ hr {
 }
 
 .card-header {
-    background-color: var(--grey3); /* Gris claro de site.css para el header */
+    background-color: var(--table-header-bg);
     color: var(--title-color-main); /* Texto oscuro global */
     text-align: left;
     border-top-left-radius: 0.75rem;
@@ -225,7 +225,7 @@ textarea.form-control {
 
 /* Estilos para el panel de cálculo (Calculadora Inteligente - personalizados) */
 .calculation-panel {
-    background-color: var(--grey3); /* Gris más claro de site.css para el panel */
+    background-color: var(--table-header-bg);
     border: 1px solid var(--border-color);
     border-radius: 0.5rem;
     padding: 1rem;
@@ -233,10 +233,14 @@ textarea.form-control {
 }
 
     .calculation-panel h6 {
-        color: var(--first-color); /* Usar el color primario de site.css para resaltado */
+        color: var(--title-color-main);
         margin-bottom: 0.75rem;
         font-weight: var(--font-semi-bold);
         font-size: 1rem;
+    }
+
+    .calculation-panel span {
+        color: var(--title-color-main);
     }
 
 .calculation-item {

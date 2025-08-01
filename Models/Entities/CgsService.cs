@@ -32,6 +32,7 @@ namespace VCashApp.Models.Entities
 
         [Column("FechaSolicitud", TypeName = "DATE")]
         public DateOnly RequestDate { get; set; }
+
         [Column("HoraSolicitud", TypeName = "TIME(0)")]
         public TimeOnly RequestTime { get; set; }
 
@@ -47,7 +48,7 @@ namespace VCashApp.Models.Entities
         [Column("CodEstado")]
         public int StatusCode { get; set; }
         [ForeignKey("StatusCode")]
-        public virtual AdmEstado? Status { get; set; }
+        public virtual AdmState? Status { get; set; }
 
         [Column("CodFlujo")]
         public int? FlowCode { get; set; }

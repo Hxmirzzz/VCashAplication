@@ -1681,6 +1681,42 @@
         <member name="M:VCashApp.Migrations.AddClientPointAndFoundModuleTables.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
             <inheritdoc />
         </member>
+        <member name="T:VCashApp.Migrations.DeleteStatusTableForRefatorization">
+            <inheritdoc />
+        </member>
+        <member name="M:VCashApp.Migrations.DeleteStatusTableForRefatorization.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:VCashApp.Migrations.DeleteStatusTableForRefatorization.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:VCashApp.Migrations.DeleteStatusTableForRefatorization.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="T:VCashApp.Migrations.AddRefactorizedStatusTable">
+            <inheritdoc />
+        </member>
+        <member name="M:VCashApp.Migrations.AddRefactorizedStatusTable.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:VCashApp.Migrations.AddRefactorizedStatusTable.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:VCashApp.Migrations.AddRefactorizedStatusTable.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="T:VCashApp.Migrations.SetNullCodRutaOnCefTransactions">
+            <inheritdoc />
+        </member>
+        <member name="M:VCashApp.Migrations.SetNullCodRutaOnCefTransactions.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:VCashApp.Migrations.SetNullCodRutaOnCefTransactions.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:VCashApp.Migrations.SetNullCodRutaOnCefTransactions.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
         <member name="T:VCashApp.Models.ViewModels.CentroEfectivo.CefContainerProcessingViewModel">
             <summary>
             ViewModel para la entrada de datos durante el conteo de un contenedor de efectivo.

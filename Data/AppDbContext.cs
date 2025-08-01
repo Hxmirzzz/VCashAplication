@@ -21,6 +21,7 @@ namespace VCashApp.Data
         public DbSet<DataProtectionKey> DataProtectionKeys { get; set; }
         public DbSet<PermisoPerfil> PermisosPerfil { get; set; }
         public DbSet<AdmVista> AdmVistas { get; set; }
+        public DbSet<AdmState> AdmEstados { get; set; }
         public DbSet<AdmDenominacion> AdmDenominaciones { get; set; }
         public DbSet<AdmUnidad> AdmUnidades { get; set; }
         public DbSet<AdmCargo> AdmCargos { get; set; }
@@ -35,7 +36,6 @@ namespace VCashApp.Data
         public DbSet<AdmPunto> AdmPuntos { get; set; }
         public DbSet<AdmRuta> AdmRutas { get; set; }
         public DbSet<SegRegistroEmpleado> SegRegistroEmpleados { get; set; }
-        public DbSet<AdmEstado> AdmEstados { get; set; }
         public DbSet<AdmConcepto> AdmConceptos { get; set; }
         public DbSet<AdmConsecutivo> AdmConsecutivos { get; set; }
         public DbSet<CgsService> CgsServicios { get; set; }
@@ -90,6 +90,14 @@ namespace VCashApp.Data
                 entity.Property(v => v.CodVista).IsRequired().HasMaxLength(50); // Ajusta la longitud si es necesario
                 entity.Property(v => v.NombreVista).HasMaxLength(100);
                 entity.Property(v => v.RolAsociado).HasMaxLength(50); // El campo 'rol' que describes
+            });
+
+            builder.Entity<AdmState>(entity => {
+                entity.HasKey(s => s.StateCode);
+                entity.Property(s => s.StateCode).IsRequired();
+                entity.Property(s => s.StateCode).ValueGeneratedNever();
+
+                entity.Property(s => s.StateName).IsRequired().HasMaxLength(100);
             });
 
             builder.Entity<AdmCliente>(entity =>{
@@ -264,11 +272,6 @@ namespace VCashApp.Data
                 entity.HasOne(re => re.UsuarioRegistro).WithMany().HasForeignKey(re => re.RegistroUsuarioId).IsRequired(false).OnDelete(DeleteBehavior.Restrict); // Nullable en DB
             });
 
-            builder.Entity<AdmEstado>(entity => {
-                entity.HasKey(e => e.CodEstado);
-                entity.Property(e => e.CodEstado).IsRequired();
-            });
-
             builder.Entity<AdmConcepto>(entity => {
                 entity.HasKey(c => c.CodConcepto);
                 entity.Property(c => c.CodConcepto).IsRequired();
@@ -360,7 +363,7 @@ namespace VCashApp.Data
                 entity.Property(t => t.Id).ValueGeneratedOnAdd();
 
                 entity.Property(t => t.ServiceOrderId).IsRequired().HasColumnType("NVARCHAR(450)");
-                entity.Property(t => t.RouteId).IsRequired().HasColumnType("VARCHAR(12)");
+                entity.Property(t => t.RouteId).HasColumnType("VARCHAR(12)");
                 entity.Property(t => t.SlipNumber).IsRequired();
                 entity.Property(t => t.Currency).IsRequired().HasMaxLength(3);
                 entity.Property(t => t.TransactionType).IsRequired().HasMaxLength(50);

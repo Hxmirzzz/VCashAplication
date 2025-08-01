@@ -381,10 +381,8 @@ namespace VCashApp.Controllers
 
                 if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
                 {
-                    // Devuelve la Orden de Servicio generada para usarla en la redirección JS
                     return Json(ServiceResult.SuccessResult("Servicio y Transacción CEF creados.", newServiceOrderId));
                 }
-                // Redirige al dashboard de CEF. Si quisieras redirigir a ProcessContainers, necesitarías el ID de CefTransaction.
                 return RedirectToAction(nameof(Index));
             }
             catch (InvalidOperationException ex)
