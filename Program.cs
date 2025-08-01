@@ -164,6 +164,7 @@ builder.Services.AddScoped<IExportService, ExportService>();
 builder.Services.AddScoped<ICefTransactionService, CefTransactionService>();
 builder.Services.AddScoped<ICefContainerService, CefContainerService>();
 builder.Services.AddScoped<ICefIncidentService, CefIncidentService>();
+builder.Services.AddScoped<ICefServiceCreationService, CefServiceCreationService>();
 
 builder.Services.AddHttpClient();
 

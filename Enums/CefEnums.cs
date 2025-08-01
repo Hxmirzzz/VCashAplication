@@ -2,8 +2,9 @@
 {
     public enum LocationTypeEnum
     {
-        Point,
-        Fund
+        Punto,
+        ATM,
+        Fondo
     }
 
     public enum CefTransactionTypeEnum

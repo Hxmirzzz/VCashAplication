@@ -31,6 +31,7 @@ namespace VCashApp.Controllers
         private readonly ICefTransactionService _cefTransactionService;
         private readonly ICefContainerService _cefContainerService;
         private readonly ICefIncidentService _cefIncidentService;
+        private readonly ICefServiceCreationService _cefServiceCreationService; //TEMPORAL
         private readonly IExportService _exportService;
         private readonly ILogger<CefController> _logger;
 
@@ -47,6 +48,7 @@ namespace VCashApp.Controllers
             ICefTransactionService cefTransactionService,
             ICefContainerService cefContainerService,
             ICefIncidentService cefIncidentService,
+            ICefServiceCreationService cefServiceCreationService,
             AppDbContext context,
             UserManager<ApplicationUser> userManager,
             ILogger<CefController> logger)
@@ -55,6 +57,7 @@ namespace VCashApp.Controllers
             _cefTransactionService = cefTransactionService;
             _cefContainerService = cefContainerService;
             _cefIncidentService = cefIncidentService;
+            _cefServiceCreationService = cefServiceCreationService; //TEMPORAL
             _logger = logger;
         }
 
@@ -287,6 +290,128 @@ namespace VCashApp.Controllers
                 return View(viewModel);
             }
         }
+
+        //////////// TEMPORAL ///////////////////
+
+        /// <summary>
+        /// Muestra el formulario unificado para crear un nuevo Servicio y Transacción CEF.
+        /// </summary>
+        /// <remarks>
+        /// Este es un formulario temporal para suplir la falta del módulo de Servicios.
+        /// Recibe un código de concepto para predefinir el tipo de servicio (ej: "RC", "PV").
+        /// Requiere permiso 'Create' para el módulo "CEF".
+        /// </remarks>
+        /// <param name="serviceConceptCode">Código del concepto de servicio (ej: "RC" para Recolección Oficinas).</param>
+        /// <returns>Vista del formulario de creación unificada.</returns>
+        [HttpGet("CreateServiceAndCefTransaction/{serviceConceptCode?}")]
+        [RequiredPermission(PermissionType.Create, "CEF")]
+        public async Task<IActionResult> CreateServiceAndCefTransaction(string? serviceConceptCode)
+        {
+            var currentUser = await GetCurrentApplicationUserAsync();
+            if (currentUser == null) return RedirectToPage("/Account/Login", new { area = "Identity" });
+
+            await SetCommonViewBagsCefAsync(currentUser, "Crear Servicio CEF");
+
+            CefServiceCreationViewModel viewModel = await _cefServiceCreationService.PrepareCefServiceCreationViewModelAsync(
+                                                    currentUser.Id, IpAddressForLogging, serviceConceptCode);
+
+            // Si el serviceConceptCode es nulo o inválido, podrías redirigir o mostrar un error.
+            if (string.IsNullOrEmpty(serviceConceptCode) || (viewModel.AvailableServiceConcepts != null && !viewModel.AvailableServiceConcepts.Any(s => s.Value == serviceConceptCode)))
+            {
+                // Si la URL no tiene un código válido, podemos dejar que el usuario lo seleccione.
+                // O forzar una redirección: TempData["ErrorMessage"] = "Tipo de servicio no especificado o inválido."; return RedirectToAction(nameof(Index));
+            }
+
+            return View(viewModel);
+        }
+
+        /// <summary>
+        /// Procesa el envío del formulario unificado para crear un nuevo Servicio y Transacción CEF.
+        /// </summary>
+        /// <remarks>
+        /// Este es un endpoint temporal.
+        /// Requiere permiso 'Create' para el módulo "CEF".
+        /// </remarks>
+        /// <param name="viewModel">ViewModel con todos los datos del formulario.</param>
+        /// <returns>JSON ServiceResult o redirección.</returns>
+        [HttpPost("CreateServiceAndCefTransaction")]
+        [ValidateAntiForgeryToken]
+        [RequiredPermission(PermissionType.Create, "CEF")]
+        public async Task<IActionResult> CreateServiceAndCefTransaction(CefServiceCreationViewModel viewModel)
+        {
+            var currentUser = await GetCurrentApplicationUserAsync();
+            if (currentUser == null) return Unauthorized();
+
+            await SetCommonViewBagsCefAsync(currentUser, "Procesando Creación de Servicio CEF");
+
+            viewModel.AvailableServiceConcepts = await _cefServiceCreationService.GetServiceConceptsForDropdownAsync();
+            viewModel.AvailableBranches = await _context.AdmSucursales.Where(s => s.Estado && s.CodSucursal != 32).Select(s => new SelectListItem { Value = s.CodSucursal.ToString(), Text = s.NombreSucursal }).ToListAsync();
+            viewModel.AvailableClients = await _cefServiceCreationService.GetClientsForDropdownAsync();
+            viewModel.AvailableCities = await _context.AdmCiudades.Where(c => c.Estado).Select(c => new SelectListItem { Value = c.CodCiudad.ToString(), Text = c.NombreCiudad }).ToListAsync();
+            //viewModel.AvailableRanks = await _context.AdmRangos.Where(r => r.RangoEstado == 1).Select(r => new SelectListItem { Value = r.CodRango, Text = r.InfoRangoAtencion }).ToListAsync();
+            viewModel.AvailableEmployees = new List<SelectListItem>(); 
+
+            viewModel.AvailableVehicles = new List<SelectListItem>();
+            viewModel.AvailableServiceModalities = new List<SelectListItem>();
+
+            if (!ModelState.IsValid)
+            {
+                var fieldErrors = ModelState.Where(kvp => kvp.Value.Errors.Any()).ToDictionary(
+                        kvp => kvp.Key,
+                        kvp => kvp.Value.Errors.Select(e => e.ErrorMessage).ToArray()
+                    );
+                _logger.LogWarning("Usuario: {Usuario} | IP: {IP} | Acción: Creación de Servicio CEF - Modelo Inválido | Errores: {@Errores} |",
+                    currentUser.UserName, IpAddressForLogging, fieldErrors);
+
+                if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+                {
+                    return Json(ServiceResult.FailureResult("Hay errores en el formulario.", errors: fieldErrors));
+                }
+                return View(viewModel);
+            }
+
+            try
+            {
+                // Llama al servicio unificado para crear AdmServicio y CefTransaction
+                string newServiceOrderId = await _cefServiceCreationService.ProcessCefServiceCreationAsync(viewModel, currentUser.Id, IpAddressForLogging);
+
+                TempData["SuccessMessage"] = $"Servicio '{newServiceOrderId}' y Transacción CEF inicial creados exitosamente.";
+                _logger.LogInformation("Usuario: {Usuario} | IP: {IP} | Acción: Servicio CEF temporal creado | OrdenServicio: {ServiceId} |",
+                    currentUser.UserName, IpAddressForLogging, newServiceOrderId);
+
+                if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+                {
+                    // Devuelve la Orden de Servicio generada para usarla en la redirección JS
+                    return Json(ServiceResult.SuccessResult("Servicio y Transacción CEF creados.", newServiceOrderId));
+                }
+                // Redirige al dashboard de CEF. Si quisieras redirigir a ProcessContainers, necesitarías el ID de CefTransaction.
+                return RedirectToAction(nameof(Index));
+            }
+            catch (InvalidOperationException ex)
+            {
+                ModelState.AddModelError("", ex.Message);
+                _logger.LogError(ex, "Usuario: {Usuario} | IP: {IP} | Acción: Error en creación de Servicio CEF | Mensaje: {ErrorMessage}.", currentUser.UserName, IpAddressForLogging, ex.Message);
+
+                if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+                {
+                    return Json(ServiceResult.FailureResult(ex.Message));
+                }
+                return View(viewModel);
+            }
+            catch (Exception ex)
+            {
+                ModelState.AddModelError("", "Ocurrió un error inesperado al crear el servicio y transacción CEF.");
+                _logger.LogError(ex, "Usuario: {Usuario} | IP: {IP} | Acción: Error inesperado en creación de Servicio CEF.", currentUser.UserName, IpAddressForLogging);
+
+                if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+                {
+                    return Json(ServiceResult.FailureResult("Ocurrió un error inesperado."));
+                }
+                return View(viewModel);
+            }
+        }
+
+        //////////// TEMPORAL ///////////////////
 
         /// <summary>
         /// Muestra la vista para procesar (contar) los contenedores de una transacción de CEF.
@@ -668,6 +793,80 @@ namespace VCashApp.Controllers
                 // --- FIN DE LA CORRECCIÓN ---
                 return View(viewModel);
             }
+        }
+
+        // --- NUEVAS ACCIONES AJAX PARA DROPDOWNS DINÁMICOS (DEL TEMPORAL) ---
+        /// <summary>
+        /// Obtiene una lista de ubicaciones (puntos, ATMs o fondos) para dropdowns dinámicos.
+        /// </summary>
+        /// <param name="clientId">Código del cliente.</param>
+        /// <param name="branchId">Código de la sucursal (opcional).</param>
+        /// <param name="locationType">Tipo de ubicación como cadena ("Point", "ATM" o "Fund").</param>
+        /// <returns>JSON con lista de SelectListItem.</returns>
+        [HttpGet("GetPointsOrFundsForDropdown")]
+        public async Task<IActionResult> GetPointsOrFundsForDropdown(int clientId, int? branchId, string locationType, string? serviceConceptCode)
+        {
+            var currentUser = await GetCurrentApplicationUserAsync();
+            if (currentUser == null) return Unauthorized();
+
+            if (!Enum.TryParse(locationType, out LocationTypeEnum typeEnum))
+            {
+                return BadRequest("Tipo de ubicación no válido. Use: Point, ATM o Fund");
+            }
+
+            var items = await _cefServiceCreationService.GetLocationsForDropdownAsync(clientId, branchId, typeEnum, serviceConceptCode);
+            return Json(items);
+        }
+
+        /// <summary>
+        /// Obtiene detalles de un punto, ATM o fondo para autocompletar.
+        /// </summary>
+        /// <param name="code">Código del punto/ATM o fondo.</param>
+        /// <param name="clientId">ID del cliente.</param>
+        /// <param name="isPoint">True si es un punto/ATM, false si es un fondo.</param>
+        /// <returns>JSON con los detalles.</returns>
+        [HttpGet("GetLocationDetails")]
+        public async Task<IActionResult> GetLocationDetails(string code, int clientId, bool isPoint)
+        {
+            var currentUser = await GetCurrentApplicationUserAsync();
+            if (currentUser == null) return Unauthorized();
+
+            var details = await _cefServiceCreationService.GetLocationDetailsByCodeAsync(code, clientId, isPoint);
+
+            if (details == null)
+            {
+                return Json(ServiceResult.FailureResult("Detalles de ubicación no encontrados."));
+            }
+
+            return Json(ServiceResult.SuccessResult("Detalles obtenidos.", details));
+        }
+
+        /// <summary>
+        /// Obtiene empleados (JT, Conductor, Tripulante) filtrados por sucursal y cargo.
+        /// </summary>
+        /// <param name="branchId">ID de la sucursal.</param>
+        /// <param name="positionId">ID del cargo a filtrar (ej. 64 para JT).</param>
+        /// <returns>JSON con lista de SelectListItem.</returns>
+        [HttpGet("GetEmployeesForDropdown")]
+        public async Task<IActionResult> GetEmployeesForDropdown(int branchId, int positionId)
+        {
+            var currentUser = await GetCurrentApplicationUserAsync();
+            if (currentUser == null) return Unauthorized();
+
+            var employees = await _cefServiceCreationService.GetEmployeesForDropdownAsync(branchId, positionId);
+            return Json(employees);
+        }
+
+        [HttpGet]
+        public IActionResult GetClientName(int clientId)
+        {
+            var client = _context.AdmClientes.FirstOrDefault(c => c.ClientCode == clientId);
+            if (client != null)
+            {
+                return Json(new { clientName = client.ClientName });
+            }
+
+            return NotFound();
         }
     }
 }

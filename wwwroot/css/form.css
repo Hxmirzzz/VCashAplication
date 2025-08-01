@@ -1,23 +1,25 @@
+/* Estilos para los elementos de formulario básicos (legend, label, hr) */
 legend {
-    font-size: var(--title-font-size);
-    color: var(--text-color-main);
+    font-size: var(--title-font-size); /* Usa el tamaño de título global */
+    color: var(--title-color-main); /* Usa el color de título global */
 }
 
 label {
-    font-size: var(--smaller-font-size);
-    color: var(--text-color-main);
+    font-size: var(--smaller-font-size); /* Usa el tamaño de fuente más pequeño global */
+    color: var(--text-color-main); /* Usa el color de texto principal global */
 }
 
 hr {
-    color: var(--text-color-main);
+    color: var(--border-color); /* Usa el color de borde global */
 }
 
+/* Contenedor principal del formulario */
 .form-container {
     width: 100%;
-    box-shadow: 0 2px 24px var(--shadow-color);
-    padding-inline: 1rem;
+    box-shadow: 0 2px 24px var(--shadow-color-main); /* Usa la sombra global */
     border-radius: 1rem;
     transition: background-color .4s;
+    background-color: var(--div-bg); /* Fondo de div global (blanco en tema claro) */
 }
 
 .title-container {
@@ -29,39 +31,321 @@ hr {
 }
 
     .title-container h5 {
-        color: var(--text-color-main);
+        color: var(--title-color-main); /* Usa el color de título global */
         font-size: var(--title-font-size);
     }
 
+/* Estilos de las tarjetas (cards) dentro del formulario */
 .card {
     width: 100%;
     position: static;
     box-sizing: border-box;
-    background-color: var(--div-bg);
-    border: none;
+    background-color: var(--div-bg); /* Fondo de div global (blanco) */
+    border: 1px solid var(--border-color); /* Borde global */
+    border-radius: 0.75rem;
+    box-shadow: 0 4px 12px var(--shadow-color-main); /* Sombra global */
 }
 
 .card-header {
-    background-color: #f7f7f7;
-    text-align: center;
+    background-color: var(--grey3); /* Gris claro de site.css para el header */
+    color: var(--title-color-main); /* Texto oscuro global */
+    text-align: left;
+    border-top-left-radius: 0.75rem;
+    border-top-right-radius: 0.75rem;
+    padding: 1rem 1.25rem;
+    font-size: 1rem;
+    font-weight: var(--font-semi-bold); /* Fuente semibold global */
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    border-bottom: 1px solid var(--border-color); /* Borde global */
 }
+
+    .card-header h4, .card-header h5 {
+        color: inherit !important; /* Hereda el color del texto del header */
+        margin-bottom: 0;
+        font-size: 1rem;
+    }
 
 .card-body {
-    height: 100%;
-    padding: 0;
+    height: auto;
+    padding: 1rem;
 }
 
-.form-container .card-body input[type="text"],
-.form-container .card-body select {
+/* --------------------------------------------------------------- */
+/* ESTILOS PARA HACER CAMPOS COMPACTOS SIN form-control-sm EN HTML */
+/* --------------------------------------------------------------- */
+.form-control,
+.form-select,
+textarea.form-control {
+    font-size: var(--smaller-font-size) !important;
+    min-height: calc(1.5em + .5rem + 2px) !important; /* Altura de Bootstrap para sm */
+
+    color: var(--text-color-main); /* Color de texto principal global */
+    background-color: var(--div-bg); /* Fondo del campo (blanco) */
+    border: 1px solid var(--border-color); /* Borde global */
+}
+
+
+.form-group {
+    margin-bottom: 0.75rem;
+}
+
+/* Estilos para Floating Labels (Bootstrap 5) */
+.form-floating > label {
+    color: var(--Grey1); /* Gris de site.css para el placeholder/label */
+    font-size: var(--smaller-font-size) !important; /* Asegura que la etiqueta flotante también sea pequeña */
+}
+
+/* Ajuste específico para la altura de textarea en form-floating */
+.form-floating > textarea.form-control {
+    height: auto;
+    min-height: 80px; /* Altura mínima razonable para textarea */
+}
+
+/* Estilos para validación en tiempo real (utilizando colores de site.css) */
+.form-control.is-valid,
+.form-select.is-valid,
+.form-control.is-invalid,
+.form-select.is-invalid {
+    background-repeat: no-repeat;
+    background-position: right calc(.375em + .1875rem) center;
+    background-size: calc(.75em + .375rem) calc(.75em + .375rem);
+}
+
+.form-control.is-valid,
+.form-select.is-valid {
+    border-color: var(--status-color);
+}
+
+.form-control.is-invalid,
+.form-select.is-invalid {
+    border-color: var(--third-color); /* Rojo de peligro de site.css */
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12' width='12' height='12' fill='none' stroke='%23ce2c26'%3e%3ccircle cx='6' cy='6' r='4.5'/%3e%3cpath stroke-linejoin='round' d='M5.8 3.6h.4L6 6.5z'/%3e%3ccircle cx='6' cy='8.2' r='.6' fill='%23ce2c26' stroke='none'/%3e%3c/svg%3e");
+}
+
+/* El display de .valid-feedback y .invalid-feedback se gestiona por JavaScript. */
+/* Solo aseguramos el color y tamaño de fuente. */
+.valid-feedback,
+.invalid-feedback {
+    font-size: var(--smaller-font-size);
+}
+
+.valid-feedback {
+    color: var(--status-color);
+}
+
+.invalid-feedback {
+    color: var(--third-color);
+}
+
+
+.text-danger { /* Para los span de validación de ASP.NET Core */
+    font-size: var(--smaller-font-size);
+}
+
+/* Indicadores de campos requeridos con asterisco */
+.required::after {
+    content: " *";
+    color: var(--third-color); /* Rojo de peligro de site.css */
+}
+
+/* Estilos para el Progress Stepper (estos son personalizados) */
+.progress-stepper {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 1.5rem;
+    padding: 0 0.5rem;
+    position: relative;
+}
+
+    .progress-stepper::before {
+        content: '';
+        position: absolute;
+        width: calc(100% - 1rem);
+        height: 3px;
+        background-color: var(--grey3); /* Gris claro de site.css */
+        top: 50%;
+        left: 0.5rem;
+        transform: translateY(-50%);
+        z-index: 0;
+    }
+
+    .progress-stepper .step {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        flex: 1;
+        position: relative;
+        z-index: 1;
+        cursor: pointer;
+        opacity: 0.7;
+        transition: opacity 0.3s ease;
+        padding: 0 0.25rem;
+    }
+
+        .progress-stepper .step.active,
+        .progress-stepper .step.completed {
+            opacity: 1;
+        }
+
+            .progress-stepper .step.active .step-number {
+                background-color: var(--Grey1); /* Gris para el paso activo de site.css */
+                border-color: var(--Grey1);
+                color: white;
+            }
+
+            .progress-stepper .step.completed .step-number {
+                background-color: var(--status-color); /* Verde para completado de site.css */
+                border-color: var(--status-color);
+                color: white;
+            }
+
+    .progress-stepper .step-number {
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        background-color: var(--div-bg); /* Fondo blanco del div global */
+        border: 1px solid var(--grey3);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-weight: bold;
+        font-size: 0.8rem;
+        margin-bottom: 0.3rem;
+        transition: all 0.3s ease;
+        color: var(--text-color-main); /* Color de texto principal global */
+    }
+
+    .progress-stepper .step-label {
+        font-size: var(--smaller-font-size); /* Tamaño de fuente más pequeño global */
+        text-align: center;
+        color: var(--text-color-main);
+    }
+
+/* Estilos para el panel de cálculo (Calculadora Inteligente - personalizados) */
+.calculation-panel {
+    background-color: var(--grey3); /* Gris más claro de site.css para el panel */
+    border: 1px solid var(--border-color);
+    border-radius: 0.5rem;
+    padding: 1rem;
+    margin-top: 1rem;
+}
+
+    .calculation-panel h6 {
+        color: var(--first-color); /* Usar el color primario de site.css para resaltado */
+        margin-bottom: 0.75rem;
+        font-weight: var(--font-semi-bold);
+        font-size: 1rem;
+    }
+
+.calculation-item {
+    font-size: var(--normal-font-size); /* Tamaño de fuente normal global */
     color: var(--text-color-main);
 }
 
-.form-group {
-    margin-bottom: 1rem;
+.calculation-total {
+    padding-top: 0.6rem;
+    font-size: var(--title-font-size); /* Tamaño de título global para el total */
+    color: var(--first-color); /* Color primario de site.css */
 }
 
+/* Loading states para campos dinámicos (personalizados) */
+.form-floating .form-select.is-loading,
+.form-floating .form-control.is-loading {
+    background-color: var(--grey3); /* Gris claro */
+    opacity: 0.7;
+    pointer-events: none;
+}
+
+    .form-floating .form-select.is-loading option {
+        color: var(--Grey1); /* Gris más oscuro */
+    }
+
+/* Ocultar pestañas originales de Bootstrap en móvil (personalizado) */
+@media (max-width: 768px) {
+    .nav-tabs {
+        display: none;
+    }
+
+    .progress-stepper::before {
+        display: none;
+    }
+
+    .progress-stepper .step {
+        width: 33.33%;
+        margin-bottom: 0.5rem;
+    }
+
+    .progress-stepper {
+        flex-wrap: wrap;
+    }
+
+    /* Asegurar que las etiquetas flotantes se vean bien en móvil con campos sm */
+    .form-floating > label {
+        font-size: var(--smaller-font-size);
+    }
+}
+
+/* El submit-container se oculta por defecto (para ser controlado por JS) */
+.submit-container {
+    display: none; /* JavaScript lo mostrará/ocultará */
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    margin-top: 1.5rem;
+}
+
+/* Estilos para los botones de navegación (Siguiente/Anterior/Registrar/Cancelar) */
+/* Aquí usamos las clases de Bootstrap y sobrescribimos sus colores por tus variables. */
+.btn {
+    font-size: var(--normal-font-size);
+    padding: .375rem .75rem; /* Padding estándar de Bootstrap */
+    font-weight: var(--font-semi-bold); /* Fuente semibold global */
+    border-radius: 0.25rem; /* Bordes redondeados de Bootstrap */
+    transition: all 0.2s ease;
+}
+
+.btn-primary {
+    background-color: var(--Grey1); /* Gris de site.css para el botón principal */
+    border-color: var(--Grey1);
+    color: white;
+}
+
+    .btn-primary:hover {
+        background-color: var(--text-color-main); /* Un gris un poco más claro al hover */
+        border-color: var(--text-color-main);
+        color: white;
+    }
+
+.btn-secondary {
+    background-color: var(--grey2); /* Gris claro de site.css para el botón secundario */
+    border-color: var(--grey2);
+    color: var(--text-color-main); /* Texto oscuro para contraste */
+}
+
+    .btn-secondary:hover {
+        background-color: var(--Grey1); /* Gris un poco más oscuro al hover */
+        border-color: var(--Grey1);
+        color: white;
+    }
+
+.btn-danger {
+    background-color: var(--third-color); /* Rojo de site.css */
+    border-color: var(--third-color);
+    color: white;
+}
+
+    .btn-danger:hover {
+        /* Si no usas preprocesador, calcula el color hexadecimal aquí */
+        background-color: #bb2d3b; /* Ejemplo de rojo más oscuro */
+        border-color: #bb2d3b;
+    }
+
+/* Estilos para los elementos de drag & drop (si se usan en formularios) */
+/* Estos son ejemplos de estilos personalizados. */
 .drop-zone {
-    border: 2px dashed var(--first-color-light);
+    border: 2px dashed var(--grey2); /* Gris de site.css */
     border-radius: 0.5rem;
     padding: 1rem;
     text-align: center;
@@ -71,19 +355,19 @@ hr {
     align-items: center;
     justify-content: center;
     min-height: 150px;
-    background-color: var(--input-bg);
+    background-color: var(--grey3); /* Gris claro de site.css */
     transition: all 0.2s ease-in-out;
     position: relative;
 }
 
     .drop-zone.dragover {
-        background-color: var(--first-color-lighten);
-        border-color: var(--first-color);
+        background-color: var(--border-color);
+        border-color: var(--Grey1);
     }
 
 .drop-zone-icon {
     font-size: 3rem;
-    color: var(--first-color);
+    color: var(--Grey1);
     margin-bottom: 0.5rem;
 }
 
@@ -100,19 +384,19 @@ hr {
 
 .drop-zone-info {
     font-size: var(--smaller-font-size);
-    color: var(--text-color-light);
+    color: var(--text-color-main);
     margin-top: 0.5rem;
 }
 
 .drop-zone-input {
-    opacity: 0; /* Ocultar el input de archivo real */
+    opacity: 0;
     position: absolute;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
     cursor: pointer;
-    z-index: 10; /* Asegurar que sea clickeable */
+    z-index: 10;
 }
 
 .drop-zone-preview {
@@ -120,32 +404,31 @@ hr {
     justify-content: center;
     align-items: center;
     width: 100%;
-    height: 100%; /* Opcional: para que la imagen ocupe todo el espacio si quieres */
+    height: 100%;
     position: absolute;
     top: 0;
     left: 0;
-    background-color: rgba(255, 255, 255, 0.9); /* Fondo semi-transparente para la preview */
+    background-color: rgba(255, 255, 255, 0.9);
     border-radius: 0.5rem;
-    overflow: hidden; /* Recortar si la imagen es muy grande */
-    display: none; /* Ocultar por defecto, mostrar cuando haya imagen */
-    z-index: 5; /* Detrás del input invisible pero encima del texto */
+    overflow: hidden;
+    display: none;
+    z-index: 5;
 }
 
 .drop-zone.has-file .drop-zone-preview {
-    display: flex; /* Mostrar el preview si hay un archivo */
+    display: flex;
 }
 
 .drop-zone.has-file .drop-zone-icon,
 .drop-zone.has-file .drop-zone-text,
 .drop-zone.has-file .drop-zone-info {
-    display: none; /* Ocultar el texto y el icono cuando hay un archivo */
+    display: none;
 }
-
 
 .drop-zone-preview img {
     max-width: 100%;
     max-height: 100%;
-    object-fit: contain; /* Ajustar la imagen dentro del contenedor */
+    object-fit: contain;
     border-radius: 0.5rem;
 }
 
@@ -153,7 +436,7 @@ hr {
     position: absolute;
     top: 5px;
     right: 5px;
-    background-color: rgba(255, 0, 0, 0.7);
+    background-color: rgba(206, 44, 38, 0.7); /* Rojo semi-transparente (third-color) */
     color: white;
     border: none;
     border-radius: 50%;
@@ -165,7 +448,7 @@ hr {
     cursor: pointer;
     font-size: 0.8rem;
     font-weight: bold;
-    z-index: 15; /* Asegurar que el botón de eliminar esté por encima de todo */
+    z-index: 15;
     opacity: 0.8;
     transition: opacity 0.2s ease-in-out;
 }
@@ -174,7 +457,7 @@ hr {
         opacity: 1;
     }
 
-/* BUSQUEDA DESPLEGABLE EN REGISTRO DE EMPLEADOS */
+/* BUSQUEDA DESPLEGABLE (autocomplete) */
 .autocomplete-container {
     width: 100%;
     z-index: 100;
@@ -183,106 +466,124 @@ hr {
 
 .autocomplete-results {
     position: absolute;
-    top: 100%; /* Debajo del input */
+    top: 100%;
     left: 0;
     right: 0;
-    z-index: 1000; /* Asegura que esté por encima de otros elementos */
-    border: 1px solid #ced4da;
+    z-index: 1000;
+    border: 1px solid var(--border-color);
     border-top: none;
-    background-color: #fff;
-    max-height: 200px; /* Limita la altura del desplegable */
-    overflow-y: auto; /* Agrega scroll si los resultados exceden maxHeight */
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    border-radius: 0 0 0.25rem 0.25rem; /* Bordes redondeados abajo */
+    background-color: var(--div-bg);
+    max-height: 200px;
+    overflow-y: auto;
+    box-shadow: 0 4px 6px var(--shadow-color-main);
+    border-radius: 0 0 0.25rem 0.25rem;
 }
 
 .autocomplete-item {
     padding: 0.5rem 1rem;
     cursor: pointer;
-    border-bottom: 1px solid #eee;
+    border-bottom: 1px solid var(--border-color);
     display: flex;
     align-items: center;
+    color: var(--text-color-main);
 }
 
     .autocomplete-item:last-child {
         border-bottom: none;
     }
 
-    .autocomplete-item:hover, .autocomplete-item.active { /* 'active' para navegación con teclado si se implementa */
-        background-color: #e9ecef;
+    .autocomplete-item:hover, .autocomplete-item.active {
+        background-color: var(--hover-bg);
     }
 
 .autocomplete-item-text {
-    flex-grow: 1; /* Ocupa el espacio restante */
+    flex-grow: 1;
 }
 
 .autocomplete-item-details {
     font-size: 0.8em;
-    color: #6c757d;
-    margin-left: 10px; /* Espacio entre nombre y detalles */
+    color: var(--Grey1);
+    margin-left: 10px;
 }
 
 .autocomplete-item-icon {
-    width: 24px; /* Tamaño del icono */
+    width: 24px;
     height: 24px;
-    border-radius: 50%; /* Para que la imagen sea redonda si es de perfil */
+    border-radius: 50%;
     margin-right: 10px;
     object-fit: cover;
 }
 
 .autocomplete-results .no-results-message {
     padding: 0.5rem 1rem;
-    color: #6c757d;
+    color: var(--Grey1);
     text-align: center;
 }
 
+/* Contenedores de botones (submit y modal) */
 .submit-container,
 .modal-footer {
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 100%;
+    height: auto;
     gap: 10px;
 }
 
     .submit-container .btn,
     .modal-footer .btn {
-        border: none;
-        padding: 5px 10px;
-        width: 20%;
-        color: var(--div-bg);
+        border: none; 
+        padding: 0.5rem 1rem;
+        width: auto;
+        min-width: 100px;
+        color: white; /* Color de texto blanco por defecto para la mayoría */
         font-size: var(--normal-font-size);
         font-weight: var(--font-semi-bold);
+        border-radius: 0.25rem;
+        transition: all 0.2s ease;
     }
 
     .submit-container .btn-primary,
-    .modal-footer .btn-primary,
-    .modal-footer .btn-warning {
+    .modal-footer .btn-primary {
         background: var(--first-color);
+        border-color: var(--Grey1);
     }
+
+    .modal-footer .btn-warning { /* Si se usa btn-warning en modal-footer */
+        background: var(--second-color); /* Amarillo de site.css */
+        border-color: var(--second-color);
+        color: var(--black1); /* Texto oscuro para contraste en amarillo */
+    }
+
 
     .submit-container .btn-danger,
     .submit-container .btn-exit,
     .modal-footer .btn-exit {
-        background: var(--third-color);
+        background: var(--third-color); /* Rojo de site.css */
+        border-color: var(--third-color);
     }
 
-    .submit-container .btn-primary:hover {
-        background: #e3e3e3;
-        color: var(--first-color);
+    .submit-container .btn-primary:hover,
+    .modal-footer .btn-primary:hover {
+        background: var(--text-color-main); /* Gris más claro al hover */
+        border-color: var(--text-color-main);
     }
 
-    .submit-container .btn-danger:hover {
-        background: #e3e3e3;
-        color: var(--third-color);
+    .modal-footer .btn-warning:hover {
+        /* Requiere preprocesador o valor hexadecimal fijo */
+        background: darken(var(--second-color), 10%);
+        border-color: darken(var(--second-color), 10%);
     }
 
-    .submit-container .btn-exit:hover {
-        background: #e3e3e3;
-        color: var(--third-color);
+    .submit-container .btn-danger:hover,
+    .submit-container .btn-exit:hover,
+    .modal-footer .btn-exit:hover {
+        /* Requiere preprocesador o valor hexadecimal fijo */
+        background: darken(var(--third-color), 10%);
+        border-color: darken(var(--third-color), 10%);
     }
 
-.reg-preview-container {
+.reg-preview-container { /* Si esta clase se usa, ajustar según las nuevas variables */
     border-radius: 5%;
     display: grid;
     justify-items: center;
@@ -290,7 +591,7 @@ hr {
     bottom: 0;
 }
 
-.submit-container-reg {
+.submit-container-reg { /* Si esta clase se usa para otros formularios, ajustar según las nuevas variables */
     display: flex;
     justify-content: center;
     align-items: center;
@@ -308,28 +609,40 @@ hr {
     }
 
     .submit-container-reg .btn-primary {
-        background: #239b56;
+        background: var(--status-color); /* Verde de site.css para un "registrar" si es primario */
     }
 
     .submit-container-reg .btn-danger {
-        background: var(--first-color);
+        background: var(--first-color); /* Usar el azul principal si es para "eliminar" */
     }
 
     .submit-container-reg .btn-exit {
-        background: var(--third-color);
+        background: var(--third-color); /* Rojo de site.css */
     }
 
     .submit-container-reg .btn-primary:hover {
-        background: #e3e3e3;
-        color: #239b56;
+        /* Requiere preprocesador o valor hexadecimal fijo */
+        background: darken(var(--status-color), 10%);
+        color: white;
     }
 
     .submit-container-reg .btn-danger:hover {
-        background: #e3e3e3;
-        color: var(--first-color);
+        /* Requiere preprocesador o valor hexadecimal fijo */
+        background: darken(var(--first-color), 10%);
+        color: white;
     }
 
     .submit-container-reg .btn-exit:hover {
-        background: #e3e3e3;
-        color: var(--third-color);
+        /* Requiere preprocesador o valor hexadecimal fijo */
+        background: darken(var(--third-color), 10%);
+        color: white;
     }
+
+/* Importante: Si no usas un preprocesador como SASS/LESS, debes reemplazar `darken(var(--color), 10%)` con un valor hexadecimal fijo. */
+/* Ejemplo de cómo sería si no usas preprocesador (tendrías que calcular el color): */
+/*
+.submit-container .btn-primary:hover {
+    background: #5a6268; // Un gris ligeramente más oscuro que var(--Grey1)
+    border-color: #5a6268;
+}
+*/
