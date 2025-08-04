@@ -1717,6 +1717,18 @@
         <member name="M:VCashApp.Migrations.SetNullCodRutaOnCefTransactions.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
             <inheritdoc />
         </member>
+        <member name="T:VCashApp.Migrations.AddBranchCodeToCefTransaction">
+            <inheritdoc />
+        </member>
+        <member name="M:VCashApp.Migrations.AddBranchCodeToCefTransaction.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:VCashApp.Migrations.AddBranchCodeToCefTransaction.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:VCashApp.Migrations.AddBranchCodeToCefTransaction.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
         <member name="T:VCashApp.Models.ViewModels.CentroEfectivo.CefContainerProcessingViewModel">
             <summary>
             ViewModel para la entrada de datos durante el conteo de un contenedor de efectivo.
@@ -1856,6 +1868,9 @@
             Implementación del servicio para la gestión de Transacciones de Centro de Efectivo.
             </summary>
         </member>
+        <member name="M:VCashApp.Services.Cef.CefTransactionService.GetDropdownListsAsync(System.String,System.Boolean)">
+            <inheritdoc/>
+        </member>
         <member name="M:VCashApp.Services.Cef.CefTransactionService.PrepareCheckinViewModelAsync(System.String,System.String,System.String,System.String)">
             <inheritdoc/>
         </member>
@@ -1865,7 +1880,7 @@
         <member name="M:VCashApp.Services.Cef.CefTransactionService.GetCefTransactionByIdAsync(System.Int32)">
             <inheritdoc/>
         </member>
-        <member name="M:VCashApp.Services.Cef.CefTransactionService.GetFilteredCefTransactionsAsync(System.Nullable{System.Int32},System.Nullable{System.DateOnly},System.Nullable{System.DateOnly},System.Nullable{VCashApp.Enums.CefTransactionStatusEnum},System.String,System.Int32,System.Int32)">
+        <member name="M:VCashApp.Services.Cef.CefTransactionService.GetFilteredCefTransactionsAsync(System.String,System.Nullable{System.Int32},System.Nullable{System.DateOnly},System.Nullable{System.DateOnly},System.Nullable{VCashApp.Enums.CefTransactionStatusEnum},System.String,System.Int32,System.Int32,System.Boolean)">
             <inheritdoc/>
         </member>
         <member name="M:VCashApp.Services.Cef.CefTransactionService.UpdateTransactionStatusAsync(System.Int32,VCashApp.Enums.CefTransactionStatusEnum,System.String)">
@@ -2074,7 +2089,7 @@
             <param name="transactionId">ID de la transacción de CEF.</param>
             <returns>La transacción de CEF si se encuentra, de lo contrario, null.</returns>
         </member>
-        <member name="M:VCashApp.Services.ICefTransactionService.GetFilteredCefTransactionsAsync(System.Nullable{System.Int32},System.Nullable{System.DateOnly},System.Nullable{System.DateOnly},System.Nullable{VCashApp.Enums.CefTransactionStatusEnum},System.String,System.Int32,System.Int32)">
+        <member name="M:VCashApp.Services.ICefTransactionService.GetFilteredCefTransactionsAsync(System.String,System.Nullable{System.Int32},System.Nullable{System.DateOnly},System.Nullable{System.DateOnly},System.Nullable{VCashApp.Enums.CefTransactionStatusEnum},System.String,System.Int32,System.Int32,System.Boolean)">
             <summary>
             Obtiene una lista paginada y filtrada de transacciones de Centro de Efectivo para el dashboard de Check-in o revisión.
             </summary>
@@ -2086,6 +2101,11 @@
             <param name="pageNumber">Número de página.</param>
             <param name="pageSize">Tamaño de la página.</param>
             <returns>Una tupla que contiene la lista de transacciones y el total de registros.</returns>
+        </member>
+        <member name="M:VCashApp.Services.ICefTransactionService.GetDropdownListsAsync(System.String,System.Boolean)">
+            <summary>
+            Obtiene las listas de dropdowns necesarias para el dashboard de CEF.
+            </summary>
         </member>
         <member name="M:VCashApp.Services.ICefTransactionService.UpdateTransactionStatusAsync(System.Int32,VCashApp.Enums.CefTransactionStatusEnum,System.String)">
             <summary>

@@ -71,9 +71,12 @@ namespace VCashApp.Controllers
         private async Task SetCommonViewBagsCefAsync(ApplicationUser currentUser, string pageName)
         {
             await base.SetCommonViewBagsBaseAsync(currentUser, pageName);
-            ViewBag.AvailableBranches = (await _context.AdmSucursales
-                .Select(s => new SelectListItem { Value = s.CodSucursal.ToString(), Text = s.NombreSucursal })
-                .ToListAsync());
+            bool isAdmin = ViewBag.IsAdmin;
+
+            var (sucursales, estados) = await _cefTransactionService.GetDropdownListsAsync(currentUser.Id, isAdmin);
+
+            ViewBag.AvailableBranches = sucursales;
+            ViewBag.TransactionStatuses = estados;
 
             var userRoles = await _userManager.GetRolesAsync(currentUser);
             ViewBag.HasCreatePermission = await HasPermisionForView(userRoles, "CEF", PermissionType.Create);
@@ -106,9 +109,10 @@ namespace VCashApp.Controllers
             if (currentUser == null) return RedirectToPage("/Account/Login", new { area = "Identity" });
 
             await SetCommonViewBagsCefAsync(currentUser, "Centro Efectivo");
+            bool isAdmin = ViewBag.IsAdmin;
 
             var (transactions, totalRecords) = await _cefTransactionService.GetFilteredCefTransactionsAsync(
-                branchId, startDate, endDate, status, searchTerm, pageNumber, pageSize);
+                currentUser.Id, branchId, startDate, endDate, status, searchTerm, pageNumber, pageSize, isAdmin);
 
             var transactionStatuses = Enum.GetValues(typeof(CefTransactionStatusEnum))
                 .Cast<CefTransactionStatusEnum>()
@@ -128,8 +132,8 @@ namespace VCashApp.Controllers
                 CurrentStartDate = startDate,
                 CurrentEndDate = endDate,
                 CurrentStatus = status,
-                TransactionStatuses = transactionStatuses,
-                AvailableBranches = new List<SelectListItem>()
+                AvailableBranches = ViewBag.AvailableBranches as List<SelectListItem>,
+                TransactionStatuses = ViewBag.TransactionStatuses as List<SelectListItem>
             };
 
             ViewBag.CurrentPage = pageNumber;
@@ -142,6 +146,7 @@ namespace VCashApp.Controllers
             ViewBag.CurrentEndDate = endDate?.ToString("yyyy-MM-dd");
             ViewBag.CurrentStatus = status?.ToString();
             ViewBag.TransactionStatuses = transactionStatuses;
+
 
             _logger.LogInformation("Usuario: {Usuario} | IP: {IP} | Acción: Acceso a Dashboard CEF | Conteo: {Conteo} |",
                 currentUser.UserName, IpAddressForLogging, transactions.Count());

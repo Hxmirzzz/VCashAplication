@@ -395,8 +395,8 @@ namespace VCashApp.Services
         {
             string photosPath = Path.Combine(REPO_BASE_PATH, "Fotos");
             string signaturesPath = Path.Combine(REPO_BASE_PATH, "Firmas");
-            Directory.CreateDirectory(photosPath); // Asegurar que el directorio exista
-            Directory.CreateDirectory(signaturesPath); // Asegurar que el directorio exista
+            Directory.CreateDirectory(photosPath);
+            Directory.CreateDirectory(signaturesPath);
 
             string? relativePhotoPath = model.PhotoPath;
             string? relativeSignaturePath = model.SignaturePath;

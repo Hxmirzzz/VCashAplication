@@ -84,7 +84,7 @@
                                             </div>
                                             <span asp-validation-for="BranchId" class="text-danger"></span>
                                         </div>
-                                        <div class="col-12 col-lg-4">
+                                        <div class="col-12 col-lg-2">
                                             <div class="form-floating has-validation">
                                                 <input asp-for="RequestDate" type="date" class="form-control" placeholder="Fecha de Solicitud" required aria-required="true" />
                                                 <label for="requestDate" class="required">Fecha de Solicitud</label>
@@ -93,7 +93,7 @@
                                             </div>
                                             <span asp-validation-for="RequestDate" class="text-danger"></span>
                                         </div>
-                                        <div class="col-12 col-lg-4">
+                                        <div class="col-12 col-lg-2">
                                             <div class="form-floating has-validation">
                                                 <input asp-for="RequestTime" type="time" class="form-control" placeholder="Hora de Solicitud" required aria-required="true" />
                                                 <label for="requestTime" class="required">Hora de Solicitud</label>
@@ -101,6 +101,24 @@
                                                 <div class="valid-feedback">✓ Correcto</div>
                                             </div>
                                             <span asp-validation-for="RequestTime" class="text-danger"></span>
+                                        </div>
+                                        <div class="col-12 col-lg-2">
+                                            <div class="form-floating has-validation">
+                                                <input asp-for="ProgrammingDate" type="date" class="form-control" placeholder="Fecha de Servicio" required aria-required="true" />
+                                                <label for="serviceDate" class="required">Fecha de Servicio</label>
+                                                <div class="invalid-feedback">⚠ Este campo es requerido</div>
+                                                <div class="valid-feedback">✓ Correcto</div>
+                                            </div>
+                                            <span asp-validation-for="ProgrammingDate" class="text-danger"></span>
+                                        </div>
+                                        <div class="col-12 col-lg-2">
+                                            <div class="form-floating has-validation">
+                                                <input asp-for="ProgrammingTime" type="time" class="form-control" placeholder="Hora de Servicio" required aria-required="true" />
+                                                <label for="serviceTime" class="required">Hora de Servicio</label>
+                                                <div class="invalid-feedback">⚠ Este campo es requerido</div>
+                                                <div class="valid-feedback">✓ Correcto</div>
+                                            </div>
+                                            <span asp-validation-for="ProgrammingTime" class="text-danger"></span>
                                         </div>
                                         <div class="col-12 col-lg-4">
                                             <div class="form-floating has-validation">

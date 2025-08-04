@@ -18,6 +18,12 @@ namespace VCashApp.Models.Entities
         [NotMapped]
         public virtual CgsService Service { get; set; }
 
+        [Column("CodSucursal")]
+        [ForeignKey("AdmSucursal")]
+        public int? BranchCode { get; set; }
+        [NotMapped]
+        public virtual AdmSucursal? Branch { get; set; }
+
         [StringLength(12)]
         [Column("CodRuta")]
         [ForeignKey("TdvRutaDiaria")]
@@ -27,7 +33,7 @@ namespace VCashApp.Models.Entities
 
         [Required]
         [Column("NumeroPlanilla")]
-        public int SlipNumber { get; set; } // Numero de Planilla
+        public int SlipNumber { get; set; }
 
         [Required]
         [StringLength(3)]

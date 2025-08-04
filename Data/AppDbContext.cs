@@ -396,6 +396,7 @@ namespace VCashApp.Data
                 // Relaciones
                 entity.HasOne<CgsService>().WithMany().HasForeignKey(t => t.ServiceOrderId).HasPrincipalKey(s => s.ServiceOrderId).OnDelete(DeleteBehavior.Restrict);
                 entity.HasOne<TdvRutaDiaria>().WithMany().HasForeignKey(t => t.RouteId).HasPrincipalKey(r => r.Id).IsRequired(false).OnDelete(DeleteBehavior.Restrict);
+                entity.HasOne(t => t.Branch).WithMany().HasForeignKey(t => t.BranchCode).OnDelete(DeleteBehavior.Restrict);
 
                 entity.HasOne<ApplicationUser>().WithMany().HasForeignKey(t => t.RegistrationUser).HasPrincipalKey(u => u.Id).OnDelete(DeleteBehavior.Restrict);
                 entity.HasOne<ApplicationUser>().WithMany().HasForeignKey(t => t.CountingUserBillId).HasPrincipalKey(u => u.Id).IsRequired(false).OnDelete(DeleteBehavior.Restrict);
