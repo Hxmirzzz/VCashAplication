@@ -123,6 +123,10 @@ namespace VCashApp.Models.Entities
         [StringLength(255)]
         public string? FailedResponsible { get; set; }
 
+        [Column("RazonFallido")]
+        [StringLength(450)]
+        public string? FailedReason { get; set; }
+
         [Column("PersonaCancelacion")]
         [StringLength(255)]
         public string? CancellationPerson { get; set; }

@@ -138,6 +138,12 @@
                                             </div>
                                             <span asp-validation-for="ServiceObservations" class="text-danger"></span>
                                         </div>
+                                        <div class="col-12 col-lg-4">
+                                            <div class="form-check form-switch">
+                                                <input asp-for="IsFailed" class="form-check-input" type="checkbox" id="isFailedSwitch" />
+                                                <label class="form-check-label" for="isFailedSwitch">Marcar como Fallido</label>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -318,6 +324,17 @@
                                     <div class="row g-3">
                                         <div class="col-12 col-lg-4">
                                             <div class="form-floating has-validation">
+                                                <select asp-for="Currency" asp-items="Model.AvailableCurrencies" class="form-select" id="currency" required aria-required="true">
+                                                    <option value="">Seleccionar divisa...</option>
+                                                </select>
+                                                <label for="currency" class="required">Divisa</label>
+                                                <div class="invalid-feedback">⚠ Este campo es requerido</div>
+                                                <div class="valid-feedback">✓ Correcto</div>
+                                            </div>
+                                            <span asp-validation-for="ServiceValue" class="text-danger"></span>
+                                        </div>
+                                        <div class="col-12 col-lg-4">
+                                            <div class="form-floating has-validation">
                                                 <input asp-for="ServiceValue" type="number" step="0.01" class="form-control" placeholder="Valor del Servicio" required aria-required="true" />
                                                 <label for="serviceValue" class="required">Valor del Servicio</label>
                                                 <div class="invalid-feedback">⚠ Este campo es requerido</div>
@@ -427,14 +444,45 @@
                                 </div>
                             </div>
                         </div>
-                        @* ¡IMPORTANTE! Botones "Registrar" y "Anterior" no van aquí. Se mueven al final del formulario. *@
+                    </div>
+                </div>
+
+                <div class="step-content" id="failedReasonSection" style="display:none;">
+                    <div class="card mb-4">
+                        <div class="card-header">
+                            <h5>🚨 Detalles del Fallo</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row g-3">
+                                <div class="col-12 col-lg-6">
+                                    <div class="form-floating has-validation">
+                                        <select asp-for="FailedResponsible" asp-items="Model.AvailableFailedResponsibles" class="form-select" id="failedResponsible" required aria-required="true">
+                                            <option value="">Seleccionar responsable...</option>
+                                        </select>
+                                        <label for="failedResponsible" class="required">Responsable del Fallo</label>
+                                        <div class="invalid-feedback">⚠ Este campo es requerido</div>
+                                        <div class="valid-feedback">✓ Correcto</div>
+                                    </div>
+                                    <span asp-validation-for="FailedResponsible" class="text-danger"></span>
+                                </div>
+                                <div class="col-12">
+                                    <div class="form-floating has-validation">
+                                        <textarea asp-for="FailedReason" class="form-control" placeholder="Razón del Fallo" style="height: 100px;" required aria-required="true"></textarea>
+                                        <label for="failedReason" class="required">Razón del Fallo</label>
+                                        <div class="invalid-feedback">⚠ Este campo es requerido</div>
+                                        <div class="valid-feedback">✓ Correcto</div>
+                                    </div>
+                                    <span asp-validation-for="FailedReason" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
                 <div class="form-section mt-4">
                     <div class="card">
                         <div class="card-header">
-                            <h5>⚙️ Datos del Operador (Automático)</h5>
+                            <h5>⚙️ Datos del Operador</h5>
                         </div>
                         <div class="card-body">
                             <div class="row g-3">
@@ -759,14 +807,13 @@
             $('#branchId').on('change', function() {
                 const selectedBranchId = $(this).val();
 
-                // Si ya hay un cliente de origen seleccionado, actualiza sus ubicaciones
                 if ($('#originClientId').val()) {
-        loadAndFillLocationDropdown('#originClientId', '#originType', '#originCode', $('#serviceConceptCode').val());
-                        }
-                // Si ya hay un cliente de destino seleccionado, actualiza sus ubicaciones
+                    loadAndFillLocationDropdown('#originClientId', '#originType', '#originCode', $('#serviceConceptCode').val());
+                }
+
                 if ($('#destinationClientId').val()) {
-        loadAndFillLocationDropdown('#originClientId', '#originType', '#originCode', $('#serviceConceptCode').val());
-                        }
+                    loadAndFillLocationDropdown('#originClientId', '#originType', '#originCode', $('#serviceConceptCode').val());
+                }
             });
 
             $('#serviceConceptCode').on('change', function() {
@@ -788,9 +835,9 @@
                     $('#destinationType').val('');
                 }
 
-            loadAndFillLocationDropdown('#originClientId', '#originType', '#originCode', serviceConceptCode);
-            loadAndFillLocationDropdown('#destinationClientId', '#destinationType', '#destinationCode', serviceConceptCode);
-        });
+                loadAndFillLocationDropdown('#originClientId', '#originType', '#originCode', serviceConceptCode);
+                loadAndFillLocationDropdown('#destinationClientId', '#destinationType', '#destinationCode', serviceConceptCode);
+            });
 
             $('#originClientId').on('change', function() {
                 const clientId = $(this).val();
@@ -801,26 +848,46 @@
             });
 
             $('#originType').on('change', function() {
-        loadAndFillLocationDropdown('#originClientId', '#originType', '#originCode', $('#serviceConceptCode').val());
-                    });
+                 loadAndFillLocationDropdown('#originClientId', '#originType', '#originCode', $('#serviceConceptCode').val());
+            });
 
             $('#originCode').on('change', loadOriginLocationDetails);
 
             $('#destinationClientId').on('change', function() {
                 const clientId = $(this).val();
                 loadClientName(clientId, 'DestinationClientName', function() {
-        loadAndFillLocationDropdown('#destinationClientId', '#destinationType', '#destinationCode', $('#serviceConceptCode').val());
-                        });
+                loadAndFillLocationDropdown('#destinationClientId', '#destinationType', '#destinationCode', $('#serviceConceptCode').val());
+                });
             });
 
             $('#destinationType').on('change', function() {
-        loadAndFillLocationDropdown('#destinationClientId', '#destinationType', '#destinationCode', $('#serviceConceptCode').val());
-                    });
+                loadAndFillLocationDropdown('#destinationClientId', '#destinationType', '#destinationCode', $('#serviceConceptCode').val());
+            });
 
             $('#destinationCode').on('change', loadDestinationLocationDetails);
 
             $('.calculate-total-declared').on('input', calculateTotalDeclared);
             calculateTotalDeclared();
+
+            // Lógica para mostrar/ocultar la sección de fallo
+            $('#isFailedSwitch').on('change', function() {
+                const isFailed = $(this).is(':checked');
+                const $section = $('#failedReasonSection');
+
+                if (isFailed) {
+                    $section.show();
+                    // Hacer los campos requeridos y visibles
+                    $('#failedResponsible').prop('required', true).closest('.form-floating').addClass('has-validation');
+                    $('#failedReason').prop('required', true).closest('.form-floating').addClass('has-validation');
+                } else {
+                    $section.hide();
+                    // Quitar la validación y limpiar los campos
+                    $('#failedResponsible').prop('required', false).removeClass('is-invalid is-valid');
+                    $('#failedReason').prop('required', false).removeClass('is-invalid is-valid');
+                    $('#failedResponsible').val('');
+                    $('#failedReason').val('');
+                }
+            });
 
             $('button[data-step-action="submit-final"]').on('click', function(e) {
                 e.preventDefault();

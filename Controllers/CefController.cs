@@ -103,7 +103,7 @@ namespace VCashApp.Controllers
         [RequiredPermission(PermissionType.View, "CEF")]
         public async Task<IActionResult> Index(
             int? branchId, DateOnly? startDate, DateOnly? endDate, CefTransactionStatusEnum? status,
-            string? searchTerm, int pageNumber = 1, int pageSize = 10)
+            string? search, int pageNumber = 1, int pageSize = 15)
         {
             var currentUser = await GetCurrentApplicationUserAsync();
             if (currentUser == null) return RedirectToPage("/Account/Login", new { area = "Identity" });
@@ -112,7 +112,7 @@ namespace VCashApp.Controllers
             bool isAdmin = ViewBag.IsAdmin;
 
             var (transactions, totalRecords) = await _cefTransactionService.GetFilteredCefTransactionsAsync(
-                currentUser.Id, branchId, startDate, endDate, status, searchTerm, pageNumber, pageSize, isAdmin);
+                currentUser.Id, branchId, startDate, endDate, status, search, pageNumber, pageSize, isAdmin);
 
             var transactionStatuses = Enum.GetValues(typeof(CefTransactionStatusEnum))
                 .Cast<CefTransactionStatusEnum>()
@@ -127,7 +127,7 @@ namespace VCashApp.Controllers
                 PageSize = pageSize,
                 TotalPages = (int)Math.Ceiling((double)totalRecords / pageSize),
                 TotalData = totalRecords,
-                SearchTerm = searchTerm,
+                SearchTerm = search,
                 CurrentBranchId = branchId,
                 CurrentStartDate = startDate,
                 CurrentEndDate = endDate,
@@ -140,7 +140,7 @@ namespace VCashApp.Controllers
             ViewBag.PageSize = pageSize;
             ViewBag.TotalPages = dashboardViewModel.TotalPages;
             ViewBag.TotalData = totalRecords;
-            ViewBag.SearchTerm = searchTerm;
+            ViewBag.SearchTerm = search;
             ViewBag.CurrentBranchId = branchId;
             ViewBag.CurrentStartDate = startDate?.ToString("yyyy-MM-dd");
             ViewBag.CurrentEndDate = endDate?.ToString("yyyy-MM-dd");
@@ -315,10 +315,18 @@ namespace VCashApp.Controllers
             var currentUser = await GetCurrentApplicationUserAsync();
             if (currentUser == null) return RedirectToPage("/Account/Login", new { area = "Identity" });
 
+            bool isAdmin = await _userManager.IsInRoleAsync(currentUser, "Admin");
+
+            var (availableBranches, availableServiceModalities, availableFailedReponsibles) = await _cefServiceCreationService.GetDropdownListsAsync(currentUser.Id, isAdmin);
+
             await SetCommonViewBagsCefAsync(currentUser, "Crear Servicio CEF");
 
             CefServiceCreationViewModel viewModel = await _cefServiceCreationService.PrepareCefServiceCreationViewModelAsync(
-                                                    currentUser.Id, IpAddressForLogging, serviceConceptCode);
+                currentUser.Id, IpAddressForLogging, serviceConceptCode);
+
+            viewModel.AvailableBranches = availableBranches;
+            viewModel.AvailableServiceModalities = availableServiceModalities;
+            viewModel.AvailableFailedResponsibles = availableFailedReponsibles;
 
             // Si el serviceConceptCode es nulo o inválido, podrías redirigir o mostrar un error.
             if (string.IsNullOrEmpty(serviceConceptCode) || (viewModel.AvailableServiceConcepts != null && !viewModel.AvailableServiceConcepts.Any(s => s.Value == serviceConceptCode)))

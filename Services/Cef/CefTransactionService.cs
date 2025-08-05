@@ -221,7 +221,7 @@ namespace VCashApp.Services.Cef
         /// <inheritdoc/>
         public async Task<Tuple<List<CefTransactionSummaryViewModel>, int>> GetFilteredCefTransactionsAsync(
             string currentUserId, int? branchId, DateOnly? startDate, DateOnly? endDate, CefTransactionStatusEnum? status,
-            string? searchTerm, int pageNumber, int pageSize, bool isAdmin)
+            string? search, int pageNumber, int pageSize, bool isAdmin)
         {
             var permittedBranches = new List<int>();
             if (!isAdmin)
@@ -249,7 +249,7 @@ namespace VCashApp.Services.Cef
             var pStartDate = new SqlParameter("@StartDate", startDate.HasValue ? (object)startDate.Value.ToDateTime(TimeOnly.MinValue) : DBNull.Value);
             var pEndDate = new SqlParameter("@EndDate", endDate.HasValue ? (object)endDate.Value.ToDateTime(TimeOnly.MaxValue) : DBNull.Value);
             var pStatus = new SqlParameter("@Status", status.HasValue ? (object)status.Value.ToString() : DBNull.Value);
-            var pSearchTerm = new SqlParameter("@SearchTerm", string.IsNullOrEmpty(searchTerm) ? (object)DBNull.Value : searchTerm);
+            var pSearchTerm = new SqlParameter("@SearchTerm", string.IsNullOrEmpty(search) ? (object)DBNull.Value : search);
             var pPage = new SqlParameter("@Page", pageNumber);
             var pPageSize = new SqlParameter("@PageSize", pageSize);
 
@@ -280,16 +280,10 @@ namespace VCashApp.Services.Cef
                         transactionsSummary.Add(new CefTransactionSummaryViewModel
                         {
                             Id = reader.GetInt32(reader.GetOrdinal("Id")),
-                            ServiceOrderId = reader.IsDBNull(reader.GetOrdinal("OrdenServicio"))
-                                ? string.Empty
-                                : reader.GetString(reader.GetOrdinal("OrdenServicio")),
+                            ServiceOrderId = reader.IsDBNull(reader.GetOrdinal("OrdenServicio")) ? string.Empty : reader.GetString(reader.GetOrdinal("OrdenServicio")),
                             SlipNumber = reader.GetInt32(reader.GetOrdinal("NumeroPlanilla")),
-                            Currency = reader.IsDBNull(reader.GetOrdinal("Divisa"))
-                                ? string.Empty
-                                : reader.GetString(reader.GetOrdinal("Divisa")),
-                            TransactionType = reader.IsDBNull(reader.GetOrdinal("TipoTransaccion"))
-                                ? string.Empty
-                                : reader.GetString(reader.GetOrdinal("TipoTransaccion")),
+                            Currency = reader.IsDBNull(reader.GetOrdinal("Divisa")) ? string.Empty : reader.GetString(reader.GetOrdinal("Divisa")),
+                            TransactionType = reader.IsDBNull(reader.GetOrdinal("TipoTransaccion")) ? string.Empty : reader.GetString(reader.GetOrdinal("TipoTransaccion")),
                             TotalDeclaredValue = reader.GetDecimal(reader.GetOrdinal("ValorTotalDeclarado")),
                             TotalCountedValue = reader.GetDecimal(reader.GetOrdinal("ValorTotalContado")),
                             ValueDifference = reader.GetDecimal(reader.GetOrdinal("DiferenciaValor")),

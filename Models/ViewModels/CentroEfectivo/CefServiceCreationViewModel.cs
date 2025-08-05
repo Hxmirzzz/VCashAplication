@@ -15,6 +15,11 @@ namespace VCashApp.Models.ViewModels.CentroEfectivo
         [Range(1, int.MaxValue, ErrorMessage = "El número de planilla debe ser un número positivo.")]
         public int SlipNumber { get; set; }
 
+        [Display(Name = "Divisa")]
+        [Required(ErrorMessage = "La divisa es requerida.")]
+        [StringLength(3, ErrorMessage = "La divisa debe tener 3 caracteres.")]
+        public string Currency { get; set; } = "COP";
+
         [Display(Name = "Tipo de Servicio")]
         [Required(ErrorMessage = "El tipo de servicio es requerido.")]
         public string ServiceConceptCode { get; set; } = string.Empty;
@@ -58,7 +63,17 @@ namespace VCashApp.Models.ViewModels.CentroEfectivo
 
         [Display(Name = "Observaciones del Servicio")]
         [StringLength(255, ErrorMessage = "Las observaciones no pueden exceder los 255 caracteres.")]
-        public string? ServiceObservations { get; set; } // Maps to CgsService.Observations
+        public string? ServiceObservations { get; set; }
+
+        [Display(Name = "¿Fallido?")]
+        public bool IsFailed { get; set; } = false;
+
+        [Display(Name = "Responsable del Fallo")]
+        public string? FailedResponsible { get; set; }
+
+        [Display(Name = "Razón del Fallo")]
+        [StringLength(450, ErrorMessage = "La razón no puede exceder los 450 caracteres.")]
+        public string? FailedReason { get; set; }
 
         // =============================================================
         // ORIGIN AND DESTINATION FIELDS (FOR AdmServicio - CgsService POCO)
@@ -205,6 +220,7 @@ namespace VCashApp.Models.ViewModels.CentroEfectivo
         // =============================================================
 
         // Properties for SelectLists (dropdowns in the frontend)
+        public List<SelectListItem>? AvailableCurrencies { get; set; }
         public List<SelectListItem>? AvailableServiceConcepts { get; set; }
         public List<SelectListItem>? AvailableBranches { get; set; }
         public List<SelectListItem>? AvailableClients { get; set; }
@@ -216,7 +232,9 @@ namespace VCashApp.Models.ViewModels.CentroEfectivo
         public List<SelectListItem>? AvailableRanks { get; set; }
         public List<SelectListItem>? AvailableVehicles { get; set; }
         public List<SelectListItem>? AvailableEmployees { get; set; }
-        public List<SelectListItem>? AvailableServiceModalities { get; set; } // You'll need to define how to populate this
+        public List<SelectListItem>? AvailableServiceModalities { get; set; }
+        public List<SelectListItem>? AvailableFailedResponsibles { get; set; }
+
 
         // Operator Data (Automatic, for display)
         [Display(Name = "Fecha de Registro")]

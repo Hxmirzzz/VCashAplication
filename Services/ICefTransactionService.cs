@@ -40,6 +40,7 @@ namespace VCashApp.Services
         /// <summary>
         /// Obtiene una lista paginada y filtrada de transacciones de Centro de Efectivo para el dashboard de Check-in o revisión.
         /// </summary>
+        /// <param name="currentUserId">Usuario</param>
         /// <param name="branchId">Filtro por ID de sucursal.</param>
         /// <param name="startDate">Fecha de inicio para el filtro.</param>
         /// <param name="endDate">Fecha de fin para el filtro.</param>
@@ -47,16 +48,16 @@ namespace VCashApp.Services
         /// <param name="searchTerm">Término de búsqueda.</param>
         /// <param name="pageNumber">Número de página.</param>
         /// <param name="pageSize">Tamaño de la página.</param>
+        /// <param name="isAdmin">Indica si el usuario es administrador.</param>
         /// <returns>Una tupla que contiene la lista de transacciones y el total de registros.</returns>
         Task<Tuple<List<CefTransactionSummaryViewModel>, int>> GetFilteredCefTransactionsAsync(
             string currentUserId, int? branchId, DateOnly? startDate, DateOnly? endDate, CefTransactionStatusEnum? status,
-            string? searchTerm, int pageNumber, int pageSize, bool isAdmin);
+            string? search, int pageNumber, int pageSize, bool isAdmin);
 
         /// <summary>
         /// Obtiene las listas de dropdowns necesarias para el dashboard de CEF.
         /// </summary>
         Task<(List<SelectListItem> Sucursales, List<SelectListItem> Estados)> GetDropdownListsAsync(string currentUserId, bool isAdmin);
-
 
         /// <summary>
         /// Actualiza el estado de una transacción de Centro de Efectivo.

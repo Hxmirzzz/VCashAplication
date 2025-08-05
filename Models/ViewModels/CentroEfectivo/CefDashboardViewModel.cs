@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using VCashApp.Enums;
+using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace VCashApp.Models.ViewModels.CentroEfectivo
 {
@@ -23,7 +24,7 @@ namespace VCashApp.Models.ViewModels.CentroEfectivo
         [Display(Name = "Estado Actual")]
         public CefTransactionStatusEnum? CurrentStatus { get; set; }
 
-        public List<Microsoft.AspNetCore.Mvc.Rendering.SelectListItem>? AvailableBranches { get; set; }
-        public List<Microsoft.AspNetCore.Mvc.Rendering.SelectListItem>? TransactionStatuses { get; set; }
+        public List<SelectListItem>? AvailableBranches { get; set; }
+        public List<SelectListItem>? TransactionStatuses { get; set; }
     }
 }

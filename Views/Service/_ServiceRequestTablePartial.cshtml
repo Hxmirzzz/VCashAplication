@@ -1,0 +1,132 @@
+﻿@model IEnumerable<VCashApp.Models.ViewModels.Servicio.CgsServiceSummaryViewModel>
+@{
+    int currentPage = ViewBag.CurrentPage ?? 1;
+    int totalPages = ViewBag.TotalPages ?? 1;
+    int totalData = ViewBag.TotalData ?? 0;
+    int pageSize = ViewBag.PageSize ?? 15;
+
+    bool canEdit = ViewBag.HasEditPermission ?? false;
+
+    const int maxPagesToShow = 5;
+    int halfPagesToShow = (maxPagesToShow - 1) / 2;
+    int startPage = Math.Max(1, currentPage - halfPagesToShow);
+    int endPage = Math.Min(totalPages, currentPage + halfPagesToShow);
+    if (endPage - startPage + 1 < maxPagesToShow)
+    {
+        if (startPage == 1)
+        {
+            endPage = Math.Min(totalPages, startPage + maxPagesToShow - 1);
+        }
+        else if (endPage == totalPages)
+        {
+            startPage = Math.Max(1, endPage - maxPagesToShow + 1);
+        }
+    }
+}
+
+<div class="table-section">
+    <div class="table-container">
+        <div class="table-wrapper">
+            <table class="table" id="dataTable">
+                <thead>
+                    <tr>
+                        <th>Orden Servicio</th>
+                        <th>Clave</th>
+                        <th>Cliente</th>
+                        <th>Sucursal</th>
+                        <th>Origen</th>
+                        <th>Destino</th>
+                        <th>Concepto</th>
+                        <th>Solicitud</th>
+                        <th>Ejecución</th>
+                        <th class="status-column-header">Estado</th>
+                        <th><i class="ri-list-settings-fill"></i></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model != null && Model.Any())
+                    {
+                        @foreach (var service in Model)
+                        {
+                            <tr>
+                                <td>@service.ServiceOrderId</td>
+                                <td>@service.KeyValue</td>
+                                <td>@service.ClientName</td>
+                                <td>@service.BranchName</td>
+                                <td>@service.OriginPointName</td>
+                                <td>@service.DestinationPointName</td>
+                                <td>@service.ConceptName</td>
+                                <td>@service.RequestDate.ToShortDateString() @service.RequestTime.ToString("hh\\:mm")</td>
+                                <td>@service.ProgrammingDate?.ToShortDateString() @service.ProgrammingTime?.ToString("hh\\:mm")</td>
+                                <td class="status-column">
+                                    @{
+                                        string statusText = service.StatusName.Replace("_", " ");
+                                        string badgeClass = "badge";
+                                        // Aquí puedes usar un switch o if-else para asignar clases de badge según el estado
+                                        // Por ejemplo, basándote en tu módulo CEF
+                                        switch (service.StatusCode)
+                                        {
+                                            case 1: // Estado 1 (ej: Pendiente)
+                                                badgeClass += " bg-secondary"; break;
+                                            case 2: // Estado 2 (ej: Aprobada)
+                                                badgeClass += " bg-primary"; break;
+                                            case 3: // Estado 3 (ej: En Proceso)
+                                                badgeClass += " bg-info"; break;
+                                            case 4: // Estado 4 (ej: Terminada)
+                                                badgeClass += " bg-success"; break;
+                                            case 5: // Estado 5 (ej: Rechazada)
+                                                badgeClass += " bg-danger"; break;
+                                            default:
+                                                badgeClass += " bg-dark"; break;
+                                        }
+                                    }
+                                    <span class="badge @badgeClass">@statusText</span>
+                                </td>
+                                <td>
+                                    <div class="action-buttons d-flex align-items-center justify-content-center">
+                                        <a href="@Url.Action("Details", "Cgs", new { serviceOrderId = service.ServiceOrderId })" class="btn-detail" title="Ver Detalles">
+                                            <i class="ri-eye-fill"></i>
+                                        </a>
+                                        @if (canEdit && service.StatusCode <= 2) // Lógica de ejemplo: solo se puede editar si está en estado inicial
+                                        {
+                                            <a asp-action="Edit" asp-route-serviceOrderId="@service.ServiceOrderId" class="btn-edit ml-1" title="Editar Solicitud">
+                                                <i class="ri-pencil-fill"></i>
+                                            </a>
+                                        }
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="10" class="text-center">No se encontraron solicitudes de servicio.</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="table-footer">
+        <div class="page-message">Página @currentPage de @totalPages (Total: @totalData registros)</div>
+        <div class="pagination">
+            <button class="page-link" data-page="1" @(currentPage == 1 ? "disabled" : "")>&laquo;</button>
+            <button class="page-link" data-page="@(currentPage - 1)" @(currentPage == 1 ? "disabled" : "")>&lt;</button>
+            @if (startPage > 1)
+            {
+                <button class="page-link" data-page="@(startPage - 1)">...</button>
+            }
+            @for (int i = startPage; i <= endPage; i++)
+            {
+                <button class="page-link @(currentPage == i ? "active-page" : "")" data-page="@i">@i</button>
+            }
+            @if (endPage < totalPages)
+            {
+                <button class="page-link" data-page="@(endPage + 1)">...</button>
+            }
+            <button class="page-link" data-page="@(currentPage + 1)" @(currentPage == totalPages ? "disabled" : "")>&gt;</button>
+            <button class="page-link" data-page="@totalPages" @(currentPage == totalPages ? "disabled" : "")>&raquo;</button>
+        </div>
+    </div>
+</div>

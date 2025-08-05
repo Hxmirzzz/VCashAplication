@@ -765,7 +765,7 @@ button {
 }
 
 .table-section {
-    flex-grow: 1; /* Permite que la sección de la tabla ocupe el espacio disponible */
+    flex-grow: 1;
     display: flex;
     flex-direction: column;
     overflow: hidden;
@@ -800,13 +800,16 @@ button {
     }
 
 /* Estilos para la fila de búsqueda y botones */
+.search-container {
+    padding-bottom: 1.5rem;
+}
+
 .table-controls {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 15px; /* Más espacio debajo de los controles */
-    flex-wrap: wrap; /* Permite que los elementos se envuelvan en pantallas pequeñas */
-    gap: 10px; /* Espacio entre los elementos al envolver */
+    flex-wrap: wrap;
+    gap: 1rem;
 }
 
 #tableSearch {
@@ -845,7 +848,6 @@ button {
     .control-button-wrapper > img.control-button-icon {
         width: 100%; 
         height: 100%;
-        display: block;
         object-fit: contain;
     }
 
@@ -863,44 +865,46 @@ button {
     }
 
         .control-button-wrapper button.control-button-icon img {
-            width: 100%; 
-            height: 100%;
-            display: block;
-            object-fit: contain;
+            padding: 8px;
         }
 
     .control-button-wrapper:hover {
-        background-color: var(--hover-bg); 
-        box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-        transform: scale(1.01);
+        background-color: var(--hover-bg);
+        transform: scale(1.1);
     }
 
 /* Estilos para la tabla */
 .table-container {
     overflow-x: auto;
-    margin-bottom: 15px;
-    border-radius: 5px;
+    margin-bottom: 1rem;
+    border-radius: 0.5rem;
     border: 1px solid var(--border-color);
+    box-shadow: 0 4px 12px var(--shadow-color-main);
 }
-
 
 #dataTable {
     width: 100%;
     border-collapse: collapse;
-    min-width: 600px;
+    min-width: 900px;
     background-color: transparent;
     color: var(--text-color-primary);
     border: none;
+    vertical-align: middle;
 }
+    #dataTable thead {
+        top: 0;
+        z-index: 2;
+        box-shadow: 0 2px 2px rgba(0,0,0,0.1);
+    }
 
     #dataTable th, #dataTable td {
-        padding: 0 0.5rem;
+        padding: 0.15rem 1rem;
         border-bottom: 1px solid var(--border-color);
         white-space: nowrap;
-        font-size: 14px;
-        background: var(--div-bg);
-        color: var(--text-color-secondary);
+        font-size: var(--normal-font-size);
+        color: var(--text-color-main);
         word-break: break-word;
+        background-color: var(--div-bg);
     }
 
     #dataTable th {
@@ -908,8 +912,17 @@ button {
         color: var(--table-header-text);
         font-weight: var(--font-semi-bold);
         text-transform: uppercase;
-        padding: 8px 5px;
+        padding: 10px 1rem;
         vertical-align: middle;
+    }
+
+    #dataTable tr:hover {
+        background-color: var(--hover-bg);
+    }
+
+    #dataTable tbody tr td:last-child,
+    #dataTable thead th:last-child {
+        text-align: center;
     }
 
         #dataTable th.status-column-header {
@@ -935,24 +948,39 @@ button {
     border-radius: 0.25rem;
 }
 
-.badge-success {
-    background-color: #28a745;
-    color: #fff;
-}
-
-.badge-warning {
-    background-color: #ffc107;
-    color: #212529;
-}
-
-.badge-danger {
-    background-color: #dc3545;
-    color: #fff;
+.badge-primary {
+    background-color: var(--first-color);
+    color: white;
 }
 
 .badge-secondary {
-    background-color: #6c757d;
-    color: #fff;
+    background-color: var(--Grey1);
+    color: white;
+}
+
+.badge-info {
+    background-color: var(--form-info);
+    color: white;
+}
+
+.badge-warning {
+    background-color: var(--second-color);
+    color: var(--black1);
+}
+
+.badge-success {
+    background-color: var(--status-color);
+    color: white;
+}
+
+.badge-danger {
+    background-color: var(--third-color);
+    color: white;
+}
+
+.badge-dark {
+    background-color: var(--black1);
+    color: white;
 }
 
 #dataTable th:last-child {
@@ -967,6 +995,41 @@ button {
     white-space: nowrap;
     vertical-align: middle;
 }
+
+/* Estilos para los botones de acción en la tabla */
+    .action-buttons .btn-detail,
+    .action-buttons .btn-edit {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 32px;
+        height: 32px;
+        color: var(--text-color-main);
+        transition: background-color 0.2s ease, transform 0.2s ease;
+    }
+
+        .action-buttons .btn-detail:hover,
+        .action-buttons .btn-edit:hover {
+            transform: scale(1.1);
+        }
+
+        .action-buttons .btn-detail i,
+        .action-buttons .btn-edit i {
+            font-size: 1.1rem;
+            color: inherit;
+        }
+        /* Colores de iconos específicos para acciones */
+        .action-buttons .btn-detail i {
+            color: var(--first-color);
+        }
+
+        .action-buttons .btn-edit i {
+            color: var(--second-color);
+        }
+
+            .action-buttons .btn-edit i.ri-check-double-line {
+                color: var(--status-color);
+            }
 
 #dataTable td:last-child > .action-icon,
 #dataTable td:last-child > .switch {
@@ -1076,42 +1139,36 @@ input:checked + .slider:before {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 15px 0;
-    border-top: 1px solid var(--border-color); /* Línea divisoria, usa tu variable de color */
-    flex-wrap: wrap; /* Permite que los elementos se envuelvan en pantallas pequeñas */
-    gap: 10px; /* Espacio entre los elementos cuando se envuelven */
+    padding: 1rem 0;
+    border-top: 1px solid var(--border-color);
+    flex-wrap: wrap;
+    gap: 10px;
 }
 
-/* Estilos para el mensaje de paginación */
 .page-message {
-    font-size: 0.9rem;
-    color: var(--text-color-secondary); /* Un color de texto más suave */
-    white-space: nowrap; /* Evita que el texto se rompa en varias líneas */
+    font-size: var(--normal-font-size);
+    color: var(--text-color-main);
+    white-space: nowrap;
 }
 
-/* Contenedor principal de los botones de paginación */
 .pagination {
     display: flex;
-    gap: 5px; /* Espacio entre los botones de paginación */
-    flex-wrap: wrap; /* Permite que los botones se envuelvan si hay muchos */
-    justify-content: flex-end; /* Alinea los botones a la derecha */
+    gap: 5px;
+    flex-wrap: wrap;
+    justify-content: flex-end;
 }
 
-    /* Estilos para cada botón de paginación */
     .pagination .page-link {
-        background-color: var(--card-bg-color); /* Color de fondo del botón, usa tu variable */
-        color: var(--text-color-primary); /* Color del texto/icono del botón */
-        border: 1px solid var(--border-color); /* Borde del botón */
-        padding: 8px 12px; /* Relleno para que los botones tengan buen tamaño */
-        border-radius: 5px; /* Bordes redondeados */
+        background-color: var(--div-bg);
+        color: var(--text-color-main);
+        border: 1px solid var(--border-color);
+        padding: 8px 12px;
+        border-radius: 0.5rem;
         cursor: pointer;
-        font-size: 0.9rem;
-        min-width: 35px; /* Ancho mínimo para mantener uniformidad */
+        font-size: var(--normal-font-size);
+        min-width: 40px;
         text-align: center;
-        transition: all 0.3s ease; /* Transición suave para hover y estado activo */
-        display: flex; /* Para centrar el contenido (texto o icono) */
-        align-items: center;
-        justify-content: center;
+        transition: all 0.3s ease;
     }
 
         /* Estilos para el botón de página actual */

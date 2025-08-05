@@ -1,7 +1,7 @@
-﻿@model VCashApp.Models.ViewModels.CentroEfectivo.CefDashboardViewModel
+﻿@model VCashApp.Models.ViewModels.Servicio.CgsDashboardViewModel
 @{
     Layout = "_Layout";
-    ViewData["Title"] = "Centro de Efectivo";
+    ViewData["Title"] = "Centro de Servicios";
 
     string currentSearchTerm = Model.SearchTerm ?? "";
     int currentPage = ViewBag.CurrentPage ?? 1;
@@ -26,12 +26,11 @@
         <div class="table-controls">
             <input type="text" id="tableSearch" class="form-control form-control-sm" placeholder="Buscar por Orden, Planilla, Divisa..." value="@currentSearchTerm">
             <div class="table-buttons">
-                    <div class="control-button-wrapper">
-                    <!--TEMPORAL-->
-                    <a href="@Url.Action("CreateServiceAndCefTransaction", "Cef")" class="control-button-icon" id="addCefTransactionButton" title="Registrar Nuevo Check-in"> 
-                            <img src="/assets/icon-img/add.png" alt="Registrar Check-in">
-                        </a>
-                    </div>
+                <div class="control-button-wrapper">
+                    <a href="@Url.Action("Create", "Service")" class="control-button-icon" id="addCgsServiceButton" title="Crear Solicitud">
+                        <img src="/assets/icon-img/add.png" alt="Crear Solicitud">
+                    </a>
+                </div>
                 <div class="control-button-wrapper">
                     <img src="/assets/icon-img/download.png" alt="Descargar" class="control-button-icon" id="downloadButton">
                 </div>
@@ -47,27 +46,36 @@
             <h3>Filtros Avanzados</h3>
 
             <div class="form-group">
-                <label for="filterBranchId">Sucursal:</label>
-                <select name="branchId" id="filterBranchId" class="form-control form-control-sm" asp-items="Model.AvailableBranches">
+                <label for="filterClientCode">Cliente:</label>
+                <select name="clientCode" id="filterClientCode" class="form-control form-control-sm" asp-items="@Model.AvailableClients">
+                    <option value="">-- Seleccionar Cliente --</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="filterBranchCode">Sucursal:</label>
+                <select name="branchCode" id="filterBranchCode" class="form-control form-control-sm" asp-items="@Model.AvailableBranches">
                     <option value="">-- Seleccionar Sucursal --</option>
                 </select>
             </div>
-
             <div class="form-group">
-                <label for="filterStartDate">Fecha Inicio:</label>
-                <input type="date" name="startDate" id="filterStartDate" class="form-control form-control-sm" value="@Model.CurrentStartDate?.ToString("yyyy-MM-dd")" />
+                <label for="filterConceptCode">Concepto:</label>
+                <select name="conceptCode" id="filterConceptCode" class="form-control form-control-sm" asp-items="@Model.AvailableConcepts">
+                    <option value="">-- Seleccionar Concepto --</option>
+                </select>
             </div>
-
-            <div class="form-group">
-                <label for="filterEndDate">Fecha Fin:</label>
-                <input type="date" name="endDate" id="filterEndDate" class="form-control form-control-sm" value="@Model.CurrentEndDate?.ToString("yyyy-MM-dd")" />
-            </div>
-
             <div class="form-group">
                 <label for="filterStatus">Estado:</label>
-                <select name="status" id="filterStatus" class="form-control form-control-sm" asp-items="Model.TransactionStatuses">
-                    @* Las opciones ya incluyen "-- Seleccionar Estado --" desde el controlador *@
+                <select name="status" id="filterStatus" class="form-control form-control-sm" asp-items="@Model.AvailableStatuses">
+                    <option value="">-- Seleccionar Estado --</option>
                 </select>
+            </div>
+            <div class="form-group">
+                <label for="filterStartDate">Fecha Inicio:</label>
+                <input type="date" name="startDate" id="filterStartDate" class="form-control form-control-sm" value="@(Model.CurrentStartDate?.ToString("yyyy-MM-dd"))" />
+            </div>
+            <div class="form-group">
+                <label for="filterEndDate">Fecha Fin:</label>
+                <input type="date" name="endDate" id="filterEndDate" class="form-control form-control-sm" value="@(Model.CurrentEndDate?.ToString("yyyy-MM-dd"))" />
             </div>
 
             <div class="filter-buttons">
@@ -79,7 +87,7 @@
     </div>
 
     <div id="dataTablePartial">
-        @await Html.PartialAsync("_TransactionTablePartial", Model.Transactions, new ViewDataDictionary(ViewData))
+        @await Html.PartialAsync("_ServiceRequestTablePartial", Model.ServiceRequests)
     </div>
 </div>
 
@@ -91,10 +99,10 @@
         $(document).ready(function () {
             setupTablePaginationAndFilters({
                 tableContainerId: 'dataTablePartial',
-                controllerName: 'Cef',
+                controllerName: 'Service',
                 actionName: 'Index',
                 searchInputId: 'tableSearch',
-                filterInputsSelector: '#filterBranchId, #filterStartDate, #filterEndDate, #filterStatus',
+                filterInputsSelector: '#filterClientCode, #filterBranchCode, #filterConceptCode, #filterStartDate, #filterEndDate, #filterStatus',
                 clearFiltersButtonId: 'clearFilters',
                 defaultPageSize: @pageSize
             });
@@ -109,7 +117,7 @@
                         }
 
                         var form = $('<form>', {
-                            'action': '@Url.Action("ExportTransactions", "Cef")',
+                            'action': '@Url.Action("ExportServices", "Service")',
                             'method': 'GET',
                             'target': '_blank', // Abrir en nueva pestaña
                             'style': 'display:none;'
@@ -117,13 +125,17 @@
 
                         // Recolectar los filtros actuales
                         var search = $("#tableSearch").val();
-                        var branchId = $("#filterBranchId").val();
+                        var clientCode = $("#filterBranchId").val();
+                        var branchCode = $("#filterBranchId").val();
+                        var conceptCode = $("#filterStartDate").val();
                         var startDate = $("#filterStartDate").val();
                         var endDate = $("#filterEndDate").val();
                         var status = $("#filterStatus").val();
 
                         form.append($('<input>', { name: 'search', value: search }));
-                        form.append($('<input>', { name: 'branchId', value: branchId }));
+                        form.append($('<input>', { name: 'clientCode', value: clientCode }));
+                        form.append($('<input>', { name: 'branchCode', value: branchCode }));
+                        form.append($('<input>', { name: 'conceptCode', value: conceptCode }));
                         form.append($('<input>', { name: 'startDate', value: startDate }));
                         form.append($('<input>', { name: 'endDate', value: endDate }));
                         form.append($('<input>', { name: 'status', value: status }));
@@ -132,10 +144,10 @@
                         form.submit();
                         form.remove();
                     },
-                    "Exportar Datos CEF", // Título del modal
-                    null, // Aquí irían las opciones de formato si no son fijas (Excel, CSV, PDF)
-                    "btn-primary", // Clase del botón de acción
-                    true // Mostrar input de selección de formato (si tu modal lo soporta)
+                    "Exportar Datos CGS",
+                    null,
+                    "btn-primary",
+                    true
                 );
             });
         });

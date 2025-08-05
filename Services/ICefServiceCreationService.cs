@@ -20,6 +20,15 @@ namespace VCashApp.Services
         Task<CefServiceCreationViewModel> PrepareCefServiceCreationViewModelAsync(string currentUserId, string currentIP, string? initialServiceConceptCode = null);
 
         /// <summary>
+        /// Obtiene las listas de dropdowns necesarias para la creación de un servicio y una transacción CEF.
+        /// </summary>
+        /// <param name="currentUserId">El ID del usuario actual.</param>
+        /// <param name="isAdmin">Indica si el usuario es administrador.</param>
+        /// <returns>Una tupla con las listas de SelectListItem para Sucursales y Modalidades de Servicio.</returns>
+        Task<(List<SelectListItem> AvailableBranches, List<SelectListItem> AvailableServiceModalities, List<SelectListItem> AvailableFailedReponsibles)> GetDropdownListsAsync(string currentUserId, bool isAdmin);
+
+
+        /// <summary>
         /// Processes the ViewModel, creates a new entry in AdmServicio (CgsService) and CefTransaction transactionally.
         /// Procesa el ViewModel, crea una nueva entrada en AdmServicio y CefTransaction de forma transaccional.
         /// </summary>
@@ -78,5 +87,16 @@ namespace VCashApp.Services
         /// </summary>
         /// <returns>Lista de SelectListItem para modalidades de servicio.</returns>
         Task<List<SelectListItem>> GetServiceModalitiesForDropdownAsync();
+
+        /// <summary>
+        /// Obtiene las divisas de servicio disponibles para los dropdowns.
+        /// </summary>
+        /// <returns>Lista de SelectListItem para divisas de servicio.</returns>
+        Task<List<SelectListItem>> GetCurrenciesForDropdownAsync();
+
+        /// <summary>
+        /// Obtiene la lista de responsables de fallos para los dropdowns.
+        /// </summary>
+        Task<List<SelectListItem>> GetFailedResponsiblesForDropdown();
     }
 }

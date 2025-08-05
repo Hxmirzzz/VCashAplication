@@ -16,6 +16,7 @@ using VCashApp.Filters;
 using VCashApp.Models;
 using VCashApp.Services;
 using VCashApp.Services.Cef;
+using VCashApp.Services.Service;
 
 var builder = WebApplication.CreateBuilder(args);
 Log.Logger = new LoggerConfiguration()
@@ -164,7 +165,8 @@ builder.Services.AddScoped<IExportService, ExportService>();
 builder.Services.AddScoped<ICefTransactionService, CefTransactionService>();
 builder.Services.AddScoped<ICefContainerService, CefContainerService>();
 builder.Services.AddScoped<ICefIncidentService, CefIncidentService>();
-builder.Services.AddScoped<ICefServiceCreationService, CefServiceCreationService>();
+builder.Services.AddScoped<ICefServiceCreationService, CefServiceCreationService>(); // TEMPORAL
+builder.Services.AddScoped<ICgsServiceService, CgsService>();
 
 builder.Services.AddHttpClient();
 

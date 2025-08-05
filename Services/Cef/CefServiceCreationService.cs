@@ -26,6 +26,58 @@ namespace VCashApp.Services.Cef
         }
 
         /// <inheritdoc/>
+        public async Task<(List<SelectListItem> AvailableBranches, List<SelectListItem> AvailableServiceModalities, List<SelectListItem> AvailableFailedReponsibles)> GetDropdownListsAsync(string currentUserId, bool isAdmin)
+        {
+            var allActiveBranches = await _context.AdmSucursales
+                .Where(s => s.Estado && s.CodSucursal != 32)
+                .Select(s => new { s.CodSucursal, s.NombreSucursal })
+                .ToListAsync();
+
+            List<SelectListItem> permittedBranchesList;
+
+            if (!isAdmin)
+            {
+                var permittedBranchIds = await _context.UserClaims
+                    .Where(uc => uc.UserId == currentUserId && uc.ClaimType == "SucursalId")
+                    .Select(uc => int.Parse(uc.ClaimValue))
+                    .ToListAsync();
+
+                permittedBranchesList = allActiveBranches
+                    .Where(s => permittedBranchIds.Contains(s.CodSucursal))
+                    .Select(s => new SelectListItem { Value = s.CodSucursal.ToString(), Text = s.NombreSucursal })
+                    .ToList();
+            }
+            else
+            {
+                permittedBranchesList = allActiveBranches
+                    .Select(s => new SelectListItem { Value = s.CodSucursal.ToString(), Text = s.NombreSucursal })
+                    .ToList();
+            }
+
+            var serviceModalities = new List<SelectListItem>
+            {
+                new SelectListItem { Value = "1", Text = "PROGRAMADO" },
+                new SelectListItem { Value = "2", Text = "A PEDIDO" },
+                new SelectListItem { Value = "3", Text = "FRECUENTE" }
+            };
+
+            var serviceCurrencies = new List<SelectListItem>
+            {
+                new SelectListItem { Value = "COP", Text = "COP" },
+                new SelectListItem { Value = "USD", Text = "USD" },
+                new SelectListItem { Value = "EUR", Text = "EUR" }
+            };
+
+            var failedResponsibles = new List<SelectListItem>
+            {
+                new SelectListItem { Value = "Cliente", Text = "Cliente" },
+                new SelectListItem { Value = "Vatco", Text = "Vatco" }
+            };
+
+            return (permittedBranchesList, serviceModalities, failedResponsibles);
+        }
+
+        /// <inheritdoc/>
         public async Task<CefServiceCreationViewModel> PrepareCefServiceCreationViewModelAsync(string currentUserId, string currentIP, string? initialServiceConceptCode = null)
         {
             var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == currentUserId);
@@ -61,7 +113,9 @@ namespace VCashApp.Services.Cef
                                                 .ToListAsync(),*/
                 AvailableEmployees = new List<SelectListItem>(),
                 AvailableVehicles = new List<SelectListItem>(),
-                AvailableServiceModalities = await GetServiceModalitiesForDropdownAsync()
+                AvailableServiceModalities = await GetServiceModalitiesForDropdownAsync(),
+                AvailableCurrencies = await GetCurrenciesForDropdownAsync(),
+                AvailableFailedResponsibles = await GetFailedResponsiblesForDropdown()
             };
 
             if (!string.IsNullOrEmpty(initialServiceConceptCode))
@@ -119,8 +173,9 @@ namespace VCashApp.Services.Cef
                 new SqlParameter("@HoraCancelacion", DBNull.Value),
                 new SqlParameter("@FechaRechazo", DBNull.Value),
                 new SqlParameter("@HoraRechazo", DBNull.Value),
-                new SqlParameter("@Fallido", false),
-                new SqlParameter("@ResponsableFallido", DBNull.Value),
+                new SqlParameter("@Fallido", viewModel.IsFailed),
+                new SqlParameter("@ResponsableFallido", (object)viewModel.FailedResponsible ?? DBNull.Value),
+                new SqlParameter("@RazonFallido", (object)viewModel.FailedReason ?? DBNull.Value),
                 new SqlParameter("@PersonaCancelacion", DBNull.Value),
                 new SqlParameter("@OperadorCancelacion", DBNull.Value),
                 new SqlParameter("@MotivoCancelacion", DBNull.Value),
@@ -140,7 +195,7 @@ namespace VCashApp.Services.Cef
                 // Parámetros para CefTransacciones
                 new SqlParameter("@CefCodRuta", DBNull.Value),
                 new SqlParameter("@CefNumeroPlanilla", viewModel.SlipNumber),
-                new SqlParameter("@CefDivisa", "COP"),
+                new SqlParameter("@CefDivisa", viewModel.Currency),
                 new SqlParameter("@CefTipoTransaccion", viewModel.ServiceConceptCode),
                 new SqlParameter("@CefNumeroMesaConteo", DBNull.Value),
                 new SqlParameter("@CefCantidadBolsasDeclaradas", viewModel.DeclaredBagCount),
@@ -351,6 +406,33 @@ namespace VCashApp.Services.Cef
                 new SelectListItem { Value = "1", Text = "PROGRAMADO" },
                 new SelectListItem { Value = "2", Text = "A PEDIDO" },
                 new SelectListItem { Value = "3", Text = "FRECUENTE" }
+            });
+        }
+
+        /// <summary>
+        /// Obtiene las divisas disponibles para los dropdowns.
+        /// </summary>
+        /// <returns>Lista de SelectListItem para las divisas</returns>
+        public async Task<List<SelectListItem>> GetCurrenciesForDropdownAsync()
+        {
+            return await Task.FromResult(new List<SelectListItem>
+            {
+                new SelectListItem { Value = "COP", Text = "COP" },
+                new SelectListItem { Value = "USD", Text = "USD" },
+                new SelectListItem { Value = "EUR", Text = "EUR" }
+            });
+        }
+
+        /// <summary>
+        /// Obtiene las opciones de responsables al fallo del servicio para los dropdowns.
+        /// </summary>
+        /// <returns>Lista de SelectListItem para los responsables del fallo del servicio</returns>
+        public async Task<List<SelectListItem>> GetFailedResponsiblesForDropdown()
+        {
+            return await Task.FromResult(new List<SelectListItem>
+            {
+                new SelectListItem { Value = "Cliente", Text = "Cliente" },
+                new SelectListItem { Value = "Vatco", Text = "Vatco" }
             });
         }
     }
