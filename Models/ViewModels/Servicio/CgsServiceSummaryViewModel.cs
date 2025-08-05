@@ -102,8 +102,15 @@ namespace VCashApp.Models.ViewModels.Servicio
         [Display(Name = "Código de Flujo")]
         public int? FlowCode { get; set; }
 
+        // ORIGIN FIELDS
+
         [Display(Name = "Cliente de Origen")]
         public int? OriginClientCode { get; set; }
+
+        [Display(Name = "Nombre Cliente Origen")]
+        [Required(ErrorMessage = "El nombre de cliente origen es requerido.")]
+        [StringLength(255, ErrorMessage = "El nombre de cliente origen no puede exceder los 255 caracteres.")]
+        public string OriginClientName { get; set; } = string.Empty;
 
         [Display(Name = "Tipo de Origen")]
         [Required(ErrorMessage = "El tipo de origen es requerido.")]
@@ -115,8 +122,32 @@ namespace VCashApp.Models.ViewModels.Servicio
         [StringLength(25, ErrorMessage = "El código de origen no puede exceder los 25 caracteres.")]
         public string OriginPointCode { get; set; } = null!;
 
+        [Display(Name = "Nombre Origen")]
+        [Required(ErrorMessage = "El nombre de origen es requerido.")]
+        [StringLength(255, ErrorMessage = "El nombre de origen no puede exceder los 255 caracteres.")]
+        public string OriginName { get; set; } = string.Empty;
+
+        [Display(Name = "Código Ciudad Origen")]
+        public int? OriginCityId { get; set; }
+        public string? OriginCityName { get; set; }
+
+        [Display(Name = "Código Sucursal Origen")]
+        public int? OriginBranchId { get; set; }
+
+        [Display(Name = "Código Rango Origen")]
+        [StringLength(50, ErrorMessage = "El código de rango origen no puede exceder los 50 caracteres.")]
+        public string? OriginRangeCode { get; set; }
+        public string? OriginRangeDetails { get; set; }
+
+        // DESTINATION FIELDS
+
         [Display(Name = "Cliente de Destino")]
         public int? DestinationClientCode { get; set; }
+
+        [Display(Name = "Nombre Cliente Destino")]
+        [Required(ErrorMessage = "El nombre de cliente destino es requerido.")]
+        [StringLength(255, ErrorMessage = "El nombre de cliente destino no puede exceder los 255 caracteres.")]
+        public string DestinationClientName { get; set; } = string.Empty;
 
         [Display(Name = "Tipo de Destino")]
         [Required(ErrorMessage = "El tipo de destino es requerido.")]
@@ -127,6 +158,25 @@ namespace VCashApp.Models.ViewModels.Servicio
         [Required(ErrorMessage = "El punto o fondo de destino es requerido.")]
         [StringLength(255, ErrorMessage = "El código de destino no puede exceder los 255 caracteres.")]
         public string DestinationPointCode { get; set; } = null!;
+
+        [Display(Name = "Nombre Destino")]
+        [Required(ErrorMessage = "El nombre de destino es requerido.")]
+        [StringLength(255, ErrorMessage = "El nombre de destino no puede exceder los 255 caracteres.")]
+        public string DestinationName { get; set; } = string.Empty;
+
+        [Display(Name = "Código Ciudad Destino")]
+        public int? DestinationCityId { get; set; }
+        public string? DestinationCityName { get; set; }
+
+        [Display(Name = "Código Sucursal Destino")]
+        public int? DestinationBranchId { get; set; }
+
+        [Display(Name = "Código Rango Destino")]
+        [StringLength(255, ErrorMessage = "El código de rango destino no puede exceder los 255 caracteres.")]
+        public string? DestinationRangeCode { get; set; }
+        public string? DestinationRangeDetails { get; set; }
+
+        // DATES AND TIMES
 
         [Display(Name = "Fecha de Aceptación")]
         [DataType(DataType.Date)]
@@ -243,6 +293,8 @@ namespace VCashApp.Models.ViewModels.Servicio
         public List<SelectListItem>? AvailableOriginFunds { get; set; }
         public List<SelectListItem>? AvailableDestinationPoints { get; set; }
         public List<SelectListItem>? AvailableDestinationFunds { get; set; }
+        public List<SelectListItem>? AvailableFailedResponsibles { get; set; }
+
 
         [Display(Name = "Usuario de Registro")]
         public string? CgsOperatorUserName { get; set; }

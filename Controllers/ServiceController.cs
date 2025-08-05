@@ -125,7 +125,7 @@ namespace VCashApp.Controllers
         }
 
         /// <summary>
-        /// Procesa el envío del formulario para crear una solicitud de servicio.
+        /// Procesa el envío del formulario para crear una solicitud de servicio CGS.
         /// </summary>
         [HttpPost("Create")]
         [ValidateAntiForgeryToken]
@@ -133,36 +133,81 @@ namespace VCashApp.Controllers
         public async Task<IActionResult> Create(CgsServiceRequestViewModel viewModel)
         {
             var currentUser = await GetCurrentApplicationUserAsync();
-            if (currentUser == null) return Unauthorized();
+            if (currentUser == null)
+                return Unauthorized();
 
             await SetCommonViewBagsCgsAsync(currentUser, "Procesando Solicitud CGS");
 
             if (!ModelState.IsValid)
             {
-                // Re-poblar las listas para el retorno de la vista
+                var fieldErrors = ModelState
+                    .Where(kvp => kvp.Value.Errors.Any())
+                    .ToDictionary(
+                        kvp => kvp.Key,
+                        kvp => kvp.Value.Errors.Select(e => e.ErrorMessage).ToArray()
+                    );
+
+                _logger.LogWarning("Usuario: {Usuario} | IP: {IP} | Acción: CGS - Modelo Inválido | Errores: {@Errores}",
+                    currentUser.UserName, IpAddressForLogging, fieldErrors);
+
+                if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+                {
+                    return Json(ServiceResult.FailureResult("Hay errores en el formulario.", errors: fieldErrors));
+                }
+
                 await PopulateViewModelDropdownsAsync(viewModel);
                 return View(viewModel);
             }
 
-            var serviceResult = await _cgsService.CreateServiceRequestAsync(viewModel, currentUser.Id, IpAddressForLogging);
+            try
+            {
+                var result = await _cgsService.CreateServiceRequestAsync(viewModel, currentUser.Id, IpAddressForLogging);
 
-            if (serviceResult.Success)
-            {
-                TempData["SuccessMessage"] = serviceResult.Message;
-                _logger.LogInformation("Usuario: {Usuario} | IP: {IP} | Acción: Solicitud CGS creada exitosamente | Orden de Servicio: {ServiceOrderId}",
-                    currentUser.UserName, IpAddressForLogging, serviceResult.Data);
-                return RedirectToAction(nameof(Index));
+                if (result.Success)
+                {
+                    TempData["SuccessMessage"] = result.Message;
+                    _logger.LogInformation("Usuario: {Usuario} | IP: {IP} | Acción: Solicitud CGS creada | Orden de Servicio: {ServiceOrderId}",
+                        currentUser.UserName, IpAddressForLogging, result.Data);
+
+                    if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+                    {
+                        return Json(ServiceResult.SuccessResult("Solicitud creada exitosamente.", result.Data));
+                    }
+
+                    return RedirectToAction(nameof(Index));
+                }
+                else
+                {
+                    ModelState.AddModelError("", result.Message);
+
+                    _logger.LogError("Usuario: {Usuario} | IP: {IP} | Acción: Error al crear solicitud CGS | Mensaje: {Mensaje}",
+                        currentUser.UserName, IpAddressForLogging, result.Message);
+
+                    if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+                    {
+                        return Json(ServiceResult.FailureResult(result.Message));
+                    }
+
+                    await PopulateViewModelDropdownsAsync(viewModel);
+                    return View(viewModel);
+                }
             }
-            else
+            catch (Exception ex)
             {
-                ModelState.AddModelError("", serviceResult.Message);
-                // Re-poblar las listas para el retorno de la vista
+                ModelState.AddModelError("", "Ocurrió un error inesperado al crear la solicitud.");
+                _logger.LogError(ex, "Usuario: {Usuario} | IP: {IP} | Acción: Error inesperado al crear solicitud CGS.",
+                    currentUser.UserName, IpAddressForLogging);
+
+                if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+                {
+                    return Json(ServiceResult.FailureResult("Ocurrió un error inesperado."));
+                }
+
                 await PopulateViewModelDropdownsAsync(viewModel);
-                _logger.LogError("Usuario: {Usuario} | IP: {IP} | Acción: Error al crear solicitud CGS | Mensaje: {ErrorMessage}",
-                    currentUser.UserName, IpAddressForLogging, serviceResult.Message);
                 return View(viewModel);
             }
         }
+
 
         // --- Acciones de API para la carga dinámica de dropdowns ---
 

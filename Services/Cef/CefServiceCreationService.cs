@@ -91,6 +91,7 @@ namespace VCashApp.Services.Cef
                 RequestDate = DateOnly.FromDateTime(DateTime.Now),
                 RequestTime = TimeOnly.FromDateTime(DateTime.Now),
                 ProgrammingDate = DateOnly.FromDateTime(DateTime.Now.AddDays(1)),
+                ProgrammingTime = TimeOnly.FromDateTime(DateTime.Now),
 
                 // Inicializar listas de SelectListItem
                 AvailableServiceConcepts = await GetServiceConceptsForDropdownAsync(),

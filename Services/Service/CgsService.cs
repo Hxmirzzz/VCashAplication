@@ -60,6 +60,8 @@ namespace VCashApp.Services.Service
 
             viewModel.RequestDate = DateOnly.FromDateTime(DateTime.Now);
             viewModel.RequestTime = TimeOnly.FromDateTime(DateTime.Now);
+            viewModel.ProgrammingDate = DateOnly.FromDateTime(DateTime.Now);
+            viewModel.ProgrammingTime = TimeOnly.FromDateTime(DateTime.Now);
             viewModel.IsFailed = false;
 
             return viewModel;
@@ -93,6 +95,20 @@ namespace VCashApp.Services.Service
                 return ServiceResult.FailureResult($"El Código de Fondo de Destino '{viewModel.DestinationPointCode}' no es válido.");
             }
 
+            DateOnly? acceptanceDate;
+            TimeOnly? acceptanceTime;
+
+            if (viewModel.StatusCode == 2)
+            {
+                acceptanceDate = null;
+                acceptanceTime = null;
+            }
+            else
+            {
+                acceptanceDate = viewModel.AcceptanceDate ?? DateOnly.FromDateTime(DateTime.Now);
+                acceptanceTime = viewModel.AcceptanceTime ?? TimeOnly.FromDateTime(DateTime.Now);
+            }
+
             var currentUser = await _context.Users.FirstOrDefaultAsync(u => u.Id == currentUserId);
             var cgsOperatorName = currentUser?.NombreUsuario ?? "System";
             var cgsOperatorBranch = await _context.AdmSucursales
@@ -101,7 +117,7 @@ namespace VCashApp.Services.Service
                                                   .FirstOrDefaultAsync() ?? "N/A";
 
             var numeroPedidoParam = new SqlParameter("@NumeroPedido", (object)viewModel.RequestNumber ?? DBNull.Value);
-            var codClienteParam = new SqlParameter("@CodCliente", viewModel.ClientCode);
+            var codClienteParam = new SqlParameter("@CodCliente", (object)viewModel.OriginClientCode ?? DBNull.Value);
             var codOsClienteParam = new SqlParameter("@CodOsCliente", (object)viewModel.ClientServiceOrderCode ?? DBNull.Value);
             var codSucParam = new SqlParameter("@CodSucursal", viewModel.BranchCode);
             var fechaSolicitudParam = new SqlParameter("@FechaSolicitud", viewModel.RequestDate.ToDateTime(TimeOnly.MinValue));
@@ -116,8 +132,8 @@ namespace VCashApp.Services.Service
             var codClienteDestinoParam = new SqlParameter("@CodClienteDestino", (object)viewModel.DestinationClientCode ?? DBNull.Value);
             var codPuntoDestinoParam = new SqlParameter("@CodPuntoDestino", viewModel.DestinationPointCode);
             var indicadorTipoDestinoParam = new SqlParameter("@IndicadorTipoDestino", viewModel.DestinationIndicatorType);
-            var fechaAceptacionParam = new SqlParameter("@FechaAceptacion", (object)viewModel.AcceptanceDate?.ToDateTime(TimeOnly.MinValue) ?? DBNull.Value);
-            var horaAceptacionParam = new SqlParameter("@HoraAceptacion", (object)viewModel.AcceptanceTime?.ToTimeSpan() ?? DBNull.Value);
+            var fechaAceptacionParam = new SqlParameter("@FechaAceptacion", (object)acceptanceDate?.ToDateTime(TimeOnly.MinValue) ?? DBNull.Value);
+            var horaAceptacionParam = new SqlParameter("@HoraAceptacion", (object)acceptanceTime?.ToTimeSpan() ?? DBNull.Value);
             var fechaProgramacionParam = new SqlParameter("@FechaProgramacion", (object)viewModel.ProgrammingDate?.ToDateTime(TimeOnly.MinValue) ?? DBNull.Value);
             var horaProgramacionParam = new SqlParameter("@HoraProgramacion", (object)viewModel.ProgrammingTime?.ToTimeSpan() ?? DBNull.Value);
             var fechaAtencionInicialParam = new SqlParameter("@FechaAtencionInicial", (object)viewModel.InitialAttentionDate?.ToDateTime(TimeOnly.MinValue) ?? DBNull.Value);
@@ -161,20 +177,21 @@ namespace VCashApp.Services.Service
                                "@ModalidadServicio, @Observaciones, @Clave, @OperadorCgsId, @SucursalCgs, @IpOperador, " +
                                "@ValorBillete, @ValorMoneda, @ValorServicio, @NumeroKitsCambio, @NumeroBolsasMoneda, @ArchivoDetalle";
 
-                // CORRECCIÓN: Usar FirstOrDefaultAsync() para obtener el resultado de la consulta.
-                var result = await _context.Database
-                                           .SqlQueryRaw<string>(sqlQuery,
-                                                numeroPedidoParam, codClienteParam, codOsClienteParam, codSucParam,
-                                                fechaSolicitudParam, horaSolicitudParam, codConceptoParam, tipoTrasladoParam, codEstadoParam, codFlujoParam,
-                                                codClienteOrigenParam, codPuntoOrigenParam, indicadorTipoOrigenParam,
-                                                codClienteDestinoParam, codPuntoDestinoParam, indicadorTipoDestinoParam,
-                                                fechaAceptacionParam, horaAceptacionParam, fechaProgramacionParam, horaProgramacionParam,
-                                                fechaAtencionInicialParam, horaAtencionInicialParam, fechaAtencionFinalParam, horaAtencionFinalParam,
-                                                fechaCancelacionParam, horaCancelacionParam, fechaRechazoParam, horaRechazoParam,
-                                                fallidoParam, responsableFallidoParam, razonFallidoParam, personaCancelacionParam, operadorCancelacionParam, motivoCancelacionParam,
-                                                modalidadServicioParam, observacionesParam, claveParam, operadorCgsIdParam, sucursalCgsParam, ipOperadorParam,
-                                                valorBilleteParam, valorMonedaParam, valorServicioParam, numeroKitsCambioParam, numeroBolsasMonedaParam, archivoDetalleParam)
-                                           .FirstOrDefaultAsync();
+                var result = (await _context.Database
+                    .SqlQueryRaw<string>(sqlQuery,
+                        numeroPedidoParam, codClienteParam, codOsClienteParam, codSucParam,
+                        fechaSolicitudParam, horaSolicitudParam, codConceptoParam, tipoTrasladoParam, codEstadoParam, codFlujoParam,
+                        codClienteOrigenParam, codPuntoOrigenParam, indicadorTipoOrigenParam,
+                        codClienteDestinoParam, codPuntoDestinoParam, indicadorTipoDestinoParam,
+                        fechaAceptacionParam, horaAceptacionParam, fechaProgramacionParam, horaProgramacionParam,
+                        fechaAtencionInicialParam, horaAtencionInicialParam, fechaAtencionFinalParam, horaAtencionFinalParam,
+                        fechaCancelacionParam, horaCancelacionParam, fechaRechazoParam, horaRechazoParam,
+                        fallidoParam, responsableFallidoParam, razonFallidoParam, personaCancelacionParam, operadorCancelacionParam, motivoCancelacionParam,
+                        modalidadServicioParam, observacionesParam, claveParam, operadorCgsIdParam, sucursalCgsParam, ipOperadorParam,
+                        valorBilleteParam, valorMonedaParam, valorServicioParam, numeroKitsCambioParam, numeroBolsasMonedaParam, archivoDetalleParam)
+                    .ToListAsync())
+                    .FirstOrDefault();
+
 
                 if (string.IsNullOrEmpty(result))
                 {
@@ -349,6 +366,7 @@ namespace VCashApp.Services.Service
         public async Task<List<SelectListItem>> GetClientsForDropdownAsync()
         {
             return await _context.AdmClientes
+                                 .Where(c => c.Status == true)
                                  .Select(c => new SelectListItem { Value = c.ClientCode.ToString(), Text = c.ClientName })
                                  .OrderBy(c => c.Text)
                                  .ToListAsync();
@@ -357,6 +375,7 @@ namespace VCashApp.Services.Service
         public async Task<List<SelectListItem>> GetBranchesForDropdownAsync()
         {
             return await _context.AdmSucursales
+                                 .Where(s => s.Estado == true && s.CodSucursal != 32)
                                  .Select(s => new SelectListItem { Value = s.CodSucursal.ToString(), Text = s.NombreSucursal })
                                  .OrderBy(s => s.Text)
                                  .ToListAsync();
@@ -366,7 +385,6 @@ namespace VCashApp.Services.Service
         {
             return await _context.AdmConceptos
                                  .Select(c => new SelectListItem { Value = c.CodConcepto.ToString(), Text = c.NombreConcepto })
-                                 .OrderBy(c => c.Text)
                                  .ToListAsync();
         }
 

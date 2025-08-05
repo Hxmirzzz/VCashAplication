@@ -92,7 +92,7 @@ namespace VCashApp.Models.ViewModels.CentroEfectivo
         [Display(Name = "Nombre Cliente Origen")]
         [Required(ErrorMessage = "El nombre de cliente origen es requerido.")]
         [StringLength(255, ErrorMessage = "El nombre de cliente origen no puede exceder los 255 caracteres.")]
-        public string OriginClientName { get; set; } = string.Empty; // Maps to CgsService.ClienteOrigen in SP (not in CgsService POCO)
+        public string OriginClientName { get; set; } = string.Empty;
 
         [Display(Name = "Código Origen")] // Code of the Point or Fund
         [Required(ErrorMessage = "El código de origen es requerido.")]
@@ -109,12 +109,12 @@ namespace VCashApp.Models.ViewModels.CentroEfectivo
         public string? OriginCityName { get; set; } // For UI display
 
         [Display(Name = "Código Sucursal Origen")]
-        public int? OriginBranchId { get; set; } // Maps to CodSucursalOrigen in SP (not in CgsService POCO)
+        public int? OriginBranchId { get; set; }
 
         [Display(Name = "Código Rango Origen")]
         [StringLength(50, ErrorMessage = "El código de rango origen no puede exceder los 50 caracteres.")]
-        public string? OriginRangeCode { get; set; } // Maps to CodRangoOrigen in SP (not in CgsService POCO)
-        public string? OriginRangeDetails { get; set; } // For UI display
+        public string? OriginRangeCode { get; set; }
+        public string? OriginRangeDetails { get; set; }
 
         // Destination
         [Display(Name = "Tipo de Destino")]
@@ -128,7 +128,7 @@ namespace VCashApp.Models.ViewModels.CentroEfectivo
         [Display(Name = "Nombre Cliente Destino")]
         [Required(ErrorMessage = "El nombre de cliente destino es requerido.")]
         [StringLength(255, ErrorMessage = "El nombre de cliente destino no puede exceder los 255 caracteres.")]
-        public string DestinationClientName { get; set; } = string.Empty; // Maps to CgsService.ClienteDestino in SP (not in CgsService POCO)
+        public string DestinationClientName { get; set; } = string.Empty;
 
         [Display(Name = "Código Destino")] // Code of the Point or Fund
         [Required(ErrorMessage = "El código de destino es requerido.")]
