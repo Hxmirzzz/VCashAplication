@@ -131,6 +131,28 @@
                                             </div>
                                             <span asp-validation-for="ServiceModality" class="text-danger"></span>
                                         </div>
+                                        <div class="col-12 col-lg-6">
+                                            <div class="form-floating has-validation">
+                                                <select asp-for="DeliveryResponsible" class="form-select" id="deliveryResponsible" required aria-required="true">
+                                                    <option value="">Seleccionar responsable...</option>
+                                                </select>
+                                                <label for="deliveryResponsible" class="required">Responsable de Entrega</label>
+                                                <div class="invalid-feedback">⚠ Este campo es requerido</div>
+                                                <div class="valid-feedback">✓ Correcto</div>
+                                            </div>
+                                            <span asp-validation-for="DeliveryResponsible" class="text-danger"></span>
+                                        </div>
+                                        <div class="col-12 col-lg-6">
+                                            <div class="form-floating has-validation">
+                                                <select asp-for="ReceptionResponsible" class="form-select" id="receptionResponsible" required aria-required="true">
+                                                    <option value="">Seleccionar responsable...</option>
+                                                </select>
+                                                <label for="receptionResponsible" class="required">Responsable de Recepción</label>
+                                                <div class="invalid-feedback">⚠ Este campo es requerido</div>
+                                                <div class="valid-feedback">✓ Correcto</div>
+                                            </div>
+                                            <span asp-validation-for="ReceptionResponsible" class="text-danger"></span>
+                                        </div>
                                         <div class="col-12">
                                             <div class="form-floating">
                                                 <textarea asp-for="ServiceObservations" class="form-control" placeholder="Observaciones del Servicio" style="height: 100px;"></textarea>
@@ -674,6 +696,54 @@
                 validateField($element);
             }
 
+            function fillDropdown(selector, data) {
+                let options = '<option value="">-- Seleccionar --</option>';
+                $.each(data, function (i, item) {
+                    const selected = item.selected ? ' selected' : '';
+                    options += `<option value="${item.value}"${selected}>${item.text}</option>`;
+                });
+                $(selector).html(options);
+            }
+
+            async function loadResponsibleDropdowns() {
+                const branchId = $('#branchId').val();
+                const serviceConceptCode = $('#serviceConceptCode').val();
+                const deliverySelector = '#deliveryResponsible';
+                const receptionSelector = '#receptionResponsible';
+
+                showFieldLoading(deliverySelector, 'Cargando responsables...');
+                showFieldLoading(receptionSelector, 'Cargando responsables...');
+
+                if (branchId && serviceConceptCode) {
+                    try {
+                        const deliveryData = await $.get('@Url.Action("GetResponsibleUsers", "Cef")', {
+                            branchId: branchId,
+                            serviceConceptCode: serviceConceptCode,
+                            isDelivery: true
+                        });
+                        const receptionData = await $.get('@Url.Action("GetResponsibleUsers", "Cef")', {
+                            branchId: branchId,
+                            serviceConceptCode: serviceConceptCode,
+                            isDelivery: false
+                        });
+                        fillDropdown(deliverySelector, deliveryData);
+                        fillDropdown(receptionSelector, receptionData);
+                    } catch (error) {
+                        console.error('Error al cargar responsables:', error);
+                        $(deliverySelector).html('<option value="">Error al cargar opciones</option>');
+                        $(receptionSelector).html('<option value="">Error al cargar opciones</option>');
+                    } finally {
+                        hideFieldLoading(deliverySelector);
+                        hideFieldLoading(receptionSelector);
+                    }
+                } else {
+                    $(deliverySelector).html('<option value="">-- Seleccionar --</option>');
+                    $(receptionSelector).html('<option value="">-- Seleccionar --</option>');
+                    hideFieldLoading(deliverySelector);
+                    hideFieldLoading(receptionSelector);
+                }
+            }
+
         // Reemplaza esta función completa
         async function loadAndFillLocationDropdown(clientIdSelector, typeSelector, codeSelector, serviceConceptCode) {
             const clientId = $(clientIdSelector).val();
@@ -814,6 +884,8 @@
                 if ($('#destinationClientId').val()) {
                     loadAndFillLocationDropdown('#originClientId', '#originType', '#originCode', $('#serviceConceptCode').val());
                 }
+
+                loadResponsibleDropdowns();
             });
 
             $('#serviceConceptCode').on('change', function() {
@@ -837,6 +909,7 @@
 
                 loadAndFillLocationDropdown('#originClientId', '#originType', '#originCode', serviceConceptCode);
                 loadAndFillLocationDropdown('#destinationClientId', '#destinationType', '#destinationCode', serviceConceptCode);
+                loadResponsibleDropdowns();
             });
 
             $('#originClientId').on('change', function() {
@@ -868,6 +941,7 @@
 
             $('.calculate-total-declared').on('input', calculateTotalDeclared);
             calculateTotalDeclared();
+            loadResponsibleDropdowns();
 
             // Lógica para mostrar/ocultar la sección de fallo
             $('#isFailedSwitch').on('change', function() {

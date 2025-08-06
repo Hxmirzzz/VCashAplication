@@ -853,6 +853,23 @@ namespace VCashApp.Controllers
         }
 
         /// <summary>
+        /// Obtiene usuarios responsables de entrega o recepción según concepto y sucursal.
+        /// </summary>
+        /// <param name="branchId">ID de la sucursal seleccionada.</param>
+        /// <param name="serviceConceptCode">Código del concepto del servicio.</param>
+        /// <param name="isDelivery">True para lista de entrega, false para recepción.</param>
+        /// <returns>JSON con lista de SelectListItem.</returns>
+        [HttpGet("GetResponsibleUsers")]
+        public async Task<IActionResult> GetResponsibleUsers(int branchId, string serviceConceptCode, bool isDelivery)
+        {
+            var currentUser = await GetCurrentApplicationUserAsync();
+            if (currentUser == null) return Unauthorized();
+
+            var items = await _cefServiceCreationService.GetResponsibleUsersForDropdownAsync(branchId, serviceConceptCode, isDelivery, currentUser.Id);
+            return Json(items);
+        }
+
+        /// <summary>
         /// Obtiene empleados (JT, Conductor, Tripulante) filtrados por sucursal y cargo.
         /// </summary>
         /// <param name="branchId">ID de la sucursal.</param>

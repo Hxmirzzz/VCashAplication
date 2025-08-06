@@ -74,6 +74,17 @@ namespace VCashApp.Services
         Task<object?> GetLocationDetailsByCodeAsync(string code, int clientId, bool isPoint);
 
         /// <summary>
+        /// Obtiene la lista de usuarios responsables de entrega o recepción
+        /// filtrados por sucursal y concepto de servicio.
+        /// </summary>
+        /// <param name="branchId">Sucursal seleccionada.</param>
+        /// <param name="serviceConceptCode">Código del concepto de servicio.</param>
+        /// <param name="isDelivery">True para responsables de entrega, false para recepción.</param>
+        /// <param name="currentUserId">ID del usuario actualmente autenticado.</param>
+        /// <returns>Lista de SelectListItem con los usuarios disponibles.</returns>
+        Task<List<SelectListItem>> GetResponsibleUsersForDropdownAsync(int branchId, string serviceConceptCode, bool isDelivery, string currentUserId);
+
+        /// <summary>
         /// Gets employees (Head of Shift, driver, crew member) filtered by branch and position.
         /// Obtiene los empleados (JT, conductor, tripulante) filtrados por sucursal y cargo.
         /// </summary>
