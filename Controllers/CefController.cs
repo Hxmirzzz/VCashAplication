@@ -362,8 +362,7 @@ namespace VCashApp.Controllers
             viewModel.AvailableClients = await _cefServiceCreationService.GetClientsForDropdownAsync();
             viewModel.AvailableCities = await _context.AdmCiudades.Where(c => c.Estado).Select(c => new SelectListItem { Value = c.CodCiudad.ToString(), Text = c.NombreCiudad }).ToListAsync();
             //viewModel.AvailableRanks = await _context.AdmRangos.Where(r => r.RangoEstado == 1).Select(r => new SelectListItem { Value = r.CodRango, Text = r.InfoRangoAtencion }).ToListAsync();
-            viewModel.AvailableEmployees = new List<SelectListItem>(); 
-
+            viewModel.AvailableEmployees = new List<SelectListItem>();
             viewModel.AvailableVehicles = new List<SelectListItem>();
             viewModel.AvailableServiceModalities = new List<SelectListItem>();
 

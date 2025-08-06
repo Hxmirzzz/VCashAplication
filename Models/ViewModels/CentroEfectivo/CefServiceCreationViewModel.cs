@@ -163,9 +163,8 @@ namespace VCashApp.Models.ViewModels.CentroEfectivo
 
         [Display(Name = "Cantidad de Kits de Cambio")]
         [Range(0, int.MaxValue, ErrorMessage = "Debe ser un número válido.")]
-        public int? ExchangeKitCount { get; set; } // Maps to CgsService.NumberOfChangeKits
+        public int? ExchangeKitCount { get; set; }
 
-        // Declared Quantities (initial for CefTransaction)
         [Display(Name = "Cantidad de Bolsas Declaradas")]
         [Required(ErrorMessage = "La cantidad de bolsas declaradas es requerida.")]
         [Range(0, int.MaxValue, ErrorMessage = "Debe ser un número válido.")]
