@@ -62,7 +62,7 @@ namespace VCashApp.Controllers
         [RequiredPermission(PermissionType.View, "CGS")]
         public async Task<IActionResult> Index(
             string? search, int? clientCode, int? branchCode, int? conceptCode, DateOnly? startDate, DateOnly? endDate, int? status,
-            int pageNumber = 1, int pageSize = 15)
+            int page = 1, int pageSize = 15)
         {
             var currentUser = await GetCurrentApplicationUserAsync();
             if (currentUser == null) return RedirectToPage("/Account/Login", new { area = "Identity" });
@@ -71,12 +71,12 @@ namespace VCashApp.Controllers
             bool isAdmin = ViewBag.IsAdmin;
 
             (List<CgsServiceSummaryViewModel> serviceRequests, int totalRecords) = await _cgsService.GetFilteredServiceRequestsAsync(
-                search, clientCode, branchCode, conceptCode, startDate, endDate, status, pageNumber, pageSize, currentUser.Id, isAdmin);
+                search, clientCode, branchCode, conceptCode, startDate, endDate, status, page, pageSize, currentUser.Id, isAdmin);
 
             var dashboardViewModel = new CgsDashboardViewModel
             {
                 ServiceRequests = serviceRequests,
-                CurrentPage = pageNumber,
+                CurrentPage = page,
                 PageSize = pageSize,
                 TotalPages = (int)Math.Ceiling((double)totalRecords / pageSize),
                 TotalData = totalRecords,
@@ -93,7 +93,7 @@ namespace VCashApp.Controllers
                 AvailableStatuses = ViewBag.AvailableStatuses as List<SelectListItem>
             };
 
-            ViewBag.CurrentPage = pageNumber;
+            ViewBag.CurrentPage = page;
             ViewBag.PageSize = pageSize;
             ViewBag.TotalPages = dashboardViewModel.TotalPages;
             ViewBag.TotalData = totalRecords;

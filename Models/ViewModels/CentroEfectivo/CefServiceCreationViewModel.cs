@@ -200,20 +200,26 @@ namespace VCashApp.Models.ViewModels.CentroEfectivo
         [Display(Name = "Valor de Documentos Declarado")]
         [Required(ErrorMessage = "El valor de documentos declarado es requerido.")]
         [Range(0.00, (double)decimal.MaxValue, ErrorMessage = "Debe ser un valor numérico válido.")]
-        public decimal DeclaredDocumentValue { get; set; } // Maps to CefTransaction.DeclaredDocumentValue
+        public decimal DeclaredDocumentValue { get; set; }
 
         [Display(Name = "Valor Total Declarado")]
-        public decimal TotalDeclaredValue { get; set; } // Will be calculated
+        public decimal TotalDeclaredValue { get; set; }
 
         [Display(Name = "Novedad Informativa Planilla")]
         [StringLength(255, ErrorMessage = "La novedad informativa no puede exceder los 255 caracteres.")]
-        public string? InformativeIncident { get; set; } // Maps to CefTransaction.InformativeIncident
+        public string? InformativeIncident { get; set; }
 
         [Display(Name = "¿Es Custodia?")]
-        public bool IsCustody { get; set; } = false; // Maps to CefTransaction.IsCustody
+        public bool IsCustody { get; set; } = false;
 
         [Display(Name = "¿Es Punto a Punto?")]
-        public bool IsPointToPoint { get; set; } = false; // Maps to CefTransaction.IsPointToPoint
+        public bool IsPointToPoint { get; set; } = false;
+
+        [Display(Name = "¿Quién Entrega?")]
+        public string? DeliveryResponsible { get; set; } = string.Empty;
+
+        [Display(Name = "¿Quién Recibe?")]
+        public string? ReceptionResponsible { get; set; } = string.Empty;
 
         // =============================================================
         // COMMON CEF / SERVICE FIELDS (DISPLAY & SELECTION)

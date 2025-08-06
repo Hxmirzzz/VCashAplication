@@ -52,7 +52,7 @@ namespace VCashApp.Services
         /// <returns>Una tupla que contiene la lista de transacciones y el total de registros.</returns>
         Task<Tuple<List<CefTransactionSummaryViewModel>, int>> GetFilteredCefTransactionsAsync(
             string currentUserId, int? branchId, DateOnly? startDate, DateOnly? endDate, CefTransactionStatusEnum? status,
-            string? search, int pageNumber, int pageSize, bool isAdmin);
+            string? search, int page, int pageSize, bool isAdmin);
 
         /// <summary>
         /// Obtiene las listas de dropdowns necesarias para el dashboard de CEF.

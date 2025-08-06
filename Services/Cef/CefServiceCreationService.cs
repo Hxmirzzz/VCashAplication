@@ -214,7 +214,9 @@ namespace VCashApp.Services.Cef
                 new SqlParameter("@CefEstadoTransaccion", CefTransactionStatusEnum.Checkin.ToString()),
                 new SqlParameter("@CefFechaRegistro", DateTime.Now),
                 new SqlParameter("@CefUsuarioRegistroId", currentUserId),
-                new SqlParameter("@CefIPRegistro", (object)currentIP ?? DBNull.Value)
+                new SqlParameter("@CefIPRegistro", (object)currentIP ?? DBNull.Value),
+                new SqlParameter("@CefEntrega", (object)viewModel.DeliveryResponsible ?? DBNull.Value),
+                new SqlParameter("@CefRecibe", (object)viewModel.ReceptionResponsible ?? DBNull.Value),
             };
 
             var parameterNames = string.Join(", ", parameters.Select(p => p.ParameterName));

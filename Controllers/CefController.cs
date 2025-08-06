@@ -103,7 +103,7 @@ namespace VCashApp.Controllers
         [RequiredPermission(PermissionType.View, "CEF")]
         public async Task<IActionResult> Index(
             int? branchId, DateOnly? startDate, DateOnly? endDate, CefTransactionStatusEnum? status,
-            string? search, int pageNumber = 1, int pageSize = 15)
+            string? search, int page = 1, int pageSize = 15)
         {
             var currentUser = await GetCurrentApplicationUserAsync();
             if (currentUser == null) return RedirectToPage("/Account/Login", new { area = "Identity" });
@@ -112,7 +112,7 @@ namespace VCashApp.Controllers
             bool isAdmin = ViewBag.IsAdmin;
 
             var (transactions, totalRecords) = await _cefTransactionService.GetFilteredCefTransactionsAsync(
-                currentUser.Id, branchId, startDate, endDate, status, search, pageNumber, pageSize, isAdmin);
+                currentUser.Id, branchId, startDate, endDate, status, search, page, pageSize, isAdmin);
 
             var transactionStatuses = Enum.GetValues(typeof(CefTransactionStatusEnum))
                 .Cast<CefTransactionStatusEnum>()
@@ -123,7 +123,7 @@ namespace VCashApp.Controllers
             var dashboardViewModel = new CefDashboardViewModel
             {
                 Transactions = transactions,
-                CurrentPage = pageNumber,
+                CurrentPage = page,
                 PageSize = pageSize,
                 TotalPages = (int)Math.Ceiling((double)totalRecords / pageSize),
                 TotalData = totalRecords,
@@ -136,7 +136,7 @@ namespace VCashApp.Controllers
                 TransactionStatuses = ViewBag.TransactionStatuses as List<SelectListItem>
             };
 
-            ViewBag.CurrentPage = pageNumber;
+            ViewBag.CurrentPage = page;
             ViewBag.PageSize = pageSize;
             ViewBag.TotalPages = dashboardViewModel.TotalPages;
             ViewBag.TotalData = totalRecords;

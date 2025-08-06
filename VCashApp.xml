@@ -1766,6 +1766,30 @@
         <member name="M:VCashApp.Migrations.FailedReasonColumnToCgsServices.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
             <inheritdoc />
         </member>
+        <member name="T:VCashApp.Migrations.AddDelivererAndReceiverColumnToCefTransaction">
+            <inheritdoc />
+        </member>
+        <member name="M:VCashApp.Migrations.AddDelivererAndReceiverColumnToCefTransaction.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:VCashApp.Migrations.AddDelivererAndReceiverColumnToCefTransaction.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:VCashApp.Migrations.AddDelivererAndReceiverColumnToCefTransaction.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="T:VCashApp.Migrations.CorrectionToDelivererAndReceiverColumnsApplyUserFK">
+            <inheritdoc />
+        </member>
+        <member name="M:VCashApp.Migrations.CorrectionToDelivererAndReceiverColumnsApplyUserFK.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:VCashApp.Migrations.CorrectionToDelivererAndReceiverColumnsApplyUserFK.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:VCashApp.Migrations.CorrectionToDelivererAndReceiverColumnsApplyUserFK.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
         <member name="T:VCashApp.Models.ViewModels.CentroEfectivo.CefContainerProcessingViewModel">
             <summary>
             ViewModel para la entrada de datos durante el conteo de un contenedor de efectivo.
@@ -2320,6 +2344,12 @@
             </summary>
             <returns>Una lista de <see cref="T:Microsoft.AspNetCore.Mvc.Rendering.SelectListItem"/> de modalidades de servicio.</returns>
         </member>
+        <member name="M:VCashApp.Services.ICgsServiceService.GetFailedResponsiblesForDropdown">
+            <summary>
+            Obtiene la lista de responsables de fallos para los dropdowns.
+            </summary>
+            <returns>Una lista de <see cref="T:Microsoft.AspNetCore.Mvc.Rendering.SelectListItem"/> de responsables fallo del servicio.</returns>
+        </member>
         <member name="T:VCashApp.Services.IEmployeeLogService">
             <summary>
             Interfaz para los servicios de lógica de negocio relacionados con los registros de empleados (entrada y salida).
@@ -2706,6 +2736,42 @@
             <param name="selectedRoleFilter">Filtro por nombre de rol.</param>
             <param name="selectedBranchFilter">Filtro por ID de sucursal.</param>
             <returns>Una colección de UserViewModel con todos los datos necesarios para la exportación.</returns>
+        </member>
+        <member name="M:VCashApp.Services.Service.CgsService.GetClientsForDropdownAsync">
+            <summary>
+            Obtiene las opciones de cliente del servicio para los dropdowns.
+            </summary>
+            <returns>Lista de SelectListItem para los clientes</returns>
+        </member>
+        <member name="M:VCashApp.Services.Service.CgsService.GetBranchesForDropdownAsync">
+            <summary>
+            Obtiene las opciones de sucursal del servicio para los dropdowns.
+            </summary>
+            <returns>Lista de SelectListItem para las sucursales del servicio</returns>
+        </member>
+        <member name="M:VCashApp.Services.Service.CgsService.GetServiceConceptsForDropdownAsync">
+            <summary>
+            Obtiene las opciones de concepto del servicio para los dropdowns.
+            </summary>
+            <returns>Lista de SelectListItem para los conceptos del servicio</returns>
+        </member>
+        <member name="M:VCashApp.Services.Service.CgsService.GetServiceStatusesForDropdownAsync">
+            <summary>
+            Obtiene las opciones de estado del servicio para los dropdowns.
+            </summary>
+            <returns>Lista de SelectListItem para los estados del servicio</returns>
+        </member>
+        <member name="M:VCashApp.Services.Service.CgsService.GetServiceModalitiesForDropdownAsync">
+            <summary>
+            Obtiene las opciones de modalidad del servicio para los dropdowns.
+            </summary>
+            <returns>Lista de SelectListItem para las modalidades del servicio</returns>
+        </member>
+        <member name="M:VCashApp.Services.Service.CgsService.GetFailedResponsiblesForDropdown">
+            <summary>
+            Obtiene las opciones de responsables al fallo del servicio para los dropdowns.
+            </summary>
+            <returns>Lista de SelectListItem para los responsables del fallo del servicio</returns>
         </member>
         <member name="T:VCashApp.Services.UserService">
             <summary>
