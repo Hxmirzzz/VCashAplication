@@ -404,6 +404,8 @@ namespace VCashApp.Data
                 entity.HasOne<ApplicationUser>().WithMany().HasForeignKey(t => t.ReviewerUserId).HasPrincipalKey(u => u.Id).IsRequired(false).OnDelete(DeleteBehavior.Restrict);
                 entity.HasOne<ApplicationUser>().WithMany().HasForeignKey(t => t.VaultUserId).HasPrincipalKey(u => u.Id).IsRequired(false).OnDelete(DeleteBehavior.Restrict);
                 entity.HasOne<ApplicationUser>().WithMany().HasForeignKey(t => t.LastUpdateUser).HasPrincipalKey(u => u.Id).IsRequired(false).OnDelete(DeleteBehavior.Restrict);
+                entity.HasOne<ApplicationUser>().WithMany().HasForeignKey(t => t.ReceiverId).HasPrincipalKey(u => u.Id).IsRequired(false).OnDelete(DeleteBehavior.Restrict);
+                entity.HasOne<ApplicationUser>().WithMany().HasForeignKey(t => t.DelivererId).HasPrincipalKey(u => u.Id).IsRequired(false).OnDelete(DeleteBehavior.Restrict);
             });
 
             builder.Entity<CefContainer>(entity =>

@@ -159,7 +159,7 @@ namespace VCashApp.Services.Service
             var ipOperadorParam = new SqlParameter("@IpOperador", currentIP);
             var valorBilleteParam = new SqlParameter("@ValorBillete", (object)viewModel.BillValue ?? DBNull.Value);
             var valorMonedaParam = new SqlParameter("@ValorMoneda", (object)viewModel.CoinValue ?? DBNull.Value);
-            var valorServicioParam = new SqlParameter("@ValorServicio", (object)viewModel.ServiceValue ?? DBNull.Value);
+            var valorServicioParam = new SqlParameter("@ValorServicio", viewModel.BillValue + viewModel.CoinValue);
             var numeroKitsCambioParam = new SqlParameter("@NumeroKitsCambio", (object)viewModel.NumberOfChangeKits ?? DBNull.Value);
             var numeroBolsasMonedaParam = new SqlParameter("@NumeroBolsasMoneda", (object)viewModel.NumberOfCoinBags ?? DBNull.Value);
             var archivoDetalleParam = new SqlParameter("@ArchivoDetalle", (object)viewModel.DetailFile ?? DBNull.Value);

@@ -1790,6 +1790,18 @@
         <member name="M:VCashApp.Migrations.CorrectionToDelivererAndReceiverColumnsApplyUserFK.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
             <inheritdoc />
         </member>
+        <member name="T:VCashApp.Migrations.SetFKToReceiverAndDelivered">
+            <inheritdoc />
+        </member>
+        <member name="M:VCashApp.Migrations.SetFKToReceiverAndDelivered.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:VCashApp.Migrations.SetFKToReceiverAndDelivered.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:VCashApp.Migrations.SetFKToReceiverAndDelivered.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
         <member name="T:VCashApp.Models.ViewModels.CentroEfectivo.CefContainerProcessingViewModel">
             <summary>
             ViewModel para la entrada de datos durante el conteo de un contenedor de efectivo.
