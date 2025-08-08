@@ -12,6 +12,7 @@
         <div class="card-body">
             <form id="cgsServiceForm" asp-action="Create" asp-controller="Service" method="post" novalidate>
                 @Html.AntiForgeryToken()
+                <input type="hidden" asp-for="KeyValue" />
                 <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
                 <div class="progress-stepper" id="progressStepper">
@@ -314,7 +315,7 @@
                                 </div>
                                 <div class="card-body">
                                     <div class="row g-3">
-                                        <div class="col-12 col-lg-4">
+                                        <div class="col-12 col-lg-4" id="changeKitField">
                                             <div class="form-floating">
                                                 <input asp-for="NumberOfChangeKits" type="number" class="form-control" placeholder="Cantidad Kit de Cambio" />
                                                 <label for="exchangeKitCount">Cantidad Kit de Cambio</label>
@@ -734,12 +735,15 @@
                 if (isCollectionConcept) {
                     $('#originType').val('@(nameof(VCashApp.Enums.LocationTypeEnum.Punto))');
                     $('#destinationType').val('@(nameof(VCashApp.Enums.LocationTypeEnum.Fondo))');
+                    $('#changeKitField').hide();
                 } else if (isAtmConcept) {
                     $('#originType').val('@(nameof(VCashApp.Enums.LocationTypeEnum.Fondo))');
                     $('#destinationType').val('@(nameof(VCashApp.Enums.LocationTypeEnum.Punto))');
+                    $('#changeKitField').show();
                 } else {
                     $('#originType').val('');
                     $('#destinationType').val('');
+                    $('#changeKitField').hide();
                 }
 
                 loadAndFillLocationDropdown('#originClientId', '#originType', '#originCode', serviceConceptCode);
@@ -889,6 +893,7 @@
                 });
             });
             updateStepper();
+            $('#serviceConceptCode').trigger('change');
         });
     </script>
 }
