@@ -18,101 +18,139 @@
 }
 
 <div class="form-container">
-    <div class="row mt-3">
-        <div class="col-12">
-            <div class="alert alert-info" id="statusMessage" style="display:none;"></div>
-            <div class="alert alert-warning" id="confirmationMessage" style="display:none;"></div>
-        </div>
-    </div>
-
     <div class="card">
+        <div class="card-header">
+            <h4 class="mb-0">@pageName</h4>
+        </div>
         <div class="card-body">
-            <div class="row">
-                <div class="col-md-12">
-                    <label for="employeeSearchInput" class="label-required form-label">Buscar empleado (Cédula o Nombre):</label>
-                    <div class="autocomplete-container">
-                        <input type="text" class="form-control form-control-sm" id="employeeSearchInput" placeholder="Ingrese número de cédula o nombre completo" autocomplete="off" required>
-                        <div id="employeeSearchResults" class="autocomplete-results" style="display:none;">
-                        </div>
-                    </div>
-                    <small class="form-text text-muted">Ejemplo: 12345 o Juan Pérez</small>
-                </div>
-            </div>
-
-            <hr />
-
-            <form id="employeeLogForm">
+            <form id="employeeLogForm" method="post" novalidate>
                 @Html.AntiForgeryToken()
+                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
-                <div class="row d-flex justify-content-center align-items-center" id="employeeDetailsSection" style="display:none;">
-                    <div class="col-md-2">
-                        <div class="reg-preview-container">
-                            <img id="photo-preview" src="~/assets/profile-img/default-profile.jpg" alt="Vista Previa de Foto">
-                        </div>
+                <div class="row g-3">
+                    <div class="col-12">
+                        <div class="alert alert-info" id="statusMessage" style="display:none;"></div>
+                        <div class="alert alert-warning" id="confirmationMessage" style="display:none;"></div>
                     </div>
-                    <div class="col-md-10">
-                        <div class="row">
-                            <div class="col-md-6">
-                                <label for="employeeIdDisplay" class="form-label">Número de Cédula:</label>
-                                <input type="text" style="font-weight: bold;" class="form-control form-control-sm" id="employeeIdDisplay" readonly>
+                </div>
 
-                                <input type="hidden" id="hdnEmployeeId" name="EmployeeId" />
-                                <input type="hidden" id="hdnFirstName" name="FirstName" />
-                                <input type="hidden" id="hdnMiddleName" name="MiddleName" />
-                                <input type="hidden" id="hdnLastName" name="LastName" />
-                                <input type="hidden" id="hdnSecondLastName" name="SecondLastName" />
-                            </div>
-                            <div class="col-md-6">
-                                <label for="fullNameDisplay">Nombre del Empleado:</label>
-                                <input type="text" style="font-weight: bold;" class="form-control form-control-sm" id="fullNameDisplay" readonly>
-                            </div>
-                        </div>
-
-                        <div class="row">
-                            <div class="col-md-4">
-                                <label for="cargoNameDisplay">Cargo:</label>
-                                <input type="text" class="form-control form-control-sm" id="cargoNameDisplay" readonly>
-                                <input type="hidden" id="hdnCargoId" name="CargoId">
-                                <input type="hidden" id="hdnCargoName" name="CargoName">
-                            </div>
-                            <div class="col-md-4">
-                                <label for="unitNameDisplay">Unidad:</label>
-                                <input type="text" class="form-control form-control-sm" id="unitNameDisplay" readonly>
-                                <input type="hidden" id="hdnUnitId" name="UnitId">
-                                <input type="hidden" id="hdnUnitName" name="UnitName">
-                                <input type="hidden" id="hdnUnitType" name="UnitType">
-                            </div>
-                            <div class="col-md-4">
-                                <label for="branchNameDisplay">Sucursal:</label>
-                                <input type="text" class="form-control form-control-sm" id="branchNameDisplay" readonly>
-                                <input type="hidden" id="hdnBranchId" name="BranchId">
-                                <input type="hidden" id="hdnBranchName" name="BranchName">
+                <div class="card mb-3">
+                    <div class="card-header"><h5 class="mb-0">Buscar Empleado</h5></div>
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <div class="col-12 col-lg-6">
+                                <div class="autocomplete-container">
+                                    <div class="form-floating has-validation">
+                                        <input type="text" class="form-control form-control-sm" id="employeeSearchInput" placeholder="Buscar empleado (Cédula o Nombre)" autocomplete="off" required aria-required="true">
+                                        <label for="employeeSearchInput" class="required">Buscar empleado (Cédula o Nombre)</label>
+                                        <div class="invalid-feedback">⚠ Este campo es requerido</div>
+                                        <div class="valid-feedback">✓ Correcto</div>
+                                    </div>
+                                    <div id="employeeSearchResults" class="autocomplete-results" style="display:none;"></div>
+                                </div>
+                                <small class="form-text text-muted">Ejemplo: 12345 o Juan Pérez</small>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <hr />
-
-                <div class="row">
-                    <div class="col-md-6">
-                        <label for="entryDateInput">Fecha de Entrada:</label>
-                        <input type="date" class="form-control form-control-sm" id="entryDateInput" name="EntryDate" readonly>
-                    </div>
-                    <div class="col-md-6">
-                        <label for="entryTimeInput">Hora de Entrada:</label>
-                        <input type="time" class="form-control form-control-sm" id="entryTimeInput" name="EntryTime" readonly>
+                <div id="employeeDetailsSection" class="card mb-3" style="display:none;">
+                    <div class="card-header"><h5 class="mb-0">Datos del Empleado</h5></div>
+                    <div class="card-body">
+                        <div class="row g-3 align-items-center">
+                            <div class="col-12 col-lg-2">
+                                <div class="reg-preview-container">
+                                    <img id="photo-preview" src="~/assets/profile-img/default-profile.jpg" alt="Vista Previa de Foto">
+                                </div>
+                            </div>
+                            <div class="col-12 col-lg-10">
+                                <div class="row g-3">
+                                    <div class="col-12 col-lg-6">
+                                        <div class="form-floating has-validation">
+                                            <input type="text" style="font-weight: bold;" class="form-control form-control-sm" id="employeeIdDisplay" placeholder="Número de Cédula" readonly>
+                                            <label for="employeeIdDisplay">Número de Cédula</label>
+                                            <div class="valid-feedback">✓ Correcto</div>
+                                        </div>
+                                        <input type="hidden" id="hdnEmployeeId" name="EmployeeId" />
+                                        <input type="hidden" id="hdnFirstName" name="FirstName" />
+                                        <input type="hidden" id="hdnMiddleName" name="MiddleName" />
+                                        <input type="hidden" id="hdnLastName" name="LastName" />
+                                        <input type="hidden" id="hdnSecondLastName" name="SecondLastName" />
+                                    </div>
+                                    <div class="col-12 col-lg-6">
+                                        <div class="form-floating has-validation">
+                                            <input type="text" style="font-weight: bold;" class="form-control form-control-sm" id="fullNameDisplay" placeholder="Nombre del Empleado" readonly>
+                                            <label for="fullNameDisplay">Nombre del Empleado</label>
+                                            <div class="valid-feedback">✓ Correcto</div>
+                                        </div>
+                                    </div>
+                                    <div class="col-12 col-lg-4">
+                                        <div class="form-floating has-validation">
+                                            <input type="text" class="form-control form-control-sm" id="cargoNameDisplay" placeholder="Cargo" readonly>
+                                            <label for="cargoNameDisplay">Cargo</label>
+                                            <div class="valid-feedback">✓ Correcto</div>
+                                        </div>
+                                        <input type="hidden" id="hdnCargoId" name="CargoId">
+                                        <input type="hidden" id="hdnCargoName" name="CargoName">
+                                    </div>
+                                    <div class="col-12 col-lg-4">
+                                        <div class="form-floating has-validation">
+                                            <input type="text" class="form-control form-control-sm" id="unitNameDisplay" placeholder="Unidad" readonly>
+                                            <label for="unitNameDisplay">Unidad</label>
+                                            <div class="valid-feedback">✓ Correcto</div>
+                                        </div>
+                                        <input type="hidden" id="hdnUnitId" name="UnitId">
+                                        <input type="hidden" id="hdnUnitName" name="UnitName">
+                                        <input type="hidden" id="hdnUnitType" name="UnitType">
+                                    </div>
+                                    <div class="col-12 col-lg-4">
+                                        <div class="form-floating has-validation">
+                                            <input type="text" class="form-control form-control-sm" id="branchNameDisplay" placeholder="Sucursal" readonly>
+                                            <label for="branchNameDisplay">Sucursal</label>
+                                            <div class="valid-feedback">✓ Correcto</div>
+                                        </div>
+                                        <input type="hidden" id="hdnBranchId" name="BranchId">
+                                        <input type="hidden" id="hdnBranchName" name="BranchName">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
-                <div class="row">
-                    <div class="col-md-6">
-                        <label for="exitDateInput">Fecha de Salida:</label>
-                        <input type="date" class="form-control form-control-sm" id="exitDateInput" name="ExitDate" readonly>
-                    </div>
-                    <div class="col-md-6">
-                        <label for="exitTimeInput">Hora de Salida:</label>
-                        <input type="time" class="form-control form-control-sm" id="exitTimeInput" name="ExitTime" readonly>
+                <div class="card mb-3">
+                    <div class="card-header"><h5 class="mb-0">Horarios del Registro</h5></div>
+                    <div class="card-body">
+                        <div class="row g-3">
+                            <div class="col-12 col-lg-6">
+                                <div class="form-floating has-validation">
+                                    <input type="date" class="form-control form-control-sm" id="entryDateInput" name="EntryDate" readonly placeholder="Fecha de Entrada">
+                                    <label for="entryDateInput">Fecha de Entrada</label>
+                                    <div class="valid-feedback">✓ Correcto</div>
+                                </div>
+                            </div>
+                            <div class="col-12 col-lg-6">
+                                <div class="form-floating has-validation">
+                                    <input type="time" class="form-control form-control-sm" id="entryTimeInput" name="EntryTime" readonly placeholder="Hora de Entrada">
+                                    <label for="entryTimeInput">Hora de Entrada</label>
+                                    <div class="valid-feedback">✓ Correcto</div>
+                                </div>
+                            </div>
+                            <div class="col-12 col-lg-6">
+                                <div class="form-floating has-validation">
+                                    <input type="date" class="form-control form-control-sm" id="exitDateInput" name="ExitDate" readonly placeholder="Fecha de Salida">
+                                    <label for="exitDateInput">Fecha de Salida</label>
+                                    <div class="valid-feedback">✓ Correcto</div>
+                                </div>
+                            </div>
+                            <div class="col-12 col-lg-6">
+                                <div class="form-floating has-validation">
+                                    <input type="time" class="form-control form-control-sm" id="exitTimeInput" name="ExitTime" readonly placeholder="Hora de Salida">
+                                    <label for="exitTimeInput">Hora de Salida</label>
+                                    <div class="valid-feedback">✓ Correcto</div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -121,7 +159,7 @@
                 <input type="hidden" id="hdnLogId" name="LogId" value="0" />
                 <input type="hidden" id="hdnConfirmedValidation" name="ConfirmedValidation" />
 
-                <div class="submit-container-reg form-group col-md-12 mt-4">
+                <div class="d-flex gap-2 justify-content-end mt-3">
                     <button type="button" class="btn btn-primary" id="btnRecordEntry" disabled>Registrar Entrada</button>
                     <button type="button" class="btn btn-danger" id="btnRecordExit" disabled>Registrar Salida</button>
                     <button type="button" class="btn btn-exit" id="btnCancel">Cancelar</button>
@@ -441,11 +479,15 @@
 
             // Event listener for search input (con debounce para rendimiento)
             let searchTimeout;
+            let currentRequestController;
+
             employeeSearchInput.on('input', function () {
                 clearTimeout(searchTimeout);
+
                 const searchTerm = $(this).val().trim();
 
                 if (searchTerm.length === 0) {
+                    if (currentRequestController) currentRequestController.abort();
                     employeeSearchResults.hide();
                     employeeSearchResults.empty();
                     employeeDetailsSection.hide();
@@ -458,8 +500,12 @@
 
                 if (isNumber || isTextSearchValid) {
                     searchTimeout = setTimeout(async () => {
+                        if (currentRequestController) currentRequestController.abort();
+                        currentRequestController = new AbortController();
+                        const { signal } = currentRequestController;
+
                         try {
-                            const response = await fetch(`@Url.Action("GetEmployeeInfo", "EmployeeLog")?searchInput=${encodeURIComponent(searchTerm)}`);
+                            const response = await fetch(`@Url.Action("GetEmployeeInfo", "EmployeeLog")?searchInput=${encodeURIComponent(searchTerm)}`, { signal });
 
                             if (!response.ok) {
                                 throw new Error(`HTTP error! status: ${response.status}`);
@@ -492,6 +538,7 @@
                                 employeeDetailsSection.hide();
                             }
                         } catch (error) {
+                            if (error.name === 'AbortError') return;
                             console.error('Error al buscar empleados:', error);
                             employeeSearchResults.empty().append(`<div class="autocomplete-item no-results-message">Error al buscar: ${error.message}</div>`);
                             employeeSearchResults.show();
@@ -499,6 +546,7 @@
                         }
                     }, 300);
                 } else {
+                    if (currentRequestController) currentRequestController.abort();
                     employeeSearchResults.hide();
                     employeeSearchResults.empty();
                     employeeDetailsSection.hide();

@@ -26,10 +26,8 @@
     }
 }
 
-<div class="table-section">
-    <div class="table-container">
-        <div class="table-wrapper">
-            <table class="table" id="dataTable">
+<div class="table-responsive">
+    <table class="table table-hover table-striped align-middle" id="dataTable">
                 <thead>
                     <tr>
                         <th>Orden Servicio</th>
@@ -117,34 +115,32 @@
                         </tr>
                     }
                 </tbody>
-            </table>
-        </div>
-    </div>
-    <div class="table-footer">
-        <div class="page-message">Página @currentPage de @totalPages (Total: @totalData registros)</div>
-        <div class="pagination">
-            <button class="page-link" data-page="1" @(currentPage == 1 ? "disabled" : "")>&laquo;</button>
+    </table>
+</div>
+<div class="d-flex justify-content-between align-items-center mt-2">
+    <div class="page-message">Página @currentPage de @totalPages (Total: @totalData registros)</div>
+    <div class="pagination">
+        <button class="page-link" data-page="1" @(currentPage == 1 ? "disabled" : "")>&laquo;</button>
 
-            <button class="page-link" data-page="@(currentPage - 1)" @(currentPage == 1 ? "disabled" : "")>&lt;</button>
+        <button class="page-link" data-page="@(currentPage - 1)" @(currentPage == 1 ? "disabled" : "")>&lt;</button>
 
-            @if (startPage > 1)
-            {
-                <button class="page-link" data-page="@(startPage - 1)">...</button>
-            }
+        @if (startPage > 1)
+        {
+            <button class="page-link" data-page="@(startPage - 1)">...</button>
+        }
 
-            @for (int i = startPage; i <= endPage; i++)
-            {
-                <button class="page-link @(currentPage == i ? "active-page" : "")" data-page="@i">@i</button>
-            }
+        @for (int i = startPage; i <= endPage; i++)
+        {
+            <button class="page-link @(currentPage == i ? "active-page" : "")" data-page="@i">@i</button>
+        }
 
-            @if (endPage < totalPages)
-            {
-                <button class="page-link" data-page="@(endPage + 1)">...</button>
-            }
+        @if (endPage < totalPages)
+        {
+            <button class="page-link" data-page="@(endPage + 1)">...</button>
+        }
 
-            <button class="page-link" data-page="@(currentPage + 1)" @(currentPage == totalPages ? "disabled" : "")>&gt;</button>
+        <button class="page-link" data-page="@(currentPage + 1)" @(currentPage == totalPages ? "disabled" : "")>&gt;</button>
 
-            <button class="page-link" data-page="@totalPages" @(currentPage == totalPages ? "disabled" : "")>&raquo;</button>
-        </div>
+        <button class="page-link" data-page="@totalPages" @(currentPage == totalPages ? "disabled" : "")>&raquo;</button>
     </div>
 </div>
