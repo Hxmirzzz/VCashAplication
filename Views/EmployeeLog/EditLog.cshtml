@@ -19,10 +19,10 @@
 
 <div class="form-container">
     <div class="card">
+        <div class="card-header">
+            <h4 class="mb-0">@pageName</h4>
+        </div>
         <div class="card-body">
-            <h4 class="mb-4">Información del Registro #@Model.Id</h4>
-            <hr />
-
             <form id="editEmployeeLogForm">
                 @Html.AntiForgeryToken()
                 <input type="hidden" id="hdnLogId" name="Id" value="@Model.Id" />
@@ -32,67 +32,72 @@
                 <input type="hidden" id="hdnBranchId" name="BranchId" value="@Model.CodSucursal" />
                 <input type="hidden" id="hdnConfirmedValidation" name="ConfirmedValidation" value="" />
 
-
-                <div class="row d-flex justify-content-center align-items-center">
-                    <div class="col-md-2">
-                        <div class="reg-preview-container">
-                            <img id="photo-preview" src="@(Model.Empleado?.FotoUrl != null ? Url.Content($"~/assets/profile-img/{System.IO.Path.GetFileName(Model.Empleado.FotoUrl)}") : Url.Content("~/assets/profile-img/default-profile.jpg"))" alt="Vista Previa de Foto">
-                        </div>
-                    </div>
-                    <div class="col-md-10">
-                        <div class="row">
-                            <div class="col-md-6">
-                                <label for="employeeIdDisplay" class="form-label">Número de Cédula:</label>
-                                <input type="text" style="font-weight: bold;" class="form-control form-control-sm" id="employeeIdDisplay" value="@Model.CodCedula" readonly>
-                            </div>
-                            <div class="col-md-6">
-                                <label for="fullNameDisplay">Nombre del Empleado:</label>
-                                <input type="text" style="font-weight: bold;" class="form-control form-control-sm" id="fullNameDisplay" value="@(Model.Empleado?.NombreCompleto ?? $"{Model.Empleado?.PrimerNombre} {Model.Empleado?.PrimerApellido}")" readonly>
+                <div class="form-section">
+                    <h4 class="pt-3">Información del Registro #@Model.Id</h4>
+                    <hr />
+                    <div class="row d-flex justify-content-center align-items-center">
+                        <div class="col-md-2">
+                            <div class="reg-preview-container">
+                                <img id="photo-preview" src="@(Model.Empleado?.FotoUrl != null ? Url.Content($"~/assets/profile-img/{System.IO.Path.GetFileName(Model.Empleado.FotoUrl)}") : Url.Content("~/assets/profile-img/default-profile.jpg"))" alt="Vista Previa de Foto">
                             </div>
                         </div>
+                        <div class="col-md-10">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <label for="employeeIdDisplay" class="form-label">Número de Cédula:</label>
+                                    <input type="text" style="font-weight: bold;" class="form-control form-control-sm" id="employeeIdDisplay" value="@Model.CodCedula" readonly>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="fullNameDisplay">Nombre del Empleado:</label>
+                                    <input type="text" style="font-weight: bold;" class="form-control form-control-sm" id="fullNameDisplay" value="@(Model.Empleado?.NombreCompleto ?? $"{Model.Empleado?.PrimerNombre} {Model.Empleado?.PrimerApellido}")" readonly>
+                                </div>
+                            </div>
 
-                        <div class="row">
-                            <div class="col-md-4">
-                                <label for="cargoNameDisplay">Cargo:</label>
-                                <input type="text" class="form-control form-control-sm" id="cargoNameDisplay" value="@Model.Empleado?.Cargo?.NombreCargo" readonly>
-                            </div>
-                            <div class="col-md-4">
-                                <label for="unitNameDisplay">Unidad:</label>
-                                <input type="text" class="form-control form-control-sm" id="unitNameDisplay" value="@Model.Empleado?.Cargo?.Unidad?.NombreUnidad" readonly>
-                            </div>
-                            <div class="col-md-4">
-                                <label for="branchNameDisplay">Sucursal:</label>
-                                <input type="text" class="form-control form-control-sm" id="branchNameDisplay" value="@Model.Sucursal?.NombreSucursal" readonly>
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <label for="cargoNameDisplay">Cargo:</label>
+                                    <input type="text" class="form-control form-control-sm" id="cargoNameDisplay" value="@Model.Empleado?.Cargo?.NombreCargo" readonly>
+                                </div>
+                                <div class="col-md-4">
+                                    <label for="unitNameDisplay">Unidad:</label>
+                                    <input type="text" class="form-control form-control-sm" id="unitNameDisplay" value="@Model.Empleado?.Cargo?.Unidad?.NombreUnidad" readonly>
+                                </div>
+                                <div class="col-md-4">
+                                    <label for="branchNameDisplay">Sucursal:</label>
+                                    <input type="text" class="form-control form-control-sm" id="branchNameDisplay" value="@Model.Sucursal?.NombreSucursal" readonly>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <hr />
-
-                <div class="row">
-                    <div class="col-md-6">
-                        <label for="entryDateInput">Fecha de Entrada:</label>
-                        <input type="date" class="form-control form-control-sm" id="entryDateInput" name="EntryDate" value="@(Model.FechaEntrada.ToString("yyyy-MM-dd"))">
+                <div class="form-section mt-4">
+                    <h4>Horarios del Registro</h4>
+                    <hr />
+                    <div class="row">
+                        <div class="col-md-6">
+                            <label for="entryDateInput">Fecha de Entrada:</label>
+                            <input type="date" class="form-control form-control-sm" id="entryDateInput" name="EntryDate" value="@(Model.FechaEntrada.ToString("yyyy-MM-dd"))">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="entryTimeInput">Hora de Entrada:</label>
+                            <input type="time" class="form-control form-control-sm" id="entryTimeInput" name="EntryTime" value="@(Model.HoraEntrada.ToString("HH:mm"))">
+                        </div>
                     </div>
-                    <div class="col-md-6">
-                        <label for="entryTimeInput">Hora de Entrada:</label>
-                        <input type="time" class="form-control form-control-sm" id="entryTimeInput" name="EntryTime" value="@(Model.HoraEntrada.ToString("HH:mm"))">
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <label for="exitDateInput">Fecha de Salida:</label>
+                            <input type="date" class="form-control form-control-sm" id="exitDateInput" name="ExitDate" value="@(Model.FechaSalida?.ToString("yyyy-MM-dd"))">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="exitTimeInput">Hora de Salida:</label>
+                            <input type="time" class="form-control form-control-sm" id="exitTimeInput" name="ExitTime" value="@(Model.HoraSalida?.ToString("HH:mm"))">
+                        </div>
                     </div>
                 </div>
 
-                <div class="row">
-                    <div class="col-md-6">
-                        <label for="exitDateInput">Fecha de Salida:</label>
-                        <input type="date" class="form-control form-control-sm" id="exitDateInput" name="ExitDate" value="@(Model.FechaSalida?.ToString("yyyy-MM-dd"))">
-                    </div>
-                    <div class="col-md-6">
-                        <label for="exitTimeInput">Hora de Salida:</label>
-                        <input type="time" class="form-control form-control-sm" id="exitTimeInput" name="ExitTime" value="@(Model.HoraSalida?.ToString("HH:mm"))">
-                    </div>
-                </div>
-
-                <div class="submit-container-reg form-group col-md-12 mt-4">
+                <div class="submit-container form-group col-md-12 mt-4">
                     <button type="submit" class="btn btn-primary" id="btnUpdateLog" @(canEditLog ? "" : "disabled")>Guardar</button>
                     <button type="button" class="btn btn-exit" id="btnCancel">Cancelar</button>
                 </div>

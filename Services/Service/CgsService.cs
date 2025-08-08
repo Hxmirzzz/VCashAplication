@@ -36,6 +36,7 @@ namespace VCashApp.Services.Service
                 new SelectListItem { Value = "I", Text = "Interno" },
                 new SelectListItem { Value = "T", Text = "Transportadora" }
             };
+            viewModel.AvailableFailedResponsibles = await GetFailedResponsiblesForDropdown();
             viewModel.AvailableServiceModalities = await GetServiceModalitiesForDropdownAsync();
 
             var currentUser = await _context.Users.FirstOrDefaultAsync(u => u.Id == currentUserId);
@@ -125,7 +126,7 @@ namespace VCashApp.Services.Service
             var codConceptoParam = new SqlParameter("@CodConcepto", viewModel.ConceptCode);
             var tipoTrasladoParam = new SqlParameter("@TipoTraslado", (object)viewModel.TransferType ?? DBNull.Value);
             var codEstadoParam = new SqlParameter("@CodEstado", viewModel.StatusCode);
-            var codFlujoParam = new SqlParameter("@CodFlujo", (object)viewModel.FlowCode ?? DBNull.Value);
+            var codFlujoParam = new SqlParameter("@CodFlujo", (object)viewModel.ConceptCode ?? DBNull.Value);
             var codClienteOrigenParam = new SqlParameter("@CodClienteOrigen", (object)viewModel.OriginClientCode ?? DBNull.Value);
             var codPuntoOrigenParam = new SqlParameter("@CodPuntoOrigen", viewModel.OriginPointCode);
             var indicadorTipoOrigenParam = new SqlParameter("@IndicadorTipoOrigen", viewModel.OriginIndicatorType);
@@ -158,7 +159,7 @@ namespace VCashApp.Services.Service
             var ipOperadorParam = new SqlParameter("@IpOperador", currentIP);
             var valorBilleteParam = new SqlParameter("@ValorBillete", (object)viewModel.BillValue ?? DBNull.Value);
             var valorMonedaParam = new SqlParameter("@ValorMoneda", (object)viewModel.CoinValue ?? DBNull.Value);
-            var valorServicioParam = new SqlParameter("@ValorServicio", (object)viewModel.ServiceValue ?? DBNull.Value);
+            var valorServicioParam = new SqlParameter("@ValorServicio", viewModel.BillValue + viewModel.CoinValue);
             var numeroKitsCambioParam = new SqlParameter("@NumeroKitsCambio", (object)viewModel.NumberOfChangeKits ?? DBNull.Value);
             var numeroBolsasMonedaParam = new SqlParameter("@NumeroBolsasMoneda", (object)viewModel.NumberOfCoinBags ?? DBNull.Value);
             var archivoDetalleParam = new SqlParameter("@ArchivoDetalle", (object)viewModel.DetailFile ?? DBNull.Value);
@@ -275,7 +276,7 @@ namespace VCashApp.Services.Service
 
         public async Task<Tuple<List<CgsServiceSummaryViewModel>, int>> GetFilteredServiceRequestsAsync(
             string? search, int? clientCode, int? branchCode, int? conceptCode, DateOnly? startDate, DateOnly? endDate, int? status,
-            int pageNumber = 1, int pageSize = 10, string? currentUserId = null, bool isAdmin = false)
+            int page = 1, int pageSize = 10, string? currentUserId = null, bool isAdmin = false)
         {
             var permittedBranchIds = new List<int>();
             if (!isAdmin && !string.IsNullOrEmpty(currentUserId))
@@ -313,7 +314,7 @@ namespace VCashApp.Services.Service
             var pEndDate = new SqlParameter("@EndDate", endDate.HasValue ? (object)endDate.Value.ToDateTime(TimeOnly.MaxValue) : DBNull.Value);
             var pStatus = new SqlParameter("@Status", status ?? (object)DBNull.Value);
             var pSearchTerm = new SqlParameter("@SearchTerm", string.IsNullOrEmpty(search) ? (object)DBNull.Value : search);
-            var pPage = new SqlParameter("@Page", pageNumber);
+            var pPage = new SqlParameter("@Page", page);
             var pPageSize = new SqlParameter("@PageSize", pageSize);
 
             var servicesSummary = new List<CgsServiceSummaryViewModel>();
@@ -363,6 +364,45 @@ namespace VCashApp.Services.Service
         }
 
         // --- MÉTODOS PARA POPULAR DROPDOWNS --
+        /// <inheritdoc/>
+        public async Task<object?> GetLocationDetailsByCodeAsync(string code, int clientId, bool isPoint)
+        {
+            if (isPoint)
+            {
+                var point = await _context.AdmPuntos
+                    .Include(p => p.City)
+                    .Include(p => p.Branch)
+                    .FirstOrDefaultAsync(p => p.PointCode == code && p.ClientCode == clientId);
+
+                return point != null ? new
+                {
+                    cityName = point.City?.NombreCiudad,
+                    branchName = point.Branch?.NombreSucursal,
+                    rangeCode = point.RangeCode ?? "N/A",
+                    rangeDetails = point.RangeAttentionInfo ?? "N/A"
+                } : null;
+            }
+            else // Es un fondo
+            {
+                var fund = await _context.AdmFondos
+                    .Include(f => f.City)
+                    .Include(f => f.Branch)
+                    .FirstOrDefaultAsync(f => f.FundCode == code && f.ClientCode == clientId);
+
+                return fund != null ? new
+                {
+                    cityName = fund.City?.NombreCiudad,
+                    branchName = fund.Branch?.NombreSucursal,
+                    rangeCode = "N/A",
+                    rangeDetails = "N/A"
+                } : null;
+            }
+        }
+
+        /// <summary>
+        /// Obtiene las opciones de cliente del servicio para los dropdowns.
+        /// </summary>
+        /// <returns>Lista de SelectListItem para los clientes</returns>
         public async Task<List<SelectListItem>> GetClientsForDropdownAsync()
         {
             return await _context.AdmClientes
@@ -372,6 +412,10 @@ namespace VCashApp.Services.Service
                                  .ToListAsync();
         }
 
+        /// <summary>
+        /// Obtiene las opciones de sucursal del servicio para los dropdowns.
+        /// </summary>
+        /// <returns>Lista de SelectListItem para las sucursales del servicio</returns>
         public async Task<List<SelectListItem>> GetBranchesForDropdownAsync()
         {
             return await _context.AdmSucursales
@@ -381,6 +425,10 @@ namespace VCashApp.Services.Service
                                  .ToListAsync();
         }
 
+        /// <summary>
+        /// Obtiene las opciones de concepto del servicio para los dropdowns.
+        /// </summary>
+        /// <returns>Lista de SelectListItem para los conceptos del servicio</returns>
         public async Task<List<SelectListItem>> GetServiceConceptsForDropdownAsync()
         {
             return await _context.AdmConceptos
@@ -388,6 +436,10 @@ namespace VCashApp.Services.Service
                                  .ToListAsync();
         }
 
+        /// <summary>
+        /// Obtiene las opciones de estado del servicio para los dropdowns.
+        /// </summary>
+        /// <returns>Lista de SelectListItem para los estados del servicio</returns>
         public async Task<List<SelectListItem>> GetServiceStatusesForDropdownAsync()
         {
             return await _context.AdmEstados
@@ -396,6 +448,10 @@ namespace VCashApp.Services.Service
                                  .ToListAsync();
         }
 
+        /// <summary>
+        /// Obtiene las opciones de modalidad del servicio para los dropdowns.
+        /// </summary>
+        /// <returns>Lista de SelectListItem para las modalidades del servicio</returns>
         public async Task<List<SelectListItem>> GetServiceModalitiesForDropdownAsync()
         {
             return new List<SelectListItem>
@@ -404,6 +460,19 @@ namespace VCashApp.Services.Service
                 new SelectListItem { Value = "2", Text = "Pedido" },
                 new SelectListItem { Value = "3", Text = "Frecuente" }
             };
+        }
+
+        /// <summary>
+        /// Obtiene las opciones de responsables al fallo del servicio para los dropdowns.
+        /// </summary>
+        /// <returns>Lista de SelectListItem para los responsables del fallo del servicio</returns>
+        public async Task<List<SelectListItem>> GetFailedResponsiblesForDropdown()
+        {
+            return await Task.FromResult(new List<SelectListItem>
+            {
+                new SelectListItem { Value = "Cliente", Text = "Cliente" },
+                new SelectListItem { Value = "Vatco", Text = "Vatco" }
+            });
         }
     }
 }

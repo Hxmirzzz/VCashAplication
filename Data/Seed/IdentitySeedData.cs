@@ -18,7 +18,7 @@ namespace VCashApp.Data.Seed
                 "Admin", "Planeador", "CEF", "Supervisor",
                 "ADATM01", "ADCEF01", "ADCF01", "ADGRG01", "ADMTF01",
                 "ADSER01", "ADSER02", "ADTH01", "ADTI01",
-                "COCEF01", "COSTV01", "GRSER001", "SUPTV01", "Seguridad", "SupervisorSeguridad", "TalentoHumano"
+                "COCEF01", "COSTV01", "GRSER001", "SUPTV01", "Seguridad", "SupervisorSeguridad", "TalentoHumano", "Jefe de Tripulación"
             };
 
             foreach (var roleName in roleNames)
@@ -134,14 +134,14 @@ namespace VCashApp.Data.Seed
             }
             else { Log.Information("[SeedData] Usuario 'talentohumano1' ya existe."); }
 
-            /*var tiUser = await userManager.FindByNameAsync("hamir01");
-            if (tiUser == null)
+            var jefeTripulacionUser = await userManager.FindByNameAsync("jefetripulacion1");
+            if (jefeTripulacionUser == null)
             {
-                tiUser = new ApplicationUser { UserName = "hamir01", Email = "hamirrocha@vatco.com.co", NombreUsuario = "Hamir Rocha", EmailConfirmed = true, PhoneNumberConfirmed = true };
-                var result = await userManager.CreateAsync(tiUser, "Vidal2026*");
-                if (result.Succeeded) await userManager.AddToRoleAsync(tiUser, "ADTI01");
+                jefeTripulacionUser = new ApplicationUser { UserName = "jefetripulacion1", Email = "jefedetripulacion@vatco.com.co", NombreUsuario = "LUIS BELTRAN", EmailConfirmed = true, PhoneNumberConfirmed = true };
+                var result = await userManager.CreateAsync(jefeTripulacionUser, "Password123!");
+                if (result.Succeeded) await userManager.AddToRoleAsync(jefeTripulacionUser, "Jefe de Tripulación");
             }
-            else { Log.Information("[SeedData] Usuario 'hamir01' ya existe."); }*/
+            else { Log.Information("[SeedData] Usuario 'jefetripulacion1' ya existe."); }
         }
 
         public static async Task SeedBranchPermissionsAsync(AppDbContext context, UserManager<ApplicationUser> userManager)
@@ -160,6 +160,7 @@ namespace VCashApp.Data.Seed
                 var seguridadUser = await userManager.FindByNameAsync("seguridad1");
                 var supervisorSeguridad = await userManager.FindByNameAsync("supervisorseguridad1");
                 var talentoHumanoUser = await userManager.FindByNameAsync("talentohumano1");
+                var jefeTripulacionUser = await userManager.FindByNameAsync("jefetripulacion1");
 
                 if (planeadorUser != null && bogotaSucursal != null)
                 {
@@ -248,6 +249,16 @@ namespace VCashApp.Data.Seed
                     }
                 }
 
+                if (jefeTripulacionUser != null && bogotaSucursal != null)
+                {
+                    var existingClaims = await userManager.GetClaimsAsync(jefeTripulacionUser);
+                    if (!existingClaims.Any(c => c.Type == "SucursalId" && c.Value == bogotaSucursal.CodSucursal.ToString()))
+                    {
+                        await userManager.AddClaimAsync(jefeTripulacionUser, new Claim("SucursalId", bogotaSucursal.CodSucursal.ToString()));
+                        Log.Information("[SeedData] Claim 'SucursalId:{SucursalId}' añadido a usuario '{UserName}'.", bogotaSucursal.CodSucursal, jefeTripulacionUser.UserName);
+                    }
+                }
+
                 Log.Information("[SeedData] Seeding de permisos por sucursal completado.");
             }
             catch (Exception ex)
@@ -294,6 +305,7 @@ namespace VCashApp.Data.Seed
                 var supervisorSeguridadRoleId = (await roleManager.FindByNameAsync("SupervisorSeguridad"))?.Id;
                 var talentoHumanoRoleId = (await roleManager.FindByNameAsync("TalentoHumano"))?.Id;
                 var tiRoleId = (await roleManager.FindByNameAsync("ADTI01"))?.Id;
+                var jefeTripulacionRoleId = (await roleManager.FindByNameAsync("Jefe de Tripulación"))?.Id;
 
                 var rolesConIds = new Dictionary<string, string?>
                 {
@@ -304,7 +316,13 @@ namespace VCashApp.Data.Seed
                     { "Seguridad", seguridadRoleId },
                     { "SupervisorSeguridad", supervisorSeguridadRoleId },
                     { "TalentoHumano", talentoHumanoRoleId },
-                    { "ADTI01", tiRoleId }
+                    { "ADTI01", tiRoleId },
+                    { "Jefe de Tripulación", jefeTripulacionRoleId }
+                };
+
+                var cefPermissions = new List<(string RoleName, bool CanView, bool CanCreate, bool CanEdit)>
+                {
+                    ( "Jefe de Tripulación", true, true, true )
                 };
 
                 // Permisos para RUDHIS (Historial de Rutas Diarias)

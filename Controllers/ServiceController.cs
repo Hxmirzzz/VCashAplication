@@ -55,6 +55,11 @@ namespace VCashApp.Controllers
             ViewBag.HasViewPermission = await HasPermisionForView(userRoles, "CGS", PermissionType.View);
         }
 
+        private static int GenerateGenericKey()
+        {
+            return Random.Shared.Next(1000, 10000);
+        }
+
         /// <summary>
         /// Muestra el dashboard principal del Centro de Gestión de Servicios, permitiendo filtrar y ver las solicitudes.
         /// </summary>
@@ -62,7 +67,7 @@ namespace VCashApp.Controllers
         [RequiredPermission(PermissionType.View, "CGS")]
         public async Task<IActionResult> Index(
             string? search, int? clientCode, int? branchCode, int? conceptCode, DateOnly? startDate, DateOnly? endDate, int? status,
-            int pageNumber = 1, int pageSize = 15)
+            int page = 1, int pageSize = 15)
         {
             var currentUser = await GetCurrentApplicationUserAsync();
             if (currentUser == null) return RedirectToPage("/Account/Login", new { area = "Identity" });
@@ -71,12 +76,12 @@ namespace VCashApp.Controllers
             bool isAdmin = ViewBag.IsAdmin;
 
             (List<CgsServiceSummaryViewModel> serviceRequests, int totalRecords) = await _cgsService.GetFilteredServiceRequestsAsync(
-                search, clientCode, branchCode, conceptCode, startDate, endDate, status, pageNumber, pageSize, currentUser.Id, isAdmin);
+                search, clientCode, branchCode, conceptCode, startDate, endDate, status, page, pageSize, currentUser.Id, isAdmin);
 
             var dashboardViewModel = new CgsDashboardViewModel
             {
                 ServiceRequests = serviceRequests,
-                CurrentPage = pageNumber,
+                CurrentPage = page,
                 PageSize = pageSize,
                 TotalPages = (int)Math.Ceiling((double)totalRecords / pageSize),
                 TotalData = totalRecords,
@@ -93,7 +98,7 @@ namespace VCashApp.Controllers
                 AvailableStatuses = ViewBag.AvailableStatuses as List<SelectListItem>
             };
 
-            ViewBag.CurrentPage = pageNumber;
+            ViewBag.CurrentPage = page;
             ViewBag.PageSize = pageSize;
             ViewBag.TotalPages = dashboardViewModel.TotalPages;
             ViewBag.TotalData = totalRecords;
@@ -120,6 +125,7 @@ namespace VCashApp.Controllers
             await SetCommonViewBagsCgsAsync(currentUser, "Nueva Solicitud CGS");
 
             var viewModel = await _cgsService.PrepareServiceRequestViewModelAsync(currentUser.Id, IpAddressForLogging);
+            viewModel.KeyValue = GenerateGenericKey();
 
             return View(viewModel);
         }
@@ -161,17 +167,19 @@ namespace VCashApp.Controllers
 
             try
             {
+                viewModel.KeyValue ??= GenerateGenericKey();
                 var result = await _cgsService.CreateServiceRequestAsync(viewModel, currentUser.Id, IpAddressForLogging);
 
                 if (result.Success)
                 {
-                    TempData["SuccessMessage"] = result.Message;
-                    _logger.LogInformation("Usuario: {Usuario} | IP: {IP} | Acción: Solicitud CGS creada | Orden de Servicio: {ServiceOrderId}",
-                        currentUser.UserName, IpAddressForLogging, result.Data);
+                    var successMessage = $"Solicitud creada exitosamente. Clave: {viewModel.KeyValue:0000}";
+                    TempData["SuccessMessage"] = successMessage;
+                    _logger.LogInformation("Usuario: {Usuario} | IP: {IP} | Acción: Solicitud CGS creada | Orden de Servicio: {ServiceOrderId} | Clave: {Clave}",
+                        currentUser.UserName, IpAddressForLogging, result.Data, viewModel.KeyValue);
 
                     if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
                     {
-                        return Json(ServiceResult.SuccessResult("Solicitud creada exitosamente.", result.Data));
+                        return Json(ServiceResult.SuccessResult(successMessage, result.Data));
                     }
 
                     return RedirectToAction(nameof(Index));
@@ -212,9 +220,32 @@ namespace VCashApp.Controllers
         // --- Acciones de API para la carga dinámica de dropdowns ---
 
         /// <summary>
+        /// Obtiene detalles de un punto, ATM o fondo para autocompletar.
+        /// </summary>
+        /// <param name="code">Código del punto/ATM o fondo.</param>
+        /// <param name="clientId">ID del cliente.</param>
+        /// <param name="isPoint">True si es un punto/ATM, false si es un fondo.</param>
+        /// <returns>JSON con los detalles.</returns>
+        [HttpGet("GetLocationDetails")]
+        public async Task<IActionResult> GetLocationDetails(string code, int clientId, bool isPoint)
+        {
+            var currentUser = await GetCurrentApplicationUserAsync();
+            if (currentUser == null) return Unauthorized();
+
+            var details = await _cgsService.GetLocationDetailsByCodeAsync(code, clientId, isPoint);
+
+            if (details == null)
+            {
+                return Json(ServiceResult.FailureResult("Detalles de ubicación no encontrados."));
+            }
+
+            return Json(ServiceResult.SuccessResult("Detalles obtenidos.", details));
+        }
+
+        /// <summary>
         /// Obtiene una lista de puntos o fondos para un cliente y sucursal específicos.
         /// </summary>
-        [HttpGet("api/GetLocations")]
+        [HttpGet("GetLocations")]
         [RequiredPermission(PermissionType.View, "CGS")]
         public async Task<IActionResult> GetLocations(int clientId, int branchId, string locationType, string conceptCode)
         {

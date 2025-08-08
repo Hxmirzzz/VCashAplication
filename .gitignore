@@ -53,12 +53,11 @@ publish/
 # DotNet tool files
 .config/dotnet-tools.json
 
-# Secret Manager files (CRÍTICO para tu caso si los usas)
-# Excluye appsettings.Development.json si contiene secretos específicos de desarrollo que no quieres en Git.
-# Si appsettings.json es donde pondrás la cadena sensible para que funcione, NO LO EXCLUYAS AQUÍ,
-# pero sé consciente de que las credenciales estarán en el repo.
-appsettings.Development.json
+# Ignorar configuraciones sensibles
 appsettings.json
+appsettings.Development.json
+appsettings.Production.json
+appsettings.QA.json
 
 # Para los archivos de secretos de usuario real (si Secret Manager funciona)
 .secrets/

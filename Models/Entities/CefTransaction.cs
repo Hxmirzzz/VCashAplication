@@ -171,6 +171,20 @@ namespace VCashApp.Models.Entities
         [Column("IPRegistro")]
         public string? RegistrationIP { get; set; }
 
+        [StringLength(450)]
+        [Column("ReponsableEntregaId")]
+        [ForeignKey("User")]
+        public string? DelivererId { get; set; }
+        [NotMapped]
+        public virtual ApplicationUser DelivererUser { get; set; }
+
+        [StringLength(450)]
+        [Column("ResponsableRecibeId")]
+        [ForeignKey("User")]
+        public string? ReceiverId { get; set; }
+        [NotMapped]
+        public virtual ApplicationUser ReceiverUser { get; set; }
+
         // Colecciones de navegación para las tablas hijas
         public virtual ICollection<CefContainer> Containers { get; set; } = new List<CefContainer>();
         public virtual ICollection<CefIncident> Incidents { get; set; } = new List<CefIncident>();

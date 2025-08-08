@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using VCashApp.Data;
 
@@ -11,9 +12,11 @@ using VCashApp.Data;
 namespace VCashApp.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250806164541_CorrectionToDelivererAndReceiverColumnsApplyUserFK")]
+    partial class CorrectionToDelivererAndReceiverColumnsApplyUserFK
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1625,11 +1628,7 @@ namespace VCashApp.Migrations
 
                     b.HasIndex("CountingUserCoinId");
 
-                    b.HasIndex("DelivererId");
-
                     b.HasIndex("LastUpdateUser");
-
-                    b.HasIndex("ReceiverId");
 
                     b.HasIndex("RegistrationUser");
 
@@ -2563,17 +2562,7 @@ namespace VCashApp.Migrations
 
                     b.HasOne("VCashApp.Models.ApplicationUser", null)
                         .WithMany()
-                        .HasForeignKey("DelivererId")
-                        .OnDelete(DeleteBehavior.Restrict);
-
-                    b.HasOne("VCashApp.Models.ApplicationUser", null)
-                        .WithMany()
                         .HasForeignKey("LastUpdateUser")
-                        .OnDelete(DeleteBehavior.Restrict);
-
-                    b.HasOne("VCashApp.Models.ApplicationUser", null)
-                        .WithMany()
-                        .HasForeignKey("ReceiverId")
                         .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("VCashApp.Models.ApplicationUser", null)
