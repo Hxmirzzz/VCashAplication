@@ -684,15 +684,12 @@
                 if (isCollectionConcept) {
                     $('#originType').val('@(nameof(VCashApp.Enums.LocationTypeEnum.Punto))');
                     $('#destinationType').val('@(nameof(VCashApp.Enums.LocationTypeEnum.Fondo))');
-                    $('#changeKitField').hide();
                 } else if (isAtmConcept) {
                     $('#originType').val('@(nameof(VCashApp.Enums.LocationTypeEnum.Fondo))');
                     $('#destinationType').val('@(nameof(VCashApp.Enums.LocationTypeEnum.Punto))');
-                    $('#changeKitField').show();
                 } else {
                     $('#originType').val('');
                     $('#destinationType').val('');
-                    $('#changeKitField').hide();
                 }
 
                 loadAndFillLocationDropdown('#originClientId', '#originType', '#originCode', serviceConceptCode);
