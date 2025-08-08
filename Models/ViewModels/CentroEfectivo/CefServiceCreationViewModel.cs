@@ -83,11 +83,11 @@ namespace VCashApp.Models.ViewModels.CentroEfectivo
         // Origin
         [Display(Name = "Tipo de Origen")]
         [Required(ErrorMessage = "El tipo de origen es requerido.")]
-        public LocationTypeEnum OriginType { get; set; } // Enum: Point, Fund. Used to derive CgsService.OriginIndicatorType
+        public LocationTypeEnum OriginType { get; set; }
 
         [Display(Name = "Código Cliente Origen")]
         [Required(ErrorMessage = "El código de cliente origen es requerido.")]
-        public int OriginClientId { get; set; } // Maps to CgsService.OriginClientCode
+        public int OriginClientId { get; set; }
 
         [Display(Name = "Nombre Cliente Origen")]
         [Required(ErrorMessage = "El nombre de cliente origen es requerido.")]

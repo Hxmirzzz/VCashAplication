@@ -120,5 +120,15 @@ namespace VCashApp.Services
         /// </summary>
         /// <returns>Una lista de <see cref="SelectListItem"/> de responsables fallo del servicio.</returns>
         Task<List<SelectListItem>> GetFailedResponsiblesForDropdown();
+
+        /// <summary>
+        /// Gets details of a point or fund given its code.
+        /// Obtiene los detalles de un punto o fondo dado su código.
+        /// </summary>
+        /// <param name="code">Point or fund code.</param>
+        /// <param name="clientId">Client ID.</param>
+        /// <param name="isPoint">True if it's a point, false if it's a fund.</param>
+        /// <returns>A dynamic object with details (Name, City, Branch, Range).</returns>
+        Task<object?> GetLocationDetailsByCodeAsync(string code, int clientId, bool isPoint);
     }
 }

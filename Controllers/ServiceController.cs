@@ -212,9 +212,32 @@ namespace VCashApp.Controllers
         // --- Acciones de API para la carga dinámica de dropdowns ---
 
         /// <summary>
+        /// Obtiene detalles de un punto, ATM o fondo para autocompletar.
+        /// </summary>
+        /// <param name="code">Código del punto/ATM o fondo.</param>
+        /// <param name="clientId">ID del cliente.</param>
+        /// <param name="isPoint">True si es un punto/ATM, false si es un fondo.</param>
+        /// <returns>JSON con los detalles.</returns>
+        [HttpGet("GetLocationDetails")]
+        public async Task<IActionResult> GetLocationDetails(string code, int clientId, bool isPoint)
+        {
+            var currentUser = await GetCurrentApplicationUserAsync();
+            if (currentUser == null) return Unauthorized();
+
+            var details = await _cgsService.GetLocationDetailsByCodeAsync(code, clientId, isPoint);
+
+            if (details == null)
+            {
+                return Json(ServiceResult.FailureResult("Detalles de ubicación no encontrados."));
+            }
+
+            return Json(ServiceResult.SuccessResult("Detalles obtenidos.", details));
+        }
+
+        /// <summary>
         /// Obtiene una lista de puntos o fondos para un cliente y sucursal específicos.
         /// </summary>
-        [HttpGet("api/GetLocations")]
+        [HttpGet("GetLocations")]
         [RequiredPermission(PermissionType.View, "CGS")]
         public async Task<IActionResult> GetLocations(int clientId, int branchId, string locationType, string conceptCode)
         {
