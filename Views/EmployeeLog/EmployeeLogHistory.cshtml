@@ -28,87 +28,93 @@
     bool canViewHistory = ViewBag.CanViewHistory ?? false;
 }
 
-<div class="search-container">
-    <div class="table-controls">
-        <input type="text" id="tableSearch" placeholder="Buscar...">
-        <div class="table-buttons">
-            @if (canCreateLog)
+<div class="main-content-container">
+    <div class="section-header">
+        <div class="alert-container">
+            @if (TempData["SuccessMessage"] != null)
             {
-                <div class="control-button-wrapper">
-                    <a href="@Url.Action("LogEntry", "EmployeeLog")" class="control-button-icon" id="addLogEntryButton" title="Record New Employee Log">
-                        <img src="/assets/icon-img/add.png" alt="Add Log Entry">
-                    </a>
-                </div>
+                <div class="alert alert-success mt-2" role="alert">@TempData["SuccessMessage"]</div>
             }
+            @if (TempData["ErrorMessage"] != null)
+            {
+                <div class="alert alert-danger mt-2" role="alert">@TempData["ErrorMessage"]</div>
+            }
+        </div>
+    </div>
 
-            <div class="control-button-wrapper">
-                <img src="/assets/icon-img/download.png" alt="Download" class="control-button-icon" id="downloadButton">
-            </div>
+    <div class="search-container">
+        <div class="table-controls">
+            <input type="text" id="tableSearch" class="form-control form-control-sm" placeholder="Buscar..." value="@currentSearchTerm">
+            <div class="table-buttons">
+                @if (canCreateLog)
+                {
+                    <div class="control-button-wrapper">
+                        <a href="@Url.Action("LogEntry", "EmployeeLog")" class="control-button-icon" id="addLogEntryButton" title="Record New Employee Log">
+                            <img src="/assets/icon-img/add.png" alt="Add Log Entry">
+                        </a>
+                    </div>
+                }
 
-            <div class="control-button-wrapper">
-                <img src="/assets/icon-img/filter-on.png" alt="Filter" class="control-button-icon" id="filterButton">
+                <div class="control-button-wrapper">
+                    <img src="/assets/icon-img/download.png" alt="Download" class="control-button-icon" id="downloadButton">
+                </div>
+
+                <div class="control-button-wrapper">
+                    <img src="/assets/icon-img/filter-on.png" alt="Filter" class="control-button-icon" id="filterButton">
+                </div>
             </div>
         </div>
     </div>
-</div>
 
-<div class="filter-sidebar" id="filterSidebar">
-    <div class="filter-sidebar-content">
-        <h3>Advanced Filters</h3>
-        
-        <div class="form-group">
-            <label for="filterCargoId">Cargo:</label>
-            <select id="filterCargoId" class="input-control" name="cargoId" asp-items="cargosFilterList"></select>
-        </div>
+    <div class="filter-sidebar" id="filterSidebar">
+        <div class="filter-sidebar-content">
+            <h3>Advanced Filters</h3>
 
-        <div class="form-group">
-            <label for="filterUnitId">Unidad:</label>
-            <select id="filterUnitId" class="input-control" name="unitId" asp-items="unidadesFilterList"></select>
-        </div>
+            <div class="form-group">
+                <label for="filterCargoId">Cargo:</label>
+                <select id="filterCargoId" class="form-control form-control-sm" name="cargoId" asp-items="cargosFilterList"></select>
+            </div>
 
-        <div class="form-group">
-            <label for="filterBranchId">Sucursal:</label>
-            <select id="filterBranchId" class="input-control" name="branchId" asp-items="sucursalesFilterList"></select>
-        </div>
+            <div class="form-group">
+                <label for="filterUnitId">Unidad:</label>
+                <select id="filterUnitId" class="form-control form-control-sm" name="unitId" asp-items="unidadesFilterList"></select>
+            </div>
 
-        <div class="form-group">
-            <label for="filterStartDate">Desde:</label>
-            <input type="date" id="filterStartDate" class="input-control" name="startDate" value="@currentStartDate" />
-        </div>
+            <div class="form-group">
+                <label for="filterBranchId">Sucursal:</label>
+                <select id="filterBranchId" class="form-control form-control-sm" name="branchId" asp-items="sucursalesFilterList"></select>
+            </div>
 
-        <div class="form-group">
-            <label for="filterEndDate">Hasta:</label>
-            <input type="date" id="filterEndDate" class="input-control" name="endDate" value="@currentEndDate" />
-        </div>
+            <div class="form-group">
+                <label for="filterStartDate">Desde:</label>
+                <input type="date" id="filterStartDate" class="form-control form-control-sm" name="startDate" value="@currentStartDate" />
+            </div>
 
-        <div class="form-group">
-            <label for="filterLogStatus">Estado:</label>
-            <select id="filterLogStatus" class="input-control" name="logStatus">
-                <option value="">Select</option>
-                <option value="1">COMPLETO</option>
-                <option value="0">EN PROGRESO</option>
-            </select>
-        </div>
+            <div class="form-group">
+                <label for="filterEndDate">Hasta:</label>
+                <input type="date" id="filterEndDate" class="form-control form-control-sm" name="endDate" value="@currentEndDate" />
+            </div>
 
-        <div class="filter-buttons">
-            <div class="cancel-filter-btn" id="clearFilters">
-                <img src="~/assets/icon-img/filter-off.png" alt="OffFilterImage" title="Limpiar Filtros" id="clearFilters" />
+            <div class="form-group">
+                <label for="filterLogStatus">Estado:</label>
+                <select id="filterLogStatus" class="form-control form-control-sm" name="logStatus">
+                    <option value="">Select</option>
+                    <option value="1">COMPLETO</option>
+                    <option value="0">EN PROGRESO</option>
+                </select>
+            </div>
+
+            <div class="filter-buttons">
+                <div class="cancel-filter-btn" id="clearFilters">
+                    <img src="~/assets/icon-img/filter-off.png" alt="OffFilterImage" title="Limpiar Filtros" id="clearFilters" />
+                </div>
             </div>
         </div>
     </div>
-</div>
 
-@if (TempData["SuccessMessage"] != null)
-{
-    <div class="alert alert-success">@TempData["SuccessMessage"]</div>
-}
-@if (TempData["ErrorMessage"] != null)
-{
-    <div class="alert alert-danger">@TempData["ErrorMessage"]</div>
-}
-
-<div id="dataTablePartial">
-    @Html.Partial("~/Views/EmployeeLog/_EmployeeLogTablePartial.cshtml", Model)
+    <div id="dataTablePartial">
+        @Html.Partial("~/Views/EmployeeLog/_EmployeeLogTablePartial.cshtml", Model)
+    </div>
 </div>
 
 @section Scripts {
