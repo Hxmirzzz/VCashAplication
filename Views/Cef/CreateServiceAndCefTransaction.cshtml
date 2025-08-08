@@ -678,10 +678,12 @@
             });
 
             $('form :input[required]').on('blur change keyup', function() {
+                $(this).data('touched', true);
                 validateField($(this));
             });
             $('form select[required]').on('change', function() {
                 validateField($(this));
+                $(this).data('touched', true);
             });
 
             function showFieldLoading(selector, defaultText = 'Cargando opciones...') {
@@ -693,7 +695,9 @@
             function hideFieldLoading(selector) {
                 const $element = $(selector);
                 $element.removeClass('is-loading').prop('disabled', false);
-                validateField($element);
+                if ($element.data('touched')) {
+                    validateField($element);
+                }
             }
 
             function fillDropdown(selector, data) {

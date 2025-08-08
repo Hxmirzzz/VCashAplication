@@ -55,6 +55,11 @@ namespace VCashApp.Controllers
             ViewBag.HasViewPermission = await HasPermisionForView(userRoles, "CGS", PermissionType.View);
         }
 
+        private static int GenerateGenericKey()
+        {
+            return Random.Shared.Next(1000, 10000);
+        }
+
         /// <summary>
         /// Muestra el dashboard principal del Centro de Gestión de Servicios, permitiendo filtrar y ver las solicitudes.
         /// </summary>
@@ -120,6 +125,7 @@ namespace VCashApp.Controllers
             await SetCommonViewBagsCgsAsync(currentUser, "Nueva Solicitud CGS");
 
             var viewModel = await _cgsService.PrepareServiceRequestViewModelAsync(currentUser.Id, IpAddressForLogging);
+            viewModel.KeyValue = GenerateGenericKey();
 
             return View(viewModel);
         }
@@ -161,17 +167,19 @@ namespace VCashApp.Controllers
 
             try
             {
+                viewModel.KeyValue ??= GenerateGenericKey();
                 var result = await _cgsService.CreateServiceRequestAsync(viewModel, currentUser.Id, IpAddressForLogging);
 
                 if (result.Success)
                 {
-                    TempData["SuccessMessage"] = result.Message;
-                    _logger.LogInformation("Usuario: {Usuario} | IP: {IP} | Acción: Solicitud CGS creada | Orden de Servicio: {ServiceOrderId}",
-                        currentUser.UserName, IpAddressForLogging, result.Data);
+                    var successMessage = $"Solicitud creada exitosamente. Clave: {viewModel.KeyValue:0000}";
+                    TempData["SuccessMessage"] = successMessage;
+                    _logger.LogInformation("Usuario: {Usuario} | IP: {IP} | Acción: Solicitud CGS creada | Orden de Servicio: {ServiceOrderId} | Clave: {Clave}",
+                        currentUser.UserName, IpAddressForLogging, result.Data, viewModel.KeyValue);
 
                     if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
                     {
-                        return Json(ServiceResult.SuccessResult("Solicitud creada exitosamente.", result.Data));
+                        return Json(ServiceResult.SuccessResult(successMessage, result.Data));
                     }
 
                     return RedirectToAction(nameof(Index));
