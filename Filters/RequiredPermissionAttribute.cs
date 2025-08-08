@@ -63,7 +63,7 @@ namespace VCashApp.Filters
             // Usamos LogContext.PushProperty para añadir propiedades que Serilog capturará.
             // Los nombres aquí son los que el sink de MSSQLServer buscará en AdditionalColumns.
             // Pushing las propiedades generales que tus controladores usan.
-            using (LogContext.PushProperty("IP", ipAddress))
+            using (LogContext.PushProperty("IpAddress", ipAddress))
             using (LogContext.PushProperty("Usuario", userName))
             using (LogContext.PushProperty("Accion", actionName))
             {

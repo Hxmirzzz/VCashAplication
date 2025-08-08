@@ -43,7 +43,7 @@ Log.Logger = new LoggerConfiguration()
                 new SqlColumn("SourceContext", SqlDbType.NVarChar) { ColumnName = "SourceContext", DataLength = 255, AllowNull = true },
 
                 new SqlColumn{ ColumnName = "Username", PropertyName = "Usuario", DataType = SqlDbType.NVarChar, DataLength = 255, AllowNull = true },
-                new SqlColumn{ ColumnName = "IpAddress", PropertyName = "IP", DataType = SqlDbType.NVarChar, DataLength = 45, AllowNull = true },
+                new SqlColumn{ ColumnName = "IpAddress", PropertyName = "IpAddress", DataType = SqlDbType.NVarChar, DataLength = 45, AllowNull = true },
                 new SqlColumn{ ColumnName = "Action", PropertyName = "Accion", DataType = SqlDbType.NVarChar, DataLength = 255, AllowNull = true },
 
                 new SqlColumn("Resultado", SqlDbType.NVarChar) { ColumnName = "Result", DataLength = 255, AllowNull = true },

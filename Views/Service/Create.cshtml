@@ -163,8 +163,8 @@
                                             </div>
                                             <span asp-validation-for="OriginClientCode" class="text-danger"></span>
                                         </div>
-                                        <div class="col-12 col-lg-2">
-                                            <div class="form-floating has-validation">
+                                        <div class="col-12 col-lg-2">                                            
+                                          <div class="form-floating has-validation">
                                                 <select asp-for="OriginIndicatorType" asp-items="Html.GetEnumSelectList<VCashApp.Enums.LocationTypeEnum>()" class="form-select" id="originType" required aria-required="true">
                                                     <option value="originType">Seleccionar tipo origen...</option>
                                                 </select>
@@ -229,6 +229,7 @@
                                                 <div class="invalid-feedback">⚠ Este campo es requerido</div>
                                                 <div class="valid-feedback">✓ Correcto</div>
                                             </div>
+                                            <input type="hidden" id="destinationClientIdHidden" name="DestinationClientCode" disabled />
                                             <span asp-validation-for="DestinationClientCode" class="text-danger"></span>
                                         </div>
                                         <div class="col-12 col-lg-2">
@@ -443,9 +444,7 @@
                     shouldShow = false;
                 }
 
-                // Aplicar la lógica de mostrar/ocultar
                 if (shouldShow) {
-                    console.log('🟢 MOSTRANDO campo Kit de Cambio');
                     $changeKitSection.css('display', 'block').show();
                 } else {
                     $changeKitSection.css('display', 'none').hide();
@@ -597,6 +596,23 @@
                 validateField($element);
             }
 
+            function isLockedConcept(code) {
+                return ['1', '2', '3', '4'].includes(code);
+            }
+
+            function syncDestinationClient() {
+                const conceptCode = $('#serviceConceptCode').val();
+                const originVal = $('#originClientId').val();
+
+                if (isLockedConcept(conceptCode)) {
+                    $('#destinationClientId').val(originVal).prop('disabled', true).trigger('change');
+                    $('#destinationClientIdHidden').val(originVal).prop('disabled', false);
+                } else {
+                    $('#destinationClientId').prop('disabled', false);
+                    $('#destinationClientIdHidden').prop('disabled', true);
+                }
+            }
+
             async function loadAndFillLocationDropdown(clientIdSelector, typeSelector, codeSelector, serviceConceptCode) {
                 const clientId = $(clientIdSelector).val();
                 const type = $(typeSelector).val();
@@ -607,6 +623,7 @@
 
                 const prefix = codeSelector.includes('Origin') ? 'Origin' : 'Destination';
                 $(`#${prefix}CityName`).val('');
+                $(`#${prefix}CityId`).val('');
                 $(`#${prefix}BranchName`).val('');
                 $(`#${prefix}RangeCode`).val('');
                 $(`#${prefix}RangeDetails`).val('');
@@ -653,11 +670,21 @@
                             $(`#${branchFieldId}`).val(data.branchName);
                             $(`#${rangeCodeFieldId}`).val(data.rangeCode);
                             $(`#${rangeDetailsFieldId}`).val(data.rangeDetails);
+                            if (isOrigin) {
+                                $('#OriginCityId').val(data.cityId);
+                            } else {
+                                $('#DestinationCityId').val(data.cityId);
+                            }
                         } else {
                             $(`#${cityFieldId}`).val('');
                             $(`#${branchFieldId}`).val('');
                             $(`#${rangeCodeFieldId}`).val('');
                             $(`#${rangeDetailsFieldId}`).val('');
+                            if (isOrigin) {
+                                $('#OriginCityId').val('');
+                            } else {
+                                $('#DestinationCityId').val('');
+                            }
                         }
                     } catch (error) {
                         console.error("Error cargando detalles de ubicación:", error);
@@ -666,12 +693,22 @@
                         $(`#${branchFieldId}`).val('');
                         $(`#${rangeCodeFieldId}`).val('');
                         $(`#${rangeDetailsFieldId}`).val('');
+                        if (isOrigin) {
+                            $('#OriginCityId').val('');
+                        } else {
+                            $('#DestinationCityId').val('');
+                        }
                     }
                 } else {
                     $(`#${cityFieldId}`).val('');
                     $(`#${branchFieldId}`).val('');
                     $(`#${rangeCodeFieldId}`).val('');
                     $(`#${rangeDetailsFieldId}`).val('');
+                    if (isOrigin) {
+                        $('#OriginCityId').val('');
+                    } else {
+                        $('#DestinationCityId').val('');
+                    }
                 }
             }
 
@@ -701,39 +738,49 @@
                 }
 
                 if ($('#destinationClientId').val()) {
-                    loadAndFillLocationDropdown('#originClientId', '#originType', '#originCode', $('#serviceConceptCode').val());
+                    loadAndFillLocationDropdown('#destinationClientId', '#destinationType', '#destinationCode', $('#serviceConceptCode').val());
                 }
             });
 
-        $('#serviceConceptCode').on('change', function() {
-            const serviceConceptCode = $(this).val();
-            const selectedText = $(this).find('option:selected').text().trim();
+            $('#serviceConceptCode').on('change', function() {
+                const serviceConceptCode = $(this).val();
+                const selectedText = $(this).find('option:selected').text().trim();
 
-            const isAtmConcept = (serviceConceptCode === '3' || serviceConceptCode === '4');
-            const isCollectionConcept = (serviceConceptCode === '1' || serviceConceptCode === '2');
+                const isAtmConcept = (serviceConceptCode === '3' || serviceConceptCode === '4');
+                const isCollectionConcept = (serviceConceptCode === '1' || serviceConceptCode === '2');
 
-            if (isCollectionConcept) {
-                $('#originType').val('@(nameof(VCashApp.Enums.LocationTypeEnum.Punto))');
-                $('#destinationType').val('@(nameof(VCashApp.Enums.LocationTypeEnum.Fondo))');
-            } else if (isAtmConcept) {
-                $('#originType').val('@(nameof(VCashApp.Enums.LocationTypeEnum.Fondo))');
-                $('#destinationType').val('@(nameof(VCashApp.Enums.LocationTypeEnum.Punto))');
-            } else {
-                $('#originType').val('');
-                $('#destinationType').val('');
-            }
+                if (isCollectionConcept) {
+                    $('#originType').val('@(nameof(VCashApp.Enums.LocationTypeEnum.Punto))');
+                    $('#destinationType').val('@(nameof(VCashApp.Enums.LocationTypeEnum.Fondo))');
+                } else if (isAtmConcept) {
+                    $('#originType').val('@(nameof(VCashApp.Enums.LocationTypeEnum.Fondo))');
+                    $('#destinationType').val('@(nameof(VCashApp.Enums.LocationTypeEnum.Punto))');
+                } else {
+                    $('#originType').val('');
+                    $('#destinationType').val('');
+                }
 
-            toggleChangeKitFieldFixed(serviceConceptCode, selectedText);
+                toggleChangeKitFieldFixed(serviceConceptCode, selectedText);
 
-            loadAndFillLocationDropdown('#originClientId', '#originType', '#originCode', serviceConceptCode);
-            loadAndFillLocationDropdown('#destinationClientId', '#destinationType', '#destinationCode', serviceConceptCode);
-        });
+                loadAndFillLocationDropdown('#originClientId', '#originType', '#originCode', serviceConceptCode);
+                loadAndFillLocationDropdown('#destinationClientId', '#destinationType', '#destinationCode', serviceConceptCode);
+                syncDestinationClient();
+            });
+
+            $('#originClientId').on('change', function() {
+                loadAndFillLocationDropdown('#originClientId', '#originType', '#originCode', $('#serviceConceptCode').val());
+                syncDestinationClient();
+            });
 
             $('#originType').on('change', function() {
                  loadAndFillLocationDropdown('#originClientId', '#originType', '#originCode', $('#serviceConceptCode').val());
             });
 
             $('#originCode').on('change', loadOriginLocationDetails);
+
+            $('#destinationClientId').on('change', function() {
+                loadAndFillLocationDropdown('#destinationClientId', '#destinationType', '#destinationCode', $('#serviceConceptCode').val());
+            });
 
             $('#destinationType').on('change', function() {
                 loadAndFillLocationDropdown('#destinationClientId', '#destinationType', '#destinationCode', $('#serviceConceptCode').val());
@@ -743,6 +790,16 @@
 
             $('.calculate-total-declared').on('input', calculateTotalDeclared);
             calculateTotalDeclared();
+            syncDestinationClient();
+
+            const initialServiceConcept = $('#serviceConceptCode').val();
+            const initialSelectedText = $('#serviceConceptCode').find('option:selected').text().trim();
+
+            if (initialServiceConcept) {
+                toggleChangeKitFieldFixed(initialServiceConcept, initialSelectedText);
+            } else {
+                toggleChangeKitFieldFixed('', '');
+            }
 
             // Lógica para mostrar/ocultar la sección de fallo
             $('#isFailedSwitch').on('change', function() {
