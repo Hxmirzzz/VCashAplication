@@ -20,9 +20,10 @@
 
 <div class="form-container">
     <div class="card">
+        <div class="card-header">
+            <h4 class="mb-0">@pageName</h4>
+        </div>
         <div class="card-body">
-            <h4 class="mb-4">Salida Manual para Log #@Model.Id</h4>
-            <hr />
             <form id="recordManualExitForm">
                 @Html.AntiForgeryToken()
 
@@ -45,79 +46,85 @@
                 <input type="hidden" id="hdnBranchId" name="BranchId" value="@(Model.CodSucursal)" />
                 <input type="hidden" id="hdnBranchName" name="BranchName" value="@(Model.Sucursal?.NombreSucursal ?? "")" />
 
-                <div class="row d-flex justify-content-center align-items-center">
-                    <div class="col-md-2">
-                        <div class="reg-preview-container">
-                            @{
-                                string photoFileName = "default-profile.jpg";
-                                if (Model.Empleado != null && !string.IsNullOrEmpty(Model.Empleado.FotoUrl))
-                                {
-                                    try
+                <div class="form-section">
+                    <h4 class="pt-3">Salida Manual para Log #@Model.Id</h4>
+                    <hr />
+                    <div class="row d-flex justify-content-center align-items-center">
+                        <div class="col-md-2">
+                            <div class="reg-preview-container">
+                                @{
+                                    string photoFileName = "default-profile.jpg";
+                                    if (Model.Empleado != null && !string.IsNullOrEmpty(Model.Empleado.FotoUrl))
                                     {
-                                        photoFileName = System.IO.Path.GetFileName(Model.Empleado.FotoUrl);
-                                    }
-                                    catch (Exception)
-                                    {
-                                        photoFileName = "default-profile.jpg";
+                                        try
+                                        {
+                                            photoFileName = System.IO.Path.GetFileName(Model.Empleado.FotoUrl);
+                                        }
+                                        catch (Exception)
+                                        {
+                                            photoFileName = "default-profile.jpg";
+                                        }
                                     }
                                 }
-                            }
-                            <img id="photo-preview" src="@Url.Content($"~/assets/profile-img/{photoFileName}")" alt="Vista Previa de Foto">
-                        </div>
-                    </div>
-                    <div class="col-md-10">
-                        <div class="row">
-                            <div class="col-md-6">
-                                <label for="employeeIdDisplay" class="form-label">Número de Cédula:</label>
-                                <input type="text" style="font-weight: bold;" class="form-control form-control-sm" id="employeeIdDisplay" value="@Model.CodCedula" readonly>
-                            </div>
-                            <div class="col-md-6">
-                                <label for="fullNameDisplay">Nombre del Empleado:</label>
-                                <input type="text" style="font-weight: bold;" class="form-control form-control-sm" id="fullNameDisplay" value="@(Model.Empleado?.NombreCompleto ?? $"{Model.Empleado?.PrimerNombre} {Model.Empleado?.PrimerApellido}")" readonly>
+                                <img id="photo-preview" src="@Url.Content($"~/assets/profile-img/{photoFileName}")" alt="Vista Previa de Foto">
                             </div>
                         </div>
-                        <div class="row">
-                            <div class="col-md-4">
-                                <label for="cargoNameDisplay">Cargo:</label>
-                                <input type="text" class="form-control form-control-sm" id="cargoNameDisplay" value="@Model.Empleado?.Cargo?.NombreCargo" readonly>
+                        <div class="col-md-10">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <label for="employeeIdDisplay" class="form-label">Número de Cédula:</label>
+                                    <input type="text" style="font-weight: bold;" class="form-control form-control-sm" id="employeeIdDisplay" value="@Model.CodCedula" readonly>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="fullNameDisplay">Nombre del Empleado:</label>
+                                    <input type="text" style="font-weight: bold;" class="form-control form-control-sm" id="fullNameDisplay" value="@(Model.Empleado?.NombreCompleto ?? $"{Model.Empleado?.PrimerNombre} {Model.Empleado?.PrimerApellido}")" readonly>
+                                </div>
                             </div>
-                            <div class="col-md-4">
-                                <label for="unitNameDisplay">Unidad:</label>
-                                <input type="text" class="form-control form-control-sm" id="unitNameDisplay" value="@Model.Empleado?.Cargo?.Unidad?.NombreUnidad" readonly>
-                            </div>
-                            <div class="col-md-4">
-                                <label for="branchNameDisplay">Sucursal:</label>
-                                <input type="text" class="form-control form-control-sm" id="branchNameDisplay" value="@Model.Sucursal?.NombreSucursal" readonly>
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <label for="cargoNameDisplay">Cargo:</label>
+                                    <input type="text" class="form-control form-control-sm" id="cargoNameDisplay" value="@Model.Empleado?.Cargo?.NombreCargo" readonly>
+                                </div>
+                                <div class="col-md-4">
+                                    <label for="unitNameDisplay">Unidad:</label>
+                                    <input type="text" class="form-control form-control-sm" id="unitNameDisplay" value="@Model.Empleado?.Cargo?.Unidad?.NombreUnidad" readonly>
+                                </div>
+                                <div class="col-md-4">
+                                    <label for="branchNameDisplay">Sucursal:</label>
+                                    <input type="text" class="form-control form-control-sm" id="branchNameDisplay" value="@Model.Sucursal?.NombreSucursal" readonly>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <hr />
-
-                <div class="row">
-                    <div class="col-md-6">
-                        <label for="entryDateDisplay">Fecha de Entrada:</label>
-                        <input type="date" class="form-control form-control-sm" id="entryDateDisplay" value="@(Model.FechaEntrada.ToString("yyyy-MM-dd"))" readonly>
+                <div class="form-section mt-4">
+                    <h4>Horarios del Registro</h4>
+                    <hr />
+                    <div class="row">
+                        <div class="col-md-6">
+                            <label for="entryDateDisplay">Fecha de Entrada:</label>
+                            <input type="date" class="form-control form-control-sm" id="entryDateDisplay" value="@(Model.FechaEntrada.ToString("yyyy-MM-dd"))" readonly>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="entryTimeDisplay">Hora de Entrada:</label>
+                            <input type="time" class="form-control form-control-sm" id="entryTimeDisplay" value="@(Model.HoraEntrada.ToString("HH:mm"))" readonly>
+                        </div>
                     </div>
-                    <div class="col-md-6">
-                        <label for="entryTimeDisplay">Hora de Entrada:</label>
-                        <input type="time" class="form-control form-control-sm" id="entryTimeDisplay" value="@(Model.HoraEntrada.ToString("HH:mm"))" readonly>
+
+                    <div class="row mt-3">
+                        <div class="col-md-6">
+                            <label for="exitDateInput" class="label-required form-label">Fecha de Salida:</label>
+                            <input type="date" class="form-control form-control-sm" id="exitDateInput" name="ExitDate" value="@(Model.FechaSalida?.ToString("yyyy-MM-dd"))" readonly>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="exitTimeInput" class="label-required form-label">Hora de Salida:</label>
+                            <input type="time" class="form-control form-control-sm" id="exitTimeInput" name="ExitTime" value="@(Model.HoraSalida?.ToString("HH:mm"))" readonly>
+                        </div>
                     </div>
                 </div>
 
-                <div class="row mt-3">
-                    <div class="col-md-6">
-                        <label for="exitDateInput" class="label-required form-label">Fecha de Salida:</label>
-                        <input type="date" class="form-control form-control-sm" id="exitDateInput" name="ExitDate" value="@(Model.FechaSalida?.ToString("yyyy-MM-dd"))" readonly>
-                    </div>
-                    <div class="col-md-6">
-                        <label for="exitTimeInput" class="label-required form-label">Hora de Salida:</label>
-                        <input type="time" class="form-control form-control-sm" id="exitTimeInput" name="ExitTime" value="@(Model.HoraSalida?.ToString("HH:mm"))" readonly>
-                    </div>
-                </div>
-
-                <div class="submit-container-reg form-group col-md-12 mt-4">
+                <div class="submit-container form-group col-md-12 mt-4">
                     <button type="submit" class="btn btn-primary" id="btnRecordManualExit" @(canCreateLog ? "" : "disabled")>Guardar</button>
                     <button type="button" class="btn btn-exit" id="btnCancel">Cancelar</button>
                 </div>
