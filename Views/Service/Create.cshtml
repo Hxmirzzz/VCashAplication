@@ -292,7 +292,7 @@
                                 </div>
                                 <div class="card-body">
                                     <div class="row g-3">
-                                        <div class="col-12 col-lg-3" id="changeKitField">
+                                        <div class="col-12 col-lg-3">
                                             <div class="form-floating">
                                                 <input asp-for="NumberOfChangeKits" type="number" class="form-control" placeholder="Cantidad Kit de Cambio" />
                                                 <label for="NumberOfChangeKits">Cantidad Kit de Cambio</label>
@@ -426,6 +426,36 @@
             const $nextButton = $('button[data-step-action="next"]');
             const $prevButton = $('button[data-step-action="prev"]');
             const $submitFinalButton = $('button[data-step-action="submit-final"]');
+
+            function toggleChangeKitFieldFixed(selectedValue, selectedText) {
+                const $changeKitSection = $('#NumberOfChangeKits').closest('.col-12.col-lg-3');
+                const $changeKitInput = $('#NumberOfChangeKits');
+                const hideFieldValues = ['1', '4'];
+                const showFieldValues = ['3', '2'];
+
+                let shouldShow = false;
+
+                if (hideFieldValues.includes(selectedValue)) {
+                    shouldShow = false;
+                } else if (showFieldValues.includes(selectedValue)) {
+                    shouldShow = true;
+                } else {
+                    shouldShow = false;
+                }
+
+                // Aplicar la lógica de mostrar/ocultar
+                if (shouldShow) {
+                    console.log('🟢 MOSTRANDO campo Kit de Cambio');
+                    $changeKitSection.css('display', 'block').show();
+                } else {
+                    $changeKitSection.css('display', 'none').hide();
+                    $changeKitInput.prop('required', false);
+                    $changeKitInput.removeClass('is-invalid is-valid');
+                    $changeKitInput.val('');
+                    $changeKitInput.siblings('.invalid-feedback, .valid-feedback').hide();
+                    $changeKitInput.siblings('.text-danger').text('');
+                }
+            }
 
             function updateStepper() {
                 $('.progress-stepper .step').removeClass('active completed');
@@ -675,26 +705,29 @@
                 }
             });
 
-            $('#serviceConceptCode').on('change', function() {
-                const serviceConceptCode = $(this).val();
+        $('#serviceConceptCode').on('change', function() {
+            const serviceConceptCode = $(this).val();
+            const selectedText = $(this).find('option:selected').text().trim();
 
-                const isAtmConcept = (serviceConceptCode === 'PR' || serviceConceptCode === 'ET');
-                const isCollectionConcept = (serviceConceptCode === 'RC' || serviceConceptCode === 'PV');
+            const isAtmConcept = (serviceConceptCode === '3' || serviceConceptCode === '4');
+            const isCollectionConcept = (serviceConceptCode === '1' || serviceConceptCode === '2');
 
-                if (isCollectionConcept) {
-                    $('#originType').val('@(nameof(VCashApp.Enums.LocationTypeEnum.Punto))');
-                    $('#destinationType').val('@(nameof(VCashApp.Enums.LocationTypeEnum.Fondo))');
-                } else if (isAtmConcept) {
-                    $('#originType').val('@(nameof(VCashApp.Enums.LocationTypeEnum.Fondo))');
-                    $('#destinationType').val('@(nameof(VCashApp.Enums.LocationTypeEnum.Punto))');
-                } else {
-                    $('#originType').val('');
-                    $('#destinationType').val('');
-                }
+            if (isCollectionConcept) {
+                $('#originType').val('@(nameof(VCashApp.Enums.LocationTypeEnum.Punto))');
+                $('#destinationType').val('@(nameof(VCashApp.Enums.LocationTypeEnum.Fondo))');
+            } else if (isAtmConcept) {
+                $('#originType').val('@(nameof(VCashApp.Enums.LocationTypeEnum.Fondo))');
+                $('#destinationType').val('@(nameof(VCashApp.Enums.LocationTypeEnum.Punto))');
+            } else {
+                $('#originType').val('');
+                $('#destinationType').val('');
+            }
 
-                loadAndFillLocationDropdown('#originClientId', '#originType', '#originCode', serviceConceptCode);
-                loadAndFillLocationDropdown('#destinationClientId', '#destinationType', '#destinationCode', serviceConceptCode);
-            });
+            toggleChangeKitFieldFixed(serviceConceptCode, selectedText);
+
+            loadAndFillLocationDropdown('#originClientId', '#originType', '#originCode', serviceConceptCode);
+            loadAndFillLocationDropdown('#destinationClientId', '#destinationType', '#destinationCode', serviceConceptCode);
+        });
 
             $('#originType').on('change', function() {
                  loadAndFillLocationDropdown('#originClientId', '#originType', '#originCode', $('#serviceConceptCode').val());
@@ -718,12 +751,10 @@
 
                 if (isFailed) {
                     $section.show();
-                    // Hacer los campos requeridos y visibles
                     $('#failedResponsible').prop('required', true).closest('.form-floating').addClass('has-validation');
                     $('#failedReason').prop('required', true).closest('.form-floating').addClass('has-validation');
                 } else {
                     $section.hide();
-                    // Quitar la validación y limpiar los campos
                     $('#failedResponsible').prop('required', false).removeClass('is-invalid is-valid');
                     $('#failedReason').prop('required', false).removeClass('is-invalid is-valid');
                     $('#failedResponsible').val('');
@@ -823,8 +854,17 @@
                     }
                 });
             });
+
+            const initialServiceConcept = $('#serviceConceptCode').val();
+            const initialSelectedText = $('#serviceConceptCode').find('option:selected').text().trim();
+
+            if (initialServiceConcept) {
+                toggleChangeKitFieldFixed(initialServiceConcept, initialSelectedText);
+            } else {
+                toggleChangeKitFieldFixed('', '');
+            }
+
             updateStepper();
-            $('#serviceConceptCode').trigger('change');
         });
     </script>
 }
