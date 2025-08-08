@@ -239,6 +239,7 @@
                                                 <div class="invalid-feedback">⚠ Este campo es requerido</div>
                                                 <div class="valid-feedback">✓ Correcto</div>
                                             </div>
+                                            <input type="hidden" id="destinationClientIdHidden" name="DestinationClientCode" disabled />
                                             <span asp-validation-for="DestinationClientCode" class="text-danger"></span>
                                         </div>
                                         <div class="col-12 col-lg-6">
@@ -582,6 +583,23 @@
                 validateField($element);
             }
 
+            function isLockedConcept(code) {
+                return ['RC', 'PV', 'PR', 'ET'].includes(code);
+            }
+
+            function syncDestinationClient() {
+                const conceptCode = $('#serviceConceptCode').val();
+                const originVal = $('#originClientId').val();
+
+                if (isLockedConcept(conceptCode)) {
+                    $('#destinationClientId').val(originVal).prop('disabled', true).trigger('change');
+                    $('#destinationClientIdHidden').val(originVal).prop('disabled', false);
+                } else {
+                    $('#destinationClientId').prop('disabled', false);
+                    $('#destinationClientIdHidden').prop('disabled', true);
+                }
+            }
+
         // Reemplaza esta función completa
         async function loadAndFillLocationDropdown(clientIdSelector, typeSelector, codeSelector, serviceConceptCode) {
             const clientId = $(clientIdSelector).val();
@@ -744,6 +762,7 @@
 
                 loadAndFillLocationDropdown('#originClientId', '#originType', '#originCode', serviceConceptCode);
                 loadAndFillLocationDropdown('#destinationClientId', '#destinationType', '#destinationCode', serviceConceptCode);
+                syncDestinationClient();
             });
 
             $('#originClientId').on('change', function() {
@@ -752,6 +771,7 @@
                             loadAndFillLocationDropdown('#originClientId', '#destinationType', '#destinationCode', $('#serviceConceptCode').val());
 
                 });
+                syncDestinationClient();
             });
 
             $('#originType').on('change', function() {
@@ -775,6 +795,7 @@
 
             $('.calculate-total-declared').on('input', calculateTotalDeclared);
             calculateTotalDeclared();
+            syncDestinationClient();
 
             // Lógica para mostrar/ocultar la sección de fallo
             $('#isFailedSwitch').on('change', function() {
