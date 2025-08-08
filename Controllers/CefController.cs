@@ -362,8 +362,7 @@ namespace VCashApp.Controllers
             viewModel.AvailableClients = await _cefServiceCreationService.GetClientsForDropdownAsync();
             viewModel.AvailableCities = await _context.AdmCiudades.Where(c => c.Estado).Select(c => new SelectListItem { Value = c.CodCiudad.ToString(), Text = c.NombreCiudad }).ToListAsync();
             //viewModel.AvailableRanks = await _context.AdmRangos.Where(r => r.RangoEstado == 1).Select(r => new SelectListItem { Value = r.CodRango, Text = r.InfoRangoAtencion }).ToListAsync();
-            viewModel.AvailableEmployees = new List<SelectListItem>(); 
-
+            viewModel.AvailableEmployees = new List<SelectListItem>();
             viewModel.AvailableVehicles = new List<SelectListItem>();
             viewModel.AvailableServiceModalities = new List<SelectListItem>();
 
@@ -850,6 +849,23 @@ namespace VCashApp.Controllers
             }
 
             return Json(ServiceResult.SuccessResult("Detalles obtenidos.", details));
+        }
+
+        /// <summary>
+        /// Obtiene usuarios responsables de entrega o recepción según concepto y sucursal.
+        /// </summary>
+        /// <param name="branchId">ID de la sucursal seleccionada.</param>
+        /// <param name="serviceConceptCode">Código del concepto del servicio.</param>
+        /// <param name="isDelivery">True para lista de entrega, false para recepción.</param>
+        /// <returns>JSON con lista de SelectListItem.</returns>
+        [HttpGet("GetResponsibleUsers")]
+        public async Task<IActionResult> GetResponsibleUsers(int branchId, string serviceConceptCode, bool isDelivery)
+        {
+            var currentUser = await GetCurrentApplicationUserAsync();
+            if (currentUser == null) return Unauthorized();
+
+            var items = await _cefServiceCreationService.GetResponsibleUsersForDropdownAsync(branchId, serviceConceptCode, isDelivery, currentUser.Id);
+            return Json(items);
         }
 
         /// <summary>

@@ -11,6 +11,7 @@
         </div>
         <div class="card-body">
             <form id="cgsServiceForm" asp-action="Create" asp-controller="Service" method="post" novalidate>
+                <input type="hidden" asp-for="KeyValue" />
                 @Html.AntiForgeryToken()
                 <input type="hidden" asp-for="KeyValue" />
                 <div asp-validation-summary="ModelOnly" class="text-danger"></div>
@@ -53,7 +54,7 @@
                                         <div class="col-12 col-lg-6">
                                             <div class="form-floating has-validation">
                                                 <input asp-for="RequestNumber" class="form-control" placeholder="Número de Pedido" required aria-required="true" />
-                                                <label for="clientOrderNumber" class="required">Número de Pedido</label>
+                                                <label for="RequestNumber" class="required">Número de Pedido</label>
                                                 <div class="invalid-feedback">⚠ Este campo es requerido</div>
                                                 <div class="valid-feedback">✓ Correcto</div>
                                             </div>
@@ -62,7 +63,7 @@
                                         <div class="col-12 col-lg-6">
                                             <div class="form-floating">
                                                 <input asp-for="ClientServiceOrderCode" class="form-control" placeholder="Código Orden Servicio Cliente" />
-                                                <label for="clientServiceOrderCode">Código Orden Servicio Cliente</label>
+                                                <label for="ClientServiceOrderCode">Código Orden Servicio Cliente</label>
                                             </div>
                                             <span asp-validation-for="ClientServiceOrderCode" class="text-danger"></span>
                                         </div>
@@ -80,7 +81,7 @@
                                         <div class="col-12 col-lg-2">
                                             <div class="form-floating has-validation">
                                                 <input asp-for="RequestDate" type="date" class="form-control" placeholder="Fecha de Solicitud" required aria-required="true" />
-                                                <label for="requestDate" class="required">Fecha de Solicitud</label>
+                                                <label for="RequestDate" class="required">Fecha de Solicitud</label>
                                                 <div class="invalid-feedback">⚠ Este campo es requerido</div>
                                                 <div class="valid-feedback">✓ Correcto</div>
                                             </div>
@@ -89,7 +90,7 @@
                                         <div class="col-12 col-lg-2">
                                             <div class="form-floating has-validation">
                                                 <input asp-for="RequestTime" type="time" class="form-control" placeholder="Hora de Solicitud" required aria-required="true" />
-                                                <label for="requestTime" class="required">Hora de Solicitud</label>
+                                                <label for="RequestTime" class="required">Hora de Solicitud</label>
                                                 <div class="invalid-feedback">⚠ Este campo es requerido</div>
                                                 <div class="valid-feedback">✓ Correcto</div>
                                             </div>
@@ -98,7 +99,7 @@
                                         <div class="col-12 col-lg-2">
                                             <div class="form-floating has-validation">
                                                 <input asp-for="ProgrammingDate" type="date" class="form-control" placeholder="Fecha de Servicio" required aria-required="true" />
-                                                <label for="serviceDate" class="required">Fecha de Servicio</label>
+                                                <label for="ProgrammingDate" class="required">Fecha de Servicio</label>
                                                 <div class="invalid-feedback">⚠ Este campo es requerido</div>
                                                 <div class="valid-feedback">✓ Correcto</div>
                                             </div>
@@ -107,7 +108,7 @@
                                         <div class="col-12 col-lg-2">
                                             <div class="form-floating has-validation">
                                                 <input asp-for="ProgrammingTime" type="time" class="form-control" placeholder="Hora de Servicio" required aria-required="true" />
-                                                <label for="serviceTime" class="required">Hora de Servicio</label>
+                                                <label for="ProgrammingTime" class="required">Hora de Servicio</label>
                                                 <div class="invalid-feedback">⚠ Este campo es requerido</div>
                                                 <div class="valid-feedback">✓ Correcto</div>
                                             </div>
@@ -127,7 +128,7 @@
                                         <div class="col-12">
                                             <div class="form-floating">
                                                 <textarea asp-for="Observations" class="form-control" placeholder="Observaciones del Servicio" style="height: 100px;"></textarea>
-                                                <label for="serviceObservations">Observaciones del Servicio</label>
+                                                <label for="Observations">Observaciones del Servicio</label>
                                             </div>
                                             <span asp-validation-for="Observations" class="text-danger"></span>
                                         </div>
@@ -162,16 +163,10 @@
                                             </div>
                                             <span asp-validation-for="OriginClientCode" class="text-danger"></span>
                                         </div>
-                                        <div class="col-12 col-lg-6">
-                                            <div class="form-floating">
-                                                <input asp-for="OriginClientName" class="form-control" placeholder="Nombre Cliente Origen" readonly />
-                                                <label for="originClientName">Nombre Cliente Origen</label>
-                                            </div>
-                                        </div>
-                                        <div class="col-12 col-lg-4">
+                                        <div class="col-12 col-lg-2">
                                             <div class="form-floating has-validation">
                                                 <select asp-for="OriginIndicatorType" asp-items="Html.GetEnumSelectList<VCashApp.Enums.LocationTypeEnum>()" class="form-select" id="originType" required aria-required="true">
-                                                    <option value="">Seleccionar tipo origen...</option>
+                                                    <option value="originType">Seleccionar tipo origen...</option>
                                                 </select>
                                                 <label for="originType" class="required">Tipo Origen</label>
                                                 <div class="invalid-feedback">⚠ Este campo es requerido</div>
@@ -190,35 +185,29 @@
                                             </div>
                                             <span asp-validation-for="OriginPointCode" class="text-danger"></span>
                                         </div>
-                                        <div class="col-12 col-lg-4">
-                                            <div class="form-floating">
-                                                <input asp-for="OriginName" class="form-control" placeholder="Nombre Origen" readonly />
-                                                <label for="originName">Nombre Origen</label>
-                                            </div>
-                                        </div>
-                                        <div class="col-12 col-lg-6">
+                                        <div class="col-12 col-lg-3">
                                             <div class="form-floating">
                                                 <input asp-for="OriginCityName" class="form-control" placeholder="Ciudad Origen" readonly />
-                                                <label for="originCityName">Ciudad Origen</label>
+                                                <label for="OriginCityName">Ciudad Origen</label>
                                                 <input type="hidden" asp-for="OriginCityId" />
                                             </div>
                                         </div>
-                                        <div class="col-12 col-lg-6">
+                                        <div class="col-12 col-lg-3">
                                             <div class="form-floating">
-                                                <input asp-for="OriginBranchId" class="form-control" placeholder="Sucursal Origen" readonly />
-                                                <label for="originBranchId">Sucursal Origen</label>
+                                                <input asp-for="OriginBranchName" class="form-control" placeholder="Sucursal Origen" readonly />
+                                                <label for="OriginBranchName">Sucursal Origen</label>
                                             </div>
                                         </div>
-                                        <div class="col-12 col-lg-6">
+                                        <div class="col-12 col-lg-3">
                                             <div class="form-floating">
                                                 <input asp-for="OriginRangeCode" class="form-control" placeholder="Código Rango Origen" readonly />
-                                                <label for="originRangeCode">Código Rango Origen</label>
+                                                <label for="OriginRangeCode">Código Rango Origen</label>
                                             </div>
                                         </div>
-                                        <div class="col-12 col-lg-6">
+                                        <div class="col-12 col-lg-3">
                                             <div class="form-floating">
                                                 <input asp-for="OriginRangeDetails" class="form-control" placeholder="Detalles Rango Origen" readonly />
-                                                <label for="originRangeDetails">Detalles Rango Origen</label>
+                                                <label for="OriginRangeDetails">Detalles Rango Origen</label>
                                             </div>
                                         </div>
                                     </div>
@@ -242,13 +231,7 @@
                                             </div>
                                             <span asp-validation-for="DestinationClientCode" class="text-danger"></span>
                                         </div>
-                                        <div class="col-12 col-lg-6">
-                                            <div class="form-floating">
-                                                <input asp-for="DestinationClientName" class="form-control" placeholder="Nombre Cliente Destino" readonly />
-                                                <label for="destinationClientName">Nombre Cliente Destino</label>
-                                            </div>
-                                        </div>
-                                        <div class="col-12 col-lg-4">
+                                        <div class="col-12 col-lg-2">
                                             <div class="form-floating has-validation">
                                                 <select asp-for="DestinationIndicatorType" asp-items="Html.GetEnumSelectList<VCashApp.Enums.LocationTypeEnum>()" class="form-select" id="destinationType" required aria-required="true">
                                                     <option value="">Seleccionar tipo destino...</option>
@@ -270,35 +253,29 @@
                                             </div>
                                             <span asp-validation-for="DestinationPointCode" class="text-danger"></span>
                                         </div>
-                                        <div class="col-12 col-lg-4">
-                                            <div class="form-floating">
-                                                <input asp-for="DestinationName" class="form-control" placeholder="Nombre Destino" readonly />
-                                                <label for="destinationName">Nombre Destino</label>
-                                            </div>
-                                        </div>
-                                        <div class="col-12 col-lg-6">
+                                        <div class="col-12 col-lg-3">
                                             <div class="form-floating">
                                                 <input asp-for="DestinationCityName" class="form-control" placeholder="Ciudad Destino" readonly />
-                                                <label for="destinationCityName">Ciudad Destino</label>
+                                                <label for="DestinationCityName">Ciudad Destino</label>
                                                 <input type="hidden" asp-for="DestinationCityId" />
                                             </div>
                                         </div>
-                                        <div class="col-12 col-lg-6">
+                                        <div class="col-12 col-lg-3">
                                             <div class="form-floating">
-                                                <input asp-for="DestinationBranchId" class="form-control" placeholder="Sucursal Destino" readonly />
-                                                <label for="destinationBranchId">Sucursal Destino</label>
+                                                <input asp-for="DestinationBranchName" class="form-control" placeholder="Sucursal Destino" readonly />
+                                                <label for="DestinationBranchName">Sucursal Destino</label>
                                             </div>
                                         </div>
-                                        <div class="col-12 col-lg-6">
+                                        <div class="col-12 col-lg-3">
                                             <div class="form-floating">
                                                 <input asp-for="DestinationRangeCode" class="form-control" placeholder="Código Rango Destino" readonly />
-                                                <label for="destinationRangeCode">Código Rango Destino</label>
+                                                <label for="DestinationRangeCode">Código Rango Destino</label>
                                             </div>
                                         </div>
-                                        <div class="col-12 col-lg-6">
+                                        <div class="col-12 col-lg-3">
                                             <div class="form-floating">
                                                 <input asp-for="DestinationRangeDetails" class="form-control" placeholder="Detalles Rango Destino" readonly />
-                                                <label for="destinationRangeDetails">Detalles Rango Destino</label>
+                                                <label for="DestinationRangeDetails">Detalles Rango Destino</label>
                                             </div>
                                         </div>
                                     </div>
@@ -318,26 +295,33 @@
                                         <div class="col-12 col-lg-3" id="changeKitField">
                                             <div class="form-floating">
                                                 <input asp-for="NumberOfChangeKits" type="number" class="form-control" placeholder="Cantidad Kit de Cambio" />
-                                                <label for="exchangeKitCount">Cantidad Kit de Cambio</label>
+                                                <label for="NumberOfChangeKits">Cantidad Kit de Cambio</label>
                                             </div>
                                             <span asp-validation-for="NumberOfChangeKits" class="text-danger"></span>
                                         </div>
-                                    </div>
-                                    <div class="row g-3 mt-3">
-                                        <div class="col-12 col-lg-4">
+                                        <div class="col-12 col-lg-3">
+                                            <div class="form-floating">
+                                                <input asp-for="NumberOfCoinBags" type="number" class="form-control" placeholder="Cantidad Bolsa de Moneda" />
+                                                <label for="NumberOfCoinBags">Cantidad Bolsa de Moneda</label>
+                                            </div>
+                                            <span asp-validation-for="NumberOfCoinBags" class="text-danger"></span>
+                                        </div>
+                                        <div class="col-12 col-lg-3">
                                             <div class="form-floating">
                                                 <input asp-for="BillValue" type="number" step="1" class="form-control calculate-total-declared" placeholder="Valor Billetes Declarados" />
-                                                <label for="declaredBillValue">Valor Billetes Declarados</label>
+                                                <label for="BillValue">Valor Billetes Declarados</label>
                                             </div>
                                             <span asp-validation-for="BillValue" class="text-danger"></span>
                                         </div>
-                                        <div class="col-12 col-lg-4">
+                                        <div class="col-12 col-lg-3">
                                             <div class="form-floating">
                                                 <input asp-for="CoinValue" type="number" step="1" class="form-control calculate-total-declared" placeholder="Valor Monedas Declaradas" />
-                                                <label for="declaredCoinValue">Valor Monedas Declaradas</label>
+                                                <label for="CoinValue">Valor Monedas Declaradas</label>
                                             </div>
                                             <span asp-validation-for="CoinValue" class="text-danger"></span>
                                         </div>
+                                    </div>
+                                    <div class="row g-3 mt-3">
                                         <div class="col-12">
                                             <div class="calculation-panel mt-3">
                                                 <h6>💰 Resumen de Valores Declarados</h6>
@@ -383,7 +367,7 @@
                                 <div class="col-12">
                                     <div class="form-floating has-validation">
                                         <textarea asp-for="FailedReason" class="form-control" placeholder="Razón del Fallo" style="height: 100px;" required aria-required="true"></textarea>
-                                        <label for="failedReason" class="required">Razón del Fallo</label>
+                                        <label for="FailedReason" class="required">Razón del Fallo</label>
                                         <div class="invalid-feedback">⚠ Este campo es requerido</div>
                                         <div class="valid-feedback">✓ Correcto</div>
                                     </div>
@@ -404,13 +388,13 @@
                                 <div class="col-12 col-lg-6">
                                     <div class="form-floating">
                                         <input asp-for="CgsOperatorUserName" class="form-control" readonly />
-                                        <label for="registrationUserName">Usuario de Registro</label>
+                                        <label for="CgsOperatorUserName">Usuario de Registro</label>
                                     </div>
                                 </div>
                                 <div class="col-12 col-lg-6">
                                     <div class="form-floating">
                                         <input asp-for="OperatorIpAddress" class="form-control" readonly />
-                                        <label for="ipAddress">Dirección IP</label>
+                                        <label for="OperatorIpAddress">Dirección IP</label>
                                     </div>
                                 </div>
                             </div>
@@ -583,72 +567,47 @@
                 validateField($element);
             }
 
-        // Reemplaza esta función completa
-        async function loadAndFillLocationDropdown(clientIdSelector, typeSelector, codeSelector, serviceConceptCode) {
-            const clientId = $(clientIdSelector).val();
-            const type = $(typeSelector).val();
-            const branchId = $('#branchId').val();
-            const $codeDropdown = $(codeSelector);
+            async function loadAndFillLocationDropdown(clientIdSelector, typeSelector, codeSelector, serviceConceptCode) {
+                const clientId = $(clientIdSelector).val();
+                const type = $(typeSelector).val();
+                const branchId = $('#branchId').val();
+                const $codeDropdown = $(codeSelector);
 
-            showFieldLoading($codeDropdown);
+                showFieldLoading($codeDropdown);
 
-            const prefix = codeSelector.includes('Origin') ? 'Origin' : 'Destination';
-            $(`#${prefix}Name`).val('');
-            $(`#${prefix}CityName`).val('');
-            $(`#${prefix}CityId`).val('');
-            $(`#${prefix}BranchId`).val('');
-            $(`#${prefix}RangeCode`).val('');
-            $(`#${prefix}RangeDetails`).val('');
+                const prefix = codeSelector.includes('Origin') ? 'Origin' : 'Destination';
+                $(`#${prefix}CityName`).val('');
+                $(`#${prefix}BranchName`).val('');
+                $(`#${prefix}RangeCode`).val('');
+                $(`#${prefix}RangeDetails`).val('');
 
-            if (clientId && type) {
-                $codeDropdown.prop('disabled', false);
-                try {
-                    const data = await $.get('@Url.Action("GetPointsOrFundsForDropdown", "Cef")', {
-                        clientId: clientId,
-                        branchId: branchId,
-                        locationType: type,
-                        serviceConceptCode: serviceConceptCode
-                    });
-                    let options = '<option value="">-- Seleccionar --</option>';
-                    $.each(data, function (i, item) {
-                        options += `<option value="${item.value}">${item.text}</option>`;
-                    });
-                    $codeDropdown.html(options);
-                } catch (error) {
-                    console.error("Error al cargar ubicaciones:", error);
-                    $codeDropdown.html('<option value="">Error al cargar opciones</option>');
-                } finally {
+                if (clientId && type) {
+                    $codeDropdown.prop('disabled', false);
+                    try {
+                        const data = await $.get('@Url.Action("GetPointsOrFundsForDropdown", "Cef")', {
+                            clientId: clientId,
+                            branchId: branchId,
+                            locationType: type,
+                            serviceConceptCode: serviceConceptCode
+                        });
+                        let options = '<option value="">-- Seleccionar --</option>';
+                        $.each(data, function (i, item) {
+                            options += `<option value="${item.value}">${item.text}</option>`;
+                        });
+                        $codeDropdown.html(options);
+                    } catch (error) {
+                        console.error("Error al cargar ubicaciones:", error);
+                        $codeDropdown.html('<option value="">Error al cargar opciones</option>');
+                    } finally {
+                        hideFieldLoading($codeDropdown);
+                    }
+                } else {
+                    $codeDropdown.html('<option value="">-- Seleccionar --</option>');
                     hideFieldLoading($codeDropdown);
                 }
-            } else {
-                $codeDropdown.html('<option value="">-- Seleccionar --</option>');
-                hideFieldLoading($codeDropdown);
-            }
-        }
-
-            function loadClientName(clientId, clientNameFieldId, callback) {
-                if (clientId) {
-                    $.get('@Url.Action("GetClientName", "Cef")', { clientId: clientId }, function(data) {
-                        $(`#${clientNameFieldId}`).val(data.clientName);
-                        if (callback) {
-                            callback();
-                        }
-                    }).fail(function() {
-                        console.error("Error al cargar el nombre del cliente.");
-                        $(`#${clientNameFieldId}`).val('');
-                        if (callback) {
-                            callback();
-                        }
-                    });
-                } else {
-                    $(`#${clientNameFieldId}`).val('');
-                    if (callback) {
-                        callback();
-                    }
-                }
             }
 
-            async function loadLocationDetails(codeFieldId, nameFieldId, cityFieldId, cityIdFieldId, branchIdFieldId, rangeCodeFieldId, rangeDetailsFieldId, isOrigin) {
+            async function loadLocationDetails(codeFieldId, cityFieldId, branchFieldId, rangeCodeFieldId, rangeDetailsFieldId, isOrigin) {
                 const code = $(`#${codeFieldId}`).val();
                 const clientId = isOrigin ? $('#originClientId').val() : $('#destinationClientId').val();
                 const type = isOrigin ? $('#originType').val() : $('#destinationType').val();
@@ -656,50 +615,42 @@
                 if (code && clientId && type) {
                     const isPoint = (type === '0' || type === '1');
                     try {
-                        const response = await $.get('@Url.Action("GetLocationDetails", "Cef")', { code: code, clientId: clientId, isPoint: isPoint });
+                        const response = await $.get('@Url.Action("GetLocationDetails", "Service")', { code: code, clientId: clientId, isPoint: isPoint });
 
                         if (response && response.success && response.data) {
                             const data = response.data;
-                            $(`#${nameFieldId}`).val(data.name);
                             $(`#${cityFieldId}`).val(data.cityName);
-                            $(`#${cityIdFieldId}`).val(data.cityId);
-                            $(`#${branchIdFieldId}`).val(data.branchId);
+                            $(`#${branchFieldId}`).val(data.branchName);
                             $(`#${rangeCodeFieldId}`).val(data.rangeCode);
                             $(`#${rangeDetailsFieldId}`).val(data.rangeDetails);
                         } else {
-                            $(`#${nameFieldId}`).val('');
                             $(`#${cityFieldId}`).val('');
-                            $(`#${cityIdFieldId}`).val('');
-                            $(`#${branchIdFieldId}`).val('');
+                            $(`#${branchFieldId}`).val('');
                             $(`#${rangeCodeFieldId}`).val('');
                             $(`#${rangeDetailsFieldId}`).val('');
                         }
                     } catch (error) {
                         console.error("Error cargando detalles de ubicación:", error);
                         Swal.fire('Error', 'No se pudieron cargar los detalles de la ubicación.', 'error');
-                        $(`#${nameFieldId}`).val('');
                         $(`#${cityFieldId}`).val('');
-                        $(`#${cityIdFieldId}`).val('');
-                        $(`#${branchIdFieldId}`).val('');
+                        $(`#${branchFieldId}`).val('');
                         $(`#${rangeCodeFieldId}`).val('');
                         $(`#${rangeDetailsFieldId}`).val('');
                     }
                 } else {
-                    $(`#${nameFieldId}`).val('');
                     $(`#${cityFieldId}`).val('');
-                    $(`#${cityIdFieldId}`).val('');
-                    $(`#${branchIdFieldId}`).val('');
+                    $(`#${branchFieldId}`).val('');
                     $(`#${rangeCodeFieldId}`).val('');
                     $(`#${rangeDetailsFieldId}`).val('');
                 }
             }
 
             function loadOriginLocationDetails() {
-                loadLocationDetails('originCode', 'OriginName', 'OriginCityName', 'OriginCityId', 'OriginBranchId', 'OriginRangeCode', 'OriginRangeDetails', true);
+                loadLocationDetails('originCode', 'OriginCityName', 'OriginBranchName', 'OriginRangeCode', 'OriginRangeDetails', true);
             }
 
             function loadDestinationLocationDetails() {
-                loadLocationDetails('destinationCode', 'DestinationName', 'DestinationCityName', 'DestinationCityId', 'DestinationBranchId', 'DestinationRangeCode', 'DestinationRangeDetails', false);
+                loadLocationDetails('destinationCode', 'DestinationCityName', 'DestinationBranchName', 'DestinationRangeCode', 'DestinationRangeDetails', false);
             }
 
             function calculateTotalDeclared() {
@@ -726,8 +677,6 @@
 
             $('#serviceConceptCode').on('change', function() {
                 const serviceConceptCode = $(this).val();
-                const originClientId = $('#originClientId').val();
-                const destinationClientId = $('#destinationClientId').val();
 
                 const isAtmConcept = (serviceConceptCode === 'PR' || serviceConceptCode === 'ET');
                 const isCollectionConcept = (serviceConceptCode === 'RC' || serviceConceptCode === 'PV');
@@ -750,26 +699,11 @@
                 loadAndFillLocationDropdown('#destinationClientId', '#destinationType', '#destinationCode', serviceConceptCode);
             });
 
-            $('#originClientId').on('change', function() {
-                const clientId = $(this).val();
-                loadClientName(clientId, 'OriginClientName', function() {
-                            loadAndFillLocationDropdown('#originClientId', '#destinationType', '#destinationCode', $('#serviceConceptCode').val());
-
-                });
-            });
-
             $('#originType').on('change', function() {
                  loadAndFillLocationDropdown('#originClientId', '#originType', '#originCode', $('#serviceConceptCode').val());
             });
 
             $('#originCode').on('change', loadOriginLocationDetails);
-
-            $('#destinationClientId').on('change', function() {
-                const clientId = $(this).val();
-                loadClientName(clientId, 'DestinationClientName', function() {
-                loadAndFillLocationDropdown('#destinationClientId', '#destinationType', '#destinationCode', $('#serviceConceptCode').val());
-                });
-            });
 
             $('#destinationType').on('change', function() {
                 loadAndFillLocationDropdown('#destinationClientId', '#destinationType', '#destinationCode', $('#serviceConceptCode').val());

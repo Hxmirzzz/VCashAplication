@@ -83,11 +83,11 @@ namespace VCashApp.Models.ViewModels.CentroEfectivo
         // Origin
         [Display(Name = "Tipo de Origen")]
         [Required(ErrorMessage = "El tipo de origen es requerido.")]
-        public LocationTypeEnum OriginType { get; set; } // Enum: Point, Fund. Used to derive CgsService.OriginIndicatorType
+        public LocationTypeEnum OriginType { get; set; }
 
         [Display(Name = "Código Cliente Origen")]
         [Required(ErrorMessage = "El código de cliente origen es requerido.")]
-        public int OriginClientId { get; set; } // Maps to CgsService.OriginClientCode
+        public int OriginClientId { get; set; }
 
         [Display(Name = "Nombre Cliente Origen")]
         [Required(ErrorMessage = "El nombre de cliente origen es requerido.")]
@@ -163,9 +163,8 @@ namespace VCashApp.Models.ViewModels.CentroEfectivo
 
         [Display(Name = "Cantidad de Kits de Cambio")]
         [Range(0, int.MaxValue, ErrorMessage = "Debe ser un número válido.")]
-        public int? ExchangeKitCount { get; set; } // Maps to CgsService.NumberOfChangeKits
+        public int? ExchangeKitCount { get; set; }
 
-        // Declared Quantities (initial for CefTransaction)
         [Display(Name = "Cantidad de Bolsas Declaradas")]
         [Required(ErrorMessage = "La cantidad de bolsas declaradas es requerida.")]
         [Range(0, int.MaxValue, ErrorMessage = "Debe ser un número válido.")]

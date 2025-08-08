@@ -364,6 +364,41 @@ namespace VCashApp.Services.Service
         }
 
         // --- MÉTODOS PARA POPULAR DROPDOWNS --
+        /// <inheritdoc/>
+        public async Task<object?> GetLocationDetailsByCodeAsync(string code, int clientId, bool isPoint)
+        {
+            if (isPoint)
+            {
+                var point = await _context.AdmPuntos
+                    .Include(p => p.City)
+                    .Include(p => p.Branch)
+                    .FirstOrDefaultAsync(p => p.PointCode == code && p.ClientCode == clientId);
+
+                return point != null ? new
+                {
+                    cityName = point.City?.NombreCiudad,
+                    branchName = point.Branch?.NombreSucursal,
+                    rangeCode = point.RangeCode ?? "N/A",
+                    rangeDetails = point.RangeAttentionInfo ?? "N/A"
+                } : null;
+            }
+            else // Es un fondo
+            {
+                var fund = await _context.AdmFondos
+                    .Include(f => f.City)
+                    .Include(f => f.Branch)
+                    .FirstOrDefaultAsync(f => f.FundCode == code && f.ClientCode == clientId);
+
+                return fund != null ? new
+                {
+                    cityName = fund.City?.NombreCiudad,
+                    branchName = fund.Branch?.NombreSucursal,
+                    rangeCode = "N/A",
+                    rangeDetails = "N/A"
+                } : null;
+            }
+        }
+
         /// <summary>
         /// Obtiene las opciones de cliente del servicio para los dropdowns.
         /// </summary>
