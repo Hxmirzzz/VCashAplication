@@ -11,6 +11,7 @@
         </div>
         <div class="card-body">
             <form id="cgsServiceForm" asp-action="Create" asp-controller="Service" method="post" novalidate>
+                <input type="hidden" asp-for="KeyValue" />
                 @Html.AntiForgeryToken()
                 <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
@@ -161,12 +162,6 @@
                                             </div>
                                             <span asp-validation-for="OriginClientCode" class="text-danger"></span>
                                         </div>
-                                        <div class="col-12 col-lg-6">
-                                            <div class="form-floating">
-                                                <input asp-for="OriginClientName" class="form-control" placeholder="Nombre Cliente Origen" readonly />
-                                                <label for="originClientName">Nombre Cliente Origen</label>
-                                            </div>
-                                        </div>
                                         <div class="col-12 col-lg-4">
                                             <div class="form-floating has-validation">
                                                 <select asp-for="OriginIndicatorType" asp-items="Html.GetEnumSelectList<VCashApp.Enums.LocationTypeEnum>()" class="form-select" id="originType" required aria-required="true">
@@ -189,12 +184,6 @@
                                             </div>
                                             <span asp-validation-for="OriginPointCode" class="text-danger"></span>
                                         </div>
-                                        <div class="col-12 col-lg-4">
-                                            <div class="form-floating">
-                                                <input asp-for="OriginName" class="form-control" placeholder="Nombre Origen" readonly />
-                                                <label for="originName">Nombre Origen</label>
-                                            </div>
-                                        </div>
                                         <div class="col-12 col-lg-6">
                                             <div class="form-floating">
                                                 <input asp-for="OriginCityName" class="form-control" placeholder="Ciudad Origen" readonly />
@@ -204,8 +193,8 @@
                                         </div>
                                         <div class="col-12 col-lg-6">
                                             <div class="form-floating">
-                                                <input asp-for="OriginBranchId" class="form-control" placeholder="Sucursal Origen" readonly />
-                                                <label for="originBranchId">Sucursal Origen</label>
+                                                <input asp-for="OriginBranchName" class="form-control" placeholder="Sucursal Origen" readonly />
+                                                <label for="OriginBranchName">Sucursal Origen</label>
                                             </div>
                                         </div>
                                         <div class="col-12 col-lg-6">
@@ -242,12 +231,6 @@
                                             <input type="hidden" id="destinationClientIdHidden" name="DestinationClientCode" disabled />
                                             <span asp-validation-for="DestinationClientCode" class="text-danger"></span>
                                         </div>
-                                        <div class="col-12 col-lg-6">
-                                            <div class="form-floating">
-                                                <input asp-for="DestinationClientName" class="form-control" placeholder="Nombre Cliente Destino" readonly />
-                                                <label for="destinationClientName">Nombre Cliente Destino</label>
-                                            </div>
-                                        </div>
                                         <div class="col-12 col-lg-4">
                                             <div class="form-floating has-validation">
                                                 <select asp-for="DestinationIndicatorType" asp-items="Html.GetEnumSelectList<VCashApp.Enums.LocationTypeEnum>()" class="form-select" id="destinationType" required aria-required="true">
@@ -270,12 +253,6 @@
                                             </div>
                                             <span asp-validation-for="DestinationPointCode" class="text-danger"></span>
                                         </div>
-                                        <div class="col-12 col-lg-4">
-                                            <div class="form-floating">
-                                                <input asp-for="DestinationName" class="form-control" placeholder="Nombre Destino" readonly />
-                                                <label for="destinationName">Nombre Destino</label>
-                                            </div>
-                                        </div>
                                         <div class="col-12 col-lg-6">
                                             <div class="form-floating">
                                                 <input asp-for="DestinationCityName" class="form-control" placeholder="Ciudad Destino" readonly />
@@ -285,8 +262,8 @@
                                         </div>
                                         <div class="col-12 col-lg-6">
                                             <div class="form-floating">
-                                                <input asp-for="DestinationBranchId" class="form-control" placeholder="Sucursal Destino" readonly />
-                                                <label for="destinationBranchId">Sucursal Destino</label>
+                                                <input asp-for="DestinationBranchName" class="form-control" placeholder="Sucursal Destino" readonly />
+                                                <label for="DestinationBranchName">Sucursal Destino</label>
                                             </div>
                                         </div>
                                         <div class="col-12 col-lg-6">
@@ -443,6 +420,34 @@
             const $prevButton = $('button[data-step-action="prev"]');
             const $submitFinalButton = $('button[data-step-action="submit-final"]');
 
+            function toggleChangeKitFieldFixed(selectedValue, selectedText) {
+                const $changeKitSection = $('#NumberOfChangeKits').closest('.col-12.col-lg-3');
+                const $changeKitInput = $('#NumberOfChangeKits');
+                const hideFieldValues = ['1', '4'];
+                const showFieldValues = ['3', '2'];
+
+                let shouldShow = false;
+
+                if (hideFieldValues.includes(selectedValue)) {
+                    shouldShow = false;
+                } else if (showFieldValues.includes(selectedValue)) {
+                    shouldShow = true;
+                } else {
+                    shouldShow = false;
+                }
+
+                if (shouldShow) {
+                    $changeKitSection.css('display', 'block').show();
+                } else {
+                    $changeKitSection.css('display', 'none').hide();
+                    $changeKitInput.prop('required', false);
+                    $changeKitInput.removeClass('is-invalid is-valid');
+                    $changeKitInput.val('');
+                    $changeKitInput.siblings('.invalid-feedback, .valid-feedback').hide();
+                    $changeKitInput.siblings('.text-danger').text('');
+                }
+            }
+
             function updateStepper() {
                 $('.progress-stepper .step').removeClass('active completed');
                 for (let i = 1; i <= totalSteps; i++) {
@@ -584,7 +589,7 @@
             }
 
             function isLockedConcept(code) {
-                return ['RC', 'PV', 'PR', 'ET'].includes(code);
+                return ['1', '2', '3', '4'].includes(code);
             }
 
             function syncDestinationClient() {
@@ -600,8 +605,7 @@
                 }
             }
 
-        // Reemplaza esta función completa
-        async function loadAndFillLocationDropdown(clientIdSelector, typeSelector, codeSelector, serviceConceptCode) {
+            async function loadAndFillLocationDropdown(clientIdSelector, typeSelector, codeSelector, serviceConceptCode) {
             const clientId = $(clientIdSelector).val();
             const type = $(typeSelector).val();
             const branchId = $('#branchId').val();
@@ -610,10 +614,9 @@
             showFieldLoading($codeDropdown);
 
             const prefix = codeSelector.includes('Origin') ? 'Origin' : 'Destination';
-            $(`#${prefix}Name`).val('');
             $(`#${prefix}CityName`).val('');
             $(`#${prefix}CityId`).val('');
-            $(`#${prefix}BranchId`).val('');
+            $(`#${prefix}BranchName`).val('');
             $(`#${prefix}RangeCode`).val('');
             $(`#${prefix}RangeDetails`).val('');
 
@@ -643,29 +646,7 @@
             }
         }
 
-            function loadClientName(clientId, clientNameFieldId, callback) {
-                if (clientId) {
-                    $.get('@Url.Action("GetClientName", "Cef")', { clientId: clientId }, function(data) {
-                        $(`#${clientNameFieldId}`).val(data.clientName);
-                        if (callback) {
-                            callback();
-                        }
-                    }).fail(function() {
-                        console.error("Error al cargar el nombre del cliente.");
-                        $(`#${clientNameFieldId}`).val('');
-                        if (callback) {
-                            callback();
-                        }
-                    });
-                } else {
-                    $(`#${clientNameFieldId}`).val('');
-                    if (callback) {
-                        callback();
-                    }
-                }
-            }
-
-            async function loadLocationDetails(codeFieldId, nameFieldId, cityFieldId, cityIdFieldId, branchIdFieldId, rangeCodeFieldId, rangeDetailsFieldId, isOrigin) {
+            async function loadLocationDetails(codeFieldId, cityFieldId, branchFieldId, rangeCodeFieldId, rangeDetailsFieldId, isOrigin) {
                 const code = $(`#${codeFieldId}`).val();
                 const clientId = isOrigin ? $('#originClientId').val() : $('#destinationClientId').val();
                 const type = isOrigin ? $('#originType').val() : $('#destinationType').val();
@@ -673,50 +654,62 @@
                 if (code && clientId && type) {
                     const isPoint = (type === '0' || type === '1');
                     try {
-                        const response = await $.get('@Url.Action("GetLocationDetails", "Cef")', { code: code, clientId: clientId, isPoint: isPoint });
+                        const response = await $.get('@Url.Action("GetLocationDetails", "Service")', { code: code, clientId: clientId, isPoint: isPoint });
 
                         if (response && response.success && response.data) {
                             const data = response.data;
-                            $(`#${nameFieldId}`).val(data.name);
                             $(`#${cityFieldId}`).val(data.cityName);
-                            $(`#${cityIdFieldId}`).val(data.cityId);
-                            $(`#${branchIdFieldId}`).val(data.branchId);
+                            $(`#${branchFieldId}`).val(data.branchName);
                             $(`#${rangeCodeFieldId}`).val(data.rangeCode);
                             $(`#${rangeDetailsFieldId}`).val(data.rangeDetails);
+                            if (isOrigin) {
+                                $('#OriginCityId').val(data.cityId);
+                            } else {
+                                $('#DestinationCityId').val(data.cityId);
+                            }
                         } else {
-                            $(`#${nameFieldId}`).val('');
                             $(`#${cityFieldId}`).val('');
-                            $(`#${cityIdFieldId}`).val('');
-                            $(`#${branchIdFieldId}`).val('');
+                            $(`#${branchFieldId}`).val('');
                             $(`#${rangeCodeFieldId}`).val('');
                             $(`#${rangeDetailsFieldId}`).val('');
+                            if (isOrigin) {
+                                $('#OriginCityId').val('');
+                            } else {
+                                $('#DestinationCityId').val('');
+                            }
                         }
                     } catch (error) {
                         console.error("Error cargando detalles de ubicación:", error);
                         Swal.fire('Error', 'No se pudieron cargar los detalles de la ubicación.', 'error');
-                        $(`#${nameFieldId}`).val('');
                         $(`#${cityFieldId}`).val('');
-                        $(`#${cityIdFieldId}`).val('');
-                        $(`#${branchIdFieldId}`).val('');
+                        $(`#${branchFieldId}`).val('');
                         $(`#${rangeCodeFieldId}`).val('');
                         $(`#${rangeDetailsFieldId}`).val('');
+                        if (isOrigin) {
+                            $('#OriginCityId').val('');
+                        } else {
+                            $('#DestinationCityId').val('');
+                        }
                     }
                 } else {
-                    $(`#${nameFieldId}`).val('');
                     $(`#${cityFieldId}`).val('');
-                    $(`#${cityIdFieldId}`).val('');
-                    $(`#${branchIdFieldId}`).val('');
+                    $(`#${branchFieldId}`).val('');
                     $(`#${rangeCodeFieldId}`).val('');
                     $(`#${rangeDetailsFieldId}`).val('');
+                    if (isOrigin) {
+                        $('#OriginCityId').val('');
+                    } else {
+                        $('#DestinationCityId').val('');
+                    }
                 }
             }
 
             function loadOriginLocationDetails() {
-                loadLocationDetails('originCode', 'OriginName', 'OriginCityName', 'OriginCityId', 'OriginBranchId', 'OriginRangeCode', 'OriginRangeDetails', true);
+                loadLocationDetails('originCode', 'OriginCityName', 'OriginBranchName', 'OriginRangeCode', 'OriginRangeDetails', true);
             }
 
             function loadDestinationLocationDetails() {
-                loadLocationDetails('destinationCode', 'DestinationName', 'DestinationCityName', 'DestinationCityId', 'DestinationBranchId', 'DestinationRangeCode', 'DestinationRangeDetails', false);
+                loadLocationDetails('destinationCode', 'DestinationCityName', 'DestinationBranchName', 'DestinationRangeCode', 'DestinationRangeDetails', false);
             }
 
             function calculateTotalDeclared() {
@@ -737,17 +730,16 @@
                 }
 
                 if ($('#destinationClientId').val()) {
-                    loadAndFillLocationDropdown('#originClientId', '#originType', '#originCode', $('#serviceConceptCode').val());
+                    loadAndFillLocationDropdown('#destinationClientId', '#destinationType', '#destinationCode', $('#serviceConceptCode').val());
                 }
             });
 
             $('#serviceConceptCode').on('change', function() {
                 const serviceConceptCode = $(this).val();
-                const originClientId = $('#originClientId').val();
-                const destinationClientId = $('#destinationClientId').val();
+                const selectedText = $(this).find('option:selected').text().trim();
 
-                const isAtmConcept = (serviceConceptCode === 'PR' || serviceConceptCode === 'ET');
-                const isCollectionConcept = (serviceConceptCode === 'RC' || serviceConceptCode === 'PV');
+                const isAtmConcept = (serviceConceptCode === '3' || serviceConceptCode === '4');
+                const isCollectionConcept = (serviceConceptCode === '1' || serviceConceptCode === '2');
 
                 if (isCollectionConcept) {
                     $('#originType').val('@(nameof(VCashApp.Enums.LocationTypeEnum.Punto))');
@@ -760,17 +752,15 @@
                     $('#destinationType').val('');
                 }
 
+                toggleChangeKitFieldFixed(serviceConceptCode, selectedText);
+
                 loadAndFillLocationDropdown('#originClientId', '#originType', '#originCode', serviceConceptCode);
                 loadAndFillLocationDropdown('#destinationClientId', '#destinationType', '#destinationCode', serviceConceptCode);
                 syncDestinationClient();
             });
 
             $('#originClientId').on('change', function() {
-                const clientId = $(this).val();
-                loadClientName(clientId, 'OriginClientName', function() {
-                            loadAndFillLocationDropdown('#originClientId', '#destinationType', '#destinationCode', $('#serviceConceptCode').val());
-
-                });
+                loadAndFillLocationDropdown('#originClientId', '#originType', '#originCode', $('#serviceConceptCode').val());
                 syncDestinationClient();
             });
 
@@ -781,10 +771,7 @@
             $('#originCode').on('change', loadOriginLocationDetails);
 
             $('#destinationClientId').on('change', function() {
-                const clientId = $(this).val();
-                loadClientName(clientId, 'DestinationClientName', function() {
                 loadAndFillLocationDropdown('#destinationClientId', '#destinationType', '#destinationCode', $('#serviceConceptCode').val());
-                });
             });
 
             $('#destinationType').on('change', function() {
@@ -796,6 +783,15 @@
             $('.calculate-total-declared').on('input', calculateTotalDeclared);
             calculateTotalDeclared();
             syncDestinationClient();
+
+            const initialServiceConcept = $('#serviceConceptCode').val();
+            const initialSelectedText = $('#serviceConceptCode').find('option:selected').text().trim();
+
+            if (initialServiceConcept) {
+                toggleChangeKitFieldFixed(initialServiceConcept, initialSelectedText);
+            } else {
+                toggleChangeKitFieldFixed('', '');
+            }
 
             // Lógica para mostrar/ocultar la sección de fallo
             $('#isFailedSwitch').on('change', function() {
