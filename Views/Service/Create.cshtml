@@ -13,7 +13,6 @@
             <form id="cgsServiceForm" asp-action="Create" asp-controller="Service" method="post" novalidate>
                 <input type="hidden" asp-for="KeyValue" />
                 @Html.AntiForgeryToken()
-                <input type="hidden" asp-for="KeyValue" />
                 <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
                 <div class="progress-stepper" id="progressStepper">
@@ -163,8 +162,8 @@
                                             </div>
                                             <span asp-validation-for="OriginClientCode" class="text-danger"></span>
                                         </div>
-                                        <div class="col-12 col-lg-2">                                            
-                                          <div class="form-floating has-validation">
+                                        <div class="col-12 col-lg-2">
+                                            <div class="form-floating has-validation">
                                                 <select asp-for="OriginIndicatorType" asp-items="Html.GetEnumSelectList<VCashApp.Enums.LocationTypeEnum>()" class="form-select" id="originType" required aria-required="true">
                                                     <option value="originType">Seleccionar tipo origen...</option>
                                                 </select>
@@ -444,6 +443,7 @@
                     shouldShow = false;
                 }
 
+                // Aplicar la lógica de mostrar/ocultar
                 if (shouldShow) {
                     $changeKitSection.css('display', 'block').show();
                 } else {
@@ -623,7 +623,6 @@
 
                 const prefix = codeSelector.includes('Origin') ? 'Origin' : 'Destination';
                 $(`#${prefix}CityName`).val('');
-                $(`#${prefix}CityId`).val('');
                 $(`#${prefix}BranchName`).val('');
                 $(`#${prefix}RangeCode`).val('');
                 $(`#${prefix}RangeDetails`).val('');
@@ -670,21 +669,11 @@
                             $(`#${branchFieldId}`).val(data.branchName);
                             $(`#${rangeCodeFieldId}`).val(data.rangeCode);
                             $(`#${rangeDetailsFieldId}`).val(data.rangeDetails);
-                            if (isOrigin) {
-                                $('#OriginCityId').val(data.cityId);
-                            } else {
-                                $('#DestinationCityId').val(data.cityId);
-                            }
                         } else {
                             $(`#${cityFieldId}`).val('');
                             $(`#${branchFieldId}`).val('');
                             $(`#${rangeCodeFieldId}`).val('');
                             $(`#${rangeDetailsFieldId}`).val('');
-                            if (isOrigin) {
-                                $('#OriginCityId').val('');
-                            } else {
-                                $('#DestinationCityId').val('');
-                            }
                         }
                     } catch (error) {
                         console.error("Error cargando detalles de ubicación:", error);
@@ -693,22 +682,12 @@
                         $(`#${branchFieldId}`).val('');
                         $(`#${rangeCodeFieldId}`).val('');
                         $(`#${rangeDetailsFieldId}`).val('');
-                        if (isOrigin) {
-                            $('#OriginCityId').val('');
-                        } else {
-                            $('#DestinationCityId').val('');
-                        }
                     }
                 } else {
                     $(`#${cityFieldId}`).val('');
                     $(`#${branchFieldId}`).val('');
                     $(`#${rangeCodeFieldId}`).val('');
                     $(`#${rangeDetailsFieldId}`).val('');
-                    if (isOrigin) {
-                        $('#OriginCityId').val('');
-                    } else {
-                        $('#DestinationCityId').val('');
-                    }
                 }
             }
 
@@ -765,6 +744,7 @@
                 loadAndFillLocationDropdown('#originClientId', '#originType', '#originCode', serviceConceptCode);
                 loadAndFillLocationDropdown('#destinationClientId', '#destinationType', '#destinationCode', serviceConceptCode);
                 syncDestinationClient();
+
             });
 
             $('#originClientId').on('change', function() {
@@ -911,16 +891,6 @@
                     }
                 });
             });
-
-            const initialServiceConcept = $('#serviceConceptCode').val();
-            const initialSelectedText = $('#serviceConceptCode').find('option:selected').text().trim();
-
-            if (initialServiceConcept) {
-                toggleChangeKitFieldFixed(initialServiceConcept, initialSelectedText);
-            } else {
-                toggleChangeKitFieldFixed('', '');
-            }
-
             updateStepper();
         });
     </script>
