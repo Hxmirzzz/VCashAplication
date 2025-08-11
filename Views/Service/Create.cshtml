@@ -725,26 +725,55 @@
                 const serviceConceptCode = $(this).val();
                 const selectedText = $(this).find('option:selected').text().trim();
 
-                const isAtmConcept = (serviceConceptCode === '3' || serviceConceptCode === '4');
-                const isCollectionConcept = (serviceConceptCode === '1' || serviceConceptCode === '2');
+                $('#originType').val('');
+                $('#destinationType').val('');
 
-                if (isCollectionConcept) {
-                    $('#originType').val('@(nameof(VCashApp.Enums.LocationTypeEnum.Punto))');
-                    $('#destinationType').val('@(nameof(VCashApp.Enums.LocationTypeEnum.Fondo))');
-                } else if (isAtmConcept) {
-                    $('#originType').val('@(nameof(VCashApp.Enums.LocationTypeEnum.Fondo))');
-                    $('#destinationType').val('@(nameof(VCashApp.Enums.LocationTypeEnum.Punto))');
+                $('#originCode').html('<option value="">-- Seleccionar --</option>').prop('disabled', true);
+                $('#destinationCode').html('<option value="">-- Seleccionar --</option>').prop('disabled', true);
+
+                const isLockedConceptType = ['1', '2', '3', '4'].includes(serviceConceptCode);
+
+                // Preseleccionar y bloquear tipos según el concepto
+                if (isLockedConceptType) {
+                    switch(serviceConceptCode) {
+                        case '1': // RECOLECCION OFICINAS
+                            $('#originType').val('0').prop('disabled', true); // Punto
+                            $('#destinationType').val('2').prop('disabled', true); // Fondo
+                            break;
+
+                        case '2': // PROVISION OFICINAS
+                            $('#originType').val('2').prop('disabled', true); // Fondo
+                            $('#destinationType').val('0').prop('disabled', true); // Punto
+                            break;
+
+                        case '3': // PROVISION ATM
+                            $('#originType').val('2').prop('disabled', true); // Fondo
+                            $('#destinationType').val('1').prop('disabled', true); // ATM
+                            break;
+
+                        case '4': // ENTULE ATM
+                            $('#originType').val('1').prop('disabled', true); // ATM
+                            $('#destinationType').val('2').prop('disabled', true); // Fondo
+                            break;
+                    }
                 } else {
-                    $('#originType').val('');
-                    $('#destinationType').val('');
+                    $('#originType').prop('disabled', false);
+                    $('#destinationType').prop('disabled', false);
                 }
+
+                $('#originType').trigger('change');
+                $('#destinationType').trigger('change');
 
                 toggleChangeKitFieldFixed(serviceConceptCode, selectedText);
 
-                loadAndFillLocationDropdown('#originClientId', '#originType', '#originCode', serviceConceptCode);
-                loadAndFillLocationDropdown('#destinationClientId', '#destinationType', '#destinationCode', serviceConceptCode);
-                syncDestinationClient();
+                if ($('#originClientId').val()) {
+                    loadAndFillLocationDropdown('#originClientId', '#originType', '#originCode', serviceConceptCode);
+                }
+                if ($('#destinationClientId').val()) {
+                    loadAndFillLocationDropdown('#destinationClientId', '#destinationType', '#destinationCode', serviceConceptCode);
+                }
 
+                syncDestinationClient();
             });
 
             $('#originClientId').on('change', function() {
