@@ -61,7 +61,7 @@ namespace VCashApp.Models.Entities
 
         [Required]
         [Column("CodPuntoOrigen")]
-        [StringLength(25)]
+        [StringLength(255)]
         public string OriginPointCode { get; set; } = null!;
 
         [Required]

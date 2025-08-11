@@ -164,7 +164,7 @@
                                         </div>
                                         <div class="col-12 col-lg-2">
                                             <div class="form-floating has-validation">
-                                                <select asp-for="OriginIndicatorType" asp-items="Html.GetEnumSelectList<VCashApp.Enums.LocationTypeEnum>()" class="form-select" id="originType" required aria-required="true">
+                                                <select asp-for="OriginIndicatorType" asp-items="Model.AvailableOriginTypes" class="form-select" id="originType" required aria-required="true">
                                                     <option value="originType">Seleccionar tipo origen...</option>
                                                 </select>
                                                 <label for="originType" class="required">Tipo Origen</label>
@@ -233,7 +233,7 @@
                                         </div>
                                         <div class="col-12 col-lg-2">
                                             <div class="form-floating has-validation">
-                                                <select asp-for="DestinationIndicatorType" asp-items="Html.GetEnumSelectList<VCashApp.Enums.LocationTypeEnum>()" class="form-select" id="destinationType" required aria-required="true">
+                                                <select asp-for="DestinationIndicatorType" asp-items="Model.AvailableDestinationTypes" class="form-select" id="destinationType" required aria-required="true">
                                                     <option value="">Seleccionar tipo destino...</option>
                                                 </select>
                                                 <label for="destinationType" class="required">Tipo Destino</label>
@@ -600,6 +600,15 @@
                 return ['1', '2', '3', '4'].includes(code);
             }
 
+            function mapLocationTypeToNumber(type) {
+                switch(type) {
+                    case 'P': return 0; // Punto
+                    case 'A': return 1; // ATM
+                    case 'F': return 2; // Fondo
+                    default: return null;
+                }
+            }
+
             function syncDestinationClient() {
                 const conceptCode = $('#serviceConceptCode').val();
                 const originVal = $('#originClientId').val();
@@ -627,13 +636,16 @@
                 $(`#${prefix}RangeCode`).val('');
                 $(`#${prefix}RangeDetails`).val('');
 
-                if (clientId && type) {
+                // Mapea el tipo a número antes de enviarlo
+                const mappedType = mapLocationTypeToNumber(type);
+
+                if (clientId && mappedType !== null) {
                     $codeDropdown.prop('disabled', false);
                     try {
                         const data = await $.get('@Url.Action("GetPointsOrFundsForDropdown", "Cef")', {
                             clientId: clientId,
                             branchId: branchId,
-                            locationType: type,
+                            locationType: mappedType,
                             serviceConceptCode: serviceConceptCode
                         });
                         let options = '<option value="">-- Seleccionar --</option>';
@@ -721,6 +733,28 @@
                 }
             });
 
+            function setAndLockType(selector, value) {
+            $(selector).val(value).prop('disabled', true);
+                const name = $(selector).attr('name');
+                // Si no existe el hidden, lo agregas
+                if ($('input[type="hidden"][name="' + name + '"]').length === 0) {
+                    $('<input>').attr({
+                        type: 'hidden',
+                        name: name,
+                        value: value
+                    }).insertAfter(selector);
+                } else {
+                    // Si ya existe, solo actualizas el valor
+                    $('input[type="hidden"][name="' + name + '"]').val(value);
+                }
+            }
+
+            function unlockType(selector) {
+                $(selector).prop('disabled', false);
+                const name = $(selector).attr('name');
+                $('input[type="hidden"][name="' + name + '"]').remove();
+            }
+
             $('#serviceConceptCode').on('change', function() {
                 const serviceConceptCode = $(this).val();
                 const selectedText = $(this).find('option:selected').text().trim();
@@ -734,31 +768,27 @@
                 const isLockedConceptType = ['1', '2', '3', '4'].includes(serviceConceptCode);
 
                 // Preseleccionar y bloquear tipos según el concepto
-                if (isLockedConceptType) {
-                    switch(serviceConceptCode) {
-                        case '1': // RECOLECCION OFICINAS
-                            $('#originType').val('0').prop('disabled', true); // Punto
-                            $('#destinationType').val('2').prop('disabled', true); // Fondo
-                            break;
-
-                        case '2': // PROVISION OFICINAS
-                            $('#originType').val('2').prop('disabled', true); // Fondo
-                            $('#destinationType').val('0').prop('disabled', true); // Punto
-                            break;
-
-                        case '3': // PROVISION ATM
-                            $('#originType').val('2').prop('disabled', true); // Fondo
-                            $('#destinationType').val('1').prop('disabled', true); // ATM
-                            break;
-
-                        case '4': // ENTULE ATM
-                            $('#originType').val('1').prop('disabled', true); // ATM
-                            $('#destinationType').val('2').prop('disabled', true); // Fondo
-                            break;
-                    }
-                } else {
-                    $('#originType').prop('disabled', false);
-                    $('#destinationType').prop('disabled', false);
+                switch(serviceConceptCode) {
+                    case '1':
+                        setAndLockType('#originType', 'P');
+                        setAndLockType('#destinationType', 'F');
+                        break;
+                    case '2':
+                        setAndLockType('#originType', 'F');
+                        setAndLockType('#destinationType', 'P');
+                        break;
+                    case '3':
+                        setAndLockType('#originType', 'F');
+                        setAndLockType('#destinationType', 'A');
+                        break;
+                    case '4':
+                        setAndLockType('#originType', 'A');
+                        setAndLockType('#destinationType', 'F');
+                        break;
+                    default:
+                        unlockType('#originType');
+                        unlockType('#destinationType');
+                        break;
                 }
 
                 $('#originType').trigger('change');

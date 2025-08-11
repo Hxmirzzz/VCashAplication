@@ -1,10 +1,15 @@
-﻿namespace VCashApp.Enums
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace VCashApp.Enums
 {
     public enum LocationTypeEnum
     {
-        Punto,
-        ATM,
-        Fondo
+        [Display(Name = "Punto")]
+        Punto = 0,
+        [Display(Name = "ATM")]
+        ATM= 1,
+        [Display(Name = "Fondo")]
+        Fondo = 2
     }
 
     public enum CefTransactionTypeEnum

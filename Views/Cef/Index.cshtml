@@ -9,81 +9,77 @@
 }
 
 <div class="main-content-container">
-    <div class="alert-container">
-        @if (TempData["SuccessMessage"] != null)
-        {
-            <div class="alert alert-success mt-2" role="alert">@TempData["SuccessMessage"]</div>
-        }
-        @if (TempData["ErrorMessage"] != null)
-        {
-            <div class="alert alert-danger mt-2" role="alert">@TempData["ErrorMessage"]</div>
-        }
+    <div class="section-header">
+        <div class="alert-container">
+            @if (TempData["SuccessMessage"] != null)
+            {
+                <div class="alert alert-success mt-2" role="alert">@TempData["SuccessMessage"]</div>
+            }
+            @if (TempData["ErrorMessage"] != null)
+            {
+                <div class="alert alert-danger mt-2" role="alert">@TempData["ErrorMessage"]</div>
+            }
+        </div>
     </div>
 
-    <div class="card">
-        <div class="card-header">
-            <h4 class="mb-0">Centro de Efectivo</h4>
-        </div>
-        <div class="card-body">
-            <div class="table-controls mb-3">
-                <input type="text" id="tableSearch" class="form-control form-control-sm" placeholder="Buscar por Orden, Planilla, Divisa..." value="@currentSearchTerm">
-                <div class="table-buttons">
-                    <div class="control-button-wrapper">
-                        <!--TEMPORAL-->
-                        <a href="@Url.Action("CreateServiceAndCefTransaction", "Cef")" class="control-button-icon" id="addCefTransactionButton" title="Registrar Nuevo Check-in">
-                            <img src="/assets/icon-img/add.png" alt="Registrar Check-in">
-                        </a>
-                    </div>
-                    <div class="control-button-wrapper">
-                        <img src="/assets/icon-img/download.png" alt="Descargar" class="control-button-icon" id="downloadButton">
-                    </div>
-                    <div class="control-button-wrapper">
-                        <img src="/assets/icon-img/filter-on.png" alt="Filtros" class="control-button-icon" id="filterButton">
-                    </div>
+    <div class="search-container">
+        <div class="table-controls">
+            <input type="text" id="tableSearch" class="form-control form-control-sm" placeholder="Buscar por Orden, Planilla, Divisa..." value="@currentSearchTerm">
+            <div class="table-buttons">
+                <div class="control-button-wrapper">
+                    <!--TEMPORAL-->
+                    <a href="@Url.Action("CreateServiceAndCefTransaction", "Cef")" class="control-button-icon" id="addCefTransactionButton" title="Registrar Nuevo Check-in">
+                        <img src="/assets/icon-img/add.png" alt="Registrar Check-in">
+                    </a>
                 </div>
-            </div>
-            <div class="table-responsive">
-                <div id="dataTablePartial">
-                    @await Html.PartialAsync("_TransactionTablePartial", Model.Transactions, new ViewDataDictionary(ViewData))
+                <div class="control-button-wrapper">
+                    <img src="/assets/icon-img/download.png" alt="Descargar" class="control-button-icon" id="downloadButton">
+                </div>
+                <div class="control-button-wrapper">
+                    <img src="/assets/icon-img/filter-on.png" alt="Filtros" class="control-button-icon" id="filterButton">
                 </div>
             </div>
         </div>
     </div>
-</div>
 
-<div class="filter-sidebar" id="filterSidebar">
-    <div class="filter-sidebar-content">
-        <h3>Filtros Avanzados</h3>
+    <div class="filter-sidebar" id="filterSidebar">
+        <div class="filter-sidebar-content">
+            <h3>Filtros Avanzados</h3>
 
-        <div class="form-group">
-            <label for="filterBranchId">Sucursal:</label>
-            <select name="branchId" id="filterBranchId" class="form-control form-control-sm" asp-items="Model.AvailableBranches">
-                <option value="">-- Seleccionar Sucursal --</option>
-            </select>
-        </div>
+            <div class="form-group">
+                <label for="filterBranchId">Sucursal:</label>
+                <select name="branchId" id="filterBranchId" class="form-control form-control-sm" asp-items="Model.AvailableBranches">
+                    <option value="">-- Seleccionar Sucursal --</option>
+                </select>
+            </div>
 
-        <div class="form-group">
-            <label for="filterStartDate">Fecha Inicio:</label>
-            <input type="date" name="startDate" id="filterStartDate" class="form-control form-control-sm" value="@Model.CurrentStartDate?.ToString("yyyy-MM-dd")" />
-        </div>
+            <div class="form-group">
+                <label for="filterStartDate">Fecha Inicio:</label>
+                <input type="date" name="startDate" id="filterStartDate" class="form-control form-control-sm" value="@Model.CurrentStartDate?.ToString("yyyy-MM-dd")" />
+            </div>
 
-        <div class="form-group">
-            <label for="filterEndDate">Fecha Fin:</label>
-            <input type="date" name="endDate" id="filterEndDate" class="form-control form-control-sm" value="@Model.CurrentEndDate?.ToString("yyyy-MM-dd")" />
-        </div>
+            <div class="form-group">
+                <label for="filterEndDate">Fecha Fin:</label>
+                <input type="date" name="endDate" id="filterEndDate" class="form-control form-control-sm" value="@Model.CurrentEndDate?.ToString("yyyy-MM-dd")" />
+            </div>
 
-        <div class="form-group">
-            <label for="filterStatus">Estado:</label>
-            <select name="status" id="filterStatus" class="form-control form-control-sm" asp-items="Model.TransactionStatuses">
-                @* Las opciones ya incluyen "-- Seleccionar Estado --" desde el controlador *@
-            </select>
-        </div>
+            <div class="form-group">
+                <label for="filterStatus">Estado:</label>
+                <select name="status" id="filterStatus" class="form-control form-control-sm" asp-items="Model.TransactionStatuses">
+                    @* Las opciones ya incluyen "-- Seleccionar Estado --" desde el controlador *@
+                </select>
+            </div>
 
-        <div class="filter-buttons">
-            <div class="cancel-filter-btn" id="clearFilters">
-                <img src="~/assets/icon-img/filter-off.png" alt="Limpiar Filtros" title="Limpiar Filtros" />
+            <div class="filter-buttons">
+                <div class="cancel-filter-btn" id="clearFilters">
+                    <img src="~/assets/icon-img/filter-off.png" alt="Limpiar Filtros" title="Limpiar Filtros" />
+                </div>
             </div>
         </div>
+    </div>
+
+    <div id="dataTablePartial">
+        @await Html.PartialAsync("_TransactionTablePartial", Model.Transactions, new ViewDataDictionary(ViewData))
     </div>
 </div>
 

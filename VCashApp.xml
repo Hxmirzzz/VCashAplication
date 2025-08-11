@@ -1820,6 +1820,42 @@
         <member name="M:VCashApp.Migrations.SetFKToReceiverAndDelivered.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
             <inheritdoc />
         </member>
+        <member name="T:VCashApp.Migrations.SetNotNullToBranchIdOnCefTransactions">
+            <inheritdoc />
+        </member>
+        <member name="M:VCashApp.Migrations.SetNotNullToBranchIdOnCefTransactions.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:VCashApp.Migrations.SetNotNullToBranchIdOnCefTransactions.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:VCashApp.Migrations.SetNotNullToBranchIdOnCefTransactions.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="T:VCashApp.Migrations.SetNullCurrencyOnTransactionsTable">
+            <inheritdoc />
+        </member>
+        <member name="M:VCashApp.Migrations.SetNullCurrencyOnTransactionsTable.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:VCashApp.Migrations.SetNullCurrencyOnTransactionsTable.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:VCashApp.Migrations.SetNullCurrencyOnTransactionsTable.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="T:VCashApp.Migrations.Set255StringLengthToCodPuntoOrigenToFixCgsServiceModel">
+            <inheritdoc />
+        </member>
+        <member name="M:VCashApp.Migrations.Set255StringLengthToCodPuntoOrigenToFixCgsServiceModel.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:VCashApp.Migrations.Set255StringLengthToCodPuntoOrigenToFixCgsServiceModel.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:VCashApp.Migrations.Set255StringLengthToCodPuntoOrigenToFixCgsServiceModel.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
         <member name="T:VCashApp.Models.ViewModels.CentroEfectivo.CefContainerProcessingViewModel">
             <summary>
             ViewModel para la entrada de datos durante el conteo de un contenedor de efectivo.
@@ -2829,6 +2865,12 @@
             Obtiene las opciones de responsables al fallo del servicio para los dropdowns.
             </summary>
             <returns>Lista de SelectListItem para los responsables del fallo del servicio</returns>
+        </member>
+        <member name="M:VCashApp.Services.Service.CgsService.GetLocationTypeSelectList">
+            <summary>
+            Obtiene las opciones de tipo de ubicación para los dropdowns.
+            </summary>
+            <returns>Lista de SelectListItem para los tipos de ubicación</returns>
         </member>
         <member name="T:VCashApp.Services.UserService">
             <summary>

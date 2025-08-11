@@ -5,7 +5,7 @@
     int totalData = ViewBag.TotalData ?? 0;
     int pageSize = ViewBag.PageSize ?? 15;
 
-    bool canEdit = ViewBag.CanEdit ?? false; 
+    bool canEdit = ViewBag.CanEdit ?? false;
 
     const int maxPagesToShow = 5;
     int halfPagesToShow = (maxPagesToShow - 1) / 2;
@@ -26,8 +26,10 @@
     }
 }
 
-<div class="table-responsive">
-    <table class="table table-hover table-striped align-middle" id="dataTable">
+<div class="table-section">
+    <div class="table-container">
+        <div class="table-wrapper">
+            <table class="table" id="dataTable">
                 <thead>
                     <tr>
                         <th>Orden Servicio</th>
@@ -53,12 +55,12 @@
                                 <td>@transaction.Currency</td>
                                 <td>@transaction.TransactionType.Replace("_", " ")</td>
                                 <td>@transaction.TotalDeclaredValue.ToString("N0")</td>
-                                <td>@transaction.TotalCountedValue.ToString("N0")</td> 
+                                <td>@transaction.TotalCountedValue.ToString("N0")</td>
                                 <td class="@(transaction.ValueDifference != 0 ? "text-danger" : "")">@transaction.ValueDifference.ToString("N0")</td>
                                 <td class="status-column">
                                     @{
                                         string statusText = transaction.TransactionStatus.Replace("_", " ");
-                                        string badgeClass = "badge"; 
+                                        string badgeClass = "badge";
                                         switch (transaction.TransactionStatus)
                                         {
                                             case nameof(VCashApp.Enums.CefTransactionStatusEnum.Checkin): badgeClass += " bg-primary"; break;
@@ -85,12 +87,12 @@
 
                                         @if (canEdit)
                                         {
-                                            @if (transaction.TransactionStatus == nameof(VCashApp.Enums.CefTransactionStatusEnum.Checkin) || 
-                                                 transaction.TransactionStatus == nameof(VCashApp.Enums.CefTransactionStatusEnum.EnqueuedForCounting) ||
-                                                 transaction.TransactionStatus == nameof(VCashApp.Enums.CefTransactionStatusEnum.BillCounting) ||
-                                                 transaction.TransactionStatus == nameof(VCashApp.Enums.CefTransactionStatusEnum.CoinCounting) ||
-                                                 transaction.TransactionStatus == nameof(VCashApp.Enums.CefTransactionStatusEnum.CheckCounting) ||
-                                                 transaction.TransactionStatus == nameof(VCashApp.Enums.CefTransactionStatusEnum.DocumentCounting))
+                                            @if (transaction.TransactionStatus == nameof(VCashApp.Enums.CefTransactionStatusEnum.Checkin) ||
+                                                                            transaction.TransactionStatus == nameof(VCashApp.Enums.CefTransactionStatusEnum.EnqueuedForCounting) ||
+                                                                            transaction.TransactionStatus == nameof(VCashApp.Enums.CefTransactionStatusEnum.BillCounting) ||
+                                                                            transaction.TransactionStatus == nameof(VCashApp.Enums.CefTransactionStatusEnum.CoinCounting) ||
+                                                                            transaction.TransactionStatus == nameof(VCashApp.Enums.CefTransactionStatusEnum.CheckCounting) ||
+                                                                            transaction.TransactionStatus == nameof(VCashApp.Enums.CefTransactionStatusEnum.DocumentCounting))
                                             {
                                                 <a asp-action="ProcessContainers" asp-route-transactionId="@transaction.Id" class="btn-edit ml-1" title="Procesar Contenedores">
                                                     <i class="ri-pencil-fill"></i>
@@ -115,32 +117,34 @@
                         </tr>
                     }
                 </tbody>
-    </table>
-</div>
-<div class="d-flex justify-content-between align-items-center mt-2">
-    <div class="page-message">Página @currentPage de @totalPages (Total: @totalData registros)</div>
-    <div class="pagination">
-        <button class="page-link" data-page="1" @(currentPage == 1 ? "disabled" : "")>&laquo;</button>
+            </table>
+        </div>
+    </div>
+    <div class="table-footer">
+        <div class="page-message">Página @currentPage de @totalPages (Total: @totalData registros)</div>
+        <div class="pagination">
+            <button class="page-link" data-page="1" @(currentPage == 1 ? "disabled" : "")>&laquo;</button>
 
-        <button class="page-link" data-page="@(currentPage - 1)" @(currentPage == 1 ? "disabled" : "")>&lt;</button>
+            <button class="page-link" data-page="@(currentPage - 1)" @(currentPage == 1 ? "disabled" : "")>&lt;</button>
 
-        @if (startPage > 1)
-        {
-            <button class="page-link" data-page="@(startPage - 1)">...</button>
-        }
+            @if (startPage > 1)
+            {
+                <button class="page-link" data-page="@(startPage - 1)">...</button>
+            }
 
-        @for (int i = startPage; i <= endPage; i++)
-        {
-            <button class="page-link @(currentPage == i ? "active-page" : "")" data-page="@i">@i</button>
-        }
+            @for (int i = startPage; i <= endPage; i++)
+            {
+                <button class="page-link @(currentPage == i ? "active-page" : "")" data-page="@i">@i</button>
+            }
 
-        @if (endPage < totalPages)
-        {
-            <button class="page-link" data-page="@(endPage + 1)">...</button>
-        }
+            @if (endPage < totalPages)
+            {
+                <button class="page-link" data-page="@(endPage + 1)">...</button>
+            }
 
-        <button class="page-link" data-page="@(currentPage + 1)" @(currentPage == totalPages ? "disabled" : "")>&gt;</button>
+            <button class="page-link" data-page="@(currentPage + 1)" @(currentPage == totalPages ? "disabled" : "")>&gt;</button>
 
-        <button class="page-link" data-page="@totalPages" @(currentPage == totalPages ? "disabled" : "")>&raquo;</button>
+            <button class="page-link" data-page="@totalPages" @(currentPage == totalPages ? "disabled" : "")>&raquo;</button>
+        </div>
     </div>
 </div>

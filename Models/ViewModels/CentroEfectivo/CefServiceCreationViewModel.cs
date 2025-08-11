@@ -24,7 +24,7 @@ namespace VCashApp.Models.ViewModels.CentroEfectivo
         [Required(ErrorMessage = "El tipo de servicio es requerido.")]
         public string ServiceConceptCode { get; set; } = string.Empty;
 
-        [Display(Name = "Número de Pedido Cliente")]
+        [Display(Name = "Número de Pedido")]
         [StringLength(255, ErrorMessage = "El número de pedido no puede exceder los 255 caracteres.")]
         public string? ClientOrderNumber { get; set; }
 
