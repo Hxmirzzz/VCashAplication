@@ -456,6 +456,24 @@
                 }
             }
 
+            function toggleMoneyFieldsReadonly(conceptCode) {
+                const shouldBeReadonly = ['1', '4'].includes(conceptCode);
+                const $billValue = $('#BillValue');
+                const $coinValue = $('#CoinValue');
+
+                if (shouldBeReadonly) {
+                    $billValue.prop('readonly', true);
+                    $coinValue.prop('readonly', true);
+                    $billValue.val(0);
+                    $coinValue.val(0);
+                } else {
+                    $billValue.prop('readonly', false);
+                    $coinValue.prop('readonly', false);
+                }
+
+                calculateTotalDeclared();
+            }
+
             function updateStepper() {
                 $('.progress-stepper .step').removeClass('active completed');
                 for (let i = 1; i <= totalSteps; i++) {
@@ -670,8 +688,9 @@
                 const clientId = isOrigin ? $('#originClientId').val() : $('#destinationClientId').val();
                 const type = isOrigin ? $('#originType').val() : $('#destinationType').val();
 
+                const isPoint = (type === 'P' || type === 'A');
+
                 if (code && clientId && type) {
-                    const isPoint = (type === '0' || type === '1');
                     try {
                         const response = await $.get('@Url.Action("GetLocationDetails", "Service")', { code: code, clientId: clientId, isPoint: isPoint });
 
@@ -794,6 +813,7 @@
                 $('#originType').trigger('change');
                 $('#destinationType').trigger('change');
 
+                toggleMoneyFieldsReadonly(serviceConceptCode);
                 toggleChangeKitFieldFixed(serviceConceptCode, selectedText);
 
                 if ($('#originClientId').val()) {
@@ -832,9 +852,8 @@
             syncDestinationClient();
 
             const initialServiceConcept = $('#serviceConceptCode').val();
-            const initialSelectedText = $('#serviceConceptCode').find('option:selected').text().trim();
-
             if (initialServiceConcept) {
+                toggleMoneyFieldsReadonly(initialServiceConcept);
                 toggleChangeKitFieldFixed(initialServiceConcept, initialSelectedText);
             } else {
                 toggleChangeKitFieldFixed('', '');
