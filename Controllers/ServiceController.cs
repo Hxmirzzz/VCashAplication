@@ -43,7 +43,6 @@ namespace VCashApp.Controllers
         {
             await base.SetCommonViewBagsBaseAsync(currentUser, pageName);
 
-            // La variable isAdmin ya se ha establecido en el ViewBag por SetCommonViewBagsBaseAsync
             ViewBag.AvailableBranches = (await _cgsService.GetBranchesForDropdownAsync());
             ViewBag.AvailableClients = (await _cgsService.GetClientsForDropdownAsync());
             ViewBag.AvailableConcepts = (await _cgsService.GetServiceConceptsForDropdownAsync());

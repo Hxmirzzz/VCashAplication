@@ -75,11 +75,11 @@ namespace VCashApp.Services.Cef
                 throw new InvalidOperationException($"La Orden de Servicio '{serviceOrderId}' no se encontró.");
             }
 
-            var existingCefTransaction = await _context.CefTransactions.AnyAsync(t => t.ServiceOrderId == serviceOrderId);
+            /*var existingCefTransaction = await _context.CefTransactions.AnyAsync(t => t.ServiceOrderId == serviceOrderId);
             if (existingCefTransaction)
             {
                 throw new InvalidOperationException($"Ya existe una transacción de Centro de Efectivo para la Orden de Servicio '{serviceOrderId}'.");
-            }
+            }*/
 
             TdvRutaDiaria? route = null;
             if (!string.IsNullOrEmpty(routeId))

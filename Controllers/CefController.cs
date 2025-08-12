@@ -79,9 +79,9 @@ namespace VCashApp.Controllers
             ViewBag.TransactionStatuses = estados;
 
             var userRoles = await _userManager.GetRolesAsync(currentUser);
-            ViewBag.HasCreatePermission = await HasPermisionForView(userRoles, "CEF", PermissionType.Create);
-            ViewBag.HasEditPermission = await HasPermisionForView(userRoles, "CEF", PermissionType.Edit);
-            ViewBag.HasViewPermission = await HasPermisionForView(userRoles, "CEF", PermissionType.View);
+            ViewBag.HasCreate = await HasPermisionForView(userRoles, "CEF", PermissionType.Create);
+            ViewBag.HasEdit = await HasPermisionForView(userRoles, "CEF", PermissionType.Edit);
+            ViewBag.HasView = await HasPermisionForView(userRoles, "CEF", PermissionType.View);
             // ViewBag.HasDeletePermission = await HasPermisionForView(userRoles, "CEF", PermissionType.Delete);
         }
 
@@ -108,7 +108,7 @@ namespace VCashApp.Controllers
             var currentUser = await GetCurrentApplicationUserAsync();
             if (currentUser == null) return RedirectToPage("/Account/Login", new { area = "Identity" });
 
-            await SetCommonViewBagsCefAsync(currentUser, "Centro Efectivo");
+            await SetCommonViewBagsCefAsync(currentUser, "Tesoreria");
             bool isAdmin = ViewBag.IsAdmin;
 
             var (transactions, totalRecords) = await _cefTransactionService.GetFilteredCefTransactionsAsync(

@@ -5,7 +5,7 @@
     int totalData = ViewBag.TotalData ?? 0;
     int pageSize = ViewBag.PageSize ?? 15;
 
-    bool canEdit = ViewBag.CanEdit ?? false;
+    bool canEdit = ViewBag.HasEdit ?? false;
 
     const int maxPagesToShow = 5;
     int halfPagesToShow = (maxPagesToShow - 1) / 2;
@@ -84,9 +84,11 @@
                                         <a href="@Url.Action("Detail", "Cef", new { transactionId = transaction.Id })" class="btn-detail" title="Ver Detalles">
                                             <i class="ri-eye-fill"></i>
                                         </a>
-
                                         @if (canEdit)
                                         {
+                                            <a asp-controller="Cef" asp-action="Checkin" asp-route-serviceOrderId="@transaction.ServiceOrderId" class="btn-edit" title="Editar">
+                                                <i class="ri-pencil-fill"></i>
+                                            </a>
                                             @if (transaction.TransactionStatus == nameof(VCashApp.Enums.CefTransactionStatusEnum.Checkin) ||
                                                                             transaction.TransactionStatus == nameof(VCashApp.Enums.CefTransactionStatusEnum.EnqueuedForCounting) ||
                                                                             transaction.TransactionStatus == nameof(VCashApp.Enums.CefTransactionStatusEnum.BillCounting) ||
