@@ -100,9 +100,11 @@ namespace VCashApp.Services.Service
             // === Valores mínimos para crear CEF desde Servicios ===
             var declaredBill = viewModel.BillValue ?? 0m;
             var declaredCoin = viewModel.CoinValue ?? 0m;
-            var declaredDocs = 0m;                         // si no lo capturas aún, va 0
+            var declaredDocs = 0m;
             var totalDeclared = declaredBill + declaredCoin + declaredDocs;
             var totalDeclaredLetters = AmountInWordsHelper.ToSpanishCurrency(totalDeclared, "COP");
+            var totalCounted = 0;
+            var totalCountedLetters = AmountInWordsHelper.ToSpanishCurrency(totalCounted, "COP");
 
             var declaredBags = viewModel.NumberOfCoinBags ?? 0;
             var declaredEnv = 0;
@@ -188,6 +190,7 @@ namespace VCashApp.Services.Service
                 new SqlParameter("@CefValorDocumentosDeclarado",   declaredDocs),
                 new SqlParameter("@CefValorTotalDeclarado",        totalDeclared),
                 new SqlParameter("@CefValorTotalDeclaradoLetras",  (object?)totalDeclaredLetters ?? DBNull.Value),
+                new SqlParameter("@CefValorTotalContadoLetras",   (object?)totalCountedLetters ?? DBNull.Value),
                 new SqlParameter("@CefNovedadInformativa",         (object?)DBNull.Value),
                 new SqlParameter("@CefEsCustodia",                 false),
                 new SqlParameter("@CefEsPuntoAPunto",              false),

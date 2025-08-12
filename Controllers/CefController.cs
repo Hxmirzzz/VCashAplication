@@ -250,20 +250,27 @@ namespace VCashApp.Controllers
                 {
                     return Json(ServiceResult.FailureResult("Hay errores en el formulario.", errors: fieldErrors));
                 }
-                return View(viewModel); // Para submits de formulario HTML tradicional
+                return View(viewModel);
             }
 
             try
             {
                 var newTransaction = await _cefTransactionService.ProcessCheckinViewModelAsync(viewModel, currentUser.Id, IpAddressForLogging);
+
                 TempData["SuccessMessage"] = $"Check-in para planilla {newTransaction.SlipNumber} registrado exitosamente. La transacción está lista para el conteo.";
                 _logger.LogInformation("Usuario: {Usuario} | IP: {IP} | Acción: Check-in Exitoso | Transacción ID: {TransactionId} | Planilla: {PlanillaNumber}.",
                     currentUser.UserName, IpAddressForLogging, newTransaction.Id, newTransaction.SlipNumber);
 
                 if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
                 {
-                    return Json(ServiceResult.SuccessResult("Check-in exitoso.", newTransaction.Id));
+                    return Json(new
+                    {
+                        success = true,
+                        message = "Check-in exitoso.",
+                        transactionId = newTransaction.Id
+                    });
                 }
+
                 return RedirectToAction(nameof(ProcessContainers), new { transactionId = newTransaction.Id });
             }
             catch (InvalidOperationException ex)
