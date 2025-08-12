@@ -96,8 +96,8 @@
                                                                             transaction.TransactionStatus == nameof(VCashApp.Enums.CefTransactionStatusEnum.CheckCounting) ||
                                                                             transaction.TransactionStatus == nameof(VCashApp.Enums.CefTransactionStatusEnum.DocumentCounting))
                                             {
-                                                <a asp-action="ProcessContainers" asp-route-transactionId="@transaction.Id" class="btn-edit ml-1" title="Procesar Contenedores">
-                                                    <i class="ri-pencil-fill"></i>
+                                                <a asp-action="ProcessContainers" asp-route-transactionId="@transaction.Id" class="btn-detail" title="Procesar Contenedores">
+                                                    <i class="ri-money-dollar-circle-fill"></i>
                                                 </a>
                                             }
                                             @if (transaction.TransactionStatus == nameof(VCashApp.Enums.CefTransactionStatusEnum.PendingReview))

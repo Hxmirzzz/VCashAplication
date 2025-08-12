@@ -2027,10 +2027,7 @@
         <member name="M:VCashApp.Services.Cef.CefTransactionService.GetDropdownListsAsync(System.String,System.Boolean)">
             <inheritdoc/>
         </member>
-        <member name="M:VCashApp.Services.Cef.CefTransactionService.PrepareCheckinViewModelAsync(System.String,System.String,System.String,System.String)">
-            <inheritdoc/>
-        </member>
-        <member name="M:VCashApp.Services.Cef.CefTransactionService.ProcessCheckinViewModelAsync(VCashApp.Models.ViewModels.CentroEfectivo.CefTransactionCheckinViewModel,System.String,System.String)">
+        <member name="M:VCashApp.Services.Cef.CefTransactionService.PrepareCheckinViewModelAsync(System.String,System.String,System.String)">
             <inheritdoc/>
         </member>
         <member name="M:VCashApp.Services.Cef.CefTransactionService.GetCefTransactionByIdAsync(System.Int32)">
@@ -2052,6 +2049,12 @@
             <summary>
             Helper para obtener una descripción legible de un detalle de valor.
             </summary>
+        </member>
+        <member name="M:VCashApp.Services.Cef.CefTransactionService.GetCurrenciesForDropdownAsync">
+            <summary>
+            Obtiene las divisas disponibles para los dropdowns.
+            </summary>
+            <returns>Lista de SelectListItem para las divisas</returns>
         </member>
         <member name="T:VCashApp.Services.EmployeeService">
             <summary>
@@ -2248,12 +2251,11 @@
             Define las operaciones de servicio para la gestión de Transacciones de Centro de Efectivo.
             </summary>
         </member>
-        <member name="M:VCashApp.Services.ICefTransactionService.PrepareCheckinViewModelAsync(System.String,System.String,System.String,System.String)">
+        <member name="M:VCashApp.Services.ICefTransactionService.PrepareCheckinViewModelAsync(System.String,System.String,System.String)">
             <summary>
             Prepara el ViewModel para la vista de Check-in de una nueva transacción.
             </summary>
             <param name="serviceOrderId">La Orden de Servicio para la que se prepara el check-in.</param>
-            <param name="routeId">La ID de la Ruta Diaria asociada (opcional).</param>
             <param name="currentUserId">La ID del usuario actual.</param>
             <param name="currentIP">La dirección IP del usuario actual.</param>
             <returns>Un ViewModel listo para la vista de Check-in.</returns>
@@ -2319,6 +2321,12 @@
             <param name="viewModel">El ViewModel con los datos de revisión y el nuevo estado.</param>
             <param name="reviewerUserId">ID del usuario revisor.</param>
             <returns>Verdadero si el proceso fue exitoso, de lo contrario, falso.</returns>
+        </member>
+        <member name="M:VCashApp.Services.ICefTransactionService.GetCurrenciesForDropdownAsync">
+            <summary>
+            Obtiene las divisas de servicio disponibles para los dropdowns.
+            </summary>
+            <returns>Lista de SelectListItem para divisas de servicio.</returns>
         </member>
         <member name="T:VCashApp.Services.ICgsServiceService">
             <summary>

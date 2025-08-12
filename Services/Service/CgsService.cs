@@ -4,8 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Linq;
-using System.Threading.Tasks;
+using VCashApp.Utils;
 using VCashApp.Data;
 using VCashApp.Models.Entities;
 using VCashApp.Models.ViewModels.Servicio;
@@ -103,6 +102,7 @@ namespace VCashApp.Services.Service
             var declaredCoin = viewModel.CoinValue ?? 0m;
             var declaredDocs = 0m;                         // si no lo capturas aún, va 0
             var totalDeclared = declaredBill + declaredCoin + declaredDocs;
+            var totalDeclaredLetters = AmountInWordsHelper.ToSpanishCurrency(totalDeclared, "COP");
 
             var declaredBags = viewModel.NumberOfCoinBags ?? 0;
             var declaredEnv = 0;
@@ -187,7 +187,7 @@ namespace VCashApp.Services.Service
                 new SqlParameter("@CefValorMonedasDeclarado",      declaredCoin),
                 new SqlParameter("@CefValorDocumentosDeclarado",   declaredDocs),
                 new SqlParameter("@CefValorTotalDeclarado",        totalDeclared),
-                new SqlParameter("@CefValorTotalDeclaradoLetras",  (object?)DBNull.Value),
+                new SqlParameter("@CefValorTotalDeclaradoLetras",  (object?)totalDeclaredLetters ?? DBNull.Value),
                 new SqlParameter("@CefNovedadInformativa",         (object?)DBNull.Value),
                 new SqlParameter("@CefEsCustodia",                 false),
                 new SqlParameter("@CefEsPuntoAPunto",              false),

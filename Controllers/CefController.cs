@@ -2,20 +2,14 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.Extensions.Logging;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using VCashApp.Utils;
 using VCashApp.Data;
 using VCashApp.Enums;
 using VCashApp.Filters;
 using VCashApp.Models;
-using VCashApp.Models.Entities;
 using VCashApp.Models.ViewModels.CentroEfectivo;
 using VCashApp.Services;
-using VCashApp.Services.Cef;
 using VCashApp.Services.DTOs;
 
 namespace VCashApp.Controllers
@@ -182,7 +176,7 @@ namespace VCashApp.Controllers
             {
                 try
                 {
-                    viewModel = await _cefTransactionService.PrepareCheckinViewModelAsync(serviceOrderId, routeId, currentUser.Id, IpAddressForLogging);
+                    viewModel = await _cefTransactionService.PrepareCheckinViewModelAsync(serviceOrderId, currentUser.Id, IpAddressForLogging);
                 }
                 catch (InvalidOperationException ex)
                 {
@@ -894,6 +888,13 @@ namespace VCashApp.Controllers
             }
 
             return NotFound();
+        }
+
+        [HttpGet("AmountInWords")]
+        public IActionResult AmountInWords(decimal value, string currency = "COP")
+        {
+            var words = AmountInWordsHelper.ToSpanishCurrency(value, currency);
+            return Json(new { words });
         }
     }
 }

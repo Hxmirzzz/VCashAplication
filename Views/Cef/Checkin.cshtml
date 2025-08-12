@@ -1,220 +1,304 @@
 @model VCashApp.Models.ViewModels.CentroEfectivo.CefTransactionCheckinViewModel
 @{
-    ViewData["Title"] = "Check-in de Tesorería";
+    ViewData["Title"] = "Tesorería";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
 <div class="form-container">
     <div class="card">
         <div class="card-header">
-            <h4 class="mb-0">Check-in de Tesorería</h4>
+            <h4 class="mb-0">CEF: Tesorería</h4>
         </div>
 
         <div class="card-body">
-            <form id="checkinForm" asp-action="Checkin" asp-controller="Cef" method="post" novalidate>
+            <form id="cefCheckinForm" asp-action="Checkin" asp-controller="Cef" method="post" novalidate>
                 @Html.AntiForgeryToken()
                 <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
-                <div class="card mb-4">
-                    <div class="card-header">
-                        <h5>📋 Datos Generales de la Transacción</h5>
+                <!-- STEPPER -->
+                <div class="progress-stepper" id="progressStepper">
+                    <div class="step active" data-step="1">
+                        <div class="step-number">1</div>
+                        <div class="step-label">Resumen del Servicio</div>
                     </div>
-                    <div class="card-body">
-                        <div class="row g-3">
-                            <div class="col-12 col-lg-6">
-                                <div class="form-floating has-validation">
-                                    <input asp-for="ServiceOrderId" class="form-control" placeholder="Orden de Servicio" required aria-required="true" />
-                                    <label for="ServiceOrderId" class="required">Orden de Servicio</label>
-                                    <div class="invalid-feedback">⚠ Este campo es requerido</div>
-                                    <div class="valid-feedback">✓ Correcto</div>
+                    <div class="step" data-step="2">
+                        <div class="step-number">2</div>
+                        <div class="step-label">Declarados (Cantidades / Valores)</div>
+                    </div>
+                    <div class="step" data-step="3">
+                        <div class="step-number">3</div>
+                        <div class="step-label">Operador y Confirmación</div>
+                    </div>
+                </div>
+
+                <!-- STEP 1: RESUMEN DEL SERVICIO -->
+                <div class="tab-content" id="myTabContent">
+                    <div class="tab-pane fade show active" id="resumen-servicio" role="tabpanel" data-step="1">
+                        <div class="step-content">
+
+                            <div class="card mb-4">
+                                <div class="card-header">
+                                    <h5>📋 Datos del Servicio</h5>
                                 </div>
-                                <span asp-validation-for="ServiceOrderId" class="text-danger"></span>
-                            </div>
-                            <div class="col-12 col-lg-6">
-                                <div class="form-floating">
-                                    <input asp-for="RouteId" class="form-control" placeholder="ID de Ruta Diaria" />
-                                    <label for="RouteId">ID de Ruta Diaria</label>
-                                </div>
-                                <span asp-validation-for="RouteId" class="text-danger"></span>
-                            </div>
-                            <div class="col-12 col-lg-6">
-                                <div class="form-floating has-validation">
-                                    <select asp-for="Currency" asp-items="Model.Currencies" class="form-select" required aria-required="true">
-                                        <option value="">-- Seleccionar --</option>
-                                    </select>
-                                    <label for="Currency" class="required">Divisa</label>
-                                    <div class="invalid-feedback">⚠ Este campo es requerido</div>
-                                    <div class="valid-feedback">✓ Correcto</div>
-                                </div>
-                                <span asp-validation-for="Currency" class="text-danger"></span>
-                            </div>
-                            <div class="col-12 col-lg-6">
-                                <div class="form-floating has-validation">
-                                    <select asp-for="TransactionType" asp-items="Html.GetEnumSelectList<VCashApp.Enums.CefTransactionTypeEnum>()" class="form-select" required aria-required="true">
-                                        <option value="">-- Seleccionar --</option>
-                                    </select>
-                                    <label for="TransactionType" class="required">Tipo de Transacción</label>
-                                    <div class="invalid-feedback">⚠ Este campo es requerido</div>
-                                    <div class="valid-feedback">✓ Correcto</div>
-                                </div>
-                                <span asp-validation-for="TransactionType" class="text-danger"></span>
-                            </div>
-                            <div class="col-12 col-lg-6">
-                                <div class="form-floating">
-                                    <input asp-for="ClientName" class="form-control" placeholder="Cliente" readonly />
-                                    <label for="ClientName">Cliente</label>
-                                </div>
-                            </div>
-                            <div class="col-12 col-lg-6">
-                                <div class="form-floating">
-                                    <input asp-for="BranchName" class="form-control" placeholder="Sucursal" readonly />
-                                    <label for="BranchName">Sucursal</label>
-                                </div>
-                            </div>
-                            <div class="col-12 col-lg-6">
-                                <div class="form-floating">
-                                    <input asp-for="OriginLocationName" class="form-control" placeholder="Origen" readonly />
-                                    <label for="OriginLocationName">Origen</label>
-                                </div>
-                            </div>
-                            <div class="col-12 col-lg-6">
-                                <div class="form-floating">
-                                    <input asp-for="DestinationLocationName" class="form-control" placeholder="Destino" readonly />
-                                    <label for="DestinationLocationName">Destino</label>
+                                <div class="card-body">
+                                    <input type="hidden" asp-for="ServiceOrderId" />
+                                    <input type="hidden" asp-for="RouteId" />
+
+                                    <div class="row g-3">
+                                        <div class="col-12 col-lg-3">
+                                            <div class="form-floating">
+                                                <input asp-for="ServiceOrderId" class="form-control" readonly />
+                                                <label asp-for="ServiceOrderId">Orden de Servicio</label>
+                                            </div>
+                                            <span asp-validation-for="ServiceOrderId" class="text-danger"></span>
+                                        </div>
+
+                                        <div class="col-12 col-lg-3">
+                                            <div class="form-floating">
+                                                <input asp-for="ClientName" class="form-control" readonly />
+                                                <label asp-for="ClientName">Cliente</label>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-12 col-lg-3">
+                                            <div class="form-floating">
+                                                <input asp-for="BranchName" class="form-control" readonly />
+                                                <label asp-for="BranchName">Sucursal</label>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-12 col-lg-3">
+                                            <div class="form-floating">
+                                                <input asp-for="HeadOfShiftName" class="form-control" readonly />
+                                                <label asp-for="HeadOfShiftName">Jefe de Turno</label>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-12 col-lg-6">
+                                            <div class="form-floating">
+                                                <input asp-for="OriginLocationName" class="form-control" readonly />
+                                                <label asp-for="OriginLocationName">Origen</label>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-12 col-lg-6">
+                                            <div class="form-floating">
+                                                <input asp-for="DestinationLocationName" class="form-control" readonly />
+                                                <label asp-for="DestinationLocationName">Destino</label>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
-                            <div class="col-12 col-lg-4">
-                                <div class="form-check form-switch">
-                                    <input asp-for="IsCustody" class="form-check-input" type="checkbox" id="isCustodySwitch" />
-                                    <label class="form-check-label" for="isCustodySwitch">¿Es Custodia?</label>
+
+                            <!-- Datos generales del Check-in -->
+                            <div class="card mb-4">
+                                <div class="card-header">
+                                    <h5>⚙️ Información General del Check-in</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row g-3">
+                                        <div class="col-12 col-lg-4">
+                                            <div class="form-floating has-validation">
+                                                <input asp-for="SlipNumber"
+                                                       class="form-control"
+                                                       placeholder="Número de planilla"
+                                                       type="number"
+                                                       min="1"
+                                                       required />
+                                                <label for="SlipNumber" class="required">Número de planilla</label>
+                                                <div class="invalid-feedback">⚠ Este campo es requerido</div>
+                                                <div class="valid-feedback">✓ Correcto</div>
+                                            </div>
+                                            <span asp-validation-for="SlipNumber" class="text-danger"></span>
+                                        </div>
+
+                                        <div class="col-12 col-lg-4">
+                                            <div class="form-floating has-validation">
+                                                <select asp-for="Currency" asp-items="Model.Currencies" class="form-select" required aria-required="true">
+                                                    <option value="">Seleccionar divisa...</option>
+                                                </select>
+                                                <label asp-for="Currency" class="required">Divisa</label>
+                                                <div class="invalid-feedback">⚠ Este campo es requerido</div>
+                                            </div>
+                                            <span asp-validation-for="Currency" class="text-danger"></span>
+                                        </div>
+                                        <div class="col-12 col-lg-4">
+                                            <div class="form-floating">
+                                                <input asp-for="TransactionType" class="form-control" readonly />
+                                                <label asp-for="TransactionType">Tipo de Transacción</label>
+                                            </div>
+                                            <span asp-validation-for="TransactionType" class="text-danger"></span>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
-                            <div class="col-12 col-lg-4">
-                                <div class="form-check form-switch">
-                                    <input asp-for="IsPointToPoint" class="form-check-input" type="checkbox" id="isPointToPointSwitch" />
-                                    <label class="form-check-label" for="isPointToPointSwitch">¿Es Punto a Punto?</label>
+
+                        </div> <!-- /step-content -->
+                    </div> <!-- /tab-pane step 1 -->
+                    <!-- STEP 2: DECLARADOS -->
+                    <div class="tab-pane fade" id="declarados" role="tabpanel" data-step="2">
+                        <div class="step-content">
+
+                            <div class="card mb-4">
+                                <div class="card-header">
+                                    <h5>📦 Cantidades Declaradas</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row g-3">
+                                        <div class="col-12 col-lg-3">
+                                            <div class="form-floating has-validation">
+                                                <input asp-for="DeclaredBagCount" type="number" min="0" class="form-control" required />
+                                                <label asp-for="DeclaredBagCount" class="required">Bolsas</label>
+                                                <div class="invalid-feedback">⚠ Requerido</div>
+                                            </div>
+                                            <span asp-validation-for="DeclaredBagCount" class="text-danger"></span>
+                                        </div>
+                                        <div class="col-12 col-lg-3">
+                                            <div class="form-floating has-validation">
+                                                <input asp-for="DeclaredEnvelopeCount" type="number" min="0" class="form-control" required />
+                                                <label asp-for="DeclaredEnvelopeCount" class="required">Sobres</label>
+                                                <div class="invalid-feedback">⚠ Requerido</div>
+                                            </div>
+                                            <span asp-validation-for="DeclaredEnvelopeCount" class="text-danger"></span>
+                                        </div>
+                                        <div class="col-12 col-lg-3">
+                                            <div class="form-floating has-validation">
+                                                <input asp-for="DeclaredCheckCount" type="number" min="0" class="form-control" required />
+                                                <label asp-for="DeclaredCheckCount" class="required">Cheques</label>
+                                                <div class="invalid-feedback">⚠ Requerido</div>
+                                            </div>
+                                            <span asp-validation-for="DeclaredCheckCount" class="text-danger"></span>
+                                        </div>
+                                        <div class="col-12 col-lg-3">
+                                            <div class="form-floating has-validation">
+                                                <input asp-for="DeclaredDocumentCount" type="number" min="0" class="form-control" required />
+                                                <label asp-for="DeclaredDocumentCount" class="required">Docs</label>
+                                                <div class="invalid-feedback">⚠ Requerido</div>
+                                            </div>
+                                            <span asp-validation-for="DeclaredDocumentCount" class="text-danger"></span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="card mb-4">
+                                <div class="card-header">
+                                    <h5>💰 Valores Declarados</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row g-3">
+                                        <div class="col-12 col-lg-4">
+                                            <div class="form-floating">
+                                                <input asp-for="DeclaredBillValue" type="number" step="1" class="form-control js-calc-total" />
+                                                <label asp-for="DeclaredBillValue">Billetes</label>
+                                            </div>
+                                            <span asp-validation-for="DeclaredBillValue" class="text-danger"></span>
+                                        </div>
+                                        <div class="col-12 col-lg-4">
+                                            <div class="form-floating">
+                                                <input asp-for="DeclaredCoinValue" type="number" step="1" class="form-control js-calc-total" />
+                                                <label asp-for="DeclaredCoinValue">Monedas</label>
+                                            </div>
+                                            <span asp-validation-for="DeclaredCoinValue" class="text-danger"></span>
+                                        </div>
+                                        <div class="col-12 col-lg-4">
+                                            <div class="form-floating">
+                                                <input asp-for="DeclaredDocumentValue" type="number" step="1" class="form-control js-calc-total" />
+                                                <label asp-for="DeclaredDocumentValue">Documentos</label>
+                                            </div>
+                                            <span asp-validation-for="DeclaredDocumentValue" class="text-danger"></span>
+                                        </div>
+
+                                        <div class="col-12">
+                                            <div class="calculation-panel mt-3">
+                                                <h6>🧮 Resumen</h6>
+                                                <div class="calculation-item">
+                                                    <span>Billetes:</span>
+                                                    <span class="value" id="sumBills">$0</span>
+                                                </div>
+                                                <div class="calculation-item">
+                                                    <span>Monedas:</span>
+                                                    <span class="value" id="sumCoins">$0</span>
+                                                </div>
+                                                <div class="calculation-item">
+                                                    <span>Docs:</span>
+                                                    <span class="value" id="sumDocs">$0</span>
+                                                </div>
+                                                <div class="calculation-total">
+                                                    <span>Total Declarado:</span>
+                                                    <span class="total-value" id="sumTotal">$0</span>
+                                                </div>
+                                            </div>
+                                            <input asp-for="TotalDeclaredValue" type="hidden" />
+                                            <div class="form-text">
+                                                <small id="declaredWordsText"></small>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-12 col-lg-6">
+                                            <div class="form-check form-switch">
+                                                <input asp-for="IsCustody" class="form-check-input" type="checkbox" id="isCustodySwitch" />
+                                                <label class="form-check-label" for="isCustodySwitch">Servicio de Custodia</label>
+                                            </div>
+                                        </div>
+                                        <div class="col-12 col-lg-6">
+                                            <div class="form-check form-switch">
+                                                <input asp-for="IsPointToPoint" class="form-check-input" type="checkbox" id="isPointToPointSwitch" />
+                                                <label class="form-check-label" for="isPointToPointSwitch">Punto a Punto</label>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-12">
+                                            <div class="form-floating">
+                                                <textarea asp-for="InformativeIncident" class="form-control" placeholder="Novedad Informativa" style="height: 100px;"></textarea>
+                                                <label asp-for="InformativeIncident">Novedad Informativa</label>
+                                            </div>
+                                            <span asp-validation-for="InformativeIncident" class="text-danger"></span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div> <!-- /step-content -->
+                    </div> <!-- /tab-pane step 2 -->
+                    <!-- STEP 3: OPERADOR -->
+                    <div class="tab-pane fade" id="operador" role="tabpanel" data-step="3">
+                        <div class="step-content">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5>👤 Datos del Operador</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row g-3">
+                                        <div class="col-12 col-lg-4">
+                                            <div class="form-floating">
+                                                <input asp-for="RegistrationDate" type="datetime-local" class="form-control" readonly />
+                                                <label asp-for="RegistrationDate">Fecha de Registro</label>
+                                            </div>
+                                        </div>
+                                        <div class="col-12 col-lg-4">
+                                            <div class="form-floating">
+                                                <input asp-for="RegistrationUserName" class="form-control" readonly />
+                                                <label asp-for="RegistrationUserName">Usuario</label>
+                                            </div>
+                                        </div>
+                                        <div class="col-12 col-lg-4">
+                                            <div class="form-floating">
+                                                <input asp-for="IPAddress" class="form-control" readonly />
+                                                <label asp-for="IPAddress">IP</label>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
-
-                <div class="card mb-4">
-                    <div class="card-header">
-                        <h5>💰 Cantidades y Valores Declarados</h5>
-                    </div>
-                    <div class="card-body">
-                        <div class="row g-3">
-                            <div class="col-12 col-lg-3">
-                                <div class="form-floating has-validation">
-                                    <input asp-for="DeclaredBagCount" type="number" class="form-control" placeholder="Cantidad de Bolsas Declaradas" required aria-required="true" />
-                                    <label for="DeclaredBagCount" class="required">Cantidad de Bolsas Declaradas</label>
-                                    <div class="invalid-feedback">⚠ Este campo es requerido</div>
-                                    <div class="valid-feedback">✓ Correcto</div>
-                                </div>
-                                <span asp-validation-for="DeclaredBagCount" class="text-danger"></span>
-                            </div>
-                            <div class="col-12 col-lg-3">
-                                <div class="form-floating has-validation">
-                                    <input asp-for="DeclaredEnvelopeCount" type="number" class="form-control" placeholder="Cantidad de Sobres Declarados" required aria-required="true" />
-                                    <label for="DeclaredEnvelopeCount" class="required">Cantidad de Sobres Declarados</label>
-                                    <div class="invalid-feedback">⚠ Este campo es requerido</div>
-                                    <div class="valid-feedback">✓ Correcto</div>
-                                </div>
-                                <span asp-validation-for="DeclaredEnvelopeCount" class="text-danger"></span>
-                            </div>
-                            <div class="col-12 col-lg-3">
-                                <div class="form-floating has-validation">
-                                    <input asp-for="DeclaredCheckCount" type="number" class="form-control" placeholder="Cantidad de Cheques Declarados" required aria-required="true" />
-                                    <label for="DeclaredCheckCount" class="required">Cantidad de Cheques Declarados</label>
-                                    <div class="invalid-feedback">⚠ Este campo es requerido</div>
-                                    <div class="valid-feedback">✓ Correcto</div>
-                                </div>
-                                <span asp-validation-for="DeclaredCheckCount" class="text-danger"></span>
-                            </div>
-                            <div class="col-12 col-lg-3">
-                                <div class="form-floating has-validation">
-                                    <input asp-for="DeclaredDocumentCount" type="number" class="form-control" placeholder="Cantidad de Documentos Declarados" required aria-required="true" />
-                                    <label for="DeclaredDocumentCount" class="required">Cantidad de Documentos Declarados</label>
-                                    <div class="invalid-feedback">⚠ Este campo es requerido</div>
-                                    <div class="valid-feedback">✓ Correcto</div>
-                                </div>
-                                <span asp-validation-for="DeclaredDocumentCount" class="text-danger"></span>
-                            </div>
-                            <div class="col-12 col-lg-4">
-                                <div class="form-floating has-validation">
-                                    <input asp-for="DeclaredBillValue" type="number" step="1" class="form-control calculate-total-declared" placeholder="Valor en Billetes Declarado" required aria-required="true" />
-                                    <label for="DeclaredBillValue" class="required">Valor en Billetes Declarado</label>
-                                    <div class="invalid-feedback">⚠ Este campo es requerido</div>
-                                    <div class="valid-feedback">✓ Correcto</div>
-                                </div>
-                                <span asp-validation-for="DeclaredBillValue" class="text-danger"></span>
-                            </div>
-                            <div class="col-12 col-lg-4">
-                                <div class="form-floating has-validation">
-                                    <input asp-for="DeclaredCoinValue" type="number" step="1" class="form-control calculate-total-declared" placeholder="Valor en Monedas Declarado" required aria-required="true" />
-                                    <label for="DeclaredCoinValue" class="required">Valor en Monedas Declarado</label>
-                                    <div class="invalid-feedback">⚠ Este campo es requerido</div>
-                                    <div class="valid-feedback">✓ Correcto</div>
-                                </div>
-                                <span asp-validation-for="DeclaredCoinValue" class="text-danger"></span>
-                            </div>
-                            <div class="col-12 col-lg-4">
-                                <div class="form-floating has-validation">
-                                    <input asp-for="DeclaredDocumentValue" type="number" step="1" class="form-control calculate-total-declared" placeholder="Valor de Documentos Declarado" required aria-required="true" />
-                                    <label for="DeclaredDocumentValue" class="required">Valor de Documentos Declarado</label>
-                                    <div class="invalid-feedback">⚠ Este campo es requerido</div>
-                                    <div class="valid-feedback">✓ Correcto</div>
-                                </div>
-                                <span asp-validation-for="DeclaredDocumentValue" class="text-danger"></span>
-                            </div>
-                            <div class="col-12 col-lg-4">
-                                <div class="form-floating">
-                                    <input asp-for="TotalDeclaredValue" type="number" step="1" class="form-control" placeholder="Valor Total Declarado" readonly />
-                                    <label for="TotalDeclaredValue">Valor Total Declarado</label>
-                                </div>
-                            </div>
-                            <div class="col-12">
-                                <div class="form-floating">
-                                    <textarea asp-for="InformativeIncident" class="form-control" placeholder="Novedad Informativa" style="height: 100px;"></textarea>
-                                    <label for="InformativeIncident">Novedad Informativa</label>
-                                </div>
-                                <span asp-validation-for="InformativeIncident" class="text-danger"></span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="card mb-4">
-                    <div class="card-header">
-                        <h5>⚙️ Datos del Operador</h5>
-                    </div>
-                    <div class="card-body">
-                        <div class="row g-3">
-                            <div class="col-12 col-lg-4">
-                                <div class="form-floating">
-                                    <input asp-for="RegistrationDate" type="datetime-local" class="form-control" readonly />
-                                    <label for="RegistrationDate">Fecha de Registro</label>
-                                </div>
-                            </div>
-                            <div class="col-12 col-lg-4">
-                                <div class="form-floating">
-                                    <input asp-for="RegistrationUserName" class="form-control" readonly />
-                                    <label for="RegistrationUserName">Usuario de Registro</label>
-                                </div>
-                            </div>
-                            <div class="col-12 col-lg-4">
-                                <div class="form-floating">
-                                    <input asp-for="IPAddress" class="form-control" readonly />
-                                    <label for="IPAddress">IP de Registro</label>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
                 <div class="submit-container form-group col-12 mt-4">
-                    <button type="submit" class="btn btn-primary">Registrar</button>
+                    <button type="button" class="btn btn-secondary" data-step-action="prev" style="display:none;">Anterior</button>
+                    <button type="button" class="btn btn-primary" data-step-action="next">Continuar</button>
+                    <button type="submit" class="btn btn-primary" data-step-action="submit-final" style="display:none;">Registrar Check-in</button>
                     <a asp-action="Index" class="btn btn-danger">Cancelar</a>
                 </div>
             </form>
@@ -226,114 +310,102 @@
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
+
     <script>
-        $(document).ready(function () {
-            $('#ServiceOrderId').on('change', function () {
-                var serviceOrderId = $(this).val();
-                if (serviceOrderId) {
-                    $.ajax({
-                        url: '@Url.Action("GetServiceDetails", "Cef")',
-                        type: 'GET',
-                        data: { serviceOrderId: serviceOrderId },
-                        success: function (response) {
-                            if (response && response.success) {
-                                $('#ClientName').val(response.data.nombreCliente);
-                                $('#BranchName').val(response.data.nombreSucursal);
-                                $('#OriginLocationName').val(response.data.nombreUbicacionOrigen);
-                                $('#DestinationLocationName').val(response.data.nombreUbicacionDestino);
+        $(function () {
+            let currentStep = 1;
+            const totalSteps = 3;
+            const $form = $('#cefCheckinForm');
+            const $next = $('button[data-step-action="next"]');
+            const $prev = $('button[data-step-action="prev"]');
+            const $submit = $('button[data-step-action="submit-final"]');
 
-                                $('#Currency').val(response.data.divisa);
-                                $('#TransactionType').val(response.data.tipoTransaccion);
-
-                                $('#DeclaredBillValue').val(response.data.valorBilletesDeclarado);
-                                $('#DeclaredCoinValue').val(response.data.valorMonedasDeclarado);
-                                $('#DeclaredDocumentValue').val(response.data.valorDocumentosDeclarado);
-
-                                $('.calculate-total-declared').trigger('input');
-                            } else if (response && response.message) {
-                                alert('Error al cargar datos del servicio: ' + response.message);
-                            }
-                        },
-                        error: function (xhr, status, error) {
-                            alert('Error al obtener detalles del servicio: ' + error);
-                            console.error(xhr.responseText);
-                        }
-                    });
-                } else {
-                    $('#ClientName').val('');
-                    $('#BranchName').val('');
-                    $('#OriginLocationName').val('');
-                    $('#DestinationLocationName').val('');
-                    $('#DeclaredBillValue').val(0);
-                    $('#DeclaredCoinValue').val(0);
-                    $('#DeclaredDocumentValue').val(0);
-                    $('.calculate-total-declared').trigger('input');
+            function updateStepper() {
+                $('.progress-stepper .step').removeClass('active completed');
+                for (let i = 1; i <= totalSteps; i++) {
+                    const $step = $('.step[data-step="' + i + '"]');
+                    if (i < currentStep) { $step.addClass('completed'); $step.find('.step-number').html('&#10003;'); }
+                    else if (i === currentStep) { $step.addClass('active'); $step.find('.step-number').text(i); }
+                    else { $step.find('.step-number').text(i); }
                 }
                 showCurrentStep();
             }
 
-            $('#checkinForm').on('submit', function (e) {
-                e.preventDefault();
+            function showCurrentStep() {
+                $('.tab-pane').removeClass('show active');
+                $('#myTabContent div[data-step="' + currentStep + '"]').addClass('show active');
+
+                $prev.toggle(currentStep > 1);
+                $next.toggle(currentStep < totalSteps);
+                $submit.toggle(currentStep === totalSteps);
+            }
 
             function validateField($f) {
-                if (!$f.prop('required') || $f.prop('disabled') || $f.prop('readonly')) {
-                    $f.removeClass('is-valid is-invalid'); return true;
+                if ($f.prop('disabled') || $f.prop('readonly')) {
+                    $f.removeClass('is-invalid is-valid');
+                    return true;
                 }
+
                 const ok = $f[0].checkValidity();
-                $f.toggleClass('is-valid', ok).toggleClass('is-invalid', !ok);
+
+                // Toggle clases Bootstrap
+                $f.toggleClass('is-valid', ok)
+                  .toggleClass('is-invalid', !ok);
+
+                const $container = $f.closest('.has-validation');
+                const $invalid = $container.find('.invalid-feedback');
+                const $valid   = $container.find('.valid-feedback');
+
+                if (ok) {
+                    $invalid.hide();
+                    $valid.show();
+                } else {
+                    $invalid.text($f[0].validationMessage || '⚠ Campo inválido').show();
+                    $valid.hide();
+                }
                 return ok;
             }
 
             function validateStep() {
                 let ok = true;
                 const $pane = $('#myTabContent .tab-pane.active');
-                $pane.find('[required]').each(function () { if (!$(this).prop('disabled')) ok = validateField($(this)) && ok; });
+                $pane.find(':input:enabled:visible').each(function () {
+                    if (!validateField($(this))) ok = false;
+                });
                 return ok;
             }
 
-                $.ajax({
-                    url: '@Url.Action("Checkin", "Cef")',
-                    type: 'POST',
-                    data: formData,
-                    success: function (response) {
-                        if (response.success) {
-                            alert(response.message);
-                            window.location.href = '@Url.Action("ProcessContainers", "Cef")?transactionId=' + response.data;
-                        } else {
-                            alert('Error: ' + response.message);
-                            if (response.errors) {
-                                $('.field-validation-error').text('').hide();
-                                $.each(response.errors, function (key, value) {
-                                    var errorSpan = $('[data-valmsg-for="' + key + '"]');
-                                    if (errorSpan.length === 0) {
-                                        errorSpan = $('<span>').addClass('text-danger field-validation-error').attr('data-valmsg-for', key);
-                                        $('[name="' + key + '"]').after(errorSpan);
-                                    }
-                                    errorSpan.text(value.join(' ')).show();
-                                });
-                            }
-                        }
-                    },
-                    error: function (xhr, status, error) {
-                        alert('Error al conectar con el servidor: ' + error);
-                        console.error(xhr.responseText);
-                    }
-                });
+            $('.progress-stepper .step').on('click', function () {
+                const target = parseInt($(this).data('step'));
+                if (target < currentStep || validateStep()) { currentStep = target; updateStepper(); }
             });
             $next.on('click', function () { if (validateStep() && currentStep < totalSteps) { currentStep++; updateStepper(); } });
             $prev.on('click', function () { if (currentStep > 1) { currentStep--; updateStepper(); } });
 
-            function calculateTotalDeclared() {
-                var total = 0;
-                $('.calculate-total-declared').each(function () {
-                    total += parseFloat($(this).val()) || 0;
-                });
+            async function updateDeclaredWords(total) {
+                try {
+                    const currency = $('#Currency').val() || 'COP';
+                    const res = await $.get('@Url.Action("AmountInWords", "Cef")', { value: total, currency });
+                    $('#declaredWordsText').text(res.words || '');
+                } catch { $('#declaredWordsText').text(''); }
+            }
+
+            function format(n){ return '$' + (n||0).toLocaleString('es-CO'); }
+            function recalc() {
+                const bills = parseFloat($('#DeclaredBillValue').val()) || 0;
+                const coins = parseFloat($('#DeclaredCoinValue').val()) || 0;
+                const docs  = parseFloat($('#DeclaredDocumentValue').val()) || 0;
+                const total = bills + coins + docs;
+                $('#sumBills').text(format(bills));
+                $('#sumCoins').text(format(coins));
+                $('#sumDocs').text(format(docs));
+                $('#sumTotal').text(format(total));
                 $('#TotalDeclaredValue').val(total.toFixed(0));
+                updateDeclaredWords(total);
             }
             $('.js-calc-total').on('input', recalc);
             recalc();
 
-            // === Envío (puedes dejar submit normal para que el controlador redireccione a ProcessContainers) ===
             updateStepper();
         });
     </script>

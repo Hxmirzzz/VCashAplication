@@ -12,7 +12,7 @@ namespace VCashApp.Enums
         Fondo = 2
     }
 
-    public enum CefTransactionTypeEnum
+    public enum CefTransactionTypeEnum // ELIMINAR
     {
         Collection,
         Provision,
