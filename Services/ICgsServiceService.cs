@@ -82,7 +82,7 @@ namespace VCashApp.Services
         /// <returns>Una tupla que contiene la lista de <see cref="CgsServiceSummaryViewModel"/> y el conteo total de registros.</returns>
         Task<Tuple<List<CgsServiceSummaryViewModel>, int>> GetFilteredServiceRequestsAsync(
             string? search, int? clientCode, int? branchCode, int? conceptCode, DateOnly? startDate, DateOnly? endDate, int? status,
-            int pageNumber = 1, int pageSize = 10, string? currentUserId = null, bool isAdmin = false);
+            int page = 1, int pageSize = 10, string? currentUserId = null, bool isAdmin = false);
 
         // -- MÉTODOS PARA POPULAR DROPDOWNS --
         /// <summary>
@@ -114,5 +114,21 @@ namespace VCashApp.Services
         /// </summary>
         /// <returns>Una lista de <see cref="SelectListItem"/> de modalidades de servicio.</returns>
         Task<List<SelectListItem>> GetServiceModalitiesForDropdownAsync();
+
+        /// <summary>
+        /// Obtiene la lista de responsables de fallos para los dropdowns.
+        /// </summary>
+        /// <returns>Una lista de <see cref="SelectListItem"/> de responsables fallo del servicio.</returns>
+        Task<List<SelectListItem>> GetFailedResponsiblesForDropdown();
+
+        /// <summary>
+        /// Gets details of a point or fund given its code.
+        /// Obtiene los detalles de un punto o fondo dado su código.
+        /// </summary>
+        /// <param name="code">Point or fund code.</param>
+        /// <param name="clientId">Client ID.</param>
+        /// <param name="isPoint">True if it's a point, false if it's a fund.</param>
+        /// <returns>A dynamic object with details (Name, City, Branch, Range).</returns>
+        Task<object?> GetLocationDetailsByCodeAsync(string code, int clientId, bool isPoint);
     }
 }

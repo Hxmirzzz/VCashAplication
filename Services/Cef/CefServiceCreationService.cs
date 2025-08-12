@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using System.Data;
 using Microsoft.Data.SqlClient;
 using System;
+using VCashApp.Models;
 
 namespace VCashApp.Services.Cef
 {
@@ -214,7 +215,9 @@ namespace VCashApp.Services.Cef
                 new SqlParameter("@CefEstadoTransaccion", CefTransactionStatusEnum.Checkin.ToString()),
                 new SqlParameter("@CefFechaRegistro", DateTime.Now),
                 new SqlParameter("@CefUsuarioRegistroId", currentUserId),
-                new SqlParameter("@CefIPRegistro", (object)currentIP ?? DBNull.Value)
+                new SqlParameter("@CefIPRegistro", (object)currentIP ?? DBNull.Value),
+                new SqlParameter("@CefEntrega", (object)viewModel.DeliveryResponsible ?? DBNull.Value),
+                new SqlParameter("@CefRecibe", (object)viewModel.ReceptionResponsible ?? DBNull.Value),
             };
 
             var parameterNames = string.Join(", ", parameters.Select(p => p.ParameterName));
@@ -384,6 +387,57 @@ namespace VCashApp.Services.Cef
                     rangeDetails = "N/A"
                 } : null;
             }
+        }
+
+        /// <inheritdoc/>
+        public async Task<List<SelectListItem>> GetResponsibleUsersForDropdownAsync(int branchId, string serviceConceptCode, bool isDelivery, string currentUserId)
+        {
+            var currentUser = await _context.Users.FirstOrDefaultAsync(u => u.Id == currentUserId);
+            if (currentUser == null)
+            {
+                return new List<SelectListItem>();
+            }
+
+            bool requiresJtForDelivery = serviceConceptCode == "RC" || serviceConceptCode == "ET";
+            bool requiresJtForReception = serviceConceptCode == "PV" || serviceConceptCode == "PR";
+            bool needsJtList = (isDelivery && requiresJtForDelivery) || (!isDelivery && requiresJtForReception);
+
+            if (needsJtList)
+            {
+                var jtRoleId = await _context.Roles
+                                             .Where(r => r.Name == "Jefe de Tripulación")
+                                             .Select(r => r.Id)
+                                             .FirstOrDefaultAsync();
+
+                if (string.IsNullOrEmpty(jtRoleId))
+                {
+                    return new List<SelectListItem>();
+                }
+
+                string branchIdStr = branchId.ToString();
+
+                return await (from u in _context.Users
+                               join ur in _context.UserRoles on u.Id equals ur.UserId
+                               join uc in _context.UserClaims on u.Id equals uc.UserId
+                               where ur.RoleId == jtRoleId
+                                     && uc.ClaimType == "SucursalId"
+                                     && uc.ClaimValue == branchIdStr
+                               select new SelectListItem
+                               {
+                                   Value = u.Id,
+                                   Text = u.NombreUsuario ?? u.UserName
+                               }).ToListAsync();
+            }
+
+            return new List<SelectListItem>
+            {
+                new SelectListItem
+                {
+                    Value = currentUser.Id,
+                    Text = currentUser.NombreUsuario ?? currentUser.UserName,
+                    Selected = true
+                }
+            };
         }
 
         /// <inheritdoc/>

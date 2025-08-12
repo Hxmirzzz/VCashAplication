@@ -24,7 +24,7 @@ namespace VCashApp.Models.ViewModels.CentroEfectivo
         [Required(ErrorMessage = "El tipo de servicio es requerido.")]
         public string ServiceConceptCode { get; set; } = string.Empty;
 
-        [Display(Name = "Número de Pedido Cliente")]
+        [Display(Name = "Número de Pedido")]
         [StringLength(255, ErrorMessage = "El número de pedido no puede exceder los 255 caracteres.")]
         public string? ClientOrderNumber { get; set; }
 
@@ -83,11 +83,11 @@ namespace VCashApp.Models.ViewModels.CentroEfectivo
         // Origin
         [Display(Name = "Tipo de Origen")]
         [Required(ErrorMessage = "El tipo de origen es requerido.")]
-        public LocationTypeEnum OriginType { get; set; } // Enum: Point, Fund. Used to derive CgsService.OriginIndicatorType
+        public LocationTypeEnum OriginType { get; set; }
 
         [Display(Name = "Código Cliente Origen")]
         [Required(ErrorMessage = "El código de cliente origen es requerido.")]
-        public int OriginClientId { get; set; } // Maps to CgsService.OriginClientCode
+        public int OriginClientId { get; set; }
 
         [Display(Name = "Nombre Cliente Origen")]
         [Required(ErrorMessage = "El nombre de cliente origen es requerido.")]
@@ -163,9 +163,8 @@ namespace VCashApp.Models.ViewModels.CentroEfectivo
 
         [Display(Name = "Cantidad de Kits de Cambio")]
         [Range(0, int.MaxValue, ErrorMessage = "Debe ser un número válido.")]
-        public int? ExchangeKitCount { get; set; } // Maps to CgsService.NumberOfChangeKits
+        public int? ExchangeKitCount { get; set; }
 
-        // Declared Quantities (initial for CefTransaction)
         [Display(Name = "Cantidad de Bolsas Declaradas")]
         [Required(ErrorMessage = "La cantidad de bolsas declaradas es requerida.")]
         [Range(0, int.MaxValue, ErrorMessage = "Debe ser un número válido.")]
@@ -200,20 +199,26 @@ namespace VCashApp.Models.ViewModels.CentroEfectivo
         [Display(Name = "Valor de Documentos Declarado")]
         [Required(ErrorMessage = "El valor de documentos declarado es requerido.")]
         [Range(0.00, (double)decimal.MaxValue, ErrorMessage = "Debe ser un valor numérico válido.")]
-        public decimal DeclaredDocumentValue { get; set; } // Maps to CefTransaction.DeclaredDocumentValue
+        public decimal DeclaredDocumentValue { get; set; }
 
         [Display(Name = "Valor Total Declarado")]
-        public decimal TotalDeclaredValue { get; set; } // Will be calculated
+        public decimal TotalDeclaredValue { get; set; }
 
         [Display(Name = "Novedad Informativa Planilla")]
         [StringLength(255, ErrorMessage = "La novedad informativa no puede exceder los 255 caracteres.")]
-        public string? InformativeIncident { get; set; } // Maps to CefTransaction.InformativeIncident
+        public string? InformativeIncident { get; set; }
 
         [Display(Name = "¿Es Custodia?")]
-        public bool IsCustody { get; set; } = false; // Maps to CefTransaction.IsCustody
+        public bool IsCustody { get; set; } = false;
 
         [Display(Name = "¿Es Punto a Punto?")]
-        public bool IsPointToPoint { get; set; } = false; // Maps to CefTransaction.IsPointToPoint
+        public bool IsPointToPoint { get; set; } = false;
+
+        [Display(Name = "¿Quién Entrega?")]
+        public string? DeliveryResponsible { get; set; } = string.Empty;
+
+        [Display(Name = "¿Quién Recibe?")]
+        public string? ReceptionResponsible { get; set; } = string.Empty;
 
         // =============================================================
         // COMMON CEF / SERVICE FIELDS (DISPLAY & SELECTION)

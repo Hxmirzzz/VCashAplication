@@ -930,6 +930,15 @@
             <param name="isPoint">True si es un punto/ATM, false si es un fondo.</param>
             <returns>JSON con los detalles.</returns>
         </member>
+        <member name="M:VCashApp.Controllers.CefController.GetResponsibleUsers(System.Int32,System.String,System.Boolean)">
+            <summary>
+            Obtiene usuarios responsables de entrega o recepción según concepto y sucursal.
+            </summary>
+            <param name="branchId">ID de la sucursal seleccionada.</param>
+            <param name="serviceConceptCode">Código del concepto del servicio.</param>
+            <param name="isDelivery">True para lista de entrega, false para recepción.</param>
+            <returns>JSON con lista de SelectListItem.</returns>
+        </member>
         <member name="M:VCashApp.Controllers.CefController.GetEmployeesForDropdown(System.Int32,System.Int32)">
             <summary>
             Obtiene empleados (JT, Conductor, Tripulante) filtrados por sucursal y cargo.
@@ -1467,6 +1476,15 @@
             Procesa el envío del formulario para crear una solicitud de servicio CGS.
             </summary>
         </member>
+        <member name="M:VCashApp.Controllers.ServiceController.GetLocationDetails(System.String,System.Int32,System.Boolean)">
+            <summary>
+            Obtiene detalles de un punto, ATM o fondo para autocompletar.
+            </summary>
+            <param name="code">Código del punto/ATM o fondo.</param>
+            <param name="clientId">ID del cliente.</param>
+            <param name="isPoint">True si es un punto/ATM, false si es un fondo.</param>
+            <returns>JSON con los detalles.</returns>
+        </member>
         <member name="M:VCashApp.Controllers.ServiceController.GetLocations(System.Int32,System.Int32,System.String,System.String)">
             <summary>
             Obtiene una lista de puntos o fondos para un cliente y sucursal específicos.
@@ -1766,6 +1784,78 @@
         <member name="M:VCashApp.Migrations.FailedReasonColumnToCgsServices.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
             <inheritdoc />
         </member>
+        <member name="T:VCashApp.Migrations.AddDelivererAndReceiverColumnToCefTransaction">
+            <inheritdoc />
+        </member>
+        <member name="M:VCashApp.Migrations.AddDelivererAndReceiverColumnToCefTransaction.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:VCashApp.Migrations.AddDelivererAndReceiverColumnToCefTransaction.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:VCashApp.Migrations.AddDelivererAndReceiverColumnToCefTransaction.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="T:VCashApp.Migrations.CorrectionToDelivererAndReceiverColumnsApplyUserFK">
+            <inheritdoc />
+        </member>
+        <member name="M:VCashApp.Migrations.CorrectionToDelivererAndReceiverColumnsApplyUserFK.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:VCashApp.Migrations.CorrectionToDelivererAndReceiverColumnsApplyUserFK.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:VCashApp.Migrations.CorrectionToDelivererAndReceiverColumnsApplyUserFK.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="T:VCashApp.Migrations.SetFKToReceiverAndDelivered">
+            <inheritdoc />
+        </member>
+        <member name="M:VCashApp.Migrations.SetFKToReceiverAndDelivered.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:VCashApp.Migrations.SetFKToReceiverAndDelivered.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:VCashApp.Migrations.SetFKToReceiverAndDelivered.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="T:VCashApp.Migrations.SetNotNullToBranchIdOnCefTransactions">
+            <inheritdoc />
+        </member>
+        <member name="M:VCashApp.Migrations.SetNotNullToBranchIdOnCefTransactions.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:VCashApp.Migrations.SetNotNullToBranchIdOnCefTransactions.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:VCashApp.Migrations.SetNotNullToBranchIdOnCefTransactions.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="T:VCashApp.Migrations.SetNullCurrencyOnTransactionsTable">
+            <inheritdoc />
+        </member>
+        <member name="M:VCashApp.Migrations.SetNullCurrencyOnTransactionsTable.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:VCashApp.Migrations.SetNullCurrencyOnTransactionsTable.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:VCashApp.Migrations.SetNullCurrencyOnTransactionsTable.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="T:VCashApp.Migrations.Set255StringLengthToCodPuntoOrigenToFixCgsServiceModel">
+            <inheritdoc />
+        </member>
+        <member name="M:VCashApp.Migrations.Set255StringLengthToCodPuntoOrigenToFixCgsServiceModel.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:VCashApp.Migrations.Set255StringLengthToCodPuntoOrigenToFixCgsServiceModel.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:VCashApp.Migrations.Set255StringLengthToCodPuntoOrigenToFixCgsServiceModel.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
         <member name="T:VCashApp.Models.ViewModels.CentroEfectivo.CefContainerProcessingViewModel">
             <summary>
             ViewModel para la entrada de datos durante el conteo de un contenedor de efectivo.
@@ -1902,6 +1992,9 @@
             <inheritdoc/>
         </member>
         <member name="M:VCashApp.Services.Cef.CefServiceCreationService.GetLocationDetailsByCodeAsync(System.String,System.Int32,System.Boolean)">
+            <inheritdoc/>
+        </member>
+        <member name="M:VCashApp.Services.Cef.CefServiceCreationService.GetResponsibleUsersForDropdownAsync(System.Int32,System.String,System.Boolean,System.String)">
             <inheritdoc/>
         </member>
         <member name="M:VCashApp.Services.Cef.CefServiceCreationService.GetEmployeesForDropdownAsync(System.Int32,System.Int32)">
@@ -2113,6 +2206,17 @@
             <param name="isPoint">True if it's a point, false if it's a fund.</param>
             <returns>A dynamic object with details (Name, City, Branch, Range).</returns>
         </member>
+        <member name="M:VCashApp.Services.ICefServiceCreationService.GetResponsibleUsersForDropdownAsync(System.Int32,System.String,System.Boolean,System.String)">
+            <summary>
+            Obtiene la lista de usuarios responsables de entrega o recepción
+            filtrados por sucursal y concepto de servicio.
+            </summary>
+            <param name="branchId">Sucursal seleccionada.</param>
+            <param name="serviceConceptCode">Código del concepto de servicio.</param>
+            <param name="isDelivery">True para responsables de entrega, false para recepción.</param>
+            <param name="currentUserId">ID del usuario actualmente autenticado.</param>
+            <returns>Lista de SelectListItem con los usuarios disponibles.</returns>
+        </member>
         <member name="M:VCashApp.Services.ICefServiceCreationService.GetEmployeesForDropdownAsync(System.Int32,System.Int32)">
             <summary>
             Gets employees (Head of Shift, driver, crew member) filtered by branch and position.
@@ -2319,6 +2423,22 @@
             Obtiene una lista de modalidades de servicio para ser utilizada en listas desplegables.
             </summary>
             <returns>Una lista de <see cref="T:Microsoft.AspNetCore.Mvc.Rendering.SelectListItem"/> de modalidades de servicio.</returns>
+        </member>
+        <member name="M:VCashApp.Services.ICgsServiceService.GetFailedResponsiblesForDropdown">
+            <summary>
+            Obtiene la lista de responsables de fallos para los dropdowns.
+            </summary>
+            <returns>Una lista de <see cref="T:Microsoft.AspNetCore.Mvc.Rendering.SelectListItem"/> de responsables fallo del servicio.</returns>
+        </member>
+        <member name="M:VCashApp.Services.ICgsServiceService.GetLocationDetailsByCodeAsync(System.String,System.Int32,System.Boolean)">
+            <summary>
+            Gets details of a point or fund given its code.
+            Obtiene los detalles de un punto o fondo dado su código.
+            </summary>
+            <param name="code">Point or fund code.</param>
+            <param name="clientId">Client ID.</param>
+            <param name="isPoint">True if it's a point, false if it's a fund.</param>
+            <returns>A dynamic object with details (Name, City, Branch, Range).</returns>
         </member>
         <member name="T:VCashApp.Services.IEmployeeLogService">
             <summary>
@@ -2706,6 +2826,51 @@
             <param name="selectedRoleFilter">Filtro por nombre de rol.</param>
             <param name="selectedBranchFilter">Filtro por ID de sucursal.</param>
             <returns>Una colección de UserViewModel con todos los datos necesarios para la exportación.</returns>
+        </member>
+        <member name="M:VCashApp.Services.Service.CgsService.GetLocationDetailsByCodeAsync(System.String,System.Int32,System.Boolean)">
+            <inheritdoc/>
+        </member>
+        <member name="M:VCashApp.Services.Service.CgsService.GetClientsForDropdownAsync">
+            <summary>
+            Obtiene las opciones de cliente del servicio para los dropdowns.
+            </summary>
+            <returns>Lista de SelectListItem para los clientes</returns>
+        </member>
+        <member name="M:VCashApp.Services.Service.CgsService.GetBranchesForDropdownAsync">
+            <summary>
+            Obtiene las opciones de sucursal del servicio para los dropdowns.
+            </summary>
+            <returns>Lista de SelectListItem para las sucursales del servicio</returns>
+        </member>
+        <member name="M:VCashApp.Services.Service.CgsService.GetServiceConceptsForDropdownAsync">
+            <summary>
+            Obtiene las opciones de concepto del servicio para los dropdowns.
+            </summary>
+            <returns>Lista de SelectListItem para los conceptos del servicio</returns>
+        </member>
+        <member name="M:VCashApp.Services.Service.CgsService.GetServiceStatusesForDropdownAsync">
+            <summary>
+            Obtiene las opciones de estado del servicio para los dropdowns.
+            </summary>
+            <returns>Lista de SelectListItem para los estados del servicio</returns>
+        </member>
+        <member name="M:VCashApp.Services.Service.CgsService.GetServiceModalitiesForDropdownAsync">
+            <summary>
+            Obtiene las opciones de modalidad del servicio para los dropdowns.
+            </summary>
+            <returns>Lista de SelectListItem para las modalidades del servicio</returns>
+        </member>
+        <member name="M:VCashApp.Services.Service.CgsService.GetFailedResponsiblesForDropdown">
+            <summary>
+            Obtiene las opciones de responsables al fallo del servicio para los dropdowns.
+            </summary>
+            <returns>Lista de SelectListItem para los responsables del fallo del servicio</returns>
+        </member>
+        <member name="M:VCashApp.Services.Service.CgsService.GetLocationTypeSelectList">
+            <summary>
+            Obtiene las opciones de tipo de ubicación para los dropdowns.
+            </summary>
+            <returns>Lista de SelectListItem para los tipos de ubicación</returns>
         </member>
         <member name="T:VCashApp.Services.UserService">
             <summary>

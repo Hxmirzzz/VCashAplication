@@ -52,7 +52,7 @@
                                         <div class="col-12 col-lg-4">
                                             <div class="form-floating has-validation">
                                                 <input asp-for="SlipNumber" class="form-control" placeholder="Número de planilla" required aria-required="true" />
-                                                <label for="slipNumber" class="required">Número de planilla</label>
+                                                <label for="SlipNumber" class="required">Número de planilla</label>
                                                 <div class="invalid-feedback">⚠ Este campo es requerido</div>
                                                 <div class="valid-feedback">✓ Correcto</div>
                                             </div>
@@ -60,7 +60,7 @@
                                         <div class="col-12 col-lg-4">
                                             <div class="form-floating has-validation">
                                                 <input asp-for="ClientOrderNumber" class="form-control" placeholder="Número de Orden Cliente" required aria-required="true" />
-                                                <label for="clientOrderNumber" class="required">Número de Orden Cliente</label>
+                                                <label for="ClientOrderNumber" class="required">Número de Orden Cliente</label>
                                                 <div class="invalid-feedback">⚠ Este campo es requerido</div>
                                                 <div class="valid-feedback">✓ Correcto</div>
                                             </div>
@@ -69,7 +69,7 @@
                                         <div class="col-12 col-lg-6">
                                             <div class="form-floating">
                                                 <input asp-for="ClientServiceOrderCode" class="form-control" placeholder="Código Orden Servicio Cliente" />
-                                                <label for="clientServiceOrderCode">Código Orden Servicio Cliente</label>
+                                                <label for="ClientServiceOrderCode">Código Orden Servicio Cliente</label>
                                             </div>
                                             <span asp-validation-for="ClientServiceOrderCode" class="text-danger"></span>
                                         </div>
@@ -87,7 +87,7 @@
                                         <div class="col-12 col-lg-2">
                                             <div class="form-floating has-validation">
                                                 <input asp-for="RequestDate" type="date" class="form-control" placeholder="Fecha de Solicitud" required aria-required="true" />
-                                                <label for="requestDate" class="required">Fecha de Solicitud</label>
+                                                <label for="RequestDate" class="required">Fecha de Solicitud</label>
                                                 <div class="invalid-feedback">⚠ Este campo es requerido</div>
                                                 <div class="valid-feedback">✓ Correcto</div>
                                             </div>
@@ -96,7 +96,7 @@
                                         <div class="col-12 col-lg-2">
                                             <div class="form-floating has-validation">
                                                 <input asp-for="RequestTime" type="time" class="form-control" placeholder="Hora de Solicitud" required aria-required="true" />
-                                                <label for="requestTime" class="required">Hora de Solicitud</label>
+                                                <label for="RequestTime" class="required">Hora de Solicitud</label>
                                                 <div class="invalid-feedback">⚠ Este campo es requerido</div>
                                                 <div class="valid-feedback">✓ Correcto</div>
                                             </div>
@@ -105,7 +105,7 @@
                                         <div class="col-12 col-lg-2">
                                             <div class="form-floating has-validation">
                                                 <input asp-for="ProgrammingDate" type="date" class="form-control" placeholder="Fecha de Servicio" required aria-required="true" />
-                                                <label for="serviceDate" class="required">Fecha de Servicio</label>
+                                                <label for="ProgrammingDate" class="required">Fecha de Servicio</label>
                                                 <div class="invalid-feedback">⚠ Este campo es requerido</div>
                                                 <div class="valid-feedback">✓ Correcto</div>
                                             </div>
@@ -114,7 +114,7 @@
                                         <div class="col-12 col-lg-2">
                                             <div class="form-floating has-validation">
                                                 <input asp-for="ProgrammingTime" type="time" class="form-control" placeholder="Hora de Servicio" required aria-required="true" />
-                                                <label for="serviceTime" class="required">Hora de Servicio</label>
+                                                <label for="ProgrammingTime" class="required">Hora de Servicio</label>
                                                 <div class="invalid-feedback">⚠ Este campo es requerido</div>
                                                 <div class="valid-feedback">✓ Correcto</div>
                                             </div>
@@ -130,6 +130,28 @@
                                                 <div class="valid-feedback">✓ Correcto</div>
                                             </div>
                                             <span asp-validation-for="ServiceModality" class="text-danger"></span>
+                                        </div>
+                                        <div class="col-12 col-lg-6">
+                                            <div class="form-floating has-validation">
+                                                <select asp-for="DeliveryResponsible" class="form-select" id="deliveryResponsible" required aria-required="true">
+                                                    <option value="">Seleccionar responsable...</option>
+                                                </select>
+                                                <label for="deliveryResponsible" class="required">Responsable de Entrega</label>
+                                                <div class="invalid-feedback">⚠ Este campo es requerido</div>
+                                                <div class="valid-feedback">✓ Correcto</div>
+                                            </div>
+                                            <span asp-validation-for="DeliveryResponsible" class="text-danger"></span>
+                                        </div>
+                                        <div class="col-12 col-lg-6">
+                                            <div class="form-floating has-validation">
+                                                <select asp-for="ReceptionResponsible" class="form-select" id="receptionResponsible" required aria-required="true">
+                                                    <option value="">Seleccionar responsable...</option>
+                                                </select>
+                                                <label for="receptionResponsible" class="required">Responsable de Recepción</label>
+                                                <div class="invalid-feedback">⚠ Este campo es requerido</div>
+                                                <div class="valid-feedback">✓ Correcto</div>
+                                            </div>
+                                            <span asp-validation-for="ReceptionResponsible" class="text-danger"></span>
                                         </div>
                                         <div class="col-12">
                                             <div class="form-floating">
@@ -656,10 +678,12 @@
             });
 
             $('form :input[required]').on('blur change keyup', function() {
+                $(this).data('touched', true);
                 validateField($(this));
             });
             $('form select[required]').on('change', function() {
                 validateField($(this));
+                $(this).data('touched', true);
             });
 
             function showFieldLoading(selector, defaultText = 'Cargando opciones...') {
@@ -671,7 +695,57 @@
             function hideFieldLoading(selector) {
                 const $element = $(selector);
                 $element.removeClass('is-loading').prop('disabled', false);
-                validateField($element);
+                if ($element.data('touched')) {
+                    validateField($element);
+                }
+            }
+
+            function fillDropdown(selector, data) {
+                let options = '<option value="">-- Seleccionar --</option>';
+                $.each(data, function (i, item) {
+                    const selected = item.selected ? ' selected' : '';
+                    options += `<option value="${item.value}"${selected}>${item.text}</option>`;
+                });
+                $(selector).html(options);
+            }
+
+            async function loadResponsibleDropdowns() {
+                const branchId = $('#branchId').val();
+                const serviceConceptCode = $('#serviceConceptCode').val();
+                const deliverySelector = '#deliveryResponsible';
+                const receptionSelector = '#receptionResponsible';
+
+                showFieldLoading(deliverySelector, 'Cargando responsables...');
+                showFieldLoading(receptionSelector, 'Cargando responsables...');
+
+                if (branchId && serviceConceptCode) {
+                    try {
+                        const deliveryData = await $.get('@Url.Action("GetResponsibleUsers", "Cef")', {
+                            branchId: branchId,
+                            serviceConceptCode: serviceConceptCode,
+                            isDelivery: true
+                        });
+                        const receptionData = await $.get('@Url.Action("GetResponsibleUsers", "Cef")', {
+                            branchId: branchId,
+                            serviceConceptCode: serviceConceptCode,
+                            isDelivery: false
+                        });
+                        fillDropdown(deliverySelector, deliveryData);
+                        fillDropdown(receptionSelector, receptionData);
+                    } catch (error) {
+                        console.error('Error al cargar responsables:', error);
+                        $(deliverySelector).html('<option value="">Error al cargar opciones</option>');
+                        $(receptionSelector).html('<option value="">Error al cargar opciones</option>');
+                    } finally {
+                        hideFieldLoading(deliverySelector);
+                        hideFieldLoading(receptionSelector);
+                    }
+                } else {
+                    $(deliverySelector).html('<option value="">-- Seleccionar --</option>');
+                    $(receptionSelector).html('<option value="">-- Seleccionar --</option>');
+                    hideFieldLoading(deliverySelector);
+                    hideFieldLoading(receptionSelector);
+                }
             }
 
         // Reemplaza esta función completa
@@ -786,7 +860,7 @@
             }
 
             function loadOriginLocationDetails() {
-                loadLocationDetails('originCode', 'OriginName', 'OriginCityName', 'OriginCityId', 'OriginBranchId', 'OriginRangeCode', 'OriginRangeDetails', true);
+                loadLocationDetails('originCode', 'OriginName', 'OriginCityName', 'OriginCityId|', 'OriginBranchId', 'OriginRangeCode', 'OriginRangeDetails', true);
             }
 
             function loadDestinationLocationDetails() {
@@ -814,6 +888,8 @@
                 if ($('#destinationClientId').val()) {
                     loadAndFillLocationDropdown('#originClientId', '#originType', '#originCode', $('#serviceConceptCode').val());
                 }
+
+                loadResponsibleDropdowns();
             });
 
             $('#serviceConceptCode').on('change', function() {
@@ -837,6 +913,7 @@
 
                 loadAndFillLocationDropdown('#originClientId', '#originType', '#originCode', serviceConceptCode);
                 loadAndFillLocationDropdown('#destinationClientId', '#destinationType', '#destinationCode', serviceConceptCode);
+                loadResponsibleDropdowns();
             });
 
             $('#originClientId').on('change', function() {
@@ -868,6 +945,7 @@
 
             $('.calculate-total-declared').on('input', calculateTotalDeclared);
             calculateTotalDeclared();
+            loadResponsibleDropdowns();
 
             // Lógica para mostrar/ocultar la sección de fallo
             $('#isFailedSwitch').on('change', function() {

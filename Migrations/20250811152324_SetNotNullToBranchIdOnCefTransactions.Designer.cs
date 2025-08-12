@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using VCashApp.Data;
 
@@ -11,9 +12,11 @@ using VCashApp.Data;
 namespace VCashApp.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250811152324_SetNotNullToBranchIdOnCefTransactions")]
+    partial class SetNotNullToBranchIdOnCefTransactions
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1478,6 +1481,7 @@ namespace VCashApp.Migrations
                         .HasColumnName("UsuarioConteoMonedasId");
 
                     b.Property<string>("Currency")
+                        .IsRequired()
                         .HasMaxLength(3)
                         .HasColumnType("nvarchar(3)")
                         .HasColumnName("Divisa");
@@ -1903,8 +1907,8 @@ namespace VCashApp.Migrations
 
                     b.Property<string>("OriginPointCode")
                         .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("nvarchar(255)")
+                        .HasMaxLength(25)
+                        .HasColumnType("nvarchar(25)")
                         .HasColumnName("CodPuntoOrigen");
 
                     b.Property<DateOnly?>("ProgrammingDate")

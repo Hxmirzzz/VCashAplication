@@ -1,14 +1,15 @@
 @model VCashApp.Models.ViewModels.CentroEfectivo.CefTransactionCheckinViewModel
 @{
-    ViewData["Title"] = "Tesoreria";
+    ViewData["Title"] = "Check-in de Tesorería";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
 <div class="form-container">
     <div class="card">
         <div class="card-header">
-            <h4 class="mb-0">Nuevo</h4>
+            <h4 class="mb-0">Check-in de Tesorería</h4>
         </div>
+
         <div class="card-body">
             <form id="checkinForm" asp-action="Checkin" asp-controller="Cef" method="post" novalidate>
                 @Html.AntiForgeryToken()
@@ -268,16 +269,27 @@
                     $('#DeclaredDocumentValue').val(0);
                     $('.calculate-total-declared').trigger('input');
                 }
-            });
+                showCurrentStep();
+            }
 
             $('#checkinForm').on('submit', function (e) {
                 e.preventDefault();
 
-                if (!$(this).valid()) {
-                    return;
+            function validateField($f) {
+                if (!$f.prop('required') || $f.prop('disabled') || $f.prop('readonly')) {
+                    $f.removeClass('is-valid is-invalid'); return true;
                 }
+                const ok = $f[0].checkValidity();
+                $f.toggleClass('is-valid', ok).toggleClass('is-invalid', !ok);
+                return ok;
+            }
 
-                var formData = $(this).serialize();
+            function validateStep() {
+                let ok = true;
+                const $pane = $('#myTabContent .tab-pane.active');
+                $pane.find('[required]').each(function () { if (!$(this).prop('disabled')) ok = validateField($(this)) && ok; });
+                return ok;
+            }
 
                 $.ajax({
                     url: '@Url.Action("Checkin", "Cef")',
@@ -308,6 +320,8 @@
                     }
                 });
             });
+            $next.on('click', function () { if (validateStep() && currentStep < totalSteps) { currentStep++; updateStepper(); } });
+            $prev.on('click', function () { if (currentStep > 1) { currentStep--; updateStepper(); } });
 
             function calculateTotalDeclared() {
                 var total = 0;
@@ -316,10 +330,11 @@
                 });
                 $('#TotalDeclaredValue').val(total.toFixed(0));
             }
+            $('.js-calc-total').on('input', recalc);
+            recalc();
 
-            $('.calculate-total-declared').on('input', calculateTotalDeclared);
-            calculateTotalDeclared();
+            // === Envío (puedes dejar submit normal para que el controlador redireccione a ProcessContainers) ===
+            updateStepper();
         });
     </script>
 }
-

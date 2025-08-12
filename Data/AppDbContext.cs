@@ -305,7 +305,7 @@ namespace VCashApp.Data
                 entity.Property(s => s.StatusCode);
                 entity.Property(s => s.FlowCode);
                 entity.Property(s => s.OriginClientCode);
-                entity.Property(s => s.OriginPointCode).HasMaxLength(25).IsRequired();
+                entity.Property(s => s.OriginPointCode).HasMaxLength(255).IsRequired();
                 entity.Property(s => s.OriginIndicatorType).HasMaxLength(1).IsRequired();
                 entity.Property(s => s.DestinationClientCode);
                 entity.Property(s => s.DestinationPointCode).HasMaxLength(255).IsRequired();
@@ -362,10 +362,11 @@ namespace VCashApp.Data
                 entity.HasKey(t => t.Id);
                 entity.Property(t => t.Id).ValueGeneratedOnAdd();
 
+                entity.Property(t => t.BranchCode).IsRequired();
                 entity.Property(t => t.ServiceOrderId).IsRequired().HasColumnType("NVARCHAR(450)");
                 entity.Property(t => t.RouteId).HasColumnType("VARCHAR(12)");
                 entity.Property(t => t.SlipNumber).IsRequired();
-                entity.Property(t => t.Currency).IsRequired().HasMaxLength(3);
+                entity.Property(t => t.Currency).HasMaxLength(3);
                 entity.Property(t => t.TransactionType).IsRequired().HasMaxLength(50);
                 entity.Property(t => t.DeclaredBagCount).IsRequired();
                 entity.Property(t => t.DeclaredEnvelopeCount).IsRequired();
@@ -404,6 +405,8 @@ namespace VCashApp.Data
                 entity.HasOne<ApplicationUser>().WithMany().HasForeignKey(t => t.ReviewerUserId).HasPrincipalKey(u => u.Id).IsRequired(false).OnDelete(DeleteBehavior.Restrict);
                 entity.HasOne<ApplicationUser>().WithMany().HasForeignKey(t => t.VaultUserId).HasPrincipalKey(u => u.Id).IsRequired(false).OnDelete(DeleteBehavior.Restrict);
                 entity.HasOne<ApplicationUser>().WithMany().HasForeignKey(t => t.LastUpdateUser).HasPrincipalKey(u => u.Id).IsRequired(false).OnDelete(DeleteBehavior.Restrict);
+                entity.HasOne<ApplicationUser>().WithMany().HasForeignKey(t => t.ReceiverId).HasPrincipalKey(u => u.Id).IsRequired(false).OnDelete(DeleteBehavior.Restrict);
+                entity.HasOne<ApplicationUser>().WithMany().HasForeignKey(t => t.DelivererId).HasPrincipalKey(u => u.Id).IsRequired(false).OnDelete(DeleteBehavior.Restrict);
             });
 
             builder.Entity<CefContainer>(entity =>

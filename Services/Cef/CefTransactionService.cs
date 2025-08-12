@@ -75,11 +75,11 @@ namespace VCashApp.Services.Cef
                 throw new InvalidOperationException($"La Orden de Servicio '{serviceOrderId}' no se encontró.");
             }
 
-            var existingCefTransaction = await _context.CefTransactions.AnyAsync(t => t.ServiceOrderId == serviceOrderId);
+            /*var existingCefTransaction = await _context.CefTransactions.AnyAsync(t => t.ServiceOrderId == serviceOrderId);
             if (existingCefTransaction)
             {
                 throw new InvalidOperationException($"Ya existe una transacción de Centro de Efectivo para la Orden de Servicio '{serviceOrderId}'.");
-            }
+            }*/
 
             TdvRutaDiaria? route = null;
             if (!string.IsNullOrEmpty(routeId))
@@ -221,7 +221,7 @@ namespace VCashApp.Services.Cef
         /// <inheritdoc/>
         public async Task<Tuple<List<CefTransactionSummaryViewModel>, int>> GetFilteredCefTransactionsAsync(
             string currentUserId, int? branchId, DateOnly? startDate, DateOnly? endDate, CefTransactionStatusEnum? status,
-            string? search, int pageNumber, int pageSize, bool isAdmin)
+            string? search, int page, int pageSize, bool isAdmin)
         {
             var permittedBranches = new List<int>();
             if (!isAdmin)
@@ -250,7 +250,7 @@ namespace VCashApp.Services.Cef
             var pEndDate = new SqlParameter("@EndDate", endDate.HasValue ? (object)endDate.Value.ToDateTime(TimeOnly.MaxValue) : DBNull.Value);
             var pStatus = new SqlParameter("@Status", status.HasValue ? (object)status.Value.ToString() : DBNull.Value);
             var pSearchTerm = new SqlParameter("@SearchTerm", string.IsNullOrEmpty(search) ? (object)DBNull.Value : search);
-            var pPage = new SqlParameter("@Page", pageNumber);
+            var pPage = new SqlParameter("@Page", page);
             var pPageSize = new SqlParameter("@PageSize", pageSize);
 
             var transactionsSummary = new List<CefTransactionSummaryViewModel>();
