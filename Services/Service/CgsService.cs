@@ -62,7 +62,7 @@ namespace VCashApp.Services.Service
 
             viewModel.RequestDate = DateOnly.FromDateTime(DateTime.Now);
             viewModel.RequestTime = TimeOnly.FromDateTime(DateTime.Now);
-            viewModel.ProgrammingDate = DateOnly.FromDateTime(DateTime.Now);
+            viewModel.ProgrammingDate = DateOnly.FromDateTime(DateTime.Now.AddDays(1));
             viewModel.ProgrammingTime = TimeOnly.FromDateTime(DateTime.Now);
             viewModel.IsFailed = false;
 
@@ -101,7 +101,7 @@ namespace VCashApp.Services.Service
             var declaredBill = viewModel.BillValue ?? 0m;
             var declaredCoin = viewModel.CoinValue ?? 0m;
             var declaredDocs = 0m;
-            var totalDeclared = declaredBill + declaredCoin + declaredDocs;
+            var totalDeclared = viewModel.ServiceValue ?? 0m;
             var totalDeclaredLetters = AmountInWordsHelper.ToSpanishCurrency(totalDeclared, "COP");
             var totalCounted = 0;
             var totalCountedLetters = AmountInWordsHelper.ToSpanishCurrency(totalCounted, "COP");
@@ -170,7 +170,7 @@ namespace VCashApp.Services.Service
 
                 new SqlParameter("@ValorBillete",           (object?)viewModel.BillValue ?? 0m),
                 new SqlParameter("@ValorMoneda",            (object?)viewModel.CoinValue ?? 0m),
-                new SqlParameter("@ValorServicio",          viewModel.BillValue + viewModel.CoinValue),
+                new SqlParameter("@ValorServicio",          totalDeclared),
                 new SqlParameter("@NumeroKitsCambio",       (object?)viewModel.NumberOfChangeKits ?? 0),
                 new SqlParameter("@NumeroBolsasMoneda",     (object?)viewModel.NumberOfCoinBags ?? 0),
                 new SqlParameter("@ArchivoDetalle",         (object?)viewModel.DetailFile ?? DBNull.Value),

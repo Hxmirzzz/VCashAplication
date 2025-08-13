@@ -1,0 +1,158 @@
+﻿@model VCashApp.Models.ViewModels.CentroEfectivo.CefContainerProcessingViewModel
+
+<div class="row g-3">
+    <input type="hidden" asp-for="Id" />
+    <input type="hidden" asp-for="CefTransactionId" />
+    <input type="hidden" asp-for="ParentContainerId" />
+
+    <div class="col-12 col-lg-3">
+        <div class="form-floating has-validation">
+            <select asp-for="ContainerType" class="form-select" asp-items="Html.GetEnumSelectList<VCashApp.Enums.CefContainerTypeEnum>()" required aria-required="true"></select>
+            <label class="required">Tipo contenedor</label>
+            <div class="invalid-feedback">⚠ Requerido</div>
+            <div class="valid-feedback">✓ Correcto</div>
+        </div>
+        <span asp-validation-for="ContainerType" class="text-danger"></span>
+    </div>
+
+    <div class="col-12 col-lg-3">
+        <div class="form-floating has-validation">
+            <input asp-for="ContainerCode" class="form-control" placeholder="Código" required aria-required="true" />
+            <label class="required">Código</label>
+            <div class="invalid-feedback">⚠ Requerido</div>
+            <div class="valid-feedback">✓ Correcto</div>
+        </div>
+        <span asp-validation-for="ContainerCode" class="text-danger"></span>
+    </div>
+
+    <div class="col-12 col-lg-3">
+        <div class="form-floating">
+            <input asp-for="DeclaredValue" type="number" step="1" class="form-control" placeholder="Valor declarado" />
+            <label>Valor declarado</label>
+        </div>
+        <span asp-validation-for="DeclaredValue" class="text-danger"></span>
+    </div>
+
+    <div class="col-12 col-lg-3">
+        <div class="form-floating">
+            <input asp-for="CurrentCountedValue" type="number" step="1" class="form-control" placeholder="Valor contado" readonly />
+            <label>Valor contado</label>
+        </div>
+    </div>
+
+    <div class="col-12 col-lg-4">
+        <div class="form-floating">
+            <input asp-for="ClientCashierName" class="form-control" placeholder="Cajero cliente" />
+            <label>Cajero cliente</label>
+        </div>
+        <span asp-validation-for="ClientCashierName" class="text-danger"></span>
+    </div>
+    <div class="col-12 col-lg-4">
+        <div class="form-floating">
+            <input asp-for="ClientCashierId" type="number" class="form-control" placeholder="ID Cajero cliente" />
+            <label>ID Cajero cliente</label>
+        </div>
+    </div>
+    <div class="col-12 col-lg-4">
+        <div class="form-floating">
+            <input asp-for="ClientEnvelopeDate" type="date" class="form-control" />
+            <label>Fecha sobre/bolsa cliente</label>
+        </div>
+    </div>
+
+    <div class="col-12">
+        <div class="form-floating">
+            <textarea asp-for="Observations" class="form-control" placeholder="Observaciones" style="height:80px;"></textarea>
+            <label>Observaciones</label>
+        </div>
+        <span asp-validation-for="Observations" class="text-danger"></span>
+    </div>
+
+    <!-- Detalles -->
+    <div class="col-12">
+        <div class="card mt-2">
+            <div class="card-header d-flex align-items-center justify-content-between">
+                <h6 class="mb-0">💵 Detalle de valores</h6>
+                <button type="button" class="btn btn-sm btn-outline-primary js-add-detail">+ Agregar detalle</button>
+            </div>
+            <div class="card-body p-2">
+                <div class="table-responsive">
+                    <table class="table table-sm align-middle mb-0 js-details-table">
+                        <thead>
+                            <tr>
+                                <th style="min-width:140px;">Tipo</th>
+                                <th>Denominación</th>
+                                <th>Cantidad</th>
+                                <th>Fajos</th>
+                                <th>Picos</th>
+                                <th>Unitario</th>
+                                <th>Importe</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @for (var i = 0; i < Model.ValueDetails.Count; i++)
+                            {
+                                <tr>
+                                    <td>
+                                        <select asp-for="ValueDetails[i].ValueType" class="form-select form-select-sm"
+                                                asp-items="Html.GetEnumSelectList<VCashApp.Enums.CefValueTypeEnum>()"></select>
+                                    </td>
+                                    <td><input asp-for="ValueDetails[i].Denomination" type="number" step="1" class="form-control form-control-sm js-calc" /></td>
+                                    <td><input asp-for="ValueDetails[i].Quantity" type="number" class="form-control form-control-sm js-calc" /></td>
+                                    <td><input asp-for="ValueDetails[i].BundlesCount" type="number" class="form-control form-control-sm js-calc" /></td>
+                                    <td><input asp-for="ValueDetails[i].LoosePiecesCount" type="number" class="form-control form-control-sm js-calc" /></td>
+                                    <td><input asp-for="ValueDetails[i].UnitValue" type="number" step="1" class="form-control form-control-sm js-calc" /></td>
+                                    <td><input asp-for="ValueDetails[i].CalculatedAmount" type="number" step="1" class="form-control form-control-sm" readonly /></td>
+                                    <td><button type="button" class="btn btn-sm btn-outline-danger js-remove-detail">×</button></td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Novedades -->
+    <div class="col-12">
+        <div class="card mt-2">
+            <div class="card-header d-flex align-items-center justify-content-between">
+                <h6 class="mb-0">🚨 Novedades</h6>
+                <button type="button" class="btn btn-sm btn-outline-warning js-add-incident">+ Agregar novedad</button>
+            </div>
+            <div class="card-body p-2">
+                <div class="table-responsive">
+                    <table class="table table-sm align-middle mb-0 js-incidents-table">
+                        <thead>
+                            <tr>
+                                <th style="min-width:160px;">Tipo</th>
+                                <th>Monto</th>
+                                <th>Denom.</th>
+                                <th>Cant.</th>
+                                <th>Descripción</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @for (var i = 0; i < Model.Incidents.Count; i++)
+                            {
+                                <tr>
+                                    <td>
+                                        <select asp-for="Incidents[i].IncidentType" class="form-select form-select-sm"
+                                                asp-items="Model.Incidents[i].IncidentTypes"></select>
+                                    </td>
+                                    <td><input asp-for="Incidents[i].AffectedAmount" type="number" step="1" class="form-control form-control-sm" /></td>
+                                    <td><input asp-for="Incidents[i].AffectedDenomination" type="number" step="1" class="form-control form-control-sm" /></td>
+                                    <td><input asp-for="Incidents[i].AffectedQuantity" type="number" class="form-control form-control-sm" /></td>
+                                    <td><input asp-for="Incidents[i].Description" class="form-control form-control-sm" /></td>
+                                    <td><button type="button" class="btn btn-sm btn-outline-danger js-remove-incident">×</button></td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -252,25 +252,18 @@ namespace VCashApp.Controllers
                 }
                 return View(viewModel);
             }
-
             try
             {
                 var newTransaction = await _cefTransactionService.ProcessCheckinViewModelAsync(viewModel, currentUser.Id, IpAddressForLogging);
-
                 TempData["SuccessMessage"] = $"Check-in para planilla {newTransaction.SlipNumber} registrado exitosamente. La transacción está lista para el conteo.";
                 _logger.LogInformation("Usuario: {Usuario} | IP: {IP} | Acción: Check-in Exitoso | Transacción ID: {TransactionId} | Planilla: {PlanillaNumber}.",
                     currentUser.UserName, IpAddressForLogging, newTransaction.Id, newTransaction.SlipNumber);
 
                 if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
                 {
-                    return Json(new
-                    {
-                        success = true,
-                        message = "Check-in exitoso.",
-                        transactionId = newTransaction.Id
-                    });
+                    var url = Url.Action(nameof(ProcessContainers), "Cef", new { transactionId = newTransaction.Id });
+                    return Json(ServiceResult.SuccessResult("Check-in exitoso.", new { transactionId = newTransaction.Id, url }));
                 }
-
                 return RedirectToAction(nameof(ProcessContainers), new { transactionId = newTransaction.Id });
             }
             catch (InvalidOperationException ex)
@@ -431,10 +424,9 @@ namespace VCashApp.Controllers
         /// Requiere permiso 'Edit' para el módulo "CEF".
         /// </remarks>
         /// <param name="transactionId">ID de la transacción CEF a procesar.</param>
-        /// <param name="containerId">ID opcional de un contenedor específico a editar/continuar.</param>
         /// <returns>Vista de procesamiento de contenedores.</returns>
         [HttpGet("ProcessContainers/{transactionId}")]
-        [RequiredPermission(PermissionType.Edit, "CEF")] // Cajeros o Supervisores que editen
+        [RequiredPermission(PermissionType.Edit, "CEF")]
         public async Task<IActionResult> ProcessContainers(int transactionId, int? containerId = null)
         {
             var currentUser = await GetCurrentApplicationUserAsync();
@@ -442,49 +434,17 @@ namespace VCashApp.Controllers
 
             await SetCommonViewBagsCefAsync(currentUser, "Procesar Contenedores CEF");
 
-            var transaction = await _cefTransactionService.GetCefTransactionByIdAsync(transactionId);
-            if (transaction == null)
-            {
-                TempData["ErrorMessage"] = "Transacción de Centro de Efectivo no encontrada.";
-                return RedirectToAction(nameof(Index));
-            }
-            if (transaction.TransactionStatus == CefTransactionStatusEnum.Approved.ToString() ||
-                transaction.TransactionStatus == CefTransactionStatusEnum.Rejected.ToString() ||
-                transaction.TransactionStatus == CefTransactionStatusEnum.Cancelled.ToString() ||
-                transaction.TransactionStatus == CefTransactionStatusEnum.PendingReview.ToString())
-            {
-                TempData["ErrorMessage"] = $"La transacción {transaction.SlipNumber} ya está en estado '{transaction.TransactionStatus.Replace("_", " ")}' y no puede ser procesada.";
-                return RedirectToAction(nameof(Index));
-            }
-            if (transaction.TransactionStatus == CefTransactionStatusEnum.Checkin.ToString())
-            {
-                // No hay cambio de estado explícito aquí, el servicio lo manejará al guardar el contenedor.
-            }
+            // 👇 Usa el page-VM que ya creaste
+            var pageVm = await _cefContainerService.PrepareProcessContainersPageAsync(transactionId);
 
-            CefContainerProcessingViewModel viewModel = await _cefContainerService.PrepareContainerProcessingViewModelAsync(containerId, transactionId);
-
-            // Cargar SelectLists para el frontend
-            ViewBag.ValueTypes = Enum.GetValues(typeof(CefValueTypeEnum))
-                                     .Cast<CefValueTypeEnum>()
-                                     .Select(e => new SelectListItem { Value = e.ToString(), Text = e.ToString().Replace("_", " ") })
-                                     .ToList();
+            // SelectLists auxiliares (si los usas)
             ViewBag.IncidentTypes = (await _cefIncidentService.GetAllIncidentTypesAsync())
-                                    .Select(it => new SelectListItem { Value = it.Code, Text = it.Description })
-                                    .ToList();
-
-            ViewBag.TransactionId = transactionId;
-            ViewBag.TransactionNumber = transaction.SlipNumber;
-            ViewBag.TransactionStatus = transaction.TransactionStatus.Replace("_", " ");
-            ViewBag.AvailableContainers = (await _cefContainerService.GetContainersByTransactionIdAsync(transactionId))
-                .Where(c => c.ParentContainerId == null)
-                .Select(c => new SelectListItem { Value = c.Id.ToString(), Text = $"{c.ContainerCode} ({c.ContainerType.Replace("_", " ")})" })
+                .Select(it => new SelectListItem { Value = it.Code, Text = it.Description })
                 .ToList();
-            ViewBag.AvailableContainers.Insert(0, new SelectListItem { Value = "0", Text = "-- Nuevo Contenedor --" });
 
-            _logger.LogInformation("Usuario: {Usuario} | IP: {IP} | Acción: Acceso a procesamiento de contenedores | Transacción: {TransactionId} | Contenedor: {ContainerId}.",
-                currentUser.UserName, IpAddressForLogging, transactionId, containerId ?? 0);
-            return View(viewModel);
+            return View(pageVm);
         }
+
 
         /// <summary>
         /// Procesa el envío del formulario de procesamiento de contenedores (guardar detalles y novedades).

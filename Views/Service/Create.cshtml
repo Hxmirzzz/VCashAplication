@@ -306,33 +306,32 @@
                                             </div>
                                             <span asp-validation-for="NumberOfCoinBags" class="text-danger"></span>
                                         </div>
-                                        <div class="col-12 col-lg-3">
+                                        <div class="col-12 col-lg-3" style="display: none;">
                                             <div class="form-floating">
                                                 <input asp-for="BillValue" type="number" step="1" class="form-control calculate-total-declared" placeholder="Valor Billetes Declarados" />
                                                 <label for="BillValue">Valor Billetes Declarados</label>
                                             </div>
                                             <span asp-validation-for="BillValue" class="text-danger"></span>
                                         </div>
-                                        <div class="col-12 col-lg-3">
+                                        <div class="col-12 col-lg-3" style="display: none;">
                                             <div class="form-floating">
                                                 <input asp-for="CoinValue" type="number" step="1" class="form-control calculate-total-declared" placeholder="Valor Monedas Declaradas" />
                                                 <label for="CoinValue">Valor Monedas Declaradas</label>
                                             </div>
                                             <span asp-validation-for="CoinValue" class="text-danger"></span>
                                         </div>
+                                        <div class="col-12 col-lg-3">
+                                            <div class="form-floating">
+                                                <input asp-for="ServiceValue" type="number" class="form-control calculate-total-declared" placeholder="Valor Total"/>
+                                                <label for="ServiceValue">Valor Total</label>
+                                            </div>
+                                            <span asp-validation-for="ServiceValue" class="text-danger"></span>
+                                        </div>
                                     </div>
                                     <div class="row g-3 mt-3">
                                         <div class="col-12">
                                             <div class="calculation-panel mt-3">
-                                                <h6>💰 Resumen de Valores Declarados</h6>
-                                                <div class="calculation-item">
-                                                    <span>Billetes:</span>
-                                                    <span class="value" id="billValue">$0</span>
-                                                </div>
-                                                <div class="calculation-item">
-                                                    <span>Monedas:</span>
-                                                    <span class="value" id="coinValue">$0</span>
-                                                </div>
+                                                <h6>💰 Resumen</h6>
                                                 <div class="calculation-total">
                                                     <span>Total Declarado:</span>
                                                     <span class="total-value" id="totalValue">$0</span>
@@ -458,6 +457,20 @@
 
             function toggleMoneyFieldsReadonly(conceptCode) {
                 const shouldBeReadonly = ['1', '4'].includes(conceptCode);
+                const $totalValue = $('#ServiceValue');
+
+                if (shouldBeReadonly) {
+                    $totalValue.prop('readonly', true);
+                    $totalValue.val(0);
+                } else {
+                    $totalValue.prop('readonly', false);
+                }
+
+                calculateTotalDeclared();
+            }
+
+            /*function toggleMoneyFieldsReadonly(conceptCode) {
+                const shouldBeReadonly = ['1', '4'].includes(conceptCode);
                 const $billValue = $('#BillValue');
                 const $coinValue = $('#CoinValue');
 
@@ -472,7 +485,7 @@
                 }
 
                 calculateTotalDeclared();
-            }
+            }*/
 
             function updateStepper() {
                 $('.progress-stepper .step').removeClass('active completed');
@@ -731,6 +744,11 @@
             }
 
             function calculateTotalDeclared() {
+                let serviceValue = parseFloat($('input[name="ServiceValue"]').val()) || 0;
+                $('#totalValue').text('$' + serviceValue.toLocaleString('es-ES'));
+            }
+
+            /*function calculateTotalDeclared() {
                 let billValue = parseFloat($('input[name="BillValue"]').val()) || 0;
                 let coinValue = parseFloat($('input[name="CoinValue"]').val()) || 0;
                 let total = billValue + coinValue;
@@ -738,7 +756,7 @@
                 $('#billValue').text('$' + billValue.toLocaleString('es-ES'));
                 $('#coinValue').text('$' + coinValue.toLocaleString('es-ES'));
                 $('#totalValue').text('$' + total.toLocaleString('es-ES'));
-            }
+            }*/
 
             $('#branchId').on('change', function() {
                 const selectedBranchId = $(this).val();

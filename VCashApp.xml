@@ -867,7 +867,6 @@
             Requiere permiso 'Edit' para el módulo "CEF".
             </remarks>
             <param name="transactionId">ID de la transacción CEF a procesar.</param>
-            <param name="containerId">ID opcional de un contenedor específico a editar/continuar.</param>
             <returns>Vista de procesamiento de contenedores.</returns>
         </member>
         <member name="M:VCashApp.Controllers.CefController.ProcessContainers(VCashApp.Models.ViewModels.CentroEfectivo.CefContainerProcessingViewModel)">
@@ -1933,7 +1932,7 @@
             Implementación del servicio para la gestión de Contenedores de Efectivo (Bolsas, Sobres).
             </summary>
         </member>
-        <member name="M:VCashApp.Services.Cef.CefContainerService.PrepareContainerProcessingViewModelAsync(System.Nullable{System.Int32},System.Int32)">
+        <member name="M:VCashApp.Services.Cef.CefContainerService.PrepareProcessContainersPageAsync(System.Int32)">
             <inheritdoc/>
         </member>
         <member name="M:VCashApp.Services.Cef.CefContainerService.SaveContainerAndDetailsAsync(VCashApp.Models.ViewModels.CentroEfectivo.CefContainerProcessingViewModel,System.String)">
@@ -2066,11 +2065,10 @@
             Define las operaciones de servicio para la gestión de Contenedores de Efectivo (Bolsas, Sobres).
             </summary>
         </member>
-        <member name="M:VCashApp.Services.ICefContainerService.PrepareContainerProcessingViewModelAsync(System.Nullable{System.Int32},System.Int32)">
+        <member name="M:VCashApp.Services.ICefContainerService.PrepareProcessContainersPageAsync(System.Int32)">
             <summary>
             Prepara un ViewModel para el procesamiento de un contenedor, sea nuevo o existente.
             </summary>
-            <param name="containerId">ID del contenedor existente (opcional, para edición/continuar conteo).</param>
             <param name="cefTransactionId">ID de la transacción CEF a la que pertenece (requerido para nuevos contenedores).</param>
             <returns>Un ViewModel listo para la vista de procesamiento del contenedor.</returns>
         </member>

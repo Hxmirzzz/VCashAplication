@@ -35,8 +35,8 @@ namespace VCashApp.Enums
 
     public enum CefContainerTypeEnum
     {
-        Bag,
-        Envelope
+        Bolsa,
+        Sobre
     }
 
     public enum CefContainerStatusEnum

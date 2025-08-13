@@ -7,7 +7,6 @@ using VCashApp.Data;
 using VCashApp.Enums;
 using VCashApp.Models.Entities;
 using VCashApp.Models.ViewModels.CentroEfectivo;
-using VCashApp.Services;
 
 namespace VCashApp.Services.Cef
 {
@@ -210,7 +209,8 @@ namespace VCashApp.Services.Cef
             var bills = viewModel.DeclaredBillValue;
             var coins = viewModel.DeclaredCoinValue;
             var docs = viewModel.DeclaredDocumentValue;
-            var totalDeclared = bills + coins + docs;
+            var totalDeclared = viewModel.TotalDeclaredValue;
+            var totalDeclaredInWords = AmountInWordsHelper.ToSpanishCurrency(totalDeclared, viewModel.Currency ?? "COP");
 
             tx.RouteId = viewModel.RouteId;
             tx.SlipNumber = viewModel.SlipNumber.Value;
@@ -224,7 +224,7 @@ namespace VCashApp.Services.Cef
             tx.DeclaredCoinValue = coins;
             tx.DeclaredDocumentValue = docs;
             tx.TotalDeclaredValue = totalDeclared;
-            tx.TotalDeclaredValueInWords = AmountInWordsHelper.ToSpanishCurrency(totalDeclared, tx.Currency ?? "COP");
+            tx.TotalDeclaredValueInWords = totalDeclaredInWords;
             tx.IsCustody = viewModel.IsCustody;
             tx.IsPointToPoint = viewModel.IsPointToPoint;
             tx.InformativeIncident = viewModel.InformativeIncident;

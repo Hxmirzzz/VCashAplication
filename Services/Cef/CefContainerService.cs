@@ -22,68 +22,88 @@ namespace VCashApp.Services.Cef
         }
 
         /// <inheritdoc/>
-        public async Task<CefContainerProcessingViewModel> PrepareContainerProcessingViewModelAsync(int? containerId, int cefTransactionId)
+        public async Task<CefProcessContainersPageViewModel> PrepareProcessContainersPageAsync(int cefTransactionId)
         {
-            var viewModel = new CefContainerProcessingViewModel
+            var vm = new CefProcessContainersPageViewModel { CefTransactionId = cefTransactionId };
+
+            // Transacción
+            var t = await _context.CefTransactions.AsNoTracking()
+                .FirstOrDefaultAsync(x => x.Id == cefTransactionId)
+                ?? throw new InvalidOperationException($"Transacción CEF {cefTransactionId} no existe.");
+
+            // Servicio
+            var s = await _context.CgsServicios.AsNoTracking()
+                .FirstOrDefaultAsync(x => x.ServiceOrderId == t.ServiceOrderId)
+                ?? throw new InvalidOperationException($"Servicio {t.ServiceOrderId} no existe.");
+
+            // Cabecera Transacción
+            vm.Transaction = new TransactionHeaderVM
             {
-                CefTransactionId = cefTransactionId,
-                ValueDetails = new List<CefValueDetailViewModel>(),
-                Incidents = new List<CefIncidentViewModel>()
+                Id = t.Id,
+                SlipNumber = t.SlipNumber,
+                Currency = t.Currency,
+                TransactionType = t.TransactionType,
+                Status = t.TransactionStatus,
+                RegistrationDate = t.RegistrationDate,
+                RegistrationUserName = await _context.Users.AsNoTracking()
+                    .Where(u => u.Id == t.RegistrationUser)
+                    .Select(u => u.NombreUsuario)
+                    .FirstOrDefaultAsync() ?? "N/A"
             };
 
-            if (containerId.HasValue && containerId.Value > 0)
+            // Cabecera Servicio
+            var conceptName = await _context.AdmConceptos.AsNoTracking()
+                .Where(c => c.CodConcepto == s.ConceptCode)
+                .Select(c => c.NombreConcepto)
+                .FirstOrDefaultAsync() ?? "N/A";
+
+            var branchName = await _context.AdmSucursales.AsNoTracking()
+                .Where(b => b.CodSucursal == s.BranchCode)
+                .Select(b => b.NombreSucursal)
+                .FirstOrDefaultAsync() ?? "N/A";
+
+            var clientName = await _context.AdmClientes.AsNoTracking()
+                .Where(c => c.ClientCode == (s.OriginClientCode != 0 ? s.OriginClientCode : s.ClientCode))
+                .Select(c => c.ClientName)
+                .FirstOrDefaultAsync() ?? "N/A";
+
+            string originName = s.OriginIndicatorType == "P"
+                ? await _context.AdmPuntos.AsNoTracking()
+                    .Where(p => p.PointCode == s.OriginPointCode).Select(p => p.PointName).FirstOrDefaultAsync() ?? $"{s.OriginIndicatorType}-{s.OriginPointCode}"
+                : await _context.AdmFondos.AsNoTracking()
+                    .Where(f => f.FundCode == s.OriginPointCode).Select(f => f.FundName).FirstOrDefaultAsync() ?? $"{s.OriginIndicatorType}-{s.OriginPointCode}";
+
+            string destinationName = s.DestinationIndicatorType == "P"
+                ? await _context.AdmPuntos.AsNoTracking()
+                    .Where(p => p.PointCode == s.DestinationPointCode).Select(p => p.PointName).FirstOrDefaultAsync() ?? $"{s.DestinationIndicatorType}-{s.DestinationPointCode}"
+                : await _context.AdmFondos.AsNoTracking()
+                    .Where(f => f.FundCode == s.DestinationPointCode).Select(f => f.FundName).FirstOrDefaultAsync() ?? $"{s.DestinationIndicatorType}-{s.DestinationPointCode}";
+
+            vm.Service = new ServiceHeaderVM
             {
-                var container = await GetContainerWithDetailsAsync(containerId.Value);
-                if (container != null)
+                ServiceOrderId = s.ServiceOrderId,
+                BranchCode = s.BranchCode,
+                BranchName = branchName,
+                ServiceDate = s.ProgrammingDate,
+                ServiceTime = s.ProgrammingTime,
+                ConceptName = conceptName,
+                OriginName = originName,
+                DestinationName = destinationName,
+                ClientName = clientName
+            };
+
+            // Inicializa con 1 contenedor por defecto si vienes “en blanco”
+            // (No tocamos tu CefContainerProcessingViewModel)
+            vm.Containers = new List<CefContainerProcessingViewModel>
+            {
+                new CefContainerProcessingViewModel
                 {
-                    viewModel.Id = container.Id; 
-                    viewModel.ParentContainerId = container.ParentContainerId;
-                    viewModel.ContainerType = Enum.Parse<CefContainerTypeEnum>(container.ContainerType);
-                    viewModel.ContainerCode = container.ContainerCode;
-                    viewModel.DeclaredValue = container.DeclaredValue;
-                    viewModel.ContainerStatus = Enum.Parse<CefContainerStatusEnum>(container.ContainerStatus);
-                    viewModel.Observations = container.Observations;
-                    viewModel.ClientCashierId = container.ClientCashierId;
-                    viewModel.ClientCashierName = container.ClientCashierName;
-                    viewModel.ClientEnvelopeDate = container.ClientEnvelopeDate;
-                    viewModel.CurrentCountedValue = container.CountedValue ?? 0;
-
-                    viewModel.ValueDetails = container.ValueDetails.Select(vd => new CefValueDetailViewModel
-                    {
-                        Id = vd.Id,
-                        ValueType = Enum.Parse<CefValueTypeEnum>(vd.ValueType),
-                        Denomination = vd.Denomination,
-                        Quantity = vd.Quantity,
-                        BundlesCount = vd.BundlesCount,
-                        LoosePiecesCount = vd.LoosePiecesCount,
-                        UnitValue = vd.UnitValue,
-                        CalculatedAmount = vd.CalculatedAmount ?? 0,
-                        IsHighDenomination = vd.IsHighDenomination,
-                        IdentifierNumber = vd.IdentifierNumber,
-                        BankName = vd.BankName,
-                        IssueDate = vd.IssueDate,
-                        Issuer = vd.Issuer,
-                        Observations = vd.Observations
-                    }).ToList();
-
-                    viewModel.Incidents = container.Incidents.Select(ni => new CefIncidentViewModel
-                    {
-                        Id = ni.Id,
-                        CefTransactionId = ni.CefTransactionId,
-                        CefContainerId = ni.CefContainerId,
-                        CefValueDetailId = ni.CefValueDetailId,
-                        IncidentType = Enum.Parse<CefIncidentTypeCategoryEnum>(_context.CefIncidentTypes.FirstOrDefault(it => it.Id == ni.IncidentTypeId)?.Code ?? "Otro"),
-                        AffectedAmount = ni.AffectedAmount,
-                        AffectedDenomination = ni.AffectedDenomination,
-                        AffectedQuantity = ni.AffectedQuantity,
-                        Description = ni.Description,
-                        ReportDate = ni.IncidentDate,
-                        ReportingUserName = _context.Users.FirstOrDefault(u => u.Id == ni.ReportedUserId)?.NombreUsuario ?? "N/A",
-                        IncidentStatus = ni.IncidentStatus
-                    }).ToList();
+                    CefTransactionId = cefTransactionId,
+                    ContainerType = CefContainerTypeEnum.Bolsa
                 }
-            }
-            return viewModel;
+            };
+
+            return vm;
         }
 
         /// <inheritdoc/>
