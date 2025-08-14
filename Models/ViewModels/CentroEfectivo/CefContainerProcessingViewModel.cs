@@ -51,8 +51,17 @@ namespace VCashApp.Models.ViewModels.CentroEfectivo
 
         public string SobreMode { get; set; } = "Docs";
 
+        public List<CefEnvelopeViewModel> Envelopes { get; set; } = new();
         public List<CefValueDetailViewModel> ValueDetails { get; set; } = new List<CefValueDetailViewModel>();
         public List<CefIncidentViewModel> Incidents { get; set; } = new List<CefIncidentViewModel>();
+    }
+
+    public class CefEnvelopeViewModel
+    {
+        public string? EnvelopeCode { get; set; }     // código del sobre (difiere del de la bolsa)
+        public CefEnvelopeSubTypeEnum SubType { get; set; } = CefEnvelopeSubTypeEnum.Efectivo;
+        public List<CefValueDetailViewModel> ValueDetails { get; set; } = new();
+        public string? Observations { get; set; }
     }
 
     /// <summary>
@@ -67,8 +76,8 @@ namespace VCashApp.Models.ViewModels.CentroEfectivo
         public CefValueTypeEnum ValueType { get; set; }
 
         [Display(Name = "Denominación")]
-        [Range(0.00, (double)decimal.MaxValue, ErrorMessage = "Debe ser un valor válido.")]
-        public decimal? Denomination { get; set; }
+        [Required(ErrorMessage = "La denominación es requerida.")]
+        public int Denomination { get; set; }
 
         [Display(Name = "Cantidad")]
         [Range(0, int.MaxValue, ErrorMessage = "Debe ser una cantidad válida.")]

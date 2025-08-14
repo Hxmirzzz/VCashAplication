@@ -1,6 +1,7 @@
 ﻿@model VCashApp.Models.ViewModels.CentroEfectivo.CefContainerProcessingViewModel
 @{
     var prefix = ViewData.TemplateInfo.HtmlFieldPrefix;
+    bool esSobre = Model.ContainerType.ToString() == "Sobre";
 }
 
 <div class="container-editor border rounded p-3" data-prefix="@prefix">
@@ -8,15 +9,25 @@
     <input type="hidden" asp-for="CefTransactionId" />
 
     <div class="row g-3">
-        <div class="col-12 col-lg-3">
+        <div class="col-12 col-lg-4">
             <div class="form-floating has-validation">
-                <select asp-for="ContainerType" class="form-select js-container-type"
-                        asp-items="Html.GetEnumSelectList<VCashApp.Enums.CefContainerTypeEnum>()" required aria-required="true">
+                <!-- Select sólo visual (disabled), pero con el valor correcto -->
+                <select class="form-select js-container-type" disabled>
+                    @if (esSobre)
+                    {
+                        <option value="Sobre" selected>Sobre</option>
+                    }
+                    else
+                    {
+                        <option value="Bolsa" selected>Bolsa</option>
+                    }
                 </select>
-                <label class="required">Tipo de Contenedor</label>
-                <div class="invalid-feedback">⚠ Requerido</div>
+                <label class="required">Tipo de contenedor</label>
+                <div class="invalid-feedback">⚠ Este campo es requerido</div>
                 <div class="valid-feedback">✓ Correcto</div>
             </div>
+            <!-- Valor real que viaja al servidor -->
+            <input type="hidden" name="@($"{prefix}.ContainerType")" value="@(esSobre ? "Sobre" : "Bolsa")" />
         </div>
 
         <div class="col-12 col-lg-3">
@@ -28,12 +39,12 @@
             </div>
         </div>
 
-        <!-- Solo para sobres: selección de bolsa padre -->
-        <div class="col-12 col-lg-3 js-parent-bag-block" style="display:none;">
+        <!-- Sólo para SOBRES: selección de bolsa padre -->
+        <div class="col-12 col-lg-3 js-parent-bag-block" style="display:@(esSobre ? "block" : "none")">
             <div class="form-floating has-validation">
                 <select asp-for="ParentContainerId" class="form-select">
                     <option value="">-- Seleccione bolsa --</option>
-                    @* JS llenará opciones *@
+                    @* (JS rellena las opciones) *@
                 </select>
                 <label>Bolsa asociada</label>
                 <div class="invalid-feedback">⚠ Requerido</div>
@@ -49,7 +60,8 @@
         </div>
     </div>
 
-    <div class="sec-bolsa mt-3">
+    <!-- ====== Sección BOLSA ====== -->
+    <div class="sec-bolsa mt-3" style="display:@(!esSobre ? "block" : "none")">
         <div class="card">
             <div class="card-header"><h6 class="mb-0">🧳 Bolsa — Detalle (Billetes/Monedas)</h6></div>
             <div class="card-body">
@@ -67,7 +79,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @* Si quieres precargar, recorre Model.ValueDetails (Bill/Coin) *@
+                        @* Pre-carga si ya vienen detalles *@
                     </tbody>
                 </table>
                 <button type="button" class="btn btn-outline-primary btn-sm js-add-detail" data-detail-scope="bolsa">
@@ -77,24 +89,37 @@
         </div>
     </div>
 
-    <div class="sec-sobre mt-3" style="display:none;">
+    <!-- ====== Sección SOBRE ====== -->
+    <div class="sec-sobre mt-3" style="display:@(esSobre ? "block" : "none")">
         <div class="mb-2">
             <div class="form-check form-check-inline">
-                <input class="form-check-input js-sobre-mode" type="radio" name="@($"{prefix}.SobreMode")" value="Cash" checked />
+                <input class="form-check-input js-sobre-mode"
+                       type="radio"
+                       name="@($"{prefix}.SobreMode")"
+                       value="Cash"
+                       @(Model.SobreMode?.ToString() == "Cash" || Model.SobreMode == null ? "checked" : "") />
                 <label class="form-check-label">Efectivo</label>
             </div>
             <div class="form-check form-check-inline">
-                <input class="form-check-input js-sobre-mode" type="radio" name="@($"{prefix}.SobreMode")" value="Document" />
+                <input class="form-check-input js-sobre-mode"
+                       type="radio"
+                       name="@($"{prefix}.SobreMode")"
+                       value="Document"
+                       @(Model.SobreMode?.ToString() == "Document" ? "checked" : "") />
                 <label class="form-check-label">Documentos/Vouchers</label>
             </div>
             <div class="form-check form-check-inline">
-                <input class="form-check-input js-sobre-mode" type="radio" name="@($"{prefix}.SobreMode")" value="Check" />
+                <input class="form-check-input js-sobre-mode"
+                       type="radio"
+                       name="@($"{prefix}.SobreMode")"
+                       value="Check"
+                       @(Model.SobreMode?.ToString() == "Check" ? "checked" : "") />
                 <label class="form-check-label">Cheques</label>
             </div>
         </div>
 
         <!-- Sobre: EFECTIVO -->
-        <div class="sec-sobre-cash">
+        <div class="sec-sobre-cash" style="display:@(Model.SobreMode == null || Model.SobreMode.ToString() == "Cash" ? "block" : "none")">
             <div class="card">
                 <div class="card-header"><h6 class="mb-0">💵 Sobre — Efectivo (Billetes/Monedas)</h6></div>
                 <div class="card-body">
@@ -121,7 +146,7 @@
         </div>
 
         <!-- Sobre: DOCUMENTOS/VOUCHERS -->
-        <div class="sec-sobre-docs" style="display:none;">
+        <div class="sec-sobre-docs" style="display:@(Model.SobreMode?.ToString() == "Document" ? "block" : "none")">
             <div class="card">
                 <div class="card-header"><h6 class="mb-0">📄 Sobre — Documentos/Vouchers</h6></div>
                 <div class="card-body">
@@ -148,7 +173,7 @@
         </div>
 
         <!-- Sobre: CHEQUES -->
-        <div class="sec-sobre-cheque" style="display:none;">
+        <div class="sec-sobre-cheque" style="display:@(Model.SobreMode?.ToString() == "Check" ? "block" : "none")">
             <div class="card">
                 <div class="card-header"><h6 class="mb-0">🏦 Sobre — Cheques</h6></div>
                 <div class="card-body">

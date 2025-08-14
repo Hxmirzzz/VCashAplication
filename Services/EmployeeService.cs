@@ -276,7 +276,7 @@ namespace VCashApp.Services
                     SegundoNombre = FormatText(model.MiddleName),
                     NombreCompleto = string.Join(" ", new[] { FormatText(model.FirstName), FormatText(model.MiddleName), FormatText(model.FirstLastName), FormatText(model.SecondLastName) }.Where(x => !string.IsNullOrWhiteSpace(x))).Trim(),
                     TipoDocumento = model.TipoDocumento,
-                    CodCedula = model.CodCedula,
+                    CodCedula = ((int)model.CodCedula),
                     NumeroCarnet = model.NumeroCarnet,
                     FechaNacimiento = model.FechaNacimiento,
                     FechaExpedicion = model.FechaExpedicion,

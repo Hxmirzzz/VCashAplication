@@ -12,6 +12,18 @@ namespace VCashApp.Enums
         Fondo = 2
     }
 
+    public enum CefEnvelopeSubTypeEnum
+    {
+        [Display(Name = "Efectivo")]
+        Efectivo = 0,
+
+        [Display(Name = "Documentos/Voucher")]
+        Document = 1,
+
+        [Display(Name = "Cheque")]
+        Check = 2
+    }
+
     public enum CefTransactionTypeEnum // ELIMINAR
     {
         Collection,
