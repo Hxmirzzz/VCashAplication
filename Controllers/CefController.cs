@@ -2,20 +2,14 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.Extensions.Logging;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using VCashApp.Utils;
 using VCashApp.Data;
 using VCashApp.Enums;
 using VCashApp.Filters;
 using VCashApp.Models;
-using VCashApp.Models.Entities;
 using VCashApp.Models.ViewModels.CentroEfectivo;
 using VCashApp.Services;
-using VCashApp.Services.Cef;
 using VCashApp.Services.DTOs;
 
 namespace VCashApp.Controllers
@@ -79,9 +73,9 @@ namespace VCashApp.Controllers
             ViewBag.TransactionStatuses = estados;
 
             var userRoles = await _userManager.GetRolesAsync(currentUser);
-            ViewBag.HasCreatePermission = await HasPermisionForView(userRoles, "CEF", PermissionType.Create);
-            ViewBag.HasEditPermission = await HasPermisionForView(userRoles, "CEF", PermissionType.Edit);
-            ViewBag.HasViewPermission = await HasPermisionForView(userRoles, "CEF", PermissionType.View);
+            ViewBag.HasCreate = await HasPermisionForView(userRoles, "CEF", PermissionType.Create);
+            ViewBag.HasEdit = await HasPermisionForView(userRoles, "CEF", PermissionType.Edit);
+            ViewBag.HasView = await HasPermisionForView(userRoles, "CEF", PermissionType.View);
             // ViewBag.HasDeletePermission = await HasPermisionForView(userRoles, "CEF", PermissionType.Delete);
         }
 
@@ -103,16 +97,16 @@ namespace VCashApp.Controllers
         [RequiredPermission(PermissionType.View, "CEF")]
         public async Task<IActionResult> Index(
             int? branchId, DateOnly? startDate, DateOnly? endDate, CefTransactionStatusEnum? status,
-            string? search, int pageNumber = 1, int pageSize = 15)
+            string? search, int page = 1, int pageSize = 15)
         {
             var currentUser = await GetCurrentApplicationUserAsync();
             if (currentUser == null) return RedirectToPage("/Account/Login", new { area = "Identity" });
 
-            await SetCommonViewBagsCefAsync(currentUser, "Centro Efectivo");
+            await SetCommonViewBagsCefAsync(currentUser, "Tesoreria");
             bool isAdmin = ViewBag.IsAdmin;
 
             var (transactions, totalRecords) = await _cefTransactionService.GetFilteredCefTransactionsAsync(
-                currentUser.Id, branchId, startDate, endDate, status, search, pageNumber, pageSize, isAdmin);
+                currentUser.Id, branchId, startDate, endDate, status, search, page, pageSize, isAdmin);
 
             var transactionStatuses = Enum.GetValues(typeof(CefTransactionStatusEnum))
                 .Cast<CefTransactionStatusEnum>()
@@ -123,7 +117,7 @@ namespace VCashApp.Controllers
             var dashboardViewModel = new CefDashboardViewModel
             {
                 Transactions = transactions,
-                CurrentPage = pageNumber,
+                CurrentPage = page,
                 PageSize = pageSize,
                 TotalPages = (int)Math.Ceiling((double)totalRecords / pageSize),
                 TotalData = totalRecords,
@@ -136,7 +130,7 @@ namespace VCashApp.Controllers
                 TransactionStatuses = ViewBag.TransactionStatuses as List<SelectListItem>
             };
 
-            ViewBag.CurrentPage = pageNumber;
+            ViewBag.CurrentPage = page;
             ViewBag.PageSize = pageSize;
             ViewBag.TotalPages = dashboardViewModel.TotalPages;
             ViewBag.TotalData = totalRecords;
@@ -182,7 +176,7 @@ namespace VCashApp.Controllers
             {
                 try
                 {
-                    viewModel = await _cefTransactionService.PrepareCheckinViewModelAsync(serviceOrderId, routeId, currentUser.Id, IpAddressForLogging);
+                    viewModel = await _cefTransactionService.PrepareCheckinViewModelAsync(serviceOrderId, currentUser.Id, IpAddressForLogging);
                 }
                 catch (InvalidOperationException ex)
                 {
@@ -256,9 +250,8 @@ namespace VCashApp.Controllers
                 {
                     return Json(ServiceResult.FailureResult("Hay errores en el formulario.", errors: fieldErrors));
                 }
-                return View(viewModel); // Para submits de formulario HTML tradicional
+                return View(viewModel);
             }
-
             try
             {
                 var newTransaction = await _cefTransactionService.ProcessCheckinViewModelAsync(viewModel, currentUser.Id, IpAddressForLogging);
@@ -268,7 +261,8 @@ namespace VCashApp.Controllers
 
                 if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
                 {
-                    return Json(ServiceResult.SuccessResult("Check-in exitoso.", newTransaction.Id));
+                    var url = Url.Action(nameof(ProcessContainers), "Cef", new { transactionId = newTransaction.Id });
+                    return Json(ServiceResult.SuccessResult("Check-in exitoso.", new { transactionId = newTransaction.Id, url }));
                 }
                 return RedirectToAction(nameof(ProcessContainers), new { transactionId = newTransaction.Id });
             }
@@ -362,8 +356,7 @@ namespace VCashApp.Controllers
             viewModel.AvailableClients = await _cefServiceCreationService.GetClientsForDropdownAsync();
             viewModel.AvailableCities = await _context.AdmCiudades.Where(c => c.Estado).Select(c => new SelectListItem { Value = c.CodCiudad.ToString(), Text = c.NombreCiudad }).ToListAsync();
             //viewModel.AvailableRanks = await _context.AdmRangos.Where(r => r.RangoEstado == 1).Select(r => new SelectListItem { Value = r.CodRango, Text = r.InfoRangoAtencion }).ToListAsync();
-            viewModel.AvailableEmployees = new List<SelectListItem>(); 
-
+            viewModel.AvailableEmployees = new List<SelectListItem>();
             viewModel.AvailableVehicles = new List<SelectListItem>();
             viewModel.AvailableServiceModalities = new List<SelectListItem>();
 
@@ -431,10 +424,9 @@ namespace VCashApp.Controllers
         /// Requiere permiso 'Edit' para el módulo "CEF".
         /// </remarks>
         /// <param name="transactionId">ID de la transacción CEF a procesar.</param>
-        /// <param name="containerId">ID opcional de un contenedor específico a editar/continuar.</param>
         /// <returns>Vista de procesamiento de contenedores.</returns>
         [HttpGet("ProcessContainers/{transactionId}")]
-        [RequiredPermission(PermissionType.Edit, "CEF")] // Cajeros o Supervisores que editen
+        [RequiredPermission(PermissionType.Edit, "CEF")]
         public async Task<IActionResult> ProcessContainers(int transactionId, int? containerId = null)
         {
             var currentUser = await GetCurrentApplicationUserAsync();
@@ -442,49 +434,17 @@ namespace VCashApp.Controllers
 
             await SetCommonViewBagsCefAsync(currentUser, "Procesar Contenedores CEF");
 
-            var transaction = await _cefTransactionService.GetCefTransactionByIdAsync(transactionId);
-            if (transaction == null)
-            {
-                TempData["ErrorMessage"] = "Transacción de Centro de Efectivo no encontrada.";
-                return RedirectToAction(nameof(Index));
-            }
-            if (transaction.TransactionStatus == CefTransactionStatusEnum.Approved.ToString() ||
-                transaction.TransactionStatus == CefTransactionStatusEnum.Rejected.ToString() ||
-                transaction.TransactionStatus == CefTransactionStatusEnum.Cancelled.ToString() ||
-                transaction.TransactionStatus == CefTransactionStatusEnum.PendingReview.ToString())
-            {
-                TempData["ErrorMessage"] = $"La transacción {transaction.SlipNumber} ya está en estado '{transaction.TransactionStatus.Replace("_", " ")}' y no puede ser procesada.";
-                return RedirectToAction(nameof(Index));
-            }
-            if (transaction.TransactionStatus == CefTransactionStatusEnum.Checkin.ToString())
-            {
-                // No hay cambio de estado explícito aquí, el servicio lo manejará al guardar el contenedor.
-            }
+            // 👇 Usa el page-VM que ya creaste
+            var pageVm = await _cefContainerService.PrepareProcessContainersPageAsync(transactionId);
 
-            CefContainerProcessingViewModel viewModel = await _cefContainerService.PrepareContainerProcessingViewModelAsync(containerId, transactionId);
-
-            // Cargar SelectLists para el frontend
-            ViewBag.ValueTypes = Enum.GetValues(typeof(CefValueTypeEnum))
-                                     .Cast<CefValueTypeEnum>()
-                                     .Select(e => new SelectListItem { Value = e.ToString(), Text = e.ToString().Replace("_", " ") })
-                                     .ToList();
+            // SelectLists auxiliares (si los usas)
             ViewBag.IncidentTypes = (await _cefIncidentService.GetAllIncidentTypesAsync())
-                                    .Select(it => new SelectListItem { Value = it.Code, Text = it.Description })
-                                    .ToList();
-
-            ViewBag.TransactionId = transactionId;
-            ViewBag.TransactionNumber = transaction.SlipNumber;
-            ViewBag.TransactionStatus = transaction.TransactionStatus.Replace("_", " ");
-            ViewBag.AvailableContainers = (await _cefContainerService.GetContainersByTransactionIdAsync(transactionId))
-                .Where(c => c.ParentContainerId == null)
-                .Select(c => new SelectListItem { Value = c.Id.ToString(), Text = $"{c.ContainerCode} ({c.ContainerType.Replace("_", " ")})" })
+                .Select(it => new SelectListItem { Value = it.Code, Text = it.Description })
                 .ToList();
-            ViewBag.AvailableContainers.Insert(0, new SelectListItem { Value = "0", Text = "-- Nuevo Contenedor --" });
 
-            _logger.LogInformation("Usuario: {Usuario} | IP: {IP} | Acción: Acceso a procesamiento de contenedores | Transacción: {TransactionId} | Contenedor: {ContainerId}.",
-                currentUser.UserName, IpAddressForLogging, transactionId, containerId ?? 0);
-            return View(viewModel);
+            return View(pageVm);
         }
+
 
         /// <summary>
         /// Procesa el envío del formulario de procesamiento de contenedores (guardar detalles y novedades).
@@ -853,6 +813,23 @@ namespace VCashApp.Controllers
         }
 
         /// <summary>
+        /// Obtiene usuarios responsables de entrega o recepción según concepto y sucursal.
+        /// </summary>
+        /// <param name="branchId">ID de la sucursal seleccionada.</param>
+        /// <param name="serviceConceptCode">Código del concepto del servicio.</param>
+        /// <param name="isDelivery">True para lista de entrega, false para recepción.</param>
+        /// <returns>JSON con lista de SelectListItem.</returns>
+        [HttpGet("GetResponsibleUsers")]
+        public async Task<IActionResult> GetResponsibleUsers(int branchId, string serviceConceptCode, bool isDelivery)
+        {
+            var currentUser = await GetCurrentApplicationUserAsync();
+            if (currentUser == null) return Unauthorized();
+
+            var items = await _cefServiceCreationService.GetResponsibleUsersForDropdownAsync(branchId, serviceConceptCode, isDelivery, currentUser.Id);
+            return Json(items);
+        }
+
+        /// <summary>
         /// Obtiene empleados (JT, Conductor, Tripulante) filtrados por sucursal y cargo.
         /// </summary>
         /// <param name="branchId">ID de la sucursal.</param>
@@ -878,6 +855,13 @@ namespace VCashApp.Controllers
             }
 
             return NotFound();
+        }
+
+        [HttpGet("AmountInWords")]
+        public IActionResult AmountInWords(decimal value, string currency = "COP")
+        {
+            var words = AmountInWordsHelper.ToSpanishCurrency(value, currency);
+            return Json(new { words });
         }
     }
 }

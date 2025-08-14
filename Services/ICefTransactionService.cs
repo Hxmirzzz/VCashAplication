@@ -14,11 +14,10 @@ namespace VCashApp.Services
         /// Prepara el ViewModel para la vista de Check-in de una nueva transacción.
         /// </summary>
         /// <param name="serviceOrderId">La Orden de Servicio para la que se prepara el check-in.</param>
-        /// <param name="routeId">La ID de la Ruta Diaria asociada (opcional).</param>
         /// <param name="currentUserId">La ID del usuario actual.</param>
         /// <param name="currentIP">La dirección IP del usuario actual.</param>
         /// <returns>Un ViewModel listo para la vista de Check-in.</returns>
-        Task<CefTransactionCheckinViewModel> PrepareCheckinViewModelAsync(string serviceOrderId, string? routeId, string currentUserId, string currentIP);
+        Task<CefTransactionCheckinViewModel> PrepareCheckinViewModelAsync(string serviceOrderId, string currentUserId, string currentIP);
 
         /// <summary>
         /// Procesa los datos del Check-in y crea una nueva transacción de Centro de Efectivo.
@@ -52,7 +51,7 @@ namespace VCashApp.Services
         /// <returns>Una tupla que contiene la lista de transacciones y el total de registros.</returns>
         Task<Tuple<List<CefTransactionSummaryViewModel>, int>> GetFilteredCefTransactionsAsync(
             string currentUserId, int? branchId, DateOnly? startDate, DateOnly? endDate, CefTransactionStatusEnum? status,
-            string? search, int pageNumber, int pageSize, bool isAdmin);
+            string? search, int page, int pageSize, bool isAdmin);
 
         /// <summary>
         /// Obtiene las listas de dropdowns necesarias para el dashboard de CEF.
@@ -83,5 +82,11 @@ namespace VCashApp.Services
         /// <param name="reviewerUserId">ID del usuario revisor.</param>
         /// <returns>Verdadero si el proceso fue exitoso, de lo contrario, falso.</returns>
         Task<bool> ProcessReviewApprovalAsync(CefTransactionReviewViewModel viewModel, string reviewerUserId);
+
+        /// <summary>
+        /// Obtiene las divisas de servicio disponibles para los dropdowns.
+        /// </summary>
+        /// <returns>Lista de SelectListItem para divisas de servicio.</returns>
+        Task<List<SelectListItem>> GetCurrenciesForDropdownAsync();
     }
 }

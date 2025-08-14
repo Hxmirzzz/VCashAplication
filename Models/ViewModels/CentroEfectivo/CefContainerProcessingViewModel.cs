@@ -49,6 +49,8 @@ namespace VCashApp.Models.ViewModels.CentroEfectivo
         [Display(Name = "Valor Contado Actual")]
         public decimal CurrentCountedValue { get; set; }
 
+        public string SobreMode { get; set; } = "Docs";
+
         public List<CefValueDetailViewModel> ValueDetails { get; set; } = new List<CefValueDetailViewModel>();
         public List<CefIncidentViewModel> Incidents { get; set; } = new List<CefIncidentViewModel>();
     }

@@ -24,7 +24,7 @@ namespace VCashApp.Models.ViewModels.CentroEfectivo
         [Required(ErrorMessage = "El tipo de servicio es requerido.")]
         public string ServiceConceptCode { get; set; } = string.Empty;
 
-        [Display(Name = "Número de Pedido Cliente")]
+        [Display(Name = "Número de Pedido")]
         [StringLength(255, ErrorMessage = "El número de pedido no puede exceder los 255 caracteres.")]
         public string? ClientOrderNumber { get; set; }
 
@@ -165,7 +165,6 @@ namespace VCashApp.Models.ViewModels.CentroEfectivo
         [Range(0, int.MaxValue, ErrorMessage = "Debe ser un número válido.")]
         public int? ExchangeKitCount { get; set; }
 
-       
         [Display(Name = "Cantidad de Bolsas Declaradas")]
         [Required(ErrorMessage = "La cantidad de bolsas declaradas es requerida.")]
         [Range(0, int.MaxValue, ErrorMessage = "Debe ser un número válido.")]
@@ -214,6 +213,12 @@ namespace VCashApp.Models.ViewModels.CentroEfectivo
 
         [Display(Name = "¿Es Punto a Punto?")]
         public bool IsPointToPoint { get; set; } = false;
+
+        [Display(Name = "¿Quién Entrega?")]
+        public string? DeliveryResponsible { get; set; } = string.Empty;
+
+        [Display(Name = "¿Quién Recibe?")]
+        public string? ReceptionResponsible { get; set; } = string.Empty;
 
        
        

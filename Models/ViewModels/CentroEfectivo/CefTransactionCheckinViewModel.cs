@@ -19,9 +19,11 @@ namespace VCashApp.Models.ViewModels.CentroEfectivo
         [StringLength(12, ErrorMessage = "El ID de Ruta Diaria no puede exceder los 12 caracteres.")]
         public string? RouteId { get; set; }
 
-        [Display(Name = "Número de Planilla")]
-        public int SlipNumber { get; set; }
-
+        [Display(Name = "Numero de Planilla")]
+        [Required(ErrorMessage = "El número de planilla es requerido.")]
+        [Range(1, int.MaxValue, ErrorMessage = "El número de planilla debe ser mayor a 0.")]
+        public int? SlipNumber { get; set; }
+      
         [Display(Name = "Divisa")]
         [Required(ErrorMessage = "La divisa es requerida.")]
         [StringLength(3, ErrorMessage = "La divisa debe tener 3 caracteres.")]
@@ -29,7 +31,7 @@ namespace VCashApp.Models.ViewModels.CentroEfectivo
 
         [Display(Name = "Tipo de Transacción")]
         [Required(ErrorMessage = "El tipo de transacción es requerido.")]
-        public CefTransactionTypeEnum TransactionType { get; set; }
+        public string? TransactionType { get; set; }
 
         [Display(Name = "Cantidad de Bolsas Declaradas")]
         [Required(ErrorMessage = "La cantidad de bolsas declaradas es requerida.")]

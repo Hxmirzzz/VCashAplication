@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using VCashApp.Data;
 
@@ -11,9 +12,11 @@ using VCashApp.Data;
 namespace VCashApp.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250806160506_AddDelivererAndReceiverColumnToCefTransaction")]
+    partial class AddDelivererAndReceiverColumnToCefTransaction
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1451,7 +1454,7 @@ namespace VCashApp.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int>("BranchCode")
+                    b.Property<int?>("BranchCode")
                         .HasColumnType("int")
                         .HasColumnName("CodSucursal");
 
@@ -1478,6 +1481,7 @@ namespace VCashApp.Migrations
                         .HasColumnName("UsuarioConteoMonedasId");
 
                     b.Property<string>("Currency")
+                        .IsRequired()
                         .HasMaxLength(3)
                         .HasColumnType("nvarchar(3)")
                         .HasColumnName("Divisa");
@@ -1510,10 +1514,10 @@ namespace VCashApp.Migrations
                         .HasColumnType("int")
                         .HasColumnName("CantidadSobresDeclarados");
 
-                    b.Property<string>("DelivererId")
-                        .HasMaxLength(450)
-                        .HasColumnType("nvarchar(450)")
-                        .HasColumnName("ReponsableEntregaId");
+                    b.Property<string>("Deliverer")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnName("Entrega");
 
                     b.Property<string>("InformativeIncident")
                         .HasMaxLength(255)
@@ -1537,10 +1541,10 @@ namespace VCashApp.Migrations
                         .HasColumnType("nvarchar(450)")
                         .HasColumnName("UsuarioUltimaActualizacionId");
 
-                    b.Property<string>("ReceiverId")
-                        .HasMaxLength(450)
-                        .HasColumnType("nvarchar(450)")
-                        .HasColumnName("ResponsableRecibeId");
+                    b.Property<string>("Receiver")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnName("Recibe");
 
                     b.Property<DateTime>("RegistrationDate")
                         .HasColumnType("DATETIME")
@@ -1624,11 +1628,7 @@ namespace VCashApp.Migrations
 
                     b.HasIndex("CountingUserCoinId");
 
-                    b.HasIndex("DelivererId");
-
                     b.HasIndex("LastUpdateUser");
-
-                    b.HasIndex("ReceiverId");
 
                     b.HasIndex("RegistrationUser");
 
@@ -1903,8 +1903,8 @@ namespace VCashApp.Migrations
 
                     b.Property<string>("OriginPointCode")
                         .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("nvarchar(255)")
+                        .HasMaxLength(25)
+                        .HasColumnType("nvarchar(25)")
                         .HasColumnName("CodPuntoOrigen");
 
                     b.Property<DateOnly?>("ProgrammingDate")
@@ -2548,8 +2548,7 @@ namespace VCashApp.Migrations
                     b.HasOne("VCashApp.Models.Entities.AdmSucursal", "Branch")
                         .WithMany()
                         .HasForeignKey("BranchCode")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("VCashApp.Models.ApplicationUser", null)
                         .WithMany()
@@ -2563,17 +2562,7 @@ namespace VCashApp.Migrations
 
                     b.HasOne("VCashApp.Models.ApplicationUser", null)
                         .WithMany()
-                        .HasForeignKey("DelivererId")
-                        .OnDelete(DeleteBehavior.Restrict);
-
-                    b.HasOne("VCashApp.Models.ApplicationUser", null)
-                        .WithMany()
                         .HasForeignKey("LastUpdateUser")
-                        .OnDelete(DeleteBehavior.Restrict);
-
-                    b.HasOne("VCashApp.Models.ApplicationUser", null)
-                        .WithMany()
-                        .HasForeignKey("ReceiverId")
                         .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("VCashApp.Models.ApplicationUser", null)

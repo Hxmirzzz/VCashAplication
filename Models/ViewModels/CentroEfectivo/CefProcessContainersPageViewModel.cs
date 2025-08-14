@@ -138,4 +138,3 @@ namespace VCashApp.Models.ViewModels.CentroEfectivo
         public string RegistrationUserName { get; set; } = "N/A";
     }
 }
-

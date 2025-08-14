@@ -20,9 +20,9 @@ namespace VCashApp.Models.Entities
 
         [Column("CodSucursal")]
         [ForeignKey("AdmSucursal")]
-        public int? BranchCode { get; set; }
+        public int BranchCode { get; set; }
         [NotMapped]
-        public virtual AdmSucursal? Branch { get; set; }
+        public virtual AdmSucursal Branch { get; set; }
 
         [StringLength(12)]
         [Column("CodRuta")]
@@ -35,10 +35,9 @@ namespace VCashApp.Models.Entities
         [Column("NumeroPlanilla")]
         public int SlipNumber { get; set; }
 
-        [Required]
         [StringLength(3)]
         [Column("Divisa")]
-        public string Currency { get; set; } // Divisa (ej: 'COP', 'USD')
+        public string? Currency { get; set; }
 
         [Required]
         [StringLength(50)]
@@ -170,6 +169,20 @@ namespace VCashApp.Models.Entities
         [StringLength(50)]
         [Column("IPRegistro")]
         public string? RegistrationIP { get; set; }
+
+        [StringLength(450)]
+        [Column("ReponsableEntregaId")]
+        [ForeignKey("User")]
+        public string? DelivererId { get; set; }
+        [NotMapped]
+        public virtual ApplicationUser DelivererUser { get; set; }
+
+        [StringLength(450)]
+        [Column("ResponsableRecibeId")]
+        [ForeignKey("User")]
+        public string? ReceiverId { get; set; }
+        [NotMapped]
+        public virtual ApplicationUser ReceiverUser { get; set; }
 
         // Colecciones de navegación para las tablas hijas
         public virtual ICollection<CefContainer> Containers { get; set; } = new List<CefContainer>();

@@ -140,7 +140,7 @@
                                             </div>
                                             <span asp-validation-for="DeclaredBagCount" class="text-danger"></span>
                                         </div>
-                                        <div class="col-12 col-lg-3" style="display: none;">
+                                        <div class="col-12 col-lg-3">
                                             <div class="form-floating has-validation">
                                                 <input asp-for="DeclaredEnvelopeCount" type="number" min="0" class="form-control" required />
                                                 <label asp-for="DeclaredEnvelopeCount" class="required">Sobres</label>
@@ -148,7 +148,7 @@
                                             </div>
                                             <span asp-validation-for="DeclaredEnvelopeCount" class="text-danger"></span>
                                         </div>
-                                        <div class="col-12 col-lg-3" style="display: none;">
+                                        <div class="col-12 col-lg-3">
                                             <div class="form-floating has-validation">
                                                 <input asp-for="DeclaredCheckCount" type="number" min="0" class="form-control" required />
                                                 <label asp-for="DeclaredCheckCount" class="required">Cheques</label>
@@ -156,21 +156,13 @@
                                             </div>
                                             <span asp-validation-for="DeclaredCheckCount" class="text-danger"></span>
                                         </div>
-                                        <div class="col-12 col-lg-3" style="display: none;">
+                                        <div class="col-12 col-lg-3">
                                             <div class="form-floating has-validation">
                                                 <input asp-for="DeclaredDocumentCount" type="number" min="0" class="form-control" required />
                                                 <label asp-for="DeclaredDocumentCount" class="required">Docs</label>
                                                 <div class="invalid-feedback">⚠ Requerido</div>
                                             </div>
                                             <span asp-validation-for="DeclaredDocumentCount" class="text-danger"></span>
-                                        </div>
-                                        <div class="col-12 col-lg-3">
-                                            <div class="form-floating has-validation">
-                                                <input asp-for="TotalDeclaredValue" type="number" min="1" class="form-control js-calc-total" required/>
-                                                <label asp-for="TotalDeclaredValue" class="required">Total Declarado</label>
-                                                <div class="invalid-feedback">⚠ Requerido</div>
-                                            </div>
-                                            <span asp-validation-for="TotalDeclaredValue" class="text-danger"></span>
                                         </div>
                                     </div>
                                 </div>
@@ -182,21 +174,21 @@
                                 </div>
                                 <div class="card-body">
                                     <div class="row g-3">
-                                        <div class="col-12 col-lg-4" style="display: none;">
+                                        <div class="col-12 col-lg-4">
                                             <div class="form-floating">
                                                 <input asp-for="DeclaredBillValue" type="number" step="1" class="form-control js-calc-total" />
                                                 <label asp-for="DeclaredBillValue">Billetes</label>
                                             </div>
                                             <span asp-validation-for="DeclaredBillValue" class="text-danger"></span>
                                         </div>
-                                        <div class="col-12 col-lg-4" style="display: none;">
+                                        <div class="col-12 col-lg-4">
                                             <div class="form-floating">
                                                 <input asp-for="DeclaredCoinValue" type="number" step="1" class="form-control js-calc-total" />
                                                 <label asp-for="DeclaredCoinValue">Monedas</label>
                                             </div>
                                             <span asp-validation-for="DeclaredCoinValue" class="text-danger"></span>
                                         </div>
-                                        <div class="col-12 col-lg-4" style="display: none;">
+                                        <div class="col-12 col-lg-4">
                                             <div class="form-floating">
                                                 <input asp-for="DeclaredDocumentValue" type="number" step="1" class="form-control js-calc-total" />
                                                 <label asp-for="DeclaredDocumentValue">Documentos</label>
@@ -206,12 +198,25 @@
 
                                         <div class="col-12">
                                             <div class="calculation-panel mt-3">
-                                                <h6>💰 Resumen</h6>
+                                                <h6>🧮 Resumen</h6>
+                                                <div class="calculation-item">
+                                                    <span>Billetes:</span>
+                                                    <span class="value" id="sumBills">$0</span>
+                                                </div>
+                                                <div class="calculation-item">
+                                                    <span>Monedas:</span>
+                                                    <span class="value" id="sumCoins">$0</span>
+                                                </div>
+                                                <div class="calculation-item">
+                                                    <span>Docs:</span>
+                                                    <span class="value" id="sumDocs">$0</span>
+                                                </div>
                                                 <div class="calculation-total">
                                                     <span>Total Declarado:</span>
                                                     <span class="total-value" id="sumTotal">$0</span>
                                                 </div>
                                             </div>
+                                            <input asp-for="TotalDeclaredValue" type="hidden" />
                                             <div class="form-text">
                                                 <small id="declaredWordsText"></small>
                                             </div>
@@ -389,20 +394,9 @@
                 const displayText = slipNumber ? ` | Planilla: ${slipNumber}` : '';
                 $('#displaySlipNumber').text(displayText);
             }
-            $('#SlipNumber').on('input', updateSlipNumberDisplay);
-            updateSlipNumberDisplay();
 
+            // ===== Cálculo de totales =====
             function format(n){ return '$' + (n||0).toLocaleString('es-CO'); }
-            function recalc() {
-                const totalValue = parseFloat($('#TotalDeclaredValue').val()) || 0;
-                $('#sumTotal').text(format(totalValue));
-                $('#TotalDeclaredValue').val(totalValue.toFixed(0));
-                updateDeclaredWords(totalValue);
-            }
-            $('.js-calc-total').on('input', recalc);
-            recalc();
-
-            /*function format(n){ return '$' + (n||0).toLocaleString('es-CO'); }
             function recalc() {
                 const bills = parseFloat($('#DeclaredBillValue').val()) || 0;
                 const coins = parseFloat($('#DeclaredCoinValue').val()) || 0;
@@ -416,7 +410,7 @@
                 updateDeclaredWords(total);
             }
             $('.js-calc-total').on('input', recalc);
-            recalc();*/
+            recalc();
 
             // ===== Envío con SweetAlert + AJAX =====
             $('button[data-step-action="submit-final"]').on('click', function (e) {
@@ -539,6 +533,8 @@
                     });
                 });
             });
+            $('#SlipNumber').on('input', updateSlipNumberDisplay);
+            updateSlipNumberDisplay();
             updateStepper();
         });
     </script>
