@@ -144,7 +144,6 @@ namespace VCashApp.Models.ViewModels.CentroEfectivo
         [StringLength(255, ErrorMessage = "La descripción no puede exceder los 255 caracteres.")]
         public string Description { get; set; } = string.Empty;
 
-        // Display properties
         [Display(Name = "Fecha y Hora de Reporte")]
         public DateTime ReportDate { get; set; } = DateTime.Now;
 

@@ -4,6 +4,9 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace VCashApp.Models.ViewModels
 {
+    /// <summary>
+    /// ViewModel utilizado para la edición de información de usuarios.
+    /// </summary>
     public class UserEditViewModel
     {
         public string Id { get; set; }

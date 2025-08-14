@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using VCashApp.Enums; // Asegúrate de que este namespace apunte a tus enums
+using VCashApp.Enums;
 
 namespace VCashApp.Models.ViewModels.CentroEfectivo
 {
@@ -19,7 +19,6 @@ namespace VCashApp.Models.ViewModels.CentroEfectivo
         [StringLength(12, ErrorMessage = "El ID de Ruta Diaria no puede exceder los 12 caracteres.")]
         public string? RouteId { get; set; }
 
-        // Check-in specific fields (user input or generated)
         [Display(Name = "Número de Planilla")]
         public int SlipNumber { get; set; }
 
@@ -30,9 +29,8 @@ namespace VCashApp.Models.ViewModels.CentroEfectivo
 
         [Display(Name = "Tipo de Transacción")]
         [Required(ErrorMessage = "El tipo de transacción es requerido.")]
-        public CefTransactionTypeEnum TransactionType { get; set; } // Using the English Enum
+        public CefTransactionTypeEnum TransactionType { get; set; }
 
-        // Declared Quantities (for bags, envelopes, checks, documents)
         [Display(Name = "Cantidad de Bolsas Declaradas")]
         [Required(ErrorMessage = "La cantidad de bolsas declaradas es requerida.")]
         [Range(0, int.MaxValue, ErrorMessage = "La cantidad de bolsas debe ser un número válido.")]
@@ -53,7 +51,6 @@ namespace VCashApp.Models.ViewModels.CentroEfectivo
         [Range(0, int.MaxValue, ErrorMessage = "La cantidad de documentos debe ser un número válido.")]
         public int DeclaredDocumentCount { get; set; }
 
-        // Declared Monetary Values
         [Display(Name = "Valor en Billetes Declarado")]
         [Required(ErrorMessage = "El valor en billetes declarado es requerido.")]
         [Range(0.00, (double)decimal.MaxValue, ErrorMessage = "Debe ser un valor numérico válido.")]
@@ -72,7 +69,6 @@ namespace VCashApp.Models.ViewModels.CentroEfectivo
         [Display(Name = "Valor Total Declarado")]
         public decimal TotalDeclaredValue { get; set; }
 
-        // Indicators
         [Display(Name = "¿Es Custodia?")]
         public bool IsCustody { get; set; } = false;
 
@@ -83,7 +79,6 @@ namespace VCashApp.Models.ViewModels.CentroEfectivo
         [StringLength(255, ErrorMessage = "La novedad informativa no puede exceder los 255 caracteres.")]
         public string? InformativeIncident { get; set; }
 
-        // Operator Data (display only, populated by controller)
         [Display(Name = "Fecha de Registro")]
         public DateTime RegistrationDate { get; set; } = DateTime.Now;
 
@@ -96,7 +91,6 @@ namespace VCashApp.Models.ViewModels.CentroEfectivo
         public List<Microsoft.AspNetCore.Mvc.Rendering.SelectListItem>? Currencies { get; set; }
         public List<Microsoft.AspNetCore.Mvc.Rendering.SelectListItem>? TransactionTypes { get; set; }
 
-        // Service/Route data to display in UI
         [Display(Name = "Cliente")]
         public string? ClientName { get; set; }
         [Display(Name = "Sucursal")]

@@ -4,6 +4,9 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace VCashApp.Models.ViewModels
 {
+    /// <summary>
+    /// ViewModel utilizado para la creación de nuevos usuarios.
+    /// </summary>
     public class UserCreateViewModel
     {
 
