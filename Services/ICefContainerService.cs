@@ -38,5 +38,12 @@ namespace VCashApp.Services
         /// <param name="transactionId">ID de la transacción CEF.</param>
         /// <returns>Lista de contenedores.</returns>
         Task<List<CefContainer>> GetContainersByTransactionIdAsync(int transactionId);
+
+        /// <summary>
+        /// Obtiene las denominaciones en formato JSON para una transacción específica.
+        /// </summary>
+        /// <param name="cefTransactionId">ID de la transaccion</param>
+        /// <returns>Lista de denominaciones</returns>
+        Task<String> BuildDenomsJsonForTransactionAsync(int cefTransactionId);
     }
 }

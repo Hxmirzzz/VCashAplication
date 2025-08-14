@@ -372,18 +372,26 @@
     </div>
 </div>
 
-@section Scripts {
+<script id="denoms-json" type="application/json">
     @{
-        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+        string denomsJson = ViewBag.DenomsJson?.ToString() ?? "{}";
     }
+    @Html.Raw(denomsJson)
+</script>
+
+@section Scripts {
+    @{ await Html.RenderPartialAsync("_ValidationScriptsPartial"); }
 
     <script>
     $(function () {
       // === STEPPER ===
       let currentStep = 1, totalSteps = 3;
-      const $form = $('#cefContainersForm');
-      const $next = $('button[data-step-action="next"]');
-      const $prev = $('button[data-step-action="prev"]');
+      // Denominaciones JSON embebidas
+      const DENOMS = JSON.parse(document.getElementById('denoms-json')?.textContent || '{}');
+
+      const $form   = $('#cefContainersForm');
+      const $next   = $('button[data-step-action="next"]');
+      const $prev   = $('button[data-step-action="prev"]');
       const $submit = $('button[data-step-action="submit-final"]');
 
       function updateStepper() {
@@ -430,50 +438,46 @@
       $prev.on('click', function () { if (currentStep > 1) { currentStep--; updateStepper(); } });
 
       // === ÍNDICE GLOBAL PARA Containers[__idx__] ===
-      let nextIdx = @Model.Containers.Count; // arranca desde los que vienen del servidor
+      let nextIdx = @Model.Containers.Count;
 
       // === Utils ===
       function getPaneIndex($pane) {
-        // Para bolsa: id="bag-tab-<bagIdx>"
-        const id = $pane.attr('id');
-        return parseInt(id.split('-').pop());
+        // id="bag-tab-<bagIdx>"
+        const id = $pane.attr('id') || '';
+        const parts = id.split('-');
+        return parseInt(parts[parts.length - 1]) || 0;
       }
-      function nextValueDetailIndex($scopePane, i) {
-        // Devuelve el siguiente índice j para Containers[i].ValueDetails[j]
-        let max = -1;
-        $scopePane.find('[name^="Containers[' + i + '].ValueDetails["]').each(function () {
-          const m = this.name.match(/ValueDetails\[(\d+)\]/);
-          if (m) max = Math.max(max, parseInt(m[1]));
-        });
-        return max + 1;
+
+      function denomOptionsHtml(kind) {
+        const arr = (DENOMS && DENOMS[kind]) ? DENOMS[kind] : [];
+        if (!arr.length) return '<option value="">-- Sin denominaciones --</option>';
+        // Soporta distintos nombres que puedan venir del backend
+        return arr.map(d => {
+          const id    = d.id ?? d.codDenominacion ?? d.CodDenominacion;
+          const value = d.value ?? d.valor ?? d.ValorDenominacion ?? d.valorDenominacion ?? '';
+          const label = d.label ?? d.text ?? d.name ?? d.Denominacion ?? `${value}`;
+          return `<option value="${id}" data-value="${value}">${label}</option>`;
+        }).join('');
       }
-      function buildDetailOptions(scope) {
-        if (scope === 'bolsa' || scope === 'sobre-cash') return ['Bill', 'Coin'];
-        if (scope === 'sobre-docs') return ['Document'];
-        return [];
-      }
+
       function toggleSobreMode($containerEditor) {
         const mode = $containerEditor.find('.js-sobre-mode:checked').val(); // Cash / Document / Check
-        $containerEditor.find('.sec-sobre-cash').toggle(mode === 'Cash');
-        $containerEditor.find('.sec-sobre-docs').toggle(mode === 'Document');
+        $containerEditor.find('.sec-sobre-cash').toggle(mode === 'Cash' || mode === 'Efectivo');
+        $containerEditor.find('.sec-sobre-docs').toggle(mode === 'Document' || mode === 'Documento');
         $containerEditor.find('.sec-sobre-cheque').toggle(mode === 'Check');
       }
       function toggleContainerSections($containerEditor) {
         const typeVal = $containerEditor.find('.js-container-type').val(); // Bolsa / Sobre
-        const $bolsa = $containerEditor.find('.sec-bolsa');
-        const $sobre = $containerEditor.find('.sec-sobre');
-        const $parent = $containerEditor.find('.js-parent-bag-block');
         const isSobre = (typeVal === 'Sobre');
-        $bolsa.toggle(!isSobre);
-        $sobre.toggle(isSobre);
-        $parent.toggle(isSobre);
+        $containerEditor.find('.sec-bolsa').toggle(!isSobre);
+        $containerEditor.find('.sec-sobre').toggle(isSobre);
+        $containerEditor.find('.js-parent-bag-block').toggle(isSobre);
         if (isSobre) {
           $containerEditor.find('.js-sobre-mode[value="Cash"]').prop('checked', true);
           toggleSobreMode($containerEditor);
         }
       }
       function refreshAllParentBagCombos() {
-        // Recolecta bolsas disponibles (por índice i) con su código
         const bags = [];
         $('#bagsTabContent .tab-pane[id^="bag-tab-"]').each(function () {
           const $bagPane = $(this);
@@ -482,11 +486,9 @@
           const code = $bagEditor.find(`input[name="Containers[${i}].ContainerCode"]`).val() || '';
           bags.push({ i, text: `Bolsa ${i + 1}${code ? ' — ' + code : ''}` });
         });
-        // Rellena en todos los sobres
         $('.container-editor').each(function(){
           const $ce = $(this);
-          const typeVal = $ce.find('.js-container-type').val();
-          if (typeVal !== 'Sobre') return;
+          if ($ce.find('.js-container-type').val() !== 'Sobre') return;
           const prefix = $ce.data('prefix');
           const $sel = $ce.find(`select[name="${prefix}.ParentContainerId"]`);
           const selected = $sel.val();
@@ -496,7 +498,7 @@
         });
       }
 
-      // === Agregar Bolsa (nueva pestaña raíz) ===
+      // === Agregar Bolsa ===
       $('#btnAddBag').on('click', function () {
         const $tabs = $('#bagsTabs');
         const $contents = $('#bagsTabContent');
@@ -504,7 +506,6 @@
         const bagIdx = nextIdx++;
         const newId = 'bag-tab-' + bagIdx;
 
-        // Botón tab
         const $btn = $(`
           <li class="nav-item" role="presentation">
             <button class="nav-link" id="${newId}-btn" data-bs-toggle="tab" data-bs-target="#${newId}" type="button" role="tab">
@@ -513,7 +514,6 @@
           </li>`);
         $tabs.append($btn);
 
-        // Contenido
         let html = $('#bag-template').html().replaceAll('__idx__', bagIdx);
         const $pane = $(`<div class="tab-pane fade" id="${newId}" role="tabpanel" data-bag-idx="${bagIdx}">${html}
             <div class="card mt-3">
@@ -535,133 +535,173 @@
         $btn.addClass('active');
         $pane.addClass('show active');
 
-        // Inicializa secciones de esa bolsa
+        // Ajustar secciones de esa bolsa
         const $bagEditor = $pane.find('.container-editor').first();
-        $bagEditor.find('.js-container-type').val('Bolsa'); // bloquea visualmente la sección de bolsa
+        $bagEditor.find('.js-container-type').val('Bolsa');
         toggleContainerSections($bagEditor);
 
         refreshAllParentBagCombos();
       });
 
-      // === Agregar Sobre DENTRO de la bolsa activa ===
+      // === Agregar Sobre en bolsa activa ===
       $(document).on('click', '.js-add-envelope-in-this-bag', function () {
         const $bagPane = $(this).closest('.tab-pane[id^="bag-tab-"]');
         const bagIdx = getPaneIndex($bagPane);
         const envIdx = nextIdx++;
 
-        // Crea sobre desde template y lo mete dentro de la lista de esa bolsa
         let html = $('#envelope-template').html().replaceAll('__idx__', envIdx);
         const $card = $(html);
         $bagPane.find('.bag-envelopes-list').append($card);
 
-        // Configurar el SOBRE recién insertado
         const $envEditor = $card.find('.container-editor').first();
         $envEditor.find('.js-container-type').val('Sobre');
         toggleContainerSections($envEditor);
 
-        // Vincular a la bolsa padre (por índice UI)
         const prefix = $envEditor.data('prefix');
         $envEditor.find(`select[name="${prefix}.ParentContainerId"]`).val(bagIdx);
 
-        // Modo por defecto: Efectivo
         $envEditor.find('.js-sobre-mode[value="Cash"]').prop('checked', true);
         toggleSobreMode($envEditor);
 
         refreshAllParentBagCombos();
       });
 
-      // Eliminar un SOBRE card
+      // Eliminar sobre
       $(document).on('click', '.js-remove-envelope-card', function () {
         $(this).closest('.envelope-card').remove();
         refreshAllParentBagCombos();
       });
 
-      // Cambios de tipo contenedor (para los existentes y nuevos)
+      // Cambios de tipo contenedor / modo sobre
       $(document).on('change', '.js-container-type', function () {
         const $ce = $(this).closest('.container-editor');
         toggleContainerSections($ce);
         refreshAllParentBagCombos();
       });
-      // Cambios de modo de sobre
       $(document).on('change', '.js-sobre-mode', function () {
         const $ce = $(this).closest('.container-editor');
         toggleSobreMode($ce);
       });
 
-      // === Detalles (bolsa / sobre-cash / sobre-docs) ===
+      // === Agregar DETALLE (bolsa / sobre-cash / sobre-docs) ===
       $(document).on('click', '.js-add-detail', function () {
-        const scope = $(this).data('detail-scope');  // bolsa | sobre-cash | sobre-docs
-        const $ce = $(this).closest('.container-editor');
-        // Necesitamos index i del contenedor
-        const prefix = $ce.data('prefix');           // Containers[i]
-        const m = prefix.match(/Containers\[(\d+)\]$/);
-        if (!m) return;
-        const i = parseInt(m[1], 10);
+        const $btn = $(this);
+        const scope = $btn.data('detail-scope');  // bolsa | sobre-cash | sobre-docs
 
-        const j = nextValueDetailIndex($ce, i);
-        const options = buildDetailOptions(scope).map(v => `<option value="${v}">${v}</option>`).join('');
+        // Tomamos el prefix real del editor (sirve para bolsa o sobre)
+        const $ce = $btn.closest('.container-editor');
+        const basePrefix = $ce.data('prefix'); // "Containers[i]" o "Containers[envIdx]"
+
+        // Calcula siguiente índice j de forma global (no dependas del pane)
+        let max = -1;
+        $(document).find('[name^="' + basePrefix + '.ValueDetails["]').each(function () {
+          const m = this.name.match(/ValueDetails\[(\d+)\]/);
+          if (m) max = Math.max(max, parseInt(m[1], 10));
+        });
+        const j = max + 1;
+
+        // Tipos y denominaciones según scope
+        let valueTypeOptions = [];
+        let denomKindDefault = null;
+
+        if (scope === 'bolsa' || scope === 'sobre-cash') {
+          valueTypeOptions = ['Bill', 'Coin'];
+          denomKindDefault = 'Bill';
+        } else if (scope === 'sobre-docs') {
+          valueTypeOptions = ['Document'];
+          denomKindDefault = 'Document';
+        }
+
+        const vtHtml   = valueTypeOptions.map(v => `<option value="${v}">${v}</option>`).join('');
+        const denomHtml = denomOptionsHtml(denomKindDefault);
 
         const row = `
           <tr>
             <td>
-              <select name="Containers[${i}].ValueDetails[${j}].ValueType" class="form-select form-select-sm">
-                ${options}
+              <select name="${basePrefix}.ValueDetails[${j}].ValueType"
+                      class="form-select form-select-sm js-vtype">
+                ${vtHtml}
               </select>
             </td>
-            <td><input name="Containers[${i}].ValueDetails[${j}].Denomination" type="number" step="1" class="form-control form-control-sm js-calc" /></td>
-            <td><input name="Containers[${i}].ValueDetails[${j}].Quantity" type="number" class="form-control form-control-sm js-calc" /></td>
-            <td><input name="Containers[${i}].ValueDetails[${j}].BundlesCount" type="number" class="form-control form-control-sm js-calc" /></td>
-            <td><input name="Containers[${i}].ValueDetails[${j}].LoosePiecesCount" type="number" class="form-control form-control-sm js-calc" /></td>
-            <td><input name="Containers[${i}].ValueDetails[${j}].UnitValue" type="number" step="1" class="form-control form-control-sm js-calc" /></td>
-            <td><input name="Containers[${i}].ValueDetails[${j}].CalculatedAmount" type="number" step="1" class="form-control form-control-sm" readonly /></td>
+            <td>
+              <select name="${basePrefix}.ValueDetails[${j}].Denomination"
+                      class="form-select form-select-sm js-denom">
+                ${denomHtml}
+              </select>
+            </td>
+            <td><input name="${basePrefix}.ValueDetails[${j}].Quantity" type="number" class="form-control form-control-sm js-calc" /></td>
+            <td><input name="${basePrefix}.ValueDetails[${j}].BundlesCount" type="number" class="form-control form-control-sm js-calc" /></td>
+            <td><input name="${basePrefix}.ValueDetails[${j}].LoosePiecesCount" type="number" class="form-control form-control-sm js-calc" /></td>
+            <td><input name="${basePrefix}.ValueDetails[${j}].UnitValue" type="number" step="1" class="form-control form-control-sm js-calc" /></td>
+            <td><input name="${basePrefix}.ValueDetails[${j}].CalculatedAmount" type="number" step="1" class="form-control form-control-sm" readonly /></td>
             <td><button type="button" class="btn btn-sm btn-outline-danger js-remove-detail">×</button></td>
           </tr>`;
-        $ce.find(`.js-details-table[data-detail-scope="${scope}"] tbody`).append(row);
+        $btn.closest('.card').find('.js-details-table[data-detail-scope="' + scope + '"] tbody').append(row);
       });
+
+      // Cambio de tipo de valor => recargar denominaciones de esa fila
+      $(document).on('change', '.js-vtype', function () {
+        const v = $(this).val(); // Bill | Coin | Document
+        const kind = (v === 'Bill' ? 'Bill' : v === 'Coin' ? 'Coin' : v === 'Document' ? 'Document' : null);
+        if (!kind) return;
+        $(this).closest('tr').find('.js-denom').html(denomOptionsHtml(kind));
+      });
+
+      // Eliminar detalle
       $(document).on('click', '.js-remove-detail', function () {
         $(this).closest('tr').remove();
       });
 
-      // === Cheques (solo en sobre-cheque) ===
+      // === CHEQUES (sólo tabla de cheques) ===
       $(document).on('click', '.js-add-cheque', function () {
         const $ce = $(this).closest('.container-editor');
-        const prefix = $ce.data('prefix');
-        const m = prefix.match(/Containers\[(\d+)\]$/);
-        if (!m) return;
-        const i = parseInt(m[1], 10);
-        const j = nextValueDetailIndex($ce, i);
+        const basePrefix = $ce.data('prefix');
+
+        let max = -1;
+        $(document).find('[name^="' + basePrefix + '.ValueDetails["]').each(function () {
+          const m = this.name.match(/ValueDetails\[(\d+)\]/);
+          if (m) max = Math.max(max, parseInt(m[1], 10));
+        });
+        const j = max + 1;
 
         const row = `
           <tr>
-            <td><input name="Containers[${i}].ValueDetails[${j}].BankName" class="form-control form-control-sm" /></td>
-            <td><input name="Containers[${i}].ValueDetails[${j}].IdentifierNumber" class="form-control form-control-sm" /></td>
-            <td><input name="Containers[${i}].ValueDetails[${j}].IssueDate" type="date" class="form-control form-control-sm" /></td>
-            <td><input name="Containers[${i}].ValueDetails[${j}].UnitValue" type="number" step="1" class="form-control form-control-sm js-calc" /></td>
-            <td><input name="Containers[${i}].ValueDetails[${j}].Quantity" type="number" class="form-control form-control-sm js-calc" value="1" /></td>
-            <td><input name="Containers[${i}].ValueDetails[${j}].CalculatedAmount" type="number" step="1" class="form-control form-control-sm" readonly /></td>
+            <td><input name="${basePrefix}.ValueDetails[${j}].BankName" class="form-control form-control-sm" /></td>
+            <td><input name="${basePrefix}.ValueDetails[${j}].IdentifierNumber" class="form-control form-control-sm" /></td>
+            <td><input name="${basePrefix}.ValueDetails[${j}].IssueDate" type="date" class="form-control form-control-sm" /></td>
+            <td><input name="${basePrefix}.ValueDetails[${j}].UnitValue" type="number" step="1" class="form-control form-control-sm js-calc" /></td>
+            <td><input name="${basePrefix}.ValueDetails[${j}].Quantity" type="number" class="form-control form-control-sm js-calc" value="1" /></td>
+            <td><input name="${basePrefix}.ValueDetails[${j}].CalculatedAmount" type="number" step="1" class="form-control form-control-sm" readonly /></td>
             <td>
-              <input type="hidden" name="Containers[${i}].ValueDetails[${j}].ValueType" value="Check" />
+              <input type="hidden" name="${basePrefix}.ValueDetails[${j}].ValueType" value="Check" />
               <button type="button" class="btn btn-sm btn-outline-danger js-remove-cheque">×</button>
             </td>
           </tr>`;
-        $ce.find('.js-cheques-table tbody').append(row);
+        $(this).closest('.card').find('.js-cheques-table tbody').append(row);
       });
       $(document).on('click', '.js-remove-cheque', function () {
         $(this).closest('tr').remove();
       });
 
-      // Cálculo general de montos
-      $(document).on('input', '.js-calc', function () {
+      // === CÁLCULO (usa valor de la denominación si no hay UnitValue) ===
+      $(document).on('input change', '.js-calc, .js-denom', function () {
         const $row = $(this).closest('tr');
-        const denom = parseFloat($row.find('input[name$=".Denomination"]').val()) || 0;
-        const qty   = parseFloat($row.find('input[name$=".Quantity"]').val()) || 0;
-        const unit  = parseFloat($row.find('input[name$=".UnitValue"]').val()) || 0;
-        // Si hay UnitValue, usa qty*unit; si no, usa denom*qty
-        const amt = (unit > 0 ? qty * unit : denom * qty);
+
+        let denomVal = 0;
+        const $denSel = $row.find('select[name$=".Denomination"]');
+        if ($denSel.length) {
+          denomVal = parseFloat($denSel.find('option:selected').data('value')) || 0;
+        } else {
+          denomVal = parseFloat($row.find('input[name$=".Denomination"]').val()) || 0;
+        }
+
+        const qty  = parseFloat($row.find('input[name$=".Quantity"]').val())     || 0;
+        const unit = parseFloat($row.find('input[name$=".UnitValue"]').val())    || 0;
+        const amt  = (unit > 0 ? qty * unit : denomVal * qty);
         $row.find('input[name$=".CalculatedAmount"]').val(amt.toFixed(0));
       });
 
-      // Validación final
+      // === SUBMIT ===
       $('button[data-step-action="submit-final"]').on('click', function (e) {
         if (!validateCurrentStep()) {
           e.preventDefault();
@@ -670,15 +710,23 @@
       });
 
       // Inicialización UI
-      // Ajusta secciones bolsa/sobre y modo de sobres ya existentes (render del servidor)
       $('.container-editor').each(function () {
         toggleContainerSections($(this));
         const $sobre = $(this).find('.sec-sobre');
         if ($sobre.is(':visible')) toggleSobreMode($(this));
       });
-      // Llenar combos de Bolsa asociada en sobres
       refreshAllParentBagCombos();
       updateStepper();
+
+      // Si hubiera filas precargadas por el servidor, rellena sus combos de denominación
+      $('tr').each(function(){
+        const $row = $(this);
+        const $vt  = $row.find('.js-vtype');
+        const $dn  = $row.find('.js-denom');
+        if ($vt.length && $dn.length) {
+          $dn.html(denomOptionsHtml($vt.val()));
+        }
+      });
     });
     </script>
 }

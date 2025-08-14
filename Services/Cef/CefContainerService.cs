@@ -1,11 +1,10 @@
-﻿using VCashApp.Services;
+﻿using Microsoft.EntityFrameworkCore;
+using System.Globalization;
 using VCashApp.Data;
+using VCashApp.Enums;
 using VCashApp.Models.Entities;
 using VCashApp.Models.ViewModels.CentroEfectivo;
-using VCashApp.Enums;
-using Microsoft.EntityFrameworkCore;
-using System.Linq;
-using System.Threading.Tasks;
+using System.Text.Json;
 
 namespace VCashApp.Services.Cef
 {
@@ -168,7 +167,7 @@ namespace VCashApp.Services.Cef
                 {
                     CefContainerId = container.Id,
                     ValueType = detailVm.ValueType.ToString(),
-                    Denomination = detailVm.Denomination,
+                    DenominationId = detailVm.Denomination,
                     Quantity = detailVm.Quantity,
                     BundlesCount = detailVm.BundlesCount,
                     LoosePiecesCount = detailVm.LoosePiecesCount,
@@ -217,6 +216,67 @@ namespace VCashApp.Services.Cef
                                  .Include(c => c.ChildContainers)
                                  .OrderBy(c => c.Id)
                                  .ToListAsync();
+        }
+        public async Task<string> BuildDenomsJsonForTransactionAsync(int cefTransactionId)
+        {
+            var tx = await _context.CefTransactions
+                .AsNoTracking()
+                .Where(t => t.Id == cefTransactionId)
+                .Select(t => new { t.Currency })
+                .FirstOrDefaultAsync()
+                ?? throw new InvalidOperationException($"Transacción {cefTransactionId} no existe.");
+
+            var currency = tx.Currency ?? "COP";
+            var denoms = await _context.AdmDenominaciones
+                .AsNoTracking()
+                .Where(d => d.DivisaDenominacion == currency)
+                .Select(d => new {
+                    id = d.CodDenominacion,
+                    value = d.ValorDenominacion,
+                    type = d.TipoDenominacion,
+                    tipoDinero = d.TipoDinero, // M = Moneda, B = Billete
+                    denominacion = d.Denominacion
+                })
+                .OrderBy(d => d.tipoDinero)
+                .ThenByDescending(d => d.value) // Ordenar por valor descendente
+                .ToListAsync();
+
+            var esCO = CultureInfo.GetCultureInfo("es-CO");
+
+            // Mapear según TipoDinero: M = Coin, B = Bill
+            var payload = new
+            {
+                Bill = denoms
+                    .Where(d => d.tipoDinero == "B") // B = Billete
+                    .Select(d => new {
+                        id = d.id,
+                        value = d.value,
+                        label = d.denominacion ?? d.value?.ToString("C0", esCO)
+                    }),
+                Coin = denoms
+                    .Where(d => d.tipoDinero == "M") // M = Moneda
+                    .Select(d => new {
+                        id = d.id,
+                        value = d.value,
+                        label = d.denominacion ?? d.value?.ToString("C0", esCO)
+                    }),
+                Document = denoms
+                    .Where(d => d.tipoDinero == "D") // Documentos si existen
+                    .Select(d => new {
+                        id = d.id,
+                        value = d.value,
+                        label = d.denominacion ?? d.value?.ToString("C0", esCO)
+                    }),
+                Check = denoms
+                    .Where(d => d.tipoDinero == "C") // Cheques si existen
+                    .Select(d => new {
+                        id = d.id,
+                        value = d.value,
+                        label = d.denominacion ?? d.value?.ToString("C0", esCO)
+                    })
+            };
+
+            return JsonSerializer.Serialize(payload);
         }
     }
 }

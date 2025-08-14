@@ -1867,6 +1867,18 @@
         <member name="M:VCashApp.Migrations.SetFKDenominationToCefValueDetailTable.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
             <inheritdoc />
         </member>
+        <member name="T:VCashApp.Migrations.SetFKDenominationNullOnCefValueDetailTable">
+            <inheritdoc />
+        </member>
+        <member name="M:VCashApp.Migrations.SetFKDenominationNullOnCefValueDetailTable.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:VCashApp.Migrations.SetFKDenominationNullOnCefValueDetailTable.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:VCashApp.Migrations.SetFKDenominationNullOnCefValueDetailTable.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
         <member name="T:VCashApp.Models.ViewModels.BranchViewModel">
             <summary>
             Representa la información principal de una sucursal.
@@ -2702,6 +2714,13 @@
             </summary>
             <param name="transactionId">ID de la transacción CEF.</param>
             <returns>Lista de contenedores.</returns>
+        </member>
+        <member name="M:VCashApp.Services.ICefContainerService.BuildDenomsJsonForTransactionAsync(System.Int32)">
+            <summary>
+            Obtiene las denominaciones en formato JSON para una transacción específica.
+            </summary>
+            <param name="cefTransactionId">ID de la transaccion</param>
+            <returns>Lista de denominaciones</returns>
         </member>
         <member name="T:VCashApp.Services.ICefIncidentService">
             <summary>

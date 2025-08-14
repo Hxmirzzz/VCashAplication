@@ -446,7 +446,6 @@ namespace VCashApp.Data
 
                 entity.Property(v => v.CefContainerId).IsRequired();
                 entity.Property(v => v.ValueType).IsRequired().HasMaxLength(50);
-                entity.Property(v => v.Denomination).IsRequired();
                 entity.Property(v => v.Quantity).IsRequired();
                 entity.Property(v => v.BundlesCount).IsRequired(false);
                 entity.Property(v => v.LoosePiecesCount).IsRequired(false);
@@ -462,7 +461,7 @@ namespace VCashApp.Data
 
                 // Relaciones
                 entity.HasOne(c => c.CefContainer).WithMany(t => t.ValueDetails).HasForeignKey(c => c.CefContainerId).OnDelete(DeleteBehavior.Cascade);
-                entity.HasOne(c => c.AdmDenominacion).WithMany().HasForeignKey(c => c.Denomination).OnDelete(DeleteBehavior.Restrict);
+                entity.HasOne(c => c.AdmDenominacion).WithMany().HasForeignKey(c => c.DenominationId).IsRequired(false).OnDelete(DeleteBehavior.Restrict);
                 entity.Property(v => v.ValueType).HasConversion<string>();
             });
 

@@ -434,13 +434,10 @@ namespace VCashApp.Controllers
 
             await SetCommonViewBagsCefAsync(currentUser, "Procesar Contenedores CEF");
 
-            // 👇 Usa el page-VM que ya creaste
             var pageVm = await _cefContainerService.PrepareProcessContainersPageAsync(transactionId);
 
-            // SelectLists auxiliares (si los usas)
-            ViewBag.IncidentTypes = (await _cefIncidentService.GetAllIncidentTypesAsync())
-                .Select(it => new SelectListItem { Value = it.Code, Text = it.Description })
-                .ToList();
+            ViewBag.IncidentTypes = (await _cefIncidentService.GetAllIncidentTypesAsync()).Select(it => new SelectListItem { Value = it.Code, Text = it.Description }).ToList();
+            ViewBag.DenomsJson = await _cefContainerService.BuildDenomsJsonForTransactionAsync(transactionId);
 
             return View(pageVm);
         }
