@@ -97,7 +97,7 @@ namespace VCashApp.Models.ViewModels.Servicio
 
         [Display(Name = "Código de Flujo")]
         public int? FlowCode { get; set; }
-
+      
         // CEF TRANSACTION FIELDS INFORMATION
         [Display(Name = "Número de Planilla")]
         [Required]
@@ -107,7 +107,6 @@ namespace VCashApp.Models.ViewModels.Servicio
         public string? Currency { get; set; } = null;
 
         // ORIGIN FIELDS
-
         [Display(Name = "Cliente de Origen")]
         public int? OriginClientCode { get; set; }
 
@@ -133,8 +132,6 @@ namespace VCashApp.Models.ViewModels.Servicio
         public string? OriginRangeCode { get; set; }
         public string? OriginRangeDetails { get; set; }
 
-        // DESTINATION FIELDS
-
         [Display(Name = "Cliente de Destino")]
         public int? DestinationClientCode { get; set; }
 
@@ -159,8 +156,6 @@ namespace VCashApp.Models.ViewModels.Servicio
         [StringLength(255, ErrorMessage = "El código de rango destino no puede exceder los 255 caracteres.")]
         public string? DestinationRangeCode { get; set; }
         public string? DestinationRangeDetails { get; set; }
-
-        // DATES AND TIMES
 
         [Display(Name = "Fecha de Aceptación")]
         [DataType(DataType.Date)]

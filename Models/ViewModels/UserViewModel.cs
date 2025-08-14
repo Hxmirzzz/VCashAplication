@@ -4,6 +4,9 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace VCashApp.Models.ViewModels
 {
+    /// <summary>
+    /// ViewModel que representa los datos mostrados de un usuario.
+    /// </summary>
     public class UserViewModel
     {
         public string Id { get; set; }
@@ -32,6 +35,9 @@ namespace VCashApp.Models.ViewModels
 
     }
 
+    /// <summary>
+    /// ViewModel para gestionar los permisos de visualización por vista.
+    /// </summary>
     public class ViewPermissionViewModel
     {
         public string CodVista { get; set; }
