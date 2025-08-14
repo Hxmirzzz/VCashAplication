@@ -120,87 +120,127 @@
                         </div>
                     </div>
 
-                    <!-- PASO 2: pestañas de contenedores -->
+                    <!-- PASO 2: Conteo y Detalles (solo Bolsas como pestañas; los Sobres viven dentro de cada Bolsa) -->
                     <div class="tab-pane fade" role="tabpanel" data-step="2">
                         <div class="step-content">
                             <div class="card mb-3">
                                 <div class="card-header d-flex align-items-center justify-content-between">
-                                    <h5 class="mb-0">🧰 Contenedores (Bolsas / Sobres)</h5>
+                                    <h5 class="mb-0">🧰 Contenedores (Bolsas y sus Sobres)</h5>
                                     <div class="d-flex gap-2">
-                                        <button type="button" class="btn btn-outline-primary" id="btnAddContainer">+ Agregar</button>
+                                        <button type="button" class="btn btn-outline-primary" id="btnAddBag">+ Agregar Contenedor (Bolsa)</button>
                                     </div>
                                 </div>
+
                                 <div class="card-body">
-                                    <ul class="nav nav-tabs" id="containersTabs" role="tablist">
-                                        @for (var i = 0; i < Model.Containers.Count; i++)
+                                    @{
+                                        var bagItems = Model.Containers
+                                                            .Select((c, idx) => new { c, idx })
+                                                            .Where(x => x.c.ParentContainerId == null && x.c.ContainerType == VCashApp.Enums.CefContainerTypeEnum.Bolsa)
+                                                            .ToList();
+                                    }
+
+                                    <ul class="nav nav-tabs" id="bagsTabs" role="tablist">
+                                        @for (var b = 0; b < bagItems.Count; b++)
                                         {
-                                            var tabId = $"c-tab-{i}";
-                                            var typeLabel = Model.Containers[i].ContainerType.ToString();
+                                            var bagIdx = bagItems[b].idx;
+                                            var tabId = $"bag-tab-{bagIdx}";
                                             <li class="nav-item" role="presentation">
-                                                <button class="nav-link @(i == 0 ? "active" : "")"
-                                                        id="@($"{tabId}-btn")"
-                                                        data-bs-toggle="tab"
-                                                        data-bs-target="@($"#{tabId}")"
+                                                <button class="nav-link @(b==0 ? "active" : "")" id="@($"{tabId}-btn")"
+                                                        data-bs-toggle="tab" data-bs-target="@($"#{tabId}")"
                                                         type="button" role="tab">
-                                                    Contenedor @(i + 1) - @typeLabel
+                                                  Contenedor @(@b + 1) — Bolsa
                                                 </button>
                                             </li>
                                         }
                                     </ul>
-                                    <div class="tab-content mt-3" id="containersTabContent">
-                                        @for (var i = 0; i < Model.Containers.Count; i++)
+
+                                    <div class="tab-content mt-3" id="bagsTabContent">
+                                        @for (var b = 0; b < bagItems.Count; b++)
                                         {
-                                            var tabId = $"c-tab-{i}";
-                                            <div class="tab-pane fade @(i==0?"show active":"")" id="@tabId" role="tabpanel">
+                                            var bagIdx = bagItems[b].idx;
+                                            var tabId = $"bag-tab-{bagIdx}";
+                                            <div class="tab-pane fade @(b==0 ? "show active" : "")" id="@tabId" role="tabpanel" data-bag-idx="@bagIdx">
                                                 @{
-                                                    var vdd = new ViewDataDictionary(ViewData);
-                                                    vdd.TemplateInfo.HtmlFieldPrefix = $"Containers[{i}]";
+                                                    var vddBag = new ViewDataDictionary(ViewData);
+                                                    vddBag.TemplateInfo.HtmlFieldPrefix = $"Containers[{bagIdx}]";
                                                 }
-                                                @Html.Partial("_ContainerEditorPartial", Model.Containers[i], vdd)
+                                                <!-- Editor de la Bolsa (una sola) -->
+                                                @Html.Partial("_ContainerEditorPartial", Model.Containers[bagIdx], vddBag)
+
+                                                <!-- ====== Sobres de esta bolsa ====== -->
+                                                <div class="card mt-3">
+                                                    <div class="card-header d-flex align-items-center justify-content-between">
+                                                        <h6 class="mb-0">✉️ Sobres de esta Bolsa</h6>
+                                                        <button type="button" class="btn btn-outline-secondary btn-sm js-add-envelope-in-this-bag">
+                                                            + Agregar Sobre
+                                                        </button>
+                                                    </div>
+                                                    <div class="card-body">
+                                                        <div class="small text-muted">Puedes añadir varios sobres; cada sobre puede ser Efectivo, Documentos/Voucher o Cheques.</div>
+                                                        <div class="bag-envelopes-list mt-3">
+                                                            @{
+                                                                var childEnvelopes = Model.Containers
+                                                                                          .Select((c, idx) => new { c, idx })
+                                                                                          .Where(x => x.c.ParentContainerId == bagIdx && x.c.ContainerType == VCashApp.Enums.CefContainerTypeEnum.Sobre)
+                                                                                          .ToList();
+                                                            }
+                                                            @for (var e = 0; e < childEnvelopes.Count; e++)
+                                                            {
+                                                                var envIdx = childEnvelopes[e].idx;
+                                                                <div class="envelope-card mb-3" data-env-idx="@envIdx">
+                                                                    @{
+                                                                        var vddEnv = new ViewDataDictionary(ViewData);
+                                                                        vddEnv.TemplateInfo.HtmlFieldPrefix = $"Containers[{envIdx}]";
+                                                                    }
+                                                                    @Html.Partial("_ContainerEditorPartial", Model.Containers[envIdx], vddEnv)
+                                                                    <div class="d-flex justify-content-end">
+                                                                        <button type="button" class="btn btn-outline-danger btn-sm js-remove-envelope-card" data-env-idx="@envIdx">
+                                                                            Eliminar sobre
+                                                                        </button>
+                                                                    </div>
+                                                                </div>
+                                                            }
+                                                        </div>
+                                                    </div>
+                                                </div>
                                             </div>
                                         }
                                     </div>
                                 </div>
                             </div>
-                            <div class="card mt-4">
-                                <div class="card-header d-flex align-items-center justify-content-between">
-                                    <h5 class="mb-0">🧾 Novedades (Opcional)</h5>
-                                    <div class="form-check form-switch">
-                                        <input class="form-check-input" type="checkbox" id="toggleIncidents">
-                                        <label class="form-check-label" for="toggleIncidents">Reportar novedades</label>
-                                    </div>
-                                </div>
+                        </div>
+                    </div>
 
-                                <div class="card-body" id="incidentsPanel" style="display:none;">
-                                    <div class="row g-3">
-                                        <div class="col-12 col-lg-6">
-                                            <div class="form-floating has-validation">
-                                                <select id="incidentContainerSelector" class="form-select">
-                                                    <option value="">Seleccionar bolsa/sobre...</option>
-                                                    @for (var i = 0; i < Model.Containers.Count; i++)
-                                                    {
-                                                        var label = $"#{i + 1} - {Model.Containers[i].ContainerType} - {Model.Containers[i].ContainerCode}";
-                                                        <option value="@i">@label</option>
-                                                    }
-                                                </select>
-                                                <label for="incidentContainerSelector">Aplicar a</label>
-                                                <div class="invalid-feedback">⚠ Seleccione un contenedor</div>
-                                                <div class="valid-feedback">✓ Correcto</div>
-                                            </div>
-                                        </div>
+                    <div id="bag-template" class="d-none">
+                        @{
+                            var vddT = new ViewDataDictionary(ViewData);
+                            vddT.TemplateInfo.HtmlFieldPrefix = "Containers[__idx__]";
+                        }
+                        @Html.Partial("_ContainerEditorPartial",
+                            new VCashApp.Models.ViewModels.CentroEfectivo.CefContainerProcessingViewModel {
+                                ContainerType = VCashApp.Enums.CefContainerTypeEnum.Bolsa,
+                                ParentContainerId = null
+                            },
+                            vddT
+                        )
+                    </div>
 
-                                        <div class="col-12 col-lg-6 d-flex align-items-end">
-                                            <button type="button" id="btnAddIncident" class="btn btn-outline-primary">
-                                                + Agregar novedad
-                                            </button>
-                                        </div>
-                                    </div>
-
-                                    @for (var i = 0; i < Model.Containers.Count; i++)
-                                    {
-                                        <div id="inc-list-c@i" class="mt-3"></div>
-                                    }
-                                </div>
+                    <div id="envelope-template" class="d-none">
+                        @{
+                          var vddE = new ViewDataDictionary(ViewData);
+                          vddE.TemplateInfo.HtmlFieldPrefix = "Containers[__idx__]";
+                        }
+                        <div class="envelope-card mb-3" data-env-idx="__idx__">
+                            @Html.Partial("_ContainerEditorPartial",
+                                new VCashApp.Models.ViewModels.CentroEfectivo.CefContainerProcessingViewModel {
+                                    ContainerType = VCashApp.Enums.CefContainerTypeEnum.Sobre
+                                },
+                                vddE
+                            )
+                            <div class="d-flex justify-content-end">
+                                <button type="button" class="btn btn-outline-danger btn-sm js-remove-envelope-card" data-env-idx="__idx__">
+                                    Eliminar sobre
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -338,241 +378,307 @@
     }
 
     <script>
-        $(function () {
-          // ====== STEPPER BÁSICO ======
-          let currentStep = 1;
-          const totalSteps = 3;
+    $(function () {
+      // === STEPPER ===
+      let currentStep = 1, totalSteps = 3;
+      const $form = $('#cefContainersForm');
+      const $next = $('button[data-step-action="next"]');
+      const $prev = $('button[data-step-action="prev"]');
+      const $submit = $('button[data-step-action="submit-final"]');
 
-          const $form   = $('#cefContainersForm');
-          const $next   = $('button[data-step-action="next"]');
-          const $prev   = $('button[data-step-action="prev"]');
-          const $submit = $('button[data-step-action="submit-final"]');
-
-          function updateStepper() {
-            $('.progress-stepper .step').removeClass('active completed');
-            for (let i = 1; i <= totalSteps; i++) {
-              const $step = $('.step[data-step="' + i + '"]');
-              if (i < currentStep) { $step.addClass('completed'); $step.find('.step-number').html('&#10003;'); }
-              else if (i === currentStep) { $step.addClass('active'); $step.find('.step-number').text(i); }
-              else { $step.find('.step-number').text(i); }
-            }
-            showCurrentStep();
-          }
-
-          function showCurrentStep() {
-            $('.tab-pane[data-step]').removeClass('show active');
-            $('#myTabContent div[data-step="' + currentStep + '"]').addClass('show active');
-            $prev.toggle(currentStep > 1);
-            $next.toggle(currentStep < totalSteps);
-            $submit.toggle(currentStep === totalSteps);
-          }
-
-          function validateField($f) {
-            if ($f.prop('disabled') || $f.prop('readonly')) {
-              $f.removeClass('is-invalid is-valid');
-              return true;
-            }
-            const ok = $f[0].checkValidity();
-            $f.toggleClass('is-valid', ok).toggleClass('is-invalid', !ok);
-
-            const $c = $f.closest('.has-validation');
-            const $invalid = $c.find('.invalid-feedback');
-            const $valid   = $c.find('.valid-feedback');
-            if (ok) { $invalid.hide(); $valid.show(); } else { $invalid.text($f[0].validationMessage || '⚠ Campo inválido').show(); $valid.hide(); }
-            return ok;
-          }
-
-          function validateCurrentStep() {
-            let ok = true;
-            $('#myTabContent .tab-pane[data-step].active :input[required]').each(function(){
-              if (!$(this).is(':disabled')) ok = validateField($(this)) && ok;
-            });
-            return ok;
-          }
-
-          $('.progress-stepper .step').on('click', function () {
-            const target = parseInt($(this).data('step'));
-            if (target < currentStep || validateCurrentStep()) { currentStep = target; updateStepper(); }
-          });
-          $next.on('click', function () {
-            if (validateCurrentStep() && currentStep < totalSteps) { currentStep++; updateStepper(); }
-            else if (!validateCurrentStep()) {
-              Swal.fire({ title: 'Campos incompletos', text: 'Complete los requeridos.', icon: 'warning', confirmButtonColor: '#3085d6' });
-            }
-          });
-          $prev.on('click', function () { if (currentStep > 1) { currentStep--; updateStepper(); } });
-
-
-          // ====== TABS DE CONTENEDORES ======
-          // Actualiza el título del tab con el tipo seleccionado
-          function refreshTabTitle(i) {
-            const $pane = $('#c-tab-' + i);
-            const $btn  = $('#c-tab-' + i + '-btn');
-            const $sel  = $pane.find('select[name="Containers[' + i + '].ContainerType"]');
-            const selectedText = ($sel.find('option:selected').text() || '').trim(); // "Bolsa" | "Sobre"
-            const nicetype = selectedText || 'Sin tipo';
-            $btn.text('Contenedor ' + (i + 1) + ' - ' + nicetype);
-          }
-
-          // Muestra/oculta secciones de editor según tipo (Bolsa/Sobre) y modo de sobre (Docs/Cheque)
-          function toggleContainerSections($pane) {
-            // Tipo de contenedor
-            const idx = $pane.attr('id').split('-').pop(); // c-tab-<idx>
-            const $sel = $pane.find('select[name="Containers[' + idx + '].ContainerType"]');
-            const typeText = ($sel.find('option:selected').text() || '').trim().toLowerCase();
-            const isBolsa = (typeText.indexOf('bolsa') === 0);
-
-            // Secciones que deben existir en _ContainerEditorPartial:
-            // .sec-bolsa
-            // .sec-sobre  (wrapper general)
-            //   .sec-sobre-docs
-            //   .sec-sobre-cheque
-            $pane.find('.sec-bolsa').toggle(isBolsa).find(':input').prop('disabled', !isBolsa);
-            $pane.find('.sec-sobre').toggle(!isBolsa).find(':input').prop('disabled', isBolsa);
-
-            if (!isBolsa) {
-              // Modo del sobre (radio .js-sobre-mode con values "Docs" | "Check")
-              const $mode = $pane.find('.js-sobre-mode:checked');
-              const modeVal = (($mode.val() || 'Docs') + '').toLowerCase();
-              const isDocs = (modeVal === 'docs');
-
-              $pane.find('.sec-sobre-docs').toggle(isDocs).find(':input').prop('disabled', !isDocs);
-              $pane.find('.sec-sobre-cheque').toggle(!isDocs).find(':input').prop('disabled', isDocs);
-            }
-          }
-
-          // Enlaza eventos por contenedor
-          function wireContainerEvents(i) {
-            const $pane = $('#c-tab-' + i);
-
-            // Cambio de tipo (Bolsa/Sobre)
-            $pane.on('change', 'select[name="Containers[' + i + '].ContainerType"]', function () {
-              toggleContainerSections($pane);
-              refreshTabTitle(i);
-            });
-
-            // Cambio de modo del sobre (Docs | Cheque)
-            $pane.on('change', '.js-sobre-mode', function () {
-              toggleContainerSections($pane);
-            });
-
-            // Agregar/Eliminar filas de Detalles (bolsa o sobre-docs)
-            $pane.on('click', '.js-add-detail', function () {
-              const $tbody = $pane.find('.js-details-table tbody');
-              const j = $tbody.find('tr').length;
-              const row =
-                '<tr>' +
-                  '<td>' +
-                    '<select name="Containers[' + i + '].ValueDetails[' + j + '].ValueType" class="form-select form-select-sm">' +
-                      '<option value="Bill">Billete</option>' +
-                      '<option value="Coin">Moneda</option>' +
-                      '<option value="Document">Documento</option>' +
-                    '</select>' +
-                  '</td>' +
-                  '<td><input name="Containers[' + i + '].ValueDetails[' + j + '].Denomination" type="number" step="1" class="form-control form-control-sm js-calc" /></td>' +
-                  '<td><input name="Containers[' + i + '].ValueDetails[' + j + '].Quantity" type="number" class="form-control form-control-sm js-calc" /></td>' +
-                  '<td><input name="Containers[' + i + '].ValueDetails[' + j + '].BundlesCount" type="number" class="form-control form-control-sm js-calc" /></td>' +
-                  '<td><input name="Containers[' + i + '].ValueDetails[' + j + '].LoosePiecesCount" type="number" class="form-control form-control-sm js-calc" /></td>' +
-                  '<td><input name="Containers[' + i + '].ValueDetails[' + j + '].UnitValue" type="number" step="1" class="form-control form-control-sm js-calc" /></td>' +
-                  '<td><input name="Containers[' + i + '].ValueDetails[' + j + '].CalculatedAmount" type="number" step="1" class="form-control form-control-sm" readonly /></td>' +
-                  '<td><button type="button" class="btn btn-sm btn-outline-danger js-remove-detail">×</button></td>' +
-                '</tr>';
-              $tbody.append(row);
-            });
-            $pane.on('click', '.js-remove-detail', function () { $(this).closest('tr').remove(); });
-
-            // Cálculo por fila
-            $pane.on('input', '.js-calc', function () {
-              const $row  = $(this).closest('tr');
-              const denom = parseFloat($row.find('input[name$=".Denomination"]').val()) || 0;
-              const qty   = parseFloat($row.find('input[name$=".Quantity"]').val()) || 0;
-              const unit  = parseFloat($row.find('input[name$=".UnitValue"]').val()) || 0;
-              const amt   = (denom > 0 && unit > 0) ? (qty * unit) : (denom * qty);
-              $row.find('input[name$=".CalculatedAmount"]').val(amt.toFixed(0));
-            });
-
-            // Agregar/Eliminar filas de Novedades (tabla local del contenedor)
-            $pane.on('click', '.js-add-incident', function () {
-              const $tbody = $pane.find('.js-incidents-table tbody');
-              const j = $tbody.find('tr').length;
-              const row =
-                '<tr>' +
-                  '<td>' +
-                    '<select name="Containers[' + i + '].Incidents[' + j + '].IncidentType" class="form-select form-select-sm">' +
-                      '<option value="Faltante">Faltante</option>' +
-                      '<option value="Sobrante">Sobrante</option>' +
-                      '<option value="Falso">Falso</option>' +
-                      '<option value="Deteriorado">Deteriorado</option>' +
-                    '</select>' +
-                  '</td>' +
-                  '<td><input name="Containers[' + i + '].Incidents[' + j + '].AffectedAmount" type="number" step="1" class="form-control form-control-sm" /></td>' +
-                  '<td><input name="Containers[' + i + '].Incidents[' + j + '].AffectedDenomination" type="number" step="1" class="form-control form-control-sm" /></td>' +
-                  '<td><input name="Containers[' + i + '].Incidents[' + j + '].AffectedQuantity" type="number" class="form-control form-control-sm" /></td>' +
-                  '<td><input name="Containers[' + i + '].Incidents[' + j + '].Description" class="form-control form-control-sm" /></td>' +
-                  '<td><button type="button" class="btn btn-sm btn-outline-danger js-remove-incident">×</button></td>' +
-                '</tr>';
-              $tbody.append(row);
-            });
-            $pane.on('click', '.js-remove-incident', function () { $(this).closest('tr').remove(); });
-
-            // Estado inicial
-            toggleContainerSections($pane);
-            refreshTabTitle(i);
-          }
-
-          // Agregar un contenedor genérico (usuario elige Bolsa/Sobre en el editor)
-          $('#btnAddContainer').on('click', function () {
-            const $tablist    = $('#containersTabs');
-            const $tabcontent = $('#containersTabContent');
-            const nextIndex   = $tabcontent.children('.tab-pane').length;
-            const newId       = 'c-tab-' + nextIndex;
-
-            // Botón del tab
-            const $btn = $(
-              '<li class="nav-item" role="presentation">' +
-                '<button class="nav-link" id="' + newId + '-btn" data-bs-toggle="tab" data-bs-target="#' + newId + '" type="button" role="tab">' +
-                  'Contenedor ' + (nextIndex + 1) + ' - Sin tipo' +
-                '</button>' +
-              '</li>');
-            $tablist.append($btn);
-
-            // Contenido desde el template oculto
-            let html = $('#container-template').html();
-            // reemplazo seguro del placeholder __idx__
-            while (html.indexOf('__idx__') !== -1) html = html.replace('__idx__', nextIndex);
-            const $pane = $('<div class="tab-pane fade" id="' + newId + '" role="tabpanel">' + html + '</div>');
-            $tabcontent.append($pane);
-
-            // Activar el tab recién creado
-            $tablist.find('button.nav-link').removeClass('active');
-            $tabcontent.find('.tab-pane').removeClass('show active');
-            $btn.addClass('active');
-            $pane.addClass('show active');
-
-            // Enlazar eventos y ajustar estado inicial
-            wireContainerEvents(nextIndex);
-          });
-
-          // Inicializa eventos para contenedores que ya vienen en el modelo.
-          (function initExistingContainers(){
-            const count = $('#containersTabContent .tab-pane').length;
-            for (let i = 0; i < count; i++) wireContainerEvents(i);
-
-            // Si no hay ninguno, crea el primero automáticamente
-            if (count === 0) $('#btnAddContainer').trigger('click');
-          })();
-
-
-          // ====== SUBMIT (dejamos postback normal; si quieres AJAX, copia tu bloque SweetAlert del Checkin) ======
-          $('button[data-step-action="submit-final"]').on('click', function (e) {
-            if (!validateCurrentStep()) {
-              e.preventDefault();
-              Swal.fire({ title: 'Campos incompletos', text: 'Revise los campos requeridos.', icon: 'warning', confirmButtonColor: '#3085d6' });
-            }
-          });
-
-          // Start UI
-          updateStepper();
+      function updateStepper() {
+        $('.progress-stepper .step').removeClass('active completed');
+        for (let i = 1; i <= totalSteps; i++) {
+          const $s = $('.step[data-step="' + i + '"]');
+          if (i < currentStep) { $s.addClass('completed'); $s.find('.step-number').html('&#10003;'); }
+          else if (i === currentStep) { $s.addClass('active'); $s.find('.step-number').text(i); }
+          else { $s.find('.step-number').text(i); }
+        }
+        showCurrentStep();
+      }
+      function showCurrentStep() {
+        $('#myTabContent .tab-pane[data-step]').removeClass('show active');
+        $('#myTabContent div[data-step="' + currentStep + '"]').addClass('show active');
+        $prev.toggle(currentStep > 1);
+        $next.toggle(currentStep < totalSteps);
+        $submit.toggle(currentStep === totalSteps);
+      }
+      function validateField($f) {
+        if ($f.prop('disabled')) { $f.removeClass('is-invalid is-valid'); return true; }
+        const ok = $f[0].checkValidity();
+        $f.toggleClass('is-valid', ok).toggleClass('is-invalid', !ok);
+        const $c = $f.closest('.has-validation');
+        $c.find('.invalid-feedback')[ok ? 'hide' : 'show']();
+        $c.find('.valid-feedback')[ok ? 'show' : 'hide']();
+        return ok;
+      }
+      function validateCurrentStep() {
+        let ok = true;
+        $('#myTabContent .tab-pane[data-step].active :input[required]').each(function(){
+          if (!$(this).is(':disabled')) ok = validateField($(this)) && ok;
         });
+        return ok;
+      }
+      $('.progress-stepper .step').on('click', function () {
+        const target = parseInt($(this).data('step'));
+        if (target < currentStep || validateCurrentStep()) { currentStep = target; updateStepper(); }
+      });
+      $next.on('click', function () {
+        if (validateCurrentStep() && currentStep < totalSteps) { currentStep++; updateStepper(); }
+        else if (!validateCurrentStep()) Swal.fire('Campos incompletos', 'Complete los requeridos.', 'warning');
+      });
+      $prev.on('click', function () { if (currentStep > 1) { currentStep--; updateStepper(); } });
+
+      // === ÍNDICE GLOBAL PARA Containers[__idx__] ===
+      let nextIdx = @Model.Containers.Count; // arranca desde los que vienen del servidor
+
+      // === Utils ===
+      function getPaneIndex($pane) {
+        // Para bolsa: id="bag-tab-<bagIdx>"
+        const id = $pane.attr('id');
+        return parseInt(id.split('-').pop());
+      }
+      function nextValueDetailIndex($scopePane, i) {
+        // Devuelve el siguiente índice j para Containers[i].ValueDetails[j]
+        let max = -1;
+        $scopePane.find('[name^="Containers[' + i + '].ValueDetails["]').each(function () {
+          const m = this.name.match(/ValueDetails\[(\d+)\]/);
+          if (m) max = Math.max(max, parseInt(m[1]));
+        });
+        return max + 1;
+      }
+      function buildDetailOptions(scope) {
+        if (scope === 'bolsa' || scope === 'sobre-cash') return ['Bill', 'Coin'];
+        if (scope === 'sobre-docs') return ['Document'];
+        return [];
+      }
+      function toggleSobreMode($containerEditor) {
+        const mode = $containerEditor.find('.js-sobre-mode:checked').val(); // Cash / Document / Check
+        $containerEditor.find('.sec-sobre-cash').toggle(mode === 'Cash');
+        $containerEditor.find('.sec-sobre-docs').toggle(mode === 'Document');
+        $containerEditor.find('.sec-sobre-cheque').toggle(mode === 'Check');
+      }
+      function toggleContainerSections($containerEditor) {
+        const typeVal = $containerEditor.find('.js-container-type').val(); // Bolsa / Sobre
+        const $bolsa = $containerEditor.find('.sec-bolsa');
+        const $sobre = $containerEditor.find('.sec-sobre');
+        const $parent = $containerEditor.find('.js-parent-bag-block');
+        const isSobre = (typeVal === 'Sobre');
+        $bolsa.toggle(!isSobre);
+        $sobre.toggle(isSobre);
+        $parent.toggle(isSobre);
+        if (isSobre) {
+          $containerEditor.find('.js-sobre-mode[value="Cash"]').prop('checked', true);
+          toggleSobreMode($containerEditor);
+        }
+      }
+      function refreshAllParentBagCombos() {
+        // Recolecta bolsas disponibles (por índice i) con su código
+        const bags = [];
+        $('#bagsTabContent .tab-pane[id^="bag-tab-"]').each(function () {
+          const $bagPane = $(this);
+          const i = getPaneIndex($bagPane);
+          const $bagEditor = $bagPane.find('.container-editor').first();
+          const code = $bagEditor.find(`input[name="Containers[${i}].ContainerCode"]`).val() || '';
+          bags.push({ i, text: `Bolsa ${i + 1}${code ? ' — ' + code : ''}` });
+        });
+        // Rellena en todos los sobres
+        $('.container-editor').each(function(){
+          const $ce = $(this);
+          const typeVal = $ce.find('.js-container-type').val();
+          if (typeVal !== 'Sobre') return;
+          const prefix = $ce.data('prefix');
+          const $sel = $ce.find(`select[name="${prefix}.ParentContainerId"]`);
+          const selected = $sel.val();
+          $sel.empty().append($('<option/>', { value: '', text: '-- Seleccione bolsa --'}));
+          bags.forEach(b => $sel.append($('<option/>', { value: b.i, text: b.text })));
+          if (selected) $sel.val(selected);
+        });
+      }
+
+      // === Agregar Bolsa (nueva pestaña raíz) ===
+      $('#btnAddBag').on('click', function () {
+        const $tabs = $('#bagsTabs');
+        const $contents = $('#bagsTabContent');
+
+        const bagIdx = nextIdx++;
+        const newId = 'bag-tab-' + bagIdx;
+
+        // Botón tab
+        const $btn = $(`
+          <li class="nav-item" role="presentation">
+            <button class="nav-link" id="${newId}-btn" data-bs-toggle="tab" data-bs-target="#${newId}" type="button" role="tab">
+              Contenedor ${$contents.children('.tab-pane').length + 1} — Bolsa
+            </button>
+          </li>`);
+        $tabs.append($btn);
+
+        // Contenido
+        let html = $('#bag-template').html().replaceAll('__idx__', bagIdx);
+        const $pane = $(`<div class="tab-pane fade" id="${newId}" role="tabpanel" data-bag-idx="${bagIdx}">${html}
+            <div class="card mt-3">
+              <div class="card-header d-flex align-items-center justify-content-between">
+                <h6 class="mb-0">✉️ Sobres de esta Bolsa</h6>
+                <button type="button" class="btn btn-outline-secondary btn-sm js-add-envelope-in-this-bag">+ Agregar Sobre</button>
+              </div>
+              <div class="card-body">
+                <div class="small text-muted">Puedes añadir varios sobres; cada sobre puede ser Efectivo, Documentos/Voucher o Cheques.</div>
+                <div class="bag-envelopes-list mt-3"></div>
+              </div>
+            </div>
+        </div>`);
+        $contents.append($pane);
+
+        // Activar
+        $tabs.find('button.nav-link').removeClass('active');
+        $contents.find('.tab-pane').removeClass('show active');
+        $btn.addClass('active');
+        $pane.addClass('show active');
+
+        // Inicializa secciones de esa bolsa
+        const $bagEditor = $pane.find('.container-editor').first();
+        $bagEditor.find('.js-container-type').val('Bolsa'); // bloquea visualmente la sección de bolsa
+        toggleContainerSections($bagEditor);
+
+        refreshAllParentBagCombos();
+      });
+
+      // === Agregar Sobre DENTRO de la bolsa activa ===
+      $(document).on('click', '.js-add-envelope-in-this-bag', function () {
+        const $bagPane = $(this).closest('.tab-pane[id^="bag-tab-"]');
+        const bagIdx = getPaneIndex($bagPane);
+        const envIdx = nextIdx++;
+
+        // Crea sobre desde template y lo mete dentro de la lista de esa bolsa
+        let html = $('#envelope-template').html().replaceAll('__idx__', envIdx);
+        const $card = $(html);
+        $bagPane.find('.bag-envelopes-list').append($card);
+
+        // Configurar el SOBRE recién insertado
+        const $envEditor = $card.find('.container-editor').first();
+        $envEditor.find('.js-container-type').val('Sobre');
+        toggleContainerSections($envEditor);
+
+        // Vincular a la bolsa padre (por índice UI)
+        const prefix = $envEditor.data('prefix');
+        $envEditor.find(`select[name="${prefix}.ParentContainerId"]`).val(bagIdx);
+
+        // Modo por defecto: Efectivo
+        $envEditor.find('.js-sobre-mode[value="Cash"]').prop('checked', true);
+        toggleSobreMode($envEditor);
+
+        refreshAllParentBagCombos();
+      });
+
+      // Eliminar un SOBRE card
+      $(document).on('click', '.js-remove-envelope-card', function () {
+        $(this).closest('.envelope-card').remove();
+        refreshAllParentBagCombos();
+      });
+
+      // Cambios de tipo contenedor (para los existentes y nuevos)
+      $(document).on('change', '.js-container-type', function () {
+        const $ce = $(this).closest('.container-editor');
+        toggleContainerSections($ce);
+        refreshAllParentBagCombos();
+      });
+      // Cambios de modo de sobre
+      $(document).on('change', '.js-sobre-mode', function () {
+        const $ce = $(this).closest('.container-editor');
+        toggleSobreMode($ce);
+      });
+
+      // === Detalles (bolsa / sobre-cash / sobre-docs) ===
+      $(document).on('click', '.js-add-detail', function () {
+        const scope = $(this).data('detail-scope');  // bolsa | sobre-cash | sobre-docs
+        const $ce = $(this).closest('.container-editor');
+        // Necesitamos index i del contenedor
+        const prefix = $ce.data('prefix');           // Containers[i]
+        const m = prefix.match(/Containers\[(\d+)\]$/);
+        if (!m) return;
+        const i = parseInt(m[1], 10);
+
+        const j = nextValueDetailIndex($ce, i);
+        const options = buildDetailOptions(scope).map(v => `<option value="${v}">${v}</option>`).join('');
+
+        const row = `
+          <tr>
+            <td>
+              <select name="Containers[${i}].ValueDetails[${j}].ValueType" class="form-select form-select-sm">
+                ${options}
+              </select>
+            </td>
+            <td><input name="Containers[${i}].ValueDetails[${j}].Denomination" type="number" step="1" class="form-control form-control-sm js-calc" /></td>
+            <td><input name="Containers[${i}].ValueDetails[${j}].Quantity" type="number" class="form-control form-control-sm js-calc" /></td>
+            <td><input name="Containers[${i}].ValueDetails[${j}].BundlesCount" type="number" class="form-control form-control-sm js-calc" /></td>
+            <td><input name="Containers[${i}].ValueDetails[${j}].LoosePiecesCount" type="number" class="form-control form-control-sm js-calc" /></td>
+            <td><input name="Containers[${i}].ValueDetails[${j}].UnitValue" type="number" step="1" class="form-control form-control-sm js-calc" /></td>
+            <td><input name="Containers[${i}].ValueDetails[${j}].CalculatedAmount" type="number" step="1" class="form-control form-control-sm" readonly /></td>
+            <td><button type="button" class="btn btn-sm btn-outline-danger js-remove-detail">×</button></td>
+          </tr>`;
+        $ce.find(`.js-details-table[data-detail-scope="${scope}"] tbody`).append(row);
+      });
+      $(document).on('click', '.js-remove-detail', function () {
+        $(this).closest('tr').remove();
+      });
+
+      // === Cheques (solo en sobre-cheque) ===
+      $(document).on('click', '.js-add-cheque', function () {
+        const $ce = $(this).closest('.container-editor');
+        const prefix = $ce.data('prefix');
+        const m = prefix.match(/Containers\[(\d+)\]$/);
+        if (!m) return;
+        const i = parseInt(m[1], 10);
+        const j = nextValueDetailIndex($ce, i);
+
+        const row = `
+          <tr>
+            <td><input name="Containers[${i}].ValueDetails[${j}].BankName" class="form-control form-control-sm" /></td>
+            <td><input name="Containers[${i}].ValueDetails[${j}].IdentifierNumber" class="form-control form-control-sm" /></td>
+            <td><input name="Containers[${i}].ValueDetails[${j}].IssueDate" type="date" class="form-control form-control-sm" /></td>
+            <td><input name="Containers[${i}].ValueDetails[${j}].UnitValue" type="number" step="1" class="form-control form-control-sm js-calc" /></td>
+            <td><input name="Containers[${i}].ValueDetails[${j}].Quantity" type="number" class="form-control form-control-sm js-calc" value="1" /></td>
+            <td><input name="Containers[${i}].ValueDetails[${j}].CalculatedAmount" type="number" step="1" class="form-control form-control-sm" readonly /></td>
+            <td>
+              <input type="hidden" name="Containers[${i}].ValueDetails[${j}].ValueType" value="Check" />
+              <button type="button" class="btn btn-sm btn-outline-danger js-remove-cheque">×</button>
+            </td>
+          </tr>`;
+        $ce.find('.js-cheques-table tbody').append(row);
+      });
+      $(document).on('click', '.js-remove-cheque', function () {
+        $(this).closest('tr').remove();
+      });
+
+      // Cálculo general de montos
+      $(document).on('input', '.js-calc', function () {
+        const $row = $(this).closest('tr');
+        const denom = parseFloat($row.find('input[name$=".Denomination"]').val()) || 0;
+        const qty   = parseFloat($row.find('input[name$=".Quantity"]').val()) || 0;
+        const unit  = parseFloat($row.find('input[name$=".UnitValue"]').val()) || 0;
+        // Si hay UnitValue, usa qty*unit; si no, usa denom*qty
+        const amt = (unit > 0 ? qty * unit : denom * qty);
+        $row.find('input[name$=".CalculatedAmount"]').val(amt.toFixed(0));
+      });
+
+      // Validación final
+      $('button[data-step-action="submit-final"]').on('click', function (e) {
+        if (!validateCurrentStep()) {
+          e.preventDefault();
+          Swal.fire('Campos incompletos', 'Revise los campos requeridos.', 'warning');
+        }
+      });
+
+      // Inicialización UI
+      // Ajusta secciones bolsa/sobre y modo de sobres ya existentes (render del servidor)
+      $('.container-editor').each(function () {
+        toggleContainerSections($(this));
+        const $sobre = $(this).find('.sec-sobre');
+        if ($sobre.is(':visible')) toggleSobreMode($(this));
+      });
+      // Llenar combos de Bolsa asociada en sobres
+      refreshAllParentBagCombos();
+      updateStepper();
+    });
     </script>
 }

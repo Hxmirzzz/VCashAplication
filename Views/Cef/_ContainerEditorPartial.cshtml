@@ -1,203 +1,184 @@
 ﻿@model VCashApp.Models.ViewModels.CentroEfectivo.CefContainerProcessingViewModel
+@{
+    var prefix = ViewData.TemplateInfo.HtmlFieldPrefix;
+}
 
-<div class="row g-3">
-    <!-- Tipo de contenedor -->
-    <div class="col-12 col-lg-4">
-        <div class="form-floating has-validation">
-            <select asp-for="ContainerType"
-                    class="form-select"
-                    asp-items="Html.GetEnumSelectList<VCashApp.Enums.CefContainerTypeEnum>()"
-                    required aria-required="true"></select>
-            <label class="required">Tipo de Contenedor</label>
-            <div class="invalid-feedback">⚠ Requerido</div>
-            <div class="valid-feedback">✓ Correcto</div>
+<div class="container-editor border rounded p-3" data-prefix="@prefix">
+    <input type="hidden" asp-for="Id" />
+    <input type="hidden" asp-for="CefTransactionId" />
+
+    <div class="row g-3">
+        <div class="col-12 col-lg-3">
+            <div class="form-floating has-validation">
+                <select asp-for="ContainerType" class="form-select js-container-type"
+                        asp-items="Html.GetEnumSelectList<VCashApp.Enums.CefContainerTypeEnum>()" required aria-required="true">
+                </select>
+                <label class="required">Tipo de Contenedor</label>
+                <div class="invalid-feedback">⚠ Requerido</div>
+                <div class="valid-feedback">✓ Correcto</div>
+            </div>
         </div>
-        <span asp-validation-for="ContainerType" class="text-danger"></span>
+
+        <div class="col-12 col-lg-3">
+            <div class="form-floating has-validation">
+                <input asp-for="ContainerCode" class="form-control" placeholder="Código" required aria-required="true" />
+                <label class="required">Código del Contenedor</label>
+                <div class="invalid-feedback">⚠ Requerido</div>
+                <div class="valid-feedback">✓ Correcto</div>
+            </div>
+        </div>
+
+        <!-- Solo para sobres: selección de bolsa padre -->
+        <div class="col-12 col-lg-3 js-parent-bag-block" style="display:none;">
+            <div class="form-floating has-validation">
+                <select asp-for="ParentContainerId" class="form-select">
+                    <option value="">-- Seleccione bolsa --</option>
+                    @* JS llenará opciones *@
+                </select>
+                <label>Bolsa asociada</label>
+                <div class="invalid-feedback">⚠ Requerido</div>
+                <div class="valid-feedback">✓ Correcto</div>
+            </div>
+        </div>
+
+        <div class="col-12 col-lg-3">
+            <div class="form-floating">
+                <input asp-for="DeclaredValue" type="number" step="1" class="form-control" placeholder="Valor declarado" />
+                <label>Valor declarado (opcional)</label>
+            </div>
+        </div>
     </div>
 
-    <!-- Código del contenedor -->
-    <div class="col-12 col-lg-4">
-        <div class="form-floating">
-            <input asp-for="ContainerCode" class="form-control" placeholder="Código del contenedor" />
-            <label>Código del Contenedor</label>
-        </div>
-        <span asp-validation-for="ContainerCode" class="text-danger"></span>
-    </div>
-
-    <!-- Valor declarado -->
-    <div class="col-12 col-lg-4">
-        <div class="form-floating">
-            <input asp-for="DeclaredValue" type="number" step="1" class="form-control" placeholder="Valor declarado" />
-            <label>Valor Declarado</label>
-        </div>
-        <span asp-validation-for="DeclaredValue" class="text-danger"></span>
-    </div>
-</div>
-
-<!-- =================== SECCIÓN: BOLSA =================== -->
-<div class="sec-bolsa mt-3">
-    <div class="card">
-        <div class="card-header d-flex align-items-center justify-content-between">
-            <h6 class="mb-0">💼 Detalle de Bolsa (Billetes / Monedas)</h6>
-            <button type="button" class="btn btn-outline-primary btn-sm js-add-detail">+ Agregar detalle</button>
-        </div>
-        <div class="card-body">
-            <div class="table-responsive">
-                <table class="table table-sm align-middle js-details-table">
+    <div class="sec-bolsa mt-3">
+        <div class="card">
+            <div class="card-header"><h6 class="mb-0">🧳 Bolsa — Detalle (Billetes/Monedas)</h6></div>
+            <div class="card-body">
+                <table class="table table-sm align-middle js-details-table" data-detail-scope="bolsa">
                     <thead>
                         <tr>
-                            <th style="min-width:140px">Tipo</th>
+                            <th>Tipo</th>
                             <th>Denominación</th>
                             <th>Cantidad</th>
                             <th>Fajos</th>
                             <th>Picos</th>
                             <th>Valor Unit.</th>
                             <th>Monto</th>
-                            <th style="width:1%"></th>
+                            <th></th>
                         </tr>
                     </thead>
                     <tbody>
-                        <!-- filas dinámicas (JS) -->
+                        @* Si quieres precargar, recorre Model.ValueDetails (Bill/Coin) *@
                     </tbody>
                 </table>
+                <button type="button" class="btn btn-outline-primary btn-sm js-add-detail" data-detail-scope="bolsa">
+                    + Agregar detalle
+                </button>
             </div>
         </div>
     </div>
-</div>
 
-<!-- =================== SECCIÓN: SOBRE =================== -->
-<div class="sec-sobre mt-3" style="display:none;">
-    <div class="card">
-        <div class="card-header"><h6 class="mb-0">✉️ Sobre</h6></div>
-        <div class="card-body">
-
-            <!-- 👇👇 BLOQUE DE RADIOS (SobreMode) AQUÍ 👇👇 -->
-            <div class="mb-2">
-                <div class="form-check form-check-inline">
-                    <input class="form-check-input js-sobre-mode"
-                           type="radio"
-                           name="@($"{ViewData.TemplateInfo.HtmlFieldPrefix}.SobreMode")"
-                           value="Docs"
-                           checked>
-                    <label class="form-check-label">Documentos/Vouchers</label>
-                </div>
-                <div class="form-check form-check-inline">
-                    <input class="form-check-input js-sobre-mode"
-                           type="radio"
-                           name="@($"{ViewData.TemplateInfo.HtmlFieldPrefix}.SobreMode")"
-                           value="Check">
-                    <label class="form-check-label">Cheque</label>
-                </div>
+    <div class="sec-sobre mt-3" style="display:none;">
+        <div class="mb-2">
+            <div class="form-check form-check-inline">
+                <input class="form-check-input js-sobre-mode" type="radio" name="@($"{prefix}.SobreMode")" value="Cash" checked />
+                <label class="form-check-label">Efectivo</label>
             </div>
-            <!-- ☝️☝️ FIN BLOQUE DE RADIOS (SobreMode) ☝️☝️ -->
-            <!-- --------- Sub-sección: Documentos/Vouchers --------- -->
-            <div class="sec-sobre-docs mt-2">
-                <div class="d-flex align-items-center justify-content-between mb-2">
-                    <strong>Contenido del Sobre (Docs/Vouchers)</strong>
-                    <button type="button" class="btn btn-outline-primary btn-sm js-add-detail">+ Agregar detalle</button>
-                </div>
-                <div class="table-responsive">
-                    <table class="table table-sm align-middle js-details-table">
+            <div class="form-check form-check-inline">
+                <input class="form-check-input js-sobre-mode" type="radio" name="@($"{prefix}.SobreMode")" value="Document" />
+                <label class="form-check-label">Documentos/Vouchers</label>
+            </div>
+            <div class="form-check form-check-inline">
+                <input class="form-check-input js-sobre-mode" type="radio" name="@($"{prefix}.SobreMode")" value="Check" />
+                <label class="form-check-label">Cheques</label>
+            </div>
+        </div>
+
+        <!-- Sobre: EFECTIVO -->
+        <div class="sec-sobre-cash">
+            <div class="card">
+                <div class="card-header"><h6 class="mb-0">💵 Sobre — Efectivo (Billetes/Monedas)</h6></div>
+                <div class="card-body">
+                    <table class="table table-sm align-middle js-details-table" data-detail-scope="sobre-cash">
                         <thead>
                             <tr>
-                                <th style="min-width:140px">Tipo</th>
+                                <th>Tipo</th>
                                 <th>Denominación</th>
                                 <th>Cantidad</th>
                                 <th>Fajos</th>
                                 <th>Picos</th>
                                 <th>Valor Unit.</th>
                                 <th>Monto</th>
-                                <th style="width:1%"></th>
+                                <th></th>
                             </tr>
                         </thead>
-                        <tbody>
-                            <!-- filas dinámicas (JS) -->
-                        </tbody>
+                        <tbody></tbody>
                     </table>
-                </div>
-                <div class="small text-muted">
-                    * En Docs/Vouchers puedes cargar <em>Billetes</em>, <em>Monedas</em> o <em>Documentos</em> (no cheques).
-                </div>
-            </div>
-
-            <!-- --------- Sub-sección: Cheque --------- -->
-            <div class="sec-sobre-cheque mt-2" style="display:none;">
-                <div class="row g-3">
-                    <!-- Forzamos el primer detalle como Cheque -->
-                    <input type="hidden" name="@($"{ViewData.TemplateInfo.HtmlFieldPrefix}.ValueDetails[0].ValueType")" value="Check" />
-
-                    <div class="col-12 col-lg-4">
-                        <div class="form-floating">
-                            <input name="@($"{ViewData.TemplateInfo.HtmlFieldPrefix}.ValueDetails[0].BankName")" class="form-control" placeholder="Banco" />
-                            <label>Banco</label>
-                        </div>
-                    </div>
-                    <div class="col-12 col-lg-4">
-                        <div class="form-floating">
-                            <input name="@($"{ViewData.TemplateInfo.HtmlFieldPrefix}.ValueDetails[0].IdentifierNumber")" class="form-control" placeholder="Número de cheque" />
-                            <label>Número de cheque</label>
-                        </div>
-                    </div>
-                    <div class="col-12 col-lg-4">
-                        <div class="form-floating">
-                            <input name="@($"{ViewData.TemplateInfo.HtmlFieldPrefix}.ValueDetails[0].IssueDate")" type="date" class="form-control" />
-                            <label>Fecha de emisión</label>
-                        </div>
-                    </div>
-
-                    <div class="col-12 col-lg-6">
-                        <div class="form-floating">
-                            <input name="@($"{ViewData.TemplateInfo.HtmlFieldPrefix}.ValueDetails[0].UnitValue")" type="number" step="1" class="form-control js-calc" placeholder="Valor del cheque" />
-                            <label>Valor del Cheque</label>
-                        </div>
-                    </div>
-                    <div class="col-12 col-lg-6">
-                        <div class="form-floating">
-                            <input name="@($"{ViewData.TemplateInfo.HtmlFieldPrefix}.ValueDetails[0].CalculatedAmount")" type="number" step="1" class="form-control" readonly />
-                            <label>Monto Calculado</label>
-                        </div>
-                    </div>
-
-                    <div class="col-12">
-                        <div class="form-floating">
-                            <input name="@($"{ViewData.TemplateInfo.HtmlFieldPrefix}.ValueDetails[0].Observations")" class="form-control" placeholder="Observaciones" />
-                            <label>Observaciones</label>
-                        </div>
-                    </div>
-                </div>
-                <div class="small text-muted mt-2">
-                    * Para cheque se capturan campos específicos (Banco, Número, Fecha, Valor). El monto calculado replica el valor.
+                    <button type="button" class="btn btn-outline-primary btn-sm js-add-detail" data-detail-scope="sobre-cash">
+                        + Agregar detalle
+                    </button>
                 </div>
             </div>
+        </div>
 
-            <!-- (Opcional) Novedades por contenedor -->
-            <div class="mt-3">
-                <div class="d-flex justify-content-between align-items-center">
-                    <h6 class="mb-0">Novedades (opcional)</h6>
-                    <button type="button" class="btn btn-outline-secondary btn-sm js-add-incident">+ Agregar novedad</button>
-                </div>
-                <div class="table-responsive mt-2">
-                    <table class="table table-sm align-middle js-incidents-table">
+        <!-- Sobre: DOCUMENTOS/VOUCHERS -->
+        <div class="sec-sobre-docs" style="display:none;">
+            <div class="card">
+                <div class="card-header"><h6 class="mb-0">📄 Sobre — Documentos/Vouchers</h6></div>
+                <div class="card-body">
+                    <table class="table table-sm align-middle js-details-table" data-detail-scope="sobre-docs">
                         <thead>
                             <tr>
                                 <th>Tipo</th>
+                                <th>Denominación</th>
+                                <th>Cantidad</th>
+                                <th>Fajos</th>
+                                <th>Picos</th>
+                                <th>Valor Unit.</th>
                                 <th>Monto</th>
-                                <th>Denom.</th>
-                                <th>Cant.</th>
-                                <th>Descripción</th>
-                                <th style="width:1%"></th>
+                                <th></th>
                             </tr>
                         </thead>
-                        <tbody>
-                            <!-- filas dinámicas (JS) -->
-                        </tbody>
+                        <tbody></tbody>
                     </table>
-                </div>
-                <div class="small text-muted">
-                    * Deja en blanco si este contenedor no tiene novedades.
+                    <button type="button" class="btn btn-outline-primary btn-sm js-add-detail" data-detail-scope="sobre-docs">
+                        + Agregar documento
+                    </button>
                 </div>
             </div>
+        </div>
 
+        <!-- Sobre: CHEQUES -->
+        <div class="sec-sobre-cheque" style="display:none;">
+            <div class="card">
+                <div class="card-header"><h6 class="mb-0">🏦 Sobre — Cheques</h6></div>
+                <div class="card-body">
+                    <table class="table table-sm align-middle js-cheques-table">
+                        <thead>
+                            <tr>
+                                <th>Banco</th>
+                                <th>Número</th>
+                                <th>Fecha</th>
+                                <th>Valor</th>
+                                <th>Cantidad</th>
+                                <th>Monto</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                    <button type="button" class="btn btn-outline-primary btn-sm js-add-cheque">
+                        + Agregar cheque
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Observaciones (común) -->
+    <div class="mt-3">
+        <div class="form-floating">
+            <textarea asp-for="Observations" class="form-control" style="height:80px" placeholder="Observaciones"></textarea>
+            <label>Observaciones</label>
         </div>
     </div>
 </div>
