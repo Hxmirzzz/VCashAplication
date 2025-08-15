@@ -1880,6 +1880,18 @@
         <member name="M:VCashApp.Migrations.SetFKDenominationNullOnCefValueDetailTable.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
             <inheritdoc />
         </member>
+        <member name="T:VCashApp.Migrations.AddAdmQualityTableAndFKToCefValueDetail">
+            <inheritdoc />
+        </member>
+        <member name="M:VCashApp.Migrations.AddAdmQualityTableAndFKToCefValueDetail.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:VCashApp.Migrations.AddAdmQualityTableAndFKToCefValueDetail.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:VCashApp.Migrations.AddAdmQualityTableAndFKToCefValueDetail.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
         <member name="T:VCashApp.Models.ViewModels.BranchViewModel">
             <summary>
             Representa la información principal de una sucursal.

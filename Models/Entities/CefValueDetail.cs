@@ -20,12 +20,17 @@ namespace VCashApp.Models.Entities
         [Required]
         [StringLength(50)]
         [Column("TipoValor")]
-        public string ValueType { get; set; } // Tipo de valor: 'Bill', 'Coin', 'Check', 'Document'
+        public string ValueType { get; set; }
 
         [Column("Denominacion")]
         [ForeignKey("AdmDenominacion")]
         public int? DenominationId { get; set; }
         public virtual AdmDenominacion? AdmDenominacion { get; set; } = null!;
+
+        [Column("Calidad")]
+        [ForeignKey("AdmQuality")]
+        public int? QualityId { get; set; }
+        public virtual AdmQuality? AdmQuality { get; set; } = null!;
 
         [Column("Cantidad")]
         public int? Quantity { get; set; } // Cantidad de unidades (para billetes/monedas)

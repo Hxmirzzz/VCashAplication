@@ -45,6 +45,7 @@ namespace VCashApp.Data
         public DbSet<CefValueDetail> CefValueDetails { get; set; }
         public DbSet<CefIncident> CefIncidents { get; set; }
         public DbSet<CefIncidentType> CefIncidentTypes { get; set; }
+        public DbSet<AdmQuality> AdmCalidad { get; set; }
         public DbSet<TdvRutaDiaria> TdvRutasDiarias { get; set; }
         // public DbSet<TdvRutaDetallePunto> TdvRutaDetallePuntos { get; set; }
 
@@ -462,7 +463,9 @@ namespace VCashApp.Data
                 // Relaciones
                 entity.HasOne(c => c.CefContainer).WithMany(t => t.ValueDetails).HasForeignKey(c => c.CefContainerId).OnDelete(DeleteBehavior.Cascade);
                 entity.HasOne(c => c.AdmDenominacion).WithMany().HasForeignKey(c => c.DenominationId).IsRequired(false).OnDelete(DeleteBehavior.Restrict);
+                entity.HasOne(c => c.AdmQuality).WithMany().HasForeignKey(c => c.QualityId).IsRequired(false).OnDelete(DeleteBehavior.Restrict);
                 entity.Property(v => v.ValueType).HasConversion<string>();
+                entity.HasIndex(v => new { v.CefContainerId, v.ValueType, v.DenominationId, v.QualityId }).IsUnique(false);
             });
 
             builder.Entity<CefIncident>(entity =>
@@ -532,6 +535,17 @@ namespace VCashApp.Data
                 entity.HasOne(e => e.UsuarioCEFDescargueObj).WithMany().HasForeignKey(e => e.UsuarioCEFDescargue).HasPrincipalKey(u => u.Id).IsRequired(false);
                 entity.HasOne(e => e.UsuarioSupervisorAperturaObj).WithMany().HasForeignKey(e => e.UsuarioSupervisorApertura).HasPrincipalKey(u => u.Id).IsRequired(false);
                 entity.HasOne(e => e.UsuarioSupervisorCierreObj).WithMany().HasForeignKey(e => e.UsuarioSupervisorCierre).HasPrincipalKey(u => u.Id).IsRequired(false);
+            });
+
+            builder.Entity<AdmQuality>(entity =>
+            {
+                entity.HasKey(q => q.Id);
+                entity.Property(q => q.Id).ValueGeneratedOnAdd();
+
+                entity.Property(q => q.QualityName).IsRequired().HasMaxLength(255);
+                entity.Property(q => q.TypeOfMoney).IsRequired().HasMaxLength(1);
+                entity.Property(q => q.DenominationFamily).IsRequired().HasMaxLength(1);
+                entity.Property(q => q.Status).IsRequired();
             });
 
             // Mapeo para TdvRutaDetallePuntos
