@@ -217,6 +217,8 @@ namespace VCashApp.Services.Cef
                                  .OrderBy(c => c.Id)
                                  .ToListAsync();
         }
+
+        /// <inheritdoc/>
         public async Task<string> BuildDenomsJsonForTransactionAsync(int cefTransactionId)
         {
             var tx = await _context.CefTransactions
@@ -227,59 +229,102 @@ namespace VCashApp.Services.Cef
                 ?? throw new InvalidOperationException($"Transacción {cefTransactionId} no existe.");
 
             var currency = tx.Currency ?? "COP";
+
             var denoms = await _context.AdmDenominaciones
                 .AsNoTracking()
                 .Where(d => d.DivisaDenominacion == currency)
-                .Select(d => new {
+                .Select(d => new
+                {
                     id = d.CodDenominacion,
                     value = d.ValorDenominacion,
-                    type = d.TipoDenominacion,
-                    tipoDinero = d.TipoDinero,
-                    denominacion = d.Denominacion,
-                    cantidadUnidadAgrupamiento = d.CantidadUnidadAgrupamiento
+                    money = d.TipoDinero,
+                    family = d.FamiliaDenominacion,
+                    label = d.Denominacion,
+                    bundleSize = d.CantidadUnidadAgrupamiento
                 })
-                .OrderBy(d => d.tipoDinero)
+                .OrderBy(d => d.money)
                 .ThenByDescending(d => d.value)
                 .ToListAsync();
 
             var esCO = CultureInfo.GetCultureInfo("es-CO");
+
+            // Función local para normalizar y formatear
+            string FormatLabel(string lbl, decimal? val) =>
+                !string.IsNullOrWhiteSpace(lbl) ? lbl : (val.HasValue ? val.Value.ToString("C0", esCO) : "");
+
+            string NormFam(string fam) =>
+                string.IsNullOrWhiteSpace(fam) ? "T" : fam.Trim().ToUpperInvariant();
+
+            int DefaultBundle(string money) =>
+                money == "B" ? 100 : (money == "M" ? 1000 : 1);
+
             var payload = new
             {
                 Bill = denoms
-                    .Where(d => d.tipoDinero == "B")
-                    .Select(d => new {
+                    .Where(d => d.money == "B")
+                    .Select(d => new
+                    {
                         id = d.id,
                         value = d.value,
-                        label = d.denominacion ?? d.value?.ToString("C0", esCO),
-                        bundleSize = d.cantidadUnidadAgrupamiento ?? 100
+                        label = FormatLabel(d.label, d.value),
+                        bundleSize = d.bundleSize ?? DefaultBundle(d.money),
+                        family = NormFam(d.family) // <- MUY IMPORTANTE
                     }),
                 Coin = denoms
-                    .Where(d => d.tipoDinero == "M")
-                    .Select(d => new {
+                    .Where(d => d.money == "M")
+                    .Select(d => new
+                    {
                         id = d.id,
                         value = d.value,
-                        label = d.denominacion ?? d.value?.ToString("C0", esCO),
-                        bundleSize = d.cantidadUnidadAgrupamiento ?? 1000
+                        label = FormatLabel(d.label, d.value),
+                        bundleSize = d.bundleSize ?? DefaultBundle(d.money),
+                        family = NormFam(d.family) // <- MUY IMPORTANTE
                     }),
                 Document = denoms
-                    .Where(d => d.tipoDinero == "D")
-                    .Select(d => new {
+                    .Where(d => d.money == "D")
+                    .Select(d => new
+                    {
                         id = d.id,
                         value = d.value,
-                        label = d.denominacion ?? d.value?.ToString("C0", esCO),
-                        bundleSize = d.cantidadUnidadAgrupamiento ?? 1
+                        label = FormatLabel(d.label, d.value),
+                        bundleSize = d.bundleSize ?? DefaultBundle(d.money),
+                        family = "T" // documentos no discriminan familia
                     }),
                 Check = denoms
-                    .Where(d => d.tipoDinero == "C")
-                    .Select(d => new {
+                    .Where(d => d.money == "C")
+                    .Select(d => new
+                    {
                         id = d.id,
                         value = d.value,
-                        label = d.denominacion ?? d.value?.ToString("C0", esCO),
-                        bundleSize = d.cantidadUnidadAgrupamiento ?? 1
+                        label = FormatLabel(d.label, d.value),
+                        bundleSize = d.bundleSize ?? DefaultBundle(d.money),
+                        family = "T" // cheques no discriminan familia
                     })
             };
 
             return JsonSerializer.Serialize(payload);
+        }
+
+        /// <inheritdoc/>
+        public async Task<string> BuildQualitiesJsonAsync()
+        {
+            var q = await _context.Set<AdmQuality>()
+                .Where(c => c.Status)
+                .OrderBy(c => c.TypeOfMoney).ThenBy(c => c.QualityName)
+                .Select(c => new {
+                    id = c.Id,
+                    name = c.QualityName,
+                    money = c.TypeOfMoney,
+                    family = c.DenominationFamily
+                })
+                .ToListAsync();
+
+            var obj = new
+            {
+                B = q.Where(x => x.money == "B").ToList(),
+                M = q.Where(x => x.money == "M").ToList()
+            };
+            return JsonSerializer.Serialize(obj);
         }
     }
 }

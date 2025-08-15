@@ -379,6 +379,13 @@
     @Html.Raw(denomsJson)
 </script>
 
+<script id="qualities-json" type="application/json">
+    @{
+        string qualitiesJson = ViewBag.QualitiesJson?.ToString() ?? "{}";
+    }
+    @Html.Raw(qualitiesJson)
+</script>
+
 @section Scripts {
     @{ await Html.RenderPartialAsync("_ValidationScriptsPartial"); }
 
@@ -386,8 +393,10 @@
     $(function () {
       // === STEPPER ===
       let currentStep = 1, totalSteps = 3;
-      // Denominaciones JSON embebidas
+
+      // Catálogos entregados por el controlador
       const DENOMS = JSON.parse(document.getElementById('denoms-json')?.textContent || '{}');
+      const QUALS  = JSON.parse(document.getElementById('qualities-json')?.textContent || '{}'); // { B:[{id,name,family}], M:[...] }
 
       const $form   = $('#cefContainersForm');
       const $next   = $('button[data-step-action="next"]');
@@ -442,170 +451,239 @@
 
       // === Utils ===
       function getPaneIndex($pane) {
-        // id="bag-tab-<bagIdx>"
         const id = $pane.attr('id') || '';
         const parts = id.split('-');
         return parseInt(parts[parts.length - 1]) || 0;
       }
 
-        function updateAvailableDenominations($table) {
-          // Obtener todas las denominaciones seleccionadas en esta tabla
-          const selectedDenoms = [];
-          $table.find('.js-denom').each(function() {
-            const val = $(this).val();
-            if (val) selectedDenoms.push(val);
-          });
-
-          // Actualizar cada dropdown
-          $table.find('.js-denom').each(function() {
-            const $select = $(this);
-            const currentValue = $select.val();
-            const valueType = $select.closest('tr').find('.js-vtype').val();
-    
-            // Obtener denominaciones excluidas (las ya seleccionadas excepto la actual)
-            const excludeValues = selectedDenoms.filter(val => val !== currentValue);
-    
-            // Regenerar opciones excluyendo las ya seleccionadas
-            const filteredOptions = denomOptionsHtml(valueType, excludeValues);
-            $select.html(filteredOptions);
-    
-            // Restaurar valor actual
-            $select.val(currentValue);
-          });
+      // ===================== CATÁLOGOS (DENOM / CALIDAD) =====================
+        function getMoneyFlag(kind) {
+            const k = (kind || '').toString().trim().toLowerCase();
+            if (k === 'bill' || k === 'billete') return 'B';
+            if (k === 'coin' || k === 'moneda')  return 'M';
+            return null;
         }
+
+        
+        function getDenomFamilyForRow($row) {
+            const fam = $row.find('.js-denom option:selected').data('family');
+            return (fam ? String(fam).toUpperCase() : 'T');
+        }
+
+        function mapUsedQualitiesByDenom($table) {
+            const map = {};
+            $table.find('tbody tr').each(function () {
+              const $r     = $(this);
+              const denom  = String($r.find('.js-denom').val() || '');
+              const qVal   = String($r.find('.js-quality').val() || '');
+              if (!denom || !qVal) return;
+              if (!map[denom]) map[denom] = new Set();
+              map[denom].add(qVal);
+            });
+            return map;
+        }
+
+      function findDenom(kind, denomId) {
+        const arr = (DENOMS && DENOMS[kind]) ? DENOMS[kind] : [];
+        return arr.find(d => String((d.id ?? d.codDenominacion ?? d.CodDenominacion)) === String(denomId));
+      }
+
+      function getDenomFamily(kind, denomId) {
+        const d = findDenom(kind, denomId);
+        // Propiedad flexible: family | familia | FamiliaDenominacion | fam
+        return d ? (d.family ?? d.familia ?? d.FamiliaDenominacion ?? d.fam ?? 'T') : 'T';
+      }
 
         function denomOptionsHtml(kind, excludeValues = []) {
-          const arr = (DENOMS && DENOMS[kind]) ? DENOMS[kind] : [];
-          if (!arr.length) return '<option value="">-- Sin denominaciones --</option>';
-  
-          let html = '<option value="">-- Seleccione denominación --</option>';
-  
-          arr.forEach(d => {
-            const id = d.id ?? d.codDenominacion ?? d.CodDenominacion;
-            const value = d.value ?? d.valor ?? d.ValorDenominacion ?? d.valorDenominacion ?? '';
-            const label = d.label ?? d.text ?? d.name ?? d.Denominacion ?? `${value}`;
-    
-            // Solo incluir si NO está en la lista de excluidos
-            if (!excludeValues.includes(String(id))) {
-              html += `<option value="${id}" data-value="${value}">${label}</option>`;
+            const arr = (DENOMS && DENOMS[kind]) ? DENOMS[kind] : [];
+            if (!arr.length) return '<option value="">-- Sin denominaciones --</option>';
+
+            let html = '<option value="">-- Seleccione denominación --</option>';
+            arr.forEach(d => {
+              const id    = d.id ?? d.codDenominacion ?? d.CodDenominacion;
+              const value = d.value ?? d.valor ?? d.ValorDenominacion ?? d.valorDenominacion ?? '';
+              const label = d.label ?? d.text ?? d.name ?? d.Denominacion ?? `${value}`;
+              const fam   = (d.family ?? d.FamiliaDenominacion ?? 'T');
+
+              if (!excludeValues.includes(String(id))) {
+                html += `<option value="${id}" data-value="${value}" data-family="${fam}">${label}</option>`;
+              }
+            });
+            return html;
+        }
+
+      // --------- CALIDADES ----------
+        function qualityOptionsHtml(kind, denomFamily, excludeIds = []) {
+            const money = getMoneyFlag(kind);           // 'B' | 'M' | null
+            const arr   = (QUALS && QUALS[money]) ? QUALS[money] : [];
+            if (!arr.length) return '<option value="">-- Sin calidades --</option>';
+
+            const keepFamilies = (money === 'B' || money === 'M')
+              ? ['N','A','T']
+              : (String(denomFamily).toUpperCase() === 'N') ? ['N','T']
+              : (String(denomFamily).toUpperCase() === 'A') ? ['A','T']
+              : ['T'];
+
+            let html = '<option value="">-- Seleccione calidad --</option>';
+            arr.forEach(q => {
+              const qId = String(q.id);
+              const fam = (q.family ?? q.FamiliaDenominacion ?? 'T').toString().trim().toUpperCase();
+              if (keepFamilies.includes(fam) && !excludeIds.includes(qId)) {
+                html += `<option value="${qId}">${q.name ?? q.QualityName ?? ''}</option>`;
+              }
+            });
+            return html;
+        }
+
+      function usedQualityIdsForSameDenom($table, denomId, $exceptRow) {
+        const used = new Set();
+        $table.find('tr').each(function(){
+          const $r = $(this);
+          if ($r.is($exceptRow)) return;
+          const dSel = $r.find('select[name$=".DenominationId"]');
+          const qSel = $r.find('select[name$=".QualityId"]');
+          if (dSel.length && qSel.length) {
+            if (String(dSel.val()) === String(denomId)) {
+              const qv = qSel.val();
+              if (qv) used.add(String(qv));
             }
+          }
+        });
+        return Array.from(used);
+      }
+
+        function updateQualityForRow($row) {
+          const kind        = $row.find('.js-vtype').val();
+          const denomFamily = getDenomFamilyForRow($row);
+          const denomId     = String($row.find('.js-denom').val() || '');
+          const $q          = $row.find('.js-quality');
+          if (!$q.length) return;
+
+          const prev = String($q.val() || '');
+
+          const $table     = $row.closest('table');
+          const usedByDen  = mapUsedQualitiesByDenom($table)[denomId] || new Set();
+          const excludeIds = Array.from(usedByDen).filter(x => x !== prev); // permite mantener la propia
+          $q.html(qualityOptionsHtml(kind, denomFamily, excludeIds));
+
+          if (prev && $q.find(`option[value="${prev}"]`).length) {
+            $q.val(prev);
+          } else {
+            // opcional: auto-seleccionar la primera disponible distinta de vacío
+            // const first = $q.find('option[value!=""]').first().val();
+            // if (first) $q.val(first);
+          }
+        }
+
+        function updateQualitiesInTable($table) {
+          const usedMap = mapUsedQualitiesByDenom($table); // denomId => Set(qualityId)
+          $table.find('tbody tr').each(function () {
+            const $r         = $(this);
+            const denomId    = String($r.find('.js-denom').val() || '');
+            const currentQ   = String($r.find('.js-quality').val() || '');
+            const $q         = $r.find('.js-quality');
+            if (!denomId || !$q.length) return;
+
+            const usedSet = usedMap[denomId] || new Set();
+
+            $q.find('option').each(function () {
+              const val = String(this.value || '');
+              if (!val) return; // "-- Seleccione calidad --"
+              // Deshabilita si ya está usada por la misma denominación y no es mi valor actual
+              this.disabled = (usedSet.has(val) && val !== currentQ);
+            });
           });
-  
-          return html;
         }
 
-        function calculateBundlesAndLoose($row) {
-          const qty = parseFloat($row.find('input[name$=".Quantity"]').val()) || 0;
-  
-          if (qty <= 0) {
-            $row.find('input[name$=".BundlesCount"]').val('0');
-            $row.find('input[name$=".LoosePiecesCount"]').val('0');
-            return;
-          }
+      // ===================== FAJOS / PICOS =====================
+      function calculateBundlesAndLoose($row) {
+        const qty = parseFloat($row.find('input[name$=".Quantity"]').val()) || 0;
+        if (qty <= 0) {
+          $row.find('input[name$=".BundlesCount"]').val('0');
+          $row.find('input[name$=".LoosePiecesCount"]').val('0');
+          return;
+        }
 
-          // Obtener información de la denominación seleccionada
-          const $denomSelect = $row.find('select[name$=".DenominationId"]');
-          const selectedOption = $denomSelect.find('option:selected');
-  
-          if (!selectedOption.length || !selectedOption.val()) {
-            $row.find('input[name$=".BundlesCount"]').val('0');
-            $row.find('input[name$=".LoosePiecesCount"]').val('0');
-            return;
-          }
+        const $denomSelect = $row.find('select[name$=".DenominationId"]');
+        const selectedOption = $denomSelect.find('option:selected');
+        if (!selectedOption.length || !selectedOption.val()) {
+          $row.find('input[name$=".BundlesCount"]').val('0');
+          $row.find('input[name$=".LoosePiecesCount"]').val('0');
+          return;
+        }
 
-          // Buscar la denominación en DENOMS para obtener bundleSize
+        const denomId = selectedOption.val();
+        const kind    = $row.find('.js-vtype').val();
+
+        let bundleSize = 1;
+        const arr = (DENOMS && DENOMS[kind]) ? DENOMS[kind] : [];
+        const denomInfo = arr.find(d => String((d.id ?? d.codDenominacion ?? d.CodDenominacion)) === String(denomId));
+        if (denomInfo && (denomInfo.bundleSize ?? denomInfo.tamañoFajo ?? denomInfo.bundle)) {
+          bundleSize = denomInfo.bundleSize ?? denomInfo.tamañoFajo ?? denomInfo.bundle;
+        }
+
+        const bundles = Math.floor(qty / bundleSize);
+        const loose   = qty % bundleSize;
+
+        $row.find('input[name$=".BundlesCount"]').val(bundles || '0');
+        $row.find('input[name$=".LoosePiecesCount"]').val(loose || '0');
+      }
+
+      $(document).on('input change', 'input[name$=".Quantity"]', function() {
+        const $row = $(this).closest('tr');
+        calculateBundlesAndLoose($row);
+        triggerAmountCalculation($row);
+      });
+
+      $(document).on('input change', 'input[name$=".BundlesCount"], input[name$=".LoosePiecesCount"]', function() {
+        const $row = $(this).closest('tr');
+        const bundles = parseFloat($row.find('input[name$=".BundlesCount"]').val()) || 0;
+        const loose   = parseFloat($row.find('input[name$=".LoosePiecesCount"]').val()) || 0;
+
+        if (bundles === 0 && loose === 0) {
+          $row.find('input[name$=".Quantity"]').val('');
+          triggerAmountCalculation($row);
+          return;
+        }
+
+        const $denomSelect = $row.find('select[name$=".DenominationId"]');
+        const selectedOption = $denomSelect.find('option:selected');
+
+        if (selectedOption.length && selectedOption.val()) {
           const denomId = selectedOption.val();
-          const valueType = $row.find('.js-vtype').val();
-  
+          const kind    = $row.find('.js-vtype').val();
+
           let bundleSize = 1;
-          const denomsArray = DENOMS[valueType] || [];
-          const denomInfo = denomsArray.find(d => String(d.id) === String(denomId));
-  
-          if (denomInfo && denomInfo.bundleSize) {
-            bundleSize = denomInfo.bundleSize;
+          const arr = (DENOMS && DENOMS[kind]) ? DENOMS[kind] : [];
+          const denomInfo = arr.find(d => String((d.id ?? d.codDenominacion ?? d.CodDenominacion)) === String(denomId));
+          if (denomInfo && (denomInfo.bundleSize ?? denomInfo.tamañoFajo ?? denomInfo.bundle)) {
+            bundleSize = denomInfo.bundleSize ?? denomInfo.tamañoFajo ?? denomInfo.bundle;
           }
 
-          const bundles = Math.floor(qty / bundleSize);
-          const loose = qty % bundleSize;
+          const totalQuantity = (bundles * bundleSize) + loose;
+          $row.find('input[name$=".Quantity"]').val(totalQuantity);
+          triggerAmountCalculation($row);
+        }
+      });
 
-          $row.find('input[name$=".BundlesCount"]').val(bundles || '0');
-          $row.find('input[name$=".LoosePiecesCount"]').val(loose || '0');
+      function triggerAmountCalculation($row) {
+        let denomVal = 0;
+        const $denSel = $row.find('select[name$=".DenominationId"]');
+        if ($denSel.length) {
+          denomVal = parseFloat($denSel.find('option:selected').data('value')) || 0;
+        } else {
+          denomVal = parseFloat($row.find('input[name$=".DenominationId"]').val()) || 0;
         }
 
-        $(document).on('input change', 'input[name$=".Quantity"]', function() {
-          const $row = $(this).closest('tr');
-          calculateBundlesAndLoose($row);
-  
-          // Mantener el cálculo de monto
-          triggerAmountCalculation($row);
-        });
+        const qty  = parseFloat($row.find('input[name$=".Quantity"]').val()) || 0;
+        const unit = parseFloat($row.find('input[name$=".UnitValue"]').val()) || 0;
+        const amt  = (unit > 0 ? qty * unit : denomVal * qty);
+        $row.find('input[name$=".CalculatedAmount"]').val(amt.toFixed(0));
+      }
 
-        // Modificar el evento de cambio de denominación
-        $(document).on('change', '.js-denom', function () {
-          const $table = $(this).closest('table');
-          const $row = $(this).closest('tr');
-  
-          // Actualizar disponibilidad de denominaciones
-          updateAvailableDenominations($table);
-  
-          // Recalcular fajos/picos con la nueva denominación
-          calculateBundlesAndLoose($row);
-  
-          // Calcular monto
-          triggerAmountCalculation($row);
-        });
-
-        $(document).on('input change', 'input[name$=".BundlesCount"], input[name$=".LoosePiecesCount"]', function() {
-          const $row = $(this).closest('tr');
-  
-          // Obtener valores
-          const bundles = parseFloat($row.find('input[name$=".BundlesCount"]').val()) || 0;
-          const loose = parseFloat($row.find('input[name$=".LoosePiecesCount"]').val()) || 0;
-  
-          if (bundles === 0 && loose === 0) {
-            $row.find('input[name$=".Quantity"]').val('');
-            triggerAmountCalculation($row);
-            return;
-          }
-
-          // Obtener bundleSize
-          const $denomSelect = $row.find('select[name$=".DenominationId"]');
-          const selectedOption = $denomSelect.find('option:selected');
-  
-          if (selectedOption.length && selectedOption.val()) {
-            const denomId = selectedOption.val();
-            const valueType = $row.find('.js-vtype').val();
-    
-            let bundleSize = 1;
-            const denomsArray = DENOMS[valueType] || [];
-            const denomInfo = denomsArray.find(d => String(d.id) === String(denomId));
-    
-            if (denomInfo && denomInfo.bundleSize) {
-              bundleSize = denomInfo.bundleSize;
-            }
-
-            const totalQuantity = (bundles * bundleSize) + loose;
-            $row.find('input[name$=".Quantity"]').val(totalQuantity);
-    
-            triggerAmountCalculation($row);
-          }
-        });
-
-        function triggerAmountCalculation($row) {
-          let denomVal = 0;
-          const $denSel = $row.find('select[name$=".DenominationId"]');
-          if ($denSel.length) {
-            denomVal = parseFloat($denSel.find('option:selected').data('value')) || 0;
-          }
-
-          const qty = parseFloat($row.find('input[name$=".Quantity"]').val()) || 0;
-          const unit = parseFloat($row.find('input[name$=".UnitValue"]').val()) || 0;
-          const amt = (unit > 0 ? qty * unit : denomVal * qty);
-          $row.find('input[name$=".CalculatedAmount"]').val(amt.toFixed(0));
-        }
-
+      // ===================== MOSTRAR/OCULTAR BLOQUES =====================
       function toggleSobreMode($containerEditor) {
-        const mode = $containerEditor.find('.js-sobre-mode:checked').val(); // Cash / Document / Check
+        const mode = $containerEditor.find('.js-sobre-mode:checked').val(); // Cash / Efectivo / Document / Documento / Check
         $containerEditor.find('.sec-sobre-cash').toggle(mode === 'Cash' || mode === 'Efectivo');
         $containerEditor.find('.sec-sobre-docs').toggle(mode === 'Document' || mode === 'Documento');
         $containerEditor.find('.sec-sobre-cheque').toggle(mode === 'Check');
@@ -642,7 +720,7 @@
         });
       }
 
-      // === Agregar Bolsa ===
+      // ===================== AGREGAR/QUITAR BOLSAS Y SOBRES =====================
       $('#btnAddBag').on('click', function () {
         const $tabs = $('#bagsTabs');
         const $contents = $('#bagsTabContent');
@@ -673,13 +751,11 @@
         </div>`);
         $contents.append($pane);
 
-        // Activar
         $tabs.find('button.nav-link').removeClass('active');
         $contents.find('.tab-pane').removeClass('show active');
         $btn.addClass('active');
         $pane.addClass('show active');
 
-        // Ajustar secciones de esa bolsa
         const $bagEditor = $pane.find('.container-editor').first();
         $bagEditor.find('.js-container-type').val('Bolsa');
         toggleContainerSections($bagEditor);
@@ -687,7 +763,6 @@
         refreshAllParentBagCombos();
       });
 
-      // === Agregar Sobre en bolsa activa ===
       $(document).on('click', '.js-add-envelope-in-this-bag', function () {
         const $bagPane = $(this).closest('.tab-pane[id^="bag-tab-"]');
         const bagIdx = getPaneIndex($bagPane);
@@ -710,13 +785,11 @@
         refreshAllParentBagCombos();
       });
 
-      // Eliminar sobre
       $(document).on('click', '.js-remove-envelope-card', function () {
         $(this).closest('.envelope-card').remove();
         refreshAllParentBagCombos();
       });
 
-      // Cambios de tipo contenedor / modo sobre
       $(document).on('change', '.js-container-type', function () {
         const $ce = $(this).closest('.container-editor');
         toggleContainerSections($ce);
@@ -727,99 +800,151 @@
         toggleSobreMode($ce);
       });
 
-      // === Agregar DETALLE (bolsa / sobre-cash / sobre-docs) ===
-        $(document).on('click', '.js-add-detail', function () {
-          const $btn = $(this);
-          const scope = $btn.data('detail-scope');  // bolsa | sobre-cash | sobre-docs
+      // ===================== DETALLES =====================
+      // IMPORTANTE: ahora NO bloqueamos repetir Denominación; la restricción es (DenominationId, QualityId)
+      function updateAvailableDenominations($table) {
+        // Si la tabla tiene columna de calidad, NO filtramos denominaciones.
+        if ($table.find('select[name$=".QualityId"].js-quality').length) return;
 
-          // Tomamos el prefix real del editor (sirve para bolsa o sobre)
-          const $ce = $btn.closest('.container-editor');
-          const basePrefix = $ce.data('prefix'); // "Containers[i]" o "Containers[envIdx]"
-
-          // Calcula siguiente índice j de forma global (no dependas del pane)
-          let max = -1;
-          $(document).find('[name^="' + basePrefix + '.ValueDetails["]').each(function () {
-            const m = this.name.match(/ValueDetails\[(\d+)\]/);
-            if (m) max = Math.max(max, parseInt(m[1], 10));
-          });
-          const j = max + 1;
-
-          // Tipos y denominaciones según scope con textos en español
-          let valueTypeOptions = [];
-          let denomKindDefault = null;
-
-          if (scope === 'bolsa' || scope === 'sobre-cash') {
-            valueTypeOptions = [
-              { value: 'Bill', text: 'Billete' },
-              { value: 'Coin', text: 'Moneda' }
-            ];
-            denomKindDefault = 'Bill';
-          } else if (scope === 'sobre-docs') {
-            valueTypeOptions = [
-              { value: 'Document', text: 'Documento' }
-            ];
-            denomKindDefault = 'Document';
-          }
-
-          // Generar HTML con textos en español
-          const vtHtml = valueTypeOptions.map(v => `<option value="${v.value}">${v.text}</option>`).join('');
-          const denomHtml = denomOptionsHtml(denomKindDefault);
-
-          const row = `
-            <tr>
-              <td>
-                <select name="${basePrefix}.ValueDetails[${j}].ValueType"
-                        class="form-select form-select-sm js-vtype">
-                  ${vtHtml}
-                </select>
-              </td>
-              <td>
-                <select name="${basePrefix}.ValueDetails[${j}].DenominationId"
-                        class="form-select form-select-sm js-denom">
-                  ${denomHtml}
-                </select>
-              </td>
-              <td><input name="${basePrefix}.ValueDetails[${j}].Quantity" type="number" class="form-control form-control-sm js-calc" /></td>
-              <td><input name="${basePrefix}.ValueDetails[${j}].BundlesCount" type="number" class="form-control form-control-sm js-calc" /></td>
-              <td><input name="${basePrefix}.ValueDetails[${j}].LoosePiecesCount" type="number" class="form-control form-control-sm js-calc" /></td>
-              <td><input name="${basePrefix}.ValueDetails[${j}].UnitValue" type="number" step="1" class="form-control form-control-sm js-calc" /></td>
-              <td><input name="${basePrefix}.ValueDetails[${j}].CalculatedAmount" type="number" step="1" class="form-control form-control-sm" readonly /></td>
-              <td><button type="button" class="btn btn-sm btn-outline-danger js-remove-detail">×</button></td>
-            </tr>`;
-          $btn.closest('.card').find('.js-details-table[data-detail-scope="' + scope + '"] tbody').append(row);
-
-          setTimeout(() => {
-            const $table = $(this).closest('.card').find('.js-details-table[data-detail-scope="' + $(this).data('detail-scope') + '"]');
-            updateAvailableDenominations($table);
-          }, 10);
+        // Sin columna de calidad, mantenemos tu lógica previa (evitar repetir denominación)
+        const selectedDenoms = [];
+        $table.find('.js-denom').each(function() {
+          const val = $(this).val();
+          if (val) selectedDenoms.push(val);
         });
+        $table.find('.js-denom').each(function() {
+          const $select = $(this);
+          const currentValue = $select.val();
+          const valueType = $select.closest('tr').find('.js-vtype').val();
+          const excludeValues = selectedDenoms.filter(val => val !== currentValue);
+          const filteredOptions = denomOptionsHtml(valueType, excludeValues);
+          $select.html(filteredOptions);
+          $select.val(currentValue);
+        });
+      }
 
-        $(document).on('change', '.js-vtype', function () {
-          const v = $(this).val();
-          const kind = (v === 'Bill' ? 'Bill' : v === 'Coin' ? 'Coin' : v === 'Document' ? 'Document' : null);
-          if (!kind) return;
-  
-          const $row = $(this).closest('tr');
-          const $denomSelect = $row.find('.js-denom');
-  
-          $denomSelect.val('');
-          $denomSelect.html(denomOptionsHtml(kind));
-  
-          const $table = $(this).closest('table');
+      // Agregar fila de detalle
+      $(document).on('click', '.js-add-detail', function () {
+        const $btn  = $(this);
+        const scope = $btn.data('detail-scope');  // bolsa | sobre-cash | sobre-docs
+        const $ce   = $btn.closest('.container-editor');
+        const basePrefix = $ce.data('prefix');
+
+        let max = -1;
+        $(document).find('[name^="' + basePrefix + '.ValueDetails["]').each(function () {
+          const m = this.name.match(/ValueDetails\[(\d+)\]/);
+          if (m) max = Math.max(max, parseInt(m[1], 10));
+        });
+        const j = max + 1;
+
+        let valueTypeOptions = [], denomKindDefault = null;
+        if (scope === 'bolsa' || scope === 'sobre-cash') {
+          valueTypeOptions = [
+            { value: 'Bill', text: 'Billete' },
+            { value: 'Coin', text: 'Moneda' }
+          ];
+          denomKindDefault = 'Bill';
+        } else if (scope === 'sobre-docs') {
+          valueTypeOptions = [{ value: 'Document', text: 'Documento' }];
+          denomKindDefault = 'Document';
+        }
+
+        const vtHtml   = valueTypeOptions.map(v => `<option value="${v.value}">${v.text}</option>`).join('');
+        const denomHtml= denomOptionsHtml(denomKindDefault);
+        // La celda de Calidad solo aplica a Billete/Moneda; si tu tabla ya trae la columna, este select será manejado abajo.
+        const qualityCell = `<td>
+            <select name="${basePrefix}.ValueDetails[${j}].QualityId" class="form-select form-select-sm js-quality">
+              <option value="">-- Seleccione calidad --</option>
+            </select>
+          </td>`;
+
+        // Detecta si la tabla actual tiene columna de calidad (por el thead)
+        const thisTableHasQuality = $btn.closest('.card').find('table thead th')
+                                      .filter(function(){ return $(this).text().trim().toLowerCase().includes('calidad'); }).length > 0;
+
+        const row = `
+          <tr>
+            <td>
+              <select name="${basePrefix}.ValueDetails[${j}].ValueType"
+                      class="form-select form-select-sm js-vtype">
+                ${vtHtml}
+              </select>
+            </td>
+            <td>
+              <select name="${basePrefix}.ValueDetails[${j}].DenominationId"
+                      class="form-select form-select-sm js-denom">
+                ${denomHtml}
+              </select>
+            </td>
+            ${ thisTableHasQuality ? qualityCell : '' }
+            <td><input name="${basePrefix}.ValueDetails[${j}].Quantity" type="number" class="form-control form-control-sm js-calc" /></td>
+            <td><input name="${basePrefix}.ValueDetails[${j}].BundlesCount" type="number" class="form-control form-control-sm js-calc" /></td>
+            <td><input name="${basePrefix}.ValueDetails[${j}].LoosePiecesCount" type="number" class="form-control form-control-sm js-calc" /></td>
+            <td><input name="${basePrefix}.ValueDetails[${j}].UnitValue" type="number" step="1" class="form-control form-control-sm js-calc" /></td>
+            <td><input name="${basePrefix}.ValueDetails[${j}].CalculatedAmount" type="number" step="1" class="form-control form-control-sm" readonly /></td>
+            <td><button type="button" class="btn btn-sm btn-outline-danger js-remove-detail">×</button></td>
+          </tr>`;
+        $btn.closest('.card').find('.js-details-table[data-detail-scope="' + scope + '"] tbody').append(row);
+
+        // Repoblar denominaciones (modo sin calidad) o calidades si aplica
+        const $newRow = $btn.closest('.card').find('.js-details-table[data-detail-scope="' + scope + '"] tbody tr').last();
+        if (thisTableHasQuality) updateQualityForRow($newRow);
+
+        setTimeout(() => {
+          const $table = $btn.closest('.card').find('.js-details-table[data-detail-scope="' + scope + '"]');
           updateAvailableDenominations($table);
-        });
+          if (thisTableHasQuality) updateQualitiesInTable($table);
+        }, 10);
+      });
 
-        $(document).on('click', '.js-remove-detail', function () {
-          const $table = $(this).closest('table');
-          $(this).closest('tr').remove();
-  
-          // Actualizar disponibilidad después de eliminar
-          setTimeout(() => {
-            updateAvailableDenominations($table);
-          }, 10);
-        });
+      $(document).on('change', '.js-vtype', function () {
+        const v = $(this).val();
+        const kind = (v === 'Bill' ? 'Bill' : v === 'Coin' ? 'Coin' : v === 'Document' ? 'Document' : null);
+        if (!kind) return;
 
-      // === CHEQUES (sólo tabla de cheques) ===
+        const $row = $(this).closest('tr');
+        const $denomSelect = $row.find('.js-denom');
+
+        $denomSelect.val('');
+        $denomSelect.html(denomOptionsHtml(kind));
+
+        // Recalcular calidades para esta fila (si existe columna)
+        updateQualityForRow($row);
+
+        const $table = $(this).closest('table');
+        updateAvailableDenominations($table);
+        updateQualitiesInTable($table);
+      });
+
+      $(document).on('change', '.js-denom', function () {
+        const $table = $(this).closest('table');
+        const $row   = $(this).closest('tr');
+
+        // Actualiza calidades (par Denom + Calidad)
+        updateQualityForRow($row);
+        updateQualitiesInTable($table);
+
+        // Fajos / picos y monto
+        calculateBundlesAndLoose($row);
+        triggerAmountCalculation($row);
+      });
+
+      $(document).on('change', '.js-quality', function(){
+        // Al cambiar calidad en una fila, refresca disponibilidad para esa misma denominación en la tabla
+        const $table = $(this).closest('table');
+        updateQualitiesInTable($table);
+      });
+
+      $(document).on('click', '.js-remove-detail', function () {
+        const $table = $(this).closest('table');
+        $(this).closest('tr').remove();
+        setTimeout(() => {
+          updateAvailableDenominations($table);
+          updateQualitiesInTable($table);
+        }, 10);
+      });
+
+      // ===================== CHEQUES =====================
       $(document).on('click', '.js-add-cheque', function () {
         const $ce = $(this).closest('.container-editor');
         const basePrefix = $ce.data('prefix');
@@ -850,25 +975,13 @@
         $(this).closest('tr').remove();
       });
 
-      // === CÁLCULO (usa valor de la denominación si no hay UnitValue) ===
+      // ===================== CÁLCULO (monto) =====================
       $(document).on('input change', '.js-calc, .js-denom', function () {
         const $row = $(this).closest('tr');
-
-        let denomVal = 0;
-        const $denSel = $row.find('select[name$=".DenominationId"]');
-        if ($denSel.length) {
-          denomVal = parseFloat($denSel.find('option:selected').data('value')) || 0;
-        } else {
-          denomVal = parseFloat($row.find('input[name$=".DenominationId"]').val()) || 0;
-        }
-
-        const qty  = parseFloat($row.find('input[name$=".Quantity"]').val())     || 0;
-        const unit = parseFloat($row.find('input[name$=".UnitValue"]').val())    || 0;
-        const amt  = (unit > 0 ? qty * unit : denomVal * qty);
-        $row.find('input[name$=".CalculatedAmount"]').val(amt.toFixed(0));
+        triggerAmountCalculation($row);
       });
 
-      // === SUBMIT ===
+      // ===================== SUBMIT =====================
       $('button[data-step-action="submit-final"]').on('click', function (e) {
         if (!validateCurrentStep()) {
           e.preventDefault();
@@ -876,7 +989,7 @@
         }
       });
 
-      // Inicialización UI
+      // ===================== INIT =====================
       $('.container-editor').each(function () {
         toggleContainerSections($(this));
         const $sobre = $(this).find('.sec-sobre');
@@ -885,18 +998,19 @@
       refreshAllParentBagCombos();
       updateStepper();
 
-      // Si hubiera filas precargadas por el servidor, rellena sus combos de denominación
+      // Relleno inicial de combos para filas precargadas
       $('tr').each(function(){
         const $row = $(this);
         const $vt  = $row.find('.js-vtype');
         const $dn  = $row.find('.js-denom');
         if ($vt.length && $dn.length) {
           $dn.html(denomOptionsHtml($vt.val()));
+          updateQualityForRow($row);
         }
       });
-
       $('.js-details-table').each(function() {
         updateAvailableDenominations($(this));
+        updateQualitiesInTable($(this));
       });
     });
     </script>

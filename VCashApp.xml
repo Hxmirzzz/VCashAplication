@@ -2577,6 +2577,12 @@
         <member name="M:VCashApp.Services.Cef.CefContainerService.GetContainersByTransactionIdAsync(System.Int32)">
             <inheritdoc/>
         </member>
+        <member name="M:VCashApp.Services.Cef.CefContainerService.BuildDenomsJsonForTransactionAsync(System.Int32)">
+            <inheritdoc/>
+        </member>
+        <member name="M:VCashApp.Services.Cef.CefContainerService.BuildQualitiesJsonAsync">
+            <inheritdoc/>
+        </member>
         <member name="T:VCashApp.Services.Cef.CefIncidentService">
             <summary>
             Implementación del servicio para la gestión de Novedades de Centro de Efectivo.
@@ -2734,6 +2740,12 @@
             </summary>
             <param name="cefTransactionId">ID de la transaccion</param>
             <returns>Lista de denominaciones</returns>
+        </member>
+        <member name="M:VCashApp.Services.ICefContainerService.BuildQualitiesJsonAsync">
+            <summary>
+            Obitene las calidades de billetes en formato JSON.
+            </summary>
+            <returns>Lista de calidades</returns>
         </member>
         <member name="T:VCashApp.Services.ICefIncidentService">
             <summary>
