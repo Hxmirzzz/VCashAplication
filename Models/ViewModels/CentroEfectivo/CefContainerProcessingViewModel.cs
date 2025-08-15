@@ -77,7 +77,7 @@ namespace VCashApp.Models.ViewModels.CentroEfectivo
 
         [Display(Name = "Denominación")]
         [Required(ErrorMessage = "La denominación es requerida.")]
-        public int Denomination { get; set; }
+        public int? DenominationId { get; set; }
 
         [Display(Name = "Cantidad")]
         [Range(0, int.MaxValue, ErrorMessage = "Debe ser una cantidad válida.")]

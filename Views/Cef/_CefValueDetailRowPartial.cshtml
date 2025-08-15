@@ -14,9 +14,9 @@
     </td>
     <td>
         <div class="form-group mb-0" style="display: none;">
-            <label asp-for="Denomination" class="sr-only"></label> @* Propiedad en inglés *@
-            <input type="number" step="1" name="ValueDetails[@index].Denomination" value="@Model.Denomination" class="form-control form-control-sm" placeholder="Denominación" />
-            <span asp-validation-for="Denomination" class="text-danger"></span> @* asp-validation-for también debe usar Model.Propiedad *@
+            <label asp-for="DenominationId" class="sr-only"></label> @* Propiedad en inglés *@
+            <input type="number" step="1" name="ValueDetails[@index].Denomination" value="@Model.DenominationId" class="form-control form-control-sm" placeholder="Denominación" />
+            <span asp-validation-for="DenominationId" class="text-danger"></span> @* asp-validation-for también debe usar Model.Propiedad *@
             <div class="form-check mt-1">
                 <input type="checkbox" name="ValueDetails[@index].IsHighDenomination" value="true" class="form-check-input" checked="@Model.IsHighDenomination" />
                 <label asp-for="IsHighDenomination" class="form-check-label"></label> @* Propiedad en inglés *@

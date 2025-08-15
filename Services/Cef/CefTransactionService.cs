@@ -506,10 +506,8 @@ namespace VCashApp.Services.Cef
         {
             return vd.ValueType switch
             {
-                nameof(CefValueTypeEnum.Bill) => $"{vd.DenominationId?.ToString("N0")} x {vd.Quantity} ({vd.CalculatedAmount?.ToString("N0")})",
-                nameof(CefValueTypeEnum.Coin) => $"{vd.DenominationId?.ToString("N0")} x {vd.Quantity} ({vd.CalculatedAmount?.ToString("N0")})",
-                nameof(CefValueTypeEnum.Check) => $"Cheque #{vd.IdentifierNumber} ({vd.BankName}) por {vd.CalculatedAmount?.ToString("N0")}",
-                nameof(CefValueTypeEnum.Document) => $"Doc #{vd.IdentifierNumber} por {vd.CalculatedAmount?.ToString("N0")}",
+                nameof(CefValueTypeEnum.Billete) => $"{vd.DenominationId?.ToString("N0")} x {vd.Quantity} ({vd.CalculatedAmount?.ToString("N0")})",
+                nameof(CefValueTypeEnum.Moneda) => $"{vd.DenominationId?.ToString("N0")} x {vd.Quantity} ({vd.CalculatedAmount?.ToString("N0")})",
                 _ => "Detalle Desconocido"
             };
         }

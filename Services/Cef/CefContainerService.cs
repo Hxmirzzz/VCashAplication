@@ -167,7 +167,7 @@ namespace VCashApp.Services.Cef
                 {
                     CefContainerId = container.Id,
                     ValueType = detailVm.ValueType.ToString(),
-                    DenominationId = detailVm.Denomination,
+                    DenominationId = detailVm.DenominationId,
                     Quantity = detailVm.Quantity,
                     BundlesCount = detailVm.BundlesCount,
                     LoosePiecesCount = detailVm.LoosePiecesCount,
@@ -234,45 +234,48 @@ namespace VCashApp.Services.Cef
                     id = d.CodDenominacion,
                     value = d.ValorDenominacion,
                     type = d.TipoDenominacion,
-                    tipoDinero = d.TipoDinero, // M = Moneda, B = Billete
-                    denominacion = d.Denominacion
+                    tipoDinero = d.TipoDinero,
+                    denominacion = d.Denominacion,
+                    cantidadUnidadAgrupamiento = d.CantidadUnidadAgrupamiento
                 })
                 .OrderBy(d => d.tipoDinero)
-                .ThenByDescending(d => d.value) // Ordenar por valor descendente
+                .ThenByDescending(d => d.value)
                 .ToListAsync();
 
             var esCO = CultureInfo.GetCultureInfo("es-CO");
-
-            // Mapear según TipoDinero: M = Coin, B = Bill
             var payload = new
             {
                 Bill = denoms
-                    .Where(d => d.tipoDinero == "B") // B = Billete
+                    .Where(d => d.tipoDinero == "B")
                     .Select(d => new {
                         id = d.id,
                         value = d.value,
-                        label = d.denominacion ?? d.value?.ToString("C0", esCO)
+                        label = d.denominacion ?? d.value?.ToString("C0", esCO),
+                        bundleSize = d.cantidadUnidadAgrupamiento ?? 100
                     }),
                 Coin = denoms
-                    .Where(d => d.tipoDinero == "M") // M = Moneda
+                    .Where(d => d.tipoDinero == "M")
                     .Select(d => new {
                         id = d.id,
                         value = d.value,
-                        label = d.denominacion ?? d.value?.ToString("C0", esCO)
+                        label = d.denominacion ?? d.value?.ToString("C0", esCO),
+                        bundleSize = d.cantidadUnidadAgrupamiento ?? 1000
                     }),
                 Document = denoms
-                    .Where(d => d.tipoDinero == "D") // Documentos si existen
+                    .Where(d => d.tipoDinero == "D")
                     .Select(d => new {
                         id = d.id,
                         value = d.value,
-                        label = d.denominacion ?? d.value?.ToString("C0", esCO)
+                        label = d.denominacion ?? d.value?.ToString("C0", esCO),
+                        bundleSize = d.cantidadUnidadAgrupamiento ?? 1
                     }),
                 Check = denoms
-                    .Where(d => d.tipoDinero == "C") // Cheques si existen
+                    .Where(d => d.tipoDinero == "C")
                     .Select(d => new {
                         id = d.id,
                         value = d.value,
-                        label = d.denominacion ?? d.value?.ToString("C0", esCO)
+                        label = d.denominacion ?? d.value?.ToString("C0", esCO),
+                        bundleSize = d.cantidadUnidadAgrupamiento ?? 1
                     })
             };
 

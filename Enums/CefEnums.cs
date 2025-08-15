@@ -1,26 +1,16 @@
-﻿using System.ComponentModel.DataAnnotations;
-
-namespace VCashApp.Enums
+﻿namespace VCashApp.Enums
 {
     public enum LocationTypeEnum
     {
-        [Display(Name = "Punto")]
         Punto = 0,
-        [Display(Name = "ATM")]
         ATM= 1,
-        [Display(Name = "Fondo")]
         Fondo = 2
     }
 
     public enum CefEnvelopeSubTypeEnum
     {
-        [Display(Name = "Efectivo")]
         Efectivo = 0,
-
-        [Display(Name = "Documentos/Voucher")]
         Document = 1,
-
-        [Display(Name = "Cheque")]
         Check = 2
     }
 
@@ -62,18 +52,16 @@ namespace VCashApp.Enums
 
     public enum CefValueTypeEnum
     {
-        Bill,
-        Coin,
-        Check,
-        Document
+        Billete,
+        Moneda
     }
 
-    public enum CefIncidentTypeCategoryEnum // Renamed to avoid confusion with the entity
+    public enum CefIncidentTypeCategoryEnum
     {
-        Overload, // Sobrante
-        Shortage, // Faltante
-        Fake, // Falso
-        Damaged, // Deteriorado
+        Overload,
+        Shortage,
+        Fake,
+        Damaged,
         CountingError,
         ContainerInconsistency,
         Other

@@ -89,8 +89,8 @@ namespace VCashApp.Controllers
         /// <param name="startDate">Fecha de inicio para el filtro de registro.</param>
         /// <param name="endDate">Fecha de fin para el filtro de registro.</param>
         /// <param name="status">Estado de la transacción para filtrar.</param>
-        /// <param name="searchTerm">Término de búsqueda.</param>
-        /// <param name="pageNumber">Número de página para paginación.</param>
+        /// <param name="search">Término de búsqueda.</param>
+        /// <param name="page">Número de página para paginación.</param>
         /// <param name="pageSize">Cantidad de registros por página.</param>
         /// <returns>Una vista con la lista de transacciones de CEF o un parcial si es una petición AJAX.</returns>
         [HttpGet("Index")]
@@ -424,6 +424,7 @@ namespace VCashApp.Controllers
         /// Requiere permiso 'Edit' para el módulo "CEF".
         /// </remarks>
         /// <param name="transactionId">ID de la transacción CEF a procesar.</param>
+        /// 
         /// <returns>Vista de procesamiento de contenedores.</returns>
         [HttpGet("ProcessContainers/{transactionId}")]
         [RequiredPermission(PermissionType.Edit, "CEF")]
