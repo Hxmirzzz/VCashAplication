@@ -10,8 +10,8 @@
     public enum CefEnvelopeSubTypeEnum
     {
         Efectivo = 0,
-        Document = 1,
-        Check = 2
+        Documento = 1,
+        Cheque = 2
     }
 
     public enum CefTransactionTypeEnum // ELIMINAR
@@ -53,7 +53,9 @@
     public enum CefValueTypeEnum
     {
         Billete,
-        Moneda
+        Moneda,
+        Documento,
+        Cheque
     }
 
     public enum CefIncidentTypeCategoryEnum

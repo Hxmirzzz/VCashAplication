@@ -96,31 +96,28 @@
             <div class="form-check form-check-inline">
                 <input class="form-check-input js-sobre-mode"
                        type="radio"
-                       name="@($"{prefix}.SobreMode")"
-                       value="Cash"
-                       @(Model.SobreMode?.ToString() == "Cash" || Model.SobreMode == null ? "checked" : "") />
+                       name="@($"{ViewData.TemplateInfo.HtmlFieldPrefix}.EnvelopeSubType")"
+                       value="Efectivo" checked>
                 <label class="form-check-label">Efectivo</label>
             </div>
             <div class="form-check form-check-inline">
                 <input class="form-check-input js-sobre-mode"
                        type="radio"
-                       name="@($"{prefix}.SobreMode")"
-                       value="Document"
-                       @(Model.SobreMode?.ToString() == "Document" ? "checked" : "") />
-                <label class="form-check-label">Documentos/Vouchers</label>
+                       name="@($"{ViewData.TemplateInfo.HtmlFieldPrefix}.EnvelopeSubType")"
+                       value="Documento">
+                <label class="form-check-label">Documentos/Voucher</label>
             </div>
             <div class="form-check form-check-inline">
                 <input class="form-check-input js-sobre-mode"
                        type="radio"
-                       name="@($"{prefix}.SobreMode")"
-                       value="Check"
-                       @(Model.SobreMode?.ToString() == "Check" ? "checked" : "") />
+                       name="@($"{ViewData.TemplateInfo.HtmlFieldPrefix}.EnvelopeSubType")"
+                       value="Cheque">
                 <label class="form-check-label">Cheques</label>
             </div>
         </div>
 
         <!-- Sobre: EFECTIVO -->
-        <div class="sec-sobre-cash" style="display:@(Model.SobreMode == null || Model.SobreMode.ToString() == "Cash" ? "block" : "none")">
+        <div class="sec-sobre-cash" style="display:@(Model.SobreMode == null || Model.SobreMode.ToString() == "Efectivo" ? "block" : "none")">
             <div class="card">
                 <div class="card-header"><h6 class="mb-0">💵 Sobre — Efectivo (Billetes/Monedas)</h6></div>
                 <div class="card-body">
@@ -148,7 +145,7 @@
         </div>
 
         <!-- Sobre: DOCUMENTOS/VOUCHERS -->
-        <div class="sec-sobre-docs" style="display:@(Model.SobreMode?.ToString() == "Document" ? "block" : "none")">
+        <div class="sec-sobre-docs" style="display:@(Model.SobreMode?.ToString() == "Documento" ? "block" : "none")">
             <div class="card">
                 <div class="card-header"><h6 class="mb-0">📄 Sobre — Documentos/Vouchers</h6></div>
                 <div class="card-body">
@@ -175,7 +172,7 @@
         </div>
 
         <!-- Sobre: CHEQUES -->
-        <div class="sec-sobre-cheque" style="display:@(Model.SobreMode?.ToString() == "Check" ? "block" : "none")">
+        <div class="sec-sobre-cheque" style="display:@(Model.SobreMode?.ToString() == "Cheque" ? "block" : "none")">
             <div class="card">
                 <div class="card-header"><h6 class="mb-0">🏦 Sobre — Cheques</h6></div>
                 <div class="card-body">

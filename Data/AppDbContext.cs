@@ -418,6 +418,7 @@ namespace VCashApp.Data
 
                 entity.Property(c => c.CefTransactionId).IsRequired();
                 entity.Property(c => c.ContainerType).IsRequired().HasMaxLength(50);
+                entity.Property(c => c.EnvelopeSubType).HasMaxLength(20).IsUnicode(false).IsRequired(false);
                 entity.Property(c => c.ContainerCode).IsRequired().HasMaxLength(100);
                 entity.Property(c => c.DeclaredValue).HasColumnType("DECIMAL(18,0)");
                 entity.Property(c => c.CountedValue).HasColumnType("DECIMAL(18,0)");
@@ -437,6 +438,21 @@ namespace VCashApp.Data
 
                 entity.Property(c => c.ContainerType).HasConversion<string>();
                 entity.Property(c => c.ContainerStatus).HasConversion<string>();
+
+                entity.HasIndex(c => c.ParentContainerId);
+                entity.HasIndex(c => new { c.CefTransactionId, c.ContainerCode });
+
+                entity.ToTable(t =>
+                {
+                    t.HasCheckConstraint(
+                        "CK_CEF_SOBRE_TipoSobreValido",
+                        "([TipoContenedor] <> 'Sobre') OR ([TipoSobre] IN ('Efectivo','Documento','Cheque'))");
+
+                    t.HasCheckConstraint(
+                        "CK_CEF_SOBRE_Padre",
+                        "(([TipoContenedor] = 'Sobre' AND [IdContenedorPadre] IS NOT NULL) OR " +
+                        " ([TipoContenedor] <> 'Sobre' AND [IdContenedorPadre] IS NULL))");
+                });
             });
 
             builder.Entity<CefValueDetail>(entity =>

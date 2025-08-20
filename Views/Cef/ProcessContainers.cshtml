@@ -10,7 +10,7 @@
             <h4 class="mb-0">Procesamiento de Contenedores</h4>
         </div>
         <div class="card-body">
-            <form id="cefContainersForm" asp-action="ProcessContainers" asp-controller="Cef" method="post" novalidate>
+            <form id="form-containers" asp-action="ProcessContainers" asp-route-transactionId="@Model.CefTransactionId" method="post">
                 @Html.AntiForgeryToken()
                 <input type="hidden" asp-for="CefTransactionId" />
 
@@ -391,6 +391,9 @@
 
     <script>
     $(function () {
+        $('#bag-template :input, #envelope-template :input, #incident-template :input, #container-template :input')
+          .prop('disabled', true);
+
       // === STEPPER ===
       let currentStep = 1, totalSteps = 3;
 
@@ -398,7 +401,7 @@
       const DENOMS = JSON.parse(document.getElementById('denoms-json')?.textContent || '{}');
       const QUALS  = JSON.parse(document.getElementById('qualities-json')?.textContent || '{}'); // { B:[{id,name,family}], M:[...] }
 
-      const $form   = $('#cefContainersForm');
+      const $form = $('#form-containers');
       const $next   = $('button[data-step-action="next"]');
       const $prev   = $('button[data-step-action="prev"]');
       const $submit = $('button[data-step-action="submit-final"]');
@@ -459,8 +462,8 @@
       // ===================== CATÁLOGOS (DENOM / CALIDAD) =====================
         function getMoneyFlag(kind) {
             const k = (kind || '').toString().trim().toLowerCase();
-            if (k === 'bill' || k === 'billete') return 'B';
-            if (k === 'coin' || k === 'moneda')  return 'M';
+            if (k === 'billete' || k === 'billete') return 'B';
+            if (k === 'moneda' || k === 'moneda')  return 'M';
             return null;
         }
 
@@ -589,13 +592,12 @@
             $q.find('option').each(function () {
               const val = String(this.value || '');
               if (!val) return; // "-- Seleccione calidad --"
-              // Deshabilita si ya está usada por la misma denominación y no es mi valor actual
               this.disabled = (usedSet.has(val) && val !== currentQ);
             });
           });
         }
 
-      // ===================== FAJOS / PICOS =====================
+      // ===================== FAJOS / PICOS =====================s
       function calculateBundlesAndLoose($row) {
         const qty = parseFloat($row.find('input[name$=".Quantity"]').val()) || 0;
         if (qty <= 0) {
@@ -683,10 +685,10 @@
 
       // ===================== MOSTRAR/OCULTAR BLOQUES =====================
       function toggleSobreMode($containerEditor) {
-        const mode = $containerEditor.find('.js-sobre-mode:checked').val(); // Cash / Efectivo / Document / Documento / Check
-        $containerEditor.find('.sec-sobre-cash').toggle(mode === 'Cash' || mode === 'Efectivo');
-        $containerEditor.find('.sec-sobre-docs').toggle(mode === 'Document' || mode === 'Documento');
-        $containerEditor.find('.sec-sobre-cheque').toggle(mode === 'Check');
+        const mode = $containerEditor.find('.js-sobre-mode:checked').val(); // Efectivo / Documento / Cheque
+        $containerEditor.find('.sec-sobre-cash').toggle(mode === 'Efectivo');
+        $containerEditor.find('.sec-sobre-docs').toggle(mode === 'Documento');
+        $containerEditor.find('.sec-sobre-cheque').toggle(mode === 'Cheque');
       }
       function toggleContainerSections($containerEditor) {
         const typeVal = $containerEditor.find('.js-container-type').val(); // Bolsa / Sobre
@@ -695,7 +697,7 @@
         $containerEditor.find('.sec-sobre').toggle(isSobre);
         $containerEditor.find('.js-parent-bag-block').toggle(isSobre);
         if (isSobre) {
-          $containerEditor.find('.js-sobre-mode[value="Cash"]').prop('checked', true);
+          $containerEditor.find('.js-sobre-mode[value="Efectivo"]').prop('checked', true);
           toggleSobreMode($containerEditor);
         }
       }
@@ -772,6 +774,8 @@
         const $card = $(html);
         $bagPane.find('.bag-envelopes-list').append($card);
 
+        $card.find(':input').prop('disabled', false);
+
         const $envEditor = $card.find('.container-editor').first();
         $envEditor.find('.js-container-type').val('Sobre');
         toggleContainerSections($envEditor);
@@ -779,7 +783,7 @@
         const prefix = $envEditor.data('prefix');
         $envEditor.find(`select[name="${prefix}.ParentContainerId"]`).val(bagIdx);
 
-        $envEditor.find('.js-sobre-mode[value="Cash"]').prop('checked', true);
+        $envEditor.find('.js-sobre-mode[value="Efectivo"]').prop('checked', true);
         toggleSobreMode($envEditor);
 
         refreshAllParentBagCombos();
@@ -840,13 +844,13 @@
         let valueTypeOptions = [], denomKindDefault = null;
         if (scope === 'bolsa' || scope === 'sobre-cash') {
           valueTypeOptions = [
-            { value: 'Bill', text: 'Billete' },
-            { value: 'Coin', text: 'Moneda' }
+            { value: 'Billete', text: 'Billete' },
+            { value: 'Moneda', text: 'Moneda' }
           ];
-          denomKindDefault = 'Bill';
+          denomKindDefault = 'Billete';
         } else if (scope === 'sobre-docs') {
-          valueTypeOptions = [{ value: 'Document', text: 'Documento' }];
-          denomKindDefault = 'Document';
+          valueTypeOptions = [{ value: 'Documento', text: 'Documento' }];
+          denomKindDefault = 'Documento';
         }
 
         const vtHtml   = valueTypeOptions.map(v => `<option value="${v.value}">${v.text}</option>`).join('');
@@ -899,7 +903,7 @@
 
       $(document).on('change', '.js-vtype', function () {
         const v = $(this).val();
-        const kind = (v === 'Bill' ? 'Bill' : v === 'Coin' ? 'Coin' : v === 'Document' ? 'Document' : null);
+        const kind = (v === 'Billete' ? 'Billete' : v === 'Moneda' ? 'Moneda' : v === 'Documento' ? 'Documento' : null);
         if (!kind) return;
 
         const $row = $(this).closest('tr');
@@ -965,7 +969,7 @@
             <td><input name="${basePrefix}.ValueDetails[${j}].Quantity" type="number" class="form-control form-control-sm js-calc" value="1" /></td>
             <td><input name="${basePrefix}.ValueDetails[${j}].CalculatedAmount" type="number" step="1" class="form-control form-control-sm" readonly /></td>
             <td>
-              <input type="hidden" name="${basePrefix}.ValueDetails[${j}].ValueType" value="Check" />
+              <input type="hidden" name="${basePrefix}.ValueDetails[${j}].ValueType" value="Cheque" />
               <button type="button" class="btn btn-sm btn-outline-danger js-remove-cheque">×</button>
             </td>
           </tr>`;
@@ -989,29 +993,71 @@
         }
       });
 
-      // ===================== INIT =====================
-      $('.container-editor').each(function () {
-        toggleContainerSections($(this));
-        const $sobre = $(this).find('.sec-sobre');
-        if ($sobre.is(':visible')) toggleSobreMode($(this));
-      });
-      refreshAllParentBagCombos();
-      updateStepper();
+$form.on('submit', function (e) {
+  e.preventDefault();
 
-      // Relleno inicial de combos para filas precargadas
-      $('tr').each(function(){
-        const $row = $(this);
-        const $vt  = $row.find('.js-vtype');
-        const $dn  = $row.find('.js-denom');
-        if ($vt.length && $dn.length) {
-          $dn.html(denomOptionsHtml($vt.val()));
-          updateQualityForRow($row);
+  // 1) Valida la pestaña actual
+  if (!validateCurrentStep()) {
+    Swal.fire('Campos incompletos', 'Revise los campos requeridos.', 'warning');
+    return;
+  }
+
+  // 2) Confirmación
+  Swal.fire({
+    title: '¿Guardar contenedores?',
+    text: 'Se guardará toda la información capturada.',
+    icon: 'question',
+    showCancelButton: true,
+    confirmButtonText: 'Sí, guardar',
+    cancelButtonText: 'Cancelar'
+  }).then((res) => {
+    if (!res.isConfirmed) return;
+
+    // 3) Loading
+    Swal.fire({
+      title: 'Guardando...',
+      allowOutsideClick: false,
+      didOpen: () => Swal.showLoading()
+    });
+
+    // 4) Envío AJAX (lleva el antiforgery porque serializamos el form)
+    $.ajax({
+      type: 'POST',
+      url: $form.attr('action'),
+      data: $form.serialize(),
+      headers: { 'X-Requested-With': 'XMLHttpRequest' },
+      success: function (response) {
+        if (response.success) {
+          Swal.fire({
+            icon: 'success',
+            title: '¡Éxito!',
+            text: response.message
+          }).then(() => {
+            if (response.data?.redirectUrl) {
+              window.location.href = response.data.redirectUrl;
+            } else {
+              location.reload();
+            }
+          });
+        } else {
+          const flatErrors = Object.values(response.errors ?? {}).flat();
+          Swal.fire({
+            icon: 'error',
+            title: 'Error al guardar',
+            html: (response.message ?? 'Error') + (flatErrors.length ? '<br>' + flatErrors.join('<br>') : '')
+          });
         }
-      });
-      $('.js-details-table').each(function() {
-        updateAvailableDenominations($(this));
-        updateQualitiesInTable($(this));
-      });
+      },
+      error: function () {
+        Swal.fire({
+          icon: 'error',
+          title: 'Error de red',
+          text: 'No se pudo guardar. Verifica tu conexión e intenta de nuevo.'
+        });
+      }
+    });
+  });
+});
     });
     </script>
 }

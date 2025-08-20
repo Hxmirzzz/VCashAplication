@@ -47,9 +47,16 @@ namespace VCashApp.Services
         Task<String> BuildDenomsJsonForTransactionAsync(int cefTransactionId);
 
         /// <summary>
-        /// Obitene las calidades de billetes en formato JSON.
+        /// Obtiene las calidades de billetes en formato JSON.
         /// </summary>
         /// <returns>Lista de calidades</returns>
         Task<String> BuildQualitiesJsonAsync();
+
+        /// <summary>
+        /// Obtiene los totales de un contenedor de efectivo para una transacción específica.
+        /// </summary>
+        /// <param name="transactionId"></param>
+        /// <returns></returns>
+        Task<(decimal declared, decimal counted, decimal diff)> GetTransactionTotalsAsync(int transactionId);
     }
 }

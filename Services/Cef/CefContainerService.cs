@@ -108,13 +108,12 @@ namespace VCashApp.Services.Cef
         /// <inheritdoc/>
         public async Task<CefContainer> SaveContainerAndDetailsAsync(CefContainerProcessingViewModel viewModel, string processingUserId)
         {
-            var transaction = await _context.CefTransactions.FirstOrDefaultAsync(t => t.Id == viewModel.CefTransactionId);
-            if (transaction == null)
-            {
-                throw new InvalidOperationException($"La transacción CEF con ID {viewModel.CefTransactionId} no existe.");
-            }
+            var transaction = await _context.CefTransactions.FirstOrDefaultAsync(t => t.Id == viewModel.CefTransactionId)
+                ?? throw new InvalidOperationException($"La transacción CEF con ID {viewModel.CefTransactionId} no existe.");
+
             // Validar estado de la transacción para permitir guardar contenedores
-            if (transaction.TransactionStatus != CefTransactionStatusEnum.EnqueuedForCounting.ToString() &&
+            if (transaction.TransactionStatus != CefTransactionStatusEnum.Checkin.ToString() &&
+                transaction.TransactionStatus != CefTransactionStatusEnum.EnqueuedForCounting.ToString() &&
                 transaction.TransactionStatus != CefTransactionStatusEnum.BillCounting.ToString() &&
                 transaction.TransactionStatus != CefTransactionStatusEnum.CoinCounting.ToString() &&
                 transaction.TransactionStatus != CefTransactionStatusEnum.CheckCounting.ToString() &&
@@ -122,6 +121,32 @@ namespace VCashApp.Services.Cef
             {
                 throw new InvalidOperationException($"La transacción {transaction.Id} no está en un estado válido para procesar contenedores.");
             }
+
+            var isSobre = viewModel.ContainerType == CefContainerTypeEnum.Sobre;
+
+            if (isSobre)
+            {
+                if (viewModel.ParentContainerId == null)
+                    throw new InvalidOperationException("Los sobres deben tener una bolsa padre.");
+                if (viewModel.EnvelopeSubType == null)
+                    throw new InvalidOperationException("Debe seleccionar el tipo de sobre (Efectivo / Documento / Cheque).");
+            }
+            else
+            {
+                viewModel.ParentContainerId = null; 
+                viewModel.EnvelopeSubType = null;
+            }
+
+            var dupPairs = (viewModel.ValueDetails ?? Enumerable.Empty<CefValueDetailViewModel>())
+                .Where(d => d.ValueType == CefValueTypeEnum.Billete || d.ValueType == CefValueTypeEnum.Moneda)
+                .Where(d => d.DenominationId != null && d.QualityId != null)
+                .GroupBy(d => new { d.DenominationId, d.QualityId })
+                .Where(g => g.Count() > 1)
+                .ToList();
+
+            if (dupPairs.Any())
+                throw new InvalidOperationException("Hay filas repetidas con la misma combinación Denominación + Calidad. Verifique los detalles.");
+
 
             CefContainer container;
             if (viewModel.Id == 0)
@@ -131,6 +156,7 @@ namespace VCashApp.Services.Cef
                     CefTransactionId = viewModel.CefTransactionId,
                     ParentContainerId = viewModel.ParentContainerId,
                     ContainerType = viewModel.ContainerType.ToString(),
+                    EnvelopeSubType = isSobre ? viewModel.EnvelopeSubType.ToString() : null,
                     ContainerCode = viewModel.ContainerCode,
                     DeclaredValue = viewModel.DeclaredValue,
                     ContainerStatus = CefContainerStatusEnum.InProcess.ToString(),
@@ -142,6 +168,7 @@ namespace VCashApp.Services.Cef
                     ClientEnvelopeDate = viewModel.ClientEnvelopeDate
                 };
                 await _context.CefContainers.AddAsync(container);
+                await _context.SaveChangesAsync();
             }
             else
             {
@@ -150,19 +177,37 @@ namespace VCashApp.Services.Cef
                                           .FirstOrDefaultAsync(c => c.Id == viewModel.Id) ?? throw new InvalidOperationException($"Contenedor con ID {viewModel.Id} no encontrado.");
 
                 container.ContainerType = viewModel.ContainerType.ToString();
+                container.EnvelopeSubType = isSobre ? viewModel.EnvelopeSubType.ToString() : null;
                 container.ContainerCode = viewModel.ContainerCode;
                 container.DeclaredValue = viewModel.DeclaredValue;
                 container.Observations = viewModel.Observations;
                 container.ClientCashierId = viewModel.ClientCashierId;
                 container.ClientCashierName = viewModel.ClientCashierName;
                 container.ClientEnvelopeDate = viewModel.ClientEnvelopeDate;
+
                 _context.CefContainers.Update(container);
                 _context.CefValueDetails.RemoveRange(container.ValueDetails);
+                await _context.SaveChangesAsync();
             }
-            await _context.SaveChangesAsync();
 
-            foreach (var detailVm in viewModel.ValueDetails)
+            decimal countedTotal = 0m;
+
+            foreach (var detailVm in viewModel.ValueDetails ?? Enumerable.Empty<CefValueDetailViewModel>())
             {
+                if (isSobre && !SobreDetalleEsValido(viewModel.EnvelopeSubType, detailVm.ValueType))
+                    throw new InvalidOperationException($"Detalle inválido para sobre {viewModel.EnvelopeSubType}: {detailVm.ValueType}.");
+
+                if (detailVm.ValueType == CefValueTypeEnum.Billete || detailVm.ValueType == CefValueTypeEnum.Moneda)
+                {
+                    if (detailVm.DenominationId == null)
+                        throw new InvalidOperationException("Debe seleccionar una denominación para Billete/Moneda.");
+                }
+                if (detailVm.ValueType == CefValueTypeEnum.Documento || detailVm.ValueType == CefValueTypeEnum.Cheque)
+                {
+                    if ((detailVm.UnitValue ?? 0) <= 0)
+                        throw new InvalidOperationException("Para Documento/Cheque debe indicar el valor unitario.");
+                }
+
                 var detail = new CefValueDetail
                 {
                     CefContainerId = container.Id,
@@ -178,20 +223,78 @@ namespace VCashApp.Services.Cef
                     BankName = detailVm.BankName,
                     IssueDate = detailVm.IssueDate,
                     Issuer = detailVm.Issuer,
-                    Observations = detailVm.Observations
+                    Observations = detailVm.Observations,
+                    QualityId = detailVm.QualityId
                 };
+
+                detail.CalculatedAmount = await CalcularMontoServidorAsync(detail);
+                countedTotal += detail.CalculatedAmount ?? 0;
+
                 await _context.CefValueDetails.AddAsync(detail);
             }
 
-            if (container.ContainerStatus == CefContainerStatusEnum.InProcess.ToString() || container.ContainerStatus == CefContainerStatusEnum.Pending.ToString())
+            container.CountedValue = countedTotal;
+
+            if (container.ContainerStatus == CefContainerStatusEnum.InProcess.ToString() ||
+                container.ContainerStatus == CefContainerStatusEnum.Pending.ToString())
             {
                 container.ContainerStatus = CefContainerStatusEnum.Counted.ToString();
                 container.ProcessingDate = DateTime.Now;
             }
-            _context.CefContainers.Update(container);
 
+            _context.CefContainers.Update(container);
             await _context.SaveChangesAsync();
+
             return container;
+        }
+
+        private static bool SobreDetalleEsValido(CefEnvelopeSubTypeEnum? subType, CefValueTypeEnum valueType)
+        {
+            if (subType == null) return false;
+
+            return subType switch
+            {
+                CefEnvelopeSubTypeEnum.Efectivo => (valueType == CefValueTypeEnum.Billete || valueType == CefValueTypeEnum.Moneda),
+                CefEnvelopeSubTypeEnum.Documento => (valueType == CefValueTypeEnum.Documento),
+                CefEnvelopeSubTypeEnum.Cheque => (valueType == CefValueTypeEnum.Cheque),
+                _ => false
+            };
+        }
+
+        private async Task<decimal> CalcularMontoServidorAsync(CefValueDetail d)
+        {
+            var qty = (decimal)(d.Quantity ?? 0);
+
+            if ((d.UnitValue ?? 0) > 0)
+                return qty * (d.UnitValue ?? 0);
+
+            if (d.DenominationId is int denomId && denomId > 0)
+            {
+                var denomVal = await _context.AdmDenominaciones
+                    .Where(a => a.CodDenominacion == denomId)
+                    .Select(a => a.ValorDenominacion)
+                    .FirstOrDefaultAsync();
+
+                return (denomVal ?? 0m) * qty;
+            }
+
+            return 0m;
+        }
+
+        public async Task<(decimal declared, decimal counted, decimal diff)> GetTransactionTotalsAsync(int transactionId)
+        {
+            var declared = await _context.CefContainers
+                .Where(c => c.CefTransactionId == transactionId)
+                .Select(c => (decimal?)c.DeclaredValue)
+                .SumAsync() ?? 0m;
+
+            var counted = await _context.CefContainers
+                .Where(c => c.CefTransactionId == transactionId)
+                .Select(c => (decimal?)c.CountedValue)
+                .SumAsync() ?? 0m;
+
+            var diff = counted - declared;
+            return (declared, counted, diff);
         }
 
         /// <inheritdoc/>
@@ -260,7 +363,7 @@ namespace VCashApp.Services.Cef
 
             var payload = new
             {
-                Bill = denoms
+                Billete = denoms
                     .Where(d => d.money == "B")
                     .Select(d => new
                     {
@@ -270,7 +373,7 @@ namespace VCashApp.Services.Cef
                         bundleSize = d.bundleSize ?? DefaultBundle(d.money),
                         family = NormFam(d.family) // <- MUY IMPORTANTE
                     }),
-                Coin = denoms
+                Moneda = denoms
                     .Where(d => d.money == "M")
                     .Select(d => new
                     {
@@ -280,7 +383,7 @@ namespace VCashApp.Services.Cef
                         bundleSize = d.bundleSize ?? DefaultBundle(d.money),
                         family = NormFam(d.family) // <- MUY IMPORTANTE
                     }),
-                Document = denoms
+                Documento = denoms
                     .Where(d => d.money == "D")
                     .Select(d => new
                     {
@@ -290,7 +393,7 @@ namespace VCashApp.Services.Cef
                         bundleSize = d.bundleSize ?? DefaultBundle(d.money),
                         family = "T" // documentos no discriminan familia
                     }),
-                Check = denoms
+                Cheque = denoms
                     .Where(d => d.money == "C")
                     .Select(d => new
                     {

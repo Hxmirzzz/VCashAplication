@@ -27,6 +27,9 @@ namespace VCashApp.Models.ViewModels.CentroEfectivo
         [StringLength(100, ErrorMessage = "El código del contenedor no puede exceder los 100 caracteres.")]
         public string ContainerCode { get; set; } = string.Empty;
 
+        [Display(Name = "Subtipo de Contenedor")]
+        public CefEnvelopeSubTypeEnum? EnvelopeSubType { get; set; }
+
         [Display(Name = "Valor Declarado del Contenedor")]
         [Range(0.00, (double)decimal.MaxValue, ErrorMessage = "Debe ser un valor válido.")]
         public decimal? DeclaredValue { get; set; }

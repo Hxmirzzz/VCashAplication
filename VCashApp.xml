@@ -870,7 +870,7 @@
             
             <returns>Vista de procesamiento de contenedores.</returns>
         </member>
-        <member name="M:VCashApp.Controllers.CefController.ProcessContainers(VCashApp.Models.ViewModels.CentroEfectivo.CefContainerProcessingViewModel)">
+        <member name="M:VCashApp.Controllers.CefController.ProcessContainers(System.Int32,VCashApp.Models.ViewModels.CentroEfectivo.CefProcessContainersPageViewModel)">
             <summary>
             Procesa el envío del formulario de procesamiento de contenedores (guardar detalles y novedades).
             </summary>
@@ -1892,6 +1892,18 @@
         <member name="M:VCashApp.Migrations.AddAdmQualityTableAndFKToCefValueDetail.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
             <inheritdoc />
         </member>
+        <member name="T:VCashApp.Migrations.AddEnvelopeSubTypeColumnToCefContainerTable">
+            <inheritdoc />
+        </member>
+        <member name="M:VCashApp.Migrations.AddEnvelopeSubTypeColumnToCefContainerTable.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:VCashApp.Migrations.AddEnvelopeSubTypeColumnToCefContainerTable.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:VCashApp.Migrations.AddEnvelopeSubTypeColumnToCefContainerTable.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
         <member name="T:VCashApp.Models.ViewModels.BranchViewModel">
             <summary>
             Representa la información principal de una sucursal.
@@ -2743,9 +2755,16 @@
         </member>
         <member name="M:VCashApp.Services.ICefContainerService.BuildQualitiesJsonAsync">
             <summary>
-            Obitene las calidades de billetes en formato JSON.
+            Obtiene las calidades de billetes en formato JSON.
             </summary>
             <returns>Lista de calidades</returns>
+        </member>
+        <member name="M:VCashApp.Services.ICefContainerService.GetTransactionTotalsAsync(System.Int32)">
+            <summary>
+            Obtiene los totales de un contenedor de efectivo para una transacción específica.
+            </summary>
+            <param name="transactionId"></param>
+            <returns></returns>
         </member>
         <member name="T:VCashApp.Services.ICefIncidentService">
             <summary>
