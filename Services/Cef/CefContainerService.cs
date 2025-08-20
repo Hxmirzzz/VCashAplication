@@ -1,10 +1,11 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.EntityFrameworkCore;
 using System.Globalization;
+using System.Text.Json;
 using VCashApp.Data;
 using VCashApp.Enums;
 using VCashApp.Models.Entities;
 using VCashApp.Models.ViewModels.CentroEfectivo;
-using System.Text.Json;
 
 namespace VCashApp.Services.Cef
 {
@@ -91,16 +92,59 @@ namespace VCashApp.Services.Cef
                 ClientName = clientName
             };
 
-            // Inicializa con 1 contenedor por defecto si vienes “en blanco”
-            // (No tocamos tu CefContainerProcessingViewModel)
-            vm.Containers = new List<CefContainerProcessingViewModel>
+            var contenedores = await _context.CefContainers
+                .AsNoTracking()
+                .Include(c => c.ValueDetails)
+                .Where(c => c.CefTransactionId == cefTransactionId)
+                .ToListAsync();
+
+            // Si no hay contenedores creados aún, cargar uno vacío para Check-In
+            if (!contenedores.Any())
             {
-                new CefContainerProcessingViewModel
+                vm.Containers = new List<CefContainerProcessingViewModel>
                 {
-                    CefTransactionId = cefTransactionId,
-                    ContainerType = CefContainerTypeEnum.Bolsa
-                }
-            };
+                    new CefContainerProcessingViewModel
+                    {
+                        CefTransactionId = cefTransactionId,
+                        ContainerType = CefContainerTypeEnum.Bolsa
+                    }
+                };
+            }
+            else
+            {
+                vm.Containers = contenedores.Select(c => new CefContainerProcessingViewModel
+                {
+                    Id = c.Id,
+                    CefTransactionId = c.CefTransactionId,
+                    ContainerCode = c.ContainerCode,
+                    ContainerType = CefContainerTypeEnum.Bolsa,
+                    EnvelopeSubType = null,
+                    DeclaredValue = c.DeclaredValue,
+                    Observations = c.Observations,
+                    ClientCashierId = c.ClientCashierId,
+                    ClientCashierName = c.ClientCashierName,
+                    ClientEnvelopeDate = c.ClientEnvelopeDate,
+                    ParentContainerId = c.ParentContainerId,
+
+                    ValueDetails = c.ValueDetails?.Select(d => new CefValueDetailViewModel
+                    {
+                        DenominationId = d.DenominationId,
+                        Quantity = d.Quantity,
+                        BundlesCount = d.BundlesCount,
+                        LoosePiecesCount = d.LoosePiecesCount,
+                        UnitValue = d.UnitValue,
+                        CalculatedAmount = d.CalculatedAmount ?? 0,
+                        IsHighDenomination = d.IsHighDenomination,
+                        IdentifierNumber = d.IdentifierNumber,
+                        BankName = d.BankName,
+                        IssueDate = d.IssueDate,
+                        Issuer = d.Issuer,
+                        Observations = d.Observations,
+                        QualityId = d.QualityId,
+                        ValueType = Enum.TryParse<CefValueTypeEnum>(d.ValueType, out var tipoValor) ? tipoValor : CefValueTypeEnum.Billete,
+                    }).ToList()
+                }).ToList();
+            }
 
             return vm;
         }

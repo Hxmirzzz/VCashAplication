@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Microsoft.AspNetCore.Mvc.Rendering;
+using System.ComponentModel.DataAnnotations;
 using VCashApp.Enums;
 
 namespace VCashApp.Models.ViewModels.CentroEfectivo
@@ -127,6 +128,10 @@ namespace VCashApp.Models.ViewModels.CentroEfectivo
         [Display(Name = "Observaciones")]
         [StringLength(255, ErrorMessage = "Las observaciones no pueden exceder los 255 caracteres.")]
         public string? Observations { get; set; }
+
+        public List<SelectListItem>? Denominations { get; set; }
+        public List<SelectListItem>? Qualities { get; set; }
+        public List<SelectListItem>? ValueTypes { get; set; }
     }
 
     /// <summary>

@@ -1,4 +1,5 @@
 ﻿@model VCashApp.Models.ViewModels.CentroEfectivo.CefContainerProcessingViewModel
+@using VCashApp.Enums;
 @{
     var prefix = ViewData.TemplateInfo.HtmlFieldPrefix;
     bool esSobre = Model.ContainerType.ToString() == "Sobre";
@@ -11,7 +12,6 @@
     <div class="row g-3">
         <div class="col-12 col-lg-4">
             <div class="form-floating has-validation">
-                <!-- Select sólo visual (disabled), pero con el valor correcto -->
                 <select class="form-select js-container-type" disabled>
                     @if (esSobre)
                     {
@@ -26,7 +26,6 @@
                 <div class="invalid-feedback">⚠ Este campo es requerido</div>
                 <div class="valid-feedback">✓ Correcto</div>
             </div>
-            <!-- Valor real que viaja al servidor -->
             <input type="hidden" name="@($"{prefix}.ContainerType")" value="@(esSobre ? "Sobre" : "Bolsa")" />
         </div>
 
@@ -80,7 +79,37 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @* Pre-carga si ya vienen detalles *@
+                        @foreach (var d in Model.ValueDetails.Where(v => v.ValueType == VCashApp.Enums.CefValueTypeEnum.Billete || v.ValueType == VCashApp.Enums.CefValueTypeEnum.Moneda))
+                        {
+                            var idx = Model.ValueDetails.IndexOf(d);
+                            var prefixDetail = $"{prefix}.ValueDetails[{idx}]";
+                            <tr>
+                                <td>
+                                    <select name="@($"{prefixDetail}.ValueType")" class="form-select form-select-sm js-vtype">
+                                        @Html.Raw($"<option value=\"Billete\" {(d.ValueType == CefValueTypeEnum.Billete ? "selected" : "")}>Billete</option>")
+                                        @Html.Raw($"<option value=\"Moneda\" {(d.ValueType == CefValueTypeEnum.Moneda ? "selected" : "")}>Moneda</option>")
+                                    </select>
+                                </td>
+                                <td>
+                                    <select name="@($"{prefixDetail}.DenominationId")"
+                                            class="form-select form-select-sm js-denom"
+                                            data-selected="@d.DenominationId">
+                                    </select>
+                                </td>
+                                <td>
+                                    <select name="@($"{prefixDetail}.QualityId")"
+                                            class="form-select form-select-sm js-quality"
+                                            data-selected="@d.QualityId">
+                                    </select>
+                                </td>
+                                <td><input name="@($"{prefixDetail}.Quantity")" type="number" class="form-control form-control-sm js-calc" value="@d.Quantity" /></td>
+                                <td><input name="@($"{prefixDetail}.BundlesCount")" type="number" class="form-control form-control-sm js-calc" value="@d.BundlesCount" /></td>
+                                <td><input name="@($"{prefixDetail}.LoosePiecesCount")" type="number" class="form-control form-control-sm js-calc" value="@d.LoosePiecesCount" /></td>
+                                <td><input name="@($"{prefixDetail}.UnitValue")" type="number" step="1" class="form-control form-control-sm js-calc" value="@d.UnitValue" /></td>
+                                <td><input name="@($"{prefixDetail}.CalculatedAmount")" type="number" step="1" class="form-control form-control-sm" value="@d.CalculatedAmount" readonly /></td>
+                                <td><button type="button" class="btn btn-sm btn-outline-danger js-remove-detail">×</button></td>
+                            </tr>
+                        }
                     </tbody>
                 </table>
                 <button type="button" class="btn btn-outline-primary btn-sm js-add-detail" data-detail-scope="bolsa">
