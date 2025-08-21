@@ -332,7 +332,6 @@ namespace VCashApp.Services.Cef
             return container;
         }
 
-
         private static bool SobreDetalleEsValido(CefEnvelopeSubTypeEnum? subType, CefValueTypeEnum valueType)
         {
             if (subType == null) return false;

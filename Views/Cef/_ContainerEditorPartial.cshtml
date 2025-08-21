@@ -64,7 +64,7 @@
         <div class="card">
             <div class="card-header"><h6 class="mb-0">💰 Bolsa — Detalle (Billetes/Monedas)</h6></div>
             <div class="card-body">
-                <table class="table table-responsive table-sm align-middle js-details-table" data-detail-scope="bolsa">
+                <table class="table table-sm align-middle js-details-table" data-detail-scope="bolsa">
                     <thead>
                         <tr>
                             <th>Tipo</th>
@@ -84,7 +84,9 @@
                             var idx = Model.ValueDetails.IndexOf(d);
                             var prefixDetail = $"{prefix}.ValueDetails[{idx}]";
                             <tr>
-                                <input type="text" name="@($"{prefixDetail}.Id")" value="@d.Id" />
+                                <td style="display: none;">
+                                    <input type="hidden" name="@($"{prefixDetail}.Id")" value="@d.Id" />
+                                </td>
                                 <td>
                                     <select name="@($"{prefixDetail}.ValueType")" class="form-select form-select-sm js-vtype">
                                         @Html.Raw($"<option value=\"Billete\" {(d.ValueType == CefValueTypeEnum.Billete ? "selected" : "")}>Billete</option>")

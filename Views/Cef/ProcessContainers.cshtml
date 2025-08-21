@@ -941,14 +941,24 @@
         updateQualitiesInTable($table);
       });
 
-      $(document).on('click', '.js-remove-detail', function () {
-        const $table = $(this).closest('table');
-        $(this).closest('tr').remove();
-        setTimeout(() => {
-          updateAvailableDenominations($table);
-          updateQualitiesInTable($table);
-        }, 10);
-      });
+        function reindexValueDetails(tableSelector) {
+            $(tableSelector).find("tbody tr").each(function (i, row) {
+                $(row).find(":input").each(function () {
+                    const input = $(this);
+                    const name = input.attr("name");
+                    if (name) {
+                        const newName = name.replace(/ValueDetails\[\d+\]/, `ValueDetails[${i}]`);
+                        input.attr("name", newName);
+                    }
+                });
+            });
+        }
+
+        $(document).on('click', '.js-remove-detail', function () {
+            const table = $(this).closest("table");
+            $(this).closest("tr").remove();
+            reindexValueDetails(table);
+        });
 
       // ===================== CHEQUES =====================
       $(document).on('click', '.js-add-cheque', function () {
@@ -995,130 +1005,123 @@
         }
       });
 
-function populateDenomsAndQuals() {
-    document.querySelectorAll('table.js-details-table tbody tr').forEach(row => {
-        const tipoSelect = row.querySelector('.js-vtype');
-        const tipo = tipoSelect?.value || "Billete";
+        function populateDenomsAndQuals() {
+            document.querySelectorAll('table.js-details-table tbody tr').forEach(row => {
+                const tipoSelect = row.querySelector('.js-vtype');
+                const tipo = tipoSelect?.value || "Billete";
 
-        const denomSel = row.querySelector('.js-denom');
-        const qualitySel = row.querySelector('.js-quality');
+                const denomSel = row.querySelector('.js-denom');
+                const qualitySel = row.querySelector('.js-quality');
 
-        if (!denomSel || !qualitySel || !DENOMS || !QUALS) return;
+                if (!denomSel || !qualitySel || !DENOMS || !QUALS) return;
 
-        // Limpiar selects
-        denomSel.innerHTML = "";
-        qualitySel.innerHTML = "";
+                denomSel.innerHTML = "";
+                qualitySel.innerHTML = "";
 
-        // Rellenar denominaciones
-        const denoms = DENOMS[tipo] || [];
-        denoms.forEach(d => {
-            const opt = document.createElement("option");
-            opt.value = d.id;
-            opt.textContent = d.label;
-            if (denomSel.dataset.selected == d.id.toString()) opt.selected = true;
-            denomSel.appendChild(opt);
-        });
+                const denoms = DENOMS[tipo] || [];
+                denoms.forEach(d => {
+                    const opt = document.createElement("option");
+                    opt.value = d.id;
+                    opt.textContent = d.label;
+                    if (denomSel.dataset.selected == d.id.toString()) opt.selected = true;
+                    denomSel.appendChild(opt);
+                });
 
-        // Obtener la familia
-        const selectedDenomId = parseInt(denomSel.dataset.selected || denomSel.value);
-        const selectedDenom = denoms.find(x => x.id === selectedDenomId);
-        const family = selectedDenom?.family || "T";
+                const selectedDenomId = parseInt(denomSel.dataset.selected || denomSel.value);
+                const selectedDenom = denoms.find(x => x.id === selectedDenomId);
+                const family = selectedDenom?.family || "T";
 
-        // Rellenar calidades
-let keepFamilies = [];
+                let keepFamilies = [];
 
-if (tipo === 'Billete' || tipo === 'Moneda') {
-    keepFamilies = ['N', 'A', 'T']; // Mostrar todas las familias si es dinero
-} else if (family === 'N') {
-    keepFamilies = ['N', 'T'];
-} else if (family === 'A') {
-    keepFamilies = ['A', 'T'];
-} else {
-    keepFamilies = ['T'];
-}
+                if (tipo === 'Billete' || tipo === 'Moneda') {
+                    keepFamilies = ['N', 'A', 'T'];
+                } else if (family === 'N') {
+                    keepFamilies = ['N', 'T'];
+                } else if (family === 'A') {
+                    keepFamilies = ['A', 'T'];
+                } else {
+                    keepFamilies = ['T'];
+                }
 
-const qualities = (QUALS[tipo.charAt(0)] || []).filter(q => {
-    const fam = (q.family ?? q.FamiliaDenominacion ?? 'T').toString().trim().toUpperCase();
-    return keepFamilies.includes(fam);
-});
+                const qualities = (QUALS[tipo.charAt(0)] || []).filter(q => {
+                    const fam = (q.family ?? q.FamiliaDenominacion ?? 'T').toString().trim().toUpperCase();
+                    return keepFamilies.includes(fam);
+                });
 
-        qualities.forEach(q => {
-            const opt = document.createElement("option");
-            opt.value = q.id;
-            opt.textContent = q.name;
-            if (qualitySel.dataset.selected == q.id.toString()) opt.selected = true;
-            qualitySel.appendChild(opt);
-        });
-    });
-}
-
-
-
-$form.on('submit', function (e) {
-  e.preventDefault();
-
-  // 1) Valida la pestaña actual
-  if (!validateCurrentStep()) {
-    Swal.fire('Campos incompletos', 'Revise los campos requeridos.', 'warning');
-    return;
-  }
-
-  // 2) Confirmación
-  Swal.fire({
-    title: '¿Guardar contenedores?',
-    text: 'Se guardará toda la información capturada.',
-    icon: 'question',
-    showCancelButton: true,
-    confirmButtonText: 'Sí, guardar',
-    cancelButtonText: 'Cancelar'
-  }).then((res) => {
-    if (!res.isConfirmed) return;
-
-    // 3) Loading
-    Swal.fire({
-      title: 'Guardando...',
-      allowOutsideClick: false,
-      didOpen: () => Swal.showLoading()
-    });
-
-    // 4) Envío AJAX (lleva el antiforgery porque serializamos el form)
-    $.ajax({
-      type: 'POST',
-      url: $form.attr('action'),
-      data: $form.serialize(),
-      headers: { 'X-Requested-With': 'XMLHttpRequest' },
-      success: function (response) {
-        if (response.success) {
-          Swal.fire({
-            icon: 'success',
-            title: '¡Éxito!',
-            text: response.message
-          }).then(() => {
-            if (response.data?.redirectUrl) {
-              window.location.href = response.data.redirectUrl;
-            } else {
-              location.reload();
-            }
-          });
-        } else {
-          const flatErrors = Object.values(response.errors ?? {}).flat();
-          Swal.fire({
-            icon: 'error',
-            title: 'Error al guardar',
-            html: (response.message ?? 'Error') + (flatErrors.length ? '<br>' + flatErrors.join('<br>') : '')
-          });
+                qualities.forEach(q => {
+                    const opt = document.createElement("option");
+                    opt.value = q.id;
+                    opt.textContent = q.name;
+                    if (qualitySel.dataset.selected == q.id.toString()) opt.selected = true;
+                    qualitySel.appendChild(opt);
+                });
+            });
         }
-      },
-      error: function () {
-        Swal.fire({
-          icon: 'error',
-          title: 'Error de red',
-          text: 'No se pudo guardar. Verifica tu conexión e intenta de nuevo.'
+
+        $form.on('submit', function (e) {
+          e.preventDefault();
+
+          // 1) Valida la pestaña actual
+          if (!validateCurrentStep()) {
+            Swal.fire('Campos incompletos', 'Revise los campos requeridos.', 'warning');
+            return;
+          }
+
+          // 2) Confirmación
+          Swal.fire({
+            title: '¿Guardar contenedores?',
+            text: 'Se guardará toda la información capturada.',
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonText: 'Sí, guardar',
+            cancelButtonText: 'Cancelar'
+          }).then((res) => {
+            if (!res.isConfirmed) return;
+
+            // 3) Loading
+            Swal.fire({
+              title: 'Guardando...',
+              allowOutsideClick: false,
+              didOpen: () => Swal.showLoading()
+            });
+
+            $.ajax({
+              type: 'POST',
+              url: $form.attr('action'),
+              data: $form.serialize(),
+              headers: { 'X-Requested-With': 'XMLHttpRequest' },
+              success: function (response) {
+                if (response.success) {
+                  Swal.fire({
+                    icon: 'success',
+                    title: '¡Éxito!',
+                    text: response.message
+                  }).then(() => {
+                    if (response.data?.redirectUrl) {
+                      window.location.href = response.data.redirectUrl;
+                    } else {
+                      location.reload();
+                    }
+                  });
+                } else {
+                  const flatErrors = Object.values(response.errors ?? {}).flat();
+                  Swal.fire({
+                    icon: 'error',
+                    title: 'Error al guardar',
+                    html: (response.message ?? 'Error') + (flatErrors.length ? '<br>' + flatErrors.join('<br>') : '')
+                  });
+                }
+              },
+              error: function () {
+                Swal.fire({
+                  icon: 'error',
+                  title: 'Error de red',
+                  text: 'No se pudo guardar. Verifica tu conexión e intenta de nuevo.'
+                });
+              }
+            });
+          });
         });
-      }
-    });
-  });
-});
         populateDenomsAndQuals();
     });
     </script>
