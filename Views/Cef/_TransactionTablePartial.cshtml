@@ -5,7 +5,7 @@
     int totalData = ViewBag.TotalData ?? 0;
     int pageSize = ViewBag.PageSize ?? 15;
 
-    bool canEdit = ViewBag.CanEdit ?? false; 
+    bool canEdit = ViewBag.HasEdit ?? false;
 
     const int maxPagesToShow = 5;
     int halfPagesToShow = (maxPagesToShow - 1) / 2;
@@ -55,12 +55,12 @@
                                 <td>@transaction.Currency</td>
                                 <td>@transaction.TransactionType.Replace("_", " ")</td>
                                 <td>@transaction.TotalDeclaredValue.ToString("N0")</td>
-                                <td>@transaction.TotalCountedValue.ToString("N0")</td> 
+                                <td>@transaction.TotalCountedValue.ToString("N0")</td>
                                 <td class="@(transaction.ValueDifference != 0 ? "text-danger" : "")">@transaction.ValueDifference.ToString("N0")</td>
                                 <td class="status-column">
                                     @{
                                         string statusText = transaction.TransactionStatus.Replace("_", " ");
-                                        string badgeClass = "badge"; 
+                                        string badgeClass = "badge";
                                         switch (transaction.TransactionStatus)
                                         {
                                             case nameof(VCashApp.Enums.CefTransactionStatusEnum.Checkin): badgeClass += " bg-primary"; break;
@@ -84,18 +84,20 @@
                                         <a href="@Url.Action("Detail", "Cef", new { transactionId = transaction.Id })" class="btn-detail" title="Ver Detalles">
                                             <i class="ri-eye-fill"></i>
                                         </a>
-
                                         @if (canEdit)
                                         {
-                                            @if (transaction.TransactionStatus == nameof(VCashApp.Enums.CefTransactionStatusEnum.Checkin) || 
-                                                 transaction.TransactionStatus == nameof(VCashApp.Enums.CefTransactionStatusEnum.EnqueuedForCounting) ||
-                                                 transaction.TransactionStatus == nameof(VCashApp.Enums.CefTransactionStatusEnum.BillCounting) ||
-                                                 transaction.TransactionStatus == nameof(VCashApp.Enums.CefTransactionStatusEnum.CoinCounting) ||
-                                                 transaction.TransactionStatus == nameof(VCashApp.Enums.CefTransactionStatusEnum.CheckCounting) ||
-                                                 transaction.TransactionStatus == nameof(VCashApp.Enums.CefTransactionStatusEnum.DocumentCounting))
+                                            <a asp-controller="Cef" asp-action="Checkin" asp-route-serviceOrderId="@transaction.ServiceOrderId" class="btn-edit" title="Editar">
+                                                <i class="ri-pencil-fill"></i>
+                                            </a>
+                                            @if (transaction.TransactionStatus == nameof(VCashApp.Enums.CefTransactionStatusEnum.Checkin) ||
+                                                                            transaction.TransactionStatus == nameof(VCashApp.Enums.CefTransactionStatusEnum.EnqueuedForCounting) ||
+                                                                            transaction.TransactionStatus == nameof(VCashApp.Enums.CefTransactionStatusEnum.BillCounting) ||
+                                                                            transaction.TransactionStatus == nameof(VCashApp.Enums.CefTransactionStatusEnum.CoinCounting) ||
+                                                                            transaction.TransactionStatus == nameof(VCashApp.Enums.CefTransactionStatusEnum.CheckCounting) ||
+                                                                            transaction.TransactionStatus == nameof(VCashApp.Enums.CefTransactionStatusEnum.DocumentCounting))
                                             {
-                                                <a asp-action="ProcessContainers" asp-route-transactionId="@transaction.Id" class="btn-edit ml-1" title="Procesar Contenedores">
-                                                    <i class="ri-pencil-fill"></i>
+                                                <a asp-action="ProcessContainers" asp-route-transactionId="@transaction.Id" class="btn-detail" title="Procesar Contenedores">
+                                                    <i class="ri-money-dollar-circle-fill"></i>
                                                 </a>
                                             }
                                             @if (transaction.TransactionStatus == nameof(VCashApp.Enums.CefTransactionStatusEnum.PendingReview))

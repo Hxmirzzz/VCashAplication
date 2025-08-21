@@ -45,6 +45,7 @@ namespace VCashApp.Data
         public DbSet<CefValueDetail> CefValueDetails { get; set; }
         public DbSet<CefIncident> CefIncidents { get; set; }
         public DbSet<CefIncidentType> CefIncidentTypes { get; set; }
+        public DbSet<AdmQuality> AdmCalidad { get; set; }
         public DbSet<TdvRutaDiaria> TdvRutasDiarias { get; set; }
         // public DbSet<TdvRutaDetallePunto> TdvRutaDetallePuntos { get; set; }
 
@@ -305,7 +306,7 @@ namespace VCashApp.Data
                 entity.Property(s => s.StatusCode);
                 entity.Property(s => s.FlowCode);
                 entity.Property(s => s.OriginClientCode);
-                entity.Property(s => s.OriginPointCode).HasMaxLength(25).IsRequired();
+                entity.Property(s => s.OriginPointCode).HasMaxLength(255).IsRequired();
                 entity.Property(s => s.OriginIndicatorType).HasMaxLength(1).IsRequired();
                 entity.Property(s => s.DestinationClientCode);
                 entity.Property(s => s.DestinationPointCode).HasMaxLength(255).IsRequired();
@@ -362,10 +363,11 @@ namespace VCashApp.Data
                 entity.HasKey(t => t.Id);
                 entity.Property(t => t.Id).ValueGeneratedOnAdd();
 
+                entity.Property(t => t.BranchCode).IsRequired();
                 entity.Property(t => t.ServiceOrderId).IsRequired().HasColumnType("NVARCHAR(450)");
                 entity.Property(t => t.RouteId).HasColumnType("VARCHAR(12)");
                 entity.Property(t => t.SlipNumber).IsRequired();
-                entity.Property(t => t.Currency).IsRequired().HasMaxLength(3);
+                entity.Property(t => t.Currency).HasMaxLength(3);
                 entity.Property(t => t.TransactionType).IsRequired().HasMaxLength(50);
                 entity.Property(t => t.DeclaredBagCount).IsRequired();
                 entity.Property(t => t.DeclaredEnvelopeCount).IsRequired();
@@ -416,6 +418,7 @@ namespace VCashApp.Data
 
                 entity.Property(c => c.CefTransactionId).IsRequired();
                 entity.Property(c => c.ContainerType).IsRequired().HasMaxLength(50);
+                entity.Property(c => c.EnvelopeSubType).HasMaxLength(20).IsUnicode(false).IsRequired(false);
                 entity.Property(c => c.ContainerCode).IsRequired().HasMaxLength(100);
                 entity.Property(c => c.DeclaredValue).HasColumnType("DECIMAL(18,0)");
                 entity.Property(c => c.CountedValue).HasColumnType("DECIMAL(18,0)");
@@ -435,6 +438,21 @@ namespace VCashApp.Data
 
                 entity.Property(c => c.ContainerType).HasConversion<string>();
                 entity.Property(c => c.ContainerStatus).HasConversion<string>();
+
+                entity.HasIndex(c => c.ParentContainerId);
+                entity.HasIndex(c => new { c.CefTransactionId, c.ContainerCode });
+
+                entity.ToTable(t =>
+                {
+                    t.HasCheckConstraint(
+                        "CK_CEF_SOBRE_TipoSobreValido",
+                        "([TipoContenedor] <> 'Sobre') OR ([TipoSobre] IN ('Efectivo','Documento','Cheque'))");
+
+                    t.HasCheckConstraint(
+                        "CK_CEF_SOBRE_Padre",
+                        "(([TipoContenedor] = 'Sobre' AND [IdContenedorPadre] IS NOT NULL) OR " +
+                        " ([TipoContenedor] <> 'Sobre' AND [IdContenedorPadre] IS NULL))");
+                });
             });
 
             builder.Entity<CefValueDetail>(entity =>
@@ -445,7 +463,6 @@ namespace VCashApp.Data
 
                 entity.Property(v => v.CefContainerId).IsRequired();
                 entity.Property(v => v.ValueType).IsRequired().HasMaxLength(50);
-                entity.Property(v => v.Denomination).IsRequired().HasColumnType("DECIMAL(18,0)");
                 entity.Property(v => v.Quantity).IsRequired();
                 entity.Property(v => v.BundlesCount).IsRequired(false);
                 entity.Property(v => v.LoosePiecesCount).IsRequired(false);
@@ -461,7 +478,10 @@ namespace VCashApp.Data
 
                 // Relaciones
                 entity.HasOne(c => c.CefContainer).WithMany(t => t.ValueDetails).HasForeignKey(c => c.CefContainerId).OnDelete(DeleteBehavior.Cascade);
+                entity.HasOne(c => c.AdmDenominacion).WithMany().HasForeignKey(c => c.DenominationId).IsRequired(false).OnDelete(DeleteBehavior.Restrict);
+                entity.HasOne(c => c.AdmQuality).WithMany().HasForeignKey(c => c.QualityId).IsRequired(false).OnDelete(DeleteBehavior.Restrict);
                 entity.Property(v => v.ValueType).HasConversion<string>();
+                entity.HasIndex(v => new { v.CefContainerId, v.ValueType, v.DenominationId, v.QualityId }).IsUnique(false);
             });
 
             builder.Entity<CefIncident>(entity =>
@@ -531,6 +551,17 @@ namespace VCashApp.Data
                 entity.HasOne(e => e.UsuarioCEFDescargueObj).WithMany().HasForeignKey(e => e.UsuarioCEFDescargue).HasPrincipalKey(u => u.Id).IsRequired(false);
                 entity.HasOne(e => e.UsuarioSupervisorAperturaObj).WithMany().HasForeignKey(e => e.UsuarioSupervisorApertura).HasPrincipalKey(u => u.Id).IsRequired(false);
                 entity.HasOne(e => e.UsuarioSupervisorCierreObj).WithMany().HasForeignKey(e => e.UsuarioSupervisorCierre).HasPrincipalKey(u => u.Id).IsRequired(false);
+            });
+
+            builder.Entity<AdmQuality>(entity =>
+            {
+                entity.HasKey(q => q.Id);
+                entity.Property(q => q.Id).ValueGeneratedOnAdd();
+
+                entity.Property(q => q.QualityName).IsRequired().HasMaxLength(255);
+                entity.Property(q => q.TypeOfMoney).IsRequired().HasMaxLength(1);
+                entity.Property(q => q.DenominationFamily).IsRequired().HasMaxLength(1);
+                entity.Property(q => q.Status).IsRequired();
             });
 
             // Mapeo para TdvRutaDetallePuntos

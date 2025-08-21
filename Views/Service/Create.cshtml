@@ -13,7 +13,6 @@
             <form id="cgsServiceForm" asp-action="Create" asp-controller="Service" method="post" novalidate>
                 <input type="hidden" asp-for="KeyValue" />
                 @Html.AntiForgeryToken()
-                <input type="hidden" asp-for="KeyValue" />
                 <div asp-validation-summary="ModelOnly" class="text-danger"></div>
 
                 <div class="progress-stepper" id="progressStepper">
@@ -165,7 +164,7 @@
                                         </div>
                                         <div class="col-12 col-lg-2">
                                             <div class="form-floating has-validation">
-                                                <select asp-for="OriginIndicatorType" asp-items="Html.GetEnumSelectList<VCashApp.Enums.LocationTypeEnum>()" class="form-select" id="originType" required aria-required="true">
+                                                <select asp-for="OriginIndicatorType" asp-items="Model.AvailableOriginTypes" class="form-select" id="originType" required aria-required="true">
                                                     <option value="originType">Seleccionar tipo origen...</option>
                                                 </select>
                                                 <label for="originType" class="required">Tipo Origen</label>
@@ -229,11 +228,12 @@
                                                 <div class="invalid-feedback">⚠ Este campo es requerido</div>
                                                 <div class="valid-feedback">✓ Correcto</div>
                                             </div>
+                                            <input type="hidden" id="destinationClientIdHidden" name="DestinationClientCode" disabled />
                                             <span asp-validation-for="DestinationClientCode" class="text-danger"></span>
                                         </div>
                                         <div class="col-12 col-lg-2">
                                             <div class="form-floating has-validation">
-                                                <select asp-for="DestinationIndicatorType" asp-items="Html.GetEnumSelectList<VCashApp.Enums.LocationTypeEnum>()" class="form-select" id="destinationType" required aria-required="true">
+                                                <select asp-for="DestinationIndicatorType" asp-items="Model.AvailableDestinationTypes" class="form-select" id="destinationType" required aria-required="true">
                                                     <option value="">Seleccionar tipo destino...</option>
                                                 </select>
                                                 <label for="destinationType" class="required">Tipo Destino</label>
@@ -292,7 +292,7 @@
                                 </div>
                                 <div class="card-body">
                                     <div class="row g-3">
-                                        <div class="col-12 col-lg-3" id="changeKitField">
+                                        <div class="col-12 col-lg-3">
                                             <div class="form-floating">
                                                 <input asp-for="NumberOfChangeKits" type="number" class="form-control" placeholder="Cantidad Kit de Cambio" />
                                                 <label for="NumberOfChangeKits">Cantidad Kit de Cambio</label>
@@ -306,33 +306,32 @@
                                             </div>
                                             <span asp-validation-for="NumberOfCoinBags" class="text-danger"></span>
                                         </div>
-                                        <div class="col-12 col-lg-3">
+                                        <div class="col-12 col-lg-3" style="display: none;">
                                             <div class="form-floating">
                                                 <input asp-for="BillValue" type="number" step="1" class="form-control calculate-total-declared" placeholder="Valor Billetes Declarados" />
                                                 <label for="BillValue">Valor Billetes Declarados</label>
                                             </div>
                                             <span asp-validation-for="BillValue" class="text-danger"></span>
                                         </div>
-                                        <div class="col-12 col-lg-3">
+                                        <div class="col-12 col-lg-3" style="display: none;">
                                             <div class="form-floating">
                                                 <input asp-for="CoinValue" type="number" step="1" class="form-control calculate-total-declared" placeholder="Valor Monedas Declaradas" />
                                                 <label for="CoinValue">Valor Monedas Declaradas</label>
                                             </div>
                                             <span asp-validation-for="CoinValue" class="text-danger"></span>
                                         </div>
+                                        <div class="col-12 col-lg-3">
+                                            <div class="form-floating">
+                                                <input asp-for="ServiceValue" type="number" class="form-control calculate-total-declared" placeholder="Valor Total"/>
+                                                <label for="ServiceValue">Valor Total</label>
+                                            </div>
+                                            <span asp-validation-for="ServiceValue" class="text-danger"></span>
+                                        </div>
                                     </div>
                                     <div class="row g-3 mt-3">
                                         <div class="col-12">
                                             <div class="calculation-panel mt-3">
-                                                <h6>💰 Resumen de Valores Declarados</h6>
-                                                <div class="calculation-item">
-                                                    <span>Billetes:</span>
-                                                    <span class="value" id="billValue">$0</span>
-                                                </div>
-                                                <div class="calculation-item">
-                                                    <span>Monedas:</span>
-                                                    <span class="value" id="coinValue">$0</span>
-                                                </div>
+                                                <h6>💰 Resumen</h6>
                                                 <div class="calculation-total">
                                                     <span>Total Declarado:</span>
                                                     <span class="total-value" id="totalValue">$0</span>
@@ -426,6 +425,67 @@
             const $nextButton = $('button[data-step-action="next"]');
             const $prevButton = $('button[data-step-action="prev"]');
             const $submitFinalButton = $('button[data-step-action="submit-final"]');
+
+            function toggleChangeKitFieldFixed(selectedValue, selectedText) {
+                const $changeKitSection = $('#NumberOfChangeKits').closest('.col-12.col-lg-3');
+                const $changeKitInput = $('#NumberOfChangeKits');
+                const hideFieldValues = ['1', '4'];
+                const showFieldValues = ['3', '2'];
+
+                let shouldShow = false;
+
+                if (hideFieldValues.includes(selectedValue)) {
+                    shouldShow = false;
+                } else if (showFieldValues.includes(selectedValue)) {
+                    shouldShow = true;
+                } else {
+                    shouldShow = false;
+                }
+
+                // Aplicar la lógica de mostrar/ocultar
+                if (shouldShow) {
+                    $changeKitSection.css('display', 'block').show();
+                } else {
+                    $changeKitSection.css('display', 'none').hide();
+                    $changeKitInput.prop('required', false);
+                    $changeKitInput.removeClass('is-invalid is-valid');
+                    $changeKitInput.val('');
+                    $changeKitInput.siblings('.invalid-feedback, .valid-feedback').hide();
+                    $changeKitInput.siblings('.text-danger').text('');
+                }
+            }
+
+            function toggleMoneyFieldsReadonly(conceptCode) {
+                const shouldBeReadonly = ['1', '4'].includes(conceptCode);
+                const $totalValue = $('#ServiceValue');
+
+                if (shouldBeReadonly) {
+                    $totalValue.prop('readonly', true);
+                    $totalValue.val(0);
+                } else {
+                    $totalValue.prop('readonly', false);
+                }
+
+                calculateTotalDeclared();
+            }
+
+            /*function toggleMoneyFieldsReadonly(conceptCode) {
+                const shouldBeReadonly = ['1', '4'].includes(conceptCode);
+                const $billValue = $('#BillValue');
+                const $coinValue = $('#CoinValue');
+
+                if (shouldBeReadonly) {
+                    $billValue.prop('readonly', true);
+                    $coinValue.prop('readonly', true);
+                    $billValue.val(0);
+                    $coinValue.val(0);
+                } else {
+                    $billValue.prop('readonly', false);
+                    $coinValue.prop('readonly', false);
+                }
+
+                calculateTotalDeclared();
+            }*/
 
             function updateStepper() {
                 $('.progress-stepper .step').removeClass('active completed');
@@ -567,6 +627,32 @@
                 validateField($element);
             }
 
+            function isLockedConcept(code) {
+                return ['1', '2', '3', '4'].includes(code);
+            }
+
+            function mapLocationTypeToNumber(type) {
+                switch(type) {
+                    case 'P': return 0; // Punto
+                    case 'A': return 1; // ATM
+                    case 'F': return 2; // Fondo
+                    default: return null;
+                }
+            }
+
+            function syncDestinationClient() {
+                const conceptCode = $('#serviceConceptCode').val();
+                const originVal = $('#originClientId').val();
+
+                if (isLockedConcept(conceptCode)) {
+                    $('#destinationClientId').val(originVal).prop('disabled', true).trigger('change');
+                    $('#destinationClientIdHidden').val(originVal).prop('disabled', false);
+                } else {
+                    $('#destinationClientId').prop('disabled', false);
+                    $('#destinationClientIdHidden').prop('disabled', true);
+                }
+            }
+
             async function loadAndFillLocationDropdown(clientIdSelector, typeSelector, codeSelector, serviceConceptCode) {
                 const clientId = $(clientIdSelector).val();
                 const type = $(typeSelector).val();
@@ -581,13 +667,16 @@
                 $(`#${prefix}RangeCode`).val('');
                 $(`#${prefix}RangeDetails`).val('');
 
-                if (clientId && type) {
+                // Mapea el tipo a número antes de enviarlo
+                const mappedType = mapLocationTypeToNumber(type);
+
+                if (clientId && mappedType !== null) {
                     $codeDropdown.prop('disabled', false);
                     try {
                         const data = await $.get('@Url.Action("GetPointsOrFundsForDropdown", "Cef")', {
                             clientId: clientId,
                             branchId: branchId,
-                            locationType: type,
+                            locationType: mappedType,
                             serviceConceptCode: serviceConceptCode
                         });
                         let options = '<option value="">-- Seleccionar --</option>';
@@ -612,8 +701,9 @@
                 const clientId = isOrigin ? $('#originClientId').val() : $('#destinationClientId').val();
                 const type = isOrigin ? $('#originType').val() : $('#destinationType').val();
 
+                const isPoint = (type === 'P' || type === 'A');
+
                 if (code && clientId && type) {
-                    const isPoint = (type === '0' || type === '1');
                     try {
                         const response = await $.get('@Url.Action("GetLocationDetails", "Service")', { code: code, clientId: clientId, isPoint: isPoint });
 
@@ -654,6 +744,11 @@
             }
 
             function calculateTotalDeclared() {
+                let serviceValue = parseFloat($('input[name="ServiceValue"]').val()) || 0;
+                $('#totalValue').text('$' + serviceValue.toLocaleString('es-ES'));
+            }
+
+            /*function calculateTotalDeclared() {
                 let billValue = parseFloat($('input[name="BillValue"]').val()) || 0;
                 let coinValue = parseFloat($('input[name="CoinValue"]').val()) || 0;
                 let total = billValue + coinValue;
@@ -661,7 +756,7 @@
                 $('#billValue').text('$' + billValue.toLocaleString('es-ES'));
                 $('#coinValue').text('$' + coinValue.toLocaleString('es-ES'));
                 $('#totalValue').text('$' + total.toLocaleString('es-ES'));
-            }
+            }*/
 
             $('#branchId').on('change', function() {
                 const selectedBranchId = $(this).val();
@@ -671,32 +766,87 @@
                 }
 
                 if ($('#destinationClientId').val()) {
-                    loadAndFillLocationDropdown('#originClientId', '#originType', '#originCode', $('#serviceConceptCode').val());
+                    loadAndFillLocationDropdown('#destinationClientId', '#destinationType', '#destinationCode', $('#serviceConceptCode').val());
                 }
             });
 
+            function setAndLockType(selector, value) {
+            $(selector).val(value).prop('disabled', true);
+                const name = $(selector).attr('name');
+                // Si no existe el hidden, lo agregas
+                if ($('input[type="hidden"][name="' + name + '"]').length === 0) {
+                    $('<input>').attr({
+                        type: 'hidden',
+                        name: name,
+                        value: value
+                    }).insertAfter(selector);
+                } else {
+                    // Si ya existe, solo actualizas el valor
+                    $('input[type="hidden"][name="' + name + '"]').val(value);
+                }
+            }
+
+            function unlockType(selector) {
+                $(selector).prop('disabled', false);
+                const name = $(selector).attr('name');
+                $('input[type="hidden"][name="' + name + '"]').remove();
+            }
+
             $('#serviceConceptCode').on('change', function() {
                 const serviceConceptCode = $(this).val();
+                const selectedText = $(this).find('option:selected').text().trim();
 
-                const isAtmConcept = (serviceConceptCode === 'PR' || serviceConceptCode === 'ET');
-                const isCollectionConcept = (serviceConceptCode === 'RC' || serviceConceptCode === 'PV');
+                $('#originType').val('');
+                $('#destinationType').val('');
 
-                if (isCollectionConcept) {
-                    $('#originType').val('@(nameof(VCashApp.Enums.LocationTypeEnum.Punto))');
-                    $('#destinationType').val('@(nameof(VCashApp.Enums.LocationTypeEnum.Fondo))');
-                    $('#changeKitField').hide();
-                } else if (isAtmConcept) {
-                    $('#originType').val('@(nameof(VCashApp.Enums.LocationTypeEnum.Fondo))');
-                    $('#destinationType').val('@(nameof(VCashApp.Enums.LocationTypeEnum.Punto))');
-                    $('#changeKitField').show();
-                } else {
-                    $('#originType').val('');
-                    $('#destinationType').val('');
-                    $('#changeKitField').hide();
+                $('#originCode').html('<option value="">-- Seleccionar --</option>').prop('disabled', true);
+                $('#destinationCode').html('<option value="">-- Seleccionar --</option>').prop('disabled', true);
+
+                const isLockedConceptType = ['1', '2', '3', '4'].includes(serviceConceptCode);
+
+                // Preseleccionar y bloquear tipos según el concepto
+                switch(serviceConceptCode) {
+                    case '1':
+                        setAndLockType('#originType', 'P');
+                        setAndLockType('#destinationType', 'F');
+                        break;
+                    case '2':
+                        setAndLockType('#originType', 'F');
+                        setAndLockType('#destinationType', 'P');
+                        break;
+                    case '3':
+                        setAndLockType('#originType', 'F');
+                        setAndLockType('#destinationType', 'A');
+                        break;
+                    case '4':
+                        setAndLockType('#originType', 'A');
+                        setAndLockType('#destinationType', 'F');
+                        break;
+                    default:
+                        unlockType('#originType');
+                        unlockType('#destinationType');
+                        break;
                 }
 
-                loadAndFillLocationDropdown('#originClientId', '#originType', '#originCode', serviceConceptCode);
-                loadAndFillLocationDropdown('#destinationClientId', '#destinationType', '#destinationCode', serviceConceptCode);
+                $('#originType').trigger('change');
+                $('#destinationType').trigger('change');
+
+                toggleMoneyFieldsReadonly(serviceConceptCode);
+                toggleChangeKitFieldFixed(serviceConceptCode, selectedText);
+
+                if ($('#originClientId').val()) {
+                    loadAndFillLocationDropdown('#originClientId', '#originType', '#originCode', serviceConceptCode);
+                }
+                if ($('#destinationClientId').val()) {
+                    loadAndFillLocationDropdown('#destinationClientId', '#destinationType', '#destinationCode', serviceConceptCode);
+                }
+
+                syncDestinationClient();
+            });
+
+            $('#originClientId').on('change', function() {
+                loadAndFillLocationDropdown('#originClientId', '#originType', '#originCode', $('#serviceConceptCode').val());
+                syncDestinationClient();
             });
 
             $('#originType').on('change', function() {
@@ -704,6 +854,10 @@
             });
 
             $('#originCode').on('change', loadOriginLocationDetails);
+
+            $('#destinationClientId').on('change', function() {
+                loadAndFillLocationDropdown('#destinationClientId', '#destinationType', '#destinationCode', $('#serviceConceptCode').val());
+            });
 
             $('#destinationType').on('change', function() {
                 loadAndFillLocationDropdown('#destinationClientId', '#destinationType', '#destinationCode', $('#serviceConceptCode').val());
@@ -713,6 +867,15 @@
 
             $('.calculate-total-declared').on('input', calculateTotalDeclared);
             calculateTotalDeclared();
+            syncDestinationClient();
+
+            const initialServiceConcept = $('#serviceConceptCode').val();
+            if (initialServiceConcept) {
+                toggleMoneyFieldsReadonly(initialServiceConcept);
+                toggleChangeKitFieldFixed(initialServiceConcept, initialSelectedText);
+            } else {
+                toggleChangeKitFieldFixed('', '');
+            }
 
             // Lógica para mostrar/ocultar la sección de fallo
             $('#isFailedSwitch').on('change', function() {
@@ -721,12 +884,10 @@
 
                 if (isFailed) {
                     $section.show();
-                    // Hacer los campos requeridos y visibles
                     $('#failedResponsible').prop('required', true).closest('.form-floating').addClass('has-validation');
                     $('#failedReason').prop('required', true).closest('.form-floating').addClass('has-validation');
                 } else {
                     $section.hide();
-                    // Quitar la validación y limpiar los campos
                     $('#failedResponsible').prop('required', false).removeClass('is-invalid is-valid');
                     $('#failedReason').prop('required', false).removeClass('is-invalid is-valid');
                     $('#failedResponsible').val('');
@@ -827,7 +988,6 @@
                 });
             });
             updateStepper();
-            $('#serviceConceptCode').trigger('change');
         });
     </script>
 }

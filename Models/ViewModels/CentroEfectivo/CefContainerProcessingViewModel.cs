@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using Microsoft.AspNetCore.Mvc.Rendering;
+using System.ComponentModel.DataAnnotations;
 using VCashApp.Enums;
 
 namespace VCashApp.Models.ViewModels.CentroEfectivo
@@ -27,6 +28,9 @@ namespace VCashApp.Models.ViewModels.CentroEfectivo
         [StringLength(100, ErrorMessage = "El código del contenedor no puede exceder los 100 caracteres.")]
         public string ContainerCode { get; set; } = string.Empty;
 
+        [Display(Name = "Subtipo de Contenedor")]
+        public CefEnvelopeSubTypeEnum? EnvelopeSubType { get; set; }
+
         [Display(Name = "Valor Declarado del Contenedor")]
         [Range(0.00, (double)decimal.MaxValue, ErrorMessage = "Debe ser un valor válido.")]
         public decimal? DeclaredValue { get; set; }
@@ -49,8 +53,19 @@ namespace VCashApp.Models.ViewModels.CentroEfectivo
         [Display(Name = "Valor Contado Actual")]
         public decimal CurrentCountedValue { get; set; }
 
+        public string SobreMode { get; set; } = "Docs";
+
+        public List<CefEnvelopeViewModel> Envelopes { get; set; } = new();
         public List<CefValueDetailViewModel> ValueDetails { get; set; } = new List<CefValueDetailViewModel>();
         public List<CefIncidentViewModel> Incidents { get; set; } = new List<CefIncidentViewModel>();
+    }
+
+    public class CefEnvelopeViewModel
+    {
+        public string? EnvelopeCode { get; set; }     // código del sobre (difiere del de la bolsa)
+        public CefEnvelopeSubTypeEnum SubType { get; set; } = CefEnvelopeSubTypeEnum.Efectivo;
+        public List<CefValueDetailViewModel> ValueDetails { get; set; } = new();
+        public string? Observations { get; set; }
     }
 
     /// <summary>
@@ -65,8 +80,12 @@ namespace VCashApp.Models.ViewModels.CentroEfectivo
         public CefValueTypeEnum ValueType { get; set; }
 
         [Display(Name = "Denominación")]
-        [Range(0.00, (double)decimal.MaxValue, ErrorMessage = "Debe ser un valor válido.")]
-        public decimal? Denomination { get; set; }
+        [Required(ErrorMessage = "La denominación es requerida.")]
+        public int? DenominationId { get; set; }
+
+        [Display(Name = "Calidad")]
+        [Required(ErrorMessage = "La calidad es requerida.")]
+        public int? QualityId { get; set; }
 
         [Display(Name = "Cantidad")]
         [Range(0, int.MaxValue, ErrorMessage = "Debe ser una cantidad válida.")]
@@ -109,6 +128,10 @@ namespace VCashApp.Models.ViewModels.CentroEfectivo
         [Display(Name = "Observaciones")]
         [StringLength(255, ErrorMessage = "Las observaciones no pueden exceder los 255 caracteres.")]
         public string? Observations { get; set; }
+
+        public List<SelectListItem>? Denominations { get; set; }
+        public List<SelectListItem>? Qualities { get; set; }
+        public List<SelectListItem>? ValueTypes { get; set; }
     }
 
     /// <summary>
@@ -144,7 +167,6 @@ namespace VCashApp.Models.ViewModels.CentroEfectivo
         [StringLength(255, ErrorMessage = "La descripción no puede exceder los 255 caracteres.")]
         public string Description { get; set; } = string.Empty;
 
-        // Display properties
         [Display(Name = "Fecha y Hora de Reporte")]
         public DateTime ReportDate { get; set; } = DateTime.Now;
 

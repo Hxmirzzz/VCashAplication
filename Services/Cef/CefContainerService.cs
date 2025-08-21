@@ -1,11 +1,11 @@
-﻿using VCashApp.Services;
+﻿using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.EntityFrameworkCore;
+using System.Globalization;
+using System.Text.Json;
 using VCashApp.Data;
+using VCashApp.Enums;
 using VCashApp.Models.Entities;
 using VCashApp.Models.ViewModels.CentroEfectivo;
-using VCashApp.Enums;
-using Microsoft.EntityFrameworkCore;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace VCashApp.Services.Cef
 {
@@ -22,80 +22,142 @@ namespace VCashApp.Services.Cef
         }
 
         /// <inheritdoc/>
-        public async Task<CefContainerProcessingViewModel> PrepareContainerProcessingViewModelAsync(int? containerId, int cefTransactionId)
+        public async Task<CefProcessContainersPageViewModel> PrepareProcessContainersPageAsync(int cefTransactionId)
         {
-            var viewModel = new CefContainerProcessingViewModel
+            var vm = new CefProcessContainersPageViewModel { CefTransactionId = cefTransactionId };
+
+            // Transacción
+            var t = await _context.CefTransactions.AsNoTracking()
+                .FirstOrDefaultAsync(x => x.Id == cefTransactionId)
+                ?? throw new InvalidOperationException($"Transacción CEF {cefTransactionId} no existe.");
+
+            // Servicio
+            var s = await _context.CgsServicios.AsNoTracking()
+                .FirstOrDefaultAsync(x => x.ServiceOrderId == t.ServiceOrderId)
+                ?? throw new InvalidOperationException($"Servicio {t.ServiceOrderId} no existe.");
+
+            // Cabecera Transacción
+            vm.Transaction = new TransactionHeaderVM
             {
-                CefTransactionId = cefTransactionId,
-                ValueDetails = new List<CefValueDetailViewModel>(),
-                Incidents = new List<CefIncidentViewModel>()
+                Id = t.Id,
+                SlipNumber = t.SlipNumber,
+                Currency = t.Currency,
+                TransactionType = t.TransactionType,
+                Status = t.TransactionStatus,
+                RegistrationDate = t.RegistrationDate,
+                RegistrationUserName = await _context.Users.AsNoTracking()
+                    .Where(u => u.Id == t.RegistrationUser)
+                    .Select(u => u.NombreUsuario)
+                    .FirstOrDefaultAsync() ?? "N/A"
             };
 
-            if (containerId.HasValue && containerId.Value > 0)
+            // Cabecera Servicio
+            var conceptName = await _context.AdmConceptos.AsNoTracking()
+                .Where(c => c.CodConcepto == s.ConceptCode)
+                .Select(c => c.NombreConcepto)
+                .FirstOrDefaultAsync() ?? "N/A";
+
+            var branchName = await _context.AdmSucursales.AsNoTracking()
+                .Where(b => b.CodSucursal == s.BranchCode)
+                .Select(b => b.NombreSucursal)
+                .FirstOrDefaultAsync() ?? "N/A";
+
+            var clientName = await _context.AdmClientes.AsNoTracking()
+                .Where(c => c.ClientCode == (s.OriginClientCode != 0 ? s.OriginClientCode : s.ClientCode))
+                .Select(c => c.ClientName)
+                .FirstOrDefaultAsync() ?? "N/A";
+
+            string originName = s.OriginIndicatorType == "P"
+                ? await _context.AdmPuntos.AsNoTracking()
+                    .Where(p => p.PointCode == s.OriginPointCode).Select(p => p.PointName).FirstOrDefaultAsync() ?? $"{s.OriginIndicatorType}-{s.OriginPointCode}"
+                : await _context.AdmFondos.AsNoTracking()
+                    .Where(f => f.FundCode == s.OriginPointCode).Select(f => f.FundName).FirstOrDefaultAsync() ?? $"{s.OriginIndicatorType}-{s.OriginPointCode}";
+
+            string destinationName = s.DestinationIndicatorType == "P"
+                ? await _context.AdmPuntos.AsNoTracking()
+                    .Where(p => p.PointCode == s.DestinationPointCode).Select(p => p.PointName).FirstOrDefaultAsync() ?? $"{s.DestinationIndicatorType}-{s.DestinationPointCode}"
+                : await _context.AdmFondos.AsNoTracking()
+                    .Where(f => f.FundCode == s.DestinationPointCode).Select(f => f.FundName).FirstOrDefaultAsync() ?? $"{s.DestinationIndicatorType}-{s.DestinationPointCode}";
+
+            vm.Service = new ServiceHeaderVM
             {
-                var container = await GetContainerWithDetailsAsync(containerId.Value);
-                if (container != null)
+                ServiceOrderId = s.ServiceOrderId,
+                BranchCode = s.BranchCode,
+                BranchName = branchName,
+                ServiceDate = s.ProgrammingDate,
+                ServiceTime = s.ProgrammingTime,
+                ConceptName = conceptName,
+                OriginName = originName,
+                DestinationName = destinationName,
+                ClientName = clientName
+            };
+
+            var contenedores = await _context.CefContainers
+                .AsNoTracking()
+                .Include(c => c.ValueDetails)
+                .Where(c => c.CefTransactionId == cefTransactionId)
+                .ToListAsync();
+
+            // Si no hay contenedores creados aún, cargar uno vacío para Check-In
+            if (!contenedores.Any())
+            {
+                vm.Containers = new List<CefContainerProcessingViewModel>
                 {
-                    viewModel.Id = container.Id; 
-                    viewModel.ParentContainerId = container.ParentContainerId;
-                    viewModel.ContainerType = Enum.Parse<CefContainerTypeEnum>(container.ContainerType);
-                    viewModel.ContainerCode = container.ContainerCode;
-                    viewModel.DeclaredValue = container.DeclaredValue;
-                    viewModel.ContainerStatus = Enum.Parse<CefContainerStatusEnum>(container.ContainerStatus);
-                    viewModel.Observations = container.Observations;
-                    viewModel.ClientCashierId = container.ClientCashierId;
-                    viewModel.ClientCashierName = container.ClientCashierName;
-                    viewModel.ClientEnvelopeDate = container.ClientEnvelopeDate;
-                    viewModel.CurrentCountedValue = container.CountedValue ?? 0;
-
-                    viewModel.ValueDetails = container.ValueDetails.Select(vd => new CefValueDetailViewModel
+                    new CefContainerProcessingViewModel
                     {
-                        Id = vd.Id,
-                        ValueType = Enum.Parse<CefValueTypeEnum>(vd.ValueType),
-                        Denomination = vd.Denomination,
-                        Quantity = vd.Quantity,
-                        BundlesCount = vd.BundlesCount,
-                        LoosePiecesCount = vd.LoosePiecesCount,
-                        UnitValue = vd.UnitValue,
-                        CalculatedAmount = vd.CalculatedAmount ?? 0,
-                        IsHighDenomination = vd.IsHighDenomination,
-                        IdentifierNumber = vd.IdentifierNumber,
-                        BankName = vd.BankName,
-                        IssueDate = vd.IssueDate,
-                        Issuer = vd.Issuer,
-                        Observations = vd.Observations
-                    }).ToList();
-
-                    viewModel.Incidents = container.Incidents.Select(ni => new CefIncidentViewModel
-                    {
-                        Id = ni.Id,
-                        CefTransactionId = ni.CefTransactionId,
-                        CefContainerId = ni.CefContainerId,
-                        CefValueDetailId = ni.CefValueDetailId,
-                        IncidentType = Enum.Parse<CefIncidentTypeCategoryEnum>(_context.CefIncidentTypes.FirstOrDefault(it => it.Id == ni.IncidentTypeId)?.Code ?? "Otro"),
-                        AffectedAmount = ni.AffectedAmount,
-                        AffectedDenomination = ni.AffectedDenomination,
-                        AffectedQuantity = ni.AffectedQuantity,
-                        Description = ni.Description,
-                        ReportDate = ni.IncidentDate,
-                        ReportingUserName = _context.Users.FirstOrDefault(u => u.Id == ni.ReportedUserId)?.NombreUsuario ?? "N/A",
-                        IncidentStatus = ni.IncidentStatus
-                    }).ToList();
-                }
+                        CefTransactionId = cefTransactionId,
+                        ContainerType = CefContainerTypeEnum.Bolsa
+                    }
+                };
             }
-            return viewModel;
+            else
+            {
+                vm.Containers = contenedores.Select(c => new CefContainerProcessingViewModel
+                {
+                    Id = c.Id,
+                    CefTransactionId = c.CefTransactionId,
+                    ContainerCode = c.ContainerCode,
+                    ContainerType = CefContainerTypeEnum.Bolsa,
+                    EnvelopeSubType = null,
+                    DeclaredValue = c.DeclaredValue,
+                    Observations = c.Observations,
+                    ClientCashierId = c.ClientCashierId,
+                    ClientCashierName = c.ClientCashierName,
+                    ClientEnvelopeDate = c.ClientEnvelopeDate,
+                    ParentContainerId = c.ParentContainerId,
+
+                    ValueDetails = c.ValueDetails?.Select(d => new CefValueDetailViewModel
+                    {
+                        Id = d.Id,
+                        DenominationId = d.DenominationId,
+                        Quantity = d.Quantity,
+                        BundlesCount = d.BundlesCount,
+                        LoosePiecesCount = d.LoosePiecesCount,
+                        UnitValue = d.UnitValue,
+                        CalculatedAmount = d.CalculatedAmount ?? 0,
+                        IsHighDenomination = d.IsHighDenomination,
+                        IdentifierNumber = d.IdentifierNumber,
+                        BankName = d.BankName,
+                        IssueDate = d.IssueDate,
+                        Issuer = d.Issuer,
+                        Observations = d.Observations,
+                        QualityId = d.QualityId,
+                        ValueType = Enum.TryParse<CefValueTypeEnum>(d.ValueType, out var tipoValor) ? tipoValor : CefValueTypeEnum.Billete,
+                    }).ToList()
+                }).ToList();
+            }
+
+            return vm;
         }
 
         /// <inheritdoc/>
         public async Task<CefContainer> SaveContainerAndDetailsAsync(CefContainerProcessingViewModel viewModel, string processingUserId)
         {
-            var transaction = await _context.CefTransactions.FirstOrDefaultAsync(t => t.Id == viewModel.CefTransactionId);
-            if (transaction == null)
-            {
-                throw new InvalidOperationException($"La transacción CEF con ID {viewModel.CefTransactionId} no existe.");
-            }
-            // Validar estado de la transacción para permitir guardar contenedores
-            if (transaction.TransactionStatus != CefTransactionStatusEnum.EnqueuedForCounting.ToString() &&
+            var transaction = await _context.CefTransactions.FirstOrDefaultAsync(t => t.Id == viewModel.CefTransactionId)
+                ?? throw new InvalidOperationException($"La transacción CEF con ID {viewModel.CefTransactionId} no existe.");
+
+            if (transaction.TransactionStatus != CefTransactionStatusEnum.Checkin.ToString() &&
+                transaction.TransactionStatus != CefTransactionStatusEnum.EnqueuedForCounting.ToString() &&
                 transaction.TransactionStatus != CefTransactionStatusEnum.BillCounting.ToString() &&
                 transaction.TransactionStatus != CefTransactionStatusEnum.CoinCounting.ToString() &&
                 transaction.TransactionStatus != CefTransactionStatusEnum.CheckCounting.ToString() &&
@@ -103,6 +165,31 @@ namespace VCashApp.Services.Cef
             {
                 throw new InvalidOperationException($"La transacción {transaction.Id} no está en un estado válido para procesar contenedores.");
             }
+
+            var isSobre = viewModel.ContainerType == CefContainerTypeEnum.Sobre;
+
+            if (isSobre)
+            {
+                if (viewModel.ParentContainerId == null)
+                    throw new InvalidOperationException("Los sobres deben tener una bolsa padre.");
+                if (viewModel.EnvelopeSubType == null)
+                    throw new InvalidOperationException("Debe seleccionar el tipo de sobre (Efectivo / Documento / Cheque).");
+            }
+            else
+            {
+                viewModel.ParentContainerId = null;
+                viewModel.EnvelopeSubType = null;
+            }
+
+            var dupPairs = (viewModel.ValueDetails ?? Enumerable.Empty<CefValueDetailViewModel>())
+                .Where(d => d.ValueType == CefValueTypeEnum.Billete || d.ValueType == CefValueTypeEnum.Moneda)
+                .Where(d => d.DenominationId != null && d.QualityId != null)
+                .GroupBy(d => new { d.DenominationId, d.QualityId })
+                .Where(g => g.Count() > 1)
+                .ToList();
+
+            if (dupPairs.Any())
+                throw new InvalidOperationException("Hay filas repetidas con la misma combinación Denominación + Calidad. Verifique los detalles.");
 
             CefContainer container;
             if (viewModel.Id == 0)
@@ -112,6 +199,7 @@ namespace VCashApp.Services.Cef
                     CefTransactionId = viewModel.CefTransactionId,
                     ParentContainerId = viewModel.ParentContainerId,
                     ContainerType = viewModel.ContainerType.ToString(),
+                    EnvelopeSubType = isSobre ? viewModel.EnvelopeSubType.ToString() : null,
                     ContainerCode = viewModel.ContainerCode,
                     DeclaredValue = viewModel.DeclaredValue,
                     ContainerStatus = CefContainerStatusEnum.InProcess.ToString(),
@@ -123,6 +211,7 @@ namespace VCashApp.Services.Cef
                     ClientEnvelopeDate = viewModel.ClientEnvelopeDate
                 };
                 await _context.CefContainers.AddAsync(container);
+                await _context.SaveChangesAsync();
             }
             else
             {
@@ -131,48 +220,166 @@ namespace VCashApp.Services.Cef
                                           .FirstOrDefaultAsync(c => c.Id == viewModel.Id) ?? throw new InvalidOperationException($"Contenedor con ID {viewModel.Id} no encontrado.");
 
                 container.ContainerType = viewModel.ContainerType.ToString();
+                container.EnvelopeSubType = isSobre ? viewModel.EnvelopeSubType.ToString() : null;
                 container.ContainerCode = viewModel.ContainerCode;
                 container.DeclaredValue = viewModel.DeclaredValue;
                 container.Observations = viewModel.Observations;
                 container.ClientCashierId = viewModel.ClientCashierId;
                 container.ClientCashierName = viewModel.ClientCashierName;
                 container.ClientEnvelopeDate = viewModel.ClientEnvelopeDate;
+
                 _context.CefContainers.Update(container);
-                _context.CefValueDetails.RemoveRange(container.ValueDetails);
             }
-            await _context.SaveChangesAsync();
 
-            foreach (var detailVm in viewModel.ValueDetails)
+            var existingDetails = container.ValueDetails.ToList();
+            var incomingDetailIds = viewModel.ValueDetails
+                .Where(d => d.Id != 0)
+                .Select(d => d.Id)
+                .ToHashSet();
+
+            var detailsToDelete = existingDetails
+                .Where(d => !incomingDetailIds.Contains(d.Id))
+                .ToList();
+
+            _context.CefValueDetails.RemoveRange(detailsToDelete);
+
+            decimal countedTotal = 0m;
+
+            foreach (var detailVm in viewModel.ValueDetails ?? Enumerable.Empty<CefValueDetailViewModel>())
             {
-                var detail = new CefValueDetail
+                if (isSobre && !SobreDetalleEsValido(viewModel.EnvelopeSubType, detailVm.ValueType))
+                    throw new InvalidOperationException($"Detalle inválido para sobre {viewModel.EnvelopeSubType}: {detailVm.ValueType}.");
+
+                if (detailVm.ValueType == CefValueTypeEnum.Billete || detailVm.ValueType == CefValueTypeEnum.Moneda)
                 {
-                    CefContainerId = container.Id,
-                    ValueType = detailVm.ValueType.ToString(),
-                    Denomination = detailVm.Denomination,
-                    Quantity = detailVm.Quantity,
-                    BundlesCount = detailVm.BundlesCount,
-                    LoosePiecesCount = detailVm.LoosePiecesCount,
-                    UnitValue = detailVm.UnitValue,
-                    CalculatedAmount = detailVm.CalculatedAmount,
-                    IsHighDenomination = detailVm.IsHighDenomination,
-                    IdentifierNumber = detailVm.IdentifierNumber,
-                    BankName = detailVm.BankName,
-                    IssueDate = detailVm.IssueDate,
-                    Issuer = detailVm.Issuer,
-                    Observations = detailVm.Observations
-                };
-                await _context.CefValueDetails.AddAsync(detail);
+                    if (detailVm.DenominationId == null)
+                        throw new InvalidOperationException("Debe seleccionar una denominación para Billete/Moneda.");
+                }
+                if (detailVm.ValueType == CefValueTypeEnum.Documento || detailVm.ValueType == CefValueTypeEnum.Cheque)
+                {
+                    if ((detailVm.UnitValue ?? 0) <= 0)
+                        throw new InvalidOperationException("Para Documento/Cheque debe indicar el valor unitario.");
+                }
+
+                var existing = existingDetails.FirstOrDefault(d => d.Id == detailVm.Id);
+
+                if (existing != null)
+                {
+                    existing.ValueType = detailVm.ValueType.ToString();
+                    existing.DenominationId = detailVm.DenominationId;
+                    existing.Quantity = detailVm.Quantity;
+                    existing.BundlesCount = detailVm.BundlesCount;
+                    existing.LoosePiecesCount = detailVm.LoosePiecesCount;
+                    existing.UnitValue = detailVm.UnitValue;
+                    existing.CalculatedAmount = await CalcularMontoServidorAsync(existing);
+                    existing.IsHighDenomination = detailVm.IsHighDenomination;
+                    existing.IdentifierNumber = detailVm.IdentifierNumber;
+                    existing.BankName = detailVm.BankName;
+                    existing.IssueDate = detailVm.IssueDate;
+                    existing.Issuer = detailVm.Issuer;
+                    existing.Observations = detailVm.Observations;
+                    existing.QualityId = detailVm.QualityId;
+
+                    _context.CefValueDetails.Update(existing);
+                    countedTotal += existing.CalculatedAmount ?? 0;
+                }
+                else
+                {
+                    var newDetail = new CefValueDetail
+                    {
+                        CefContainerId = container.Id,
+                        ValueType = detailVm.ValueType.ToString(),
+                        DenominationId = detailVm.DenominationId,
+                        Quantity = detailVm.Quantity,
+                        BundlesCount = detailVm.BundlesCount,
+                        LoosePiecesCount = detailVm.LoosePiecesCount,
+                        UnitValue = detailVm.UnitValue,
+                        IsHighDenomination = detailVm.IsHighDenomination,
+                        IdentifierNumber = detailVm.IdentifierNumber,
+                        BankName = detailVm.BankName,
+                        IssueDate = detailVm.IssueDate,
+                        Issuer = detailVm.Issuer,
+                        Observations = detailVm.Observations,
+                        QualityId = detailVm.QualityId
+                    };
+
+                    newDetail.CalculatedAmount = await CalcularMontoServidorAsync(newDetail);
+                    countedTotal += newDetail.CalculatedAmount ?? 0;
+
+                    await _context.CefValueDetails.AddAsync(newDetail);
+                }
             }
 
-            if (container.ContainerStatus == CefContainerStatusEnum.InProcess.ToString() || container.ContainerStatus == CefContainerStatusEnum.Pending.ToString())
+            container.CountedValue = countedTotal;
+
+            if (container.ContainerStatus == CefContainerStatusEnum.InProcess.ToString() ||
+                container.ContainerStatus == CefContainerStatusEnum.Pending.ToString())
             {
                 container.ContainerStatus = CefContainerStatusEnum.Counted.ToString();
                 container.ProcessingDate = DateTime.Now;
             }
-            _context.CefContainers.Update(container);
 
+            _context.CefContainers.Update(container);
             await _context.SaveChangesAsync();
+
+            if (transaction.TransactionStatus == CefTransactionStatusEnum.Checkin.ToString())
+            {
+                transaction.TransactionStatus = CefTransactionStatusEnum.BillCounting.ToString();
+                _context.CefTransactions.Update(transaction);
+                await _context.SaveChangesAsync();
+            }
+
             return container;
+        }
+
+
+        private static bool SobreDetalleEsValido(CefEnvelopeSubTypeEnum? subType, CefValueTypeEnum valueType)
+        {
+            if (subType == null) return false;
+
+            return subType switch
+            {
+                CefEnvelopeSubTypeEnum.Efectivo => (valueType == CefValueTypeEnum.Billete || valueType == CefValueTypeEnum.Moneda),
+                CefEnvelopeSubTypeEnum.Documento => (valueType == CefValueTypeEnum.Documento),
+                CefEnvelopeSubTypeEnum.Cheque => (valueType == CefValueTypeEnum.Cheque),
+                _ => false
+            };
+        }
+
+        private async Task<decimal> CalcularMontoServidorAsync(CefValueDetail d)
+        {
+            var qty = (decimal)(d.Quantity ?? 0);
+
+            if ((d.UnitValue ?? 0) > 0)
+                return qty * (d.UnitValue ?? 0);
+
+            if (d.DenominationId is int denomId && denomId > 0)
+            {
+                var denomVal = await _context.AdmDenominaciones
+                    .Where(a => a.CodDenominacion == denomId)
+                    .Select(a => a.ValorDenominacion)
+                    .FirstOrDefaultAsync();
+
+                return (denomVal ?? 0m) * qty;
+            }
+
+            return 0m;
+        }
+
+        public async Task<(decimal declared, decimal counted, decimal diff)> GetTransactionTotalsAsync(int transactionId)
+        {
+            var declared = await _context.CefContainers
+                .Where(c => c.CefTransactionId == transactionId)
+                .Select(c => (decimal?)c.DeclaredValue)
+                .SumAsync() ?? 0m;
+
+            var counted = await _context.CefContainers
+                .Where(c => c.CefTransactionId == transactionId)
+                .Select(c => (decimal?)c.CountedValue)
+                .SumAsync() ?? 0m;
+
+            var diff = counted - declared;
+            return (declared, counted, diff);
         }
 
         /// <inheritdoc/>
@@ -197,6 +404,115 @@ namespace VCashApp.Services.Cef
                                  .Include(c => c.ChildContainers)
                                  .OrderBy(c => c.Id)
                                  .ToListAsync();
+        }
+
+        /// <inheritdoc/>
+        public async Task<string> BuildDenomsJsonForTransactionAsync(int cefTransactionId)
+        {
+            var tx = await _context.CefTransactions
+                .AsNoTracking()
+                .Where(t => t.Id == cefTransactionId)
+                .Select(t => new { t.Currency })
+                .FirstOrDefaultAsync()
+                ?? throw new InvalidOperationException($"Transacción {cefTransactionId} no existe.");
+
+            var currency = tx.Currency ?? "COP";
+
+            var denoms = await _context.AdmDenominaciones
+                .AsNoTracking()
+                .Where(d => d.DivisaDenominacion == currency)
+                .Select(d => new
+                {
+                    id = d.CodDenominacion,
+                    value = d.ValorDenominacion,
+                    money = d.TipoDinero,
+                    family = d.FamiliaDenominacion,
+                    label = d.Denominacion,
+                    bundleSize = d.CantidadUnidadAgrupamiento
+                })
+                .OrderBy(d => d.money)
+                .ThenByDescending(d => d.value)
+                .ToListAsync();
+
+            var esCO = CultureInfo.GetCultureInfo("es-CO");
+
+            // Función local para normalizar y formatear
+            string FormatLabel(string lbl, decimal? val) =>
+                !string.IsNullOrWhiteSpace(lbl) ? lbl : (val.HasValue ? val.Value.ToString("C0", esCO) : "");
+
+            string NormFam(string fam) =>
+                string.IsNullOrWhiteSpace(fam) ? "T" : fam.Trim().ToUpperInvariant();
+
+            int DefaultBundle(string money) =>
+                money == "B" ? 100 : (money == "M" ? 1000 : 1);
+
+            var payload = new
+            {
+                Billete = denoms
+                    .Where(d => d.money == "B")
+                    .Select(d => new
+                    {
+                        id = d.id,
+                        value = d.value,
+                        label = FormatLabel(d.label, d.value),
+                        bundleSize = d.bundleSize ?? DefaultBundle(d.money),
+                        family = NormFam(d.family) // <- MUY IMPORTANTE
+                    }),
+                Moneda = denoms
+                    .Where(d => d.money == "M")
+                    .Select(d => new
+                    {
+                        id = d.id,
+                        value = d.value,
+                        label = FormatLabel(d.label, d.value),
+                        bundleSize = d.bundleSize ?? DefaultBundle(d.money),
+                        family = NormFam(d.family) // <- MUY IMPORTANTE
+                    }),
+                Documento = denoms
+                    .Where(d => d.money == "D")
+                    .Select(d => new
+                    {
+                        id = d.id,
+                        value = d.value,
+                        label = FormatLabel(d.label, d.value),
+                        bundleSize = d.bundleSize ?? DefaultBundle(d.money),
+                        family = "T" // documentos no discriminan familia
+                    }),
+                Cheque = denoms
+                    .Where(d => d.money == "C")
+                    .Select(d => new
+                    {
+                        id = d.id,
+                        value = d.value,
+                        label = FormatLabel(d.label, d.value),
+                        bundleSize = d.bundleSize ?? DefaultBundle(d.money),
+                        family = "T" // cheques no discriminan familia
+                    })
+            };
+
+            return JsonSerializer.Serialize(payload);
+        }
+
+        /// <inheritdoc/>
+        public async Task<string> BuildQualitiesJsonAsync()
+        {
+            var q = await _context.Set<AdmQuality>()
+                .Where(c => c.Status)
+                .OrderBy(c => c.TypeOfMoney).ThenBy(c => c.QualityName)
+                .Select(c => new {
+                    id = c.Id,
+                    name = c.QualityName,
+                    money = c.TypeOfMoney,
+                    family = c.DenominationFamily
+                })
+                .ToListAsync();
+
+            var obj = new
+            {
+                B = q.Where(x => x.money == "B").ToList(),
+                M = q.Where(x => x.money == "M").ToList()
+            };
+            return JsonSerializer.Serialize(obj);
         }
     }
 }

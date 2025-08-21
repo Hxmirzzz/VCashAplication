@@ -5,12 +5,15 @@ using System.ComponentModel.DataAnnotations;
 
 namespace VCashApp.Models.ViewModels
 {
+    /// <summary>
+    /// ViewModel que describe los datos básicos de un empleado.
+    /// </summary>
     public class EmpleadoViewModel
     {
         [Display(Name = "Cédula")]
         [Required(ErrorMessage = "La cédula es obligatoria.")]
-        [Range(1000000, 9999999999, ErrorMessage = "El número de documento debe tener entre 7 y 10 dígitos.")]
-        public int CodCedula { get; set; }
+        [Range(typeof(long), "1000000", "9999999999", ErrorMessage = "El número de documento debe tener entre 7 y 10 dígitos.")]
+        public long CodCedula { get; set; }
 
         [Display(Name = "Tipo Documento")]
         [Required(ErrorMessage = "El tipo de documento es obligatorio.")]

@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using VCashApp.Data;
 
@@ -11,9 +12,11 @@ using VCashApp.Data;
 namespace VCashApp.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250811152324_SetNotNullToBranchIdOnCefTransactions")]
+    partial class SetNotNullToBranchIdOnCefTransactions
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -979,41 +982,6 @@ namespace VCashApp.Migrations
                     b.ToTable("AdmPuntos", (string)null);
                 });
 
-            modelBuilder.Entity("VCashApp.Models.Entities.AdmQuality", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasColumnName("Id");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("DenominationFamily")
-                        .IsRequired()
-                        .HasMaxLength(1)
-                        .HasColumnType("nvarchar(1)")
-                        .HasColumnName("Familia");
-
-                    b.Property<string>("QualityName")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("nvarchar(255)")
-                        .HasColumnName("NombreCalidad");
-
-                    b.Property<bool>("Status")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("TypeOfMoney")
-                        .IsRequired()
-                        .HasMaxLength(1)
-                        .HasColumnType("nvarchar(1)")
-                        .HasColumnName("TipoDinero");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("AdmCalidad");
-                });
-
             modelBuilder.Entity("VCashApp.Models.Entities.AdmRuta", b =>
                 {
                     b.Property<string>("CodRutaSuc")
@@ -1342,12 +1310,6 @@ namespace VCashApp.Migrations
                         .HasColumnType("DECIMAL(18,0)")
                         .HasColumnName("ValorDeclarado");
 
-                    b.Property<string>("EnvelopeSubType")
-                        .HasMaxLength(20)
-                        .IsUnicode(false)
-                        .HasColumnType("varchar(20)")
-                        .HasColumnName("TipoSobre");
-
                     b.Property<string>("Observations")
                         .HasMaxLength(255)
                         .HasColumnType("nvarchar(255)")
@@ -1368,18 +1330,13 @@ namespace VCashApp.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("CefTransactionId");
+
                     b.HasIndex("ParentContainerId");
 
                     b.HasIndex("ProcessingUserId");
 
-                    b.HasIndex("CefTransactionId", "ContainerCode");
-
-                    b.ToTable("CefContenedores", null, t =>
-                        {
-                            t.HasCheckConstraint("CK_CEF_SOBRE_Padre", "(([TipoContenedor] = 'Sobre' AND [IdContenedorPadre] IS NOT NULL) OR  ([TipoContenedor] <> 'Sobre' AND [IdContenedorPadre] IS NULL))");
-
-                            t.HasCheckConstraint("CK_CEF_SOBRE_TipoSobreValido", "([TipoContenedor] <> 'Sobre') OR ([TipoSobre] IN ('Efectivo','Documento','Cheque'))");
-                        });
+                    b.ToTable("CefContenedores", (string)null);
                 });
 
             modelBuilder.Entity("VCashApp.Models.Entities.CefIncident", b =>
@@ -1524,6 +1481,7 @@ namespace VCashApp.Migrations
                         .HasColumnName("UsuarioConteoMonedasId");
 
                     b.Property<string>("Currency")
+                        .IsRequired()
                         .HasMaxLength(3)
                         .HasColumnType("nvarchar(3)")
                         .HasColumnName("Divisa");
@@ -1715,8 +1673,8 @@ namespace VCashApp.Migrations
                         .HasColumnType("int")
                         .HasColumnName("IdContenedorCef");
 
-                    b.Property<int?>("DenominationId")
-                        .HasColumnType("int")
+                    b.Property<decimal>("Denomination")
+                        .HasColumnType("DECIMAL(18,0)")
                         .HasColumnName("Denominacion");
 
                     b.Property<string>("IdentifierNumber")
@@ -1746,10 +1704,6 @@ namespace VCashApp.Migrations
                         .HasColumnType("nvarchar(255)")
                         .HasColumnName("Observaciones");
 
-                    b.Property<int?>("QualityId")
-                        .HasColumnType("int")
-                        .HasColumnName("Calidad");
-
                     b.Property<int>("Quantity")
                         .HasColumnType("int")
                         .HasColumnName("Cantidad");
@@ -1766,11 +1720,7 @@ namespace VCashApp.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("DenominationId");
-
-                    b.HasIndex("QualityId");
-
-                    b.HasIndex("CefContainerId", "ValueType", "DenominationId", "QualityId");
+                    b.HasIndex("CefContainerId");
 
                     b.ToTable("CefDetallesValores", (string)null);
                 });
@@ -1957,8 +1907,8 @@ namespace VCashApp.Migrations
 
                     b.Property<string>("OriginPointCode")
                         .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("nvarchar(255)")
+                        .HasMaxLength(25)
+                        .HasColumnType("nvarchar(25)")
                         .HasColumnName("CodPuntoOrigen");
 
                     b.Property<DateOnly?>("ProgrammingDate")
@@ -2667,20 +2617,6 @@ namespace VCashApp.Migrations
                         .HasForeignKey("CefContainerId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.HasOne("VCashApp.Models.Entities.AdmDenominacion", "AdmDenominacion")
-                        .WithMany()
-                        .HasForeignKey("DenominationId")
-                        .OnDelete(DeleteBehavior.Restrict);
-
-                    b.HasOne("VCashApp.Models.Entities.AdmQuality", "AdmQuality")
-                        .WithMany()
-                        .HasForeignKey("QualityId")
-                        .OnDelete(DeleteBehavior.Restrict);
-
-                    b.Navigation("AdmDenominacion");
-
-                    b.Navigation("AdmQuality");
 
                     b.Navigation("CefContainer");
                 });

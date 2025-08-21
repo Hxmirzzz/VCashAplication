@@ -69,10 +69,6 @@ namespace VCashApp.Models.ViewModels.Servicio
         [StringLength(255, ErrorMessage = "El código OS del cliente no puede exceder los 255 caracteres.")]
         public string? ClientServiceOrderCode { get; set; }
 
-        [Display(Name = "Cliente Principal")]
-        [Required(ErrorMessage = "El cliente principal es requerido.")]
-        public int ClientCode { get; set; }
-
         [Display(Name = "Sucursal Principal")]
         [Required(ErrorMessage = "La sucursal principal es requerida.")]
         public int BranchCode { get; set; }
@@ -101,20 +97,27 @@ namespace VCashApp.Models.ViewModels.Servicio
 
         [Display(Name = "Código de Flujo")]
         public int? FlowCode { get; set; }
+      
+        // CEF TRANSACTION FIELDS INFORMATION
+        [Display(Name = "Número de Planilla")]
+        [Required]
+        public int SlipNumber { get; set; }
+
+        [Display(Name = "Divisa")]
+        public string? Currency { get; set; } = null;
 
         // ORIGIN FIELDS
-
         [Display(Name = "Cliente de Origen")]
         public int? OriginClientCode { get; set; }
 
         [Display(Name = "Tipo de Origen")]
         [Required(ErrorMessage = "El tipo de origen es requerido.")]
         [StringLength(1, ErrorMessage = "El tipo de origen debe ser un carácter ('P' para Punto, 'F' para Fondo).")]
-        public string OriginIndicatorType { get; set; } = "P";
+        public string OriginIndicatorType { get; set; }
 
         [Display(Name = "Punto/Fondo de Origen")]
         [Required(ErrorMessage = "El punto o fondo de origen es requerido.")]
-        [StringLength(25, ErrorMessage = "El código de origen no puede exceder los 25 caracteres.")]
+        [StringLength(255, ErrorMessage = "El código de origen no puede exceder los 255 caracteres.")]
         public string OriginPointCode { get; set; } = null!;
 
         [Display(Name = "Ciudad Origen")]
@@ -129,15 +132,13 @@ namespace VCashApp.Models.ViewModels.Servicio
         public string? OriginRangeCode { get; set; }
         public string? OriginRangeDetails { get; set; }
 
-        // DESTINATION FIELDS
-
         [Display(Name = "Cliente de Destino")]
         public int? DestinationClientCode { get; set; }
 
         [Display(Name = "Tipo de Destino")]
         [Required(ErrorMessage = "El tipo de destino es requerido.")]
         [StringLength(1, ErrorMessage = "El tipo de destino debe ser un carácter ('P' para Punto, 'F' para Fondo).")]
-        public string DestinationIndicatorType { get; set; } = "F";
+        public string DestinationIndicatorType { get; set; }
 
         [Display(Name = "Punto/Fondo de Destino")]
         [Required(ErrorMessage = "El punto o fondo de destino es requerido.")]
@@ -155,8 +156,6 @@ namespace VCashApp.Models.ViewModels.Servicio
         [StringLength(255, ErrorMessage = "El código de rango destino no puede exceder los 255 caracteres.")]
         public string? DestinationRangeCode { get; set; }
         public string? DestinationRangeDetails { get; set; }
-
-        // DATES AND TIMES
 
         [Display(Name = "Fecha de Aceptación")]
         [DataType(DataType.Date)]
@@ -247,6 +246,41 @@ namespace VCashApp.Models.ViewModels.Servicio
         [Range(0, int.MaxValue, ErrorMessage = "La cantidad de bolsas de moneda debe ser un número válido.")]
         public int? NumberOfCoinBags { get; set; } = 0;
 
+        // Cantidades declaradas (además de NumberOfCoinBags ya existente)
+        [Display(Name = "Sobres Declarados")]
+        [Required, Range(0, int.MaxValue)]
+        public int DeclaredEnvelopeCount { get; set; }
+
+        [Display(Name = "Cheques Declarados")]
+        [Required, Range(0, int.MaxValue)]
+        public int DeclaredCheckCount { get; set; }
+
+        [Display(Name = "Documentos Declarados")]
+        [Required, Range(0, int.MaxValue)]
+        public int DeclaredDocumentCount { get; set; }
+
+        // Valores declarados (ya tienes BillValue/CoinValue/ServiceValue en el servicio,
+        // agrega el de Documentos y el total)
+        [Display(Name = "Valor Documentos Declarado")]
+        [Required, Range(0, double.MaxValue)]
+        public decimal DeclaredDocumentValue { get; set; }
+
+        [Display(Name = "Novedad Informativa")]
+        [StringLength(255)]
+        public string? InformativeIncident { get; set; }
+
+        [Display(Name = "¿Es Custodia?")]
+        public bool IsCustody { get; set; }
+
+        [Display(Name = "¿Es Punto a Punto?")]
+        public bool IsPointToPoint { get; set; }
+
+        [Display(Name = "Entrega (usuario/id)")]
+        public string? DeliveryResponsible { get; set; }
+
+        [Display(Name = "Recibe (usuario/id)")]
+        public string? ReceptionResponsible { get; set; }
+
         [Display(Name = "Observaciones")]
         [StringLength(255, ErrorMessage = "Las observaciones no pueden exceder los 255 caracteres.")]
         public string? Observations { get; set; }
@@ -269,6 +303,8 @@ namespace VCashApp.Models.ViewModels.Servicio
         public List<SelectListItem>? AvailableTransferTypes { get; set; }
         public List<SelectListItem>? AvailableServiceModalities { get; set; }
 
+        public List<SelectListItem>? AvailableOriginTypes { get; set; }
+        public List<SelectListItem>? AvailableDestinationTypes { get; set; }
         public List<SelectListItem>? AvailableOriginPoints { get; set; }
         public List<SelectListItem>? AvailableOriginFunds { get; set; }
         public List<SelectListItem>? AvailableDestinationPoints { get; set; }
@@ -304,6 +340,8 @@ namespace VCashApp.Models.ViewModels.Servicio
             AvailableTransferTypes = new List<SelectListItem>();
             AvailableServiceModalities = new List<SelectListItem>();
 
+            AvailableOriginTypes = new List<SelectListItem>();
+            AvailableDestinationTypes = new List<SelectListItem>();
             AvailableOriginPoints = new List<SelectListItem>();
             AvailableOriginFunds = new List<SelectListItem>();
             AvailableDestinationPoints = new List<SelectListItem>();

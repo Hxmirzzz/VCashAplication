@@ -2,13 +2,11 @@
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using System.Data;
-using System.Linq;
-using System.Threading.Tasks;
+using VCashApp.Utils;
 using VCashApp.Data;
 using VCashApp.Enums;
 using VCashApp.Models.Entities;
 using VCashApp.Models.ViewModels.CentroEfectivo;
-using VCashApp.Services;
 
 namespace VCashApp.Services.Cef
 {
@@ -63,147 +61,182 @@ namespace VCashApp.Services.Cef
         }
 
         /// <inheritdoc/>
-        public async Task<CefTransactionCheckinViewModel> PrepareCheckinViewModelAsync(string serviceOrderId, string? routeId, string currentUserId, string currentIP)
+        public async Task<CefTransactionCheckinViewModel> PrepareCheckinViewModelAsync(string serviceOrderId, string currentUserId, string currentIP)
         {
-            var service = await _context.CgsServicios
-                                        .Include(s => s.Client)
-                                        .Include(s => s.Branch)
-                                        .FirstOrDefaultAsync(s => s.ServiceOrderId == serviceOrderId);
-
-            if (service == null)
-            {
-                throw new InvalidOperationException($"La Orden de Servicio '{serviceOrderId}' no se encontró.");
-            }
-
-            var existingCefTransaction = await _context.CefTransactions.AnyAsync(t => t.ServiceOrderId == serviceOrderId);
-            if (existingCefTransaction)
-            {
-                throw new InvalidOperationException($"Ya existe una transacción de Centro de Efectivo para la Orden de Servicio '{serviceOrderId}'.");
-            }
-
-            TdvRutaDiaria? route = null;
-            if (!string.IsNullOrEmpty(routeId))
-            {
-                route = await _context.TdvRutasDiarias
-                                        .Include(r => r.JT)
-                                        .FirstOrDefaultAsync(r => r.Id == routeId);
-            }
-
-            var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == currentUserId);
+            var user = await _context.Users.AsNoTracking().FirstOrDefaultAsync(u => u.Id == currentUserId);
             string userName = user?.NombreUsuario ?? "Desconocido";
 
-            string clientName = "N/A";
-            if (service.ClientCode != 0)
+            var vm = new CefTransactionCheckinViewModel
             {
-                var clientEntity = await _context.AdmClientes.FirstOrDefaultAsync(c => c.ClientCode == service.ClientCode);
-                clientName = clientEntity?.ClientName ?? "N/A";
-            }
-            else if (service.OriginClientCode != 0)
-            {
-                clientName = service.OriginClient.ClientName;
-            }
-
-            var viewModel = new CefTransactionCheckinViewModel
-            {
-                ServiceOrderId = service.ServiceOrderId,
-                RouteId = route?.Id,
-                SlipNumber = 0,
-                Currency = "COP", 
-                TransactionType = Enum.TryParse<CefTransactionTypeEnum>(service.Concept.TipoConcepto, out var type) ? type : CefTransactionTypeEnum.Collection,
-                DeclaredBagCount = service.NumberOfCoinBags ?? 0,
-                DeclaredEnvelopeCount = 0,
-                DeclaredCheckCount = 0,
-                DeclaredDocumentCount = 0,
-                DeclaredBillValue = service.BillValue ?? 0,
-                DeclaredCoinValue = service.CoinValue ?? 0,
-                DeclaredDocumentValue = 0,
-                TotalDeclaredValue = (service.BillValue ?? 0) + (service.CoinValue ?? 0) + (service.ServiceValue ?? 0),
-
-                IsCustody = false,
-                IsPointToPoint = false,
-                InformativeIncident = service.Observations,
-
+                ServiceOrderId = serviceOrderId,
                 RegistrationDate = DateTime.Now,
                 RegistrationUserName = userName,
                 IPAddress = currentIP,
 
-                ClientName = clientName,
-                BranchName = service.Branch?.NombreSucursal ?? "N/A",
-                OriginLocationName = service.OriginPointCode ?? "N/A",
-                DestinationLocationName = service.DestinationPointCode ?? "N/A",
-                HeadOfShiftName = route?.JT?.NombreCompleto ?? "N/A",
-                VehicleCode = route?.CodVehiculo ?? "N/A"
+                Currencies = await GetCurrenciesForDropdownAsync(),
             };
 
-            // Rellenar SelectLists para el frontend
-            viewModel.Currencies = new List<Microsoft.AspNetCore.Mvc.Rendering.SelectListItem>
-            {
-                new ("COP", "COP"),
-                new ("USD", "USD")
-            };
-            viewModel.TransactionTypes = Enum.GetValues(typeof(CefTransactionTypeEnum))
-                                             .Cast<CefTransactionTypeEnum>()
-                                             .Select(e => new Microsoft.AspNetCore.Mvc.Rendering.SelectListItem
-                                             {
-                                                 Value = e.ToString(),
-                                                 Text = e.ToString()
-                                             }).ToList();
+            // === Traer servicio (datos de cabecera) ===
+            var s = await _context.CgsServicios
+                .AsNoTracking()
+                .Where(x => x.ServiceOrderId == serviceOrderId)
+                .Select(x => new
+                {
+                    x.ServiceOrderId,
+                    x.BranchCode,
+                    x.ConceptCode,
+                    x.ClientCode,
+                    x.OriginClientCode,
+                    x.OriginPointCode,
+                    x.OriginIndicatorType,
+                    x.DestinationClientCode,
+                    x.DestinationPointCode,
+                    x.DestinationIndicatorType,
+                    x.RequestDate,
+                    x.RequestTime,
+                    x.NumberOfCoinBags,
+                    x.BillValue,
+                    x.CoinValue
+                })
+                .FirstOrDefaultAsync();
 
-            return viewModel;
+            if (s == null)
+                throw new InvalidOperationException($"No existe el servicio '{serviceOrderId}'.");
+
+            // Sucursal
+            vm.BranchName = await _context.AdmSucursales.AsNoTracking()
+                .Where(b => b.CodSucursal == s.BranchCode)
+                .Select(b => b.NombreSucursal)
+                .FirstOrDefaultAsync() ?? "N/A";
+
+            // Concepto
+            var concept = await _context.AdmConceptos.AsNoTracking()
+                .Where(c => c.CodConcepto == s.ConceptCode)
+                .Select(c => new { c.NombreConcepto, c.TipoConcepto })
+                .FirstOrDefaultAsync();
+
+            // Cliente (prefiere origen si lo tienes, si no, usa CodCliente)
+            var clientIdRef = s.OriginClientCode != 0 ? s.OriginClientCode : s.ClientCode;
+            vm.ClientName = await _context.AdmClientes.AsNoTracking()
+                .Where(c => c.ClientCode == clientIdRef)
+                .Select(c => c.ClientName)
+                .FirstOrDefaultAsync() ?? "N/A";
+
+            // Origen/Destino (nombre según indicador P/F; si no existe, muestra el código)
+            vm.OriginLocationName = s.OriginIndicatorType == "P"
+                ? (await _context.AdmPuntos.AsNoTracking()
+                    .Where(p => p.PointCode == s.OriginPointCode)
+                    .Select(p => p.PointName)
+                    .FirstOrDefaultAsync() ?? $"{s.OriginIndicatorType}-{s.OriginPointCode}")
+                : (await _context.AdmFondos.AsNoTracking()
+                    .Where(f => f.FundCode == s.OriginPointCode)
+                    .Select(f => f.FundName)
+                    .FirstOrDefaultAsync() ?? $"{s.OriginIndicatorType}-{s.OriginPointCode}");
+
+            vm.DestinationLocationName = s.DestinationIndicatorType == "P"
+                ? (await _context.AdmPuntos.AsNoTracking()
+                    .Where(p => p.PointCode == s.DestinationPointCode)
+                    .Select(p => p.PointName)
+                    .FirstOrDefaultAsync() ?? $"{s.DestinationIndicatorType}-{s.DestinationPointCode}")
+                : (await _context.AdmFondos.AsNoTracking()
+                    .Where(f => f.FundCode == s.DestinationPointCode)
+                    .Select(f => f.FundName)
+                    .FirstOrDefaultAsync() ?? $"{s.DestinationIndicatorType}-{s.DestinationPointCode}");
+
+            vm.HeadOfShiftName = "N/A"; // puedes poblarla si ya tienes relación de ruta ↔ JT
+
+            var t = await _context.CefTransactions
+                .AsNoTracking()
+                .FirstOrDefaultAsync(x => x.ServiceOrderId == serviceOrderId);
+
+            vm.TransactionType = t?.TransactionType
+                               ?? concept?.TipoConcepto
+                               ?? "N/A";
+
+            // Declarados: usa lo existente en CEF; si no, cae a los valores del servicio
+            var declaredBills = t?.DeclaredBillValue ?? (s.BillValue ?? 0m);
+            var declaredCoins = t?.DeclaredCoinValue ?? (s.CoinValue ?? 0m);
+            var declaredDocs = t?.DeclaredDocumentValue ?? 0m;
+
+            vm.DeclaredBillValue = declaredBills;
+            vm.DeclaredCoinValue = declaredCoins;
+            vm.DeclaredDocumentValue = declaredDocs;
+
+            vm.DeclaredBagCount = t?.DeclaredBagCount ?? (s.NumberOfCoinBags ?? 0);
+            vm.DeclaredEnvelopeCount = t?.DeclaredEnvelopeCount ?? 0;
+            vm.DeclaredCheckCount = t?.DeclaredCheckCount ?? 0;
+            vm.DeclaredDocumentCount = t?.DeclaredDocumentCount ?? 0;
+
+            vm.TotalDeclaredValue = declaredBills + declaredCoins + declaredDocs;
+
+            // Planilla / Divisa / Tipo (si ya existía la transacción)
+            vm.SlipNumber = t?.SlipNumber ?? 0;
+            vm.Currency = t?.Currency;
+
+            vm.IsCustody = t?.IsCustody ?? false;
+            vm.IsPointToPoint = t?.IsPointToPoint ?? false;
+            vm.InformativeIncident = t?.InformativeIncident;
+
+            return vm;
         }
 
-        /// <inheritdoc/>
         public async Task<CefTransaction> ProcessCheckinViewModelAsync(CefTransactionCheckinViewModel viewModel, string currentUserId, string currentIP)
         {
-            var existingService = await _context.CgsServicios.FirstOrDefaultAsync(s => s.ServiceOrderId == viewModel.ServiceOrderId);
-            if (existingService == null)
-            {
+            var service = await _context.CgsServicios.FirstOrDefaultAsync(s => s.ServiceOrderId == viewModel.ServiceOrderId);
+            if (service == null)
                 throw new InvalidOperationException($"La Orden de Servicio '{viewModel.ServiceOrderId}' no existe.");
-            }
-            var existingCefTransaction = await _context.CefTransactions.AnyAsync(t => t.ServiceOrderId == viewModel.ServiceOrderId);
-            if (existingCefTransaction)
-            {
-                throw new InvalidOperationException($"Ya existe una transacción de Centro de Efectivo para la Orden de Servicio '{viewModel.ServiceOrderId}'.");
-            }
+
+            if (!viewModel.SlipNumber.HasValue || viewModel.SlipNumber.Value <= 0)
+                throw new InvalidOperationException("El número de planilla debe ser mayor a 0.");
 
             if (!string.IsNullOrEmpty(viewModel.RouteId))
             {
-                var existingRoute = await _context.TdvRutasDiarias.FirstOrDefaultAsync(r => r.Id == viewModel.RouteId);
-                if (existingRoute == null)
-                {
+                var route = await _context.TdvRutasDiarias
+                    .FirstOrDefaultAsync(r => r.Id == viewModel.RouteId);
+                if (route == null)
                     throw new InvalidOperationException($"La Ruta Diaria '{viewModel.RouteId}' no existe.");
-                }
             }
 
-            var transaction = new CefTransaction
-            {
-                ServiceOrderId = viewModel.ServiceOrderId,
-                RouteId = viewModel.RouteId,
-                Currency = viewModel.Currency,
-                TransactionType = viewModel.TransactionType.ToString(),
-                DeclaredBagCount = viewModel.DeclaredBagCount,
-                DeclaredEnvelopeCount = viewModel.DeclaredEnvelopeCount,
-                DeclaredCheckCount = viewModel.DeclaredCheckCount,
-                DeclaredDocumentCount = viewModel.DeclaredDocumentCount,
-                DeclaredBillValue = viewModel.DeclaredBillValue,
-                DeclaredCoinValue = viewModel.DeclaredCoinValue,
-                DeclaredDocumentValue = viewModel.DeclaredDocumentValue,
-                TotalDeclaredValue = viewModel.TotalDeclaredValue,
-                TotalDeclaredValueInWords = "Pendiente de implementar",
-                IsCustody = viewModel.IsCustody,
-                IsPointToPoint = viewModel.IsPointToPoint,
-                InformativeIncident = viewModel.InformativeIncident,
-                TransactionStatus = CefTransactionStatusEnum.Checkin.ToString(),
-                RegistrationDate = DateTime.Now,
-                RegistrationUser = currentUserId,
-                RegistrationIP = currentIP,
-                TotalCountedValue = 0,
-                ValueDifference = 0
-            };
+            var tx = await _context.CefTransactions
+                .FirstOrDefaultAsync(t => t.ServiceOrderId == viewModel.ServiceOrderId);
 
-            await _context.CefTransactions.AddAsync(transaction);
+            if (tx == null)
+                throw new InvalidOperationException(
+                    $"No existe una transacción CEF para la Orden de Servicio '{viewModel.ServiceOrderId}'. " +
+                    $"Debe haberse generado al crear el servicio."
+                );
+
+            var bills = viewModel.DeclaredBillValue;
+            var coins = viewModel.DeclaredCoinValue;
+            var docs = viewModel.DeclaredDocumentValue;
+            var totalDeclared = viewModel.TotalDeclaredValue;
+            var totalDeclaredInWords = AmountInWordsHelper.ToSpanishCurrency(totalDeclared, viewModel.Currency ?? "COP");
+
+            tx.RouteId = viewModel.RouteId;
+            tx.SlipNumber = viewModel.SlipNumber.Value;
+            tx.Currency = viewModel.Currency;
+            tx.TransactionType = viewModel.TransactionType;
+            tx.DeclaredBagCount = viewModel.DeclaredBagCount;
+            tx.DeclaredEnvelopeCount = viewModel.DeclaredEnvelopeCount;
+            tx.DeclaredCheckCount = viewModel.DeclaredCheckCount;
+            tx.DeclaredDocumentCount = viewModel.DeclaredDocumentCount;
+            tx.DeclaredBillValue = bills;
+            tx.DeclaredCoinValue = coins;
+            tx.DeclaredDocumentValue = docs;
+            tx.TotalDeclaredValue = totalDeclared;
+            tx.TotalDeclaredValueInWords = totalDeclaredInWords;
+            tx.IsCustody = viewModel.IsCustody;
+            tx.IsPointToPoint = viewModel.IsPointToPoint;
+            tx.InformativeIncident = viewModel.InformativeIncident;
+            tx.TransactionStatus = CefTransactionStatusEnum.Checkin.ToString();
+
+            // Si tienes campos de auditoría de última actualización en tu entidad, setéalos aquí:
+            // tx.LastUpdatedDate = DateTime.Now;
+            // tx.LastUpdatedUser = currentUserId;
+            // tx.LastUpdatedIP   = currentIP;
+
             await _context.SaveChangesAsync();
-            return transaction;
+            return tx;
         }
 
         /// <inheritdoc/>
@@ -473,12 +506,24 @@ namespace VCashApp.Services.Cef
         {
             return vd.ValueType switch
             {
-                nameof(CefValueTypeEnum.Bill) => $"{vd.Denomination?.ToString("N0")} x {vd.Quantity} ({vd.CalculatedAmount?.ToString("N0")})",
-                nameof(CefValueTypeEnum.Coin) => $"{vd.Denomination?.ToString("N0")} x {vd.Quantity} ({vd.CalculatedAmount?.ToString("N0")})",
-                nameof(CefValueTypeEnum.Check) => $"Cheque #{vd.IdentifierNumber} ({vd.BankName}) por {vd.CalculatedAmount?.ToString("N0")}",
-                nameof(CefValueTypeEnum.Document) => $"Doc #{vd.IdentifierNumber} por {vd.CalculatedAmount?.ToString("N0")}",
+                nameof(CefValueTypeEnum.Billete) => $"{vd.DenominationId?.ToString("N0")} x {vd.Quantity} ({vd.CalculatedAmount?.ToString("N0")})",
+                nameof(CefValueTypeEnum.Moneda) => $"{vd.DenominationId?.ToString("N0")} x {vd.Quantity} ({vd.CalculatedAmount?.ToString("N0")})",
                 _ => "Detalle Desconocido"
             };
+        }
+
+        /// <summary>
+        /// Obtiene las divisas disponibles para los dropdowns.
+        /// </summary>
+        /// <returns>Lista de SelectListItem para las divisas</returns>
+        public async Task<List<SelectListItem>> GetCurrenciesForDropdownAsync()
+        {
+            return await Task.FromResult(new List<SelectListItem>
+            {
+                new SelectListItem { Value = "COP", Text = "COP" },
+                new SelectListItem { Value = "USD", Text = "USD" },
+                new SelectListItem { Value = "EUR", Text = "EUR" }
+            });
         }
     }
 }

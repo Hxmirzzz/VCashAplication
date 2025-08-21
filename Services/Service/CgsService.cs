@@ -4,8 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Data;
-using System.Linq;
-using System.Threading.Tasks;
+using VCashApp.Utils;
 using VCashApp.Data;
 using VCashApp.Models.Entities;
 using VCashApp.Models.ViewModels.Servicio;
@@ -30,6 +29,8 @@ namespace VCashApp.Services.Service
             viewModel.AvailableBranches = await GetBranchesForDropdownAsync();
             viewModel.AvailableConcepts = await GetServiceConceptsForDropdownAsync();
             viewModel.AvailableStatuses = await GetServiceStatusesForDropdownAsync();
+            viewModel.AvailableOriginTypes = GetLocationTypeSelectList();
+            viewModel.AvailableDestinationTypes = GetLocationTypeSelectList();
             viewModel.AvailableTransferTypes = new List<SelectListItem>
             {
                 new SelectListItem { Value = "N", Text = "Normal (Predeterminado)" },
@@ -61,7 +62,7 @@ namespace VCashApp.Services.Service
 
             viewModel.RequestDate = DateOnly.FromDateTime(DateTime.Now);
             viewModel.RequestTime = TimeOnly.FromDateTime(DateTime.Now);
-            viewModel.ProgrammingDate = DateOnly.FromDateTime(DateTime.Now);
+            viewModel.ProgrammingDate = DateOnly.FromDateTime(DateTime.Now.AddDays(1));
             viewModel.ProgrammingTime = TimeOnly.FromDateTime(DateTime.Now);
             viewModel.IsFailed = false;
 
@@ -70,145 +71,147 @@ namespace VCashApp.Services.Service
 
         public async Task<ServiceResult> CreateServiceRequestAsync(CgsServiceRequestViewModel viewModel, string currentUserId, string currentIP)
         {
+            var serviceConcept = await _context.AdmConceptos.AsNoTracking().FirstOrDefaultAsync(c => c.CodConcepto == viewModel.ConceptCode);
+            if (serviceConcept == null)
+            {
+                throw new InvalidOperationException("Código de concepto de servicio no válido.");
+            }
+
+            var branchName = await _context.AdmSucursales
+                .Where(s => s.CodSucursal == viewModel.BranchCode)
+                .Select(s => s.NombreSucursal)
+                .FirstOrDefaultAsync();
+
+            // === Validaciones ===
             if (viewModel.ConceptCode == 5 && (viewModel.TransferType != "I" && viewModel.TransferType != "T"))
-            {
-                return ServiceResult.FailureResult("Para el concepto 'TRASLADO', el Tipo de Traslado debe ser 'Interno' o 'Transportadora'.");
-            }
+                return ServiceResult.FailureResult("Para TRASLADO, Tipo de Traslado debe ser 'Interno' o 'Transportadora'.");
             else if (viewModel.ConceptCode != 5)
-            {
                 viewModel.TransferType = "N";
-            }
 
             if (viewModel.OriginIndicatorType == "P" && !await _context.AdmPuntos.AnyAsync(p => p.PointCode == viewModel.OriginPointCode))
-            {
-                return ServiceResult.FailureResult($"El Código de Punto de Origen '{viewModel.OriginPointCode}' no es válido.");
-            }
+                return ServiceResult.FailureResult($"Código de Punto de Origen '{viewModel.OriginPointCode}' inválido.");
             if (viewModel.OriginIndicatorType == "F" && !await _context.AdmFondos.AnyAsync(f => f.FundCode == viewModel.OriginPointCode))
-            {
-                return ServiceResult.FailureResult($"El Código de Fondo de Origen '{viewModel.OriginPointCode}' no es válido.");
-            }
+                return ServiceResult.FailureResult($"Código de Fondo de Origen '{viewModel.OriginPointCode}' inválido.");
             if (viewModel.DestinationIndicatorType == "P" && !await _context.AdmPuntos.AnyAsync(p => p.PointCode == viewModel.DestinationPointCode))
-            {
-                return ServiceResult.FailureResult($"El Código de Punto de Destino '{viewModel.DestinationPointCode}' no es válido.");
-            }
+                return ServiceResult.FailureResult($"Código de Punto de Destino '{viewModel.DestinationPointCode}' inválido.");
             if (viewModel.DestinationIndicatorType == "F" && !await _context.AdmFondos.AnyAsync(f => f.FundCode == viewModel.DestinationPointCode))
+                return ServiceResult.FailureResult($"Código de Fondo de Destino '{viewModel.DestinationPointCode}' inválido.");
+
+            // === Valores mínimos para crear CEF desde Servicios ===
+            var declaredBill = viewModel.BillValue ?? 0m;
+            var declaredCoin = viewModel.CoinValue ?? 0m;
+            var declaredDocs = 0m;
+            var totalDeclared = viewModel.ServiceValue ?? 0m;
+            var totalDeclaredLetters = AmountInWordsHelper.ToSpanishCurrency(totalDeclared, "COP");
+            var totalCounted = 0;
+            var totalCountedLetters = AmountInWordsHelper.ToSpanishCurrency(totalCounted, "COP");
+
+            var declaredBags = viewModel.NumberOfCoinBags ?? 0;
+            var declaredEnv = 0;
+            var declaredChecks = 0;
+            var declaredDocsCt = 0;
+
+            var cefEstado = "Registrada";
+            int cefPlanilla = 0;
+            var acceptanceDate = DateOnly.FromDateTime(DateTime.Now);
+            var acceptanceTime = TimeOnly.FromDateTime(DateTime.Now);
+
+            var p = new[]
             {
-                return ServiceResult.FailureResult($"El Código de Fondo de Destino '{viewModel.DestinationPointCode}' no es válido.");
-            }
+                // ===== CgsServicios =====
+                new SqlParameter("@NumeroPedido",           (object?)viewModel.RequestNumber ?? DBNull.Value),
+                new SqlParameter("@CodCliente",             viewModel.OriginClientCode),
+                new SqlParameter("@CodOsCliente",           (object?)viewModel.ClientServiceOrderCode ?? DBNull.Value),
+                new SqlParameter("@CodSucursal",            viewModel.BranchCode),
+                new SqlParameter("@FechaSolicitud",         viewModel.RequestDate.ToDateTime(TimeOnly.MinValue)),
+                new SqlParameter("@HoraSolicitud",          viewModel.RequestTime.ToTimeSpan()),
+                new SqlParameter("@CodConcepto",            viewModel.ConceptCode),
+                new SqlParameter("@TipoTraslado",           (object?)viewModel.TransferType ?? DBNull.Value),
+                new SqlParameter("@CodEstado",              viewModel.StatusCode),
+                new SqlParameter("@CodFlujo",               (object?)viewModel.ConceptCode ?? DBNull.Value),
 
-            DateOnly? acceptanceDate;
-            TimeOnly? acceptanceTime;
+                new SqlParameter("@CodClienteOrigen",       (object?)viewModel.OriginClientCode ?? DBNull.Value),
+                new SqlParameter("@CodPuntoOrigen",         viewModel.OriginPointCode),
+                new SqlParameter("@IndicadorTipoOrigen",    viewModel.OriginIndicatorType),
 
-            if (viewModel.StatusCode == 2)
-            {
-                acceptanceDate = null;
-                acceptanceTime = null;
-            }
-            else
-            {
-                acceptanceDate = viewModel.AcceptanceDate ?? DateOnly.FromDateTime(DateTime.Now);
-                acceptanceTime = viewModel.AcceptanceTime ?? TimeOnly.FromDateTime(DateTime.Now);
-            }
+                new SqlParameter("@CodClienteDestino",      (object?)viewModel.DestinationClientCode ?? DBNull.Value),
+                new SqlParameter("@CodPuntoDestino",        viewModel.DestinationPointCode),
+                new SqlParameter("@IndicadorTipoDestino",   viewModel.DestinationIndicatorType),
 
-            var currentUser = await _context.Users.FirstOrDefaultAsync(u => u.Id == currentUserId);
-            var cgsOperatorName = currentUser?.NombreUsuario ?? "System";
-            var cgsOperatorBranch = await _context.AdmSucursales
-                                                  .Where(s => s.CodSucursal == viewModel.BranchCode)
-                                                  .Select(s => s.NombreSucursal)
-                                                  .FirstOrDefaultAsync() ?? "N/A";
+                new SqlParameter("@FechaAceptacion",        acceptanceDate),
+                new SqlParameter("@HoraAceptacion",         acceptanceTime),
+                new SqlParameter("@FechaProgramacion",      (object?)viewModel.ProgrammingDate?.ToDateTime(TimeOnly.MinValue) ?? DBNull.Value),
+                new SqlParameter("@HoraProgramacion",       (object?)viewModel.ProgrammingTime?.ToTimeSpan() ?? DBNull.Value),
 
-            var numeroPedidoParam = new SqlParameter("@NumeroPedido", (object)viewModel.RequestNumber ?? DBNull.Value);
-            var codClienteParam = new SqlParameter("@CodCliente", (object)viewModel.OriginClientCode ?? DBNull.Value);
-            var codOsClienteParam = new SqlParameter("@CodOsCliente", (object)viewModel.ClientServiceOrderCode ?? DBNull.Value);
-            var codSucParam = new SqlParameter("@CodSucursal", viewModel.BranchCode);
-            var fechaSolicitudParam = new SqlParameter("@FechaSolicitud", viewModel.RequestDate.ToDateTime(TimeOnly.MinValue));
-            var horaSolicitudParam = new SqlParameter("@HoraSolicitud", viewModel.RequestTime.ToTimeSpan());
-            var codConceptoParam = new SqlParameter("@CodConcepto", viewModel.ConceptCode);
-            var tipoTrasladoParam = new SqlParameter("@TipoTraslado", (object)viewModel.TransferType ?? DBNull.Value);
-            var codEstadoParam = new SqlParameter("@CodEstado", viewModel.StatusCode);
-            var codFlujoParam = new SqlParameter("@CodFlujo", (object)viewModel.ConceptCode ?? DBNull.Value);
-            var codClienteOrigenParam = new SqlParameter("@CodClienteOrigen", (object)viewModel.OriginClientCode ?? DBNull.Value);
-            var codPuntoOrigenParam = new SqlParameter("@CodPuntoOrigen", viewModel.OriginPointCode);
-            var indicadorTipoOrigenParam = new SqlParameter("@IndicadorTipoOrigen", viewModel.OriginIndicatorType);
-            var codClienteDestinoParam = new SqlParameter("@CodClienteDestino", (object)viewModel.DestinationClientCode ?? DBNull.Value);
-            var codPuntoDestinoParam = new SqlParameter("@CodPuntoDestino", viewModel.DestinationPointCode);
-            var indicadorTipoDestinoParam = new SqlParameter("@IndicadorTipoDestino", viewModel.DestinationIndicatorType);
-            var fechaAceptacionParam = new SqlParameter("@FechaAceptacion", (object)acceptanceDate?.ToDateTime(TimeOnly.MinValue) ?? DBNull.Value);
-            var horaAceptacionParam = new SqlParameter("@HoraAceptacion", (object)acceptanceTime?.ToTimeSpan() ?? DBNull.Value);
-            var fechaProgramacionParam = new SqlParameter("@FechaProgramacion", (object)viewModel.ProgrammingDate?.ToDateTime(TimeOnly.MinValue) ?? DBNull.Value);
-            var horaProgramacionParam = new SqlParameter("@HoraProgramacion", (object)viewModel.ProgrammingTime?.ToTimeSpan() ?? DBNull.Value);
-            var fechaAtencionInicialParam = new SqlParameter("@FechaAtencionInicial", (object)viewModel.InitialAttentionDate?.ToDateTime(TimeOnly.MinValue) ?? DBNull.Value);
-            var horaAtencionInicialParam = new SqlParameter("@HoraAtencionInicial", (object)viewModel.InitialAttentionTime?.ToTimeSpan() ?? DBNull.Value);
-            var fechaAtencionFinalParam = new SqlParameter("@FechaAtencionFinal", (object)viewModel.FinalAttentionDate?.ToDateTime(TimeOnly.MinValue) ?? DBNull.Value);
-            var horaAtencionFinalParam = new SqlParameter("@HoraAtencionFinal", (object)viewModel.FinalAttentionTime?.ToTimeSpan() ?? DBNull.Value);
-            var fechaCancelacionParam = new SqlParameter("@FechaCancelacion", (object)viewModel.CancellationDate?.ToDateTime(TimeOnly.MinValue) ?? DBNull.Value);
-            var horaCancelacionParam = new SqlParameter("@HoraCancelacion", (object)viewModel.CancellationTime?.ToTimeSpan() ?? DBNull.Value);
-            var fechaRechazoParam = new SqlParameter("@FechaRechazo", (object)viewModel.RejectionDate?.ToDateTime(TimeOnly.MinValue) ?? DBNull.Value);
-            var horaRechazoParam = new SqlParameter("@HoraRechazo", (object)viewModel.RejectionTime?.ToTimeSpan() ?? DBNull.Value);
-            var fallidoParam = new SqlParameter("@Fallido", viewModel.IsFailed);
-            var responsableFallidoParam = new SqlParameter("@ResponsableFallido", (object)viewModel.FailedResponsible ?? DBNull.Value);
-            var razonFallidoParam = new SqlParameter("@RazonFallido", (object)viewModel.FailedReason ?? DBNull.Value);
-            var personaCancelacionParam = new SqlParameter("@PersonaCancelacion", (object)viewModel.CancellationPerson ?? DBNull.Value);
-            var operadorCancelacionParam = new SqlParameter("@OperadorCancelacion", (object)viewModel.CancellationOperator ?? DBNull.Value);
-            var motivoCancelacionParam = new SqlParameter("@MotivoCancelacion", (object)viewModel.CancellationReason ?? DBNull.Value);
-            var modalidadServicioParam = new SqlParameter("@ModalidadServicio", (object)viewModel.ServiceModality ?? DBNull.Value);
-            var observacionesParam = new SqlParameter("@Observaciones", (object)viewModel.Observations ?? DBNull.Value);
-            var claveParam = new SqlParameter("@Clave", (object)viewModel.KeyValue ?? DBNull.Value);
-            var operadorCgsIdParam = new SqlParameter("@OperadorCgsId", currentUserId);
-            var sucursalCgsParam = new SqlParameter("@SucursalCgs", cgsOperatorBranch);
-            var ipOperadorParam = new SqlParameter("@IpOperador", currentIP);
-            var valorBilleteParam = new SqlParameter("@ValorBillete", (object)viewModel.BillValue ?? DBNull.Value);
-            var valorMonedaParam = new SqlParameter("@ValorMoneda", (object)viewModel.CoinValue ?? DBNull.Value);
-            var valorServicioParam = new SqlParameter("@ValorServicio", viewModel.BillValue + viewModel.CoinValue);
-            var numeroKitsCambioParam = new SqlParameter("@NumeroKitsCambio", (object)viewModel.NumberOfChangeKits ?? DBNull.Value);
-            var numeroBolsasMonedaParam = new SqlParameter("@NumeroBolsasMoneda", (object)viewModel.NumberOfCoinBags ?? DBNull.Value);
-            var archivoDetalleParam = new SqlParameter("@ArchivoDetalle", (object)viewModel.DetailFile ?? DBNull.Value);
+                new SqlParameter("@FechaAtencionInicial",   (object?)viewModel.InitialAttentionDate?.ToDateTime(TimeOnly.MinValue) ?? DBNull.Value),
+                new SqlParameter("@HoraAtencionInicial",    (object?)viewModel.InitialAttentionTime?.ToTimeSpan() ?? DBNull.Value),
+                new SqlParameter("@FechaAtencionFinal",     (object?)viewModel.FinalAttentionDate?.ToDateTime(TimeOnly.MinValue) ?? DBNull.Value),
+                new SqlParameter("@HoraAtencionFinal",      (object?)viewModel.FinalAttentionTime?.ToTimeSpan() ?? DBNull.Value),
 
-            try
-            {
-                var sqlQuery = "EXEC dbo.AddCgsService " +
-                               "@NumeroPedido, @CodCliente, @CodOsCliente, @CodSucursal, " +
-                               "@FechaSolicitud, @HoraSolicitud, @CodConcepto, @TipoTraslado, @CodEstado, @CodFlujo, " +
-                               "@CodClienteOrigen, @CodPuntoOrigen, @IndicadorTipoOrigen, " +
-                               "@CodClienteDestino, @CodPuntoDestino, @IndicadorTipoDestino, " +
-                               "@FechaAceptacion, @HoraAceptacion, @FechaProgramacion, @HoraProgramacion, " +
-                               "@FechaAtencionInicial, @HoraAtencionInicial, @FechaAtencionFinal, @HoraAtencionFinal, " +
-                               "@FechaCancelacion, @HoraCancelacion, @FechaRechazo, @HoraRechazo, " +
-                               "@Fallido, @ResponsableFallido, @RazonFallido, @PersonaCancelacion, @OperadorCancelacion, @MotivoCancelacion, " +
-                               "@ModalidadServicio, @Observaciones, @Clave, @OperadorCgsId, @SucursalCgs, @IpOperador, " +
-                               "@ValorBillete, @ValorMoneda, @ValorServicio, @NumeroKitsCambio, @NumeroBolsasMoneda, @ArchivoDetalle";
+                new SqlParameter("@FechaCancelacion",       (object?)viewModel.CancellationDate?.ToDateTime(TimeOnly.MinValue) ?? DBNull.Value),
+                new SqlParameter("@HoraCancelacion",        (object?)viewModel.CancellationTime?.ToTimeSpan() ?? DBNull.Value),
+                new SqlParameter("@FechaRechazo",           (object?)viewModel.RejectionDate?.ToDateTime(TimeOnly.MinValue) ?? DBNull.Value),
+                new SqlParameter("@HoraRechazo",            (object?)viewModel.RejectionTime?.ToTimeSpan() ?? DBNull.Value),
 
-                var result = (await _context.Database
-                    .SqlQueryRaw<string>(sqlQuery,
-                        numeroPedidoParam, codClienteParam, codOsClienteParam, codSucParam,
-                        fechaSolicitudParam, horaSolicitudParam, codConceptoParam, tipoTrasladoParam, codEstadoParam, codFlujoParam,
-                        codClienteOrigenParam, codPuntoOrigenParam, indicadorTipoOrigenParam,
-                        codClienteDestinoParam, codPuntoDestinoParam, indicadorTipoDestinoParam,
-                        fechaAceptacionParam, horaAceptacionParam, fechaProgramacionParam, horaProgramacionParam,
-                        fechaAtencionInicialParam, horaAtencionInicialParam, fechaAtencionFinalParam, horaAtencionFinalParam,
-                        fechaCancelacionParam, horaCancelacionParam, fechaRechazoParam, horaRechazoParam,
-                        fallidoParam, responsableFallidoParam, razonFallidoParam, personaCancelacionParam, operadorCancelacionParam, motivoCancelacionParam,
-                        modalidadServicioParam, observacionesParam, claveParam, operadorCgsIdParam, sucursalCgsParam, ipOperadorParam,
-                        valorBilleteParam, valorMonedaParam, valorServicioParam, numeroKitsCambioParam, numeroBolsasMonedaParam, archivoDetalleParam)
-                    .ToListAsync())
-                    .FirstOrDefault();
+                new SqlParameter("@Fallido",                viewModel.IsFailed),
+                new SqlParameter("@ResponsableFallido",     (object?)viewModel.FailedResponsible ?? DBNull.Value),
+                new SqlParameter("@RazonFallido",           (object?)viewModel.FailedReason ?? DBNull.Value),
 
+                new SqlParameter("@PersonaCancelacion",     (object?)viewModel.CancellationPerson ?? DBNull.Value),
+                new SqlParameter("@OperadorCancelacion",    (object?)viewModel.CancellationOperator ?? DBNull.Value),
+                new SqlParameter("@MotivoCancelacion",      (object?)viewModel.CancellationReason ?? DBNull.Value),
 
-                if (string.IsNullOrEmpty(result))
-                {
-                    return ServiceResult.FailureResult("Error al generar el número de Orden de Servicio.");
-                }
+                new SqlParameter("@ModalidadServicio",      (object?)viewModel.ServiceModality ?? DBNull.Value),
+                new SqlParameter("@Observaciones",          (object?)viewModel.Observations ?? DBNull.Value),
+                new SqlParameter("@Clave",                  (object?)viewModel.KeyValue ?? DBNull.Value),
+                new SqlParameter("@OperadorCgsId",          currentUserId),
+                new SqlParameter("@SucursalCgs",            branchName),
+                new SqlParameter("@IpOperador",             (object?)currentIP ?? DBNull.Value),
 
-                return ServiceResult.SuccessResult("Solicitud de servicio creada exitosamente.", new { serviceOrderId = result });
-            }
-            catch (SqlException sqlEx)
-            {
-                return ServiceResult.FailureResult($"Error de base de datos al crear la solicitud: {sqlEx.Message}");
-            }
-            catch (Exception ex)
-            {
-                return ServiceResult.FailureResult($"Ocurrió un error inesperado al crear la solicitud: {ex.Message}");
-            }
+                new SqlParameter("@ValorBillete",           (object?)viewModel.BillValue ?? 0m),
+                new SqlParameter("@ValorMoneda",            (object?)viewModel.CoinValue ?? 0m),
+                new SqlParameter("@ValorServicio",          totalDeclared),
+                new SqlParameter("@NumeroKitsCambio",       (object?)viewModel.NumberOfChangeKits ?? 0),
+                new SqlParameter("@NumeroBolsasMoneda",     (object?)viewModel.NumberOfCoinBags ?? 0),
+                new SqlParameter("@ArchivoDetalle",         (object?)viewModel.DetailFile ?? DBNull.Value),
+
+                // ===== CefTransacciones =====
+                new SqlParameter("@CefCodRuta",                    (object?)DBNull.Value),
+                new SqlParameter("@CefNumeroPlanilla",             cefPlanilla),
+                new SqlParameter("@CefDivisa",                     (object?)DBNull.Value),
+                new SqlParameter("@CefTipoTransaccion",            serviceConcept.TipoConcepto),
+                new SqlParameter("@CefNumeroMesaConteo",           (object?)DBNull.Value),
+                new SqlParameter("@CefCantidadBolsasDeclaradas",   declaredBags),
+                new SqlParameter("@CefCantidadSobresDeclarados",   declaredEnv),
+                new SqlParameter("@CefCantidadChequesDeclarados",  declaredChecks),
+                new SqlParameter("@CefCantidadDocumentosDeclarados", declaredDocsCt),
+                new SqlParameter("@CefValorBilletesDeclarado",     declaredBill),
+                new SqlParameter("@CefValorMonedasDeclarado",      declaredCoin),
+                new SqlParameter("@CefValorDocumentosDeclarado",   declaredDocs),
+                new SqlParameter("@CefValorTotalDeclarado",        totalDeclared),
+                new SqlParameter("@CefValorTotalDeclaradoLetras",  (object?)totalDeclaredLetters ?? DBNull.Value),
+                new SqlParameter("@CefValorTotalContadoLetras",   (object?)totalCountedLetters ?? DBNull.Value),
+                new SqlParameter("@CefNovedadInformativa",         (object?)DBNull.Value),
+                new SqlParameter("@CefEsCustodia",                 false),
+                new SqlParameter("@CefEsPuntoAPunto",              false),
+                new SqlParameter("@CefEstadoTransaccion",          cefEstado),
+                new SqlParameter("@CefFechaRegistro",              DateTime.Now),
+                new SqlParameter("@CefUsuarioRegistroId",          currentUserId),
+                new SqlParameter("@CefIPRegistro",                 (object?)currentIP ?? DBNull.Value),
+                new SqlParameter("@CefReponsableEntregaId",        (object?)DBNull.Value),
+                new SqlParameter("@CefResponsableRecibeId",        (object?)DBNull.Value),
+            };
+
+            var sql = "EXEC dbo.AddServiceTransaction "
+                      + string.Join(", ", p.Select(x => x.ParameterName));
+
+            var rows = await _context.Database.SqlQueryRaw<string>(sql, p).ToListAsync();
+            var orden = rows.FirstOrDefault();
+
+            if (string.IsNullOrWhiteSpace(orden))
+                return ServiceResult.FailureResult("No se pudo generar la Orden de Servicio.");
+
+            return ServiceResult.SuccessResult($"Servicio creado: {orden}", orden);
         }
 
         public async Task<List<SelectListItem>> GetPointsByClientAndBranchAsync(int clientCode, int branchCode, int pointType)
@@ -473,6 +476,20 @@ namespace VCashApp.Services.Service
                 new SelectListItem { Value = "Cliente", Text = "Cliente" },
                 new SelectListItem { Value = "Vatco", Text = "Vatco" }
             });
+        }
+
+        /// <summary>
+        /// Obtiene las opciones de tipo de ubicación para los dropdowns.
+        /// </summary>
+        /// <returns>Lista de SelectListItem para los tipos de ubicación</returns>
+        public static List<SelectListItem> GetLocationTypeSelectList()
+        {
+            return new List<SelectListItem>
+            {
+                new SelectListItem { Value = "P", Text = "Punto" },
+                new SelectListItem { Value = "A", Text = "ATM" },
+                new SelectListItem { Value = "F", Text = "Fondo" }
+            };
         }
     }
 }

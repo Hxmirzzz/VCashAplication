@@ -2,20 +2,14 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.Extensions.Logging;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using VCashApp.Utils;
 using VCashApp.Data;
 using VCashApp.Enums;
 using VCashApp.Filters;
 using VCashApp.Models;
-using VCashApp.Models.Entities;
 using VCashApp.Models.ViewModels.CentroEfectivo;
 using VCashApp.Services;
-using VCashApp.Services.Cef;
 using VCashApp.Services.DTOs;
 
 namespace VCashApp.Controllers
@@ -79,9 +73,9 @@ namespace VCashApp.Controllers
             ViewBag.TransactionStatuses = estados;
 
             var userRoles = await _userManager.GetRolesAsync(currentUser);
-            ViewBag.HasCreatePermission = await HasPermisionForView(userRoles, "CEF", PermissionType.Create);
-            ViewBag.HasEditPermission = await HasPermisionForView(userRoles, "CEF", PermissionType.Edit);
-            ViewBag.HasViewPermission = await HasPermisionForView(userRoles, "CEF", PermissionType.View);
+            ViewBag.HasCreate = await HasPermisionForView(userRoles, "CEF", PermissionType.Create);
+            ViewBag.HasEdit = await HasPermisionForView(userRoles, "CEF", PermissionType.Edit);
+            ViewBag.HasView = await HasPermisionForView(userRoles, "CEF", PermissionType.View);
             // ViewBag.HasDeletePermission = await HasPermisionForView(userRoles, "CEF", PermissionType.Delete);
         }
 
@@ -95,8 +89,8 @@ namespace VCashApp.Controllers
         /// <param name="startDate">Fecha de inicio para el filtro de registro.</param>
         /// <param name="endDate">Fecha de fin para el filtro de registro.</param>
         /// <param name="status">Estado de la transacción para filtrar.</param>
-        /// <param name="searchTerm">Término de búsqueda.</param>
-        /// <param name="pageNumber">Número de página para paginación.</param>
+        /// <param name="search">Término de búsqueda.</param>
+        /// <param name="page">Número de página para paginación.</param>
         /// <param name="pageSize">Cantidad de registros por página.</param>
         /// <returns>Una vista con la lista de transacciones de CEF o un parcial si es una petición AJAX.</returns>
         [HttpGet("Index")]
@@ -108,7 +102,7 @@ namespace VCashApp.Controllers
             var currentUser = await GetCurrentApplicationUserAsync();
             if (currentUser == null) return RedirectToPage("/Account/Login", new { area = "Identity" });
 
-            await SetCommonViewBagsCefAsync(currentUser, "Centro Efectivo");
+            await SetCommonViewBagsCefAsync(currentUser, "Tesoreria");
             bool isAdmin = ViewBag.IsAdmin;
 
             var (transactions, totalRecords) = await _cefTransactionService.GetFilteredCefTransactionsAsync(
@@ -182,7 +176,7 @@ namespace VCashApp.Controllers
             {
                 try
                 {
-                    viewModel = await _cefTransactionService.PrepareCheckinViewModelAsync(serviceOrderId, routeId, currentUser.Id, IpAddressForLogging);
+                    viewModel = await _cefTransactionService.PrepareCheckinViewModelAsync(serviceOrderId, currentUser.Id, IpAddressForLogging);
                 }
                 catch (InvalidOperationException ex)
                 {
@@ -256,9 +250,8 @@ namespace VCashApp.Controllers
                 {
                     return Json(ServiceResult.FailureResult("Hay errores en el formulario.", errors: fieldErrors));
                 }
-                return View(viewModel); // Para submits de formulario HTML tradicional
+                return View(viewModel);
             }
-
             try
             {
                 var newTransaction = await _cefTransactionService.ProcessCheckinViewModelAsync(viewModel, currentUser.Id, IpAddressForLogging);
@@ -268,7 +261,8 @@ namespace VCashApp.Controllers
 
                 if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
                 {
-                    return Json(ServiceResult.SuccessResult("Check-in exitoso.", newTransaction.Id));
+                    var url = Url.Action(nameof(ProcessContainers), "Cef", new { transactionId = newTransaction.Id });
+                    return Json(ServiceResult.SuccessResult("Check-in exitoso.", new { transactionId = newTransaction.Id, url }));
                 }
                 return RedirectToAction(nameof(ProcessContainers), new { transactionId = newTransaction.Id });
             }
@@ -430,10 +424,10 @@ namespace VCashApp.Controllers
         /// Requiere permiso 'Edit' para el módulo "CEF".
         /// </remarks>
         /// <param name="transactionId">ID de la transacción CEF a procesar.</param>
-        /// <param name="containerId">ID opcional de un contenedor específico a editar/continuar.</param>
+        /// 
         /// <returns>Vista de procesamiento de contenedores.</returns>
         [HttpGet("ProcessContainers/{transactionId}")]
-        [RequiredPermission(PermissionType.Edit, "CEF")] // Cajeros o Supervisores que editen
+        [RequiredPermission(PermissionType.Edit, "CEF")]
         public async Task<IActionResult> ProcessContainers(int transactionId, int? containerId = null)
         {
             var currentUser = await GetCurrentApplicationUserAsync();
@@ -441,49 +435,23 @@ namespace VCashApp.Controllers
 
             await SetCommonViewBagsCefAsync(currentUser, "Procesar Contenedores CEF");
 
-            var transaction = await _cefTransactionService.GetCefTransactionByIdAsync(transactionId);
-            if (transaction == null)
-            {
-                TempData["ErrorMessage"] = "Transacción de Centro de Efectivo no encontrada.";
-                return RedirectToAction(nameof(Index));
-            }
-            if (transaction.TransactionStatus == CefTransactionStatusEnum.Approved.ToString() ||
-                transaction.TransactionStatus == CefTransactionStatusEnum.Rejected.ToString() ||
-                transaction.TransactionStatus == CefTransactionStatusEnum.Cancelled.ToString() ||
-                transaction.TransactionStatus == CefTransactionStatusEnum.PendingReview.ToString())
-            {
-                TempData["ErrorMessage"] = $"La transacción {transaction.SlipNumber} ya está en estado '{transaction.TransactionStatus.Replace("_", " ")}' y no puede ser procesada.";
-                return RedirectToAction(nameof(Index));
-            }
-            if (transaction.TransactionStatus == CefTransactionStatusEnum.Checkin.ToString())
-            {
-                // No hay cambio de estado explícito aquí, el servicio lo manejará al guardar el contenedor.
-            }
+            var pageVm = await _cefContainerService.PrepareProcessContainersPageAsync(transactionId);
 
-            CefContainerProcessingViewModel viewModel = await _cefContainerService.PrepareContainerProcessingViewModelAsync(containerId, transactionId);
+            ViewBag.IncidentTypes = (await _cefIncidentService.GetAllIncidentTypesAsync()).Select(it => new SelectListItem { Value = it.Code, Text = it.Description }).ToList();
+            ViewBag.DenomsJson = await _cefContainerService.BuildDenomsJsonForTransactionAsync(transactionId);
+            ViewBag.QualitiesJson = await _cefContainerService.BuildQualitiesJsonAsync();
 
-            // Cargar SelectLists para el frontend
-            ViewBag.ValueTypes = Enum.GetValues(typeof(CefValueTypeEnum))
-                                     .Cast<CefValueTypeEnum>()
-                                     .Select(e => new SelectListItem { Value = e.ToString(), Text = e.ToString().Replace("_", " ") })
-                                     .ToList();
-            ViewBag.IncidentTypes = (await _cefIncidentService.GetAllIncidentTypesAsync())
-                                    .Select(it => new SelectListItem { Value = it.Code, Text = it.Description })
-                                    .ToList();
-
-            ViewBag.TransactionId = transactionId;
-            ViewBag.TransactionNumber = transaction.SlipNumber;
-            ViewBag.TransactionStatus = transaction.TransactionStatus.Replace("_", " ");
-            ViewBag.AvailableContainers = (await _cefContainerService.GetContainersByTransactionIdAsync(transactionId))
-                .Where(c => c.ParentContainerId == null)
-                .Select(c => new SelectListItem { Value = c.Id.ToString(), Text = $"{c.ContainerCode} ({c.ContainerType.Replace("_", " ")})" })
-                .ToList();
-            ViewBag.AvailableContainers.Insert(0, new SelectListItem { Value = "0", Text = "-- Nuevo Contenedor --" });
-
-            _logger.LogInformation("Usuario: {Usuario} | IP: {IP} | Acción: Acceso a procesamiento de contenedores | Transacción: {TransactionId} | Contenedor: {ContainerId}.",
-                currentUser.UserName, IpAddressForLogging, transactionId, containerId ?? 0);
-            return View(viewModel);
+            return View(pageVm);
         }
+
+        [HttpGet("ProcessTotals")]
+        [RequiredPermission(PermissionType.Edit, "CEF")]
+        public async Task<IActionResult> ProcessTotals(int transactionId)
+        {
+            var (declared, counted, diff) = await _cefContainerService.GetTransactionTotalsAsync(transactionId);
+            return Json(new { declared, counted, diff });
+        }
+
 
         /// <summary>
         /// Procesa el envío del formulario de procesamiento de contenedores (guardar detalles y novedades).
@@ -494,79 +462,163 @@ namespace VCashApp.Controllers
         /// </remarks>
         /// <param name="viewModel">ViewModel con los datos del contenedor, detalles y novedades.</param>
         /// <returns>Un JSON ServiceResult o redirección a la misma vista para continuar o al dashboard.</returns>
-        [HttpPost("ProcessContainers")]
+        [HttpPost("ProcessContainers/{transactionId:int}")]
         [ValidateAntiForgeryToken]
         [RequiredPermission(PermissionType.Edit, "CEF")]
-        public async Task<IActionResult> ProcessContainers(CefContainerProcessingViewModel viewModel)
+        public async Task<IActionResult> ProcessContainers(int transactionId, CefProcessContainersPageViewModel viewModel)
         {
             var currentUser = await GetCurrentApplicationUserAsync();
             if (currentUser == null) return Unauthorized();
 
             await SetCommonViewBagsCefAsync(currentUser, "Procesando Contenedores CEF");
 
-            ViewBag.ValueTypes = Enum.GetValues(typeof(CefValueTypeEnum)).Cast<CefValueTypeEnum>().Select(e => new SelectListItem { Value = e.ToString(), Text = e.ToString().Replace("_", " ") }).ToList();
-            ViewBag.IncidentTypes = (await _cefIncidentService.GetAllIncidentTypesAsync()).Select(it => new SelectListItem { Value = it.Code, Text = it.Description }).ToList();
-            ViewBag.TransactionId = viewModel.CefTransactionId; 
+            // Asegura el id de la transacción en el VM
+            viewModel.CefTransactionId = transactionId;
+
+            // Catálogos por si hay que re-renderizar
+            ViewBag.IncidentTypes = (await _cefIncidentService.GetAllIncidentTypesAsync())
+                .Select(it => new SelectListItem { Value = it.Code, Text = it.Description })
+                .ToList();
+            ViewBag.DenomsJson = await _cefContainerService.BuildDenomsJsonForTransactionAsync(transactionId);
+            ViewBag.QualitiesJson = await _cefContainerService.BuildQualitiesJsonAsync();
+
+            // Validaciones mínimas
+            if (viewModel?.Containers == null || viewModel.Containers.Count == 0)
+                ModelState.AddModelError("", "No se recibieron contenedores para guardar.");
+
+            // Duplicados por contenedor (Tipo + Denom + Calidad)
+            if (viewModel?.Containers != null)
+            {
+                for (int cIdx = 0; cIdx < viewModel.Containers.Count; cIdx++)
+                {
+                    var c = viewModel.Containers[cIdx];
+                    if (c?.ValueDetails == null) continue;
+
+                    var dup = c.ValueDetails
+                        .GroupBy(v => new { v.ValueType, v.DenominationId, v.QualityId })
+                        .FirstOrDefault(g => g.Count() > 1);
+
+                    if (dup != null)
+                    {
+                        ModelState.AddModelError(
+                            $"Containers[{cIdx}]",
+                            $"Hay filas duplicadas (Tipo:{dup.Key.ValueType}, Denom:{dup.Key.DenominationId}, Calidad:{dup.Key.QualityId})."
+                        );
+                    }
+                }
+            }
+
+            var isAjax = Request.Headers["X-Requested-With"] == "XMLHttpRequest";
 
             if (!ModelState.IsValid)
             {
-                var fieldErrors = ModelState
-                    .Where(kvp => kvp.Value.Errors.Any())
-                    .ToDictionary(
-                        kvp => kvp.Key,
-                        kvp => kvp.Value.Errors.Select(e => e.ErrorMessage).ToArray()
-                    );
-                _logger.LogWarning("Usuario: {Usuario} | IP: {IP} | Acción: Procesamiento de Contenedores - Modelo Inválido | Errores: {@Errores} |",
-                    currentUser.UserName, IpAddressForLogging, fieldErrors);
-
-                if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+                if (isAjax)
                 {
-                    return Json(ServiceResult.FailureResult("Hay errores en el formulario de contenedor.", errors: fieldErrors));
+                    var errorDict = ModelState
+                        .Where(kvp => kvp.Value.Errors.Any())
+                        .ToDictionary(
+                            kvp => kvp.Key,
+                            kvp => kvp.Value.Errors.Select(e => e.ErrorMessage).ToArray()
+                        );
+
+                    return Json(ServiceResult.FailureResult("Hay errores en el formulario.", errors: errorDict));
                 }
-                return View(viewModel);
+
+                var pageVm = await _cefContainerService.PrepareProcessContainersPageAsync(transactionId);
+                pageVm.Containers = viewModel.Containers ?? new List<CefContainerProcessingViewModel>();
+                return View(pageVm);
             }
 
             try
             {
-                var savedContainer = await _cefContainerService.SaveContainerAndDetailsAsync(viewModel, currentUser.Id);
-
-                foreach (var incidentVm in viewModel.Incidents)
+                // isAjax ya lo calculas arriba
+                using (var tx = await _context.Database.BeginTransactionAsync())
                 {
-                    incidentVm.CefContainerId = savedContainer.Id;
-                    await _cefIncidentService.RegisterIncidentAsync(incidentVm, currentUser.Id);
+                    // 1) Mapa de índice de la vista -> ID real en BD de bolsas
+                    var bagIndexToId = new Dictionary<int, int>();
+
+                    // 2) Guardar primero BOLSAS (ParentContainerId == null)
+                    for (int idx = 0; idx < viewModel.Containers.Count; idx++)
+                    {
+                        var containerVm = viewModel.Containers[idx];
+                        if (containerVm == null) continue;
+
+                        var esBolsa = containerVm.ContainerType == CefContainerTypeEnum.Bolsa;
+                        var esSobre = containerVm.ContainerType == CefContainerTypeEnum.Sobre;
+
+                        if (esBolsa)
+                        {
+                            // Asegura que las bolsas no tengan padre
+                            containerVm.ParentContainerId = null;
+                            var savedBag = await _cefContainerService.SaveContainerAndDetailsAsync(containerVm, currentUser.Id);
+                            bagIndexToId[idx] = savedBag.Id;
+                        }
+                    }
+
+                    // 3) Guardar luego SOBRES (ParentContainerId es un ÍNDICE de bolsa en la vista)
+                    for (int idx = 0; idx < viewModel.Containers.Count; idx++)
+                    {
+                        var containerVm = viewModel.Containers[idx];
+                        if (containerVm == null) continue;
+
+                        var esSobre = containerVm.ContainerType == CefContainerTypeEnum.Sobre;
+                        if (!esSobre) continue;
+
+                        if (containerVm.ParentContainerId == null)
+                            throw new InvalidOperationException("Los sobres deben tener asignada una bolsa padre.");
+
+                        var parentIndex = containerVm.ParentContainerId.Value;
+
+                        // Mapea el índice de la vista al ID real de la bolsa recién guardada
+                        if (!bagIndexToId.TryGetValue(parentIndex, out var realParentId))
+                            throw new InvalidOperationException($"No se encontró la bolsa padre para el sobre (índice {parentIndex}).");
+
+                        containerVm.ParentContainerId = realParentId;
+
+                        var savedEnv = await _cefContainerService.SaveContainerAndDetailsAsync(containerVm, currentUser.Id);
+
+                        // Novedades (incidents) de sobre
+                        if (containerVm.Incidents != null)
+                        {
+                            foreach (var inc in containerVm.Incidents)
+                            {
+                                inc.CefContainerId = savedEnv.Id;
+                                await _cefIncidentService.RegisterIncidentAsync(inc, currentUser.Id);
+                            }
+                        }
+                    }
+
+                    await tx.CommitAsync();
                 }
 
-                TempData["SuccessMessage"] = $"Contenedor '{savedContainer.ContainerCode}' procesado exitosamente.";
-                _logger.LogInformation("Usuario: {Usuario} | IP: {IP} | Acción: Contenedor procesado | ID Contenedor: {ContainerId} | ID Transacción: {TransactionId}.",
-                    currentUser.UserName, IpAddressForLogging, savedContainer.Id, savedContainer.CefTransactionId);
-
-                if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
+                if (isAjax)
                 {
-                    return Json(ServiceResult.SuccessResult("Contenedor procesado exitosamente.", new { containerId = savedContainer.Id, transactionId = savedContainer.CefTransactionId }));
+                    var redirectUrl = Url.Action(nameof(ProcessContainers), new { transactionId });
+                    return Json(ServiceResult.SuccessResult("Contenedores guardados correctamente.", new { redirectUrl }));
                 }
-                return RedirectToAction(nameof(ProcessContainers), new { transactionId = savedContainer.CefTransactionId, containerId = savedContainer.Id });
+
+                TempData["SuccessMessage"] = "Contenedores guardados correctamente.";
+                return RedirectToAction(nameof(ProcessContainers), new { transactionId });
             }
             catch (InvalidOperationException ex)
             {
-                ModelState.AddModelError("", ex.Message);
-                _logger.LogError(ex, "Usuario: {Usuario} | IP: {IP} | Acción: Error al procesar contenedor | Mensaje: {ErrorMessage}.", currentUser.UserName, IpAddressForLogging, ex.Message);
-
-                if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
-                {
+                if (isAjax)
                     return Json(ServiceResult.FailureResult(ex.Message));
-                }
-                return View(viewModel);
-            }
-            catch (Exception ex)
-            {
-                ModelState.AddModelError("", "Ocurrió un error inesperado al procesar el contenedor.");
-                _logger.LogError(ex, "Usuario: {Usuario} | IP: {IP} | Acción: Error inesperado al procesar contenedor.", currentUser.UserName, IpAddressForLogging);
 
-                if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
-                {
-                    return Json(ServiceResult.FailureResult("Ocurrió un error inesperado."));
-                }
-                return View(viewModel);
+                ModelState.AddModelError("", ex.Message);
+                var pageVm = await _cefContainerService.PrepareProcessContainersPageAsync(transactionId);
+                pageVm.Containers = viewModel.Containers ?? new List<CefContainerProcessingViewModel>();
+                return View(pageVm);
+            }
+            catch (Exception)
+            {
+                if (isAjax)
+                    return Json(ServiceResult.FailureResult("Ocurrió un error inesperado al guardar los contenedores."));
+
+                ModelState.AddModelError("", "Ocurrió un error inesperado al guardar los contenedores.");
+                var pageVm = await _cefContainerService.PrepareProcessContainersPageAsync(transactionId);
+                pageVm.Containers = viewModel.Containers ?? new List<CefContainerProcessingViewModel>();
+                return View(pageVm);
             }
         }
 
@@ -894,6 +946,13 @@ namespace VCashApp.Controllers
             }
 
             return NotFound();
+        }
+
+        [HttpGet("AmountInWords")]
+        public IActionResult AmountInWords(decimal value, string currency = "COP")
+        {
+            var words = AmountInWordsHelper.ToSpanishCurrency(value, currency);
+            return Json(new { words });
         }
     }
 }

@@ -2,12 +2,19 @@
 {
     public enum LocationTypeEnum
     {
-        Punto,
-        ATM,
-        Fondo
+        Punto = 0,
+        ATM= 1,
+        Fondo = 2
     }
 
-    public enum CefTransactionTypeEnum
+    public enum CefEnvelopeSubTypeEnum
+    {
+        Efectivo = 0,
+        Documento = 1,
+        Cheque = 2
+    }
+
+    public enum CefTransactionTypeEnum // ELIMINAR
     {
         Collection,
         Provision,
@@ -30,8 +37,8 @@
 
     public enum CefContainerTypeEnum
     {
-        Bag,
-        Envelope
+        Bolsa,
+        Sobre
     }
 
     public enum CefContainerStatusEnum
@@ -45,18 +52,18 @@
 
     public enum CefValueTypeEnum
     {
-        Bill,
-        Coin,
-        Check,
-        Document
+        Billete,
+        Moneda,
+        Documento,
+        Cheque
     }
 
-    public enum CefIncidentTypeCategoryEnum // Renamed to avoid confusion with the entity
+    public enum CefIncidentTypeCategoryEnum
     {
-        Overload, // Sobrante
-        Shortage, // Faltante
-        Fake, // Falso
-        Damaged, // Deteriorado
+        Overload,
+        Shortage,
+        Fake,
+        Damaged,
         CountingError,
         ContainerInconsistency,
         Other

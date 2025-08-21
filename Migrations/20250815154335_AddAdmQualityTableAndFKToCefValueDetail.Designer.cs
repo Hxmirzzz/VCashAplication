@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using VCashApp.Data;
 
@@ -11,9 +12,11 @@ using VCashApp.Data;
 namespace VCashApp.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250815154335_AddAdmQualityTableAndFKToCefValueDetail")]
+    partial class AddAdmQualityTableAndFKToCefValueDetail
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1342,12 +1345,6 @@ namespace VCashApp.Migrations
                         .HasColumnType("DECIMAL(18,0)")
                         .HasColumnName("ValorDeclarado");
 
-                    b.Property<string>("EnvelopeSubType")
-                        .HasMaxLength(20)
-                        .IsUnicode(false)
-                        .HasColumnType("varchar(20)")
-                        .HasColumnName("TipoSobre");
-
                     b.Property<string>("Observations")
                         .HasMaxLength(255)
                         .HasColumnType("nvarchar(255)")
@@ -1368,18 +1365,13 @@ namespace VCashApp.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("CefTransactionId");
+
                     b.HasIndex("ParentContainerId");
 
                     b.HasIndex("ProcessingUserId");
 
-                    b.HasIndex("CefTransactionId", "ContainerCode");
-
-                    b.ToTable("CefContenedores", null, t =>
-                        {
-                            t.HasCheckConstraint("CK_CEF_SOBRE_Padre", "(([TipoContenedor] = 'Sobre' AND [IdContenedorPadre] IS NOT NULL) OR  ([TipoContenedor] <> 'Sobre' AND [IdContenedorPadre] IS NULL))");
-
-                            t.HasCheckConstraint("CK_CEF_SOBRE_TipoSobreValido", "([TipoContenedor] <> 'Sobre') OR ([TipoSobre] IN ('Efectivo','Documento','Cheque'))");
-                        });
+                    b.ToTable("CefContenedores", (string)null);
                 });
 
             modelBuilder.Entity("VCashApp.Models.Entities.CefIncident", b =>

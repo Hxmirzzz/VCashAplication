@@ -1,347 +1,1125 @@
-﻿@model VCashApp.Models.ViewModels.CentroEfectivo.CefContainerProcessingViewModel
+﻿@model VCashApp.Models.ViewModels.CentroEfectivo.CefProcessContainersPageViewModel
+@using VCashApp.Enums;
 @{
-    ViewData["Title"] = "Procesar Contenedores CEF";
+    ViewData["Title"] = "Procesar Contenedores";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<div class="main-content-container">
-    <div class="section-header">
-        <h1>Procesar Contenedores - Planilla: @ViewBag.TransactionNumber</h1>
-        <p>Estado de la Transacción: <span class="badge bg-info">@ViewBag.TransactionStatus</span></p>
-    </div>
-
+<div class="form-container">
     <div class="card">
         <div class="card-header">
-            <h4 class="mb-0">Detalles del Contenedor</h4>
+            <h4 class="mb-0">Procesamiento de Contenedores</h4>
         </div>
         <div class="card-body">
-            <form id="containerProcessingForm" asp-action="ProcessContainers" asp-controller="Cef" method="post">
+            <form id="form-containers" asp-action="ProcessContainers" asp-route-transactionId="@Model.CefTransactionId" method="post">
                 @Html.AntiForgeryToken()
                 <input type="hidden" asp-for="CefTransactionId" />
-                <input type="hidden" asp-for="Id" />
 
-                <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+                <!-- Stepper principal -->
+                <div class="progress-stepper" id="progressStepper">
+                    <div class="step active" data-step="1">
+                        <div class="step-number">1</div>
+                        <div class="step-label">Información General</div>
+                    </div>
+                    <div class="step" data-step="2">
+                        <div class="step-number">2</div>
+                        <div class="step-label">Conteo y Detalles</div>
+                    </div>
+                    <div class="step" data-step="3">
+                        <div class="step-number">3</div>
+                        <div class="step-label">Resumen</div>
+                    </div>
+                </div>
 
-                <div class="form-section">
-                    <h3>Selección y Datos Generales</h3>
-                    <hr />
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label for="selectContainer" class="control-label">Seleccionar Contenedor Existente:</label>
-                                <select id="selectContainer" class="form-control form-control-sm" onchange="loadContainerDetails()">
-                                    <option value="0">-- Nuevo Contenedor --</option>
-                                    @foreach (var containerItem in ViewBag.AvailableContainers)
-                                    {
-                                        <option value="@containerItem.Value" selected="@(Model.Id.ToString() == containerItem.Value.ToString())">@containerItem.Text</option>
+                <div class="tab-content" id="myTabContent">
+
+                    <!-- PASO 1: info general (solo lectura) -->
+                    <div class="tab-pane fade show active" role="tabpanel" data-step="1">
+                        <div class="step-content">
+                            <div class="card mb-4">
+                                <div class="card-header"><h5>📋 Cabecera del Servicio</h5></div>
+                                <div class="card-body">
+                                    <div class="row g-3">
+                                        <div class="col-12 col-lg-3">
+                                            <div class="form-floating">
+                                                <input class="form-control" value="@Model.Transaction.SlipNumber" readonly />
+                                                <label>Número de Planilla</label>
+                                            </div>
+                                        </div>
+                                        <div class="col-12 col-lg-3">
+                                            <div class="form-floating">
+                                                <input class="form-control" value="@Model.Service.ServiceOrderId" readonly />
+                                                <label>Orden de Servicio</label>
+                                            </div>
+                                        </div>
+                                        <div class="col-12 col-lg-3">
+                                            <div class="form-floating">
+                                                <input class="form-control" value="@Model.Service.BranchName" readonly />
+                                                <label>Sucursal</label>
+                                            </div>
+                                        </div>
+                                        <div class="col-12 col-lg-3">
+                                            <div class="form-floating">
+                                                <input class="form-control" value="@(Model.Service.ServiceDate?.ToString("yyyy-MM-dd") ?? "N/A")" readonly />
+                                                <label>Fecha de Servicio</label>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-12 col-lg-4">
+                                            <div class="form-floating">
+                                                <input class="form-control" value="@Model.Service.ClientName" readonly />
+                                                <label>Cliente</label>
+                                            </div>
+                                        </div>
+                                        <div class="col-12 col-lg-4">
+                                            <div class="form-floating">
+                                                <input class="form-control" value="@Model.Service.ConceptName" readonly />
+                                                <label>Concepto</label>
+                                            </div>
+                                        </div>
+                                        <div class="col-12 col-lg-4">
+                                            <div class="form-floating">
+                                                <input class="form-control" value="@Model.Transaction.Currency" readonly />
+                                                <label>Divisa</label>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-12 col-lg-6">
+                                            <div class="form-floating">
+                                                <input class="form-control" value="@Model.Service.OriginName" readonly />
+                                                <label>Origen</label>
+                                            </div>
+                                        </div>
+                                        <div class="col-12 col-lg-6">
+                                            <div class="form-floating">
+                                                <input class="form-control" value="@Model.Service.DestinationName" readonly />
+                                                <label>Destino</label>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-12 col-lg-4">
+                                            <div class="form-floating">
+                                                <input class="form-control" value="@Model.Transaction.TransactionType" readonly />
+                                                <label>Tipo de Transacción</label>
+                                            </div>
+                                        </div>
+                                        <div class="col-12 col-lg-4">
+                                            <div class="form-floating">
+                                                <input class="form-control" value="@Model.Transaction.Status" readonly />
+                                                <label>Estado</label>
+                                            </div>
+                                        </div>
+                                        <div class="col-12 col-lg-4">
+                                            <div class="form-floating">
+                                                <input class="form-control" value="@Model.Transaction.RegistrationDate.ToString("yyyy-MM-dd HH:mm")" readonly />
+                                                <label>Fecha Registro Transacción</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>                            
+                        </div>
+                    </div>
+
+                    <!-- PASO 2: Conteo y Detalles (solo Bolsas como pestañas; los Sobres viven dentro de cada Bolsa) -->
+                    <div class="tab-pane fade" role="tabpanel" data-step="2">
+                        <div class="step-content">
+                            <div class="card mb-3">
+                                <div class="card-header d-flex align-items-center justify-content-between">
+                                    <h5 class="mb-0">🧰 Contenedores (Bolsas y sus Sobres)</h5>
+                                    <div class="d-flex gap-2">
+                                        <button type="button" class="btn btn-outline-primary" id="btnAddBag">+ Agregar Contenedor (Bolsa)</button>
+                                    </div>
+                                </div>
+
+                                <div class="card-body">
+                                    @{
+                                        var bagItems = Model.Containers
+                                            .Select((c, idx) => new { c, idx })
+                                            .Where(x => x.c.ParentContainerId == null && x.c.ContainerType == VCashApp.Enums.CefContainerTypeEnum.Bolsa)
+                                            .ToList();
+
                                     }
-                                </select>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label asp-for="ParentContainerId" class="control-label"></label>
-                                <input asp-for="ParentContainerId" type="number" class="form-control form-control-sm" placeholder="Si es sobre, ID de la bolsa" />
-                                <span asp-validation-for="ParentContainerId" class="text-danger"></span>
+
+                                    <ul class="nav nav-tabs" id="bagsTabs" role="tablist">
+                                        @for (var b = 0; b < bagItems.Count; b++)
+                                        {
+                                            var bagIdx = bagItems[b].idx;
+                                            var tabId = $"bag-tab-{bagIdx}";
+                                            <li class="nav-item" role="presentation">
+                                                <button class="nav-link @(b==0 ? "active" : "")" id="@($"{tabId}-btn")"
+                                                        data-bs-toggle="tab" data-bs-target="@($"#{tabId}")"
+                                                        type="button" role="tab">
+                                                  Contenedor @(@b + 1) — Bolsa
+                                                </button>
+                                            </li>
+                                        }
+                                    </ul>
+
+                                    <div class="tab-content mt-3" id="bagsTabContent">
+                                        @for (var b = 0; b < bagItems.Count; b++)
+                                        {
+                                            var bagIdx = bagItems[b].idx;
+                                            var tabId = $"bag-tab-{bagIdx}";
+                                            <div class="tab-pane fade @(b==0 ? "show active" : "")" id="@tabId" role="tabpanel" data-bag-idx="@bagIdx">
+                                                @{
+                                                    var vddBag = new ViewDataDictionary(ViewData);
+                                                    vddBag.TemplateInfo.HtmlFieldPrefix = $"Containers[{bagIdx}]";
+                                                }
+                                                <!-- Editor de la Bolsa (una sola) -->
+                                                @Html.Partial("_ContainerEditorPartial", Model.Containers[bagIdx], vddBag)
+
+                                                <!-- ====== Sobres de esta bolsa ====== -->
+                                                <div class="card mt-3">
+                                                    <div class="card-header d-flex align-items-center justify-content-between">
+                                                        <h6 class="mb-0">✉️ Sobres de esta Bolsa</h6>
+                                                        <button type="button" class="btn btn-outline-secondary btn-sm js-add-envelope-in-this-bag">
+                                                            + Agregar Sobre
+                                                        </button>
+                                                    </div>
+                                                    <div class="card-body">
+                                                        <div class="small text-muted">Puedes añadir varios sobres; cada sobre puede ser Efectivo, Documentos/Voucher o Cheques.</div>
+                                                        <div class="bag-envelopes-list mt-3">
+                                                            @{
+                                                                var bagId = Model.Containers[bagIdx].Id;
+                                                                var childEnvelopes = Model.Containers
+                                                                    .Select((c, idx) => new { c, idx })
+                                                                    .Where(x => x.c.ParentContainerId == bagId && x.c.ContainerType == CefContainerTypeEnum.Sobre)
+                                                                    .ToList();
+                                                            }
+                                                            @for (var e = 0; e < childEnvelopes.Count; e++)
+                                                            {
+                                                                var envIdx = childEnvelopes[e].idx;
+                                                                <div class="envelope-card mb-3" data-env-idx="@envIdx">
+                                                                    @{
+                                                                        var vddEnv = new ViewDataDictionary(ViewData);
+                                                                        vddEnv.TemplateInfo.HtmlFieldPrefix = $"Containers[{envIdx}]";
+                                                                    }
+                                                                    @Html.Partial("_ContainerEditorPartial", Model.Containers[envIdx], vddEnv)
+                                                                    <div class="d-flex justify-content-end">
+                                                                        <button type="button" class="btn btn-outline-danger btn-sm js-remove-envelope-card" data-env-idx="@envIdx">
+                                                                            Eliminar sobre
+                                                                        </button>
+                                                                    </div>
+                                                                </div>
+                                                            }
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        }
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label asp-for="ContainerType" class="control-label"></label>
-                                <select asp-for="ContainerType" asp-items="Html.GetEnumSelectList<VCashApp.Enums.CefContainerTypeEnum>()" class="form-control form-control-sm">
-                                    <option value="">-- Seleccionar --</option>
-                                </select>
-                                <span asp-validation-for="ContainerType" class="text-danger"></span>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label asp-for="ContainerCode" class="control-label"></label>
-                                <input asp-for="ContainerCode" class="form-control form-control-sm" />
-                                <span asp-validation-for="ContainerCode" class="text-danger"></span>
+
+                    <div id="bag-template" class="d-none">
+                        @{
+                            var vddT = new ViewDataDictionary(ViewData);
+                            vddT.TemplateInfo.HtmlFieldPrefix = "Containers[__idx__]";
+                        }
+                        @Html.Partial("_ContainerEditorPartial",
+                            new VCashApp.Models.ViewModels.CentroEfectivo.CefContainerProcessingViewModel {
+                                ContainerType = VCashApp.Enums.CefContainerTypeEnum.Bolsa,
+                                ParentContainerId = null
+                            },
+                            vddT
+                        )
+                    </div>
+
+                    <div id="envelope-template" class="d-none">
+                        @{
+                          var vddE = new ViewDataDictionary(ViewData);
+                          vddE.TemplateInfo.HtmlFieldPrefix = "Containers[__idx__]";
+                        }
+                        <div class="envelope-card mb-3" data-env-idx="__idx__">
+                            @Html.Partial("_ContainerEditorPartial",
+                                new VCashApp.Models.ViewModels.CentroEfectivo.CefContainerProcessingViewModel {
+                                    ContainerType = VCashApp.Enums.CefContainerTypeEnum.Sobre
+                                },
+                                vddE
+                            )
+                            <div class="d-flex justify-content-end">
+                                <button type="button" class="btn btn-outline-danger btn-sm js-remove-envelope-card" data-env-idx="__idx__">
+                                    Eliminar sobre
+                                </button>
                             </div>
                         </div>
                     </div>
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label asp-for="DeclaredValue" class="control-label"></label>
-                                <input asp-for="DeclaredValue" type="number" step="1" class="form-control form-control-sm" />
-                                <span asp-validation-for="DeclaredValue" class="text-danger"></span>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="form-group">
-                                <label asp-for="CurrentCountedValue" class="control-label"></label>
-                                <input asp-for="CurrentCountedValue" type="number" step="1" class="form-control form-control-sm" readonly />
+
+                    <!-- PASO 3: Resumen -->
+                    <div class="tab-pane fade" role="tabpanel" data-step="3">
+                        <div class="step-content">
+                            <div class="card">
+                                <div class="card-header"><h5>📊 Resumen</h5></div>
+                                <div class="card-body">
+                                    <div class="row g-3">
+                                        <div class="col-12 col-lg-4">
+                                            <div class="form-floating">
+                                                <input class="form-control" id="sumDeclaredAll" value="@Model.TotalDeclaredAll.ToString("N0")" readonly />
+                                                <label>Total Declarado</label>
+                                            </div>
+                                        </div>
+                                        <div class="col-12 col-lg-4">
+                                            <div class="form-floating">
+                                                <input class="form-control" id="sumCountedAll" value="@Model.TotalCountedAll.ToString("N0")" readonly />
+                                                <label>Total Contado</label>
+                                            </div>
+                                        </div>
+                                        <div class="col-12 col-lg-4">
+                                            <div class="form-floating">
+                                                <input class="form-control" id="sumDiffAll" value="@Model.DifferenceAll.ToString("N0")" readonly />
+                                                <label>Diferencia</label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="alert alert-info mt-3">
+                                        Este resumen se recalcula al guardar los contenedores (veremos el multipost luego).
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
-                    <div class="form-group">
-                        <label asp-for="Observations" class="control-label"></label>
-                        <textarea asp-for="Observations" class="form-control form-control-sm"></textarea>
-                        <span asp-validation-for="Observations" class="text-danger"></span>
-                    </div>
+
                 </div>
 
-                <div class="form-section mt-4">
-                    <h3>Detalles de Valores Contados</h3>
-                    <hr />
-                    <table class="table table-bordered table-sm" id="valueDetailsTable">
-                        <thead>
-                            <tr>
-                                <th>Tipo Valor</th>
-                                <th>Denominación/Valor Unitario</th>
-                                <th>Cantidad</th>
-                                <th>Fajos</th>
-                                <th>Picos</th>
-                                <th>Monto Calculado</th>
-                                <th>Identificador (Cheque/Doc)</th>
-                                <th>Banco</th>
-                                <th>Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @if (Model.ValueDetails != null)
-                            {
-                                for (int i = 0; i < Model.ValueDetails.Count; i++)
-                                {
-                                    @Html.Partial("_CefValueDetailRowPartial", Model.ValueDetails[i], new ViewDataDictionary(ViewData) { { "index", i } })
-                                }
-                            }
-                        </tbody>
-                    </table>
-                    <button type="button" class="btn btn-primary btn-sm" onclick="addValueDetailRow()">Añadir Detalle de Valor</button>
-                </div>
-
-                <div class="form-section mt-4">
-                    <h3>Novedades del Contenedor</h3>
-                    <hr />
-                    <table class="table table-bordered table-sm" id="incidentsTable">
-                        <thead>
-                            <tr>
-                                <th>Tipo Novedad</th>
-                                <th>Monto Afectado</th>
-                                <th>Denominación Afectada</th>
-                                <th>Cantidad Afectada</th>
-                                <th>Descripción</th>
-                                <th>Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @if (Model.Incidents != null)
-                            {
-                                for (int i = 0; i < Model.Incidents.Count; i++)
-                                {
-                                    @Html.Partial("_CefIncidentRowPartial", Model.Incidents[i], new ViewDataDictionary(ViewData) { { "index", i } })
-                                }
-                            }
-                        </tbody>
-                    </table>
-                    <button type="button" class="btn btn-warning btn-sm" onclick="addIncidentRow()">Añadir Novedad</button>
-                </div>
-
-                <div class="submit-container form-group col-md-12 mt-4">
-                    <button type="submit" class="btn btn-primary">Guardar Contenedor</button>
-                    <a asp-action="Index" class="btn btn-danger">Volver al Dashboard</a>
-                    <button type="button" class="btn btn-success" onclick="finalizeCounting(@ViewBag.TransactionId)">Finalizar Conteo y Enviar a Revisión</button>
+                <!-- Botonera -->
+                <div class="submit-container form-group col-12 mt-4">
+                    <button type="button" class="btn btn-secondary" data-step-action="prev" style="display:none;">Anterior</button>
+                    <button type="button" class="btn btn-primary" data-step-action="next">Continuar</button>
+                    <button type="submit" class="btn btn-primary" data-step-action="submit-final" style="display:none;">Guardar</button>
+                    <a asp-action="Index" class="btn btn-danger">Cancelar</a>
                 </div>
             </form>
         </div>
     </div>
 </div>
 
-@section Scripts {
+<div id="container-template" class="d-none">
     @{
-        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+        var vddT = new ViewDataDictionary(ViewData);
+        vddT.TemplateInfo.HtmlFieldPrefix = "Containers[__idx__]";
     }
-    <script src="/js/form-control/modals.js"></script>
+    @Html.Partial("_ContainerEditorPartial",
+    new VCashApp.Models.ViewModels.CentroEfectivo.CefContainerProcessingViewModel(),
+        vddT)
+</div>
+
+<div id="incident-template" class="d-none">
+    <div class="incident-row card mt-3" data-cidx="__cidx__" data-iidx="__iidx__">
+        <div class="card-body">
+            <div class="row g-3">
+                <div class="col-12 col-lg-4">
+                    <div class="form-floating has-validation">
+                        <select name="Containers[__cidx__].Incidents[__iidx__].IncidentType" class="form-select">
+                            <option value="">Seleccionar tipo...</option>
+                            @foreach (var it in (IEnumerable<SelectListItem>)ViewBag.IncidentTypes ?? new List<SelectListItem>())
+                                                        {
+                                <option value="@it.Value">@it.Text</option>
+                            }
+                        </select>
+                        <label>Tipo de Novedad</label>
+                        <div class="invalid-feedback">⚠ Requerido</div>
+                        <div class="valid-feedback">✓ Correcto</div>
+                    </div>
+                </div>
+
+                <div class="col-12 col-lg-3">
+                    <div class="form-floating has-validation">
+                        <input type="number" step="0.01"
+                               name="Containers[__cidx__].Incidents[__iidx__].AffectedAmount"
+                               class="form-control" placeholder="Monto afectado" />
+                        <label>Monto afectado</label>
+                        <div class="invalid-feedback">⚠ Requerido</div>
+                        <div class="valid-feedback">✓ Correcto</div>
+                    </div>
+                </div>
+
+                <div class="col-12 col-lg-3">
+                    <div class="form-floating">
+                        <input type="number" step="0.01"
+                               name="Containers[__cidx__].Incidents[__iidx__].AffectedDenomination"
+                               class="form-control" placeholder="Denominación afectada" />
+                        <label>Denominación afectada</label>
+                    </div>
+                </div>
+
+                <div class="col-12 col-lg-2">
+                    <div class="form-floating">
+                        <input type="number"
+                               name="Containers[__cidx__].Incidents[__iidx__].AffectedQuantity"
+                               class="form-control" placeholder="Cantidad" />
+                        <label>Cantidad</label>
+                    </div>
+                </div>
+
+                <div class="col-12">
+                    <div class="form-floating has-validation">
+                        <textarea name="Containers[__cidx__].Incidents[__iidx__].Description"
+                                  class="form-control" placeholder="Descripción"
+                                  style="height: 80px;"></textarea>
+                        <label>Descripción</label>
+                        <div class="invalid-feedback">⚠ Requerido</div>
+                        <div class="valid-feedback">✓ Correcto</div>
+                    </div>
+                </div>
+
+                <div class="col-12 d-flex justify-content-end">
+                    <button type="button" class="btn btn-outline-danger btn-sm js-remove-incident">
+                        Eliminar novedad
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script id="denoms-json" type="application/json">
+    @{
+        string denomsJson = ViewBag.DenomsJson?.ToString() ?? "{}";
+    }
+    @Html.Raw(denomsJson)
+</script>
+
+<script id="qualities-json" type="application/json">
+    @{
+        string qualitiesJson = ViewBag.QualitiesJson?.ToString() ?? "{}";
+    }
+    @Html.Raw(qualitiesJson)
+</script>
+
+@section Scripts {
+    @{ await Html.RenderPartialAsync("_ValidationScriptsPartial"); }
+
     <script>
-        var valueDetailIndex = @(Model.ValueDetails?.Count ?? 0);
-        var incidentIndex = @(Model.Incidents?.Count ?? 0);
+    $(function () {
+        $('#bag-template :input, #envelope-template :input, #incident-template :input, #container-template :input')
+          .prop('disabled', true);
 
-        function addValueDetailRow() {
-            var template = $('#valueDetailTemplate').html();
-            var newRow = template.replace(/\[0\]/g, '[' + valueDetailIndex + ']');
-            $('#valueDetailsTable tbody').append(newRow);
-            $.validator.unobtrusive.parse('#valueDetailsTable tbody tr:last-child'); // Re-parsear validación para elementos nuevos
-            valueDetailIndex++;
-            updateCalculatedAmounts();
-            $(document).find('select[name$="[' + (valueDetailIndex - 1) + '].TipoValor"]').trigger('change'); // Disparar change para mostrar/ocultar campos
+      // === STEPPER ===
+      let currentStep = 1, totalSteps = 3;
+
+      const DENOMS = JSON.parse(document.getElementById('denoms-json')?.textContent || '{}');
+      const QUALS  = JSON.parse(document.getElementById('qualities-json')?.textContent || '{}');
+
+      const $form = $('#form-containers');
+      const $next   = $('button[data-step-action="next"]');
+      const $prev   = $('button[data-step-action="prev"]');
+      const $submit = $('button[data-step-action="submit-final"]');
+
+      function updateStepper() {
+        $('.progress-stepper .step').removeClass('active completed');
+        for (let i = 1; i <= totalSteps; i++) {
+          const $s = $('.step[data-step="' + i + '"]');
+          if (i < currentStep) { $s.addClass('completed'); $s.find('.step-number').html('&#10003;'); }
+          else if (i === currentStep) { $s.addClass('active'); $s.find('.step-number').text(i); }
+          else { $s.find('.step-number').text(i); }
+        }
+        showCurrentStep();
+      }
+      function showCurrentStep() {
+        $('#myTabContent .tab-pane[data-step]').removeClass('show active');
+        $('#myTabContent div[data-step="' + currentStep + '"]').addClass('show active');
+        $prev.toggle(currentStep > 1);
+        $next.toggle(currentStep < totalSteps);
+        $submit.toggle(currentStep === totalSteps);
+      }
+      function validateField($f) {
+        if ($f.prop('disabled')) { $f.removeClass('is-invalid is-valid'); return true; }
+        const ok = $f[0].checkValidity();
+        $f.toggleClass('is-valid', ok).toggleClass('is-invalid', !ok);
+        const $c = $f.closest('.has-validation');
+        $c.find('.invalid-feedback')[ok ? 'hide' : 'show']();
+        $c.find('.valid-feedback')[ok ? 'show' : 'hide']();
+        return ok;
+      }
+      function validateCurrentStep() {
+        let ok = true;
+        $('#myTabContent .tab-pane[data-step].active :input[required]').each(function(){
+          if (!$(this).is(':disabled')) ok = validateField($(this)) && ok;
+        });
+        return ok;
+      }
+      $('.progress-stepper .step').on('click', function () {
+        const target = parseInt($(this).data('step'));
+        if (target < currentStep || validateCurrentStep()) { currentStep = target; updateStepper(); }
+      });
+      $next.on('click', function () {
+        if (validateCurrentStep() && currentStep < totalSteps) { currentStep++; updateStepper(); }
+        else if (!validateCurrentStep()) Swal.fire('Campos incompletos', 'Complete los requeridos.', 'warning');
+      });
+      $prev.on('click', function () { if (currentStep > 1) { currentStep--; updateStepper(); } });
+
+      // === ÍNDICE GLOBAL PARA Containers[__idx__] ===
+      let nextIdx = @Model.Containers.Count;
+
+      // === Utils ===
+      function getPaneIndex($pane) {
+        const id = $pane.attr('id') || '';
+        const parts = id.split('-');
+        return parseInt(parts[parts.length - 1]) || 0;
+      }
+
+      // ===================== CATÁLOGOS (DENOM / CALIDAD) =====================
+        function getMoneyFlag(kind) {
+            const k = (kind || '').toString().trim().toLowerCase();
+            if (k === 'billete' || k === 'billete') return 'B';
+            if (k === 'moneda' || k === 'moneda')  return 'M';
+            return null;
         }
 
-        function addIncidentRow() {
-            var template = $('#incidentTemplate').html();
-            var newRow = template.replace(/\[0\]/g, '[' + incidentIndex + ']');
-            $('#incidentsTable tbody').append(newRow);
-            $.validator.unobtrusive.parse('#incidentsTable tbody tr:last-child');
-            incidentIndex++;
+        
+        function getDenomFamilyForRow($row) {
+            const fam = $row.find('.js-denom option:selected').data('family');
+            return (fam ? String(fam).toUpperCase() : 'T');
         }
 
-        function removeRow(button) {
-            $(button).closest('tr').remove();
-            updateCalculatedAmounts();
-        }
-
-        function updateCalculatedAmounts() {
-            let totalContadoActual = 0;
-            $('#valueDetailsTable tbody tr').each(function () {
-                var tipoValor = $(this).find('select[name$=".TipoValor"]').val();
-                var cantidad = parseFloat($(this).find('input[name$=".Cantidad"]').val()) || 0;
-                var denominacion = parseFloat($(this).find('input[name$=".Denominacion"]').val()) || 0;
-                var valorUnitario = parseFloat($(this).find('input[name$=".ValorUnitario"]').val()) || 0;
-                var montoCalculado = 0;
-
-                // Usar nombres de enum en C# para comparar, que son los strings guardados en DB
-                if (tipoValor === '@(nameof(VCashApp.Enums.CefValueTypeEnum.Bill))' || tipoValor === '@(nameof(VCashApp.Enums.CefValueTypeEnum.Coin))') {
-                    montoCalculado = cantidad * denominacion;
-                } else if (tipoValor === '@(nameof(VCashApp.Enums.CefValueTypeEnum.Check))' || tipoValor === '@(nameof(VCashApp.Enums.CefValueTypeEnum.Document))') {
-                    montoCalculado = valorUnitario;
-                }
-                $(this).find('input[name$=".MontoCalculado"]').val(montoCalculado.toFixed(0)); // Ajustado a N0
-                totalContadoActual += montoCalculado;
+        function mapUsedQualitiesByDenom($table) {
+            const map = {};
+            $table.find('tbody tr').each(function () {
+              const $r     = $(this);
+              const denom  = String($r.find('.js-denom').val() || '');
+              const qVal   = String($r.find('.js-quality').val() || '');
+              if (!denom || !qVal) return;
+              if (!map[denom]) map[denom] = new Set();
+              map[denom].add(qVal);
             });
-            $('#ValorContadoActual').val(totalContadoActual.toFixed(0)); // Ajustado a N0
+            return map;
         }
 
-        $(document).on('change', 'select[name$=".TipoValor"]', function() {
-            var row = $(this).closest('tr');
-            var tipoValor = $(this).val();
+      function findDenom(kind, denomId) {
+        const arr = (DENOMS && DENOMS[kind]) ? DENOMS[kind] : [];
+        return arr.find(d => String((d.id ?? d.codDenominacion ?? d.CodDenominacion)) === String(denomId));
+      }
 
-            // Selectores más específicos para los inputs
-            var denominacionInput = row.find('input[name$=".Denominacion"]');
-            var cantidadInput = row.find('input[name$=".Cantidad"]');
-            var fajosInput = row.find('input[name$=".CantidadFajos"]');
-            var picosInput = row.find('input[name$=".CantidadPicos"]');
-            var esAltaDenominacionCheckbox = row.find('input[name$=".EsAltaDenominacion"]');
+      function getDenomFamily(kind, denomId) {
+        const d = findDenom(kind, denomId);
+        // Propiedad flexible: family | familia | FamiliaDenominacion | fam
+        return d ? (d.family ?? d.familia ?? d.FamiliaDenominacion ?? d.fam ?? 'T') : 'T';
+      }
 
-            var valorUnitarioInput = row.find('input[name$=".ValorUnitario"]');
-            var numeroIdentificadorInput = row.find('input[name$=".NumeroIdentificador"]');
-            var bancoInput = row.find('input[name$=".Banco"]');
-            var fechaEmisionInput = row.find('input[name$=".FechaEmision"]');
-            var emisorInput = row.find('input[name$=".Emisor"]');
+        function denomOptionsHtml(kind, excludeValues = []) {
+            const arr = (DENOMS && DENOMS[kind]) ? DENOMS[kind] : [];
+            if (!arr.length) return '<option value="">-- Sin denominaciones --</option>';
 
-            var isBillOrCoin = (tipoValor === '@(nameof(VCashApp.Enums.CefValueTypeEnum.Bill))' || tipoValor === '@(nameof(VCashApp.Enums.CefValueTypeEnum.Coin))');
-            var isCheckOrDocument = (tipoValor === '@(nameof(VCashApp.Enums.CefValueTypeEnum.Check))' || tipoValor === '@(nameof(VCashApp.Enums.CefValueTypeEnum.Document))');
+            let html = '<option value="">-- Seleccione denominación --</option>';
+            arr.forEach(d => {
+              const id    = d.id ?? d.codDenominacion ?? d.CodDenominacion;
+              const value = d.value ?? d.valor ?? d.ValorDenominacion ?? d.valorDenominacion ?? '';
+              const label = d.label ?? d.text ?? d.name ?? d.Denominacion ?? `${value}`;
+              const fam   = (d.family ?? d.FamiliaDenominacion ?? 'T');
 
-            // Mostrar/ocultar y limpiar campos de billetes/monedas
-            denominacionInput.closest('td').toggle(isBillOrCoin);
-            cantidadInput.closest('td').toggle(isBillOrCoin);
-            fajosInput.closest('td').toggle(isBillOrCoin);
-            picosInput.closest('td').toggle(isBillOrCoin);
-            esAltaDenominacionCheckbox.closest('td').toggle(isBillOrCoin); // Si está en la misma celda
-
-            if (!isBillOrCoin) {
-                denominacionInput.val('');
-                cantidadInput.val('');
-                fajosInput.val('');
-                picosInput.val('');
-                esAltaDenominacionCheckbox.prop('checked', false);
-            }
-
-            // Mostrar/ocultar y limpiar campos de cheques/documentos
-            valorUnitarioInput.closest('td').toggle(isCheckOrDocument);
-            numeroIdentificadorInput.closest('td').toggle(isCheckOrDocument);
-            bancoInput.closest('td').toggle(isCheckOrDocument);
-            fechaEmisionInput.closest('td').toggle(isCheckOrDocument);
-            emisorInput.closest('td').toggle(isCheckOrDocument);
-
-            if (!isCheckOrDocument) {
-                valorUnitarioInput.val('');
-                numeroIdentificadorInput.val('');
-                bancoInput.val('');
-                fechaEmisionInput.val(''); // Considera establecer a null o DateOnly.MinValue si es DateTime
-                emisorInput.val('');
-            }
-
-            updateCalculatedAmounts();
-        }).trigger('change'); // Disparar en la carga inicial para filas existentes
-
-        // Eventos para recalcular el monto cuando cambian cantidad, denominación o valor unitario
-        $(document).on('input', 'input[name$=".Denominacion"], input[name$=".Cantidad"], input[name$=".ValorUnitario"]', updateCalculatedAmounts);
-
-        // Lógica para cargar detalles de un contenedor existente al seleccionar en el dropdown
-        function loadContainerDetails() {
-            var selectedContainerId = $('#selectContainer').val();
-            // Redirigir a la misma acción con el containerId para que el controlador cargue el ViewModel
-            // ViewBag.TransactionId viene del controlador
-            window.location.href = '@Url.Action("ProcessContainers", "Cef")?transactionId=' + @ViewBag.TransactionId + '&containerId=' + selectedContainerId;
-        }
-
-        // Script para submit AJAX del formulario (similar a Checkin)
-        $('#containerProcessingForm').on('submit', function(e) {
-            e.preventDefault();
-
-            if (!$(this).valid()) {
-                return;
-            }
-
-            var formData = $(this).serialize();
-
-            $.ajax({
-                url: '@Url.Action("ProcessContainers", "Cef")',
-                type: 'POST',
-                data: formData,
-                success: function(response) {
-                    if (response.success) {
-                        alert(response.message);
-                        // Redireccionar al siguiente paso (la misma vista con el contenedor recién guardado/actualizado)
-                        // response.data contendrá { containerId: X, transactionId: Y }
-                        window.location.href = '@Url.Action("ProcessContainers", "Cef")?transactionId=' + response.data.transactionId + '&containerId=' + response.data.containerId;
-                    } else {
-                        alert('Error: ' + response.message);
-                        if (response.errors) {
-                            $('.field-validation-error').text('').hide();
-                            $.each(response.errors, function(key, value) {
-                                var fieldName = key;
-                                var errorSpan = $('[data-valmsg-for="' + fieldName + '"]');
-                                if (errorSpan.length === 0) {
-                                    errorSpan = $('<span>').addClass('text-danger field-validation-error').attr('data-valmsg-for', fieldName);
-                                    $('[name="' + fieldName + '"]').after(errorSpan);
-                                }
-                                errorSpan.text(value.join(' ')).show();
-                            });
-                        }
-                    }
-                },
-                error: function(xhr, status, error) {
-                    alert('Error al conectar con el servidor: ' + error);
-                    console.error(xhr.responseText);
-                }
+              if (!excludeValues.includes(String(id))) {
+                html += `<option value="${id}" data-value="${value}" data-family="${fam}">${label}</option>`;
+              }
             });
+            return html;
+        }
+
+      // --------- CALIDADES ----------
+        function qualityOptionsHtml(kind, denomFamily, excludeIds = []) {
+            const money = getMoneyFlag(kind);           // 'B' | 'M' | null
+            const arr   = (QUALS && QUALS[money]) ? QUALS[money] : [];
+            if (!arr.length) return '<option value="">-- Sin calidades --</option>';
+
+            const keepFamilies = (money === 'B' || money === 'M')
+              ? ['N','A','T']
+              : (String(denomFamily).toUpperCase() === 'N') ? ['N','T']
+              : (String(denomFamily).toUpperCase() === 'A') ? ['A','T']
+              : ['T'];
+
+            let html = '<option value="">-- Seleccione calidad --</option>';
+            arr.forEach(q => {
+              const qId = String(q.id);
+              const fam = (q.family ?? q.FamiliaDenominacion ?? 'T').toString().trim().toUpperCase();
+              if (keepFamilies.includes(fam) && !excludeIds.includes(qId)) {
+                html += `<option value="${qId}">${q.name ?? q.QualityName ?? ''}</option>`;
+              }
+            });
+            return html;
+        }
+
+      function usedQualityIdsForSameDenom($table, denomId, $exceptRow) {
+        const used = new Set();
+        $table.find('tr').each(function(){
+          const $r = $(this);
+          if ($r.is($exceptRow)) return;
+          const dSel = $r.find('select[name$=".DenominationId"]');
+          const qSel = $r.find('select[name$=".QualityId"]');
+          if (dSel.length && qSel.length) {
+            if (String(dSel.val()) === String(denomId)) {
+              const qv = qSel.val();
+              if (qv) used.add(String(qv));
+            }
+          }
+        });
+        return Array.from(used);
+      }
+
+        function updateQualityForRow($row) {
+          const kind        = $row.find('.js-vtype').val();
+          const denomFamily = getDenomFamilyForRow($row);
+          const denomId     = String($row.find('.js-denom').val() || '');
+          const $q          = $row.find('.js-quality');
+          if (!$q.length) return;
+
+          const prev = String($q.val() || '');
+
+          const $table     = $row.closest('table');
+          const usedByDen  = mapUsedQualitiesByDenom($table)[denomId] || new Set();
+          const excludeIds = Array.from(usedByDen).filter(x => x !== prev); // permite mantener la propia
+          $q.html(qualityOptionsHtml(kind, denomFamily, excludeIds));
+
+          if (prev && $q.find(`option[value="${prev}"]`).length) {
+            $q.val(prev);
+          } else {
+            // opcional: auto-seleccionar la primera disponible distinta de vacío
+            // const first = $q.find('option[value!=""]').first().val();
+            // if (first) $q.val(first);
+          }
+        }
+
+        function updateQualitiesInTable($table) {
+          const usedMap = mapUsedQualitiesByDenom($table); // denomId => Set(qualityId)
+          $table.find('tbody tr').each(function () {
+            const $r         = $(this);
+            const denomId    = String($r.find('.js-denom').val() || '');
+            const currentQ   = String($r.find('.js-quality').val() || '');
+            const $q         = $r.find('.js-quality');
+            if (!denomId || !$q.length) return;
+
+            const usedSet = usedMap[denomId] || new Set();
+
+            $q.find('option').each(function () {
+              const val = String(this.value || '');
+              if (!val) return; // "-- Seleccione calidad --"
+              this.disabled = (usedSet.has(val) && val !== currentQ);
+            });
+          });
+        }
+
+      // ===================== FAJOS / PICOS =====================s
+      function calculateBundlesAndLoose($row) {
+        const qty = parseFloat($row.find('input[name$=".Quantity"]').val()) || 0;
+        if (qty <= 0) {
+          $row.find('input[name$=".BundlesCount"]').val('0');
+          $row.find('input[name$=".LoosePiecesCount"]').val('0');
+          return;
+        }
+
+        const $denomSelect = $row.find('select[name$=".DenominationId"]');
+        const selectedOption = $denomSelect.find('option:selected');
+        if (!selectedOption.length || !selectedOption.val()) {
+          $row.find('input[name$=".BundlesCount"]').val('0');
+          $row.find('input[name$=".LoosePiecesCount"]').val('0');
+          return;
+        }
+
+        const denomId = selectedOption.val();
+        const kind    = $row.find('.js-vtype').val();
+
+        let bundleSize = 1;
+        const arr = (DENOMS && DENOMS[kind]) ? DENOMS[kind] : [];
+        const denomInfo = arr.find(d => String((d.id ?? d.codDenominacion ?? d.CodDenominacion)) === String(denomId));
+        if (denomInfo && (denomInfo.bundleSize ?? denomInfo.tamañoFajo ?? denomInfo.bundle)) {
+          bundleSize = denomInfo.bundleSize ?? denomInfo.tamañoFajo ?? denomInfo.bundle;
+        }
+
+        const bundles = Math.floor(qty / bundleSize);
+        const loose   = qty % bundleSize;
+
+        $row.find('input[name$=".BundlesCount"]').val(bundles || '0');
+        $row.find('input[name$=".LoosePiecesCount"]').val(loose || '0');
+      }
+
+      $(document).on('input change', 'input[name$=".Quantity"]', function() {
+        const $row = $(this).closest('tr');
+        calculateBundlesAndLoose($row);
+        triggerAmountCalculation($row);
+      });
+
+      $(document).on('input change', 'input[name$=".BundlesCount"], input[name$=".LoosePiecesCount"]', function() {
+        const $row = $(this).closest('tr');
+        const bundles = parseFloat($row.find('input[name$=".BundlesCount"]').val()) || 0;
+        const loose   = parseFloat($row.find('input[name$=".LoosePiecesCount"]').val()) || 0;
+
+        if (bundles === 0 && loose === 0) {
+          $row.find('input[name$=".Quantity"]').val('');
+          triggerAmountCalculation($row);
+          return;
+        }
+
+        const $denomSelect = $row.find('select[name$=".DenominationId"]');
+        const selectedOption = $denomSelect.find('option:selected');
+
+        if (selectedOption.length && selectedOption.val()) {
+          const denomId = selectedOption.val();
+          const kind    = $row.find('.js-vtype').val();
+
+          let bundleSize = 1;
+          const arr = (DENOMS && DENOMS[kind]) ? DENOMS[kind] : [];
+          const denomInfo = arr.find(d => String((d.id ?? d.codDenominacion ?? d.CodDenominacion)) === String(denomId));
+          if (denomInfo && (denomInfo.bundleSize ?? denomInfo.tamañoFajo ?? denomInfo.bundle)) {
+            bundleSize = denomInfo.bundleSize ?? denomInfo.tamañoFajo ?? denomInfo.bundle;
+          }
+
+          const totalQuantity = (bundles * bundleSize) + loose;
+          $row.find('input[name$=".Quantity"]').val(totalQuantity);
+          triggerAmountCalculation($row);
+        }
+      });
+
+      function triggerAmountCalculation($row) {
+        let denomVal = 0;
+        const $denSel = $row.find('select[name$=".DenominationId"]');
+        if ($denSel.length) {
+          denomVal = parseFloat($denSel.find('option:selected').data('value')) || 0;
+        } else {
+          denomVal = parseFloat($row.find('input[name$=".DenominationId"]').val()) || 0;
+        }
+
+        const qty  = parseFloat($row.find('input[name$=".Quantity"]').val()) || 0;
+        const unit = parseFloat($row.find('input[name$=".UnitValue"]').val()) || 0;
+        const amt  = (unit > 0 ? qty * unit : denomVal * qty);
+        $row.find('input[name$=".CalculatedAmount"]').val(amt.toFixed(0));
+      }
+
+      // ===================== MOSTRAR/OCULTAR BLOQUES =====================
+      function toggleSobreMode($containerEditor) {
+        const mode = $containerEditor.find('.js-sobre-mode:checked').val(); // Efectivo / Documento / Cheque
+        $containerEditor.find('.sec-sobre-cash').toggle(mode === 'Efectivo');
+        $containerEditor.find('.sec-sobre-docs').toggle(mode === 'Documento');
+        $containerEditor.find('.sec-sobre-cheque').toggle(mode === 'Cheque');
+      }
+      function toggleContainerSections($containerEditor) {
+        const typeVal = $containerEditor.find('.js-container-type').val(); // Bolsa / Sobre
+        const isSobre = (typeVal === 'Sobre');
+        $containerEditor.find('.sec-bolsa').toggle(!isSobre);
+        $containerEditor.find('.sec-sobre').toggle(isSobre);
+        $containerEditor.find('.js-parent-bag-block').toggle(isSobre);
+        if (isSobre) {
+          $containerEditor.find('.js-sobre-mode[value="Efectivo"]').prop('checked', true);
+          toggleSobreMode($containerEditor);
+        }
+      }
+      function refreshAllParentBagCombos() {
+        const bags = [];
+        $('#bagsTabContent .tab-pane[id^="bag-tab-"]').each(function () {
+          const $bagPane = $(this);
+          const i = getPaneIndex($bagPane);
+          const $bagEditor = $bagPane.find('.container-editor').first();
+          const code = $bagEditor.find(`input[name="Containers[${i}].ContainerCode"]`).val() || '';
+          bags.push({ i, text: `Bolsa ${i + 1}${code ? ' — ' + code : ''}` });
+        });
+        $('.container-editor').each(function(){
+          const $ce = $(this);
+          if ($ce.find('.js-container-type').val() !== 'Sobre') return;
+          const prefix = $ce.data('prefix');
+          const $sel = $ce.find(`select[name="${prefix}.ParentContainerId"]`);
+          const selected = $sel.val();
+          $sel.empty().append($('<option/>', { value: '', text: '-- Seleccione bolsa --'}));
+          bags.forEach(b => $sel.append($('<option/>', { value: b.i, text: b.text })));
+          if (selected) $sel.val(selected);
+        });
+      }
+
+      // ===================== AGREGAR/QUITAR BOLSAS Y SOBRES =====================
+      $('#btnAddBag').on('click', function () {
+        const $tabs = $('#bagsTabs');
+        const $contents = $('#bagsTabContent');
+
+        const bagIdx = nextIdx++;
+        const newId = 'bag-tab-' + bagIdx;
+
+        const $btn = $(`
+          <li class="nav-item" role="presentation">
+            <button class="nav-link" id="${newId}-btn" data-bs-toggle="tab" data-bs-target="#${newId}" type="button" role="tab">
+              Contenedor ${$contents.children('.tab-pane').length + 1} — Bolsa
+            </button>
+          </li>`);
+        $tabs.append($btn);
+
+        let html = $('#bag-template').html().replaceAll('__idx__', bagIdx);
+        const $pane = $(`<div class="tab-pane fade" id="${newId}" role="tabpanel" data-bag-idx="${bagIdx}">${html}
+            <div class="card mt-3">
+              <div class="card-header d-flex align-items-center justify-content-between">
+                <h6 class="mb-0">✉️ Sobres de esta Bolsa</h6>
+                <button type="button" class="btn btn-outline-secondary btn-sm js-add-envelope-in-this-bag">+ Agregar Sobre</button>
+              </div>
+              <div class="card-body">
+                <div class="small text-muted">Puedes añadir varios sobres; cada sobre puede ser Efectivo, Documentos/Voucher o Cheques.</div>
+                <div class="bag-envelopes-list mt-3"></div>
+              </div>
+            </div>
+        </div>`);
+        $contents.append($pane);
+
+        $tabs.find('button.nav-link').removeClass('active');
+        $contents.find('.tab-pane').removeClass('show active');
+        $btn.addClass('active');
+        $pane.addClass('show active');
+
+        const $bagEditor = $pane.find('.container-editor').first();
+        $bagEditor.find('.js-container-type').val('Bolsa');
+        toggleContainerSections($bagEditor);
+
+        refreshAllParentBagCombos();
+      });
+
+      $(document).on('click', '.js-add-envelope-in-this-bag', function () {
+        const $bagPane = $(this).closest('.tab-pane[id^="bag-tab-"]');
+        const bagIdx = getPaneIndex($bagPane);
+        const envIdx = nextIdx++;
+
+        let html = $('#envelope-template').html().replaceAll('__idx__', envIdx);
+        const $card = $(html);
+        $bagPane.find('.bag-envelopes-list').append($card);
+
+        $card.find(':input').prop('disabled', false);
+
+        const $envEditor = $card.find('.container-editor').first();
+        $envEditor.find('.js-container-type').val('Sobre');
+        toggleContainerSections($envEditor);
+
+        const prefix = $envEditor.data('prefix');
+        $envEditor.find(`select[name="${prefix}.ParentContainerId"]`).val(bagIdx);
+
+        $envEditor.find('.js-sobre-mode[value="Efectivo"]').prop('checked', true);
+        toggleSobreMode($envEditor);
+
+        refreshAllParentBagCombos();
+      });
+
+      $(document).on('click', '.js-remove-envelope-card', function () {
+        $(this).closest('.envelope-card').remove();
+        refreshAllParentBagCombos();
+      });
+
+      $(document).on('change', '.js-container-type', function () {
+        const $ce = $(this).closest('.container-editor');
+        toggleContainerSections($ce);
+        refreshAllParentBagCombos();
+      });
+      $(document).on('change', '.js-sobre-mode', function () {
+        const $ce = $(this).closest('.container-editor');
+        toggleSobreMode($ce);
+      });
+
+      // ===================== DETALLES =====================
+      // IMPORTANTE: ahora NO bloqueamos repetir Denominación; la restricción es (DenominationId, QualityId)
+      function updateAvailableDenominations($table) {
+        // Si la tabla tiene columna de calidad, NO filtramos denominaciones.
+        if ($table.find('select[name$=".QualityId"].js-quality').length) return;
+
+        // Sin columna de calidad, mantenemos tu lógica previa (evitar repetir denominación)
+        const selectedDenoms = [];
+        $table.find('.js-denom').each(function() {
+          const val = $(this).val();
+          if (val) selectedDenoms.push(val);
+        });
+        $table.find('.js-denom').each(function() {
+          const $select = $(this);
+          const currentValue = $select.val();
+          const valueType = $select.closest('tr').find('.js-vtype').val();
+          const excludeValues = selectedDenoms.filter(val => val !== currentValue);
+          const filteredOptions = denomOptionsHtml(valueType, excludeValues);
+          $select.html(filteredOptions);
+          $select.val(currentValue);
+        });
+      }
+
+      // Agregar fila de detalle
+      $(document).on('click', '.js-add-detail', function () {
+        const $btn  = $(this);
+        const scope = $btn.data('detail-scope');  // bolsa | sobre-cash | sobre-docs
+        const $ce   = $btn.closest('.container-editor');
+        const basePrefix = $ce.data('prefix');
+
+        let max = -1;
+        $(document).find('[name^="' + basePrefix + '.ValueDetails["]').each(function () {
+          const m = this.name.match(/ValueDetails\[(\d+)\]/);
+          if (m) max = Math.max(max, parseInt(m[1], 10));
+        });
+        const j = max + 1;
+
+        let valueTypeOptions = [], denomKindDefault = null;
+        if (scope === 'bolsa' || scope === 'sobre-cash') {
+          valueTypeOptions = [
+            { value: 'Billete', text: 'Billete' },
+            { value: 'Moneda', text: 'Moneda' }
+          ];
+          denomKindDefault = 'Billete';
+        } else if (scope === 'sobre-docs') {
+          valueTypeOptions = [{ value: 'Documento', text: 'Documento' }];
+          denomKindDefault = 'Documento';
+        }
+
+        const vtHtml   = valueTypeOptions.map(v => `<option value="${v.value}">${v.text}</option>`).join('');
+        const denomHtml= denomOptionsHtml(denomKindDefault);
+        // La celda de Calidad solo aplica a Billete/Moneda; si tu tabla ya trae la columna, este select será manejado abajo.
+        const qualityCell = `<td>
+            <select name="${basePrefix}.ValueDetails[${j}].QualityId" class="form-select form-select-sm js-quality">
+              <option value="">-- Seleccione calidad --</option>
+            </select>
+          </td>`;
+
+        // Detecta si la tabla actual tiene columna de calidad (por el thead)
+        const thisTableHasQuality = $btn.closest('.card').find('table thead th')
+                                      .filter(function(){ return $(this).text().trim().toLowerCase().includes('calidad'); }).length > 0;
+
+        const row = `
+          <tr>
+            <td>
+              <select name="${basePrefix}.ValueDetails[${j}].ValueType"
+                      class="form-select form-select-sm js-vtype">
+                ${vtHtml}
+              </select>
+            </td>
+            <td>
+              <select name="${basePrefix}.ValueDetails[${j}].DenominationId"
+                      class="form-select form-select-sm js-denom">
+                ${denomHtml}
+              </select>
+            </td>
+            ${ thisTableHasQuality ? qualityCell : '' }
+            <td><input name="${basePrefix}.ValueDetails[${j}].Quantity" type="number" class="form-control form-control-sm js-calc" /></td>
+            <td><input name="${basePrefix}.ValueDetails[${j}].BundlesCount" type="number" class="form-control form-control-sm js-calc" readonly /></td>
+            <td><input name="${basePrefix}.ValueDetails[${j}].LoosePiecesCount" type="number" class="form-control form-control-sm js-calc" readonly /></td>
+            <td><input name="${basePrefix}.ValueDetails[${j}].UnitValue" type="number" step="1" class="form-control form-control-sm js-calc" readonly /></td>
+            <td><input name="${basePrefix}.ValueDetails[${j}].CalculatedAmount" type="number" step="1" class="form-control form-control-sm" readonly /></td>
+            <td><button type="button" class="btn btn-sm btn-outline-danger js-remove-detail">×</button></td>
+          </tr>`;
+        $btn.closest('.card').find('.js-details-table[data-detail-scope="' + scope + '"] tbody').append(row);
+
+        // Repoblar denominaciones (modo sin calidad) o calidades si aplica
+        const $newRow = $btn.closest('.card').find('.js-details-table[data-detail-scope="' + scope + '"] tbody tr').last();
+        if (thisTableHasQuality) updateQualityForRow($newRow);
+
+        setTimeout(() => {
+          const $table = $btn.closest('.card').find('.js-details-table[data-detail-scope="' + scope + '"]');
+          updateAvailableDenominations($table);
+          if (thisTableHasQuality) updateQualitiesInTable($table);
+        }, 10);
+      });
+
+      $(document).on('change', '.js-vtype', function () {
+        const v = $(this).val();
+        const kind = (v === 'Billete' ? 'Billete' : v === 'Moneda' ? 'Moneda' : v === 'Documento' ? 'Documento' : null);
+        if (!kind) return;
+
+        const $row = $(this).closest('tr');
+        const $denomSelect = $row.find('.js-denom');
+
+        $denomSelect.val('');
+        $denomSelect.html(denomOptionsHtml(kind));
+
+        // Recalcular calidades para esta fila (si existe columna)
+        updateQualityForRow($row);
+
+        const $table = $(this).closest('table');
+        updateAvailableDenominations($table);
+        updateQualitiesInTable($table);
+      });
+
+      $(document).on('change', '.js-denom', function () {
+        const $table = $(this).closest('table');
+        const $row   = $(this).closest('tr');
+
+        // Actualiza calidades (par Denom + Calidad)
+        updateQualityForRow($row);
+        updateQualitiesInTable($table);
+
+        // Fajos / picos y monto
+        calculateBundlesAndLoose($row);
+        triggerAmountCalculation($row);
+      });
+
+      $(document).on('change', '.js-quality', function(){
+        // Al cambiar calidad en una fila, refresca disponibilidad para esa misma denominación en la tabla
+        const $table = $(this).closest('table');
+        updateQualitiesInTable($table);
+      });
+
+      $(document).on('click', '.js-remove-detail', function () {
+        const $table = $(this).closest('table');
+        $(this).closest('tr').remove();
+        setTimeout(() => {
+          updateAvailableDenominations($table);
+          updateQualitiesInTable($table);
+        }, 10);
+      });
+
+      // ===================== CHEQUES =====================
+      $(document).on('click', '.js-add-cheque', function () {
+        const $ce = $(this).closest('.container-editor');
+        const basePrefix = $ce.data('prefix');
+
+        let max = -1;
+        $(document).find('[name^="' + basePrefix + '.ValueDetails["]').each(function () {
+          const m = this.name.match(/ValueDetails\[(\d+)\]/);
+          if (m) max = Math.max(max, parseInt(m[1], 10));
+        });
+        const j = max + 1;
+
+        const row = `
+          <tr>
+            <td><input name="${basePrefix}.ValueDetails[${j}].BankName" class="form-control form-control-sm" /></td>
+            <td><input name="${basePrefix}.ValueDetails[${j}].IdentifierNumber" class="form-control form-control-sm" /></td>
+            <td><input name="${basePrefix}.ValueDetails[${j}].IssueDate" type="date" class="form-control form-control-sm" /></td>
+            <td><input name="${basePrefix}.ValueDetails[${j}].UnitValue" type="number" step="1" class="form-control form-control-sm js-calc" /></td>
+            <td><input name="${basePrefix}.ValueDetails[${j}].Quantity" type="number" class="form-control form-control-sm js-calc" value="1" /></td>
+            <td><input name="${basePrefix}.ValueDetails[${j}].CalculatedAmount" type="number" step="1" class="form-control form-control-sm" readonly /></td>
+            <td>
+              <input type="hidden" name="${basePrefix}.ValueDetails[${j}].ValueType" value="Cheque" />
+              <button type="button" class="btn btn-sm btn-outline-danger js-remove-cheque">×</button>
+            </td>
+          </tr>`;
+        $(this).closest('.card').find('.js-cheques-table tbody').append(row);
+      });
+      $(document).on('click', '.js-remove-cheque', function () {
+        $(this).closest('tr').remove();
+      });
+
+      // ===================== CÁLCULO (monto) =====================
+      $(document).on('input change', '.js-calc, .js-denom', function () {
+        const $row = $(this).closest('tr');
+        triggerAmountCalculation($row);
+      });
+
+      // ===================== SUBMIT =====================
+      $('button[data-step-action="submit-final"]').on('click', function (e) {
+        if (!validateCurrentStep()) {
+          e.preventDefault();
+          Swal.fire('Campos incompletos', 'Revise los campos requeridos.', 'warning');
+        }
+      });
+
+function populateDenomsAndQuals() {
+    document.querySelectorAll('table.js-details-table tbody tr').forEach(row => {
+        const tipoSelect = row.querySelector('.js-vtype');
+        const tipo = tipoSelect?.value || "Billete";
+
+        const denomSel = row.querySelector('.js-denom');
+        const qualitySel = row.querySelector('.js-quality');
+
+        if (!denomSel || !qualitySel || !DENOMS || !QUALS) return;
+
+        // Limpiar selects
+        denomSel.innerHTML = "";
+        qualitySel.innerHTML = "";
+
+        // Rellenar denominaciones
+        const denoms = DENOMS[tipo] || [];
+        denoms.forEach(d => {
+            const opt = document.createElement("option");
+            opt.value = d.id;
+            opt.textContent = d.label;
+            if (denomSel.dataset.selected == d.id.toString()) opt.selected = true;
+            denomSel.appendChild(opt);
         });
 
-        // Función para finalizar el conteo completo de la transacción
-        function finalizeCounting(transactionId) {
-            showConfirmationModal(
-                "¿Está seguro de finalizar el conteo de esta transacción y enviarla a revisión? Una vez finalizado, no podrá editar los contenedores.",
-                function (confirm) {
-                    if (confirm) {
-                        $.ajax({
-                            url: '@Url.Action("FinalizeCounting", "Cef")/' + transactionId,
-                            type: 'POST',
-                            headers: { 'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val() },
-                            success: function(response) {
-                                if (response.success) {
-                                    alert(response.message);
-                                    window.location.href = '@Url.Action("ReviewTransaction", "Cef")?transactionId=' + transactionId;
-                                } else {
-                                    alert('Error: ' + response.message);
-                                }
-                            },
-                            error: function(xhr, status, error) {
-                                alert('Error al finalizar el conteo: ' + error);
-                            }
-                        });
-                    }
-                },
-                "Confirmar Finalización",
-                null,
-                "btn-success",
-                false
-            );
+        // Obtener la familia
+        const selectedDenomId = parseInt(denomSel.dataset.selected || denomSel.value);
+        const selectedDenom = denoms.find(x => x.id === selectedDenomId);
+        const family = selectedDenom?.family || "T";
+
+        // Rellenar calidades
+let keepFamilies = [];
+
+if (tipo === 'Billete' || tipo === 'Moneda') {
+    keepFamilies = ['N', 'A', 'T']; // Mostrar todas las familias si es dinero
+} else if (family === 'N') {
+    keepFamilies = ['N', 'T'];
+} else if (family === 'A') {
+    keepFamilies = ['A', 'T'];
+} else {
+    keepFamilies = ['T'];
+}
+
+const qualities = (QUALS[tipo.charAt(0)] || []).filter(q => {
+    const fam = (q.family ?? q.FamiliaDenominacion ?? 'T').toString().trim().toUpperCase();
+    return keepFamilies.includes(fam);
+});
+
+        qualities.forEach(q => {
+            const opt = document.createElement("option");
+            opt.value = q.id;
+            opt.textContent = q.name;
+            if (qualitySel.dataset.selected == q.id.toString()) opt.selected = true;
+            qualitySel.appendChild(opt);
+        });
+    });
+}
+
+
+
+$form.on('submit', function (e) {
+  e.preventDefault();
+
+  // 1) Valida la pestaña actual
+  if (!validateCurrentStep()) {
+    Swal.fire('Campos incompletos', 'Revise los campos requeridos.', 'warning');
+    return;
+  }
+
+  // 2) Confirmación
+  Swal.fire({
+    title: '¿Guardar contenedores?',
+    text: 'Se guardará toda la información capturada.',
+    icon: 'question',
+    showCancelButton: true,
+    confirmButtonText: 'Sí, guardar',
+    cancelButtonText: 'Cancelar'
+  }).then((res) => {
+    if (!res.isConfirmed) return;
+
+    // 3) Loading
+    Swal.fire({
+      title: 'Guardando...',
+      allowOutsideClick: false,
+      didOpen: () => Swal.showLoading()
+    });
+
+    // 4) Envío AJAX (lleva el antiforgery porque serializamos el form)
+    $.ajax({
+      type: 'POST',
+      url: $form.attr('action'),
+      data: $form.serialize(),
+      headers: { 'X-Requested-With': 'XMLHttpRequest' },
+      success: function (response) {
+        if (response.success) {
+          Swal.fire({
+            icon: 'success',
+            title: '¡Éxito!',
+            text: response.message
+          }).then(() => {
+            if (response.data?.redirectUrl) {
+              window.location.href = response.data.redirectUrl;
+            } else {
+              location.reload();
+            }
+          });
+        } else {
+          const flatErrors = Object.values(response.errors ?? {}).flat();
+          Swal.fire({
+            icon: 'error',
+            title: 'Error al guardar',
+            html: (response.message ?? 'Error') + (flatErrors.length ? '<br>' + flatErrors.join('<br>') : '')
+          });
         }
+      },
+      error: function () {
+        Swal.fire({
+          icon: 'error',
+          title: 'Error de red',
+          text: 'No se pudo guardar. Verifica tu conexión e intenta de nuevo.'
+        });
+      }
+    });
+  });
+});
+        populateDenomsAndQuals();
+    });
     </script>
 }

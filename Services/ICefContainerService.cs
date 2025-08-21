@@ -12,10 +12,9 @@ namespace VCashApp.Services
         /// <summary>
         /// Prepara un ViewModel para el procesamiento de un contenedor, sea nuevo o existente.
         /// </summary>
-        /// <param name="containerId">ID del contenedor existente (opcional, para edición/continuar conteo).</param>
         /// <param name="cefTransactionId">ID de la transacción CEF a la que pertenece (requerido para nuevos contenedores).</param>
         /// <returns>Un ViewModel listo para la vista de procesamiento del contenedor.</returns>
-        Task<CefContainerProcessingViewModel> PrepareContainerProcessingViewModelAsync(int? containerId, int cefTransactionId);
+        Task<CefProcessContainersPageViewModel> PrepareProcessContainersPageAsync(int cefTransactionId);
 
         /// <summary>
         /// Crea o actualiza un contenedor de efectivo (bolsa/sobre) y sus detalles de valores.
@@ -39,5 +38,25 @@ namespace VCashApp.Services
         /// <param name="transactionId">ID de la transacción CEF.</param>
         /// <returns>Lista de contenedores.</returns>
         Task<List<CefContainer>> GetContainersByTransactionIdAsync(int transactionId);
+
+        /// <summary>
+        /// Obtiene las denominaciones en formato JSON para una transacción específica.
+        /// </summary>
+        /// <param name="cefTransactionId">ID de la transaccion</param>
+        /// <returns>Lista de denominaciones</returns>
+        Task<String> BuildDenomsJsonForTransactionAsync(int cefTransactionId);
+
+        /// <summary>
+        /// Obtiene las calidades de billetes en formato JSON.
+        /// </summary>
+        /// <returns>Lista de calidades</returns>
+        Task<String> BuildQualitiesJsonAsync();
+
+        /// <summary>
+        /// Obtiene los totales de un contenedor de efectivo para una transacción específica.
+        /// </summary>
+        /// <param name="transactionId"></param>
+        /// <returns></returns>
+        Task<(decimal declared, decimal counted, decimal diff)> GetTransactionTotalsAsync(int transactionId);
     }
 }

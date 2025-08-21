@@ -34,6 +34,10 @@ namespace VCashApp.Models.Entities
         [Column("CodigoContenedor")]
         public string ContainerCode { get; set; } // Número de Sello / Número de la Bolsa
 
+        [StringLength(20)]
+        [Column("TipoSobre")]
+        public string? EnvelopeSubType { get; set; } // null para Bolsa; 'Efectivo' | 'Documento' | 'Cheque' para Sobre
+
         [Column("ValorDeclarado", TypeName = "DECIMAL(18,0)")]
         public decimal? DeclaredValue { get; set; } // Valor declarado para este contenedor (si aplica)
 
