@@ -53,6 +53,7 @@ publish/
 # DotNet tool files
 .config/dotnet-tools.json
 
+
 # Ignorar configuraciones sensibles
 appsettings.json
 appsettings.Development.json
