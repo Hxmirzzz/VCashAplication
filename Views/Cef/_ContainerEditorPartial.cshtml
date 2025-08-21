@@ -62,9 +62,9 @@
     <!-- ====== Sección BOLSA ====== -->
     <div class="sec-bolsa mt-3" style="display:@(!esSobre ? "block" : "none")">
         <div class="card">
-            <div class="card-header"><h6 class="mb-0">🧳 Bolsa — Detalle (Billetes/Monedas)</h6></div>
+            <div class="card-header"><h6 class="mb-0">💰 Bolsa — Detalle (Billetes/Monedas)</h6></div>
             <div class="card-body">
-                <table class="table table-sm align-middle js-details-table" data-detail-scope="bolsa">
+                <table class="table table-responsive table-sm align-middle js-details-table" data-detail-scope="bolsa">
                     <thead>
                         <tr>
                             <th>Tipo</th>
@@ -84,6 +84,7 @@
                             var idx = Model.ValueDetails.IndexOf(d);
                             var prefixDetail = $"{prefix}.ValueDetails[{idx}]";
                             <tr>
+                                <input type="text" name="@($"{prefixDetail}.Id")" value="@d.Id" />
                                 <td>
                                     <select name="@($"{prefixDetail}.ValueType")" class="form-select form-select-sm js-vtype">
                                         @Html.Raw($"<option value=\"Billete\" {(d.ValueType == CefValueTypeEnum.Billete ? "selected" : "")}>Billete</option>")
@@ -103,9 +104,9 @@
                                     </select>
                                 </td>
                                 <td><input name="@($"{prefixDetail}.Quantity")" type="number" class="form-control form-control-sm js-calc" value="@d.Quantity" /></td>
-                                <td><input name="@($"{prefixDetail}.BundlesCount")" type="number" class="form-control form-control-sm js-calc" value="@d.BundlesCount" /></td>
-                                <td><input name="@($"{prefixDetail}.LoosePiecesCount")" type="number" class="form-control form-control-sm js-calc" value="@d.LoosePiecesCount" /></td>
-                                <td><input name="@($"{prefixDetail}.UnitValue")" type="number" step="1" class="form-control form-control-sm js-calc" value="@d.UnitValue" /></td>
+                                <td><input name="@($"{prefixDetail}.BundlesCount")" type="number" class="form-control form-control-sm js-calc" value="@d.BundlesCount" readonly /></td>
+                                <td><input name="@($"{prefixDetail}.LoosePiecesCount")" type="number" class="form-control form-control-sm js-calc" value="@d.LoosePiecesCount" readonly /></td>
+                                <td><input name="@($"{prefixDetail}.UnitValue")" type="number" step="1" class="form-control form-control-sm js-calc" value="@d.UnitValue" readonly /></td>
                                 <td><input name="@($"{prefixDetail}.CalculatedAmount")" type="number" step="1" class="form-control form-control-sm" value="@d.CalculatedAmount" readonly /></td>
                                 <td><button type="button" class="btn btn-sm btn-outline-danger js-remove-detail">×</button></td>
                             </tr>

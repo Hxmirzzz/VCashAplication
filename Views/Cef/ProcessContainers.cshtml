@@ -884,9 +884,9 @@
             </td>
             ${ thisTableHasQuality ? qualityCell : '' }
             <td><input name="${basePrefix}.ValueDetails[${j}].Quantity" type="number" class="form-control form-control-sm js-calc" /></td>
-            <td><input name="${basePrefix}.ValueDetails[${j}].BundlesCount" type="number" class="form-control form-control-sm js-calc" /></td>
-            <td><input name="${basePrefix}.ValueDetails[${j}].LoosePiecesCount" type="number" class="form-control form-control-sm js-calc" /></td>
-            <td><input name="${basePrefix}.ValueDetails[${j}].UnitValue" type="number" step="1" class="form-control form-control-sm js-calc" /></td>
+            <td><input name="${basePrefix}.ValueDetails[${j}].BundlesCount" type="number" class="form-control form-control-sm js-calc" readonly /></td>
+            <td><input name="${basePrefix}.ValueDetails[${j}].LoosePiecesCount" type="number" class="form-control form-control-sm js-calc" readonly /></td>
+            <td><input name="${basePrefix}.ValueDetails[${j}].UnitValue" type="number" step="1" class="form-control form-control-sm js-calc" readonly /></td>
             <td><input name="${basePrefix}.ValueDetails[${j}].CalculatedAmount" type="number" step="1" class="form-control form-control-sm" readonly /></td>
             <td><button type="button" class="btn btn-sm btn-outline-danger js-remove-detail">×</button></td>
           </tr>`;
@@ -995,65 +995,63 @@
         }
       });
 
-        function populateDenomsAndQuals() {
-            document.querySelectorAll('table.js-details-table tbody tr').forEach(row => {
-                const tipoSelect = row.querySelector('.js-vtype');
-                const tipo = tipoSelect?.value || "Billete";
+function populateDenomsAndQuals() {
+    document.querySelectorAll('table.js-details-table tbody tr').forEach(row => {
+        const tipoSelect = row.querySelector('.js-vtype');
+        const tipo = tipoSelect?.value || "Billete";
 
-                const denomSel = row.querySelector('.js-denom');
-                const qualitySel = row.querySelector('.js-quality');
+        const denomSel = row.querySelector('.js-denom');
+        const qualitySel = row.querySelector('.js-quality');
 
-                if (!denomSel || !qualitySel || !DENOMS || !QUALS) return;
+        if (!denomSel || !qualitySel || !DENOMS || !QUALS) return;
 
-                // Limpiar selects
-                denomSel.innerHTML = "";
-                qualitySel.innerHTML = "";
+        // Limpiar selects
+        denomSel.innerHTML = "";
+        qualitySel.innerHTML = "";
 
-                // Rellenar denominaciones
-                const denoms = DENOMS[tipo] || [];
-                denoms.forEach(d => {
-                    const opt = document.createElement("option");
-                    opt.value = d.id;
-                    opt.textContent = d.label;
-                    if (denomSel.dataset.selected == d.id.toString()) opt.selected = true;
-                    denomSel.appendChild(opt);
-                });
+        // Rellenar denominaciones
+        const denoms = DENOMS[tipo] || [];
+        denoms.forEach(d => {
+            const opt = document.createElement("option");
+            opt.value = d.id;
+            opt.textContent = d.label;
+            if (denomSel.dataset.selected == d.id.toString()) opt.selected = true;
+            denomSel.appendChild(opt);
+        });
 
-                // Obtener la familia
-                const selectedDenomId = parseInt(denomSel.dataset.selected || denomSel.value);
-                const selectedDenom = denoms.find(x => x.id === selectedDenomId);
-                const family = selectedDenom?.family || "T";
+        // Obtener la familia
+        const selectedDenomId = parseInt(denomSel.dataset.selected || denomSel.value);
+        const selectedDenom = denoms.find(x => x.id === selectedDenomId);
+        const family = selectedDenom?.family || "T";
 
-                let keepFamilies = [];
+        // Rellenar calidades
+let keepFamilies = [];
 
-                if (tipo === 'Billete' || tipo === 'Moneda') {
-                    keepFamilies = ['N', 'A', 'T'];
-                } else if (family === 'N') {
-                    keepFamilies = ['N', 'T'];
-                } else if (family === 'A') {
-                    keepFamilies = ['A', 'T'];
-                } else {
-                    keepFamilies = ['T'];
-                }
+if (tipo === 'Billete' || tipo === 'Moneda') {
+    keepFamilies = ['N', 'A', 'T']; // Mostrar todas las familias si es dinero
+} else if (family === 'N') {
+    keepFamilies = ['N', 'T'];
+} else if (family === 'A') {
+    keepFamilies = ['A', 'T'];
+} else {
+    keepFamilies = ['T'];
+}
 
-                const qualities = (QUALS[tipo.charAt(0)] || []).filter(q => {
-                    const fam = (q.family ?? q.FamiliaDenominacion ?? 'T').toString().trim().toUpperCase();
-                    return keepFamilies.includes(fam);
-                });
-                qualities.forEach(q => {
-                    const opt = document.createElement("option");
-                    opt.value = q.id;
-                    opt.textContent = q.name;
-                    if (qualitySel.dataset.selected == q.id.toString()) opt.selected = true;
-                    qualitySel.appendChild(opt);
-                });
-            });
-        }
+const qualities = (QUALS[tipo.charAt(0)] || []).filter(q => {
+    const fam = (q.family ?? q.FamiliaDenominacion ?? 'T').toString().trim().toUpperCase();
+    return keepFamilies.includes(fam);
+});
 
-  window.addEventListener('load', () => {
-    console.log("✅ Window loaded: ejecutando populateDenomsAndQuals");
-    populateDenomsAndQuals();
-  });
+        qualities.forEach(q => {
+            const opt = document.createElement("option");
+            opt.value = q.id;
+            opt.textContent = q.name;
+            if (qualitySel.dataset.selected == q.id.toString()) opt.selected = true;
+            qualitySel.appendChild(opt);
+        });
+    });
+}
+
 
 
 $form.on('submit', function (e) {
@@ -1121,6 +1119,7 @@ $form.on('submit', function (e) {
     });
   });
 });
+        populateDenomsAndQuals();
     });
     </script>
 }

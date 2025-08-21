@@ -128,6 +128,7 @@ namespace VCashApp.Services.Cef
 
                     ValueDetails = c.ValueDetails?.Select(d => new CefValueDetailViewModel
                     {
+                        Id = d.Id,
                         DenominationId = d.DenominationId,
                         Quantity = d.Quantity,
                         BundlesCount = d.BundlesCount,
@@ -155,7 +156,6 @@ namespace VCashApp.Services.Cef
             var transaction = await _context.CefTransactions.FirstOrDefaultAsync(t => t.Id == viewModel.CefTransactionId)
                 ?? throw new InvalidOperationException($"La transacción CEF con ID {viewModel.CefTransactionId} no existe.");
 
-            // Validar estado de la transacción para permitir guardar contenedores
             if (transaction.TransactionStatus != CefTransactionStatusEnum.Checkin.ToString() &&
                 transaction.TransactionStatus != CefTransactionStatusEnum.EnqueuedForCounting.ToString() &&
                 transaction.TransactionStatus != CefTransactionStatusEnum.BillCounting.ToString() &&
@@ -177,7 +177,7 @@ namespace VCashApp.Services.Cef
             }
             else
             {
-                viewModel.ParentContainerId = null; 
+                viewModel.ParentContainerId = null;
                 viewModel.EnvelopeSubType = null;
             }
 
@@ -190,7 +190,6 @@ namespace VCashApp.Services.Cef
 
             if (dupPairs.Any())
                 throw new InvalidOperationException("Hay filas repetidas con la misma combinación Denominación + Calidad. Verifique los detalles.");
-
 
             CefContainer container;
             if (viewModel.Id == 0)
@@ -230,9 +229,19 @@ namespace VCashApp.Services.Cef
                 container.ClientEnvelopeDate = viewModel.ClientEnvelopeDate;
 
                 _context.CefContainers.Update(container);
-                _context.CefValueDetails.RemoveRange(container.ValueDetails);
-                await _context.SaveChangesAsync();
             }
+
+            var existingDetails = container.ValueDetails.ToList();
+            var incomingDetailIds = viewModel.ValueDetails
+                .Where(d => d.Id != 0)
+                .Select(d => d.Id)
+                .ToHashSet();
+
+            var detailsToDelete = existingDetails
+                .Where(d => !incomingDetailIds.Contains(d.Id))
+                .ToList();
+
+            _context.CefValueDetails.RemoveRange(detailsToDelete);
 
             decimal countedTotal = 0m;
 
@@ -252,29 +261,53 @@ namespace VCashApp.Services.Cef
                         throw new InvalidOperationException("Para Documento/Cheque debe indicar el valor unitario.");
                 }
 
-                var detail = new CefValueDetail
+                var existing = existingDetails.FirstOrDefault(d => d.Id == detailVm.Id);
+
+                if (existing != null)
                 {
-                    CefContainerId = container.Id,
-                    ValueType = detailVm.ValueType.ToString(),
-                    DenominationId = detailVm.DenominationId,
-                    Quantity = detailVm.Quantity,
-                    BundlesCount = detailVm.BundlesCount,
-                    LoosePiecesCount = detailVm.LoosePiecesCount,
-                    UnitValue = detailVm.UnitValue,
-                    CalculatedAmount = detailVm.CalculatedAmount,
-                    IsHighDenomination = detailVm.IsHighDenomination,
-                    IdentifierNumber = detailVm.IdentifierNumber,
-                    BankName = detailVm.BankName,
-                    IssueDate = detailVm.IssueDate,
-                    Issuer = detailVm.Issuer,
-                    Observations = detailVm.Observations,
-                    QualityId = detailVm.QualityId
-                };
+                    existing.ValueType = detailVm.ValueType.ToString();
+                    existing.DenominationId = detailVm.DenominationId;
+                    existing.Quantity = detailVm.Quantity;
+                    existing.BundlesCount = detailVm.BundlesCount;
+                    existing.LoosePiecesCount = detailVm.LoosePiecesCount;
+                    existing.UnitValue = detailVm.UnitValue;
+                    existing.CalculatedAmount = await CalcularMontoServidorAsync(existing);
+                    existing.IsHighDenomination = detailVm.IsHighDenomination;
+                    existing.IdentifierNumber = detailVm.IdentifierNumber;
+                    existing.BankName = detailVm.BankName;
+                    existing.IssueDate = detailVm.IssueDate;
+                    existing.Issuer = detailVm.Issuer;
+                    existing.Observations = detailVm.Observations;
+                    existing.QualityId = detailVm.QualityId;
 
-                detail.CalculatedAmount = await CalcularMontoServidorAsync(detail);
-                countedTotal += detail.CalculatedAmount ?? 0;
+                    _context.CefValueDetails.Update(existing);
+                    countedTotal += existing.CalculatedAmount ?? 0;
+                }
+                else
+                {
+                    var newDetail = new CefValueDetail
+                    {
+                        CefContainerId = container.Id,
+                        ValueType = detailVm.ValueType.ToString(),
+                        DenominationId = detailVm.DenominationId,
+                        Quantity = detailVm.Quantity,
+                        BundlesCount = detailVm.BundlesCount,
+                        LoosePiecesCount = detailVm.LoosePiecesCount,
+                        UnitValue = detailVm.UnitValue,
+                        IsHighDenomination = detailVm.IsHighDenomination,
+                        IdentifierNumber = detailVm.IdentifierNumber,
+                        BankName = detailVm.BankName,
+                        IssueDate = detailVm.IssueDate,
+                        Issuer = detailVm.Issuer,
+                        Observations = detailVm.Observations,
+                        QualityId = detailVm.QualityId
+                    };
 
-                await _context.CefValueDetails.AddAsync(detail);
+                    newDetail.CalculatedAmount = await CalcularMontoServidorAsync(newDetail);
+                    countedTotal += newDetail.CalculatedAmount ?? 0;
+
+                    await _context.CefValueDetails.AddAsync(newDetail);
+                }
             }
 
             container.CountedValue = countedTotal;
@@ -289,8 +322,16 @@ namespace VCashApp.Services.Cef
             _context.CefContainers.Update(container);
             await _context.SaveChangesAsync();
 
+            if (transaction.TransactionStatus == CefTransactionStatusEnum.Checkin.ToString())
+            {
+                transaction.TransactionStatus = CefTransactionStatusEnum.BillCounting.ToString();
+                _context.CefTransactions.Update(transaction);
+                await _context.SaveChangesAsync();
+            }
+
             return container;
         }
+
 
         private static bool SobreDetalleEsValido(CefEnvelopeSubTypeEnum? subType, CefValueTypeEnum valueType)
         {
