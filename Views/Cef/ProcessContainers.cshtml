@@ -190,14 +190,20 @@
                                                             @for (var e = 0; e < childEnvelopes.Count; e++)
                                                             {
                                                                 var envIdx = childEnvelopes[e].idx;
-                                                                <div class="envelope-card mb-3" data-env-idx="@envIdx">
+                                                                var env    = Model.Containers[envIdx];
+                                                                <div class="envelope-card mb-3"
+                                                                     data-env-idx="@envIdx"
+                                                                     data-container-id="@env.Id">
                                                                     @{
                                                                         var vddEnv = new ViewDataDictionary(ViewData);
                                                                         vddEnv.TemplateInfo.HtmlFieldPrefix = $"Containers[{envIdx}]";
                                                                     }
-                                                                    @Html.Partial("_ContainerEditorPartial", Model.Containers[envIdx], vddEnv)
+                                                                    @Html.Partial("_ContainerEditorPartial", env, vddEnv)
                                                                     <div class="d-flex justify-content-end">
-                                                                        <button type="button" class="btn btn-outline-danger btn-sm js-remove-envelope-card" data-env-idx="@envIdx">
+                                                                        <button type="button"
+                                                                                class="btn btn-outline-danger btn-sm js-remove-envelope-card"
+                                                                                data-env-idx="@envIdx"
+                                                                                data-container-id="@env.Id">
                                                                             Eliminar sobre
                                                                         </button>
                                                                     </div>
@@ -233,7 +239,9 @@
                           var vddE = new ViewDataDictionary(ViewData);
                           vddE.TemplateInfo.HtmlFieldPrefix = "Containers[__idx__]";
                         }
-                        <div class="envelope-card mb-3" data-env-idx="__idx__">
+                        <div class="envelope-card mb-3"
+                             data-env-idx="__idx__"
+                             data-container-id="0">
                             @Html.Partial("_ContainerEditorPartial",
                                 new VCashApp.Models.ViewModels.CentroEfectivo.CefContainerProcessingViewModel {
                                     ContainerType = VCashApp.Enums.CefContainerTypeEnum.Sobre
@@ -241,7 +249,10 @@
                                 vddE
                             )
                             <div class="d-flex justify-content-end">
-                                <button type="button" class="btn btn-outline-danger btn-sm js-remove-envelope-card" data-env-idx="__idx__">
+                                <button type="button"
+                                        class="btn btn-outline-danger btn-sm js-remove-envelope-card"
+                                        data-env-idx="__idx__"
+                                        data-container-id="0">
                                     Eliminar sobre
                                 </button>
                             </div>
@@ -600,38 +611,59 @@
         }
 
       // ===================== FAJOS / PICOS =====================s
-      function calculateBundlesAndLoose($row) {
-        const qty = parseFloat($row.find('input[name$=".Quantity"]').val()) || 0;
-        if (qty <= 0) {
-          $row.find('input[name$=".BundlesCount"]').val('0');
-          $row.find('input[name$=".LoosePiecesCount"]').val('0');
-          return;
+        function calculateBundlesAndLoose($row) {
+          const qty = parseFloat($row.find('input[name$=".Quantity"]').val()) || 0;
+  
+          if (qty <= 0) {
+            $row.find('input[name$=".BundlesCount"]').val('0');
+            $row.find('input[name$=".LoosePiecesCount"]').val('0');
+            // NO resetear UnitValue para datos existentes
+            return;
+          }
+
+          const $denomSelect = $row.find('select[name$=".DenominationId"]');
+          const selectedOption = $denomSelect.find('option:selected');
+  
+          if (!selectedOption.length || !selectedOption.val()) {
+            $row.find('input[name$=".BundlesCount"]').val('0');
+            $row.find('input[name$=".LoosePiecesCount"]').val('0');
+            // NO resetear UnitValue para datos existentes
+            return;
+          }
+
+          const denomId = selectedOption.val();
+          const kind = $row.find('.js-vtype').val();
+
+          // Obtener bundleSize
+          let bundleSize = 1;
+          const arr = (DENOMS && DENOMS[kind]) ? DENOMS[kind] : [];
+          const denomInfo = arr.find(d => String((d.id ?? d.codDenominacion ?? d.CodDenominacion)) === String(denomId));
+          if (denomInfo && (denomInfo.bundleSize ?? denomInfo.tamañoFajo ?? denomInfo.bundle)) {
+            bundleSize = denomInfo.bundleSize ?? denomInfo.tamañoFajo ?? denomInfo.bundle;
+          }
+
+          // Calcular fajos y picos
+          const bundles = Math.floor(qty / bundleSize);
+          const loose = qty % bundleSize;
+          $row.find('input[name$=".BundlesCount"]').val(bundles || '0');
+          $row.find('input[name$=".LoosePiecesCount"]').val(loose || '0');
+
+          // Obtener valor unitario - MEJORADO para datos existentes
+          let unitValue = parseFloat(selectedOption.data('value')) || 0;
+  
+          // Si no hay data-value en el option, buscar en DENOMS
+          if (unitValue === 0 && denomInfo) {
+            unitValue = denomInfo.value ?? denomInfo.valor ?? denomInfo.ValorDenominacion ?? denomInfo.valorDenominacion ?? 0;
+          }
+  
+          // Si aún no hay valor unitario, mantener el existente
+          const currentUnitValue = parseFloat($row.find('input[name$=".UnitValue"]').val()) || 0;
+          if (unitValue === 0 && currentUnitValue > 0) {
+            unitValue = currentUnitValue;
+          }
+
+          $row.find('input[name$=".UnitValue"]').val(unitValue || '0');
         }
-
-        const $denomSelect = $row.find('select[name$=".DenominationId"]');
-        const selectedOption = $denomSelect.find('option:selected');
-        if (!selectedOption.length || !selectedOption.val()) {
-          $row.find('input[name$=".BundlesCount"]').val('0');
-          $row.find('input[name$=".LoosePiecesCount"]').val('0');
-          return;
-        }
-
-        const denomId = selectedOption.val();
-        const kind    = $row.find('.js-vtype').val();
-
-        let bundleSize = 1;
-        const arr = (DENOMS && DENOMS[kind]) ? DENOMS[kind] : [];
-        const denomInfo = arr.find(d => String((d.id ?? d.codDenominacion ?? d.CodDenominacion)) === String(denomId));
-        if (denomInfo && (denomInfo.bundleSize ?? denomInfo.tamañoFajo ?? denomInfo.bundle)) {
-          bundleSize = denomInfo.bundleSize ?? denomInfo.tamañoFajo ?? denomInfo.bundle;
-        }
-
-        const bundles = Math.floor(qty / bundleSize);
-        const loose   = qty % bundleSize;
-
-        $row.find('input[name$=".BundlesCount"]').val(bundles || '0');
-        $row.find('input[name$=".LoosePiecesCount"]').val(loose || '0');
-      }
 
       $(document).on('input change', 'input[name$=".Quantity"]', function() {
         const $row = $(this).closest('tr');
@@ -670,20 +702,89 @@
         }
       });
 
-      function triggerAmountCalculation($row) {
-        let denomVal = 0;
-        const $denSel = $row.find('select[name$=".DenominationId"]');
-        if ($denSel.length) {
-          denomVal = parseFloat($denSel.find('option:selected').data('value')) || 0;
-        } else {
-          denomVal = parseFloat($row.find('input[name$=".DenominationId"]').val()) || 0;
+        function triggerAmountCalculation($row) {
+          const qty = parseFloat($row.find('input[name$=".Quantity"]').val()) || 0;
+          let unitValue = parseFloat($row.find('input[name$=".UnitValue"]').val()) || 0;
+  
+          // Si no hay valor unitario, intentar obtenerlo de la denominación
+          if (unitValue === 0) {
+            const $denSel = $row.find('select[name$=".DenominationId"]');
+            const denomId = $denSel.val();
+            const kind = $row.find('.js-vtype').val();
+    
+            if (denomId && kind) {
+              // Buscar en data-value del option seleccionado
+              const selectedOption = $denSel.find('option:selected');
+              unitValue = parseFloat(selectedOption.data('value')) || 0;
+      
+              // Si no hay data-value, buscar en DENOMS
+              if (unitValue === 0) {
+                const arr = (DENOMS && DENOMS[kind]) ? DENOMS[kind] : [];
+                const denomInfo = arr.find(d => String((d.id ?? d.codDenominacion ?? d.CodDenominacion)) === String(denomId));
+                if (denomInfo) {
+                  unitValue = denomInfo.value ?? denomInfo.valor ?? denomInfo.ValorDenominacion ?? denomInfo.valorDenominacion ?? 0;
+                }
+              }
+      
+              // Actualizar el campo UnitValue si se encontró el valor
+              if (unitValue > 0) {
+                $row.find('input[name$=".UnitValue"]').val(unitValue);
+              }
+            }
+          }
+
+          const amt = qty * unitValue;
+          $row.find('input[name$=".CalculatedAmount"]').val(amt.toFixed(0));
         }
 
-        const qty  = parseFloat($row.find('input[name$=".Quantity"]').val()) || 0;
-        const unit = parseFloat($row.find('input[name$=".UnitValue"]').val()) || 0;
-        const amt  = (unit > 0 ? qty * unit : denomVal * qty);
-        $row.find('input[name$=".CalculatedAmount"]').val(amt.toFixed(0));
-      }
+        // Función para inicializar datos existentes
+        function initializeExistingData() {
+          // Recorrer todas las filas existentes y calcular valores
+          $('table.js-details-table tbody tr').each(function() {
+            const $row = $(this);
+    
+            // Verificar si es una fila con datos (tiene denominación seleccionada)
+            const $denomSelect = $row.find('select[name$=".DenominationId"]');
+            if ($denomSelect.val()) {
+              // Asegurar que el data-value esté disponible en el option seleccionado
+              ensureDenomDataValue($row);
+      
+              // Recalcular fajos y picos si hay cantidad
+              const qty = parseFloat($row.find('input[name$=".Quantity"]').val()) || 0;
+              if (qty > 0) {
+                calculateBundlesAndLoose($row);
+              }
+      
+              // Recalcular monto
+              triggerAmountCalculation($row);
+            }
+          });
+        }
+
+        // Función para asegurar que el data-value esté disponible en options existentes
+        function ensureDenomDataValue($row) {
+          const $denomSelect = $row.find('select[name$=".DenominationId"]');
+          const selectedValue = $denomSelect.val();
+          const kind = $row.find('.js-vtype').val();
+  
+          if (selectedValue && kind) {
+            const selectedOption = $denomSelect.find('option:selected');
+    
+            // Si el option no tiene data-value, agregarlo
+            if (!selectedOption.data('value')) {
+              const arr = (DENOMS && DENOMS[kind]) ? DENOMS[kind] : [];
+              const denomInfo = arr.find(d => String((d.id ?? d.codDenominacion ?? d.CodDenominacion)) === String(selectedValue));
+      
+              if (denomInfo) {
+                const value = denomInfo.value ?? denomInfo.valor ?? denomInfo.ValorDenominacion ?? denomInfo.valorDenominacion ?? 0;
+                const family = denomInfo.family ?? denomInfo.familia ?? denomInfo.FamiliaDenominacion ?? denomInfo.fam ?? 'T';
+        
+                selectedOption.attr('data-value', value);
+                selectedOption.attr('data-family', family);
+              }
+            }
+          }
+        }
 
       // ===================== MOSTRAR/OCULTAR BLOQUES =====================
       function toggleSobreMode($containerEditor) {
@@ -728,6 +829,7 @@
       $('#btnAddBag').on('click', function () {
         const $tabs = $('#bagsTabs');
         const $contents = $('#bagsTabContent');
+        const realTransactionId = $('#CefTransactionId').val();
 
         const bagIdx = nextIdx++;
         const newId = 'bag-tab-' + bagIdx;
@@ -761,40 +863,112 @@
         $pane.addClass('show active');
 
         const $bagEditor = $pane.find('.container-editor').first();
+        $bagEditor.find(':input').prop('disabled', false);
         $bagEditor.find('.js-container-type').val('Bolsa');
+        $bagEditor.find('input[name$=".CefTransactionId"]').val(realTransactionId);
         toggleContainerSections($bagEditor);
 
         refreshAllParentBagCombos();
       });
 
-      $(document).on('click', '.js-add-envelope-in-this-bag', function () {
-        const $bagPane = $(this).closest('.tab-pane[id^="bag-tab-"]');
-        const bagIdx = getPaneIndex($bagPane);
-        const envIdx = nextIdx++;
+        $(document).on('click', '.js-add-envelope-in-this-bag', function () {
+            const $bagPane = $(this).closest('.tab-pane[id^="bag-tab-"]');
+            const bagIdx = getPaneIndex($bagPane);
+            const envIdx = nextIdx++;
+            const realtransactionId = $('#CefTransactionId').val();
 
-        let html = $('#envelope-template').html().replaceAll('__idx__', envIdx);
-        const $card = $(html);
-        $bagPane.find('.bag-envelopes-list').append($card);
+            const $bagEditor = $bagPane.find('.container-editor').first();
+            const realBagId = $bagEditor.find('input[name$=".Id"]').val();
+            const bagLabel = $bagEditor.find('input[name$=".ContainerCode"]').val();
 
-        $card.find(':input').prop('disabled', false);
+            let html = $('#envelope-template').html().replaceAll('__idx__', envIdx);
+            const $card = $(html);
+            $bagPane.find('.bag-envelopes-list').append($card);
 
-        const $envEditor = $card.find('.container-editor').first();
-        $envEditor.find('.js-container-type').val('Sobre');
-        toggleContainerSections($envEditor);
+            $card.find(':input').prop('disabled', false);
 
-        const prefix = $envEditor.data('prefix');
-        $envEditor.find(`select[name="${prefix}.ParentContainerId"]`).val(bagIdx);
+            const $envEditor = $card.find('.container-editor').first();
+            const prefix = $envEditor.data('prefix');
 
-        $envEditor.find('.js-sobre-mode[value="Efectivo"]').prop('checked', true);
-        toggleSobreMode($envEditor);
+            $envEditor.find('.js-container-type').val('Sobre');
+            $envEditor.find('input[name$=".CefTransactionId"]').val(realtransactionId);
+            $envEditor.find(`input[name="${prefix}.ParentContainerId"]`).val(bagIdx);
 
-        refreshAllParentBagCombos();
-      });
+            const $visualSelect = $envEditor.find('.js-parent-bag-block select[name="VisibleBagName"]');
+            $visualSelect.empty().append(`<option value="${realBagId}" selected>${bagLabel}</option>`);
 
-      $(document).on('click', '.js-remove-envelope-card', function () {
-        $(this).closest('.envelope-card').remove();
-        refreshAllParentBagCombos();
-      });
+            toggleContainerSections($envEditor);
+            $envEditor.find('.js-sobre-mode[value="Efectivo"]').prop('checked', true);
+            toggleSobreMode($envEditor);
+
+            refreshAllParentBagCombos();
+        });
+
+        $(document).on('click', '.js-remove-envelope-card', function () {
+          const $btn         = $(this);
+          const $card        = $btn.closest('.envelope-card');
+          const containerId  = parseInt($btn.data('container-id') || $card.data('container-id') || 0, 10);
+          const transactionId= $('#CefTransactionId').val();
+          const token        = $('input[name="__RequestVerificationToken"]').val();
+
+          // Si es NUEVO (Id = 0): solo quitar del DOM
+          if (!containerId || containerId === 0) {
+            $card.remove();
+            refreshAllParentBagCombos();
+            Swal.fire('Eliminado', 'El sobre (sin guardar) fue eliminado del formulario.', 'success');
+            return;
+          }
+
+          // Confirmar y borrar en servidor
+          Swal.fire({
+            title: '¿Eliminar sobre?',
+            text: 'Se eliminará el sobre y todos sus detalles.',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Sí, eliminar',
+            cancelButtonText: 'Cancelar'
+          }).then((res) => {
+            if (!res.isConfirmed) return;
+
+            $btn.prop('disabled', true);
+
+            $.ajax({
+              type: 'POST',
+              url: '@Url.Action("DeleteContainer")',
+              data: {
+                transactionId: transactionId,
+                containerId: containerId,
+                __RequestVerificationToken: token
+              }
+            }).done(function (r) {
+              if (r && r.success) {
+                // Quitar del DOM
+                $card.remove();
+                refreshAllParentBagCombos();
+
+                // Refrescar totales (usa tu acción existente)
+                $.get('@Url.Action("ProcessTotals")', { transactionId: transactionId })
+                  .done(function(t) {
+                    // Actualiza los inputs del Resumen (son <input/>, usar .val())
+                    $('#sumDeclaredAll').val(Number(t.declared).toLocaleString());
+                    $('#sumCountedAll').val(Number(t.counted).toLocaleString());
+                    $('#sumDiffAll').val(Number(t.diff).toLocaleString());
+                  });
+
+                Swal.fire('Eliminado', 'El sobre fue eliminado correctamente.', 'success');
+              } else {
+                Swal.fire('Atención', (r && r.message) || 'No se pudo eliminar el sobre.', 'info');
+              }
+            }).fail(function (xhr) {
+              const msg = (xhr.responseJSON && xhr.responseJSON.message)
+                        || xhr.responseText
+                        || 'Error inesperado al eliminar.';
+              Swal.fire('Error', msg, 'error');
+            }).always(function () {
+              $btn.prop('disabled', false);
+            });
+          });
+        });
 
       $(document).on('change', '.js-container-type', function () {
         const $ce = $(this).closest('.container-editor');
@@ -807,12 +981,9 @@
       });
 
       // ===================== DETALLES =====================
-      // IMPORTANTE: ahora NO bloqueamos repetir Denominación; la restricción es (DenominationId, QualityId)
       function updateAvailableDenominations($table) {
-        // Si la tabla tiene columna de calidad, NO filtramos denominaciones.
         if ($table.find('select[name$=".QualityId"].js-quality').length) return;
 
-        // Sin columna de calidad, mantenemos tu lógica previa (evitar repetir denominación)
         const selectedDenoms = [];
         $table.find('.js-denom').each(function() {
           const val = $(this).val();
@@ -1056,6 +1227,7 @@
                     qualitySel.appendChild(opt);
                 });
             });
+            setTimeout(initializeExistingData, 50);
         }
 
         $form.on('submit', function (e) {
@@ -1123,6 +1295,7 @@
           });
         });
         populateDenomsAndQuals();
+        setTimeout(initializeExistingData, 100);
     });
     </script>
 }

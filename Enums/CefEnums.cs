@@ -23,17 +23,18 @@
 
     public enum CefTransactionStatusEnum
     {
-        Checkin,
-        EnqueuedForCounting,
-        BillCounting,
-        CoinCounting,
-        CheckCounting,
-        DocumentCounting,
-        PendingReview,
-        Approved,
-        Rejected,
-        Cancelled
+        RegistroTesoreria,        // Checkin
+        EncoladoParaConteo,       // EnqueuedForCounting
+        ConteoBilletes,           // BillCounting
+        ConteoMonedas,            // CoinCounting
+        ConteoCheques,            // CheckCounting
+        ConteoDocumentos,         // DocumentCounting
+        PendienteRevision,        // PendingReview
+        Aprobado,                 // Approved
+        Rechazado,                // Rejected
+        Cancelado                 // Cancelled
     }
+
 
     public enum CefContainerTypeEnum
     {

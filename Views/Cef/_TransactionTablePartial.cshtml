@@ -63,16 +63,16 @@
                                         string badgeClass = "badge";
                                         switch (transaction.TransactionStatus)
                                         {
-                                            case nameof(VCashApp.Enums.CefTransactionStatusEnum.Checkin): badgeClass += " bg-primary"; break;
-                                            case nameof(VCashApp.Enums.CefTransactionStatusEnum.EnqueuedForCounting): badgeClass += " bg-secondary"; break;
-                                            case nameof(VCashApp.Enums.CefTransactionStatusEnum.BillCounting):
-                                            case nameof(VCashApp.Enums.CefTransactionStatusEnum.CoinCounting):
-                                            case nameof(VCashApp.Enums.CefTransactionStatusEnum.CheckCounting):
-                                            case nameof(VCashApp.Enums.CefTransactionStatusEnum.DocumentCounting): badgeClass += " bg-info"; break;
-                                            case nameof(VCashApp.Enums.CefTransactionStatusEnum.PendingReview): badgeClass += " bg-warning text-dark"; break;
-                                            case nameof(VCashApp.Enums.CefTransactionStatusEnum.Approved): badgeClass += " bg-success"; break;
-                                            case nameof(VCashApp.Enums.CefTransactionStatusEnum.Rejected): badgeClass += " bg-danger"; break;
-                                            case nameof(VCashApp.Enums.CefTransactionStatusEnum.Cancelled): badgeClass += " bg-dark"; break;
+                                            case nameof(VCashApp.Enums.CefTransactionStatusEnum.RegistroTesoreria): badgeClass += " bg-primary"; break;
+                                            case nameof(VCashApp.Enums.CefTransactionStatusEnum.EncoladoParaConteo): badgeClass += " bg-secondary"; break;
+                                            case nameof(VCashApp.Enums.CefTransactionStatusEnum.ConteoBilletes):
+                                            case nameof(VCashApp.Enums.CefTransactionStatusEnum.ConteoMonedas):
+                                            case nameof(VCashApp.Enums.CefTransactionStatusEnum.ConteoCheques):
+                                            case nameof(VCashApp.Enums.CefTransactionStatusEnum.ConteoDocumentos): badgeClass += " bg-info"; break;
+                                            case nameof(VCashApp.Enums.CefTransactionStatusEnum.PendienteRevision): badgeClass += " bg-warning text-dark"; break;
+                                            case nameof(VCashApp.Enums.CefTransactionStatusEnum.Aprobado): badgeClass += " bg-success"; break;
+                                            case nameof(VCashApp.Enums.CefTransactionStatusEnum.Rechazado): badgeClass += " bg-danger"; break;
+                                            case nameof(VCashApp.Enums.CefTransactionStatusEnum.Cancelado): badgeClass += " bg-dark"; break;
                                             default: badgeClass += " bg-secondary"; break;
                                         }
                                     }
@@ -86,26 +86,31 @@
                                         </a>
                                         @if (canEdit)
                                         {
-                                            <a asp-controller="Cef" asp-action="Checkin" asp-route-serviceOrderId="@transaction.ServiceOrderId" class="btn-edit" title="Editar">
-                                                <i class="ri-pencil-fill"></i>
-                                            </a>
-                                            @if (transaction.TransactionStatus == nameof(VCashApp.Enums.CefTransactionStatusEnum.Checkin) ||
-                                                                            transaction.TransactionStatus == nameof(VCashApp.Enums.CefTransactionStatusEnum.EnqueuedForCounting) ||
-                                                                            transaction.TransactionStatus == nameof(VCashApp.Enums.CefTransactionStatusEnum.BillCounting) ||
-                                                                            transaction.TransactionStatus == nameof(VCashApp.Enums.CefTransactionStatusEnum.CoinCounting) ||
-                                                                            transaction.TransactionStatus == nameof(VCashApp.Enums.CefTransactionStatusEnum.CheckCounting) ||
-                                                                            transaction.TransactionStatus == nameof(VCashApp.Enums.CefTransactionStatusEnum.DocumentCounting))
+                                            @if (transaction.TransactionStatus == nameof(VCashApp.Enums.CefTransactionStatusEnum.RegistroTesoreria))
+                                            {
+                                                <a asp-controller="Cef" asp-action="Checkin" asp-route-serviceOrderId="@transaction.ServiceOrderId" class="btn-edit" title="Editar">
+                                                    <i class="ri-pencil-fill"></i>
+                                                </a>
+                                            }
+                                            @if (transaction.TransactionStatus == nameof(VCashApp.Enums.CefTransactionStatusEnum.EncoladoParaConteo) ||
+                                                transaction.TransactionStatus == nameof(VCashApp.Enums.CefTransactionStatusEnum.ConteoBilletes) ||
+                                                transaction.TransactionStatus == nameof(VCashApp.Enums.CefTransactionStatusEnum.ConteoMonedas) ||
+                                                transaction.TransactionStatus == nameof(VCashApp.Enums.CefTransactionStatusEnum.ConteoCheques) ||
+                                                transaction.TransactionStatus == nameof(VCashApp.Enums.CefTransactionStatusEnum.ConteoDocumentos))
                                             {
                                                 <a asp-action="ProcessContainers" asp-route-transactionId="@transaction.Id" class="btn-detail" title="Procesar Contenedores">
                                                     <i class="ri-money-dollar-circle-fill"></i>
                                                 </a>
                                             }
-                                            @if (transaction.TransactionStatus == nameof(VCashApp.Enums.CefTransactionStatusEnum.PendingReview))
+                                            @if (transaction.TransactionStatus == nameof(VCashApp.Enums.CefTransactionStatusEnum.PendienteRevision))
                                             {
                                                 <a asp-action="ReviewTransaction" asp-route-transactionId="@transaction.Id" class="btn-edit ml-1" title="Revisar Transacción">
                                                     <i class="ri-check-double-line"></i>
                                                 </a>
                                             }
+                                            <a asp-action="ReviewTransaction" asp-route-transactionId="@transaction.Id" class="btn-edit ml-1" title="Revisar Transacción">
+                                                <i class="ri-check-double-line"></i>
+                                            </a>
                                         }
                                     </div>
                                 </td>

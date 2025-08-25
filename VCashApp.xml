@@ -2766,6 +2766,12 @@
             <param name="transactionId"></param>
             <returns></returns>
         </member>
+        <member name="M:VCashApp.Services.ICefContainerService.DeleteContainerAsync(System.Int32,System.Int32)">
+            <summary>
+            Elimina un contenedor de efectivo y sus detalles asociados.
+            </summary>
+            <returns>true si se eliminó correctamente, false si no se encontró el contenedor.</returns>
+        </member>
         <member name="T:VCashApp.Services.ICefIncidentService">
             <summary>
             Define las operaciones de servicio para la gestión de Novedades de Centro de Efectivo.

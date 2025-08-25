@@ -141,7 +141,7 @@
                 <div class="form-section mt-4">
                     <h3>Decisión de Revisión</h3>
                     <hr />
-                    @if (Model.CurrentStatus == VCashApp.Enums.CefTransactionStatusEnum.PendingReview)
+                    @if (Model.CurrentStatus == VCashApp.Enums.CefTransactionStatusEnum.PendienteRevision)
                     {
                         <div class="form-group">
                             <label asp-for="NewStatus" class="control-label"></label>
@@ -170,7 +170,7 @@
                 </div>
 
                 <div class="submit-container form-group col-md-12 mt-4">
-                    @if (ViewBag.CanReview != null && (bool)ViewBag.CanReview && Model.CurrentStatus == VCashApp.Enums.CefTransactionStatusEnum.PendingReview)
+                    @if (ViewBag.CanReview != null && (bool)ViewBag.CanReview && Model.CurrentStatus == VCashApp.Enums.CefTransactionStatusEnum.PendienteRevision)
                     {
                         <button type="submit" class="btn btn-primary">Procesar Revisión</button>
                     }

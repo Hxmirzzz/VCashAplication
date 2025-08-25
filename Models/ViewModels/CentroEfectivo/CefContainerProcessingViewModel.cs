@@ -19,6 +19,11 @@ namespace VCashApp.Models.ViewModels.CentroEfectivo
         [Range(0, int.MaxValue, ErrorMessage = "El ID del contenedor padre debe ser un número válido.")]
         public int? ParentContainerId { get; set; }
 
+        [Display(Name = "Código del Contenedor Padre")]
+        public string? ParentContainerCode { get; set; }
+
+        public int? BagViewIndex { get; set; }
+
         [Display(Name = "Tipo de Contenedor")]
         [Required(ErrorMessage = "El tipo de contenedor es requerido.")]
         public CefContainerTypeEnum ContainerType { get; set; }

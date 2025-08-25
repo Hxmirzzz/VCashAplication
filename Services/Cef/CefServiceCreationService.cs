@@ -212,7 +212,7 @@ namespace VCashApp.Services.Cef
                 new SqlParameter("@CefNovedadInformativa", (object)viewModel.InformativeIncident ?? DBNull.Value),
                 new SqlParameter("@CefEsCustodia", viewModel.IsCustody),
                 new SqlParameter("@CefEsPuntoAPunto", viewModel.IsPointToPoint),
-                new SqlParameter("@CefEstadoTransaccion", CefTransactionStatusEnum.Checkin.ToString()),
+                new SqlParameter("@CefEstadoTransaccion", CefTransactionStatusEnum.RegistroTesoreria.ToString()),
                 new SqlParameter("@CefFechaRegistro", DateTime.Now),
                 new SqlParameter("@CefUsuarioRegistroId", currentUserId),
                 new SqlParameter("@CefIPRegistro", (object)currentIP ?? DBNull.Value),

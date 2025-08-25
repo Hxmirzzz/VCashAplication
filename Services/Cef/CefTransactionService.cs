@@ -228,7 +228,7 @@ namespace VCashApp.Services.Cef
             tx.IsCustody = viewModel.IsCustody;
             tx.IsPointToPoint = viewModel.IsPointToPoint;
             tx.InformativeIncident = viewModel.InformativeIncident;
-            tx.TransactionStatus = CefTransactionStatusEnum.Checkin.ToString();
+            tx.TransactionStatus = CefTransactionStatusEnum.EncoladoParaConteo.ToString();
 
             // Si tienes campos de auditoría de última actualización en tu entidad, setéalos aquí:
             // tx.LastUpdatedDate = DateTime.Now;
@@ -347,9 +347,9 @@ namespace VCashApp.Services.Cef
                 return false;
             }
 
-            if (transaction.TransactionStatus == CefTransactionStatusEnum.Approved.ToString() ||
-                transaction.TransactionStatus == CefTransactionStatusEnum.Rejected.ToString() ||
-                transaction.TransactionStatus == CefTransactionStatusEnum.Cancelled.ToString())
+            if (transaction.TransactionStatus == CefTransactionStatusEnum.Aprobado.ToString() ||
+                transaction.TransactionStatus == CefTransactionStatusEnum.Rechazado.ToString() ||
+                transaction.TransactionStatus == CefTransactionStatusEnum.Cancelado.ToString())
             {
                 throw new InvalidOperationException($"La transacción {transactionId} ya está en un estado final y no puede ser modificada.");
             }
@@ -358,7 +358,7 @@ namespace VCashApp.Services.Cef
             transaction.LastUpdateDate = DateTime.Now;
             transaction.LastUpdateUser = reviewerUserId;
 
-            if (newStatus == CefTransactionStatusEnum.Approved || newStatus == CefTransactionStatusEnum.Rejected)
+            if (newStatus == CefTransactionStatusEnum.Aprobado || newStatus == CefTransactionStatusEnum.Rechazado)
             {
                 transaction.CountingEndDate = DateTime.Now;
             }
@@ -469,10 +469,10 @@ namespace VCashApp.Services.Cef
                 }).ToList()
             };
 
-            viewModel.AvailableStatuses = new List<Microsoft.AspNetCore.Mvc.Rendering.SelectListItem>
+            viewModel.AvailableStatuses = new List<SelectListItem>
             {
-                new (CefTransactionStatusEnum.Approved.ToString(), "Aprobada"),
-                new (CefTransactionStatusEnum.Rejected.ToString(), "Rechazada")
+                new (CefTransactionStatusEnum.Aprobado.ToString(), "Aprobada"),
+                new (CefTransactionStatusEnum.Rechazado.ToString(), "Rechazada")
             };
 
             return viewModel;
@@ -484,7 +484,7 @@ namespace VCashApp.Services.Cef
             var transaction = await _context.CefTransactions.FirstOrDefaultAsync(t => t.Id == viewModel.Id);
             if (transaction == null) return false;
 
-            if (transaction.TransactionStatus == CefTransactionStatusEnum.PendingReview.ToString())
+            if (transaction.TransactionStatus == CefTransactionStatusEnum.PendienteRevision.ToString())
             {
                 throw new InvalidOperationException($"La transacción {transaction.Id} no está en estado 'Pendiente de Revisión' para ser aprobada o rechazada.");
             }

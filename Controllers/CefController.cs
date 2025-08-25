@@ -452,6 +452,15 @@ namespace VCashApp.Controllers
             return Json(new { declared, counted, diff });
         }
 
+        [HttpPost("DeleteContainer")]
+        [ValidateAntiForgeryToken]
+        [RequiredPermission(PermissionType.Edit, "CEF")]
+        public async Task<IActionResult> DeleteContainer(int transactionId, int containerId)
+        {
+            var ok = await _cefContainerService.DeleteContainerAsync(transactionId, containerId);
+            if (!ok) return NotFound();
+            return Json(new { success = true });
+        }
 
         /// <summary>
         /// Procesa el envío del formulario de procesamiento de contenedores (guardar detalles y novedades).
@@ -531,13 +540,10 @@ namespace VCashApp.Controllers
 
             try
             {
-                // isAjax ya lo calculas arriba
                 using (var tx = await _context.Database.BeginTransactionAsync())
                 {
-                    // 1) Mapa de índice de la vista -> ID real en BD de bolsas
                     var bagIndexToId = new Dictionary<int, int>();
 
-                    // 2) Guardar primero BOLSAS (ParentContainerId == null)
                     for (int idx = 0; idx < viewModel.Containers.Count; idx++)
                     {
                         var containerVm = viewModel.Containers[idx];
@@ -548,7 +554,6 @@ namespace VCashApp.Controllers
 
                         if (esBolsa)
                         {
-                            // Asegura que las bolsas no tengan padre
                             containerVm.ParentContainerId = null;
                             var savedBag = await _cefContainerService.SaveContainerAndDetailsAsync(containerVm, currentUser.Id);
                             bagIndexToId[idx] = savedBag.Id;
@@ -569,11 +574,19 @@ namespace VCashApp.Controllers
 
                         var parentIndex = containerVm.ParentContainerId.Value;
 
-                        // Mapea el índice de la vista al ID real de la bolsa recién guardada
-                        if (!bagIndexToId.TryGetValue(parentIndex, out var realParentId))
-                            throw new InvalidOperationException($"No se encontró la bolsa padre para el sobre (índice {parentIndex}).");
-
-                        containerVm.ParentContainerId = realParentId;
+                        if (bagIndexToId.ContainsValue(parentIndex))
+                        {
+                            containerVm.ParentContainerId = parentIndex;
+                        }
+                        else if (bagIndexToId.TryGetValue(parentIndex, out var realParentId))
+                        {
+                            containerVm.ParentContainerId = realParentId;
+                        }
+                        else
+                        {
+                            Console.WriteLine($"Índice o ID de bolsa no encontrado: {parentIndex}");
+                            throw new InvalidOperationException($"No se encontró la bolsa padre para el sobre (índice o ID {parentIndex}).");
+                        }
 
                         var savedEnv = await _cefContainerService.SaveContainerAndDetailsAsync(containerVm, currentUser.Id);
 
@@ -649,7 +662,7 @@ namespace VCashApp.Controllers
                     throw new InvalidOperationException("No todos los contenedores han sido procesados. Por favor, complete el conteo de todos los contenedores.");
                 }
 
-                var success = await _cefTransactionService.UpdateTransactionStatusAsync(transactionId, CefTransactionStatusEnum.PendingReview, currentUser.Id); // <-- CORREGIDO AQUÍ
+                var success = await _cefTransactionService.UpdateTransactionStatusAsync(transactionId, CefTransactionStatusEnum.PendienteRevision, currentUser.Id); // <-- CORREGIDO AQUÍ
 
                 if (success)
                 {
@@ -705,7 +718,7 @@ namespace VCashApp.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
-            if (viewModel.CurrentStatus != CefTransactionStatusEnum.PendingReview)
+            if (viewModel.CurrentStatus != CefTransactionStatusEnum.PendienteRevision)
             {
                 TempData["ErrorMessage"] = $"La transacción {viewModel.SlipNumber} no está en estado 'Pendiente de Revisión'. Estado actual: {viewModel.CurrentStatus.ToString().Replace("_", " ")}.";
                 return RedirectToAction(nameof(Index));
@@ -736,8 +749,8 @@ namespace VCashApp.Controllers
 
             viewModel.AvailableStatuses = new List<SelectListItem>
             {
-                new (CefTransactionStatusEnum.Approved.ToString(), "Aprobada"),
-                new (CefTransactionStatusEnum.Rejected.ToString(), "Rechazada")
+                new (CefTransactionStatusEnum.Aprobado.ToString(), "Aprobada"),
+                new (CefTransactionStatusEnum.Rechazado.ToString(), "Rechazada")
             };
             ViewBag.CanReview = await HasPermisionForView(await _userManager.GetRolesAsync(currentUser), "CEF", PermissionType.Edit);
 

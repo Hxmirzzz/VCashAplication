@@ -1,12 +1,9 @@
 ﻿using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
 using System.Data;
 using VCashApp.Utils;
 using VCashApp.Data;
-using VCashApp.Models.Entities;
 using VCashApp.Models.ViewModels.Servicio;
 using VCashApp.Services.DTOs;
 
@@ -111,7 +108,7 @@ namespace VCashApp.Services.Service
             var declaredChecks = 0;
             var declaredDocsCt = 0;
 
-            var cefEstado = "Registrada";
+            var cefEstado = "RegistroTesoreria";
             int cefPlanilla = 0;
             var acceptanceDate = DateOnly.FromDateTime(DateTime.Now);
             var acceptanceTime = TimeOnly.FromDateTime(DateTime.Now);

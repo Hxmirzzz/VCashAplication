@@ -117,14 +117,15 @@ namespace VCashApp.Services.Cef
                     Id = c.Id,
                     CefTransactionId = c.CefTransactionId,
                     ContainerCode = c.ContainerCode,
-                    ContainerType = CefContainerTypeEnum.Bolsa,
-                    EnvelopeSubType = null,
+                    ContainerType = Enum.TryParse<CefContainerTypeEnum>(c.ContainerType, out var tipo) ? tipo : CefContainerTypeEnum.Bolsa,
+                    EnvelopeSubType = Enum.TryParse<CefEnvelopeSubTypeEnum>(c.EnvelopeSubType, out var subtipo) ? subtipo : null,
                     DeclaredValue = c.DeclaredValue,
                     Observations = c.Observations,
                     ClientCashierId = c.ClientCashierId,
                     ClientCashierName = c.ClientCashierName,
                     ClientEnvelopeDate = c.ClientEnvelopeDate,
                     ParentContainerId = c.ParentContainerId,
+                    ParentContainerCode = contenedores.FirstOrDefault(p => p.Id == c.ParentContainerId)?.ContainerCode,
 
                     ValueDetails = c.ValueDetails?.Select(d => new CefValueDetailViewModel
                     {
@@ -151,23 +152,26 @@ namespace VCashApp.Services.Cef
         }
 
         /// <inheritdoc/>
-        public async Task<CefContainer> SaveContainerAndDetailsAsync(CefContainerProcessingViewModel viewModel, string processingUserId)
+        public async Task<CefContainer> SaveContainerAndDetailsAsync(
+            CefContainerProcessingViewModel viewModel,
+            string processingUserId)
         {
-            var transaction = await _context.CefTransactions.FirstOrDefaultAsync(t => t.Id == viewModel.CefTransactionId)
+            // 0) Cargar transacción + validar estado
+            var transaction = await _context.CefTransactions
+                .FirstOrDefaultAsync(t => t.Id == viewModel.CefTransactionId)
                 ?? throw new InvalidOperationException($"La transacción CEF con ID {viewModel.CefTransactionId} no existe.");
 
-            if (transaction.TransactionStatus != CefTransactionStatusEnum.Checkin.ToString() &&
-                transaction.TransactionStatus != CefTransactionStatusEnum.EnqueuedForCounting.ToString() &&
-                transaction.TransactionStatus != CefTransactionStatusEnum.BillCounting.ToString() &&
-                transaction.TransactionStatus != CefTransactionStatusEnum.CoinCounting.ToString() &&
-                transaction.TransactionStatus != CefTransactionStatusEnum.CheckCounting.ToString() &&
-                transaction.TransactionStatus != CefTransactionStatusEnum.DocumentCounting.ToString())
+            if (transaction.TransactionStatus != CefTransactionStatusEnum.EncoladoParaConteo.ToString() &&
+                transaction.TransactionStatus != CefTransactionStatusEnum.ConteoBilletes.ToString() &&
+                transaction.TransactionStatus != CefTransactionStatusEnum.ConteoMonedas.ToString() &&
+                transaction.TransactionStatus != CefTransactionStatusEnum.ConteoCheques.ToString() &&
+                transaction.TransactionStatus != CefTransactionStatusEnum.ConteoDocumentos.ToString())
             {
                 throw new InvalidOperationException($"La transacción {transaction.Id} no está en un estado válido para procesar contenedores.");
             }
 
+            // 1) Validaciones de sobre/bolsa
             var isSobre = viewModel.ContainerType == CefContainerTypeEnum.Sobre;
-
             if (isSobre)
             {
                 if (viewModel.ParentContainerId == null)
@@ -181,7 +185,10 @@ namespace VCashApp.Services.Cef
                 viewModel.EnvelopeSubType = null;
             }
 
-            var dupPairs = (viewModel.ValueDetails ?? Enumerable.Empty<CefValueDetailViewModel>())
+            // 2) Normalizar detalles (evita NullReference) + validar duplicados
+            var detailsVms = viewModel.ValueDetails ?? new List<CefValueDetailViewModel>();
+
+            var dupPairs = detailsVms
                 .Where(d => d.ValueType == CefValueTypeEnum.Billete || d.ValueType == CefValueTypeEnum.Moneda)
                 .Where(d => d.DenominationId != null && d.QualityId != null)
                 .GroupBy(d => new { d.DenominationId, d.QualityId })
@@ -191,6 +198,7 @@ namespace VCashApp.Services.Cef
             if (dupPairs.Any())
                 throw new InvalidOperationException("Hay filas repetidas con la misma combinación Denominación + Calidad. Verifique los detalles.");
 
+            // 3) Crear o cargar contenedor
             CefContainer container;
             if (viewModel.Id == 0)
             {
@@ -199,7 +207,7 @@ namespace VCashApp.Services.Cef
                     CefTransactionId = viewModel.CefTransactionId,
                     ParentContainerId = viewModel.ParentContainerId,
                     ContainerType = viewModel.ContainerType.ToString(),
-                    EnvelopeSubType = isSobre ? viewModel.EnvelopeSubType.ToString() : null,
+                    EnvelopeSubType = isSobre ? viewModel.EnvelopeSubType?.ToString() : null,
                     ContainerCode = viewModel.ContainerCode,
                     DeclaredValue = viewModel.DeclaredValue,
                     ContainerStatus = CefContainerStatusEnum.InProcess.ToString(),
@@ -210,17 +218,20 @@ namespace VCashApp.Services.Cef
                     ClientCashierName = viewModel.ClientCashierName,
                     ClientEnvelopeDate = viewModel.ClientEnvelopeDate
                 };
+
                 await _context.CefContainers.AddAsync(container);
+                // Guardar aquí para obtener Id y poder asociar detalles nuevos
                 await _context.SaveChangesAsync();
             }
             else
             {
                 container = await _context.CefContainers
-                                          .Include(c => c.ValueDetails)
-                                          .FirstOrDefaultAsync(c => c.Id == viewModel.Id) ?? throw new InvalidOperationException($"Contenedor con ID {viewModel.Id} no encontrado.");
+                    .Include(c => c.ValueDetails)
+                    .FirstOrDefaultAsync(c => c.Id == viewModel.Id)
+                    ?? throw new InvalidOperationException($"Contenedor con ID {viewModel.Id} no encontrado.");
 
                 container.ContainerType = viewModel.ContainerType.ToString();
-                container.EnvelopeSubType = isSobre ? viewModel.EnvelopeSubType.ToString() : null;
+                container.EnvelopeSubType = isSobre ? viewModel.EnvelopeSubType?.ToString() : null;
                 container.ContainerCode = viewModel.ContainerCode;
                 container.DeclaredValue = viewModel.DeclaredValue;
                 container.Observations = viewModel.Observations;
@@ -231,21 +242,25 @@ namespace VCashApp.Services.Cef
                 _context.CefContainers.Update(container);
             }
 
-            var existingDetails = container.ValueDetails.ToList();
-            var incomingDetailIds = viewModel.ValueDetails
+            // 4) Sincronizar detalles (delete/update/insert)
+            var existingDetails = container.ValueDetails?.ToList() ?? new List<CefValueDetail>();
+            var incomingDetailIds = detailsVms
                 .Where(d => d.Id != 0)
                 .Select(d => d.Id)
                 .ToHashSet();
 
+            // 4.1) Eliminar detalles que ya no vienen en el POST
             var detailsToDelete = existingDetails
                 .Where(d => !incomingDetailIds.Contains(d.Id))
                 .ToList();
 
-            _context.CefValueDetails.RemoveRange(detailsToDelete);
+            if (detailsToDelete.Count > 0)
+                _context.CefValueDetails.RemoveRange(detailsToDelete);
 
+            // 4.2) Upsert de detalles + recálculo del total contado
             decimal countedTotal = 0m;
 
-            foreach (var detailVm in viewModel.ValueDetails ?? Enumerable.Empty<CefValueDetailViewModel>())
+            foreach (var detailVm in detailsVms)
             {
                 if (isSobre && !SobreDetalleEsValido(viewModel.EnvelopeSubType, detailVm.ValueType))
                     throw new InvalidOperationException($"Detalle inválido para sobre {viewModel.EnvelopeSubType}: {detailVm.ValueType}.");
@@ -271,7 +286,6 @@ namespace VCashApp.Services.Cef
                     existing.BundlesCount = detailVm.BundlesCount;
                     existing.LoosePiecesCount = detailVm.LoosePiecesCount;
                     existing.UnitValue = detailVm.UnitValue;
-                    existing.CalculatedAmount = await CalcularMontoServidorAsync(existing);
                     existing.IsHighDenomination = detailVm.IsHighDenomination;
                     existing.IdentifierNumber = detailVm.IdentifierNumber;
                     existing.BankName = detailVm.BankName;
@@ -280,8 +294,10 @@ namespace VCashApp.Services.Cef
                     existing.Observations = detailVm.Observations;
                     existing.QualityId = detailVm.QualityId;
 
-                    _context.CefValueDetails.Update(existing);
+                    existing.CalculatedAmount = await CalcularMontoServidorAsync(existing);
                     countedTotal += existing.CalculatedAmount ?? 0;
+
+                    _context.CefValueDetails.Update(existing);
                 }
                 else
                 {
@@ -312,8 +328,10 @@ namespace VCashApp.Services.Cef
 
             container.CountedValue = countedTotal;
 
-            if (container.ContainerStatus == CefContainerStatusEnum.InProcess.ToString() ||
-                container.ContainerStatus == CefContainerStatusEnum.Pending.ToString())
+            // Si ya se contó algo, pasar a Counted
+            if ((container.ContainerStatus == CefContainerStatusEnum.InProcess.ToString() ||
+                 container.ContainerStatus == CefContainerStatusEnum.Pending.ToString()) &&
+                countedTotal > 0)
             {
                 container.ContainerStatus = CefContainerStatusEnum.Counted.ToString();
                 container.ProcessingDate = DateTime.Now;
@@ -322,14 +340,45 @@ namespace VCashApp.Services.Cef
             _context.CefContainers.Update(container);
             await _context.SaveChangesAsync();
 
-            if (transaction.TransactionStatus == CefTransactionStatusEnum.Checkin.ToString())
+            // 5) Avanzar estado de la transacción según lo cargado
+            if (transaction.TransactionStatus == CefTransactionStatusEnum.EncoladoParaConteo.ToString())
             {
-                transaction.TransactionStatus = CefTransactionStatusEnum.BillCounting.ToString();
-                _context.CefTransactions.Update(transaction);
-                await _context.SaveChangesAsync();
+                // Dependiendo de los detalles ingresados, escoge el primer estado de conteo correspondiente
+                var hasBillsOrCoins = detailsVms.Any(d => d.ValueType == CefValueTypeEnum.Billete || d.ValueType == CefValueTypeEnum.Moneda);
+                var hasChecks = detailsVms.Any(d => d.ValueType == CefValueTypeEnum.Cheque);
+                var hasDocs = detailsVms.Any(d => d.ValueType == CefValueTypeEnum.Documento);
+
+                if (hasBillsOrCoins)
+                    transaction.TransactionStatus = CefTransactionStatusEnum.ConteoBilletes.ToString();
+                else if (hasChecks)
+                    transaction.TransactionStatus = CefTransactionStatusEnum.ConteoCheques.ToString();
+                else if (hasDocs)
+                    transaction.TransactionStatus = CefTransactionStatusEnum.ConteoDocumentos.ToString();
+
+                if (transaction.TransactionStatus != CefTransactionStatusEnum.EncoladoParaConteo.ToString())
+                {
+                    _context.CefTransactions.Update(transaction);
+                    await _context.SaveChangesAsync();
+                }
             }
 
             return container;
+        }
+
+        public async Task<bool> DeleteContainerAsync(int transactionId, int containerId)
+        {
+            // Evita intento de borrar un "padre" con hijos (tu FK ParentContainerId está en RESTRICT)
+            var hasChildren = await _context.CefContainers
+                .AnyAsync(c => c.ParentContainerId == containerId);
+            if (hasChildren)
+                throw new InvalidOperationException("No se puede eliminar un contenedor padre porque tiene sobres hijos.");
+
+            // Borra el contenedor; los detalles se eliminan por CASCADE en la BD
+            var rows = await _context.CefContainers
+                .Where(c => c.Id == containerId && c.CefTransactionId == transactionId)
+                .ExecuteDeleteAsync();
+
+            return rows > 0;
         }
 
         private static bool SobreDetalleEsValido(CefEnvelopeSubTypeEnum? subType, CefValueTypeEnum valueType)

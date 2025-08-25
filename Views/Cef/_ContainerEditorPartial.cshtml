@@ -3,6 +3,8 @@
 @{
     var prefix = ViewData.TemplateInfo.HtmlFieldPrefix;
     bool esSobre = Model.ContainerType.ToString() == "Sobre";
+    int? bolsaSeleccionadaId = Model.ParentContainerId;
+    string bolsaLabel = Model.ParentContainerCode ?? "";
 }
 
 <div class="container-editor border rounded p-3" data-prefix="@prefix">
@@ -41,15 +43,18 @@
         <!-- Sólo para SOBRES: selección de bolsa padre -->
         <div class="col-12 col-lg-3 js-parent-bag-block" style="display:@(esSobre ? "block" : "none")">
             <div class="form-floating has-validation">
-                <select asp-for="ParentContainerId" class="form-select">
+                <select class="form-select" name="VisibleBagName" disabled>
                     <option value="">-- Seleccione bolsa --</option>
-                    @* (JS rellena las opciones) *@
+                    @if (bolsaSeleccionadaId != null)
+                    {
+                        <option value="@bolsaSeleccionadaId" selected>@bolsaLabel</option>
+                    }
                 </select>
                 <label>Bolsa asociada</label>
-                <div class="invalid-feedback">⚠ Requerido</div>
-                <div class="valid-feedback">✓ Correcto</div>
             </div>
         </div>
+
+        <input type="hidden" asp-for="ParentContainerId" />
 
         <div class="col-12 col-lg-3">
             <div class="form-floating">
@@ -79,7 +84,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach (var d in Model.ValueDetails.Where(v => v.ValueType == VCashApp.Enums.CefValueTypeEnum.Billete || v.ValueType == VCashApp.Enums.CefValueTypeEnum.Moneda))
+                        @foreach (var d in Model.ValueDetails.Where(v => v.ValueType == CefValueTypeEnum.Billete || v.ValueType == CefValueTypeEnum.Moneda))
                         {
                             var idx = Model.ValueDetails.IndexOf(d);
                             var prefixDetail = $"{prefix}.ValueDetails[{idx}]";
@@ -149,7 +154,7 @@
         </div>
 
         <!-- Sobre: EFECTIVO -->
-        <div class="sec-sobre-cash" style="display:@(Model.SobreMode == null || Model.SobreMode.ToString() == "Efectivo" ? "block" : "none")">
+        <div class="sec-sobre-cash" style="display:@(Model.EnvelopeSubType == CefEnvelopeSubTypeEnum.Efectivo ? "block" : "none")">
             <div class="card">
                 <div class="card-header"><h6 class="mb-0">💵 Sobre — Efectivo (Billetes/Monedas)</h6></div>
                 <div class="card-body">
@@ -167,7 +172,42 @@
                                 <th></th>
                             </tr>
                         </thead>
-                        <tbody></tbody>
+                        <tbody>
+                            @foreach (var d in Model.ValueDetails.Where(v => v.ValueType == CefValueTypeEnum.Billete || v.ValueType == CefValueTypeEnum.Moneda))
+                            {
+                                var idx = Model.ValueDetails.IndexOf(d);
+                                var prefixDetail = $"{prefix}.ValueDetails[{idx}]";
+                                <tr>
+                                    <td style="display: none;">
+                                        <input type="hidden" name="@($"{prefixDetail}.Id")" value="@d.Id" />
+                                    </td>
+                                    <td>
+                                        <select name="@($"{prefixDetail}.ValueType")" class="form-select form-select-sm js-vtype">
+                                            @Html.Raw($"<option value=\"Billete\" {(d.ValueType == CefValueTypeEnum.Billete ? "selected" : "")}>Billete</option>")
+                                            @Html.Raw($"<option value=\"Moneda\" {(d.ValueType == CefValueTypeEnum.Moneda ? "selected" : "")}>Moneda</option>")
+                                        </select>
+                                    </td>
+                                    <td>
+                                        <select name="@($"{prefixDetail}.DenominationId")"
+                                                class="form-select form-select-sm js-denom"
+                                                data-selected="@d.DenominationId">
+                                        </select>
+                                    </td>
+                                    <td>
+                                        <select name="@($"{prefixDetail}.QualityId")"
+                                                class="form-select form-select-sm js-quality"
+                                                data-selected="@d.QualityId">
+                                        </select>
+                                    </td>
+                                    <td><input name="@($"{prefixDetail}.Quantity")" type="number" class="form-control form-control-sm js-calc" value="@d.Quantity" /></td>
+                                    <td><input name="@($"{prefixDetail}.BundlesCount")" type="number" class="form-control form-control-sm js-calc" value="@d.BundlesCount" readonly /></td>
+                                    <td><input name="@($"{prefixDetail}.LoosePiecesCount")" type="number" class="form-control form-control-sm js-calc" value="@d.LoosePiecesCount" readonly /></td>
+                                    <td><input name="@($"{prefixDetail}.UnitValue")" type="number" step="1" class="form-control form-control-sm js-calc" value="@d.UnitValue" readonly /></td>
+                                    <td><input name="@($"{prefixDetail}.CalculatedAmount")" type="number" step="1" class="form-control form-control-sm" value="@d.CalculatedAmount" readonly /></td>
+                                    <td><button type="button" class="btn btn-sm btn-outline-danger js-remove-detail">×</button></td>
+                                </tr>
+                            }
+                        </tbody>
                     </table>
                     <button type="button" class="btn btn-outline-primary btn-sm js-add-detail" data-detail-scope="sobre-cash">
                         + Agregar detalle
