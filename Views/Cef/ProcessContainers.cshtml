@@ -126,9 +126,9 @@
                         <div class="step-content">
                             <div class="card mb-3">
                                 <div class="card-header d-flex align-items-center justify-content-between">
-                                    <h5 class="mb-0">🧰 Contenedores (Bolsas y sus Sobres)</h5>
+                                    <h5 class="mb-0">🧰 Contenedores (Bolsas y Sobres)</h5>
                                     <div class="d-flex gap-2">
-                                        <button type="button" class="btn btn-outline-primary" id="btnAddBag">+ Agregar Contenedor (Bolsa)</button>
+                                        <button type="button" class="btn btn-outline-primary" id="btnAddBag">+ Agregar Bolsa</button>
                                     </div>
                                 </div>
 
@@ -150,7 +150,7 @@
                                                 <button class="nav-link @(b==0 ? "active" : "")" id="@($"{tabId}-btn")"
                                                         data-bs-toggle="tab" data-bs-target="@($"#{tabId}")"
                                                         type="button" role="tab">
-                                                  Contenedor @(@b + 1) — Bolsa
+                                                  Bolsa @(@b + 1)
                                                 </button>
                                             </li>
                                         }
@@ -199,7 +199,7 @@
                                                                         vddEnv.TemplateInfo.HtmlFieldPrefix = $"Containers[{envIdx}]";
                                                                     }
                                                                     @Html.Partial("_ContainerEditorPartial", env, vddEnv)
-                                                                    <div class="d-flex justify-content-end">
+                                                                    <div class="d-flex justify-content-end pt-2">
                                                                         <button type="button"
                                                                                 class="btn btn-outline-danger btn-sm js-remove-envelope-card"
                                                                                 data-env-idx="@envIdx"
@@ -239,7 +239,7 @@
                           var vddE = new ViewDataDictionary(ViewData);
                           vddE.TemplateInfo.HtmlFieldPrefix = "Containers[__idx__]";
                         }
-                        <div class="envelope-card mb-3"
+                        <div class="envelope-card mb-2"
                              data-env-idx="__idx__"
                              data-container-id="0">
                             @Html.Partial("_ContainerEditorPartial",
@@ -703,21 +703,28 @@
       });
 
         function triggerAmountCalculation($row) {
+          const $table = $row.closest('.js-details-table');
+          const isDocScope = $table.data('detail-scope') === 'sobre-docs';
+          if (isDocScope) {
+            const $ce = $row.closest('.container-editor');
+            const declared = parseFloat($ce.find('input[name$=".DeclaredValue"]').val()) || 0;
+            $row.find('input[name$=".CalculatedAmount"]').val(declared.toFixed(0));
+            return;
+          }
+
+          // === Billete/Moneda (tu lógica actual) ===
           const qty = parseFloat($row.find('input[name$=".Quantity"]').val()) || 0;
           let unitValue = parseFloat($row.find('input[name$=".UnitValue"]').val()) || 0;
-  
-          // Si no hay valor unitario, intentar obtenerlo de la denominación
+
           if (unitValue === 0) {
             const $denSel = $row.find('select[name$=".DenominationId"]');
             const denomId = $denSel.val();
             const kind = $row.find('.js-vtype').val();
-    
+
             if (denomId && kind) {
-              // Buscar en data-value del option seleccionado
               const selectedOption = $denSel.find('option:selected');
               unitValue = parseFloat(selectedOption.data('value')) || 0;
-      
-              // Si no hay data-value, buscar en DENOMS
+
               if (unitValue === 0) {
                 const arr = (DENOMS && DENOMS[kind]) ? DENOMS[kind] : [];
                 const denomInfo = arr.find(d => String((d.id ?? d.codDenominacion ?? d.CodDenominacion)) === String(denomId));
@@ -725,8 +732,7 @@
                   unitValue = denomInfo.value ?? denomInfo.valor ?? denomInfo.ValorDenominacion ?? denomInfo.valorDenominacion ?? 0;
                 }
               }
-      
-              // Actualizar el campo UnitValue si se encontró el valor
+
               if (unitValue > 0) {
                 $row.find('input[name$=".UnitValue"]').val(unitValue);
               }
@@ -739,23 +745,17 @@
 
         // Función para inicializar datos existentes
         function initializeExistingData() {
-          // Recorrer todas las filas existentes y calcular valores
           $('table.js-details-table tbody tr').each(function() {
             const $row = $(this);
-    
-            // Verificar si es una fila con datos (tiene denominación seleccionada)
             const $denomSelect = $row.find('select[name$=".DenominationId"]');
             if ($denomSelect.val()) {
-              // Asegurar que el data-value esté disponible en el option seleccionado
               ensureDenomDataValue($row);
       
-              // Recalcular fajos y picos si hay cantidad
               const qty = parseFloat($row.find('input[name$=".Quantity"]').val()) || 0;
               if (qty > 0) {
                 calculateBundlesAndLoose($row);
               }
       
-              // Recalcular monto
               triggerAmountCalculation($row);
             }
           });
@@ -793,17 +793,21 @@
         $containerEditor.find('.sec-sobre-docs').toggle(mode === 'Documento');
         $containerEditor.find('.sec-sobre-cheque').toggle(mode === 'Cheque');
       }
-      function toggleContainerSections($containerEditor) {
-        const typeVal = $containerEditor.find('.js-container-type').val(); // Bolsa / Sobre
-        const isSobre = (typeVal === 'Sobre');
-        $containerEditor.find('.sec-bolsa').toggle(!isSobre);
-        $containerEditor.find('.sec-sobre').toggle(isSobre);
-        $containerEditor.find('.js-parent-bag-block').toggle(isSobre);
-        if (isSobre) {
-          $containerEditor.find('.js-sobre-mode[value="Efectivo"]').prop('checked', true);
-          toggleSobreMode($containerEditor);
+        function toggleContainerSections($containerEditor) {
+          const typeVal = $containerEditor.find('.js-container-type').val(); // Bolsa / Sobre
+          const isSobre = (typeVal === 'Sobre');
+
+          $containerEditor.find('.sec-bolsa').toggle(!isSobre);
+          $containerEditor.find('.sec-sobre').toggle(isSobre);
+          $containerEditor.find('.js-parent-bag-block').toggle(isSobre);
+
+          if (isSobre) {
+            if ($containerEditor.find('.js-sobre-mode:checked').length === 0) {
+              $containerEditor.find('.js-sobre-mode[value="Efectivo"]').prop('checked', true);
+            }
+            toggleSobreMode($containerEditor);
+          }
         }
-      }
       function refreshAllParentBagCombos() {
         const bags = [];
         $('#bagsTabContent .tab-pane[id^="bag-tab-"]').each(function () {
@@ -837,7 +841,7 @@
         const $btn = $(`
           <li class="nav-item" role="presentation">
             <button class="nav-link" id="${newId}-btn" data-bs-toggle="tab" data-bs-target="#${newId}" type="button" role="tab">
-              Contenedor ${$contents.children('.tab-pane').length + 1} — Bolsa
+              Bolsa ${$contents.children('.tab-pane').length + 1}
             </button>
           </li>`);
         $tabs.append($btn);
@@ -902,6 +906,16 @@
             toggleSobreMode($envEditor);
 
             refreshAllParentBagCombos();
+        });
+
+        // Documento/Voucher: si cambia el Valor declarado del SOBRE, refrescar Monto del detalle
+        $(document).on('input change', 'input[name$=".DeclaredValue"]', function () {
+          const $ce = $(this).closest('.container-editor');
+          const declared = parseFloat($(this).val()) || 0;
+
+          $ce.find('.js-details-table[data-detail-scope="sobre-docs"] tbody tr').each(function () {
+            $(this).find('input[name$=".CalculatedAmount"]').val(declared.toFixed(0));
+          });
         });
 
         $(document).on('click', '.js-remove-envelope-card', function () {
@@ -975,10 +989,17 @@
         toggleContainerSections($ce);
         refreshAllParentBagCombos();
       });
-      $(document).on('change', '.js-sobre-mode', function () {
-        const $ce = $(this).closest('.container-editor');
-        toggleSobreMode($ce);
-      });
+        $(document).on('change', '.js-sobre-mode', function () {
+          const $ce = $(this).closest('.container-editor');
+          toggleSobreMode($ce);
+
+          const mode = $ce.find('.js-sobre-mode:checked').val();
+          if (mode === 'Documento') {
+            $ce.find('.js-details-table[data-detail-scope="sobre-docs"] tbody tr').each(function(){
+              triggerAmountCalculation($(this));
+            });
+          }
+        });
 
       // ===================== DETALLES =====================
       function updateAvailableDenominations($table) {
@@ -1000,79 +1021,122 @@
         });
       }
 
-      // Agregar fila de detalle
-      $(document).on('click', '.js-add-detail', function () {
-        const $btn  = $(this);
-        const scope = $btn.data('detail-scope');  // bolsa | sobre-cash | sobre-docs
-        const $ce   = $btn.closest('.container-editor');
-        const basePrefix = $ce.data('prefix');
+        // Agregar fila de detalle
+        $(document).on('click', '.js-add-detail', function () {
+          const $btn  = $(this);
+          const scope = $btn.data('detail-scope');  // bolsa | sobre-cash | sobre-docs
+          const $card = $btn.closest('.card');
+          const $table = $card.find('.js-details-table[data-detail-scope="' + scope + '"]');
 
-        let max = -1;
-        $(document).find('[name^="' + basePrefix + '.ValueDetails["]').each(function () {
-          const m = this.name.match(/ValueDetails\[(\d+)\]/);
-          if (m) max = Math.max(max, parseInt(m[1], 10));
-        });
-        const j = max + 1;
+          // === Documento/Voucher: solo 1 detalle ===
+          if (scope === 'sobre-docs') {
+            if ($table.find('tbody tr').length > 0) {
+              Swal.fire('Solo un detalle', 'En Documento/Voucher solo se permite un detalle.', 'info');
+              return;
+            }
+          }
 
-        let valueTypeOptions = [], denomKindDefault = null;
-        if (scope === 'bolsa' || scope === 'sobre-cash') {
-          valueTypeOptions = [
-            { value: 'Billete', text: 'Billete' },
-            { value: 'Moneda', text: 'Moneda' }
-          ];
-          denomKindDefault = 'Billete';
-        } else if (scope === 'sobre-docs') {
-          valueTypeOptions = [{ value: 'Documento', text: 'Documento' }];
-          denomKindDefault = 'Documento';
-        }
+          const $ce   = $btn.closest('.container-editor');
+          const basePrefix = $ce.data('prefix');
 
-        const vtHtml   = valueTypeOptions.map(v => `<option value="${v.value}">${v.text}</option>`).join('');
-        const denomHtml= denomOptionsHtml(denomKindDefault);
-        // La celda de Calidad solo aplica a Billete/Moneda; si tu tabla ya trae la columna, este select será manejado abajo.
-        const qualityCell = `<td>
-            <select name="${basePrefix}.ValueDetails[${j}].QualityId" class="form-select form-select-sm js-quality">
-              <option value="">-- Seleccione calidad --</option>
-            </select>
-          </td>`;
+          let max = -1;
+          $(document).find('[name^="' + basePrefix + '.ValueDetails["]').each(function () {
+            const m = this.name.match(/ValueDetails\[(\d+)\]/);
+            if (m) max = Math.max(max, parseInt(m[1], 10));
+          });
+          const j = max + 1;
 
-        // Detecta si la tabla actual tiene columna de calidad (por el thead)
-        const thisTableHasQuality = $btn.closest('.card').find('table thead th')
-                                      .filter(function(){ return $(this).text().trim().toLowerCase().includes('calidad'); }).length > 0;
+          // Config según scope
+          let valueTypeOptions = [], denomKindDefault = null;
+          let showDenom = true, showQuality = true, showBundleFields = true, showUnit = true;
 
-        const row = `
-          <tr>
+          if (scope === 'bolsa' || scope === 'sobre-cash') {
+            valueTypeOptions = [
+              { value: 'Billete', text: 'Billete' },
+              { value: 'Moneda',  text: 'Moneda'  }
+            ];
+            denomKindDefault = 'Billete';
+          } else if (scope === 'sobre-docs') {
+            valueTypeOptions = [{ value: 'Documento', text: 'Documento' }];
+            denomKindDefault = 'Documento';
+            showDenom = false;
+            showQuality = false;
+            showBundleFields = false;
+            showUnit = false; // <-- NO mostrar columna "Valor Unit."
+          }
+
+          const vtHtml    = valueTypeOptions.map(v => `<option value="${v.value}">${v.text}</option>`).join('');
+          const denomHtml = denomOptionsHtml(denomKindDefault);
+
+          const hasQualityColInTable = $table.find('thead th')
+            .filter(function(){ return $(this).text().trim().toLowerCase().includes('calidad'); }).length > 0;
+
+          let cells = `
             <td>
               <select name="${basePrefix}.ValueDetails[${j}].ValueType"
-                      class="form-select form-select-sm js-vtype">
-                ${vtHtml}
-              </select>
+                      class="form-select form-select-sm js-vtype">${vtHtml}</select>
             </td>
-            <td>
-              <select name="${basePrefix}.ValueDetails[${j}].DenominationId"
-                      class="form-select form-select-sm js-denom">
-                ${denomHtml}
-              </select>
-            </td>
-            ${ thisTableHasQuality ? qualityCell : '' }
+          `;
+
+          if (showDenom) {
+            cells += `
+              <td>
+                <select name="${basePrefix}.ValueDetails[${j}].DenominationId"
+                        class="form-select form-select-sm js-denom">${denomHtml}</select>
+              </td>`;
+          }
+
+          if (hasQualityColInTable && showQuality) {
+            cells += `
+              <td>
+                <select name="${basePrefix}.ValueDetails[${j}].QualityId"
+                        class="form-select form-select-sm js-quality">
+                  <option value="">-- Seleccione calidad --</option>
+                </select>
+              </td>`;
+          }
+
+          cells += `
             <td><input name="${basePrefix}.ValueDetails[${j}].Quantity" type="number" class="form-control form-control-sm js-calc" /></td>
-            <td><input name="${basePrefix}.ValueDetails[${j}].BundlesCount" type="number" class="form-control form-control-sm js-calc" readonly /></td>
-            <td><input name="${basePrefix}.ValueDetails[${j}].LoosePiecesCount" type="number" class="form-control form-control-sm js-calc" readonly /></td>
-            <td><input name="${basePrefix}.ValueDetails[${j}].UnitValue" type="number" step="1" class="form-control form-control-sm js-calc" readonly /></td>
+          `;
+
+          if (showBundleFields) {
+            cells += `
+              <td><input name="${basePrefix}.ValueDetails[${j}].BundlesCount" type="number" class="form-control form-control-sm js-calc" readonly /></td>
+              <td><input name="${basePrefix}.ValueDetails[${j}].LoosePiecesCount" type="number" class="form-control form-control-sm js-calc" readonly /></td>
+            `;
+          }
+
+          // 👇 Para Documento: NO agregar la celda de "Valor Unit.", enviar hidden vacío
+          if (showUnit) {
+            cells += `<td><input name="${basePrefix}.ValueDetails[${j}].UnitValue" type="number" step="1" class="form-control form-control-sm js-calc" /></td>`;
+          } else {
+            cells += `<input type="hidden" name="${basePrefix}.ValueDetails[${j}].UnitValue" value="" />`;
+          }
+
+          cells += `
             <td><input name="${basePrefix}.ValueDetails[${j}].CalculatedAmount" type="number" step="1" class="form-control form-control-sm" readonly /></td>
             <td><button type="button" class="btn btn-sm btn-outline-danger js-remove-detail">×</button></td>
-          </tr>`;
-        $btn.closest('.card').find('.js-details-table[data-detail-scope="' + scope + '"] tbody').append(row);
+          `;
 
-        // Repoblar denominaciones (modo sin calidad) o calidades si aplica
-        const $newRow = $btn.closest('.card').find('.js-details-table[data-detail-scope="' + scope + '"] tbody tr').last();
-        if (thisTableHasQuality) updateQualityForRow($newRow);
+          const row = `<tr>${cells}</tr>`;
+          $table.find('tbody').append(row);
 
-        setTimeout(() => {
-          const $table = $btn.closest('.card').find('.js-details-table[data-detail-scope="' + scope + '"]');
-          updateAvailableDenominations($table);
-          if (thisTableHasQuality) updateQualitiesInTable($table);
-        }, 10);
-      });
+          const $newRow = $table.find('tbody tr').last();
+
+          // Post-append: sólo si aplica
+          if (hasQualityColInTable && showQuality) updateQualityForRow($newRow);
+
+          setTimeout(() => {
+            if (showDenom) updateAvailableDenominations($table);
+            if (hasQualityColInTable && showQuality) updateQualitiesInTable($table);
+          }, 10);
+
+          // Documento/Voucher: forzar que Monto = Valor Declarado del sobre
+          if (scope === 'sobre-docs') {
+            triggerAmountCalculation($newRow);
+          }
+        });
 
       $(document).on('change', '.js-vtype', function () {
         const v = $(this).val();
@@ -1147,9 +1211,10 @@
           <tr>
             <td><input name="${basePrefix}.ValueDetails[${j}].BankName" class="form-control form-control-sm" /></td>
             <td><input name="${basePrefix}.ValueDetails[${j}].IdentifierNumber" class="form-control form-control-sm" /></td>
+            <td><input name="${basePrefix}.ValueDetails[${j}].Issuer" class="form-control form-control-sm" /></td>
             <td><input name="${basePrefix}.ValueDetails[${j}].IssueDate" type="date" class="form-control form-control-sm" /></td>
             <td><input name="${basePrefix}.ValueDetails[${j}].UnitValue" type="number" step="1" class="form-control form-control-sm js-calc" /></td>
-            <td><input name="${basePrefix}.ValueDetails[${j}].Quantity" type="number" class="form-control form-control-sm js-calc" value="1" /></td>
+            <td style="display: none;"><input name="${basePrefix}.ValueDetails[${j}].Quantity" type="number" class="form-control form-control-sm js-calc" value="1" /></td>
             <td><input name="${basePrefix}.ValueDetails[${j}].CalculatedAmount" type="number" step="1" class="form-control form-control-sm" readonly /></td>
             <td>
               <input type="hidden" name="${basePrefix}.ValueDetails[${j}].ValueType" value="Cheque" />
@@ -1294,8 +1359,15 @@
             });
           });
         });
+        $('.container-editor').each(function () {
+          const $ce = $(this);
+          toggleContainerSections($ce);
+        });
         populateDenomsAndQuals();
         setTimeout(initializeExistingData, 100);
+        $('.js-details-table[data-detail-scope="sobre-docs"] tbody tr').each(function(){
+          triggerAmountCalculation($(this));
+        });
     });
     </script>
 }

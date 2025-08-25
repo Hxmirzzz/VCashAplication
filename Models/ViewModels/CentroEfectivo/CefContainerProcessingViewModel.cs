@@ -76,7 +76,7 @@ namespace VCashApp.Models.ViewModels.CentroEfectivo
     /// <summary>
     /// ViewModel para la entrada de datos de un detalle de valor (billete, moneda, cheque, documento) dentro de un contenedor.
     /// </summary>
-    public class CefValueDetailViewModel
+    public class CefValueDetailViewModel : IValidatableObject
     {
         public int Id { get; set; }
 
@@ -85,11 +85,9 @@ namespace VCashApp.Models.ViewModels.CentroEfectivo
         public CefValueTypeEnum ValueType { get; set; }
 
         [Display(Name = "Denominación")]
-        [Required(ErrorMessage = "La denominación es requerida.")]
         public int? DenominationId { get; set; }
 
         [Display(Name = "Calidad")]
-        [Required(ErrorMessage = "La calidad es requerida.")]
         public int? QualityId { get; set; }
 
         [Display(Name = "Cantidad")]
@@ -105,7 +103,6 @@ namespace VCashApp.Models.ViewModels.CentroEfectivo
         public int? LoosePiecesCount { get; set; }
 
         [Display(Name = "Valor Unitario")]
-        [Range(0.01, (double)decimal.MaxValue, ErrorMessage = "Debe ser un valor positivo.")]
         public decimal? UnitValue { get; set; }
 
         [Display(Name = "Monto Calculado")]
@@ -137,6 +134,35 @@ namespace VCashApp.Models.ViewModels.CentroEfectivo
         public List<SelectListItem>? Denominations { get; set; }
         public List<SelectListItem>? Qualities { get; set; }
         public List<SelectListItem>? ValueTypes { get; set; }
+
+        public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
+        {
+            // Billete/Moneda: piden Denominación + Calidad
+            if (ValueType == CefValueTypeEnum.Billete || ValueType == CefValueTypeEnum.Moneda)
+            {
+                if (DenominationId == null)
+                    yield return new ValidationResult("La denominación es requerida.", new[] { nameof(DenominationId) });
+                if (QualityId == null)
+                    yield return new ValidationResult("La calidad es requerida.", new[] { nameof(QualityId) });
+                if (UnitValue == null || UnitValue <= 0)
+                    yield return new ValidationResult("El valor unitario es requerido.", new[] { nameof(UnitValue) });
+            }
+
+            // Documento/Cheque: piden Valor Unitario y Cantidad; NO piden denominación/calidad
+            if (ValueType == CefValueTypeEnum.Documento)
+            {
+                if (Quantity <= 0)
+                    yield return new ValidationResult("La cantidad es requerida.", new[] { nameof(Quantity) });
+            }
+
+            if (ValueType == CefValueTypeEnum.Cheque)
+            {
+                if (UnitValue == null || UnitValue <= 0)
+                    yield return new ValidationResult("El valor unitario es requerido.", new[] { nameof(UnitValue) });
+                if (Quantity <= 0)
+                    yield return new ValidationResult("La cantidad es requerida.", new[] { nameof(Quantity) });
+            }
+        }
     }
 
     /// <summary>

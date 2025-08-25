@@ -495,7 +495,7 @@ namespace VCashApp.Controllers
             if (viewModel?.Containers == null || viewModel.Containers.Count == 0)
                 ModelState.AddModelError("", "No se recibieron contenedores para guardar.");
 
-            // Duplicados por contenedor (Tipo + Denom + Calidad)
+            // Duplicados por contenedor SOLO para Billete/Moneda
             if (viewModel?.Containers != null)
             {
                 for (int cIdx = 0; cIdx < viewModel.Containers.Count; cIdx++)
@@ -504,6 +504,7 @@ namespace VCashApp.Controllers
                     if (c?.ValueDetails == null) continue;
 
                     var dup = c.ValueDetails
+                        .Where(v => v.ValueType == CefValueTypeEnum.Billete || v.ValueType == CefValueTypeEnum.Moneda)
                         .GroupBy(v => new { v.ValueType, v.DenominationId, v.QualityId })
                         .FirstOrDefault(g => g.Count() > 1);
 

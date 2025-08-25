@@ -5,6 +5,7 @@
     bool esSobre = Model.ContainerType.ToString() == "Sobre";
     int? bolsaSeleccionadaId = Model.ParentContainerId;
     string bolsaLabel = Model.ParentContainerCode ?? "";
+    var baseId = Html.IdFor(m => m.EnvelopeSubType);
 }
 
 <div class="container-editor border rounded p-3" data-prefix="@prefix">
@@ -131,25 +132,16 @@
     <div class="sec-sobre mt-3" style="display:@(esSobre ? "block" : "none")">
         <div class="mb-2">
             <div class="form-check form-check-inline">
-                <input class="form-check-input js-sobre-mode"
-                       type="radio"
-                       name="@($"{ViewData.TemplateInfo.HtmlFieldPrefix}.EnvelopeSubType")"
-                       value="Efectivo" checked>
-                <label class="form-check-label">Efectivo</label>
+                <input id="@($"{baseId}_Efectivo")" class="form-check-input js-sobre-mode" asp-for="EnvelopeSubType" type="radio" value="Efectivo">
+                <label class="form-check-label" for="@($"{baseId}_Efectivo")">Efectivo</label>
             </div>
             <div class="form-check form-check-inline">
-                <input class="form-check-input js-sobre-mode"
-                       type="radio"
-                       name="@($"{ViewData.TemplateInfo.HtmlFieldPrefix}.EnvelopeSubType")"
-                       value="Documento">
-                <label class="form-check-label">Documentos/Voucher</label>
+                <input id="@($"{baseId}_Documento")" class="form-check-input js-sobre-mode" asp-for="EnvelopeSubType" type="radio" value="Documento">
+                <label class="form-check-label" for="@($"{baseId}_Documento")">Documentos/Voucher</label>
             </div>
             <div class="form-check form-check-inline">
-                <input class="form-check-input js-sobre-mode"
-                       type="radio"
-                       name="@($"{ViewData.TemplateInfo.HtmlFieldPrefix}.EnvelopeSubType")"
-                       value="Cheque">
-                <label class="form-check-label">Cheques</label>
+                <input id="@($"{baseId}_Cheque")" class="form-check-input js-sobre-mode" asp-for="EnvelopeSubType" type="radio" value="Cheque">
+                <label class="form-check-label" for="@($"{baseId}_Cheque")">Cheques</label>
             </div>
         </div>
 
@@ -221,22 +213,64 @@
             <div class="card">
                 <div class="card-header"><h6 class="mb-0">📄 Sobre — Documentos/Vouchers</h6></div>
                 <div class="card-body">
+                    <div class="row g-3 mb-3">
+                        <div class="col-12 col-lg-4">
+                            <div class="form-floating has-validation">
+                                <input asp-for="ClientCashierName" class="form-control" />
+                                <label asp-for="ClientCashierName">Cajero Origen — Nombre</label>
+                                <div class="invalid-feedback">⚠ Requerido</div>
+                            </div>
+                        </div>
+                        <div class="col-12 col-lg-4">
+                            <div class="form-floating has-validation">
+                                <input asp-for="ClientCashierId" type="number" class="form-control" />
+                                <label asp-for="ClientCashierId">Cajero Origen — Documento</label>
+                                <div class="invalid-feedback">⚠ Requerido</div>
+                            </div>
+                        </div>
+                        <div class="col-12 col-lg-4">
+                            <div class="form-floating has-validation">
+                                <input asp-for="ClientEnvelopeDate" type="date" class="form-control" />
+                                <label asp-for="ClientEnvelopeDate">Fecha del sobre (origen)</label>
+                                <div class="invalid-feedback">⚠ Requerido</div>
+                            </div>
+                        </div>
+                    </div>
+
                     <table class="table table-sm align-middle js-details-table" data-detail-scope="sobre-docs">
                         <thead>
                             <tr>
                                 <th>Tipo</th>
-                                <th>Denominación</th>
                                 <th>Cantidad</th>
-                                <th>Fajos</th>
-                                <th>Picos</th>
-                                <th>Valor Unit.</th>
                                 <th>Monto</th>
                                 <th></th>
                             </tr>
                         </thead>
-                        <tbody></tbody>
+                        <tbody>
+                            @foreach (var d in Model.ValueDetails.Where(v => v.ValueType == CefValueTypeEnum.Documento))
+                            {
+                                var idx = Model.ValueDetails.IndexOf(d);
+                                var prefixDetail = $"{prefix}.ValueDetails[{idx}]";
+                                <tr>
+                                    <td style="display: none;">
+                                        <input type="hidden" name="@($"{prefixDetail}.Id")" value="@d.Id" />
+                                    </td>
+                                    <td>
+                                        <select name="@($"{prefixDetail}.ValueType")" class="form-select form-select-sm js-vtype">
+                                            @Html.Raw($"<option value=\"Documento\" {(d.ValueType == CefValueTypeEnum.Documento ? "selected" : "")}>Documento</option>")
+                                        </select>
+                                    </td>
+                                    <td><input name="@($"{prefixDetail}.Quantity")" type="number" class="form-control form-control-sm js-calc" value="@d.Quantity" /></td>
+                                    <td><input name="@($"{prefixDetail}.CalculatedAmount")" type="number" step="0.01" class="form-control form-control-sm" value="@d.CalculatedAmount" readonly /></td>
+                                    <td><button type="button" class="btn btn-sm btn-outline-danger js-remove-detail">×</button></td>
+                                </tr>
+                            }
+                        </tbody>
                     </table>
-                    <button type="button" class="btn btn-outline-primary btn-sm js-add-detail" data-detail-scope="sobre-docs">
+
+                    <button type="button"
+                            class="btn btn-outline-primary btn-sm js-add-detail"
+                            data-detail-scope="sobre-docs">
                         + Agregar documento
                     </button>
                 </div>
@@ -253,14 +287,33 @@
                             <tr>
                                 <th>Banco</th>
                                 <th>Número</th>
+                                <th>Emisor</th>
                                 <th>Fecha</th>
                                 <th>Valor</th>
-                                <th>Cantidad</th>
                                 <th>Monto</th>
                                 <th></th>
                             </tr>
                         </thead>
-                        <tbody></tbody>
+                        <tbody>
+                            @foreach (var c in Model.ValueDetails.Where(v => v.ValueType == CefValueTypeEnum.Cheque))
+                            {
+                                var idx = Model.ValueDetails.IndexOf(c);
+                                var prefixDetail = $"{prefix}.ValueDetails[{idx}]";
+                                <tr>
+                                    <td style="display: none;">
+                                        <input type="hidden" name="@($"{prefixDetail}.Id")" value="@c.Id" />
+                                        <input type="text" name="@($"{prefixDetail}.Quantity")" value="1" />
+                                        <input type="text" name="@($"{prefixDetail}.ValueType")" value="@c.ValueType" />
+                                    </td>
+                                    <td><input name="@($"{prefixDetail}.BankName")" class="form-control form-control-sm" value="@c.BankName" /></td>
+                                    <td><input name="@($"{prefixDetail}.IdentifierNumber")" type="number" class="form-control form-control-sm" value="@c.IdentifierNumber"></td>
+                                    <td><input name="@($"{prefixDetail}.Issuer")" class="form-control form-control-sm" value="@c.Issuer" /></td>
+                                    <td><input name="@($"{prefixDetail}.IssueDate")" type="date" class="form-control form-control-sm" value="@(c.IssueDate.HasValue? c.IssueDate.Value.ToString("yyyy-MM-dd") : "")" /></td>
+                                    <td><input name="@($"{prefixDetail}.UnitValue")" type="number" class="form-control form-control-sm" value="@c.UnitValue" /></td>
+                                    <td><input name="@($"{prefixDetail}.CalculatedAmount")" type="number" class="form-control form-control-sm" value="@c.CalculatedAmount" /></td>
+                                </tr>
+                            }
+                        </tbody>
                     </table>
                     <button type="button" class="btn btn-outline-primary btn-sm js-add-cheque">
                         + Agregar cheque
