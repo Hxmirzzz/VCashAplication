@@ -151,6 +151,9 @@
                                                         data-bs-toggle="tab" data-bs-target="@($"#{tabId}")"
                                                         type="button" role="tab">
                                                   Bolsa @(@b + 1)
+                                                  <span class="badge bg-secondary ms-2 js-bag-badge-declared" title="Declarado">0</span>
+                                                  <span class="badge bg-info ms-1 js-bag-badge-counted"   title="Contado">0</span>
+                                                  <span class="badge bg-light text-dark ms-1 js-bag-badge-diff" title="Dif.">0</span>
                                                 </button>
                                             </li>
                                         }
@@ -295,12 +298,12 @@
 
                 </div>
 
-                <!-- Botonera -->
-                <div class="submit-container form-group col-12 mt-4">
+                <div class="submit-container-spacer"></div>
+                <div class="submit-container form-group col-12 mt-4 fixed">
                     <button type="button" class="btn btn-secondary" data-step-action="prev" style="display:none;">Anterior</button>
                     <button type="button" class="btn btn-primary" data-step-action="next">Continuar</button>
                     <button type="submit" class="btn btn-primary" data-step-action="submit-final" style="display:none;">Guardar</button>
-                    <a asp-action="Index" class="btn btn-danger">Cancelar</a>
+                    <a asp-action="Index" class="btn btn-danger js-cancel">Cancelar</a>
                 </div>
             </form>
         </div>
@@ -419,6 +422,17 @@
       const $prev   = $('button[data-step-action="prev"]');
       const $submit = $('button[data-step-action="submit-final"]');
 
+        let isDirty = false;
+        let skipUnload = false;
+
+        $form.on('input change', ':input', function () {
+          if (!$(this).is('[type="hidden"]')) isDirty = true;
+        });
+
+        $(document).on('click',
+          '.js-add-detail,.js-remove-detail,.js-add-cheque,.js-remove-cheque,.js-add-envelope-in-this-bag,#btnAddBag,.js-remove-envelope-card',
+          function(){ isDirty = true; });
+
       function updateStepper() {
         $('.progress-stepper .step').removeClass('active completed');
         for (let i = 1; i <= totalSteps; i++) {
@@ -462,17 +476,84 @@
       });
       $prev.on('click', function () { if (currentStep > 1) { currentStep--; updateStepper(); } });
 
-      // === ÍNDICE GLOBAL PARA Containers[__idx__] ===
-      let nextIdx = @Model.Containers.Count;
+        // === ÍNDICE GLOBAL PARA Containers[__idx__] ===
+        let nextIdx = @Model.Containers.Count;
 
-      // === Utils ===
-      function getPaneIndex($pane) {
-        const id = $pane.attr('id') || '';
-        const parts = id.split('-');
-        return parseInt(parts[parts.length - 1]) || 0;
-      }
+        // === Utils ===
+        function getPaneIndex($pane) {
+            const id = $pane.attr('id') || '';
+            const parts = id.split('-');
+            return parseInt(parts[parts.length - 1]) || 0;
+        }
 
-      // ===================== CATÁLOGOS (DENOM / CALIDAD) =====================
+        function fmt(n){ return (Number(n)||0).toLocaleString(); }
+
+        function sumEditor($editor){
+          let s = 0;
+          const typeVal = $editor.find('.js-container-type').val();
+
+          if (typeVal === 'Bolsa') {
+            $editor.find('.sec-bolsa .js-details-table tbody input[name$=".CalculatedAmount"]').each(function(){
+              s += Number($(this).val() || 0);
+            });
+          } else {
+            const mode = $editor.find('.js-sobre-mode:checked').val();
+
+            if (mode === 'Efectivo') {
+              $editor.find('.sec-sobre-cash .js-details-table tbody input[name$=".CalculatedAmount"]').each(function(){
+                s += Number($(this).val() || 0);
+              });
+            } else if (mode === 'Documento') {
+              $editor.find('.sec-sobre-docs .js-details-table tbody input[name$=".CalculatedAmount"]').each(function(){
+                s += Number($(this).val() || 0);
+              });
+            } else if (mode === 'Cheque') {
+              $editor.find('.sec-sobre-cheque .js-cheques-table tbody input[name$=".CalculatedAmount"]').each(function(){
+                s += Number($(this).val() || 0);
+              });
+            }
+          }
+          return s;
+        }
+
+        // Refresca los 3 badges de una pestaña de bolsa concreta
+        function updateBagBadgeFromPane($bagPane){
+          const tabId   = $bagPane.attr('id'); // ej: "bag-tab-3"
+          const $tabBtn = $(`#bagsTabs button[data-bs-target="#${tabId}"]`);
+          const bagIdx  = getPaneIndex($bagPane);
+
+          // Editor principal de la bolsa
+          const $bagEd = $bagPane.find('.container-editor').first();
+
+          // 1) Contado de la bolsa
+          let counted = sumEditor($bagEd);
+
+          // 2) + Contado de cada sobre hijo
+          $bagPane.find('.envelope-card').each(function(){
+            counted += sumEditor($(this));
+          });
+
+          // 3) Declarado de la bolsa (input de esa bolsa)
+          const declared = Number($bagEd.find(`input[name="Containers[${bagIdx}].DeclaredValue"]`).val() || 0);
+          const diff     = counted - declared;
+
+          $tabBtn.find('.js-bag-badge-declared').text(fmt(declared));
+          $tabBtn.find('.js-bag-badge-counted').text(fmt(counted));
+          $tabBtn.find('.js-bag-badge-diff')    .text((diff>=0?'+':'') + fmt(diff));
+        }
+
+        // Recorre todas las pestañas y actualiza sus badges
+        function updateAllBagBadges(){
+          $('#bagsTabContent .tab-pane[id^="bag-tab-"]').each(function(){
+            updateBagBadgeFromPane($(this));
+          });
+        }
+
+        function setSectionEnabled($section, enabled) {
+          $section.find(':input').prop('disabled', !enabled);
+        }
+
+        // ===================== CATÁLOGOS (DENOM / CALIDAD) =====================
         function getMoneyFlag(kind) {
             const k = (kind || '').toString().trim().toLowerCase();
             if (k === 'billete' || k === 'billete') return 'B';
@@ -741,6 +822,35 @@
 
           const amt = qty * unitValue;
           $row.find('input[name$=".CalculatedAmount"]').val(amt.toFixed(0));
+          updateContainerSubtotal($row.closest('.container-editor'));
+        }
+
+        function updateContainerSubtotal($ce) {
+          let total = 0;
+          const typeVal = $ce.find('.js-container-type').val();
+
+          if (typeVal === 'Bolsa') {
+            $ce.find('.sec-bolsa .js-details-table tbody input[name$=".CalculatedAmount"]').each(function(){
+              total += Number($(this).val() || 0);
+            });
+          } else {
+            const mode = $ce.find('.js-sobre-mode:checked').val();
+            if (mode === 'Efectivo') {
+              $ce.find('.sec-sobre-cash .js-details-table tbody input[name$=".CalculatedAmount"]').each(function(){
+                total += Number($(this).val() || 0);
+              });
+            } else if (mode === 'Documento') {
+              $ce.find('.sec-sobre-docs .js-details-table tbody input[name$=".CalculatedAmount"]').each(function(){
+                total += Number($(this).val() || 0);
+              });
+            } else if (mode === 'Cheque') {
+              $ce.find('.sec-sobre-cheque .js-cheques-table tbody input[name$=".CalculatedAmount"]').each(function(){
+                total += Number($(this).val() || 0);
+              });
+            }
+          }
+
+          $ce.find('.js-container-subtotal').text(Number(total).toLocaleString());
         }
 
         // Función para inicializar datos existentes
@@ -786,19 +896,38 @@
           }
         }
 
-      // ===================== MOSTRAR/OCULTAR BLOQUES =====================
-      function toggleSobreMode($containerEditor) {
-        const mode = $containerEditor.find('.js-sobre-mode:checked').val(); // Efectivo / Documento / Cheque
-        $containerEditor.find('.sec-sobre-cash').toggle(mode === 'Efectivo');
-        $containerEditor.find('.sec-sobre-docs').toggle(mode === 'Documento');
-        $containerEditor.find('.sec-sobre-cheque').toggle(mode === 'Cheque');
-      }
+        // ===================== MOSTRAR/OCULTAR BLOQUES =====================
+        function toggleSobreMode($containerEditor) {
+          const mode = $containerEditor.find('.js-sobre-mode:checked').val(); // Efectivo / Documento / Cheque
+
+          const $cash   = $containerEditor.find('.sec-sobre-cash');
+          const $docs   = $containerEditor.find('.sec-sobre-docs');
+          const $cheque = $containerEditor.find('.sec-sobre-cheque');
+
+          $cash.toggle(mode === 'Efectivo');
+          $docs.toggle(mode === 'Documento');
+          $cheque.toggle(mode === 'Cheque');
+
+          setSectionEnabled($cash,   mode === 'Efectivo');
+          setSectionEnabled($docs,   mode === 'Documento');
+          setSectionEnabled($cheque, mode === 'Cheque');
+
+          updateContainerSubtotal($containerEditor);
+        }
+
         function toggleContainerSections($containerEditor) {
-          const typeVal = $containerEditor.find('.js-container-type').val(); // Bolsa / Sobre
+          const typeVal = $containerEditor.find('.js-container-type').val();
           const isSobre = (typeVal === 'Sobre');
 
-          $containerEditor.find('.sec-bolsa').toggle(!isSobre);
-          $containerEditor.find('.sec-sobre').toggle(isSobre);
+          const $secBolsa = $containerEditor.find('.sec-bolsa');
+          const $secSobre = $containerEditor.find('.sec-sobre');
+
+          $secBolsa.toggle(!isSobre);
+          $secSobre.toggle(isSobre);
+
+          setSectionEnabled($secBolsa, !isSobre);
+          setSectionEnabled($secSobre,  isSobre);
+
           $containerEditor.find('.js-parent-bag-block').toggle(isSobre);
 
           if (isSobre) {
@@ -807,7 +936,10 @@
             }
             toggleSobreMode($containerEditor);
           }
+
+          updateContainerSubtotal($containerEditor);
         }
+
       function refreshAllParentBagCombos() {
         const bags = [];
         $('#bagsTabContent .tab-pane[id^="bag-tab-"]').each(function () {
@@ -873,6 +1005,7 @@
         toggleContainerSections($bagEditor);
 
         refreshAllParentBagCombos();
+        setTimeout(updateAllBagBadges, 0);
       });
 
         $(document).on('click', '.js-add-envelope-in-this-bag', function () {
@@ -906,16 +1039,22 @@
             toggleSobreMode($envEditor);
 
             refreshAllParentBagCombos();
+            setTimeout(updateAllBagBadges, 0);
         });
 
         // Documento/Voucher: si cambia el Valor declarado del SOBRE, refrescar Monto del detalle
         $(document).on('input change', 'input[name$=".DeclaredValue"]', function () {
-          const $ce = $(this).closest('.container-editor');
-          const declared = parseFloat($(this).val()) || 0;
+            const $ce = $(this).closest('.container-editor');
+            const declared = parseFloat($(this).val()) || 0;
 
-          $ce.find('.js-details-table[data-detail-scope="sobre-docs"] tbody tr').each(function () {
-            $(this).find('input[name$=".CalculatedAmount"]').val(declared.toFixed(0));
-          });
+            $ce.find('.js-details-table[data-detail-scope="sobre-docs"] tbody tr').each(function () {
+                $(this).find('input[name$=".CalculatedAmount"]').val(declared.toFixed(0));
+            });
+
+            updateContainerSubtotal($ce);
+
+            const $pane = $(this).closest('.tab-pane[id^="bag-tab-"]');
+            if ($pane.length) updateBagBadgeFromPane($pane);
         });
 
         $(document).on('click', '.js-remove-envelope-card', function () {
@@ -959,8 +1098,8 @@
                 // Quitar del DOM
                 $card.remove();
                 refreshAllParentBagCombos();
+                updateAllBagBadges();
 
-                // Refrescar totales (usa tu acción existente)
                 $.get('@Url.Action("ProcessTotals")', { transactionId: transactionId })
                   .done(function(t) {
                     // Actualiza los inputs del Resumen (son <input/>, usar .val())
@@ -989,6 +1128,7 @@
         toggleContainerSections($ce);
         refreshAllParentBagCombos();
       });
+
         $(document).on('change', '.js-sobre-mode', function () {
           const $ce = $(this).closest('.container-editor');
           toggleSobreMode($ce);
@@ -999,6 +1139,8 @@
               triggerAmountCalculation($(this));
             });
           }
+
+          updateContainerSubtotal($ce);
         });
 
       // ===================== DETALLES =====================
@@ -1136,6 +1278,10 @@
           if (scope === 'sobre-docs') {
             triggerAmountCalculation($newRow);
           }
+
+            const $pane = $btn.closest('.tab-pane[id^="bag-tab-"]');
+            if ($pane.length) setTimeout(()=>updateBagBadgeFromPane($pane), 0);
+            updateContainerSubtotal($ce);
         });
 
       $(document).on('change', '.js-vtype', function () {
@@ -1190,9 +1336,15 @@
         }
 
         $(document).on('click', '.js-remove-detail', function () {
-            const table = $(this).closest("table");
-            $(this).closest("tr").remove();
-            reindexValueDetails(table);
+          const $table = $(this).closest("table");
+          const $pane  = $(this).closest('.tab-pane[id^="bag-tab-"]');
+          const $ce    = $table.closest('.container-editor');
+
+          $(this).closest("tr").remove();
+          reindexValueDetails($table);
+
+          if ($pane.length) updateBagBadgeFromPane($pane);
+          updateContainerSubtotal($ce);
         });
 
       // ===================== CHEQUES =====================
@@ -1222,16 +1374,28 @@
             </td>
           </tr>`;
         $(this).closest('.card').find('.js-cheques-table tbody').append(row);
-      });
-      $(document).on('click', '.js-remove-cheque', function () {
-        $(this).closest('tr').remove();
+
+        const $pane = $(this).closest('.tab-pane[id^="bag-tab-"]');
+        if ($pane.length) setTimeout(()=>updateBagBadgeFromPane($pane), 0);
+
+        updateContainerSubtotal($ce);
       });
 
-      // ===================== CÁLCULO (monto) =====================
-      $(document).on('input change', '.js-calc, .js-denom', function () {
-        const $row = $(this).closest('tr');
-        triggerAmountCalculation($row);
-      });
+        $(document).on('click', '.js-remove-cheque', function () {
+            const $pane = $(this).closest('.tab-pane[id^="bag-tab-"]');
+            $(this).closest('tr').remove();
+            if ($pane.length) updateBagBadgeFromPane($pane);
+            updateContainerSubtotal($ce);
+        });
+
+        // ===================== CÁLCULO (monto) =====================
+        $(document).on('input change', '.js-calc, .js-denom', function () {
+            const $row  = $(this).closest('tr');
+            triggerAmountCalculation($row);
+
+            const $pane = $(this).closest('.tab-pane[id^="bag-tab-"]');
+            if ($pane.length) updateBagBadgeFromPane($pane);
+        });
 
       // ===================== SUBMIT =====================
       $('button[data-step-action="submit-final"]').on('click', function (e) {
@@ -1295,16 +1459,41 @@
             setTimeout(initializeExistingData, 50);
         }
 
+        window.addEventListener('beforeunload', function (e) {
+            if (!isDirty || skipUnload) return;
+            e.preventDefault();
+            e.returnValue = '';
+        });
+
+        $(document).on('click', '.js-cancel', function (e) {
+            if (!isDirty) return;
+            e.preventDefault();
+            const href = this.href;
+
+            Swal.fire({
+                title: 'Hay cambios sin guardar',
+                text: 'Si sales, perderás lo no guardado. ¿Deseas salir de todas formas?',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Salir sin guardar',
+                cancelButtonText: 'Cancelar'
+            }).then(res => {
+                if (res.isConfirmed) {
+                    isDirty = false;
+                    skipUnload = true;
+                    window.location.href = href;
+                }
+            });
+        });
+
         $form.on('submit', function (e) {
           e.preventDefault();
 
-          // 1) Valida la pestaña actual
           if (!validateCurrentStep()) {
             Swal.fire('Campos incompletos', 'Revise los campos requeridos.', 'warning');
             return;
           }
 
-          // 2) Confirmación
           Swal.fire({
             title: '¿Guardar contenedores?',
             text: 'Se guardará toda la información capturada.',
@@ -1329,17 +1518,17 @@
               headers: { 'X-Requested-With': 'XMLHttpRequest' },
               success: function (response) {
                 if (response.success) {
-                  Swal.fire({
-                    icon: 'success',
-                    title: '¡Éxito!',
-                    text: response.message
-                  }).then(() => {
-                    if (response.data?.redirectUrl) {
-                      window.location.href = response.data.redirectUrl;
-                    } else {
-                      location.reload();
-                    }
-                  });
+                  isDirty = false;
+                  skipUnload = true;
+
+                  Swal.fire({ icon: 'success', title: '¡Éxito!', text: response.message })
+                    .then(() => {
+                      if (response.data?.redirectUrl) {
+                        window.location.href = response.data.redirectUrl;
+                      } else {
+                        location.reload();
+                      }
+                    });
                 } else {
                   const flatErrors = Object.values(response.errors ?? {}).flat();
                   Swal.fire({
@@ -1360,14 +1549,16 @@
           });
         });
         $('.container-editor').each(function () {
-          const $ce = $(this);
-          toggleContainerSections($ce);
+            const $ce = $(this);
+            toggleContainerSections($ce);
+            updateContainerSubtotal($(this));
         });
         populateDenomsAndQuals();
         setTimeout(initializeExistingData, 100);
         $('.js-details-table[data-detail-scope="sobre-docs"] tbody tr').each(function(){
           triggerAmountCalculation($(this));
         });
+        setTimeout(updateAllBagBadges, 150);
     });
     </script>
 }

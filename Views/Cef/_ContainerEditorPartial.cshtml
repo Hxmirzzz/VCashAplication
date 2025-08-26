@@ -9,6 +9,16 @@
 }
 
 <div class="container-editor border rounded p-3" data-prefix="@prefix">
+    @{
+    var subtotalContado = (Model.ValueDetails?.Sum(v => v.CalculatedAmount) ?? 0M);
+    }
+    <div class="d-flex justify-content-end align-items-center mb-2">
+        <small class="text-muted me-2">Subtotal contado:</small>
+        <span class="badge bg-light text-dark border">
+            <strong class="js-container-subtotal" data-prefix="@prefix">@subtotalContado.ToString("N0")</strong>
+        </span>
+    </div>
+
     <input type="hidden" asp-for="Id" />
     <input type="hidden" asp-for="CefTransactionId" />
 
@@ -311,6 +321,7 @@
                                     <td><input name="@($"{prefixDetail}.IssueDate")" type="date" class="form-control form-control-sm" value="@(c.IssueDate.HasValue? c.IssueDate.Value.ToString("yyyy-MM-dd") : "")" /></td>
                                     <td><input name="@($"{prefixDetail}.UnitValue")" type="number" class="form-control form-control-sm" value="@c.UnitValue" /></td>
                                     <td><input name="@($"{prefixDetail}.CalculatedAmount")" type="number" class="form-control form-control-sm" value="@c.CalculatedAmount" /></td>
+                                    <td><button type="button" class="btn btn-sm btn-outline-danger js-remove-detail">×</button></td>
                                 </tr>
                             }
                         </tbody>
