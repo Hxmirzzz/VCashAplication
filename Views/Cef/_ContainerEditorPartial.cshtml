@@ -296,8 +296,8 @@
                         <thead>
                             <tr>
                                 <th>Banco</th>
-                                <th>Número</th>
-                                <th>Emisor</th>
+                                <th>Cuenta</th>
+                                <th>Codigo</th>
                                 <th>Fecha</th>
                                 <th>Valor</th>
                                 <th>Monto</th>
@@ -315,9 +315,15 @@
                                         <input type="text" name="@($"{prefixDetail}.Quantity")" value="1" />
                                         <input type="text" name="@($"{prefixDetail}.ValueType")" value="@c.ValueType" />
                                     </td>
-                                    <td><input name="@($"{prefixDetail}.BankName")" class="form-control form-control-sm" value="@c.BankName" /></td>
-                                    <td><input name="@($"{prefixDetail}.IdentifierNumber")" type="number" class="form-control form-control-sm" value="@c.IdentifierNumber"></td>
-                                    <td><input name="@($"{prefixDetail}.Issuer")" class="form-control form-control-sm" value="@c.Issuer" /></td>
+                                    <td>
+                                        <select name="@($"{prefixDetail}.EntitieBankId")"
+                                                class="form-select form-select-sm js-bank"
+                                                data-selected="@c.EntitieBankId">
+                                            <option value="">-- Seleccione entidad --</option>
+                                        </select>
+                                    </td>
+                                    <td><input name="@($"{prefixDetail}.AccountNumber")" class="form-control form-control-sm" value="@c.AccountNumber" /></td>
+                                    <td><input name="@($"{prefixDetail}.CheckNumber")" type="number" class="form-control form-control-sm" value="@c.CheckNumber"></td>
                                     <td><input name="@($"{prefixDetail}.IssueDate")" type="date" class="form-control form-control-sm" value="@(c.IssueDate.HasValue? c.IssueDate.Value.ToString("yyyy-MM-dd") : "")" /></td>
                                     <td><input name="@($"{prefixDetail}.UnitValue")" type="number" class="form-control form-control-sm" value="@c.UnitValue" /></td>
                                     <td><input name="@($"{prefixDetail}.CalculatedAmount")" type="number" class="form-control form-control-sm" value="@c.CalculatedAmount" /></td>

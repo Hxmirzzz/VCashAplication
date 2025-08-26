@@ -26,6 +26,19 @@ namespace VCashApp.Services
         Task<CefContainer> SaveContainerAndDetailsAsync(CefContainerProcessingViewModel viewModel, string processingUserId);
 
         /// <summary>
+        /// Elimina un contenedor de efectivo y sus detalles asociados.
+        /// </summary>
+        /// <returns>true si se eliminó correctamente, false si no se encontró el contenedor.</returns>
+        Task<bool> DeleteContainerAsync(int transactionId, int containerId);
+
+        /// <summary>
+        /// Obtiene los totales de un contenedor de efectivo para una transacción específica.
+        /// </summary>
+        /// <param name="transactionId"></param>
+        /// <returns></returns>
+        Task<(decimal declared, decimal counted, decimal diff)> GetTransactionTotalsAsync(int transactionId);
+
+        /// <summary>
         /// Obtiene un contenedor de efectivo por su ID, incluyendo sus detalles de valores y novedades.
         /// </summary>
         /// <param name="containerId">ID del contenedor.</param>
@@ -53,16 +66,9 @@ namespace VCashApp.Services
         Task<String> BuildQualitiesJsonAsync();
 
         /// <summary>
-        /// Obtiene los totales de un contenedor de efectivo para una transacción específica.
+        /// Obtener todas las entidades bancarias.
         /// </summary>
-        /// <param name="transactionId"></param>
-        /// <returns></returns>
-        Task<(decimal declared, decimal counted, decimal diff)> GetTransactionTotalsAsync(int transactionId);
-
-        /// <summary>
-        /// Elimina un contenedor de efectivo y sus detalles asociados.
-        /// </summary>
-        /// <returns>true si se eliminó correctamente, false si no se encontró el contenedor.</returns>
-        Task<bool> DeleteContainerAsync(int transactionId, int containerId);
+        /// <returns>Lista de las entidades bancarias.</returns>
+        Task<string> BuildBankEntitiesJsonAsync();
     }
 }

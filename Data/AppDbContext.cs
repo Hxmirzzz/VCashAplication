@@ -38,6 +38,7 @@ namespace VCashApp.Data
         public DbSet<SegRegistroEmpleado> SegRegistroEmpleados { get; set; }
         public DbSet<AdmConcepto> AdmConceptos { get; set; }
         public DbSet<AdmConsecutivo> AdmConsecutivos { get; set; }
+        public DbSet<AdmBankEntitie> AdmBankEntities { get; set; }
         public DbSet<CgsService> CgsServicios { get; set; }
         public DbSet<CgsLocationType> CgsLocationTypes { get; set; }
         public DbSet<CefTransaction> CefTransactions { get; set; }
@@ -289,6 +290,12 @@ namespace VCashApp.Data
                 entity.Property(d => d.ValorDenominacion).HasColumnType("DECIMAL(18,0)");
             });
 
+            builder.Entity<AdmBankEntitie>(entity =>
+            {
+                entity.HasKey(b => b.Id);
+                entity.Property(b => b.Name);
+            });
+
             builder.Entity<CgsService>(entity =>
             {
                 entity.ToTable("CgsServicios");
@@ -470,16 +477,14 @@ namespace VCashApp.Data
                 entity.Property(v => v.CalculatedAmount).HasColumnType("DECIMAL(18,0)");
                 // .HasComputedColumnSql("ISNULL(d.Denomination, d.UnitValue) * d.Quantity", stored: true); // Almacenado para consistencia
                 entity.Property(v =>v.IsHighDenomination).IsRequired(false);
-                entity.Property(v => v.IdentifierNumber).HasMaxLength(100);
-                entity.Property(v => v.BankName).HasMaxLength(100);
                 entity.Property(v => v.IssueDate).HasColumnType("DATE");
-                entity.Property(v => v.Issuer).HasMaxLength(255);
                 entity.Property(v => v.Observations).HasMaxLength(255);
 
                 // Relaciones
                 entity.HasOne(c => c.CefContainer).WithMany(t => t.ValueDetails).HasForeignKey(c => c.CefContainerId).OnDelete(DeleteBehavior.Cascade);
                 entity.HasOne(c => c.AdmDenominacion).WithMany().HasForeignKey(c => c.DenominationId).IsRequired(false).OnDelete(DeleteBehavior.Restrict);
                 entity.HasOne(c => c.AdmQuality).WithMany().HasForeignKey(c => c.QualityId).IsRequired(false).OnDelete(DeleteBehavior.Restrict);
+                entity.HasOne(c => c.AdmBankEntitie).WithMany().HasForeignKey(c => c.EntitieBankId).IsRequired(false).OnDelete(DeleteBehavior.Restrict);
                 entity.Property(v => v.ValueType).HasConversion<string>();
                 entity.HasIndex(v => new { v.CefContainerId, v.ValueType, v.DenominationId, v.QualityId }).IsUnique(false);
             });

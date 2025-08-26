@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using VCashApp.Data;
 
@@ -11,9 +12,11 @@ using VCashApp.Data;
 namespace VCashApp.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250826184502_AddAdmEntitieBankTable")]
+    partial class AddAdmEntitieBankTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1716,9 +1719,10 @@ namespace VCashApp.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int?>("AccountNumber")
-                        .HasColumnType("int")
-                        .HasColumnName("NumeroCuenta");
+                    b.Property<string>("BankName")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnName("Banco");
 
                     b.Property<int?>("BundlesCount")
                         .HasColumnType("int")
@@ -1732,17 +1736,18 @@ namespace VCashApp.Migrations
                         .HasColumnType("int")
                         .HasColumnName("IdContenedorCef");
 
-                    b.Property<int?>("CheckNumber")
-                        .HasColumnType("int")
-                        .HasColumnName("NumeroCheque");
-
                     b.Property<int?>("DenominationId")
                         .HasColumnType("int")
                         .HasColumnName("Denominacion");
 
                     b.Property<string>("EntitieBankId")
                         .HasColumnType("nvarchar(10)")
-                        .HasColumnName("EntidadBancaria");
+                        .HasColumnName("EntitieBankId");
+
+                    b.Property<string>("IdentifierNumber")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)")
+                        .HasColumnName("NumeroIdentificador");
 
                     b.Property<bool?>("IsHighDenomination")
                         .HasColumnType("bit")
@@ -1751,6 +1756,11 @@ namespace VCashApp.Migrations
                     b.Property<DateOnly?>("IssueDate")
                         .HasColumnType("DATE")
                         .HasColumnName("FechaEmision");
+
+                    b.Property<string>("Issuer")
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)")
+                        .HasColumnName("Emisor");
 
                     b.Property<int?>("LoosePiecesCount")
                         .HasColumnType("int")

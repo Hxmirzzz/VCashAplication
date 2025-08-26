@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc.Rendering;
 using System.ComponentModel.DataAnnotations;
 using VCashApp.Enums;
+using VCashApp.Models.Entities;
 
 namespace VCashApp.Models.ViewModels.CentroEfectivo
 {
@@ -109,28 +110,26 @@ namespace VCashApp.Models.ViewModels.CentroEfectivo
         public decimal CalculatedAmount { get; set; }
 
         [Display(Name = "¿Es de Alta Denominación?")]
-        public bool? IsHighDenomination { get; set; } 
+        public bool? IsHighDenomination { get; set; }
 
-        [Display(Name = "Número de Identificador")]
-        [StringLength(100, ErrorMessage = "El número identificador no puede exceder los 100 caracteres.")]
-        public string? IdentifierNumber { get; set; }
+        [Display(Name = "Entidad Bancaria")]
+        public string? EntitieBankId { get; set; }
 
-        [Display(Name = "Banco")]
-        [StringLength(100, ErrorMessage = "El nombre del banco no puede exceder los 100 caracteres.")]
-        public string? BankName { get; set; }
+        [Display(Name = "Número de Cuenta")]
+        public int? AccountNumber { get; set; }
+
+        [Display(Name = "Código del Cheque")]
+        public int? CheckNumber { get; set; }
 
         [Display(Name = "Fecha de Emisión")]
         [DataType(DataType.Date)]
         public DateOnly? IssueDate { get; set; }
 
-        [Display(Name = "Emisor")]
-        [StringLength(255, ErrorMessage = "El nombre del emisor no puede exceder los 255 caracteres.")]
-        public string? Issuer { get; set; }
-
         [Display(Name = "Observaciones")]
         [StringLength(255, ErrorMessage = "Las observaciones no pueden exceder los 255 caracteres.")]
         public string? Observations { get; set; }
 
+        public List<SelectListItem>? BankEntities { get; set; } = new List<SelectListItem>();
         public List<SelectListItem>? Denominations { get; set; }
         public List<SelectListItem>? Qualities { get; set; }
         public List<SelectListItem>? ValueTypes { get; set; }
@@ -207,6 +206,6 @@ namespace VCashApp.Models.ViewModels.CentroEfectivo
         [Display(Name = "Estado de la Novedad")]
         public string IncidentStatus { get; set; } = "Reported";
 
-        public List<Microsoft.AspNetCore.Mvc.Rendering.SelectListItem>? IncidentTypes { get; set; }
+        public List<SelectListItem>? IncidentTypes { get; set; }
     }
 }

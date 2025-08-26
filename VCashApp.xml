@@ -1904,6 +1904,54 @@
         <member name="M:VCashApp.Migrations.AddEnvelopeSubTypeColumnToCefContainerTable.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
             <inheritdoc />
         </member>
+        <member name="T:VCashApp.Migrations.AddAdmEntitieBankTable">
+            <inheritdoc />
+        </member>
+        <member name="M:VCashApp.Migrations.AddAdmEntitieBankTable.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:VCashApp.Migrations.AddAdmEntitieBankTable.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:VCashApp.Migrations.AddAdmEntitieBankTable.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="T:VCashApp.Migrations.AddAccountNumberAndCheckNumberToCefValueDetailsTable">
+            <inheritdoc />
+        </member>
+        <member name="M:VCashApp.Migrations.AddAccountNumberAndCheckNumberToCefValueDetailsTable.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:VCashApp.Migrations.AddAccountNumberAndCheckNumberToCefValueDetailsTable.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:VCashApp.Migrations.AddAccountNumberAndCheckNumberToCefValueDetailsTable.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="T:VCashApp.Migrations.SetNewNameToEntitieBankIdOnCefValueDetailTable">
+            <inheritdoc />
+        </member>
+        <member name="M:VCashApp.Migrations.SetNewNameToEntitieBankIdOnCefValueDetailTable.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:VCashApp.Migrations.SetNewNameToEntitieBankIdOnCefValueDetailTable.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:VCashApp.Migrations.SetNewNameToEntitieBankIdOnCefValueDetailTable.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="T:VCashApp.Migrations.RemoveIssueIdentifierNumberAndBankNameToCefValueDetailTable">
+            <inheritdoc />
+        </member>
+        <member name="M:VCashApp.Migrations.RemoveIssueIdentifierNumberAndBankNameToCefValueDetailTable.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:VCashApp.Migrations.RemoveIssueIdentifierNumberAndBankNameToCefValueDetailTable.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:VCashApp.Migrations.RemoveIssueIdentifierNumberAndBankNameToCefValueDetailTable.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
         <member name="T:VCashApp.Models.ViewModels.BranchViewModel">
             <summary>
             Representa la información principal de una sucursal.
@@ -2595,6 +2643,9 @@
         <member name="M:VCashApp.Services.Cef.CefContainerService.BuildQualitiesJsonAsync">
             <inheritdoc/>
         </member>
+        <member name="M:VCashApp.Services.Cef.CefContainerService.BuildBankEntitiesJsonAsync">
+            <inheritdoc/>
+        </member>
         <member name="T:VCashApp.Services.Cef.CefIncidentService">
             <summary>
             Implementación del servicio para la gestión de Novedades de Centro de Efectivo.
@@ -2732,6 +2783,19 @@
             <returns>El contenedor de CEF creado o actualizado.</returns>
             <exception cref="T:System.InvalidOperationException">Se lanza si la transacción no es válida o hay errores de guardado.</exception>
         </member>
+        <member name="M:VCashApp.Services.ICefContainerService.DeleteContainerAsync(System.Int32,System.Int32)">
+            <summary>
+            Elimina un contenedor de efectivo y sus detalles asociados.
+            </summary>
+            <returns>true si se eliminó correctamente, false si no se encontró el contenedor.</returns>
+        </member>
+        <member name="M:VCashApp.Services.ICefContainerService.GetTransactionTotalsAsync(System.Int32)">
+            <summary>
+            Obtiene los totales de un contenedor de efectivo para una transacción específica.
+            </summary>
+            <param name="transactionId"></param>
+            <returns></returns>
+        </member>
         <member name="M:VCashApp.Services.ICefContainerService.GetContainerWithDetailsAsync(System.Int32)">
             <summary>
             Obtiene un contenedor de efectivo por su ID, incluyendo sus detalles de valores y novedades.
@@ -2759,18 +2823,11 @@
             </summary>
             <returns>Lista de calidades</returns>
         </member>
-        <member name="M:VCashApp.Services.ICefContainerService.GetTransactionTotalsAsync(System.Int32)">
+        <member name="M:VCashApp.Services.ICefContainerService.BuildBankEntitiesJsonAsync">
             <summary>
-            Obtiene los totales de un contenedor de efectivo para una transacción específica.
+            Obtener todas las entidades bancarias.
             </summary>
-            <param name="transactionId"></param>
-            <returns></returns>
-        </member>
-        <member name="M:VCashApp.Services.ICefContainerService.DeleteContainerAsync(System.Int32,System.Int32)">
-            <summary>
-            Elimina un contenedor de efectivo y sus detalles asociados.
-            </summary>
-            <returns>true si se eliminó correctamente, false si no se encontró el contenedor.</returns>
+            <returns>Lista de las entidades bancarias.</returns>
         </member>
         <member name="T:VCashApp.Services.ICefIncidentService">
             <summary>

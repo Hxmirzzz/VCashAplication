@@ -55,18 +55,6 @@
         <input type="number" step="1" name="ValueDetails[@index].CalculatedAmount" value="@Model.CalculatedAmount" class="form-control form-control-sm" readonly />
     </td>
     <td>
-        <div class="form-group mb-0" style="display: none;">
-            <label asp-for="IdentifierNumber" class="sr-only"></label>
-            <input type="text" name="ValueDetails[@index].IdentifierNumber" value="@Model.IdentifierNumber" class="form-control form-control-sm" placeholder="ID (Cheque/Doc)" />
-        </div>
-    </td>
-    <td>
-        <div class="form-group mb-0" style="display: none;">
-            <label asp-for="BankName" class="sr-only"></label>
-            <input type="text" name="ValueDetails[@index].BankName" value="@Model.BankName" class="form-control form-control-sm" placeholder="Banco (Cheque)" />
-        </div>
-    </td>
-    <td>
         <button type="button" class="btn btn-danger btn-sm" onclick="removeRow(this)">Eliminar</button>
     </td>
 </tr>

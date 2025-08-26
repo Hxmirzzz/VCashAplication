@@ -137,10 +137,10 @@ namespace VCashApp.Services.Cef
                         UnitValue = d.UnitValue,
                         CalculatedAmount = d.CalculatedAmount ?? 0,
                         IsHighDenomination = d.IsHighDenomination,
-                        IdentifierNumber = d.IdentifierNumber,
-                        BankName = d.BankName,
+                        EntitieBankId = d.EntitieBankId,
+                        AccountNumber = d.AccountNumber,
+                        CheckNumber = d.CheckNumber,
                         IssueDate = d.IssueDate,
-                        Issuer = d.Issuer,
                         Observations = d.Observations,
                         QualityId = d.QualityId,
                         ValueType = Enum.TryParse<CefValueTypeEnum>(d.ValueType, out var tipoValor) ? tipoValor : CefValueTypeEnum.Billete,
@@ -316,10 +316,10 @@ namespace VCashApp.Services.Cef
                         existing.LoosePiecesCount = null;
                         existing.UnitValue = null;
                         existing.QualityId = null;
-                        existing.IdentifierNumber = detailVm.IdentifierNumber;
-                        existing.BankName = detailVm.BankName;
+                        existing.EntitieBankId = detailVm.EntitieBankId;
+                        existing.AccountNumber = detailVm.AccountNumber;
+                        existing.CheckNumber = detailVm.CheckNumber;
                         existing.IssueDate = detailVm.IssueDate;
-                        existing.Issuer = detailVm.Issuer;
                         existing.Observations = detailVm.Observations;
 
                         existing.CalculatedAmount = montoDoc;
@@ -337,10 +337,10 @@ namespace VCashApp.Services.Cef
                             LoosePiecesCount = null,
                             UnitValue = null,
                             QualityId = null,
-                            IdentifierNumber = detailVm.IdentifierNumber,
-                            BankName = detailVm.BankName,
+                            EntitieBankId = detailVm.EntitieBankId,
+                            AccountNumber = detailVm.AccountNumber,
+                            CheckNumber = detailVm.CheckNumber,
                             IssueDate = detailVm.IssueDate,
-                            Issuer = detailVm.Issuer,
                             Observations = detailVm.Observations,
                             CalculatedAmount = montoDoc
                         };
@@ -379,10 +379,10 @@ namespace VCashApp.Services.Cef
                     existingStd.LoosePiecesCount = isCheque ? null : detailVm.LoosePiecesCount;
                     existingStd.UnitValue = detailVm.UnitValue;
                     existingStd.IsHighDenomination = detailVm.IsHighDenomination;
-                    existingStd.IdentifierNumber = detailVm.IdentifierNumber;
-                    existingStd.BankName = detailVm.BankName;
+                    existingStd.EntitieBankId = detailVm.EntitieBankId;
+                    existingStd.AccountNumber = detailVm.AccountNumber;
+                    existingStd.CheckNumber = detailVm.CheckNumber;
                     existingStd.IssueDate = detailVm.IssueDate;
-                    existingStd.Issuer = detailVm.Issuer;
                     existingStd.Observations = detailVm.Observations;
                     existingStd.QualityId = isCheque ? null : detailVm.QualityId;
 
@@ -403,10 +403,10 @@ namespace VCashApp.Services.Cef
                         LoosePiecesCount = isCheque ? null : detailVm.LoosePiecesCount,
                         UnitValue = detailVm.UnitValue,
                         IsHighDenomination = detailVm.IsHighDenomination,
-                        IdentifierNumber = detailVm.IdentifierNumber,
-                        BankName = detailVm.BankName,
+                        EntitieBankId = detailVm.EntitieBankId,
+                        AccountNumber = detailVm.AccountNumber,
+                        CheckNumber = detailVm.CheckNumber,
                         IssueDate = detailVm.IssueDate,
-                        Issuer = detailVm.Issuer,
                         Observations = detailVm.Observations,
                         QualityId = isCheque ? null : detailVm.QualityId
                     };
@@ -652,6 +652,18 @@ namespace VCashApp.Services.Cef
                 M = q.Where(x => x.money == "M").ToList()
             };
             return JsonSerializer.Serialize(obj);
+        }
+
+        /// <inheritdoc/>
+        public async Task<string> BuildBankEntitiesJsonAsync()
+        {
+            var data = await _context.AdmBankEntities
+                .AsNoTracking()
+                .OrderBy(b => b.Name)
+                .Select(b => new { value = b.Id, text = b.Name })
+                .ToListAsync();
+
+            return JsonSerializer.Serialize(data);
         }
     }
 }

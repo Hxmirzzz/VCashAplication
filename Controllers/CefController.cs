@@ -440,6 +440,7 @@ namespace VCashApp.Controllers
             ViewBag.IncidentTypes = (await _cefIncidentService.GetAllIncidentTypesAsync()).Select(it => new SelectListItem { Value = it.Code, Text = it.Description }).ToList();
             ViewBag.DenomsJson = await _cefContainerService.BuildDenomsJsonForTransactionAsync(transactionId);
             ViewBag.QualitiesJson = await _cefContainerService.BuildQualitiesJsonAsync();
+            ViewBag.BanksJson = await _cefContainerService.BuildBankEntitiesJsonAsync();
 
             return View(pageVm);
         }

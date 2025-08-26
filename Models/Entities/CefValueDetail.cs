@@ -46,25 +46,24 @@ namespace VCashApp.Models.Entities
 
         [Required]
         [Column("MontoCalculado", TypeName = "DECIMAL(18,0)")]
-        public decimal? CalculatedAmount { get; set; } // Denomination * Quantity o UnitValue
+        public decimal? CalculatedAmount { get; set; }
 
         [Column("EsAltaDenominacion")]
-        public bool? IsHighDenomination { get; set; } // Indica si es billete de alta denominación
+        public bool? IsHighDenomination { get; set; }
 
-        [StringLength(100)]
-        [Column("NumeroIdentificador")]
-        public string? IdentifierNumber { get; set; }
+        [Column("EntidadBancaria")]
+        [ForeignKey("AdmBankEntitie")]
+        public string? EntitieBankId { get; set; }
+        public virtual AdmBankEntitie? AdmBankEntitie { get; set; } = null!;
 
-        [StringLength(100)]
-        [Column("Banco")]
-        public string? BankName { get; set; }
+        [Column("NumeroCuenta")]
+        public int? AccountNumber { get; set; }
+
+        [Column("NumeroCheque")]
+        public int? CheckNumber { get; set; }
 
         [Column("FechaEmision", TypeName = "DATE")]
         public DateOnly? IssueDate { get; set; }
-
-        [StringLength(255)]
-        [Column("Emisor")]
-        public string? Issuer { get; set; } // Emisor (para cheques/documentos)
 
         [StringLength(255)]
         [Column("Observaciones")]
