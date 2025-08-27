@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 namespace VCashApp.Models.Entities
 {
     [Table("AdmEntidadesBancarias")]
-    public class AdmBankEntitie
+    public class AdmBankEntiy
     {
         [Key]
         [Column("Id")]

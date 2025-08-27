@@ -33,7 +33,7 @@ namespace VCashApp.Models.Entities
         public virtual AdmQuality? AdmQuality { get; set; } = null!;
 
         [Column("Cantidad")]
-        public int? Quantity { get; set; } // Cantidad de unidades (para billetes/monedas)
+        public int? Quantity { get; set; }
 
         [Column("CantidadFajos")]
         public int? BundlesCount { get; set; }
@@ -54,7 +54,7 @@ namespace VCashApp.Models.Entities
         [Column("EntidadBancaria")]
         [ForeignKey("AdmBankEntitie")]
         public string? EntitieBankId { get; set; }
-        public virtual AdmBankEntitie? AdmBankEntitie { get; set; } = null!;
+        public virtual AdmBankEntiy? AdmBankEntitie { get; set; } = null!;
 
         [Column("NumeroCuenta")]
         public int? AccountNumber { get; set; }

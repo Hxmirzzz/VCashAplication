@@ -77,63 +77,148 @@
 
     <!-- ====== Sección BOLSA ====== -->
     <div class="sec-bolsa mt-3" style="display:@(!esSobre ? "block" : "none")">
-        <div class="card">
-            <div class="card-header"><h6 class="mb-0">💰 Bolsa — Detalle (Billetes/Monedas)</h6></div>
-            <div class="card-body">
-                <table class="table table-sm align-middle js-details-table" data-detail-scope="bolsa">
-                    <thead>
-                        <tr>
-                            <th>Tipo</th>
-                            <th>Denominación</th>
-                            <th class="col-calidad">Calidad</th>
-                            <th>Cantidad</th>
-                            <th>Fajos</th>
-                            <th>Picos</th>
-                            <th>Valor Unit.</th>
-                            <th>Monto</th>
-                            <th></th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach (var d in Model.ValueDetails.Where(v => v.ValueType == CefValueTypeEnum.Billete || v.ValueType == CefValueTypeEnum.Moneda))
-                        {
-                            var idx = Model.ValueDetails.IndexOf(d);
-                            var prefixDetail = $"{prefix}.ValueDetails[{idx}]";
-                            <tr>
-                                <td style="display: none;">
-                                    <input type="hidden" name="@($"{prefixDetail}.Id")" value="@d.Id" />
-                                </td>
-                                <td>
-                                    <select name="@($"{prefixDetail}.ValueType")" class="form-select form-select-sm js-vtype">
-                                        @Html.Raw($"<option value=\"Billete\" {(d.ValueType == CefValueTypeEnum.Billete ? "selected" : "")}>Billete</option>")
-                                        @Html.Raw($"<option value=\"Moneda\" {(d.ValueType == CefValueTypeEnum.Moneda ? "selected" : "")}>Moneda</option>")
-                                    </select>
-                                </td>
-                                <td>
-                                    <select name="@($"{prefixDetail}.DenominationId")"
-                                            class="form-select form-select-sm js-denom"
-                                            data-selected="@d.DenominationId">
-                                    </select>
-                                </td>
-                                <td>
-                                    <select name="@($"{prefixDetail}.QualityId")"
-                                            class="form-select form-select-sm js-quality"
-                                            data-selected="@d.QualityId">
-                                    </select>
-                                </td>
-                                <td><input name="@($"{prefixDetail}.Quantity")" type="number" class="form-control form-control-sm js-calc" value="@d.Quantity" /></td>
-                                <td><input name="@($"{prefixDetail}.BundlesCount")" type="number" class="form-control form-control-sm js-calc" value="@d.BundlesCount" readonly /></td>
-                                <td><input name="@($"{prefixDetail}.LoosePiecesCount")" type="number" class="form-control form-control-sm js-calc" value="@d.LoosePiecesCount" readonly /></td>
-                                <td><input name="@($"{prefixDetail}.UnitValue")" type="number" step="1" class="form-control form-control-sm js-calc" value="@d.UnitValue" readonly /></td>
-                                <td><input name="@($"{prefixDetail}.CalculatedAmount")" type="number" step="1" class="form-control form-control-sm" value="@d.CalculatedAmount" readonly /></td>
-                                <td><button type="button" class="btn btn-sm btn-outline-danger js-remove-detail">×</button></td>
-                            </tr>
-                        }
-                    </tbody>
-                </table>
-                <button type="button" class="btn btn-outline-primary btn-sm js-add-detail" data-detail-scope="bolsa">
-                    + Agregar detalle
-                </button>
+
+        <div class="row g-3">
+            <!-- ===== Billetes ===== -->
+            <div class="col-12 col-xl-6">
+                <div class="card">
+                    <div class="card-header d-flex align-items-center justify-content-between">
+                        <h6 class="mb-0">💵 Bolsa — Billetes</h6>
+                        <button type="button"
+                                class="btn btn-outline-primary btn-sm js-add-detail"
+                                data-detail-scope="bolsa-billete">
+                            + Agregar billete
+                        </button>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-container-responsive">
+                            <table class="table table-sm align-middle js-details-table" data-detail-scope="bolsa-billete">
+                                <thead>
+                                    <tr>
+                                        <th>Denominación</th>
+                                        <th class="col-calidad">Calidad</th>
+                                        <th>Cantidad</th>
+                                        <th>Fajos</th>
+                                        <th>Picos</th>
+                                        <th>Valor Unit.</th>
+                                        <th>Monto</th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var d in Model.ValueDetails.Where(v => v.ValueType == CefValueTypeEnum.Billete))
+                                    {
+                                        var idx = Model.ValueDetails.IndexOf(d);
+                                        var prefixDetail = $"{prefix}.ValueDetails[{idx}]";
+                                        <tr>
+                                            <!-- Id -->
+                                            <td style="display:none;">
+                                                <input type="hidden" name="@($"{prefixDetail}.Id")" value="@d.Id" />
+                                            </td>
+
+                                            <!-- Denominación (con ValueType oculto y .js-vtype fijo) -->
+                                            <td>
+                                                <input type="hidden" name="@($"{prefixDetail}.ValueType")" value="Billete" class="js-vtype" />
+                                                <select name="@($"{prefixDetail}.DenominationId")"
+                                                        class="form-select form-select-sm js-denom"
+                                                        data-selected="@d.DenominationId">
+                                                </select>
+                                            </td>
+
+                                            <!-- Calidad -->
+                                            <td>
+                                                <select name="@($"{prefixDetail}.QualityId")"
+                                                        class="form-select form-select-sm js-quality"
+                                                        data-selected="@d.QualityId">
+                                                </select>
+                                            </td>
+
+                                            <!-- Cantidad / Fajos / Picos / Unit / Monto -->
+                                            <td><input name="@($"{prefixDetail}.Quantity")" type="number" class="form-control form-control-sm js-calc" value="@d.Quantity" /></td>
+                                            <td><input name="@($"{prefixDetail}.BundlesCount")" type="number" class="form-control form-control-sm js-calc" value="@d.BundlesCount" readonly /></td>
+                                            <td><input name="@($"{prefixDetail}.LoosePiecesCount")" type="number" class="form-control form-control-sm js-calc" value="@d.LoosePiecesCount" readonly /></td>
+                                            <td><input name="@($"{prefixDetail}.UnitValue")" type="number" step="1" class="form-control form-control-sm js-calc" value="@d.UnitValue" readonly /></td>
+                                            <td><input name="@($"{prefixDetail}.CalculatedAmount")" type="number" step="1" class="form-control form-control-sm" value="@d.CalculatedAmount" readonly /></td>
+
+                                            <td><button type="button" class="btn btn-sm btn-outline-danger js-remove-detail">×</button></td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== Monedas ===== -->
+            <div class="col-12 col-xl-6">
+                <div class="card">
+                    <div class="card-header d-flex align-items-center justify-content-between">
+                        <h6 class="mb-0">💰 Bolsa — Monedas</h6>
+                        <button type="button"
+                                class="btn btn-outline-primary btn-sm js-add-detail"
+                                data-detail-scope="bolsa-moneda">
+                            + Agregar moneda
+                        </button>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-container-responsive">
+                            <table class="table table-sm align-middle js-details-table" data-detail-scope="bolsa-moneda">
+                                <thead>
+                                    <tr>
+                                        <th>Denominación</th>
+                                        <th class="col-calidad">Calidad</th>
+                                        <th>Cantidad</th>
+                                        <th>Fajos</th>
+                                        <th>Picos</th>
+                                        <th>Valor Unit.</th>
+                                        <th>Monto</th>
+                                        <th></th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var d in Model.ValueDetails.Where(v => v.ValueType == CefValueTypeEnum.Moneda))
+                                    {
+                                        var idx = Model.ValueDetails.IndexOf(d);
+                                        var prefixDetail = $"{prefix}.ValueDetails[{idx}]";
+                                        <tr>
+                                            <!-- Id -->
+                                            <td style="display:none;">
+                                                <input type="hidden" name="@($"{prefixDetail}.Id")" value="@d.Id" />
+                                            </td>
+
+                                            <!-- Denominación (con ValueType oculto y .js-vtype fijo) -->
+                                            <td>
+                                                <input type="hidden" name="@($"{prefixDetail}.ValueType")" value="Moneda" class="js-vtype" />
+                                                <select name="@($"{prefixDetail}.DenominationId")"
+                                                        class="form-select form-select-sm js-denom"
+                                                        data-selected="@d.DenominationId">
+                                                </select>
+                                            </td>
+
+                                            <!-- Calidad -->
+                                            <td>
+                                                <select name="@($"{prefixDetail}.QualityId")"
+                                                        class="form-select form-select-sm js-quality"
+                                                        data-selected="@d.QualityId">
+                                                </select>
+                                            </td>
+
+                                            <!-- Cantidad / Fajos / Picos / Unit / Monto -->
+                                            <td><input name="@($"{prefixDetail}.Quantity")" type="number" class="form-control form-control-sm js-calc" value="@d.Quantity" /></td>
+                                            <td><input name="@($"{prefixDetail}.BundlesCount")" type="number" class="form-control form-control-sm js-calc" value="@d.BundlesCount" readonly /></td>
+                                            <td><input name="@($"{prefixDetail}.LoosePiecesCount")" type="number" class="form-control form-control-sm js-calc" value="@d.LoosePiecesCount" readonly /></td>
+                                            <td><input name="@($"{prefixDetail}.UnitValue")" type="number" step="1" class="form-control form-control-sm js-calc" value="@d.UnitValue" readonly /></td>
+                                            <td><input name="@($"{prefixDetail}.CalculatedAmount")" type="number" step="1" class="form-control form-control-sm" value="@d.CalculatedAmount" readonly /></td>
+
+                                            <td><button type="button" class="btn btn-sm btn-outline-danger js-remove-detail">×</button></td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -155,65 +240,142 @@
             </div>
         </div>
 
-        <!-- Sobre: EFECTIVO -->
+        <!-- Sobre: EFECTIVO (separado Billetes / Monedas) -->
         <div class="sec-sobre-cash" style="display:@(Model.EnvelopeSubType == CefEnvelopeSubTypeEnum.Efectivo ? "block" : "none")">
             <div class="card">
-                <div class="card-header"><h6 class="mb-0">💵 Sobre — Efectivo (Billetes/Monedas)</h6></div>
+                <div class="card-header"><h6 class="mb-0">💵 Sobre — Efectivo</h6></div>
                 <div class="card-body">
-                    <table class="table table-sm align-middle js-details-table" data-detail-scope="sobre-cash">
-                        <thead>
-                            <tr>
-                                <th>Tipo</th>
-                                <th>Denominación</th>
-                                <th class="col-calidad">Calidad</th>
-                                <th>Cantidad</th>
-                                <th>Fajos</th>
-                                <th>Picos</th>
-                                <th>Valor Unit.</th>
-                                <th>Monto</th>
-                                <th></th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach (var d in Model.ValueDetails.Where(v => v.ValueType == CefValueTypeEnum.Billete || v.ValueType == CefValueTypeEnum.Moneda))
-                            {
-                                var idx = Model.ValueDetails.IndexOf(d);
-                                var prefixDetail = $"{prefix}.ValueDetails[{idx}]";
+
+                    <!-- ===== Billetes ===== -->
+                    <div class="mb-3">
+                        <div class="d-flex align-items-center justify-content-between mb-2">
+                            <h6 class="mb-0">Billetes</h6>
+                            <button type="button"
+                                    class="btn btn-outline-primary btn-sm js-add-detail"
+                                    data-detail-scope="sobre-billete">
+                                + Agregar billete
+                            </button>
+                        </div>
+
+                        <table class="table table-sm align-middle js-details-table"
+                               data-detail-scope="sobre-billete"
+                               data-fixed-kind="Billete">
+                            <thead>
                                 <tr>
-                                    <td style="display: none;">
-                                        <input type="hidden" name="@($"{prefixDetail}.Id")" value="@d.Id" />
-                                    </td>
-                                    <td>
-                                        <select name="@($"{prefixDetail}.ValueType")" class="form-select form-select-sm js-vtype">
-                                            @Html.Raw($"<option value=\"Billete\" {(d.ValueType == CefValueTypeEnum.Billete ? "selected" : "")}>Billete</option>")
-                                            @Html.Raw($"<option value=\"Moneda\" {(d.ValueType == CefValueTypeEnum.Moneda ? "selected" : "")}>Moneda</option>")
-                                        </select>
-                                    </td>
-                                    <td>
-                                        <select name="@($"{prefixDetail}.DenominationId")"
-                                                class="form-select form-select-sm js-denom"
-                                                data-selected="@d.DenominationId">
-                                        </select>
-                                    </td>
-                                    <td>
-                                        <select name="@($"{prefixDetail}.QualityId")"
-                                                class="form-select form-select-sm js-quality"
-                                                data-selected="@d.QualityId">
-                                        </select>
-                                    </td>
-                                    <td><input name="@($"{prefixDetail}.Quantity")" type="number" class="form-control form-control-sm js-calc" value="@d.Quantity" /></td>
-                                    <td><input name="@($"{prefixDetail}.BundlesCount")" type="number" class="form-control form-control-sm js-calc" value="@d.BundlesCount" readonly /></td>
-                                    <td><input name="@($"{prefixDetail}.LoosePiecesCount")" type="number" class="form-control form-control-sm js-calc" value="@d.LoosePiecesCount" readonly /></td>
-                                    <td><input name="@($"{prefixDetail}.UnitValue")" type="number" step="1" class="form-control form-control-sm js-calc" value="@d.UnitValue" readonly /></td>
-                                    <td><input name="@($"{prefixDetail}.CalculatedAmount")" type="number" step="1" class="form-control form-control-sm" value="@d.CalculatedAmount" readonly /></td>
-                                    <td><button type="button" class="btn btn-sm btn-outline-danger js-remove-detail">×</button></td>
+                                    <th>Denominación</th>
+                                    <th class="col-calidad">Calidad</th>
+                                    <th>Cantidad</th>
+                                    <th>Fajos</th>
+                                    <th>Picos</th>
+                                    <th>Valor Unit.</th>
+                                    <th>Monto</th>
+                                    <th></th>
                                 </tr>
-                            }
-                        </tbody>
-                    </table>
-                    <button type="button" class="btn btn-outline-primary btn-sm js-add-detail" data-detail-scope="sobre-cash">
-                        + Agregar detalle
-                    </button>
+                            </thead>
+                            <tbody>
+                                @foreach (var d in Model.ValueDetails.Where(v => v.ValueType == CefValueTypeEnum.Billete))
+                                {
+                                    var idx = Model.ValueDetails.IndexOf(d);
+                                    var prefixDetail = $"{prefix}.ValueDetails[{idx}]";
+                                    <tr>
+                                        <!-- Id (oculto) -->
+                                        <td style="display:none;">
+                                            <input type="hidden" name="@($"{prefixDetail}.Id")" value="@d.Id" />
+                                        </td>
+
+                                        <!-- Denominación + ValueType fijo -->
+                                        <td>
+                                            <input type="hidden" name="@($"{prefixDetail}.ValueType")" value="Billete" class="js-vtype" />
+                                            <select name="@($"{prefixDetail}.DenominationId")"
+                                                    class="form-select form-select-sm js-denom"
+                                                    data-selected="@d.DenominationId"></select>
+                                        </td>
+
+                                        <!-- Calidad -->
+                                        <td>
+                                            <select name="@($"{prefixDetail}.QualityId")"
+                                                    class="form-select form-select-sm js-quality"
+                                                    data-selected="@d.QualityId"></select>
+                                        </td>
+
+                                        <!-- Cantidad / Fajos / Picos / Unit / Monto / Remove -->
+                                        <td><input name="@($"{prefixDetail}.Quantity")" type="number" class="form-control form-control-sm js-calc" value="@d.Quantity" /></td>
+                                        <td><input name="@($"{prefixDetail}.BundlesCount")" type="number" class="form-control form-control-sm js-calc" value="@d.BundlesCount" readonly /></td>
+                                        <td><input name="@($"{prefixDetail}.LoosePiecesCount")" type="number" class="form-control form-control-sm js-calc" value="@d.LoosePiecesCount" readonly /></td>
+                                        <td><input name="@($"{prefixDetail}.UnitValue")" type="number" class="form-control form-control-sm js-calc" value="@d.UnitValue" readonly /></td>
+                                        <td><input name="@($"{prefixDetail}.CalculatedAmount")" type="number" class="form-control form-control-sm" value="@d.CalculatedAmount" readonly /></td>
+                                        <td><button type="button" class="btn btn-sm btn-outline-danger js-remove-detail">×</button></td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- ===== Monedas ===== -->
+                    <div>
+                        <div class="d-flex align-items-center justify-content-between mb-2">
+                            <h6 class="mb-0">Monedas</h6>
+                            <button type="button"
+                                    class="btn btn-outline-primary btn-sm js-add-detail"
+                                    data-detail-scope="sobre-moneda">
+                                + Agregar moneda
+                            </button>
+                        </div>
+
+                        <table class="table table-sm align-middle js-details-table"
+                               data-detail-scope="sobre-moneda"
+                               data-fixed-kind="Moneda">
+                            <thead>
+                                <tr>
+                                    <th>Denominación</th>
+                                    <th class="col-calidad">Calidad</th>
+                                    <th>Cantidad</th>
+                                    <th>Fajos</th>
+                                    <th>Picos</th>
+                                    <th>Valor Unit.</th>
+                                    <th>Monto</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var d in Model.ValueDetails.Where(v => v.ValueType == CefValueTypeEnum.Moneda))
+                                {
+                                    var idx = Model.ValueDetails.IndexOf(d);
+                                    var prefixDetail = $"{prefix}.ValueDetails[{idx}]";
+                                    <tr>
+                                        <!-- Id (oculto) -->
+                                        <td style="display:none;">
+                                            <input type="hidden" name="@($"{prefixDetail}.Id")" value="@d.Id" />
+                                        </td>
+
+                                        <!-- Denominación + ValueType fijo (IMPORTANTE: .js-vtype aquí) -->
+                                        <td>
+                                            <input type="hidden" name="@($"{prefixDetail}.ValueType")" value="Moneda" class="js-vtype" />
+                                            <select name="@($"{prefixDetail}.DenominationId")"
+                                                    class="form-select form-select-sm js-denom"
+                                                    data-selected="@d.DenominationId"></select>
+                                        </td>
+
+                                        <!-- Calidad -->
+                                        <td>
+                                            <select name="@($"{prefixDetail}.QualityId")"
+                                                    class="form-select form-select-sm js-quality"
+                                                    data-selected="@d.QualityId"></select>
+                                        </td>
+
+                                        <!-- Cantidad / Fajos / Picos / Unit / Monto / Remove -->
+                                        <td><input name="@($"{prefixDetail}.Quantity")" type="number" class="form-control form-control-sm js-calc" value="@d.Quantity" /></td>
+                                        <td><input name="@($"{prefixDetail}.BundlesCount")" type="number" class="form-control form-control-sm js-calc" value="@d.BundlesCount" readonly /></td>
+                                        <td><input name="@($"{prefixDetail}.LoosePiecesCount")" type="number" class="form-control form-control-sm js-calc" value="@d.LoosePiecesCount" readonly /></td>
+                                        <td><input name="@($"{prefixDetail}.UnitValue")" type="number" class="form-control form-control-sm js-calc" value="@d.UnitValue" readonly /></td>
+                                        <td><input name="@($"{prefixDetail}.CalculatedAmount")" type="number" class="form-control form-control-sm" value="@d.CalculatedAmount" readonly /></td>
+                                        <td><button type="button" class="btn btn-sm btn-outline-danger js-remove-detail">×</button></td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+
                 </div>
             </div>
         </div>
@@ -300,7 +462,6 @@
                                 <th>Codigo</th>
                                 <th>Fecha</th>
                                 <th>Valor</th>
-                                <th>Monto</th>
                                 <th></th>
                             </tr>
                         </thead>
@@ -312,8 +473,8 @@
                                 <tr>
                                     <td style="display: none;">
                                         <input type="hidden" name="@($"{prefixDetail}.Id")" value="@c.Id" />
-                                        <input type="text" name="@($"{prefixDetail}.Quantity")" value="1" />
-                                        <input type="text" name="@($"{prefixDetail}.ValueType")" value="@c.ValueType" />
+                                        <input type="hidden" name="@($"{prefixDetail}.Quantity")" value="1" />
+                                        <input type="hidden" name="@($"{prefixDetail}.ValueType")" value="@c.ValueType" />
                                     </td>
                                     <td>
                                         <select name="@($"{prefixDetail}.EntitieBankId")"
@@ -325,8 +486,12 @@
                                     <td><input name="@($"{prefixDetail}.AccountNumber")" class="form-control form-control-sm" value="@c.AccountNumber" /></td>
                                     <td><input name="@($"{prefixDetail}.CheckNumber")" type="number" class="form-control form-control-sm" value="@c.CheckNumber"></td>
                                     <td><input name="@($"{prefixDetail}.IssueDate")" type="date" class="form-control form-control-sm" value="@(c.IssueDate.HasValue? c.IssueDate.Value.ToString("yyyy-MM-dd") : "")" /></td>
-                                    <td><input name="@($"{prefixDetail}.UnitValue")" type="number" class="form-control form-control-sm" value="@c.UnitValue" /></td>
-                                    <td><input name="@($"{prefixDetail}.CalculatedAmount")" type="number" class="form-control form-control-sm" value="@c.CalculatedAmount" /></td>
+                                    <td><input name="@($"{prefixDetail}.UnitValue")" type="number" step="1" class="form-control form-control-sm js-calc" value="@c.UnitValue" /></td>
+                                    <td style="display: none;">
+                                        <input name="@($"{prefixDetail}.CalculatedAmount")" type="number" step="1"
+                                               class="form-control form-control-sm" value="@c.CalculatedAmount" readonly />
+                                    </td>
+
                                     <td><button type="button" class="btn btn-sm btn-outline-danger js-remove-detail">×</button></td>
                                 </tr>
                             }
@@ -340,7 +505,6 @@
         </div>
     </div>
 
-    <!-- Observaciones (común) -->
     <div class="mt-3">
         <div class="form-floating">
             <textarea asp-for="Observations" class="form-control" style="height:80px" placeholder="Observaciones"></textarea>

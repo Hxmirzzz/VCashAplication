@@ -1,25 +1,29 @@
-/* Estilos para los elementos de formulario básicos (legend, label, hr) */
+ï»¿/* ===================================================================
+   BASE: elementos simples de formulario
+   =================================================================== */
 legend {
-    font-size: var(--title-font-size); /* Usa el tamaño de título global */
-    color: var(--title-color-main); /* Usa el color de título global */
+    font-size: var(--title-font-size);
+    color: var(--title-color-main);
 }
 
 label {
-    font-size: var(--smaller-font-size); /* Usa el tamaño de fuente más pequeño global */
-    color: var(--text-color-main); /* Usa el color de texto principal global */
+    font-size: var(--smaller-font-size);
+    color: var(--text-color-main);
 }
 
 hr {
-    color: var(--border-color); /* Usa el color de borde global */
+    color: var(--border-color);
 }
 
-/* Contenedor principal del formulario */
+/* ===================================================================
+   CONTENEDORES GENERALES (form, cards, tÃ­tulos)
+   =================================================================== */
 .form-container {
     width: 100%;
-    box-shadow: 0 2px 24px var(--shadow-color-main); /* Usa la sombra global */
+    box-shadow: 0 2px 24px var(--shadow-color-main);
     border-radius: 1rem;
     transition: background-color .4s;
-    background-color: var(--div-bg); /* Fondo de div global (blanco en tema claro) */
+    background-color: var(--div-bg);
 }
 
 .title-container {
@@ -31,38 +35,37 @@ hr {
 }
 
     .title-container h5 {
-        color: var(--title-color-main); /* Usa el color de título global */
+        color: var(--title-color-main);
         font-size: var(--title-font-size);
     }
 
-/* Estilos de las tarjetas (cards) dentro del formulario */
 .card {
     width: 100%;
     position: static;
     box-sizing: border-box;
-    background-color: var(--div-bg); /* Fondo de div global (blanco) */
-    border: 1px solid var(--border-color); /* Borde global */
-    border-radius: 0.75rem;
-    box-shadow: 0 4px 12px var(--shadow-color-main); /* Sombra global */
+    background-color: var(--div-bg);
+    border: 1px solid var(--border-color);
+    border-radius: .75rem;
+    box-shadow: 0 4px 12px var(--shadow-color-main);
 }
 
 .card-header {
     background-color: var(--table-header-bg);
-    color: var(--title-color-main); /* Texto oscuro global */
+    color: var(--title-color-main);
     text-align: left;
-    border-top-left-radius: 0.75rem;
-    border-top-right-radius: 0.75rem;
+    border-top-left-radius: .75rem;
+    border-top-right-radius: .75rem;
     padding: 1rem 1.25rem;
     font-size: 1rem;
-    font-weight: var(--font-semi-bold); /* Fuente semibold global */
+    font-weight: var(--font-semi-bold);
     display: flex;
     align-items: center;
-    gap: 0.5rem;
-    border-bottom: 1px solid var(--border-color); /* Borde global */
+    gap: .5rem;
+    border-bottom: 1px solid var(--border-color);
 }
 
     .card-header h4, .card-header h5 {
-        color: inherit !important; /* Hereda el color del texto del header */
+        color: inherit !important;
         margin-bottom: 0;
         font-size: 1rem;
     }
@@ -72,62 +75,70 @@ hr {
     padding: 1rem;
 }
 
-/* --------------------------------------------------------------- */
-/* ESTILOS PARA HACER CAMPOS COMPACTOS SIN form-control-sm EN HTML */
-/* --------------------------------------------------------------- */
+.table-container-responsive {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    border-radius: .5rem;
+}
+
+.table-container-responsive {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    border-radius: .5rem;
+}
+/*.table-container-responsive > .table {
+        width: max-content;
+        min-width: 600px;
+        margin-bottom: 0;
+    }*/
+
+/* ===================================================================
+   CAMPOS: inputs/ selects/ floating labels/ validaciÃ³n
+   =================================================================== */
 .form-control,
 .form-select,
 textarea.form-control {
     font-size: var(--smaller-font-size) !important;
-    min-height: calc(1.5em + .5rem + 2px) !important; /* Altura de Bootstrap para sm */
-
-    color: var(--text-color-main); /* Color de texto principal global */
-    background-color: var(--div-bg); /* Fondo del campo (blanco) */
-    border: 1px solid var(--border-color); /* Borde global */
+    min-height: calc(1.5em + .5rem + 2px) !important;
+    color: var(--text-color-main);
+    background-color: var(--div-bg);
+    border: 1px solid var(--border-color);
 }
-
 
 .form-group {
-    margin-bottom: 0.75rem;
+    margin-bottom: .75rem;
 }
 
-/* Estilos para Floating Labels (Bootstrap 5) */
 .form-floating > label {
-    color: var(--Grey1); /* Gris de site.css para el placeholder/label */
-    font-size: var(--smaller-font-size) !important; /* Asegura que la etiqueta flotante también sea pequeña */
+    color: var(--Grey1);
+    font-size: var(--smaller-font-size) !important;
 }
 
-/* Ajuste específico para la altura de textarea en form-floating */
 .form-floating > textarea.form-control {
     height: auto;
-    min-height: 80px; /* Altura mínima razonable para textarea */
+    min-height: 80px;
 }
 
-/* Estilos para validación en tiempo real (utilizando colores de site.css) */
-.form-control.is-valid,
-.form-select.is-valid,
-.form-control.is-invalid,
-.form-select.is-invalid {
+/* ValidaciÃ³n */
+.form-control.is-valid, .form-select.is-valid,
+.form-control.is-invalid, .form-select.is-invalid {
     background-repeat: no-repeat;
     background-position: right calc(.375em + .1875rem) center;
     background-size: calc(.75em + .375rem) calc(.75em + .375rem);
 }
 
-.form-control.is-valid,
-.form-select.is-valid {
+.form-control.is-valid, .form-select.is-valid {
     border-color: var(--status-color);
 }
 
-.form-control.is-invalid,
-.form-select.is-invalid {
-    border-color: var(--third-color); /* Rojo de peligro de site.css */
+.form-control.is-invalid, .form-select.is-invalid {
+    border-color: var(--third-color);
     background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12' width='12' height='12' fill='none' stroke='%23ce2c26'%3e%3ccircle cx='6' cy='6' r='4.5'/%3e%3cpath stroke-linejoin='round' d='M5.8 3.6h.4L6 6.5z'/%3e%3ccircle cx='6' cy='8.2' r='.6' fill='%23ce2c26' stroke='none'/%3e%3c/svg%3e");
 }
 
-/* El display de .valid-feedback y .invalid-feedback se gestiona por JavaScript. */
-/* Solo aseguramos el color y tamaño de fuente. */
-.valid-feedback,
-.invalid-feedback {
+.valid-feedback, .invalid-feedback {
     font-size: var(--smaller-font-size);
 }
 
@@ -139,23 +150,24 @@ textarea.form-control {
     color: var(--third-color);
 }
 
-
-.text-danger { /* Para los span de validación de ASP.NET Core */
+.text-danger {
     font-size: var(--smaller-font-size);
 }
 
-/* Indicadores de campos requeridos con asterisco */
+/* Requeridos */
 .required::after {
     content: " *";
-    color: var(--third-color); /* Rojo de peligro de site.css */
+    color: var(--third-color);
 }
 
-/* Estilos para el Progress Stepper (estos son personalizados) */
+/* ===================================================================
+   STEPPER DE PROGRESO
+   =================================================================== */
 .progress-stepper {
     display: flex;
     justify-content: space-between;
     margin-bottom: 1.5rem;
-    padding: 0 0.5rem;
+    padding: 0 .5rem;
     position: relative;
 }
 
@@ -164,9 +176,9 @@ textarea.form-control {
         position: absolute;
         width: calc(100% - 1rem);
         height: 3px;
-        background-color: var(--grey3); /* Gris claro de site.css */
+        background-color: var(--grey3);
         top: 50%;
-        left: 0.5rem;
+        left: .5rem;
         transform: translateY(-50%);
         z-index: 0;
     }
@@ -179,62 +191,63 @@ textarea.form-control {
         position: relative;
         z-index: 1;
         cursor: pointer;
-        opacity: 0.7;
-        transition: opacity 0.3s ease;
-        padding: 0 0.25rem;
+        opacity: .7;
+        transition: opacity .3s ease;
+        padding: 0 .25rem;
     }
 
-        .progress-stepper .step.active,
-        .progress-stepper .step.completed {
+        .progress-stepper .step.active, .progress-stepper .step.completed {
             opacity: 1;
         }
 
             .progress-stepper .step.active .step-number {
-                background-color: var(--Grey1); /* Gris para el paso activo de site.css */
+                background-color: var(--Grey1);
                 border-color: var(--Grey1);
-                color: white;
+                color: #fff;
             }
 
             .progress-stepper .step.completed .step-number {
-                background-color: var(--status-color); /* Verde para completado de site.css */
+                background-color: var(--status-color);
                 border-color: var(--status-color);
-                color: white;
+                color: #fff;
             }
 
     .progress-stepper .step-number {
         width: 30px;
         height: 30px;
         border-radius: 50%;
-        background-color: var(--div-bg); /* Fondo blanco del div global */
+        background-color: var(--div-bg);
         border: 1px solid var(--grey3);
         display: flex;
         justify-content: center;
         align-items: center;
         font-weight: bold;
-        font-size: 0.8rem;
-        margin-bottom: 0.3rem;
-        transition: all 0.3s ease;
-        color: var(--text-color-main); /* Color de texto principal global */
+        font-size: .8rem;
+        margin-bottom: .3rem;
+        transition: all .3s ease;
+        color: var(--text-color-main);
     }
 
     .progress-stepper .step-label {
-        font-size: var(--smaller-font-size); /* Tamaño de fuente más pequeño global */
+        font-size: var(--smaller-font-size);
         text-align: center;
         color: var(--text-color-main);
     }
 
-/* Estilos para el panel de cálculo (Calculadora Inteligente - personalizados) */
+/* ===================================================================
+   PANEL DE CÃLCULO
+   =================================================================== */
 .calculation-panel {
     background-color: var(--table-header-bg);
     border: 1px solid var(--border-color);
-    border-radius: 0.5rem;
+    border-radius: .5rem;
     padding: 1rem;
     margin-top: 1rem;
 }
 
     .calculation-panel h6 {
         color: var(--title-color-main);
-        margin-bottom: 0.75rem;
+        margin-bottom: .75rem;
         font-weight: var(--font-semi-bold);
         font-size: 1rem;
     }
@@ -244,113 +257,113 @@ textarea.form-control {
     }
 
 .calculation-item {
-    font-size: var(--normal-font-size); /* Tamaño de fuente normal global */
+    font-size: var(--normal-font-size);
     color: var(--text-color-main);
 }
 
 .calculation-total {
-    padding-top: 0.6rem;
-    font-size: var(--title-font-size); /* Tamaño de título global para el total */
-    color: var(--first-color); /* Color primario de site.css */
+    padding-top: .6rem;
+    font-size: var(--title-font-size);
+    color: var(--first-color);
 }
 
-/* Loading states para campos dinámicos (personalizados) */
-.form-floating .form-select.is-loading,
-.form-floating .form-control.is-loading {
-    background-color: var(--grey3); /* Gris claro */
-    opacity: 0.7;
-    pointer-events: none;
-}
-
-    .form-floating .form-select.is-loading option {
-        color: var(--Grey1); /* Gris más oscuro */
-    }
-
-/* Ocultar pestañas originales de Bootstrap en móvil (personalizado) */
-@media (max-width: 768px) {
-    .nav-tabs {
-        display: none;
-    }
-
-    .progress-stepper::before {
-        display: none;
-    }
-
-    .progress-stepper .step {
-        width: 33.33%;
-        margin-bottom: 0.5rem;
-    }
-
-    .progress-stepper {
-        flex-wrap: wrap;
-    }
-
-    /* Asegurar que las etiquetas flotantes se vean bien en móvil con campos sm */
-    .form-floating > label {
-        font-size: var(--smaller-font-size);
-    }
-}
-
-/* El submit-container se oculta por defecto (para ser controlado por JS) */
+/* ===================================================================
+   BOTONES / SUBMIT
+   =================================================================== */
 .submit-container {
-    display: none; /* JavaScript lo mostrará/ocultará */
+    display: none;
     justify-content: center;
     align-items: center;
     gap: 10px;
     margin-top: 1.5rem;
 }
 
-/* Estilos para los botones de navegación (Siguiente/Anterior/Registrar/Cancelar) */
-/* Aquí usamos las clases de Bootstrap y sobrescribimos sus colores por tus variables. */
 .btn {
     font-size: var(--normal-font-size);
-    padding: .375rem .75rem; /* Padding estándar de Bootstrap */
-    font-weight: var(--font-semi-bold); /* Fuente semibold global */
-    border-radius: 0.25rem; /* Bordes redondeados de Bootstrap */
-    transition: all 0.2s ease;
+    padding: .375rem .75rem;
+    font-weight: var(--font-semi-bold);
+    border-radius: .25rem;
+    transition: all .2s ease;
 }
 
 .btn-primary {
-    background-color: var(--Grey1); /* Gris de site.css para el botón principal */
+    background-color: var(--Grey1);
     border-color: var(--Grey1);
-    color: white;
+    color: #fff;
 }
 
     .btn-primary:hover {
-        background-color: var(--text-color-main); /* Un gris un poco más claro al hover */
+        background-color: var(--text-color-main);
         border-color: var(--text-color-main);
-        color: white;
+        color: #fff;
     }
 
 .btn-secondary {
-    background-color: var(--grey2); /* Gris claro de site.css para el botón secundario */
+    background-color: var(--grey2);
     border-color: var(--grey2);
-    color: var(--text-color-main); /* Texto oscuro para contraste */
+    color: var(--text-color-main);
 }
 
     .btn-secondary:hover {
-        background-color: var(--Grey1); /* Gris un poco más oscuro al hover */
+        background-color: var(--Grey1);
         border-color: var(--Grey1);
-        color: white;
+        color: #fff;
     }
 
 .btn-danger {
-    background-color: var(--third-color); /* Rojo de site.css */
+    background-color: var(--third-color);
     border-color: var(--third-color);
-    color: white;
+    color: #fff;
 }
 
     .btn-danger:hover {
-        /* Si no usas preprocesador, calcula el color hexadecimal aquí */
-        background-color: #bb2d3b; /* Ejemplo de rojo más oscuro */
+        background-color: #bb2d3b;
         border-color: #bb2d3b;
     }
 
-/* Estilos para los elementos de drag & drop (si se usan en formularios) */
-/* Estos son ejemplos de estilos personalizados. */
+/* Botones en contenedores especÃ­ficos */
+.submit-container, .modal-footer {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: auto;
+    gap: 10px;
+}
+
+    .submit-container .btn, .modal-footer .btn {
+        border: none;
+        padding: .5rem 1rem;
+        width: auto;
+        min-width: 100px;
+        color: #fff;
+        font-size: var(--normal-font-size);
+        font-weight: var(--font-semi-bold);
+        border-radius: .25rem;
+        transition: all .2s ease;
+    }
+
+    .submit-container .btn-primary, .modal-footer .btn-primary {
+        background: var(--first-color);
+        border-color: var(--Grey1);
+    }
+
+    .modal-footer .btn-warning {
+        background: var(--second-color);
+        border-color: var(--second-color);
+        color: var(--black1);
+    }
+
+    .submit-container .btn-danger, .submit-container .btn-exit, .modal-footer .btn-exit {
+        background: var(--third-color);
+        border-color: var(--third-color);
+    }
+
+/* ===================================================================
+   DRAG & DROP
+   =================================================================== */
 .drop-zone {
-    border: 2px dashed var(--grey2); /* Gris de site.css */
-    border-radius: 0.5rem;
+    border: 2px dashed var(--grey2);
+    border-radius: .5rem;
     padding: 1rem;
     text-align: center;
     cursor: pointer;
@@ -359,8 +372,8 @@ textarea.form-control {
     align-items: center;
     justify-content: center;
     min-height: 150px;
-    background-color: var(--grey3); /* Gris claro de site.css */
-    transition: all 0.2s ease-in-out;
+    background-color: var(--grey3);
+    transition: all .2s ease-in-out;
     position: relative;
 }
 
@@ -372,7 +385,7 @@ textarea.form-control {
 .drop-zone-icon {
     font-size: 3rem;
     color: var(--Grey1);
-    margin-bottom: 0.5rem;
+    margin-bottom: .5rem;
 }
 
 .drop-zone-text {
@@ -389,14 +402,13 @@ textarea.form-control {
 .drop-zone-info {
     font-size: var(--smaller-font-size);
     color: var(--text-color-main);
-    margin-top: 0.5rem;
+    margin-top: .5rem;
 }
 
 .drop-zone-input {
     opacity: 0;
     position: absolute;
-    top: 0;
-    left: 0;
+    inset: 0;
     width: 100%;
     height: 100%;
     cursor: pointer;
@@ -404,18 +416,16 @@ textarea.form-control {
 }
 
 .drop-zone-preview {
-    display: flex;
+    display: none;
     justify-content: center;
     align-items: center;
     width: 100%;
     height: 100%;
     position: absolute;
-    top: 0;
-    left: 0;
-    background-color: rgba(255, 255, 255, 0.9);
-    border-radius: 0.5rem;
+    inset: 0;
+    background-color: rgba(255,255,255,.9);
+    border-radius: .5rem;
     overflow: hidden;
-    display: none;
     z-index: 5;
 }
 
@@ -423,9 +433,7 @@ textarea.form-control {
     display: flex;
 }
 
-.drop-zone.has-file .drop-zone-icon,
-.drop-zone.has-file .drop-zone-text,
-.drop-zone.has-file .drop-zone-info {
+.drop-zone.has-file .drop-zone-icon, .drop-zone.has-file .drop-zone-text, .drop-zone.has-file .drop-zone-info {
     display: none;
 }
 
@@ -433,15 +441,15 @@ textarea.form-control {
     max-width: 100%;
     max-height: 100%;
     object-fit: contain;
-    border-radius: 0.5rem;
+    border-radius: .5rem;
 }
 
 .drop-zone-remove {
     position: absolute;
     top: 5px;
     right: 5px;
-    background-color: rgba(206, 44, 38, 0.7); /* Rojo semi-transparente (third-color) */
-    color: white;
+    background-color: rgba(206,44,38,.7);
+    color: #fff;
     border: none;
     border-radius: 50%;
     width: 25px;
@@ -450,18 +458,20 @@ textarea.form-control {
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    font-size: 0.8rem;
+    font-size: .8rem;
     font-weight: bold;
     z-index: 15;
-    opacity: 0.8;
-    transition: opacity 0.2s ease-in-out;
+    opacity: .8;
+    transition: opacity .2s ease-in-out;
 }
 
     .drop-zone-remove:hover {
         opacity: 1;
     }
 
-/* BUSQUEDA DESPLEGABLE (autocomplete) */
+/* ===================================================================
+   AUTOCOMPLETE
+   =================================================================== */
 .autocomplete-container {
     width: 100%;
     z-index: 100;
@@ -480,11 +490,11 @@ textarea.form-control {
     max-height: 200px;
     overflow-y: auto;
     box-shadow: 0 4px 6px var(--shadow-color-main);
-    border-radius: 0 0 0.25rem 0.25rem;
+    border-radius: 0 0 .25rem .25rem;
 }
 
 .autocomplete-item {
-    padding: 0.5rem 1rem;
+    padding: .5rem 1rem;
     cursor: pointer;
     border-bottom: 1px solid var(--border-color);
     display: flex;
@@ -505,7 +515,7 @@ textarea.form-control {
 }
 
 .autocomplete-item-details {
-    font-size: 0.8em;
+    font-size: .8em;
     color: var(--Grey1);
     margin-left: 10px;
 }
@@ -519,75 +529,231 @@ textarea.form-control {
 }
 
 .autocomplete-results .no-results-message {
-    padding: 0.5rem 1rem;
+    padding: .5rem 1rem;
     color: var(--Grey1);
     text-align: center;
 }
 
-/* Contenedores de botones (submit y modal) */
-.submit-container,
-.modal-footer {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: auto;
-    gap: 10px;
+/* ===================================================================
+   TABS (Bootstrap) + CONTENIDO
+   =================================================================== */
+.nav-tabs {
+    border-bottom: 1px solid var(--border-color);
 }
 
-    .submit-container .btn,
-    .modal-footer .btn {
-        border: none; 
-        padding: 0.5rem 1rem;
-        width: auto;
-        min-width: 100px;
-        color: white; /* Color de texto blanco por defecto para la mayoría */
-        font-size: var(--normal-font-size);
-        font-weight: var(--font-semi-bold);
-        border-radius: 0.25rem;
-        transition: all 0.2s ease;
+    .nav-tabs .nav-link {
+        color: var(--text-color-main);
+        background-color: transparent;
+        border: 1px solid transparent;
+        transition: background-color .2s ease, color .2s ease, border-color .2s ease;
     }
 
-    .submit-container .btn-primary,
-    .modal-footer .btn-primary {
-        background: var(--first-color);
-        border-color: var(--Grey1);
+        .nav-tabs .nav-link:hover {
+            background-color: var(--hover-bg);
+            border-color: var(--border-color) var(--border-color) transparent;
+        }
+
+        .nav-tabs .nav-link.active {
+            color: var(--title-color-main);
+            background-color: var(--table-header-bg);
+            border-color: var(--border-color) var(--border-color) var(--div-bg);
+        }
+
+        .nav-tabs .nav-link.disabled {
+            color: var(--grey2);
+        }
+
+.tab-content {
+    background: var(--div-bg);
+    border-top: 0;
+    border-radius: 0 0 .75rem .75rem;
+}
+
+/* ===================================================================
+   TABS SCROLLER (flechas + sombras)
+   =================================================================== */
+.tabs-scroll-wrap {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: .25rem;
+    width: 100%;
+}
+
+.tabs-viewport {
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: thin;
+}
+
+    .tabs-viewport .nav {
+        flex-wrap: nowrap !important;
+        white-space: nowrap;
     }
 
-    .modal-footer .btn-warning { /* Si se usa btn-warning en modal-footer */
-        background: var(--second-color); /* Amarillo de site.css */
-        border-color: var(--second-color);
-        color: var(--black1); /* Texto oscuro para contraste en amarillo */
+/* Flechas (unificadas) */
+.tabs-arrow {
+    flex: 0 0 auto;
+    width: 32px;
+    height: 32px;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    background: var(--button-bg-color);
+    color: var(--button-text-color);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+
+    .tabs-arrow[disabled] {
+        opacity: .4;
+        cursor: default;
     }
 
+/* Sombras laterales */
+.tabs-shadow {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 28px;
+    pointer-events: none;
+    z-index: 2;
+}
 
-    .submit-container .btn-danger,
-    .submit-container .btn-exit,
-    .modal-footer .btn-exit {
-        background: var(--third-color); /* Rojo de site.css */
-        border-color: var(--third-color);
+.tabs-shadow--left {
+    left: 40px;
+    background: linear-gradient(to right, var(--table-header-bg), transparent);
+}
+
+.tabs-shadow--right {
+    right: 40px;
+    background: linear-gradient(to left, var(--table-header-bg), transparent);
+}
+
+/* Scrollbar estÃ©tica */
+.tabs-viewport::-webkit-scrollbar {
+    height: 8px;
+}
+
+.tabs-viewport::-webkit-scrollbar-thumb {
+    border-radius: 8px;
+    background: rgba(0,0,0,.15);
+}
+
+/* ===================================================================
+   TABLAS EN EDITORES (bolsa / sobre)
+   =================================================================== */
+.container-editor .table,
+.container-editor .js-details-table,
+.container-editor .js-cheques-table {
+    background-color: var(--div-bg);
+    color: var(--text-color-main);
+    border-color: var(--border-color);
+}
+
+    .container-editor .table th,
+    .container-editor .js-details-table th,
+    .container-editor .js-cheques-table th {
+        background-color: var(--table-header-bg);
+        color: var(--table-header-text);
+        border-color: var(--border-color);
     }
 
-    .submit-container .btn-primary:hover,
-    .modal-footer .btn-primary:hover {
-        background: var(--text-color-main); /* Gris más claro al hover */
-        border-color: var(--text-color-main);
+    .container-editor .table td,
+    .container-editor .js-details-table td,
+    .container-editor .js-cheques-table td {
+        background-color: var(--div-bg);
+        color: var(--text-color-main);
+        border-color: var(--border-color);
     }
 
-    .modal-footer .btn-warning:hover {
-        /* Requiere preprocesador o valor hexadecimal fijo */
-        background: darken(var(--second-color), 10%);
-        border-color: darken(var(--second-color), 10%);
+    .container-editor .js-details-table tbody tr:hover,
+    .container-editor .js-cheques-table tbody tr:hover {
+        background-color: var(--hover-bg);
     }
 
-    .submit-container .btn-danger:hover,
-    .submit-container .btn-exit:hover,
-    .modal-footer .btn-exit:hover {
-        /* Requiere preprocesador o valor hexadecimal fijo */
-        background: darken(var(--third-color), 10%);
-        border-color: darken(var(--third-color), 10%);
+    /* Inputs/Selects dentro de celdas */
+    .container-editor .table input.form-control,
+    .container-editor .table select.form-select {
+        background-color: var(--div-bg);
+        color: var(--text-color-main);
+        border-color: var(--border-color);
     }
 
-.reg-preview-container { /* Si esta clase se usa, ajustar según las nuevas variables */
+/* ===================================================================
+   TABLAS RESPONSIVE (scroll-x para billetes/monedas/cheques)
+   =================================================================== */
+.form-table-responsive {
+    display: block;
+    width: 100%;
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    border-radius: .5rem;
+}
+
+    .form-table-responsive > .table {
+        width: max-content;
+        min-width: 720px;
+        margin-bottom: 0;
+    }
+
+@media (max-width:576px) {
+    .form-table-responsive > .table {
+        min-width: 560px;
+    }
+}
+
+/* ===================================================================
+   MEDIA QUERIES (mÃ³vil / tablet)
+   =================================================================== */
+@media (max-width:768px) {
+    /* Tabs de bootstrap ocultas en mÃ³vil: usamos stepper */
+    .nav-tabs {
+        display: none;
+    }
+
+    .progress-stepper::before {
+        display: none;
+    }
+
+    .progress-stepper .step {
+        width: 33.33%;
+        margin-bottom: .5rem;
+    }
+
+    .progress-stepper {
+        flex-wrap: wrap;
+    }
+
+    /* Ajustes tipogrÃ¡ficos */
+    .form-floating > label {
+        font-size: var(--smaller-font-size);
+    }
+
+    .container-editor .card-header h6 {
+        font-size: .95rem;
+    }
+
+    .container-editor .table,
+    .container-editor .js-details-table,
+    .container-editor .js-cheques-table {
+        font-size: var(--smaller-font-size);
+    }
+
+        .container-editor .table th, .container-editor .table td {
+            padding: .4rem .5rem;
+        }
+}
+
+/* ===================================================================
+   OTROS CONTENEDORES (si los usas en otras pantallas)
+   =================================================================== */
+.reg-preview-container {
     border-radius: 5%;
     display: grid;
     justify-items: center;
@@ -595,7 +761,7 @@ textarea.form-control {
     bottom: 0;
 }
 
-.submit-container-reg { /* Si esta clase se usa para otros formularios, ajustar según las nuevas variables */
+.submit-container-reg {
     display: flex;
     justify-content: center;
     align-items: center;
@@ -613,115 +779,13 @@ textarea.form-control {
     }
 
     .submit-container-reg .btn-primary {
-        background: var(--status-color); /* Verde de site.css para un "registrar" si es primario */
+        background: var(--status-color);
     }
 
     .submit-container-reg .btn-danger {
-        background: var(--first-color); /* Usar el azul principal si es para "eliminar" */
+        background: var(--first-color);
     }
 
     .submit-container-reg .btn-exit {
-        background: var(--third-color); /* Rojo de site.css */
+        background: var(--third-color);
     }
-
-    .submit-container-reg .btn-primary:hover {
-        /* Requiere preprocesador o valor hexadecimal fijo */
-        background: darken(var(--status-color), 10%);
-        color: white;
-    }
-
-    .submit-container-reg .btn-danger:hover {
-        /* Requiere preprocesador o valor hexadecimal fijo */
-        background: darken(var(--first-color), 10%);
-        color: white;
-    }
-
-    .submit-container-reg .btn-exit:hover {
-        /* Requiere preprocesador o valor hexadecimal fijo */
-        background: darken(var(--third-color), 10%);
-        color: white;
-    }
-
-/* Importante: Si no usas un preprocesador como SASS/LESS, debes reemplazar `darken(var(--color), 10%)` con un valor hexadecimal fijo. */
-/* Ejemplo de cómo sería si no usas preprocesador (tendrías que calcular el color): */
-/*
-.submit-container .btn-primary:hover {
-    background: #5a6268; // Un gris ligeramente más oscuro que var(--Grey1)
-    border-color: #5a6268;
-}
-*/
-
-/* Contenedor principal del scroller */
-.tabs-scroll-wrap {
-    position: relative;
-    display: flex; /* <- FLEX en vez de grid */
-    align-items: center;
-    gap: .25rem;
-    width: 100%; /* <- ocupa todo el ancho del header */
-}
-
-/* Área que realmente scrollea */
-.tabs-viewport {
-    flex: 1 1 auto; /* <- se expande */
-    min-width: 0; /* <- CLAVE: evita que “se corte” dentro de flex/grid */
-    overflow-x: auto;
-    overflow-y: hidden;
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: thin;
-}
-
-    /* Evitar que Bootstrap envuelva las tabs */
-    .tabs-viewport .nav {
-        flex-wrap: nowrap !important;
-        white-space: nowrap;
-    }
-
-/* Botones flecha */
-.tabs-arrow {
-    flex: 0 0 auto;
-    width: 32px;
-    height: 32px;
-    border: 0;
-    border-radius: 6px;
-    background: var(--bs-secondary-bg, #f1f3f5);
-    color: var(--bs-body-color, #212529);
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-}
-
-    .tabs-arrow[disabled] {
-        opacity: .4;
-        cursor: default;
-    }
-
-/* Sombras laterales (color toma el cap del card header) */
-.tabs-shadow {
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    width: 28px;
-    pointer-events: none;
-    z-index: 2;
-}
-
-.tabs-shadow--left {
-    left: 40px; /* ~ ancho de la flecha + gap */
-    background: linear-gradient(to right, var(--bs-card-cap-bg, #fff), transparent);
-}
-
-.tabs-shadow--right {
-    right: 40px;
-    background: linear-gradient(to left, var(--bs-card-cap-bg, #fff), transparent);
-}
-
-/* Opcional: mejorar tactilidad */
-.tabs-viewport::-webkit-scrollbar {
-    height: 8px;
-}
-
-.tabs-viewport::-webkit-scrollbar-thumb {
-    border-radius: 8px;
-    background: rgba(0,0,0,.15);
-}

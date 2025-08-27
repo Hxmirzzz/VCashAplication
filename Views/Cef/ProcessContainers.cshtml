@@ -604,6 +604,19 @@
           function setSectionEnabled($section, enabled) {
             $section.find(':input').prop('disabled', !enabled);
           }
+          function getRowKind($row) {
+            const $sel = $row.find('.js-vtype');
+            if ($sel.length && $sel.val()) return String($sel.val());
+
+            const hidden = $row.find('input[name$=".ValueType"]').val();
+            if (hidden) return String(hidden);
+
+            const $table = $row.closest('table.js-details-table');
+            const fk = $table.data('fixed-kind');
+            if (fk) return String(fk);
+
+            return null;
+          }
 
           function sumEditor($editor){
             let s = 0;
@@ -772,7 +785,7 @@
             return html;
           }
           function updateQualityForRow($row) {
-            const kind        = $row.find('.js-vtype').val();
+            const kind        = getRowKind($row);
             const denomFamily = getDenomFamilyForRow($row);
             const denomId     = String($row.find('.js-denom').val() || '');
             const $q          = $row.find('.js-quality');
@@ -826,7 +839,7 @@
             }
 
             const denomId = selectedOption.val();
-            const kind    = $row.find('.js-vtype').val();
+            const kind    = getRowKind($row);
 
             // Tamaño del fajo
             let bundleSize = 1;
@@ -1139,23 +1152,34 @@
               $select.val(currentValue);
             });
           }
-          function reindexValueDetails(tableSelector) {
-            $(tableSelector).find("tbody tr").each(function (i, row) {
-              $(row).find(":input").each(function () {
-                const input = $(this);
-                const name = input.attr("name");
-                if (name) {
-                  const newName = name.replace(/ValueDetails\[\d+\]/, `ValueDetails[${i}]`);
-                  input.attr("name", newName);
-                }
+
+          function reindexValueDetailsForContainer($ce) {
+            const basePrefix = $ce.data('prefix');
+            let k = 0;
+
+            const $rows = $ce
+              .find('table.js-details-table:visible tbody tr, table.js-cheques-table:visible tbody tr')
+              .filter(function () {
+                return $(this).find(`:input[name^="${basePrefix}.ValueDetails["]:enabled`).length > 0;
               });
+
+            $rows.each(function () {
+              $(this).find(`:input[name^="${basePrefix}.ValueDetails["]`).each(function () {
+                const $inp = $(this);
+                const name = $inp.attr('name');
+                if (!name) return;
+
+                const newName = name.replace(/ValueDetails\[[^\]]+\]/, `ValueDetails[${k}]`);
+                $inp.attr('name', newName);
+              });
+              k++;
             });
           }
 
           // -> Agregar fila detalle
           $(document).on('click', '.js-add-detail', function () {
             const $btn  = $(this);
-            const scope = $btn.data('detail-scope');  // bolsa | sobre-cash | sobre-docs
+            const scope = $btn.data('detail-scope');
             const $card = $btn.closest('.card');
             const $table = $card.find('.js-details-table[data-detail-scope="' + scope + '"]');
 
@@ -1176,66 +1200,71 @@
             });
             const j = max + 1;
 
-            let valueTypeOptions = [], denomKindDefault = null;
             let showDenom = true, showQuality = true, showBundleFields = true, showUnit = true;
+            let fixedKind = null;
+            let valueTypeOptions = [], denomKindDefault = null;
 
-            if (scope === 'bolsa' || scope === 'sobre-cash') {
-              valueTypeOptions = [
-                { value: 'Billete', text: 'Billete' },
-                { value: 'Moneda',  text: 'Moneda'  }
-              ];
-              denomKindDefault = 'Billete';
+            if (scope === 'bolsa-billete' || scope === 'sobre-billete') {
+              fixedKind = 'Billete';
+            } else if (scope === 'bolsa-moneda' || scope === 'sobre-moneda') {
+              fixedKind = 'Moneda';
             } else if (scope === 'sobre-docs') {
-              valueTypeOptions = [{ value: 'Documento', text: 'Documento' }];
-              denomKindDefault = 'Documento';
-              showDenom = false;
-              showQuality = false;
-              showBundleFields = false;
-              showUnit = false; // NO mostrar "Valor Unit."
+              valueTypeOptions   = [{ value: 'Documento', text: 'Documento' }];
+              denomKindDefault   = 'Documento';
+              showDenom = false; showQuality = false; showBundleFields = false; showUnit = false;
             }
 
             const vtHtml    = valueTypeOptions.map(v => `<option value="${v.value}">${v.text}</option>`).join('');
-            const denomHtml = denomOptionsHtml(denomKindDefault);
+            const denomHtml = denomOptionsHtml(fixedKind || denomKindDefault);
 
             const hasQualityColInTable = $table.find('thead th')
               .filter(function(){ return $(this).text().trim().toLowerCase().includes('calidad'); }).length > 0;
 
-            let cells = `
-              <td>
-                <select name="${basePrefix}.ValueDetails[${j}].ValueType"
-                        class="form-select form-select-sm js-vtype">${vtHtml}</select>
-              </td>
-            `;
+            let cells = '';
+
+            if (fixedKind) {
+              // 👉 Sobre-Billete / Sobre-Moneda (y Bolsa-Billete/Moneda): sin columna "Tipo"
+              cells += `<td style="display:none;">
+                          <input type="hidden" name="${basePrefix}.ValueDetails[${j}].ValueType" value="${fixedKind}" />
+                        </td>`;
+            } else {
+              // 👉 sobre-docs (o cualquier tabla que aún use selector de tipo)
+              cells += `<td>
+                          <select name="${basePrefix}.ValueDetails[${j}].ValueType"
+                                  class="form-select form-select-sm js-vtype">${vtHtml}</select>
+                        </td>`;
+            }
+
             if (showDenom) {
-              cells += `
-                <td>
-                  <select name="${basePrefix}.ValueDetails[${j}].DenominationId"
-                          class="form-select form-select-sm js-denom">${denomHtml}</select>
-                </td>`;
+              cells += `<td>
+                          <select name="${basePrefix}.ValueDetails[${j}].DenominationId"
+                                  class="form-select form-select-sm js-denom">${denomHtml}</select>
+                        </td>`;
             }
             if (hasQualityColInTable && showQuality) {
-              cells += `
-                <td>
-                  <select name="${basePrefix}.ValueDetails[${j}].QualityId"
-                          class="form-select form-select-sm js-quality">
-                    <option value="">-- Seleccione calidad --</option>
-                  </select>
-                </td>`;
+              cells += `<td>
+                          <select name="${basePrefix}.ValueDetails[${j}].QualityId"
+                                  class="form-select form-select-sm js-quality">
+                            <option value="">-- Seleccione calidad --</option>
+                          </select>
+                        </td>`;
             }
+
             cells += `<td><input name="${basePrefix}.ValueDetails[${j}].Quantity" type="number" class="form-control form-control-sm js-calc" /></td>`;
+
             if (showBundleFields) {
-              cells += `
-                <td><input name="${basePrefix}.ValueDetails[${j}].BundlesCount" type="number" class="form-control form-control-sm js-calc" readonly /></td>
-                <td><input name="${basePrefix}.ValueDetails[${j}].LoosePiecesCount" type="number" class="form-control form-control-sm js-calc" readonly /></td>`;
+              cells += `<td><input name="${basePrefix}.ValueDetails[${j}].BundlesCount" type="number" class="form-control form-control-sm js-calc" readonly /></td>
+                        <td><input name="${basePrefix}.ValueDetails[${j}].LoosePiecesCount" type="number" class="form-control form-control-sm js-calc" readonly /></td>`;
             }
+
             if (showUnit) {
               cells += `<td><input name="${basePrefix}.ValueDetails[${j}].UnitValue" type="number" step="1" class="form-control form-control-sm js-calc" /></td>`;
             } else {
               cells += `<input type="hidden" name="${basePrefix}.ValueDetails[${j}].UnitValue" value="" />`;
             }
-            cells += `
-              <td><input name="${basePrefix}.ValueDetails[${j}].CalculatedAmount" type="number" step="1" class="form-control form-control-sm" readonly /></td>
-              <td><button type="button" class="btn btn-sm btn-outline-danger js-remove-detail">×</button></td>`;
+
+            cells += `<td><input name="${basePrefix}.ValueDetails[${j}].CalculatedAmount" type="number" step="1" class="form-control form-control-sm" readonly /></td>
+                      <td><button type="button" class="btn btn-sm btn-outline-danger js-remove-detail">×</button></td>`;
 
             $table.find('tbody').append(`<tr>${cells}</tr>`);
             const $newRow = $table.find('tbody tr').last();
@@ -1263,7 +1292,7 @@
             const $ce    = $table.closest('.container-editor');
 
             $(this).closest("tr").remove();
-            reindexValueDetails($table);
+            reindexValueDetailsForContainer($ce);
 
             if ($pane.length) updateBagBadgeFromPane($pane);
             updateContainerSubtotal($ce);
@@ -1293,7 +1322,7 @@
 
             if (selectedOption.length && selectedOption.val()) {
               const denomId = selectedOption.val();
-              const kind    = $row.find('.js-vtype').val();
+              const kind    = getRowKind($row);
 
               let bundleSize = 1;
               const arr       = (DENOMS && DENOMS[kind]) ? DENOMS[kind] : [];
@@ -1307,7 +1336,6 @@
 
               $row.find('input[name$=".Quantity"]').val(totalQuantity);
 
-              // (Opcional) formatea bonito si usas formatInput
               if (typeof formatInput === 'function') {
                 formatInput($row.find('input[name$=".Quantity"]'));
               }
@@ -1589,7 +1617,7 @@
                 <td><input name="${basePrefix}.ValueDetails[${j}].IssueDate" type="date" class="form-control form-control-sm" /></td>
                 <td><input name="${basePrefix}.ValueDetails[${j}].UnitValue" type="number" step="1" class="form-control form-control-sm js-calc" /></td>
                 <td style="display: none;"><input name="${basePrefix}.ValueDetails[${j}].Quantity" type="number" class="form-control form-control-sm js-calc" value="1" /></td>
-                <td><input name="${basePrefix}.ValueDetails[${j}].CalculatedAmount" type="number" step="1" class="form-control form-control-sm" readonly /></td>
+                <td style="display: none;"><input name="${basePrefix}.ValueDetails[${j}].CalculatedAmount" type="number" step="1" class="form-control form-control-sm" readonly /></td>
                 <td>
                   <input type="hidden" name="${basePrefix}.ValueDetails[${j}].ValueType" value="Cheque" />
                   <button type="button" class="btn btn-sm btn-outline-danger js-remove-cheque">×</button>
@@ -1607,8 +1635,12 @@
 
           $(document).on('click', '.js-remove-cheque', function () {
             const $pane = $(this).closest('.tab-pane[id^="bag-tab-"]');
-            const $ce   = $(this).closest('.container-editor'); // define $ce local (misma lógica)
+            const $ce   = $(this).closest('.container-editor');
+
             $(this).closest('tr').remove();
+
+            reindexValueDetailsForContainer($ce);
+
             if ($pane.length) updateBagBadgeFromPane($pane);
             updateContainerSubtotal($ce);
           });
@@ -1685,9 +1717,11 @@
                 didOpen: () => Swal.showLoading()
               });
 
+              $('.container-editor').each(function () {
+                reindexValueDetailsForContainer($(this));
+              });
               unformatAllNumbers();
               const payload = $form.serialize();
-
               formatAllNumbers();
 
               $.ajax({

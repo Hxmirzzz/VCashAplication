@@ -6,6 +6,7 @@ using VCashApp.Data;
 using VCashApp.Enums;
 using VCashApp.Models.Entities;
 using VCashApp.Models.ViewModels.CentroEfectivo;
+using VCashApp.Utils;
 
 namespace VCashApp.Services.Cef
 {
@@ -148,15 +149,17 @@ namespace VCashApp.Services.Cef
                 }).ToList();
             }
 
+            var totals = await GetTransactionTotalsAsync(cefTransactionId);
+            vm.TotalDeclaredAll = totals.declared;
+            vm.TotalCountedAll = totals.counted;
+            vm.DifferenceAll = totals.diff;
+
             return vm;
         }
 
         /// <inheritdoc/>
-        public async Task<CefContainer> SaveContainerAndDetailsAsync(
-            CefContainerProcessingViewModel viewModel,
-            string processingUserId)
+        public async Task<CefContainer> SaveContainerAndDetailsAsync(CefContainerProcessingViewModel viewModel, string processingUserId)
         {
-            // 0) Transacción + estado válido
             var transaction = await _context.CefTransactions
                 .FirstOrDefaultAsync(t => t.Id == viewModel.CefTransactionId)
                 ?? throw new InvalidOperationException($"La transacción CEF con ID {viewModel.CefTransactionId} no existe.");
@@ -197,7 +200,7 @@ namespace VCashApp.Services.Cef
                     throw new InvalidOperationException("Debe indicar el DOCUMENTO del cajero que contó en el origen.");
                 if ((viewModel.DeclaredValue ?? 0m) <= 0)
                     throw new InvalidOperationException("Para Documento/Voucher debe indicar un Valor declarado mayor a 0.");
-                // Fecha del sobre puede ser opcional, pero si la necesitas obligatoria:
+                // Fecha del sobre puede ser opcional
                 // if (viewModel.ClientEnvelopeDate == null) throw new InvalidOperationException("Debe indicar la fecha del sobre (origen).");
             }
 
@@ -453,6 +456,21 @@ namespace VCashApp.Services.Cef
                 }
             }
 
+            // Recalcular agregados de la transacción y persistirlos
+            var (declared, counted, diff) = await GetTransactionTotalsAsync(transaction.Id);
+
+            transaction.TotalDeclaredValue = declared;
+            transaction.TotalCountedValue = counted;
+            transaction.ValueDifference = diff;
+            transaction.TotalCountedValueInWords = AmountInWordsHelper.ToSpanishCurrency(counted, transaction.Currency);
+
+            // (Opcional) si quieres marcar auditoría mínima
+            transaction.LastUpdateDate = DateTime.Now;
+            transaction.LastUpdateUser = processingUserId;
+
+            _context.CefTransactions.Update(transaction);
+            await _context.SaveChangesAsync();
+
             return container;
         }
 
@@ -464,10 +482,25 @@ namespace VCashApp.Services.Cef
             if (hasChildren)
                 throw new InvalidOperationException("No se puede eliminar un contenedor padre porque tiene sobres hijos.");
 
-            // Borra el contenedor; los detalles se eliminan por CASCADE en la BD
             var rows = await _context.CefContainers
                 .Where(c => c.Id == containerId && c.CefTransactionId == transactionId)
                 .ExecuteDeleteAsync();
+
+            if (rows > 0)
+            {
+                var tx = await _context.CefTransactions.FirstOrDefaultAsync(t => t.Id == transactionId);
+                if (tx != null)
+                {
+                    var (declared, counted, diff) = await GetTransactionTotalsAsync(transactionId);
+                    tx.TotalDeclaredValue = declared;
+                    tx.TotalCountedValue = counted;
+                    tx.ValueDifference = diff;
+                    tx.LastUpdateDate = DateTime.Now;
+
+                    _context.CefTransactions.Update(tx);
+                    await _context.SaveChangesAsync();
+                }
+            }
 
             return rows > 0;
         }

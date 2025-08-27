@@ -17,7 +17,6 @@ namespace VCashApp.Data
             : base(options)
         {
         }
-
         public DbSet<DataProtectionKey> DataProtectionKeys { get; set; }
         public DbSet<PermisoPerfil> PermisosPerfil { get; set; }
         public DbSet<AdmVista> AdmVistas { get; set; }
@@ -38,7 +37,7 @@ namespace VCashApp.Data
         public DbSet<SegRegistroEmpleado> SegRegistroEmpleados { get; set; }
         public DbSet<AdmConcepto> AdmConceptos { get; set; }
         public DbSet<AdmConsecutivo> AdmConsecutivos { get; set; }
-        public DbSet<AdmBankEntitie> AdmBankEntities { get; set; }
+        public DbSet<AdmBankEntiy> AdmBankEntities { get; set; }
         public DbSet<CgsService> CgsServicios { get; set; }
         public DbSet<CgsLocationType> CgsLocationTypes { get; set; }
         public DbSet<CefTransaction> CefTransactions { get; set; }
@@ -290,7 +289,7 @@ namespace VCashApp.Data
                 entity.Property(d => d.ValorDenominacion).HasColumnType("DECIMAL(18,0)");
             });
 
-            builder.Entity<AdmBankEntitie>(entity =>
+            builder.Entity<AdmBankEntiy>(entity =>
             {
                 entity.HasKey(b => b.Id);
                 entity.Property(b => b.Name);
