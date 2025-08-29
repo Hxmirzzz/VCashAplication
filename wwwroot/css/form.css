@@ -11,18 +11,17 @@ label {
     color: var(--text-color-main);
 }
 
-hr {
-    color: var(--border-color);
-}
+    hr {
+        color: var(--border-color);
+    }
 
 /* ===================================================================
    CONTENEDORES GENERALES (form, cards, títulos)
    =================================================================== */
 .form-container {
     width: 100%;
-    box-shadow: 0 2px 24px var(--shadow-color-main);
     border-radius: 1rem;
-    transition: background-color .4s;
+    transition: margin-left var(--transition-duration) var(--transition-timing-function);
     background-color: var(--div-bg);
 }
 
@@ -43,10 +42,11 @@ hr {
     width: 100%;
     position: static;
     box-sizing: border-box;
-    background-color: var(--div-bg);
+    background: var(--div-bg);
     border: 1px solid var(--border-color);
     border-radius: .75rem;
     box-shadow: 0 4px 12px var(--shadow-color-main);
+    color: var(--text-color-main);
 }
 
 .card-header {
@@ -358,11 +358,11 @@ textarea.form-control {
         border-color: var(--third-color);
     }
 
+
 /* ===================================================================
    DRAG & DROP
    =================================================================== */
 .drop-zone {
-    border: 2px dashed var(--grey2);
     border-radius: .5rem;
     padding: 1rem;
     text-align: center;
@@ -483,7 +483,7 @@ textarea.form-control {
     top: 100%;
     left: 0;
     right: 0;
-    z-index: 1000;
+    z-index: 1055;
     border: 1px solid var(--border-color);
     border-top: none;
     background-color: var(--div-bg);
@@ -532,6 +532,11 @@ textarea.form-control {
     padding: .5rem 1rem;
     color: var(--Grey1);
     text-align: center;
+}
+
+.autocomplete-item.loading {
+    opacity: .8;
+    font-style: italic;
 }
 
 /* ===================================================================
@@ -753,12 +758,23 @@ textarea.form-control {
 /* ===================================================================
    OTROS CONTENEDORES (si los usas en otras pantallas)
    =================================================================== */
+.text-muted {
+    color: var(--text-color-main) !important;
+}
+
 .reg-preview-container {
     border-radius: 5%;
     display: grid;
     justify-items: center;
     align-items: center;
     bottom: 0;
+}
+
+.reg-preview-container img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+    border-radius: 5%;
 }
 
 .submit-container-reg {
@@ -789,3 +805,60 @@ textarea.form-control {
     .submit-container-reg .btn-exit {
         background: var(--third-color);
     }
+
+.stat-tiles .tile {
+    background: var(--div-bg);
+    color: var(--text-color-main);
+    border: 1px solid var(--border-color);
+    border-radius: 1rem;
+    padding: 1rem 1.25rem;
+    box-shadow: 0 6px 18px var(--shadow-color-main);
+    font-family: var(--body-font);
+}
+
+.tile-label {
+    font-size: .875rem;
+    color: var(--text-color-main);
+    opacity: .9;
+}
+
+.tile-value {
+    font-size: 1.9rem;
+    font-weight: 700;
+    line-height: 1.2;
+    color: var(--title-color-main);
+}
+
+.tile-diff.negative {
+    color: var(--third-color);
+}
+
+.tile-diff.positive {
+    color: var(--status-color);
+}
+
+.list-group {
+    background: var(--div-bg) !important;
+}
+
+.list-group-item {
+    background: var(--div-bg);
+    color: var(--text-color-main);
+    border-color: var(--border-color);
+}
+
+/* Badges mantienen Bootstrap, pero si quieres matiz con tema: */
+.badge.bg-secondary {
+    background-color: var(--grey3) !important;
+    color: var(--black1) !important;
+}
+
+.badge.bg-info {
+    background-color: var(--first-color) !important;
+    color: #fff !important;
+}
+
+.badge.bg-light {
+    background-color: var(--hover-bg) !important;
+    color: var(--text-color-main) !important;
+}

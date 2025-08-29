@@ -462,11 +462,29 @@ namespace VCashApp.Services.Cef
             transaction.TotalDeclaredValue = declared;
             transaction.TotalCountedValue = counted;
             transaction.ValueDifference = diff;
-            transaction.TotalCountedValueInWords = AmountInWordsHelper.ToSpanishCurrency(counted, transaction.Currency);
 
-            // (Opcional) si quieres marcar auditoría mínima
+            // Mantén el de contado (ya lo tenías) y añade el de declarado en letras
+            transaction.TotalCountedValueInWords = AmountInWordsHelper.ToSpanishCurrency(counted, transaction.Currency);
+            transaction.TotalDeclaredValueInWords = AmountInWordsHelper.ToSpanishCurrency(declared, transaction.Currency);
+
+            // NUEVO: breakdown por tipo y conteos
+            var br = await ComputeDeclaredBreakdownAsync(transaction.Id);
+
+            // Conteos
+            transaction.DeclaredBagCount = br.BagCount;
+            transaction.DeclaredEnvelopeCount = br.EnvelopeCount;
+            transaction.DeclaredCheckCount = br.CheckCount;
+            transaction.DeclaredDocumentCount = br.DocumentCount;
+
+            // Valores declarados por tipo
+            transaction.DeclaredBillValue = br.BillDeclared;
+            transaction.DeclaredCoinValue = br.CoinDeclared;
+            transaction.DeclaredDocumentValue = br.DocDeclared;
+
+            // Auditoría
             transaction.LastUpdateDate = DateTime.Now;
             transaction.LastUpdateUser = processingUserId;
+
 
             _context.CefTransactions.Update(transaction);
             await _context.SaveChangesAsync();
@@ -495,6 +513,20 @@ namespace VCashApp.Services.Cef
                     tx.TotalDeclaredValue = declared;
                     tx.TotalCountedValue = counted;
                     tx.ValueDifference = diff;
+
+                    var br = await ComputeDeclaredBreakdownAsync(transactionId);
+                    tx.DeclaredBagCount = br.BagCount;
+                    tx.DeclaredEnvelopeCount = br.EnvelopeCount;
+                    tx.DeclaredCheckCount = br.CheckCount;
+                    tx.DeclaredDocumentCount = br.DocumentCount;
+
+                    tx.DeclaredBillValue = br.BillDeclared;
+                    tx.DeclaredCoinValue = br.CoinDeclared;
+                    tx.DeclaredDocumentValue = br.DocDeclared;
+
+                    tx.TotalDeclaredValueInWords = AmountInWordsHelper.ToSpanishCurrency(tx.TotalDeclaredValue, tx.Currency);
+                    tx.TotalCountedValueInWords = AmountInWordsHelper.ToSpanishCurrency(tx.TotalCountedValue, tx.Currency);
+
                     tx.LastUpdateDate = DateTime.Now;
 
                     _context.CefTransactions.Update(tx);
@@ -697,6 +729,67 @@ namespace VCashApp.Services.Cef
                 .ToListAsync();
 
             return JsonSerializer.Serialize(data);
+        }
+
+        // Puedes moverlo al final de la clase si prefieres.
+        private sealed record DeclaredBreakdown(
+            int BagCount,
+            int EnvelopeCount,
+            int CheckCount,
+            int DocumentCount,
+            decimal BillDeclared,
+            decimal CoinDeclared,
+            decimal DocDeclared
+        );
+
+        private async Task<DeclaredBreakdown> ComputeDeclaredBreakdownAsync(int transactionId)
+        {
+            // Conteos de contenedores
+            var bagCount = await _context.CefContainers
+                .CountAsync(c => c.CefTransactionId == transactionId &&
+                                 c.ContainerType == CefContainerTypeEnum.Bolsa.ToString());
+
+            var envelopeCount = await _context.CefContainers
+                .CountAsync(c => c.CefTransactionId == transactionId &&
+                                 c.ContainerType == CefContainerTypeEnum.Sobre.ToString());
+
+            // Proyección de detalles por transacción (join por Container)
+            var details = from vd in _context.CefValueDetails
+                          join c in _context.CefContainers on vd.CefContainerId equals c.Id
+                          where c.CefTransactionId == transactionId
+                          select vd;
+
+            // Cantidades (usa Quantity por si documentos/cheques traen más de 1)
+            var checkCount = await details
+                .Where(vd => vd.ValueType == CefValueTypeEnum.Cheque.ToString())
+                .SumAsync(vd => (int?)vd.Quantity) ?? 0;
+
+            var documentCount = await details
+                .Where(vd => vd.ValueType == CefValueTypeEnum.Documento.ToString())
+                .SumAsync(vd => (int?)vd.Quantity) ?? 0;
+
+            // Valores declarados por tipo (tomados de CalculatedAmount)
+            var billDeclared = await details
+                .Where(vd => vd.ValueType == CefValueTypeEnum.Billete.ToString())
+                .SumAsync(vd => (decimal?)(vd.CalculatedAmount ?? 0m)) ?? 0m;
+
+            var coinDeclared = await details
+                .Where(vd => vd.ValueType == CefValueTypeEnum.Moneda.ToString())
+                .SumAsync(vd => (decimal?)(vd.CalculatedAmount ?? 0m)) ?? 0m;
+
+            var docDeclared = await details
+                .Where(vd => vd.ValueType == CefValueTypeEnum.Documento.ToString())
+                .SumAsync(vd => (decimal?)(vd.CalculatedAmount ?? 0m)) ?? 0m;
+
+            return new DeclaredBreakdown(
+                bagCount,
+                envelopeCount,
+                checkCount,
+                documentCount,
+                billDeclared,
+                coinDeclared,
+                docDeclared
+            );
         }
     }
 }
