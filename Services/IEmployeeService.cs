@@ -1,8 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc.Rendering;
-using System.Collections.Generic;
-using System.IO;
-using System.Threading.Tasks;
 using VCashApp.Models.ViewModels;
+using VCashApp.Services.EmployeeLog;
 using VCashApp.Services.DTOs;
 
 namespace VCashApp.Services

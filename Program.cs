@@ -12,11 +12,11 @@ using System.IO;
 using VCashApp.Data;
 using VCashApp.Data.Seed;
 using VCashApp.Extentions;
-using VCashApp.Filters;
 using VCashApp.Models;
 using VCashApp.Services;
 using VCashApp.Services.Cef;
 using VCashApp.Services.Service;
+using VCashApp.Services.EmployeeLog;
 
 var builder = WebApplication.CreateBuilder(args);
 Log.Logger = new LoggerConfiguration()

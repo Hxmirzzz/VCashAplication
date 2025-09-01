@@ -3,18 +3,13 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
-using Serilog.Context;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using VCashApp.Data;
-using VCashApp.Enums;
 using VCashApp.Filters;
 using VCashApp.Models;
-using VCashApp.Models.Entities;
+using VCashApp.Models.ViewModels.EmployeeLog;
 using VCashApp.Services;
 using VCashApp.Services.DTOs;
+using VCashApp.Services.Helpers;
 
 namespace VCashApp.Controllers
 {
@@ -97,13 +92,22 @@ namespace VCashApp.Controllers
         [RequiredPermission(PermissionType.Create, "REG")]
         public async Task<IActionResult> LogEntry()
         {
-            var currentUser = await GetCurrentApplicationUserAsync();
-            if (currentUser == null) return RedirectToPage("/Account/Login", new { area = "Identity" });
+            var user = await GetCurrentApplicationUserAsync();
+            if (user == null) return RedirectToPage("/Account/Login", new { area = "Identity" });
 
-            await SetCommonViewBagsEmployeeLogAsync(currentUser, "Employee Log");
+            await SetCommonViewBagsEmployeeLogAsync(user, "Crear");
 
-            Log.Information("| User: {User} | IP: {Ip} | Action: Accessing Employee Log Entry Form | Result: Access Granted |", currentUser.UserName, ViewBag.Ip);
-            return View();
+            var vm = await _employeeLogService.GetEntryViewModelAsync(
+                user.UserName ?? "",
+                ViewBag.UnidadName,
+                ViewBag.BranchName,
+                ViewBag.FullName,
+                ViewBag.CanCreateLog ?? false,
+                ViewBag.CanEditLog ?? false
+            );
+
+            Log.Information("| User: {User} | IP: {Ip} | Action: Accessing Log Entry Form | Result: Access Granted |", user.UserName, ViewBag.Ip);
+            return View(vm);
         }
 
         /// <summary>
@@ -160,7 +164,7 @@ namespace VCashApp.Controllers
                     }
                 }
 
-                var employees = await _context.GetEmployeeInfoFromSpAsync(
+                var employees = await _employeeLogService.GetEmployeeInfoAsync(
                     currentUser.Id,
                     permittedBranchIds,
                     searchInput,
@@ -271,9 +275,7 @@ namespace VCashApp.Controllers
             await SetCommonViewBagsEmployeeLogAsync(currentUser, "Edit Employee Log");
 
             var logEntry = await _context.SegRegistroEmpleados
-                                         .Include(r => r.Empleado)
-                                             .ThenInclude(e => e.Cargo)
-                                                 .ThenInclude(c => c.Unidad)
+                                         .Include(r => r.Empleado).ThenInclude(e => e.Cargo).ThenInclude(c => c.Unidad)
                                          .Include(r => r.Sucursal)
                                          .FirstOrDefaultAsync(r => r.Id == id);
 
@@ -284,20 +286,32 @@ namespace VCashApp.Controllers
                 return RedirectToAction(nameof(EmployeeLogHistory));
             }
 
-            // Check branch permission (similar to other modules)
             bool isAdmin = (bool)ViewBag.IsAdmin;
             if (!isAdmin)
             {
-                List<int> permittedBranchIds = await GetUserPermittedSucursalesAsync(currentUser.Id);
-                if (!permittedBranchIds.Contains(logEntry.CodSucursal))
+                var permitted = await GetUserPermittedSucursalesAsync(currentUser.Id);
+                if (!permitted.Contains(logEntry.CodSucursal))
                 {
                     Log.Warning("| User: {User} | IP: {Ip} | Action: Accessing Edit Log Form | LogId: {LogId} | Result: Forbidden (Branch access denied) |", currentUser.UserName, ViewBag.Ip, id);
                     return Forbid();
                 }
             }
 
+            var vm = await _employeeLogService.GetEditViewModelAsync(id, ViewBag.CanEditLog ?? false);
+            if (vm == null)
+            {
+                Log.Warning("| User: {User} | IP: {Ip} | Action: Accessing Edit Log Form | LogId: {LogId} | Result: Not Found (VM) |", currentUser.UserName, ViewBag.Ip, id);
+                TempData["ErrorMessage"] = "Log entry not found.";
+                return RedirectToAction(nameof(EmployeeLogHistory));
+            }
+
+            ViewBag.EntryDateVal = TimeFormatHelper.ToDateInput(logEntry.FechaEntrada);
+            ViewBag.EntryTimeVal = TimeFormatHelper.ToTimeInput24(logEntry.HoraEntrada);
+            ViewBag.ExitDateVal = TimeFormatHelper.ToDateInput(logEntry.FechaSalida);
+            ViewBag.ExitTimeVal = TimeFormatHelper.ToTimeInput24(logEntry.HoraSalida);
+
             Log.Information("| User: {User} | IP: {Ip} | Action: Accessing Edit Log Form | LogId: {LogId} | Result: Access Granted |", currentUser.UserName, ViewBag.Ip, id);
-            return View(logEntry); // Pass the log entry to the view
+            return View(vm);
         }
 
         /// <summary>
@@ -359,8 +373,8 @@ namespace VCashApp.Controllers
             bool isAdmin = (bool)ViewBag.IsAdmin;
             if (!isAdmin)
             {
-                List<int> permittedBranchIds = await GetUserPermittedSucursalesAsync(currentUser.Id);
-                if (!permittedBranchIds.Contains(logEntry.CodSucursal))
+                var permitted = await GetUserPermittedSucursalesAsync(currentUser.Id);
+                if (!permitted.Contains(logEntry.CodSucursal))
                 {
                     Log.Warning("| User: {User} | IP: {Ip} | Action: Accessing Manual Exit Form | LogId: {LogId} | Result: Forbidden (Branch access denied) |", currentUser.UserName, ViewBag.Ip, id);
                     return Forbid();
@@ -370,8 +384,23 @@ namespace VCashApp.Controllers
             logEntry.FechaSalida = DateOnly.FromDateTime(DateTime.Now.Date);
             logEntry.HoraSalida = TimeOnly.FromDateTime(DateTime.Now);
 
+            ViewBag.EntryDateVal = TimeFormatHelper.ToDateInput(logEntry.FechaEntrada);
+            ViewBag.EntryTimeVal = TimeFormatHelper.ToTimeInput24(logEntry.HoraEntrada);
+
+            ViewBag.ExitDateVal = TimeFormatHelper.ToDateInput(logEntry.FechaSalida);
+            ViewBag.ExitTimeVal = TimeFormatHelper.ToTimeInput24(logEntry.HoraSalida);
+
+            var vm = await _employeeLogService.GetManualExitViewModelAsync(
+                id, ViewBag.CanCreateLog ?? false, ViewBag.CanEditLog ?? false);
+            if (vm == null)
+            {
+                Log.Warning("| User: {User} | IP: {Ip} | Action: Accessing Manual Exit Form | LogId: {LogId} | Result: Not Found (VM) |", currentUser.UserName, ViewBag.Ip, id);
+                TempData["ErrorMessage"] = "Log entry not found.";
+                return RedirectToAction(nameof(EmployeeLogHistory));
+            }
+
             Log.Information("| User: {User} | IP: {Ip} | Action: Accessing Manual Exit Form | LogId: {LogId} | Result: Access Granted |", currentUser.UserName, ViewBag.Ip, id);
-            return View(logEntry); // Pass the log entry to the view
+            return View(vm);
         }
 
         /// <summary>
@@ -455,39 +484,45 @@ namespace VCashApp.Controllers
             bool isAdmin = (bool)ViewBag.IsAdmin;
 
             var (data, totalData) = await _employeeLogService.GetFilteredEmployeeLogsAsync(
-                currentUser.Id,
-                cargoId,
-                unitId,
-                branchId,
-                filterStartDate,
-                filterEndDate,
-                logStatus,
-                search,
-                page,
-                pageSize,
-                isAdmin
-            );
+                currentUser.Id, cargoId, unitId, branchId,
+                filterStartDate, filterEndDate, logStatus, search,
+                page, pageSize, isAdmin);
 
             ViewBag.CurrentPage = page;
-            ViewBag.PageSize = pageSize;
             ViewBag.TotalPages = (int)Math.Ceiling((double)totalData / pageSize);
             ViewBag.TotalData = totalData;
-            ViewBag.SearchTerm = search;
-            ViewBag.CurrentCargoId = cargoId;
-            ViewBag.CurrentUnitId = unitId;
-            ViewBag.CurrentBranchId = branchId;
-            ViewBag.CurrentStartDate = filterStartDate?.ToString("yyyy-MM-dd");
-            ViewBag.CurrentEndDate = filterEndDate?.ToString("yyyy-MM-dd");
-            ViewBag.CurrentLogStatus = logStatus;
+            ViewBag.PageSize = pageSize;
 
-            Log.Information("| User: {User} | IP: {Ip} | Action: Accessing Employee Log History | Count: {Count} | Result: Access Granted |", currentUser.UserName, ViewBag.Ip, data.Count);
+            var vm = new EmployeeLogDashboardViewModel
+            {
+                SearchTerm = search,
+                CargoId = cargoId,
+                UnitId = unitId,
+                BranchId = branchId,
+                StartDate = filterStartDate,
+                EndDate = filterEndDate,
+                LogStatus = logStatus,
+                CurrentPage = page,
+                PageSize = pageSize,
+                TotalData = totalData,
+                TotalPages = ViewBag.TotalPages,
+                Logs = data,
+
+                Cargos = ViewBag.Cargos,
+                Unidades = ViewBag.Unidades,
+                Sucursales = ViewBag.Sucursales,
+                LogStatusList = ViewBag.LogStatusFilterList,
+                CanCreateLog = ViewBag.CanCreateLog ?? false,
+                CanEditLog = ViewBag.CanEditLog ?? false,
+                CanViewHistory = ViewBag.CanViewHistory ?? false
+            };
 
             if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
             {
-                return PartialView("~/Views/EmployeeLog/_MainLogTablePartial.cshtml", data);
+                return PartialView("~/Views/EmployeeLog/_MainLogTablePartial.cshtml", vm.Logs);
             }
 
-            return View(data);
+            return View(vm);
         }
 
         /// <summary>
@@ -499,56 +534,66 @@ namespace VCashApp.Controllers
         /// <param name="startDate">Fecha de inicio para el filtro de rango.</param>
         /// <param name="endDate">Fecha de fin para el filtro de rango.</param>
         /// <param name="logStatus">Estado del log (0: abierto, 1: cerrado).</param>
-        /// <param name="searchTerm">Término de búsqueda por cédula o nombre.</param>
+        /// <param name="search">Término de búsqueda por cédula o nombre.</param>
         /// <param name="page">Número de página actual.</param>
         /// <param name="pageSize">Número de elementos por página.</param>
         /// <returns>La vista del historial de logs de empleados, con datos paginados.</returns>
         [HttpGet("EmployeeLogHistory")]
         [RequiredPermission(PermissionType.View, "REGHIS")]
-        public async Task<IActionResult> EmployeeLogHistory(int? cargoId, string? unitId, int? branchId, DateOnly? startDate, DateOnly? endDate, int? logStatus, string? search, int page = 1, int pageSize = 15)
+        public async Task<IActionResult> EmployeeLogHistory(
+            int? cargoId, string? unitId, int? branchId,
+            DateOnly? startDate, DateOnly? endDate,
+            int? logStatus, string? search,
+            int page = 1, int pageSize = 15)
         {
             var currentUser = await GetCurrentApplicationUserAsync();
             if (currentUser == null) return RedirectToPage("/Account/Login", new { area = "Identity" });
-            Log.Information($"Usuario autenticado: {User.Identity.Name}");
 
             await SetCommonViewBagsEmployeeLogAsync(currentUser, "Historial");
 
             bool isAdmin = (bool)ViewBag.IsAdmin;
 
+            unitId = string.IsNullOrWhiteSpace(unitId) ? null : unitId;
+            search = string.IsNullOrWhiteSpace(search) ? null : search;
+
             var (data, totalData) = await _employeeLogService.GetFilteredEmployeeLogsAsync(
-                currentUser.Id,
-                cargoId,
-                unitId,
-                branchId,
-                startDate,
-                endDate,
-                logStatus,
-                search,
-                page,
-                pageSize,
-                isAdmin
-            );
+                currentUser.Id, cargoId, unitId, branchId,
+                startDate, endDate, logStatus, search,
+                page, pageSize, isAdmin);
 
             ViewBag.CurrentPage = page;
-            ViewBag.PageSize = pageSize;
             ViewBag.TotalPages = (int)Math.Ceiling((double)totalData / pageSize);
             ViewBag.TotalData = totalData;
-            ViewBag.SearchTerm = search;
-            ViewBag.CurrentCargoId = cargoId;
-            ViewBag.CurrentUnitId = unitId;
-            ViewBag.CurrentBranchId = branchId;
-            ViewBag.CurrentStartDate = startDate?.ToString("yyyy-MM-dd");
-            ViewBag.CurrentEndDate = endDate?.ToString("yyyy-MM-dd");
-            ViewBag.CurrentLogStatus = logStatus;
+            ViewBag.PageSize = pageSize;
 
-            Log.Information("| User: {User} | IP: {Ip} | Action: Accessing Employee Log History | Count: {Count} | Result: Access Granted |", currentUser.UserName, ViewBag.Ip, data.Count);
+            var vm = new EmployeeLogDashboardViewModel
+            {
+                SearchTerm = search,
+                CargoId = cargoId,
+                UnitId = unitId,
+                BranchId = branchId,
+                StartDate = startDate,
+                EndDate = endDate,
+                LogStatus = logStatus,
+                CurrentPage = page,
+                PageSize = pageSize,
+                TotalData = totalData,
+                TotalPages = ViewBag.TotalPages,
+                Logs = data,
+
+                Cargos = ViewBag.Cargos,
+                Unidades = ViewBag.Unidades,
+                Sucursales = ViewBag.Sucursales,
+                LogStatusList = ViewBag.LogStatusFilterList,
+                CanCreateLog = ViewBag.CanCreateLog ?? false,
+                CanEditLog = ViewBag.CanEditLog ?? false,
+                CanViewHistory = ViewBag.CanViewHistory ?? false
+            };
 
             if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
-            {
                 return PartialView("~/Views/EmployeeLog/_EmployeeLogTablePartial.cshtml", data);
-            }
 
-            return View(data);
+            return View(vm);
         }
 
         /// <summary>
@@ -566,9 +611,7 @@ namespace VCashApp.Controllers
             await SetCommonViewBagsEmployeeLogAsync(currentUser, "Log Details");
 
             var logEntry = await _context.SegRegistroEmpleados
-                                         .Include(r => r.Empleado)
-                                             .ThenInclude(e => e.Cargo)
-                                                 .ThenInclude(c => c.Unidad)
+                                         .Include(r => r.Empleado).ThenInclude(e => e.Cargo).ThenInclude(c => c.Unidad)
                                          .Include(r => r.Sucursal)
                                          .Include(r => r.UsuarioRegistro)
                                          .FirstOrDefaultAsync(r => r.Id == id);
@@ -580,20 +623,32 @@ namespace VCashApp.Controllers
                 return RedirectToAction(nameof(EmployeeLogHistory));
             }
 
-            // Check branch permission (similar to other modules)
             bool isAdmin = (bool)ViewBag.IsAdmin;
             if (!isAdmin)
             {
-                List<int> permittedBranchIds = await GetUserPermittedSucursalesAsync(currentUser.Id);
-                if (!permittedBranchIds.Contains(logEntry.CodSucursal))
+                var permitted = await GetUserPermittedSucursalesAsync(currentUser.Id);
+                if (!permitted.Contains(logEntry.CodSucursal))
                 {
                     Log.Warning("| User: {User} | IP: {Ip} | Action: Accessing Log Details | LogId: {LogId} | Result: Forbidden (Branch access denied) |", currentUser.UserName, ViewBag.Ip, id);
                     return Forbid();
                 }
             }
 
+            var vm = await _employeeLogService.GetDetailsViewModelAsync(id);
+            if (vm == null)
+            {
+                Log.Warning("| User: {User} | IP: {Ip} | Action: Accessing Log Details | LogId: {LogId} | Result: Not Found (VM) |", currentUser.UserName, ViewBag.Ip, id);
+                TempData["ErrorMessage"] = "Log entry not found.";
+                return RedirectToAction(nameof(EmployeeLogHistory));
+            }
+
+            ViewBag.EntryDateVal = TimeFormatHelper.ToDateInput(logEntry.FechaEntrada);
+            ViewBag.EntryTimeVal = TimeFormatHelper.ToTimeInput24(logEntry.HoraEntrada);
+            ViewBag.ExitDateVal = TimeFormatHelper.ToDateInput(logEntry.FechaSalida);
+            ViewBag.ExitTimeVal = TimeFormatHelper.ToTimeInput24(logEntry.HoraSalida);
+
             Log.Information("| User: {User} | IP: {Ip} | Action: Accessing Log Details | LogId: {LogId} | Result: Access Granted |", currentUser.UserName, ViewBag.Ip, id);
-            return View("LogDetails", logEntry); // Pass the log entry to the view
+            return View("LogDetails", vm);
         }
     }
 }

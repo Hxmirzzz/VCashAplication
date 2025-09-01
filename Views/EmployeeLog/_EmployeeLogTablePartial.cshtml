@@ -1,6 +1,4 @@
-﻿@model IEnumerable<VCashApp.Models.Entities.SegRegistroEmpleado>
-@using VCashApp.Enums
-@using System.Globalization
+﻿@model IEnumerable<VCashApp.Models.ViewModels.EmployeeLog.EmployeeLogSummaryViewModel>
 
 @{
     int currentPage = ViewBag.CurrentPage ?? 1;
@@ -9,6 +7,7 @@
     int pageSize = ViewBag.PageSize ?? 15;
 
     bool canEditLog = ViewBag.CanEditLog ?? false;
+        
     const int maxPagesToShow = 5;
     int halfPagesToShow = (maxPagesToShow - 1) / 2;
 
@@ -53,11 +52,11 @@
                         {
                             <tr>
                                 <td>@item.Id</td>
-                                <td>@item.PrimerNombreEmpleado @item.PrimerApellidoEmpleado</td>
+                                <td>@item.EmpleadoNombre</td>
                                 <td>@item.CodCedula</td>
-                                <td>@item.NombreSucursalEmpleado</td>
-                                <td>@item.NombreCargoEmpleado</td>
-                                <td>@item.NombreUnidadEmpleado</td>
+                                <td>@item.NombreSucursal</td>
+                                <td>@item.NombreCargo</td>
+                                <td>@item.NombreUnidad</td>
                                 <td>@item.FechaEntrada.ToString("yyyy-MM-dd") @item.HoraEntrada.ToString("HH:mm")</td>
                                 <td>
                                     @if (item.FechaSalida.HasValue && item.HoraSalida.HasValue)

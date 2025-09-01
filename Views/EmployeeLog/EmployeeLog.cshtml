@@ -1,31 +1,37 @@
-﻿@model IEnumerable<VCashApp.Models.Entities.SegRegistroEmpleado>
-@using VCashApp.Models.Entities
-@using VCashApp.Enums
+﻿@model VCashApp.Models.ViewModels.EmployeeLog.EmployeeLogDashboardViewModel
 @using Microsoft.AspNetCore.Mvc.Rendering
-@using System.Globalization;
 
 @{
     Layout = "_Layout";
     ViewData["Title"] = "Registro de Empleados";
 
-    string currentSearchTerm = ViewBag.SearchTerm ?? "";
-    int currentPage = ViewBag.CurrentPage ?? 1;
-    int pageSize = ViewBag.PageSize ?? 15;
+    string currentSearchTerm = Model.SearchTerm ?? "";
+    int currentPage = Model.CurrentPage;
+    int pageSize = Model.PageSize;
 
-    string currentCargoId = (ViewBag.CurrentCargoId ?? "").ToString();
-    string currentUnitId = ViewBag.CurrentUnitId ?? "";
-    string currentBranchId = (ViewBag.CurrentBranchId ?? "").ToString();
-    string currentStartDate = ViewBag.CurrentStartDate ?? "";
-    string currentEndDate = ViewBag.CurrentEndDate ?? "";
-    string currentLogStatus = (ViewBag.CurrentLogStatus ?? "").ToString();
+    string currentCargoId = Model.CargoId?.ToString() ?? "";
+    string currentUnitId = Model.UnitId ?? "";
+    string currentBranchId = Model.BranchId?.ToString() ?? "";
+    string currentStartDate = Model.StartDate?.ToString("yyyy-MM-dd") ?? "";
+    string currentEndDate = Model.EndDate?.ToString("yyyy-MM-dd") ?? "";
+    string currentLogStatus = Model.LogStatus?.ToString() ?? "";
 
-    SelectList cargosFilterList = ViewBag.Cargos as SelectList ?? new SelectList(new List<SelectListItem>());
-    SelectList unidadesFilterList = ViewBag.Unidades as SelectList ?? new SelectList(new List<SelectListItem>());
-    SelectList sucursalesFilterList = ViewBag.Sucursales as SelectList ?? new SelectList(new List<SelectListItem>());
+    SelectList cargosFilterList = Model.Cargos ?? new SelectList(Enumerable.Empty<SelectListItem>());
+    SelectList unidadesFilterList = Model.Unidades ?? new SelectList(Enumerable.Empty<SelectListItem>());
+    SelectList sucursalesFilterList = Model.Sucursales ?? new SelectList(Enumerable.Empty<SelectListItem>());
 
-    bool canCreateLog = ViewBag.CanCreateLog ?? false;
-    bool canEditLog = ViewBag.CanEditLog ?? false;
-    bool canViewHistory = ViewBag.CanViewHistory ?? false;
+    bool canCreateLog = Model.CanCreateLog;
+    bool canEditLog = Model.CanEditLog;
+    bool canViewHistory = Model.CanViewHistory;
+
+    // Mantén estos ViewBags si tu parcial los usa para paginación
+    ViewBag.CurrentPage = Model.CurrentPage;
+    ViewBag.TotalPages = Model.TotalPages;
+    ViewBag.TotalData = Model.TotalData;
+    ViewBag.PageSize = Model.PageSize;
+
+    ViewBag.CanCreateLog = canCreateLog;
+    ViewBag.CanEditLog = canEditLog;
 }
 
 <div class="main-content-container">
@@ -72,17 +78,23 @@
 
             <div class="form-group">
                 <label for="filterCargoId">Cargo:</label>
-                <select id="filterCargoId" class="form-control form-control-sm" name="cargoId" asp-items="cargosFilterList"></select>
+                <select id="filterCargoId" class="form-control form-control-sm" name="cargoId" asp-items="cargosFilterList">
+                    <option value="">-- Selecciona --</option>
+                </select>
             </div>
 
             <div class="form-group">
                 <label for="filterUnitId">Unidad:</label>
-                <select id="filterUnitId" class="form-control form-control-sm" name="unitId" asp-items="unidadesFilterList"></select>
+                <select id="filterUnitId" class="form-control form-control-sm" name="unitId" asp-items="unidadesFilterList">
+                    <option value="">-- Selecciona --</option>
+                </select>
             </div>
 
             <div class="form-group">
                 <label for="filterBranchId">Sucursal:</label>
-                <select id="filterBranchId" class="form-control form-control-sm" name="branchId" asp-items="sucursalesFilterList"></select>
+                <select id="filterBranchId" class="form-control form-control-sm" name="branchId" asp-items="sucursalesFilterList">
+                    <option value="">-- Selecciona --</option>
+                </select>
             </div>
 
             <div class="form-group">
@@ -106,14 +118,14 @@
 
             <div class="filter-buttons">
                 <div class="cancel-filter-btn" id="clearFilters">
-                    <img src="~/assets/icon-img/filter-off.png" alt="OffFilterImage" title="Limpiar Filtros" id="clearFilters" />
+                    <img src="~/assets/icon-img/filter-off.png" alt="OffFilterImage" title="Limpiar Filtros" />
                 </div>
             </div>
         </div>
     </div>
 
     <div id="dataTablePartial">
-        @Html.Partial("~/Views/EmployeeLog/_MainLogTablePartial.cshtml", Model)
+        @Html.Partial("~/Views/EmployeeLog/_MainLogTablePartial.cshtml", Model.Logs)
     </div>
 </div>
 

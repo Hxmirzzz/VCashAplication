@@ -1,20 +1,17 @@
-﻿@model VCashApp.Models.Entities.SegRegistroEmpleado
+﻿@model VCashApp.Models.ViewModels.EmployeeLog.EmployeeLogEditViewModel
 @using System.Globalization
-@using System.IO
 
 @{
     Layout = "_Layout";
     ViewData["Title"] = "Editar Registro de Empleado";
-    bool canEditLog = ViewBag.CanEditLog ?? false;
+    bool canEditLog = Model.CanEditLog;
 
-    // Helpers de formato seguros
-    string entryDateVal = Model.FechaEntrada.ToString("yyyy-MM-dd");
-    string entryTimeVal = Model.HoraEntrada.ToString(@"hh\:mm");
-    string exitDateVal = Model.FechaSalida?.ToString("yyyy-MM-dd") ?? "";
-    string exitTimeVal = Model.HoraSalida?.ToString(@"hh\:mm") ?? "";
+    string entryDateVal = Model.EntryDate.ToString("yyyy-MM-dd");
+    string entryTimeVal = Model.EntryTime.ToString(@"hh\:mm");
+    string exitDateVal = Model.ExitDate?.ToString("yyyy-MM-dd") ?? "";
+    string exitTimeVal = Model.ExitTime?.ToString(@"hh\:mm") ?? "";
 
-    string fullName = Model.Empleado?.NombreCompleto ??
-                      $"{Model.Empleado?.PrimerNombre} {Model.Empleado?.SegundoNombre} {Model.Empleado?.PrimerApellido} {Model.Empleado?.SegundoApellido}".Replace("  ", " ").Trim();
+    string fullName = Model.EmployeeFullName ?? "";
 }
 
 <div class="form-container">
@@ -23,21 +20,21 @@
 
         <!-- Hidden base -->
         <input type="hidden" id="hdnLogId" name="Id" value="@Model.Id" />
-        <input type="hidden" id="hdnEmployeeId" name="EmployeeId" value="@Model.CodCedula" />
-        <input type="hidden" id="hdnCargoId" name="CargoId" value="@Model.Empleado?.CodCargo" />
-        <input type="hidden" id="hdnUnitId" name="UnitId" value="@Model.Empleado?.Cargo?.Unidad?.CodUnidad" />
-        <input type="hidden" id="hdnBranchId" name="BranchId" value="@Model.CodSucursal" />
+        <input type="hidden" id="hdnEmployeeId" name="EmployeeId" value="@Model.EmployeeId" />
+        <input type="hidden" id="hdnCargoId" name="CargoId" value="@Model.CargoId" />
+        <input type="hidden" id="hdnUnitId" name="UnitId" value="@Model.UnitId" />
+        <input type="hidden" id="hdnBranchId" name="BranchId" value="@Model.BranchId" />
         <input type="hidden" id="hdnConfirmedValidation" name="ConfirmedValidation" value="" />
 
         <!-- Hidden extra para paridad con Create -->
-        <input type="hidden" id="hdnFirstName" name="FirstName" value="@Model.Empleado?.PrimerNombre" />
-        <input type="hidden" id="hdnMiddleName" name="MiddleName" value="@Model.Empleado?.SegundoNombre" />
-        <input type="hidden" id="hdnLastName" name="LastName" value="@Model.Empleado?.PrimerApellido" />
-        <input type="hidden" id="hdnSecondLastName" name="SecondLastName" value="@Model.Empleado?.SegundoApellido" />
-        <input type="hidden" id="hdnCargoName" name="CargoName" value="@Model.Empleado?.Cargo?.NombreCargo" />
-        <input type="hidden" id="hdnUnitName" name="UnitName" value="@Model.Empleado?.Cargo?.Unidad?.NombreUnidad" />
-        <input type="hidden" id="hdnUnitType" name="UnitType" value="@Model.Empleado?.Cargo?.Unidad?.TipoUnidad" />
-        <input type="hidden" id="hdnBranchName" name="BranchName" value="@Model.Sucursal?.NombreSucursal" />
+        <input type="hidden" id="hdnFirstName" name="FirstName" value="" />
+        <input type="hidden" id="hdnMiddleName" name="MiddleName" value="" />
+        <input type="hidden" id="hdnLastName" name="LastName" value="" />
+        <input type="hidden" id="hdnSecondLastName" name="SecondLastName" value="" />
+        <input type="hidden" id="hdnCargoName" name="CargoName" value="@Model.CargoName" />
+        <input type="hidden" id="hdnUnitName" name="UnitName" value="@Model.UnitName" />
+        <input type="hidden" id="hdnUnitType" name="UnitType" value="@Model.UnitType" />
+        <input type="hidden" id="hdnBranchName" name="BranchName" value="@Model.BranchName" />
 
         <!-- 👤 Datos del empleado -->
         <div class="card mt-3" id="cardDatosEmpleado">
@@ -53,31 +50,31 @@
                         <div class="row g-3">
                             <div class="col-md-6">
                                 <div class="form-floating">
-                                    <input type="text" class="form-control" id="employeeIdDisplay" readonly placeholder="Cédula" value="@Model.CodCedula">
+                                    <input type="text" class="form-control" id="employeeIdDisplay" readonly value="@Model.EmployeeId">
                                     <label for="employeeIdDisplay">Número de Cédula</label>
                                 </div>
                             </div>
                             <div class="col-md-6">
                                 <div class="form-floating">
-                                    <input type="text" class="form-control" id="fullNameDisplay" readonly placeholder="Nombre" value="@fullName">
+                                    <input type="text" class="form-control" id="fullNameDisplay" readonly value="@fullName">
                                     <label for="fullNameDisplay">Nombre del Empleado</label>
                                 </div>
                             </div>
                             <div class="col-md-4">
                                 <div class="form-floating">
-                                    <input type="text" class="form-control" id="cargoNameDisplay" readonly placeholder="Cargo" value="@Model.Empleado?.Cargo?.NombreCargo">
+                                    <input type="text" class="form-control" id="cargoNameDisplay" readonly value="@Model.CargoName">
                                     <label for="cargoNameDisplay">Cargo</label>
                                 </div>
                             </div>
                             <div class="col-md-4">
                                 <div class="form-floating">
-                                    <input type="text" class="form-control" id="unitNameDisplay" readonly placeholder="Unidad" value="@Model.Empleado?.Cargo?.Unidad?.NombreUnidad">
+                                    <input type="text" class="form-control" id="unitNameDisplay" readonly value="@Model.UnitName">
                                     <label for="unitNameDisplay">Unidad</label>
                                 </div>
                             </div>
                             <div class="col-md-4">
                                 <div class="form-floating">
-                                    <input type="text" class="form-control" id="branchNameDisplay" readonly placeholder="Sucursal" value="@Model.Sucursal?.NombreSucursal">
+                                    <input type="text" class="form-control" id="branchNameDisplay" readonly value="@Model.BranchName">
                                     <label for="branchNameDisplay">Sucursal</label>
                                 </div>
                             </div>
@@ -95,26 +92,26 @@
                 <div class="row g-3">
                     <div class="col-md-6">
                         <div class="form-floating">
-                            <input type="date" class="form-control" id="entryDateInput" name="EntryDate" placeholder="YYYY-MM-DD" value="@entryDateVal">
+                            <input type="date" class="form-control" id="entryDateInput" name="EntryDate" value="@ViewBag.EntryDateVal">
                             <label for="entryDateInput">Fecha de Entrada</label>
                         </div>
                     </div>
                     <div class="col-md-6">
                         <div class="form-floating">
-                            <input type="time" class="form-control" id="entryTimeInput" name="EntryTime" placeholder="HH:MM" value="@entryTimeVal">
+                            <input type="time" class="form-control" id="entryTimeInput" name="EntryTime" value="@ViewBag.EntryTimeVal">
                             <label for="entryTimeInput">Hora de Entrada</label>
                         </div>
                     </div>
 
                     <div class="col-md-6">
                         <div class="form-floating">
-                            <input type="date" class="form-control" id="exitDateInput" name="ExitDate" placeholder="YYYY-MM-DD" value="@exitDateVal">
+                            <input type="date" class="form-control" id="exitDateInput" name="ExitDate" value="@ViewBag.ExitDateVal">
                             <label for="exitDateInput">Fecha de Salida</label>
                         </div>
                     </div>
                     <div class="col-md-6">
                         <div class="form-floating">
-                            <input type="time" class="form-control" id="exitTimeInput" name="ExitTime" placeholder="HH:MM" value="@exitTimeVal">
+                            <input type="time" class="form-control" id="exitTimeInput" name="ExitTime" value="@ViewBag.ExitTimeVal">
                             <label for="exitTimeInput">Hora de Salida</label>
                         </div>
                     </div>
@@ -225,7 +222,7 @@
                     if (result.success) {
                         Swal.close();
                         await Swal.fire({ icon:'success', title:'¡Guardado!', text: result.message });
-                        window.location.href = '@Url.Action("LogEntry", "EmployeeLog")';
+                        window.history.back();
                         return result;
                     } else {
                         Swal.close();

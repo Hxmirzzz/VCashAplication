@@ -1,6 +1,5 @@
-﻿@model VCashApp.Models.Entities.SegRegistroEmpleado
+﻿@model VCashApp.Models.ViewModels.EmployeeLog.EmployeeLogEntryViewModel
 @using VCashApp.Services
-@using VCashApp.Models.Entities
 @using System.Globalization
 
 @{
@@ -218,7 +217,8 @@
             // ===== Helpers búsqueda segura =====
             const SAFE_SEARCH = {
               seq: 0,
-              ctrl: null
+              ctrl: null,
+              cache: new Map()
             };
 
             function debounce(fn, delay) {
@@ -236,7 +236,7 @@
               else externalSignal.addEventListener('abort', () => controller.abort(), { once: true });
             }
 
-            async function fetchWithTimeout(url, { timeout = 8000, signal } = {}) {
+            async function fetchWithTimeout(url, { timeout = 4000, signal } = {}) { // CAMBIO: timeout de 8000 a 4000
               const ctrl = new AbortController();
               const tid = setTimeout(() => ctrl.abort(), timeout);
               mergeAbort(ctrl, signal);
@@ -252,7 +252,7 @@
               return [408, 429, 500, 502, 503, 504].includes(status);
             }
 
-            async function fetchJsonSafe(url, { timeout = 8000, retries = 1, signal } = {}) {
+            async function fetchJsonSafe(url, { timeout = 4000, retries = 0, signal } = {}) { // CAMBIO: timeout 4000, retries 0
               let attempt = 0;
               while (true) {
                 try {
@@ -265,12 +265,11 @@
                   }
                   return await res.json();
                 } catch (err) {
-                  // Si nos cancelaron, salimos silenciosamente
                   if (signal?.aborted) throw err;
                   const status = err.status || 0;
                   const networkish = err.name === 'TypeError' || err.name === 'AbortError';
                   if (attempt < retries && (networkish || isRetryableStatus(status))) {
-                    await wait(300 * Math.pow(2, attempt)); // backoff
+                    await wait(200); // CAMBIO: espera más corta
                     attempt++;
                     continue;
                   }
@@ -287,6 +286,31 @@
 
             function setSearchingUI($results){
               renderSearchMessage($results, 'Buscando…', 'loading');
+            }
+
+            function renderResults(data) {
+              employeeSearchResults.empty();
+
+              if (data?.error) {
+                renderSearchMessage(employeeSearchResults, data.error);
+                return;
+              }
+
+              if (Array.isArray(data) && data.length > 0) {
+                // OPTIMIZACIÓN: HTML más directo
+                const html = data.map(emp => `
+                  <div class="autocomplete-item" data-employee-json='${JSON.stringify(emp)}'>
+                    <img src="${emp.photoUrl ? `/${emp.photoUrl.startsWith('/') ? emp.photoUrl.substring(1) : emp.photoUrl}` : '/assets/profile-img/default-profile.jpg'}"
+                         class="autocomplete-item-icon" alt="Foto">
+                    <span class="autocomplete-item-text">${emp.employeeName}</span>
+                    <span class="autocomplete-item-details">(${emp.employeeId}) - ${emp.branchName || 'N/A'}</span>
+                  </div>
+                `).join('');
+
+                employeeSearchResults.html(html).show();
+              } else {
+                renderSearchMessage(employeeSearchResults, 'No se encontraron empleados.');
+              }
             }
 
             function resetForm() {
@@ -528,17 +552,14 @@
             const runSafeSearch = debounce(async function () {
               const term = employeeSearchInput.val().trim();
 
-              // limpiar si vacío
               if (!term) {
                 employeeSearchResults.hide().empty();
                 resetCoreFields();
-                // cancela cualquier request previo
                 SAFE_SEARCH.ctrl?.abort();
                 SAFE_SEARCH.ctrl = null;
                 return;
               }
 
-              // regla mínima de búsqueda (número completo o texto >= 2)
               const isNumber = /^\d+$/.test(term);
               const isTextSearchValid = term.length >= 2 && !isNumber;
               if (!(isNumber || isTextSearchValid)) {
@@ -546,100 +567,110 @@
                 return;
               }
 
-              // sin conexión -> mensaje inmediato
+              if (SAFE_SEARCH.cache.has(term)) {
+                const cachedData = SAFE_SEARCH.cache.get(term);
+                renderResults(cachedData);
+                return;
+              }
+
               if (!navigator.onLine) {
                 renderSearchMessage(employeeSearchResults, 'Sin conexión. Intenta nuevamente.', 'no-results-message');
                 return;
               }
 
-              // cancelar request previo, iniciar nuevo
               SAFE_SEARCH.ctrl?.abort();
               const ctrl = new AbortController();
               SAFE_SEARCH.ctrl = ctrl;
               const mySeq = ++SAFE_SEARCH.seq;
 
-              // UI: buscando…
               setSearchingUI(employeeSearchResults);
 
               const url = `@Url.Action("GetEmployeeInfo", "EmployeeLog")?searchInput=${encodeURIComponent(term)}`;
 
               try {
-                const data = await fetchJsonSafe(url, { timeout: 8000, retries: 1, signal: ctrl.signal });
+                const data = await fetchJsonSafe(url, { timeout: 4000, retries: 0, signal: ctrl.signal });
 
-                // si llegó fuera de orden, ignorar
                 if (mySeq !== SAFE_SEARCH.seq) return;
-                employeeSearchResults.empty();
 
-                if (data?.error) {
-                  renderSearchMessage(employeeSearchResults, data.error);
-                  return;
+                // NUEVO: Guardar en cache
+                SAFE_SEARCH.cache.set(term, data);
+                if (SAFE_SEARCH.cache.size > 30) {
+                  const firstKey = SAFE_SEARCH.cache.keys().next().value;
+                  SAFE_SEARCH.cache.delete(firstKey);
                 }
 
-                if (Array.isArray(data) && data.length > 0) {
-                  const frag = document.createDocumentFragment();
+                renderResults(data);
 
-                  data.forEach(emp => {
-                    const $item = $('<div class="autocomplete-item"></div>');
-
-                    $item.data('employee', emp);
-
-                    $item.html(`
-                      <img src="${emp.photoUrl ? `/${emp.photoUrl.startsWith('/') ? emp.photoUrl.substring(1) : emp.photoUrl}` : '/assets/profile-img/default-profile.jpg'}"
-                           class="autocomplete-item-icon" alt="Foto">
-                      <span class="autocomplete-item-text">${emp.employeeName}</span>
-                      <span class="autocomplete-item-details">(${emp.employeeId}) - ${emp.branchName || 'N/A'}</span>
-                    `);
-
-                    frag.appendChild($item[0]);
-                  });
-
-                  employeeSearchResults.append(frag).show();
-                } else {
-                  renderSearchMessage(employeeSearchResults, 'No se encontraron empleados.');
-                }
               } catch (err) {
-                // si fue cancelación por nueva búsqueda, no mostrar error
-                if (ctrl.signal.aborted) return;
-
-                console.error('Error al buscar empleados:', err);
-                const msg = err.name === 'AbortError'
-                  ? 'La búsqueda fue cancelada.'
-                  : (err.message?.includes('HTTP') ? 'Error del servidor. Inténtalo de nuevo.' : 'Error al buscar. Verifica tu conexión.');
-                renderSearchMessage(employeeSearchResults, msg);
+                if (ctrl.signal.aborted && mySeq !== SAFE_SEARCH.seq) return;
+                if (!ctrl.signal.aborted) {
+                  console.error('Error al buscar empleados:', err);
+                  const msg = err.name === 'AbortError' ? 'Búsqueda cancelada.' : 'Error al buscar. Intenta de nuevo.';
+                  renderSearchMessage(employeeSearchResults, msg);
+                }
               }
-            }, 300);
+            }, 120);
 
             // input listener
             employeeSearchInput.on('input', runSafeSearch);
 
             // Enter: si hay un único resultado, seleccionarlo rápido
             employeeSearchInput.on('keydown', function(e){
-              if (e.key === 'Enter') {
-                const $items = employeeSearchResults.find('.autocomplete-item').not('.no-results-message,.loading');
-                if ($items.length === 1) {
-                  const employeeData = $items.first().data('employee');
-                  if (employeeData) selectEmployee(employeeData);
-                  e.preventDefault();
+                if (e.key === 'Enter') {
+                    const $items = employeeSearchResults.find('.autocomplete-item').not('.no-results-message,.loading');
+                    if ($items.length === 1) {
+                        const employeeDataJson = $items.first().attr('data-employee-json');
+                        if (employeeDataJson) {
+                            try {
+                                const employeeData = JSON.parse(employeeDataJson);
+                                selectEmployee(employeeData);
+                                e.preventDefault();
+                            } catch (parseError) {
+                                console.error('Error al parsear datos del empleado:', parseError);
+                            }
+                        }
+                    }
                 }
-              }
             });
 
             // Antes: .on('click', '.autocomplete-item', ...
             employeeSearchResults.on('mousedown', '.autocomplete-item', function (e) {
-              e.preventDefault(); // evita que el input pierda foco antes de leer el dato
+                e.preventDefault();
 
-              let employeeData = $(this).data('employee');
+                const $item = $(this);
 
-              // por si viniera como string (defensa extra)
-              if (typeof employeeData === 'string') {
-                try { employeeData = JSON.parse(employeeData); } catch (_) {}
-              }
+                // Si tiene clases de mensaje, ignorar
+                if ($item.hasClass('no-results-message') || $item.hasClass('loading')) {
+                    return;
+                }
 
-              if (employeeData && employeeData.employeeId) {
-                selectEmployee(employeeData);
-              } else {
-                console.warn('Item sin datos válidos', employeeData);
-              }
+                // Intentar obtener los datos del atributo JSON primero
+                const employeeDataJson = $item.attr('data-employee-json');
+
+                if (employeeDataJson) {
+                    try {
+                        const employeeData = JSON.parse(employeeDataJson);
+                        if (employeeData && employeeData.employeeId) {
+                            // Pausar búsquedas mientras seleccionamos
+                            if (SAFE_SEARCH.ctrl && !SAFE_SEARCH.ctrl.signal.aborted) {
+                                SAFE_SEARCH.ctrl.abort();
+                            }
+                            selectEmployee(employeeData);
+                        } else {
+                            console.warn('Datos de empleado incompletos:', employeeData);
+                        }
+                    } catch (parseError) {
+                        console.error('Error al parsear datos del empleado:', parseError, employeeDataJson);
+                    }
+                } else {
+                    // Fallback: intentar con jQuery.data() (menos confiable)
+                    const employeeData = $item.data('employee');
+                    if (employeeData && employeeData.employeeId) {
+                        selectEmployee(employeeData);
+                    } else {
+                        console.warn('No se pudieron obtener los datos del empleado del item clickeado');
+                    }
+                }
             });
 
             // === Botones ===
