@@ -120,7 +120,6 @@ namespace VCashApp.Services.Cef
                     ContainerCode = c.ContainerCode,
                     ContainerType = Enum.TryParse<CefContainerTypeEnum>(c.ContainerType, out var tipo) ? tipo : CefContainerTypeEnum.Bolsa,
                     EnvelopeSubType = Enum.TryParse<CefEnvelopeSubTypeEnum>(c.EnvelopeSubType, out var subtipo) ? subtipo : null,
-                    DeclaredValue = c.DeclaredValue,
                     Observations = c.Observations,
                     ClientCashierId = c.ClientCashierId,
                     ClientCashierName = c.ClientCashierName,
@@ -191,17 +190,24 @@ namespace VCashApp.Services.Cef
             var isDoc = isSobre && viewModel.EnvelopeSubType == CefEnvelopeSubTypeEnum.Documento;
             var isCheck = isSobre && viewModel.EnvelopeSubType == CefEnvelopeSubTypeEnum.Cheque;
 
-            // Documento/Voucher: cajero y valor declarado requeridos
+            // Documento/Voucher: cajero requerido y 1 detalle con monto (UnitValue) > 0
             if (isDoc)
             {
                 if (string.IsNullOrWhiteSpace(viewModel.ClientCashierName))
                     throw new InvalidOperationException("Debe indicar el NOMBRE del cajero que contó en el origen.");
                 if (viewModel.ClientCashierId == null)
                     throw new InvalidOperationException("Debe indicar el DOCUMENTO del cajero que contó en el origen.");
-                if ((viewModel.DeclaredValue ?? 0m) <= 0)
-                    throw new InvalidOperationException("Para Documento/Voucher debe indicar un Valor declarado mayor a 0.");
-                // Fecha del sobre puede ser opcional
-                // if (viewModel.ClientEnvelopeDate == null) throw new InvalidOperationException("Debe indicar la fecha del sobre (origen).");
+
+                if (viewModel.ValueDetails == null || viewModel.ValueDetails.Count == 0)
+                    throw new InvalidOperationException("Documento/Voucher requiere un detalle con monto.");
+                if (viewModel.ValueDetails.Count > 1)
+                    throw new InvalidOperationException("Documento/Voucher debe tener exactamente un detalle.");
+
+                var only = viewModel.ValueDetails[0];
+                if ((only.UnitValue ?? 0m) <= 0)
+                    throw new InvalidOperationException("El monto del Documento/Voucher debe ser mayor a 0.");
+                if (only.ValueType != CefValueTypeEnum.Documento)
+                    throw new InvalidOperationException("El detalle de Documento/Voucher debe ser de tipo Documento.");
             }
 
             // 2) Normalizar detalles
@@ -249,7 +255,6 @@ namespace VCashApp.Services.Cef
                     ContainerType = viewModel.ContainerType.ToString(),
                     EnvelopeSubType = isSobre ? viewModel.EnvelopeSubType?.ToString() : null,
                     ContainerCode = viewModel.ContainerCode,
-                    DeclaredValue = viewModel.DeclaredValue,
                     ContainerStatus = CefContainerStatusEnum.InProcess.ToString(),
                     Observations = viewModel.Observations,
                     ProcessingUserId = processingUserId,
@@ -272,7 +277,6 @@ namespace VCashApp.Services.Cef
                 container.ContainerType = viewModel.ContainerType.ToString();
                 container.EnvelopeSubType = isSobre ? viewModel.EnvelopeSubType?.ToString() : null;
                 container.ContainerCode = viewModel.ContainerCode;
-                container.DeclaredValue = viewModel.DeclaredValue;
                 container.Observations = viewModel.Observations;
                 container.ClientCashierId = viewModel.ClientCashierId;
                 container.ClientCashierName = viewModel.ClientCashierName;
@@ -303,11 +307,15 @@ namespace VCashApp.Services.Cef
                         throw new InvalidOperationException("Debe seleccionar una denominación para Billete/Moneda.");
                 }
 
-                // === Documento/Voucher: usar ValorDeclarado como monto, sin multiplicaciones ===
+                // === Documento/Voucher: monto = UnitValue * Quantity (qty por defecto 1) ===
                 if (detailVm.ValueType == CefValueTypeEnum.Documento)
                 {
-                    var montoDoc = viewModel.DeclaredValue ?? 0m;
                     var qty = (detailVm.Quantity <= 0) ? 1 : detailVm.Quantity;
+                    var unit = detailVm.UnitValue ?? 0m;
+                    if (unit <= 0m)
+                        throw new InvalidOperationException("Para Documento/Voucher debe indicar el monto (UnitValue) > 0.");
+
+                    var montoDoc = unit * qty;
 
                     var existing = existingDetails.FirstOrDefault(d => d.Id == detailVm.Id);
                     if (existing != null)
@@ -317,15 +325,15 @@ namespace VCashApp.Services.Cef
                         existing.DenominationId = null;
                         existing.BundlesCount = null;
                         existing.LoosePiecesCount = null;
-                        existing.UnitValue = null;
+                        existing.UnitValue = unit;
                         existing.QualityId = null;
                         existing.EntitieBankId = detailVm.EntitieBankId;
                         existing.AccountNumber = detailVm.AccountNumber;
                         existing.CheckNumber = detailVm.CheckNumber;
                         existing.IssueDate = detailVm.IssueDate;
                         existing.Observations = detailVm.Observations;
-
                         existing.CalculatedAmount = montoDoc;
+
                         _context.CefValueDetails.Update(existing);
                     }
                     else
@@ -338,7 +346,7 @@ namespace VCashApp.Services.Cef
                             DenominationId = null,
                             BundlesCount = null,
                             LoosePiecesCount = null,
-                            UnitValue = null,
+                            UnitValue = unit,
                             QualityId = null,
                             EntitieBankId = detailVm.EntitieBankId,
                             AccountNumber = detailVm.AccountNumber,
@@ -350,8 +358,8 @@ namespace VCashApp.Services.Cef
                         await _context.CefValueDetails.AddAsync(newDetail);
                     }
 
-                    countedTotal += montoDoc;
-                    continue; // ¡No llamar CalcularMontoServidorAsync!
+                    countedTotal += montoDoc ?? 0;
+                    continue;
                 }
 
                 // Cheque: requiere valor unitario (>0). (Documento NO cae aquí)
@@ -456,35 +464,19 @@ namespace VCashApp.Services.Cef
                 }
             }
 
-            // Recalcular agregados de la transacción y persistirlos
             var (declared, counted, diff) = await GetTransactionTotalsAsync(transaction.Id);
 
-            transaction.TotalDeclaredValue = declared;
+            // Declarado es autoridad de la transacción (no se toca aquí)
             transaction.TotalCountedValue = counted;
             transaction.ValueDifference = diff;
-
-            // Mantén el de contado (ya lo tenías) y añade el de declarado en letras
             transaction.TotalCountedValueInWords = AmountInWordsHelper.ToSpanishCurrency(counted, transaction.Currency);
-            transaction.TotalDeclaredValueInWords = AmountInWordsHelper.ToSpanishCurrency(declared, transaction.Currency);
 
-            // NUEVO: breakdown por tipo y conteos
-            var br = await ComputeDeclaredBreakdownAsync(transaction.Id);
-
-            // Conteos
-            transaction.DeclaredBagCount = br.BagCount;
-            transaction.DeclaredEnvelopeCount = br.EnvelopeCount;
-            transaction.DeclaredCheckCount = br.CheckCount;
-            transaction.DeclaredDocumentCount = br.DocumentCount;
-
-            // Valores declarados por tipo
-            transaction.DeclaredBillValue = br.BillDeclared;
-            transaction.DeclaredCoinValue = br.CoinDeclared;
-            transaction.DeclaredDocumentValue = br.DocDeclared;
+            // (Opcional) refrescar en letras el declarado, usando el valor ya persistido en la transacción
+            transaction.TotalDeclaredValueInWords = AmountInWordsHelper.ToSpanishCurrency(transaction.TotalDeclaredValue, transaction.Currency);
 
             // Auditoría
             transaction.LastUpdateDate = DateTime.Now;
             transaction.LastUpdateUser = processingUserId;
-
 
             _context.CefTransactions.Update(transaction);
             await _context.SaveChangesAsync();
@@ -510,19 +502,10 @@ namespace VCashApp.Services.Cef
                 if (tx != null)
                 {
                     var (declared, counted, diff) = await GetTransactionTotalsAsync(transactionId);
-                    tx.TotalDeclaredValue = declared;
+
+                    // Declarado NO se toca
                     tx.TotalCountedValue = counted;
                     tx.ValueDifference = diff;
-
-                    var br = await ComputeDeclaredBreakdownAsync(transactionId);
-                    tx.DeclaredBagCount = br.BagCount;
-                    tx.DeclaredEnvelopeCount = br.EnvelopeCount;
-                    tx.DeclaredCheckCount = br.CheckCount;
-                    tx.DeclaredDocumentCount = br.DocumentCount;
-
-                    tx.DeclaredBillValue = br.BillDeclared;
-                    tx.DeclaredCoinValue = br.CoinDeclared;
-                    tx.DeclaredDocumentValue = br.DocDeclared;
 
                     tx.TotalDeclaredValueInWords = AmountInWordsHelper.ToSpanishCurrency(tx.TotalDeclaredValue, tx.Currency);
                     tx.TotalCountedValueInWords = AmountInWordsHelper.ToSpanishCurrency(tx.TotalCountedValue, tx.Currency);
@@ -572,16 +555,19 @@ namespace VCashApp.Services.Cef
 
         public async Task<(decimal declared, decimal counted, decimal diff)> GetTransactionTotalsAsync(int transactionId)
         {
-            var declared = await _context.CefContainers
-                .Where(c => c.CefTransactionId == transactionId)
-                .Select(c => (decimal?)c.DeclaredValue)
-                .SumAsync() ?? 0m;
+            var tx = await _context.CefTransactions
+                .AsNoTracking()
+                .Where(t => t.Id == transactionId)
+                .Select(t => new { t.TotalDeclaredValue })
+                .FirstOrDefaultAsync()
+                ?? throw new InvalidOperationException("Transacción no encontrada.");
 
             var counted = await _context.CefContainers
                 .Where(c => c.CefTransactionId == transactionId)
                 .Select(c => (decimal?)c.CountedValue)
                 .SumAsync() ?? 0m;
 
+            var declared = tx.TotalDeclaredValue;
             var diff = counted - declared;
             return (declared, counted, diff);
         }
@@ -742,7 +728,9 @@ namespace VCashApp.Services.Cef
             decimal DocDeclared
         );
 
-        private async Task<DeclaredBreakdown> ComputeDeclaredBreakdownAsync(int transactionId)
+        // NOTA: Este breakdown NO se debe recalcular en el flujo de proceso/conteo.
+        // Úsese solo en el flujo donde el usuario declara valores (check-in).
+        /*private async Task<DeclaredBreakdown> ComputeDeclaredBreakdownAsync(int transactionId)
         {
             // Conteos de contenedores
             var bagCount = await _context.CefContainers
@@ -790,6 +778,6 @@ namespace VCashApp.Services.Cef
                 coinDeclared,
                 docDeclared
             );
-        }
+        }*/
     }
 }

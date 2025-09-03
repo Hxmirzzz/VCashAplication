@@ -17,6 +17,7 @@ using VCashApp.Services;
 using VCashApp.Services.Cef;
 using VCashApp.Services.Service;
 using VCashApp.Services.EmployeeLog;
+using VCashApp.Services.Range;
 
 var builder = WebApplication.CreateBuilder(args);
 Log.Logger = new LoggerConfiguration()
@@ -167,6 +168,7 @@ builder.Services.AddScoped<ICefContainerService, CefContainerService>();
 builder.Services.AddScoped<ICefIncidentService, CefIncidentService>();
 builder.Services.AddScoped<ICefServiceCreationService, CefServiceCreationService>(); // TEMPORAL
 builder.Services.AddScoped<ICgsServiceService, CgsService>();
+builder.Services.AddScoped<IRangeService, RangeService>();
 
 builder.Services.AddHttpClient();
 

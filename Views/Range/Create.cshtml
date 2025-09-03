@@ -1,0 +1,369 @@
+﻿@model VCashApp.Models.ViewModels.Range.RangeFormViewModel
+@{
+    ViewData["Title"] = "Crear Rango";
+    Layout = "_Layout";
+}
+
+<div class="form-container">
+    <div class="card">
+        <div class="card-header d-flex align-items-center justify-content-between">
+            <h4 class="mb-0">Nuevo Rango de Atención</h4>
+            <a asp-action="Index" class="btn btn-outline-secondary btn-sm">Volver</a>
+        </div>
+
+        <div class="card-body">
+            <form id="range-create-form" asp-action="Create" method="post" data-validate-url="@Url.Action("ValidateUnique","Range")">
+                @Html.AntiForgeryToken()
+
+                <div class="row g-3">
+                    <div class="col-12 col-lg-4">
+                        <div class="form-floating has-validation">
+                            <input asp-for="CodRange" class="form-control" placeholder="Código" />
+                            <label asp-for="CodRange">Código</label>
+                            <span asp-validation-for="CodRange" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <div class="col-12 col-lg-5">
+                        <div class="form-floating">
+                            <select asp-for="ClientId" class="form-select" asp-items="Model.AvailableClients">
+                                <option value="">-- Seleccione cliente --</option>
+                            </select>
+                            <label asp-for="ClientId">Cliente</label>
+                            <span asp-validation-for="ClientId" class="text-danger"></span>
+                        </div>
+                    </div>
+
+                    <div class="col-12 col-lg-3">
+                        <div class="form-floating">
+                            <select class="form-select" id="rangeStatusSelect">
+                                <option value="true" selected>Activo</option>
+                                <option value="false">Inactivo</option>
+                            </select>
+                            <label>Estado</label>
+                        </div>
+                        <input type="hidden" asp-for="RangeStatus" />
+                    </div>
+
+                    <div class="col-12">
+                        <div class="form-floating">
+                            <textarea asp-for="RangeInformation" class="form-control" placeholder="Descripción" style="height: 80px;"></textarea>
+                            <label asp-for="RangeInformation">Descripción (opcional)</label>
+                            <span asp-validation-for="RangeInformation" class="text-danger"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <hr class="my-4" />
+
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">⏱ Horarios por día (hasta 3 rangos)</h5>
+                    </div>
+                    <div class="container-editor">
+                        <div class="card-body p-0">
+                            <div class="table-responsive">
+                                <table class="table table-sm align-middle mb-0">
+                                    <thead>
+                                        <tr>
+                                            <th style="width:140px;">Día</th>
+                                            <th style="width:110px;">Activo</th>
+                                            <th style="width:130px;">Código</th>
+                                            <th>Rango 1</th>
+                                            <th>Rango 2</th>
+                                            <th>Rango 3</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        @* LUNES *@
+                                        <tr data-day="mon">
+                                            <td><strong>Lunes</strong></td>
+                                            <td>
+                                                <div class="form-check">
+                                                    <input asp-for="Monday" class="form-check-input js-day-flag" />
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <span>1</span>
+                                                <input asp-for="MondayId" class="form-control form-control-sm" type="hidden" value="1" />
+                                            </td>
+                                            <td>
+                                                <div class="d-flex gap-1">
+                                                    <input asp-for="Lr1Hi" class="form-control form-control-sm js-t" type="time" />
+                                                    <span class="mt-1">–</span>
+                                                    <input asp-for="Lr1Hf" class="form-control form-control-sm js-t" type="time" />
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div class="d-flex gap-1">
+                                                    <input asp-for="Lr2Hi" class="form-control form-control-sm js-t" type="time" />
+                                                    <span class="mt-1">–</span>
+                                                    <input asp-for="Lr2Hf" class="form-control form-control-sm js-t" type="time" />
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div class="d-flex gap-1">
+                                                    <input asp-for="Lr3Hi" class="form-control form-control-sm js-t" type="time" />
+                                                    <span class="mt-1">–</span>
+                                                    <input asp-for="Lr3Hf" class="form-control form-control-sm js-t" type="time" />
+                                                </div>
+                                            </td>
+                                        </tr>
+
+                                        @* MARTES *@
+                                        <tr data-day="tue">
+                                            <td><strong>Martes</strong></td>
+                                            <td>
+                                                <input asp-for="Tuesday" class="form-check-input js-day-flag" />
+                                            </td>
+                                            <td>
+                                                <span>2</span>
+                                                <input asp-for="TuesdayId" class="form-control form-control-sm" type="hidden" value="2" />
+                                            </td>
+                                            <td>
+                                                <div class="d-flex gap-1">
+                                                    <input asp-for="Mr1Hi" class="form-control form-control-sm js-t" type="time" />
+                                                    <span class="mt-1">–</span>
+                                                    <input asp-for="Mr1Hf" class="form-control form-control-sm js-t" type="time" />
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div class="d-flex gap-1">
+                                                    <input asp-for="Mr2Hi" class="form-control form-control-sm js-t" type="time" />
+                                                    <span class="mt-1">–</span>
+                                                    <input asp-for="Mr2Hf" class="form-control form-control-sm js-t" type="time" />
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div class="d-flex gap-1">
+                                                    <input asp-for="Mr3Hi" class="form-control form-control-sm js-t" type="time" />
+                                                    <span class="mt-1">–</span>
+                                                    <input asp-for="Mr3Hf" class="form-control form-control-sm js-t" type="time" />
+                                                </div>
+                                            </td>
+                                        </tr>
+
+                                        @* MIÉRCOLES *@
+                                        <tr data-day="wed">
+                                            <td><strong>Miércoles</strong></td>
+                                            <td>
+                                                <input asp-for="Wednesday" class="form-check-input js-day-flag" />
+                                            </td>
+                                            <td>
+                                                <span>3</span>
+                                                <input asp-for="WednesdayId" class="form-control form-control-sm" type="hidden" value="3" />
+                                            </td>
+                                            <td>
+                                                <div class="d-flex gap-1">
+                                                    <input asp-for="Wr1Hi" class="form-control form-control-sm js-t" type="time" />
+                                                    <span class="mt-1">–</span>
+                                                    <input asp-for="Wr1Hf" class="form-control form-control-sm js-t" type="time" />
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div class="d-flex gap-1">
+                                                    <input asp-for="Wr2Hi" class="form-control form-control-sm js-t" type="time" />
+                                                    <span class="mt-1">–</span>
+                                                    <input asp-for="Wr2Hf" class="form-control form-control-sm js-t" type="time" />
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div class="d-flex gap-1">
+                                                    <input asp-for="Wr3Hi" class="form-control form-control-sm js-t" type="time" />
+                                                    <span class="mt-1">–</span>
+                                                    <input asp-for="Wr3Hf" class="form-control form-control-sm js-t" type="time" />
+                                                </div>
+                                            </td>
+                                        </tr>
+
+                                        @* JUEVES *@
+                                        <tr data-day="thu">
+                                            <td><strong>Jueves</strong></td>
+                                            <td>
+                                                <input asp-for="Thursday" class="form-check-input js-day-flag" />
+                                            </td>
+                                            <td>
+                                                <span>4</span>
+                                                <input asp-for="ThursdayId" class="form-control form-control-sm" type="hidden" value="4" />
+                                            </td>
+                                            <td>
+                                                <div class="d-flex gap-1">
+                                                    <input asp-for="Jr1Hi" class="form-control form-control-sm js-t" type="time" />
+                                                    <span class="mt-1">–</span>
+                                                    <input asp-for="Jr1Hf" class="form-control form-control-sm js-t" type="time" />
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div class="d-flex gap-1">
+                                                    <input asp-for="Jr2Hi" class="form-control form-control-sm js-t" type="time" />
+                                                    <span class="mt-1">–</span>
+                                                    <input asp-for="Jr2Hf" class="form-control form-control-sm js-t" type="time" />
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div class="d-flex gap-1">
+                                                    <input asp-for="Jr3Hi" class="form-control form-control-sm js-t" type="time" />
+                                                    <span class="mt-1">–</span>
+                                                    <input asp-for="Jr3Hf" class="form-control form-control-sm js-t" type="time" />
+                                                </div>
+                                            </td>
+                                        </tr>
+
+                                        @* VIERNES *@
+                                        <tr data-day="fri">
+                                            <td><strong>Viernes</strong></td>
+                                            <td>
+                                                <input asp-for="Friday" class="form-check-input js-day-flag" />
+                                            </td>
+                                            <td>
+                                                <span>5</span>
+                                                <input asp-for="FridayId" class="form-control form-control-sm" type="hidden" value="5" />
+                                            </td>
+                                            <td>
+                                                <div class="d-flex gap-1">
+                                                    <input asp-for="Vr1Hi" class="form-control form-control-sm js-t" type="time" />
+                                                    <span class="mt-1">–</span>
+                                                    <input asp-for="Vr1Hf" class="form-control form-control-sm js-t" type="time" />
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div class="d-flex gap-1">
+                                                    <input asp-for="Vr2Hi" class="form-control form-control-sm js-t" type="time" />
+                                                    <span class="mt-1">–</span>
+                                                    <input asp-for="Vr2Hf" class="form-control form-control-sm js-t" type="time" />
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div class="d-flex gap-1">
+                                                    <input asp-for="Vr3Hi" class="form-control form-control-sm js-t" type="time" />
+                                                    <span class="mt-1">–</span>
+                                                    <input asp-for="Vr3Hf" class="form-control form-control-sm js-t" type="time" />
+                                                </div>
+                                            </td>
+                                        </tr>
+
+                                        @* SÁBADO *@
+                                        <tr data-day="sat">
+                                            <td><strong>Sábado</strong></td>
+                                            <td>
+                                                <input asp-for="Saturday" class="form-check-input js-day-flag" />
+                                            </td>
+                                            <td>
+                                                <span>6</span>
+                                                <input asp-for="SaturdayId" class="form-control form-control-sm" type="hidden" value="6" />
+                                            </td>
+                                            <td>
+                                                <div class="d-flex gap-1">
+                                                    <input asp-for="Sr1Hi" class="form-control form-control-sm js-t" type="time" />
+                                                    <span class="mt-1">–</span>
+                                                    <input asp-for="Sr1Hf" class="form-control form-control-sm js-t" type="time" />
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div class="d-flex gap-1">
+                                                    <input asp-for="Sr2Hi" class="form-control form-control-sm js-t" type="time" />
+                                                    <span class="mt-1">–</span>
+                                                    <input asp-for="Sr2Hf" class="form-control form-control-sm js-t" type="time" />
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div class="d-flex gap-1">
+                                                    <input asp-for="Sr3Hi" class="form-control form-control-sm js-t" type="time" />
+                                                    <span class="mt-1">–</span>
+                                                    <input asp-for="Sr3Hf" class="form-control form-control-sm js-t" type="time" />
+                                                </div>
+                                            </td>
+                                        </tr>
+
+                                        @* DOMINGO *@
+                                        <tr data-day="sun">
+                                            <td><strong>Domingo</strong></td>
+                                            <td>
+                                                <input asp-for="Sunday" class="form-check-input js-day-flag" />
+                                            </td>
+                                            <td>
+                                                <span>7</span>
+                                                <input asp-for="SundayId" class="form-control form-control-sm" type="hidden" value="7" />
+                                            </td>
+                                            <td>
+                                                <div class="d-flex gap-1">
+                                                    <input asp-for="Dr1Hi" class="form-control form-control-sm js-t" type="time" />
+                                                    <span class="mt-1">–</span>
+                                                    <input asp-for="Dr1Hf" class="form-control form-control-sm js-t" type="time" />
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div class="d-flex gap-1">
+                                                    <input asp-for="Dr2Hi" class="form-control form-control-sm js-t" type="time" />
+                                                    <span class="mt-1">–</span>
+                                                    <input asp-for="Dr2Hf" class="form-control form-control-sm js-t" type="time" />
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div class="d-flex gap-1">
+                                                    <input asp-for="Dr3Hi" class="form-control form-control-sm js-t" type="time" />
+                                                    <span class="mt-1">–</span>
+                                                    <input asp-for="Dr3Hf" class="form-control form-control-sm js-t" type="time" />
+                                                </div>
+                                            </td>
+                                        </tr>
+
+                                        @* FESTIVO *@
+                                        <tr data-day="hol">
+                                            <td><strong>Festivo</strong></td>
+                                            <td>
+                                                <input asp-for="Holiday" class="form-check-input js-day-flag" />
+                                            </td>
+                                            <td>
+                                                <span>0</span>
+                                                <input asp-for="HolidayId" class="form-control form-control-sm" type="hidden" value="0" />
+                                            </td>
+                                            <td>
+                                                <div class="d-flex gap-1">
+                                                    <input asp-for="Fr1Hi" class="form-control form-control-sm js-t" type="time" />
+                                                    <span class="mt-1">–</span>
+                                                    <input asp-for="Fr1Hf" class="form-control form-control-sm js-t" type="time" />
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div class="d-flex gap-1">
+                                                    <input asp-for="Fr2Hi" class="form-control form-control-sm js-t" type="time" />
+                                                    <span class="mt-1">–</span>
+                                                    <input asp-for="Fr2Hf" class="form-control form-control-sm js-t" type="time" />
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <div class="d-flex gap-1">
+                                                    <input asp-for="Fr3Hi" class="form-control form-control-sm js-t" type="time" />
+                                                    <span class="mt-1">–</span>
+                                                    <input asp-for="Fr3Hf" class="form-control form-control-sm js-t" type="time" />
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <small class="text-muted d-block p-3">
+                                Tip: si un día no aplica, desmárcalo para deshabilitar sus horas.
+                            </small>
+                        </div>
+                    </div>
+                </div>
+                
+
+                <div class="submit-container-spacer"></div>
+                <div class="submit-container form-group col-12 mt-4 fixed">
+                    <button type="submit" class="btn btn-primary">Guardar</button>
+                    <a asp-action="Index" class="btn btn-danger">Cancelar</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{ await Html.RenderPartialAsync("_ValidationScriptsPartial"); }
+
+    <script src="~/js/form-control/range-form-handler.js"></script>
+}

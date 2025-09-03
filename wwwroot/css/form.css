@@ -707,15 +707,20 @@ textarea.form-control {
         margin-bottom: 0;
     }
 
-@media (max-width:576px) {
-    .form-table-responsive > .table {
-        min-width: 560px;
-    }
-}
 
 /* ===================================================================
    MEDIA QUERIES (móvil / tablet)
    =================================================================== */
+@media (max-width:576px) {
+    .form-table-responsive > .table {
+        min-width: 560px;
+    }
+
+    #bagsTabs .badge {
+        font-size: .70rem;
+    }
+}
+
 @media (max-width:768px) {
     /* Tabs de bootstrap ocultas en móvil: usamos stepper */
     .nav-tabs {

@@ -1200,6 +1200,59 @@
             <param name="id">El ID del registro de log a mostrar.</param>
             <returns>La vista de detalles del log.</returns>
         </member>
+        <member name="T:VCashApp.Controllers.RangeController">
+            <summary>
+            Controlador para administrar rangos de atención (AdmRangos).
+            Mantiene el mismo patrón de tus controladores (ruta, permisos, ViewBags, AJAX/JSON, logging).
+            </summary>
+        </member>
+        <member name="M:VCashApp.Controllers.RangeController.SetCommonViewBagsRangesAsync(VCashApp.Models.ApplicationUser,System.String)">
+            <summary>
+            Setea los ViewBags comunes para la UI de rangos (drop-downs, permisos, datos de cabecera).
+            </summary>
+        </member>
+        <member name="M:VCashApp.Controllers.RangeController.Index(System.String,System.Nullable{System.Int32},System.Nullable{System.Boolean},System.Int32,System.Int32)">
+            <summary>
+            Muestra el dashboard principal de Rangos, permitiendo filtrar y ver los registros.
+            </summary>
+        </member>
+        <member name="M:VCashApp.Controllers.RangeController.Create">
+            <summary>
+            Muestra el formulario de creación.
+            </summary>
+        </member>
+        <member name="M:VCashApp.Controllers.RangeController.Create(VCashApp.Models.ViewModels.Range.RangeFormViewModel)">
+            <summary>
+            Procesa la creación de un rango. 
+            Aplica validación de unicidad por (cliente + schedule_key) en DB; aquí se captura el error y se retorna JSON o View.
+            </summary>
+        </member>
+        <member name="M:VCashApp.Controllers.RangeController.Edit(System.Int32)">
+            <summary>
+            Vista de edición.
+            </summary>
+        </member>
+        <member name="M:VCashApp.Controllers.RangeController.Edit(VCashApp.Models.ViewModels.Range.RangeFormViewModel)">
+            <summary>
+            Procesa la edición (validación de unicidad en DB).
+            </summary>
+        </member>
+        <member name="M:VCashApp.Controllers.RangeController.Details(System.Int32)">
+            <summary>
+            Detalle del rango.
+            </summary>
+        </member>
+        <member name="M:VCashApp.Controllers.RangeController.Delete(System.Int32)">
+            <summary>
+            Desactiva (soft-delete) un rango.
+            </summary>
+        </member>
+        <member name="M:VCashApp.Controllers.RangeController.ValidateUnique(VCashApp.Models.ViewModels.Range.RangeFormViewModel)">
+            <summary>
+            Valida en caliente (AJAX) si la combinación de cliente + horarios ya existe (usa la misma lógica del servicio).
+            Útil en la UI para avisar antes de postear el form.
+            </summary>
+        </member>
         <member name="T:VCashApp.Controllers.RutasDiariasController">
             <summary>
             Controlador para la gestión de rutas diarias.
@@ -1952,6 +2005,66 @@
         <member name="M:VCashApp.Migrations.RemoveIssueIdentifierNumberAndBankNameToCefValueDetailTable.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
             <inheritdoc />
         </member>
+        <member name="T:VCashApp.Migrations.AddAdmRangeTable">
+            <inheritdoc />
+        </member>
+        <member name="M:VCashApp.Migrations.AddAdmRangeTable.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:VCashApp.Migrations.AddAdmRangeTable.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:VCashApp.Migrations.AddAdmRangeTable.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="T:VCashApp.Migrations.SetFKToAdmPointsTable">
+            <inheritdoc />
+        </member>
+        <member name="M:VCashApp.Migrations.SetFKToAdmPointsTable.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:VCashApp.Migrations.SetFKToAdmPointsTable.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:VCashApp.Migrations.SetFKToAdmPointsTable.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="T:VCashApp.Migrations.SetValidationToAdmRangeTable">
+            <inheritdoc />
+        </member>
+        <member name="M:VCashApp.Migrations.SetValidationToAdmRangeTable.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:VCashApp.Migrations.SetValidationToAdmRangeTable.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:VCashApp.Migrations.SetValidationToAdmRangeTable.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="T:VCashApp.Migrations.Fix_Range_ScheduleKey_WithClient">
+            <inheritdoc />
+        </member>
+        <member name="M:VCashApp.Migrations.Fix_Range_ScheduleKey_WithClient.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:VCashApp.Migrations.Fix_Range_ScheduleKey_WithClient.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:VCashApp.Migrations.Fix_Range_ScheduleKey_WithClient.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="T:VCashApp.Migrations.DeleteDeclaredValueColumnOfCefContainerTable">
+            <inheritdoc />
+        </member>
+        <member name="M:VCashApp.Migrations.DeleteDeclaredValueColumnOfCefContainerTable.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:VCashApp.Migrations.DeleteDeclaredValueColumnOfCefContainerTable.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:VCashApp.Migrations.DeleteDeclaredValueColumnOfCefContainerTable.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
         <member name="T:VCashApp.Models.ViewModels.BranchViewModel">
             <summary>
             Representa la información principal de una sucursal.
@@ -2497,6 +2610,139 @@
         <member name="T:VCashApp.Models.ViewModels.EmpleadoViewModel">
             <summary>
             ViewModel que describe los datos básicos de un empleado.
+            </summary>
+        </member>
+        <member name="T:VCashApp.Models.ViewModels.Range.RangeDashboardViewModel">
+            <summary>
+            ViewModel para la vista de dashboard de rangos.
+            Contiene la lista paginada de rangos y los filtros aplicados.
+            </summary>
+        </member>
+        <member name="P:VCashApp.Models.ViewModels.Range.RangeDashboardViewModel.Ranges">
+            <summary>
+            Lista de rangos resumidos que se muestran en la tabla.
+            </summary>
+        </member>
+        <member name="P:VCashApp.Models.ViewModels.Range.RangeDashboardViewModel.CurrentPage">
+            <summary>
+            Número de página actual.
+            </summary>
+        </member>
+        <member name="P:VCashApp.Models.ViewModels.Range.RangeDashboardViewModel.PageSize">
+            <summary>
+            Cantidad de registros por página.
+            </summary>
+        </member>
+        <member name="P:VCashApp.Models.ViewModels.Range.RangeDashboardViewModel.TotalPages">
+            <summary>
+            Total de páginas disponibles.
+            </summary>
+        </member>
+        <member name="P:VCashApp.Models.ViewModels.Range.RangeDashboardViewModel.TotalData">
+            <summary>
+            Total de registros encontrados según los filtros.
+            </summary>
+        </member>
+        <member name="P:VCashApp.Models.ViewModels.Range.RangeDashboardViewModel.SearchTerm">
+            <summary>
+            Término de búsqueda ingresado por el usuario.
+            </summary>
+        </member>
+        <member name="P:VCashApp.Models.ViewModels.Range.RangeDashboardViewModel.CurrentClientId">
+            <summary>
+            Cliente actualmente seleccionado como filtro.
+            </summary>
+        </member>
+        <member name="P:VCashApp.Models.ViewModels.Range.RangeDashboardViewModel.RangeStatus">
+            <summary>
+            Estado actual del filtro (true = activo, false = inactivo, null = todos).
+            </summary>
+        </member>
+        <member name="P:VCashApp.Models.ViewModels.Range.RangeDashboardViewModel.AvailableClients">
+            <summary>
+            Lista de clientes disponibles para el filtro en la vista.
+            </summary>
+        </member>
+        <member name="T:VCashApp.Models.ViewModels.Range.RangeFormViewModel">
+            <summary>
+            ViewModel para formularios de creación y edición de rangos de atencion.
+            Contiene propiedades para los detalles del rango y horarios por día.
+            </summary>
+        </member>
+        <member name="P:VCashApp.Models.ViewModels.Range.RangeFormViewModel.Id">
+            <summary>
+            Identificador del rango (nulo cuando es creación).
+            </summary>
+        </member>
+        <member name="P:VCashApp.Models.ViewModels.Range.RangeFormViewModel.CodRange">
+            <summary>
+            Código único del rango.
+            </summary>
+        </member>
+        <member name="P:VCashApp.Models.ViewModels.Range.RangeFormViewModel.ClientId">
+            <summary>
+            Identificador del cliente asociado.
+            </summary>
+        </member>
+        <member name="P:VCashApp.Models.ViewModels.Range.RangeFormViewModel.RangeInformation">
+            <summary>
+            Información descriptiva del rango.
+            </summary>
+        </member>
+        <member name="P:VCashApp.Models.ViewModels.Range.RangeFormViewModel.RangeStatus">
+            <summary>
+            Estado del rango (activo/inactivo).
+            </summary>
+        </member>
+        <member name="P:VCashApp.Models.ViewModels.Range.RangeFormViewModel.AvailableClients">
+            <summary>
+            Lista de clientes disponibles para mostrar en un dropdown.
+            </summary>
+        </member>
+        <member name="M:VCashApp.Models.ViewModels.Range.RangeFormViewModel.Validate(System.ComponentModel.DataAnnotations.ValidationContext)">
+            <summary>
+            Valida los horarios ingresados para cada día.
+            </summary>
+        </member>
+        <member name="T:VCashApp.Models.ViewModels.Range.RangeSummaryViewModel">
+            <summary>
+            Vista resumida de un rango de atención.
+            Usado en listados y tablas para mostrar la información básica.
+            </summary>
+        </member>
+        <member name="P:VCashApp.Models.ViewModels.Range.RangeSummaryViewModel.Id">
+            <summary>
+            Identificador único del rango.
+            </summary>
+        </member>
+        <member name="P:VCashApp.Models.ViewModels.Range.RangeSummaryViewModel.CodRange">
+            <summary>
+            Código del rango definido por el usuario o el sistema.
+            </summary>
+        </member>
+        <member name="P:VCashApp.Models.ViewModels.Range.RangeSummaryViewModel.ClientId">
+            <summary>
+            Identificador del cliente asociado al rango.
+            </summary>
+        </member>
+        <member name="P:VCashApp.Models.ViewModels.Range.RangeSummaryViewModel.ClientName">
+            <summary>
+            Nombre del cliente asociado al rango.
+            </summary>
+        </member>
+        <member name="P:VCashApp.Models.ViewModels.Range.RangeSummaryViewModel.RangeInformation">
+            <summary>
+            Información descriptiva o notas del rango.
+            </summary>
+        </member>
+        <member name="P:VCashApp.Models.ViewModels.Range.RangeSummaryViewModel.RangeStatus">
+            <summary>
+            Indica si el rango está activo (<c>true</c>) o inactivo (<c>false</c>).
+            </summary>
+        </member>
+        <member name="P:VCashApp.Models.ViewModels.Range.RangeSummaryViewModel.ActiveDays">
+            <summary>
+            Texto concatenado de los días activos (ejemplo: "Lunes, Martes, Jueves").
             </summary>
         </member>
         <member name="T:VCashApp.Models.ViewModels.Servicio.CgsDashboardViewModel">
@@ -3462,6 +3708,76 @@
             o lanza una <see cref="T:System.NotImplementedException"/> si el formato no está soportado.
             </returns>
         </member>
+        <member name="T:VCashApp.Services.IRangeService">
+            <summary>
+            Interfaz para el servicio de gestión de rangos.
+            </summary>
+        </member>
+        <member name="M:VCashApp.Services.IRangeService.GetPagedAsync(System.String,System.Nullable{System.Int32},System.Nullable{System.Boolean},System.Int32,System.Int32)">
+            <summary>
+            Obtiene un listado paginado de rangos, con filtros opcionales por término de búsqueda, cliente y estado activo.
+            </summary>
+            <param name="search">Buscador</param>
+            <param name="clientId">Codigo de Cliente</param>
+            <param name="rangeStatus">Estado</param>
+            <param name="page">Pagina</param>
+            <param name="pageSize">Cantidad por Pagina</param>
+            <returns>Lista de rangos</returns>
+        </member>
+        <member name="M:VCashApp.Services.IRangeService.PrepareCreateAsync">
+            <summary>
+            Prepara el formulario para crear rangos.
+            </summary>
+            <returns>Vista del formulario</returns>
+        </member>
+        <member name="M:VCashApp.Services.IRangeService.CreateAsync(VCashApp.Models.ViewModels.Range.RangeFormViewModel)">
+            <summary>
+            Crea un nuevo rango en la base de datos.
+            </summary>
+            <param name="vm">Identificador para cada valor en ViewModel</param>
+            <returns></returns>
+        </member>
+        <member name="M:VCashApp.Services.IRangeService.PrepareEditAsync(System.Int32)">
+            <summary>
+            Prepara el formulario para editar un rango existente.
+            </summary>
+            <param name="id">Identificador del rango</param>
+            <returns>Vista del formulario con datos cargados</returns>
+        </member>
+        <member name="M:VCashApp.Services.IRangeService.UpdateAsync(VCashApp.Models.ViewModels.Range.RangeFormViewModel)">
+            <summary>
+            Edita un rango existente en la base de datos.
+            </summary>
+            <param name="vm">Identificador para cada valor en ViewModel</param>
+            <returns></returns>
+        </member>
+        <member name="M:VCashApp.Services.IRangeService.GetByIdAsync(System.Int32)">
+            <summary>
+            Obtiene un rango por su ID.
+            </summary>
+            <param name="id">Identificador del rangos</param>
+            <returns>Rango o nulo si no se encuentra</returns>
+        </member>
+        <member name="M:VCashApp.Services.IRangeService.DeleteAsync(System.Int32)">
+            <summary>
+            Accion para eliminar un rango.
+            </summary>
+            <param name="id">Identificador del rango</param>
+            <returns></returns>
+        </member>
+        <member name="M:VCashApp.Services.IRangeService.GetClientsForDropdownAsync(System.Nullable{System.Int32})">
+            <summary>
+            Obtiene una lista de clientes para un dropdown.
+            </summary>
+            <returns>Lista de clientes</returns>
+        </member>
+        <member name="M:VCashApp.Services.IRangeService.ValidateUniqueAsync(VCashApp.Models.ViewModels.Range.RangeFormViewModel)">
+            <summary>
+            Valida que el código de rango sea único para el cliente especificado.
+            </summary>
+            <param name="vm">Variable definida para el ViewModel</param>
+            <returns></returns>
+        </member>
         <member name="T:VCashApp.Services.IRutaDiariaService">
             <summary>
             Interfaz para los servicios de lógica de negocio relacionados con la gestión de Rutas Diarias.
@@ -3667,6 +3983,50 @@
             <param name="selectedRoleFilter">Filtro por nombre de rol.</param>
             <param name="selectedBranchFilter">Filtro por ID de sucursal.</param>
             <returns>Una colección de UserViewModel con todos los datos necesarios para la exportación.</returns>
+        </member>
+        <member name="M:VCashApp.Services.Range.RangeService.GetClientsForDropdownAsync(System.Nullable{System.Int32})">
+            <summary>
+            Devuelve una lista de clientes activos para usar en un dropdown.
+            </summary>
+            <remarks>Solo clientes con estado activo (<c>Status == true</c>) son incluidos en el
+            resultado.</remarks>
+            <param name="selected">El cliente pre-seleccionado en el selector. Pasa <see langword="null"/> a indicacar que no hay
+            pre-seleccion.</param>
+            <returns>Lista de clientes <see cref="T:Microsoft.AspNetCore.Mvc.Rendering.SelectListItem"/> Lista de clientes.</returns>
+        </member>
+        <member name="M:VCashApp.Services.Range.RangeService.GetPagedAsync(System.String,System.Nullable{System.Int32},System.Nullable{System.Boolean},System.Int32,System.Int32)">
+            <summary>
+            Obtiene un listado paginado de rangos, con filtros opcionales por término de búsqueda, cliente y estado activo.
+            </summary>
+            <param name="search">Filtro de busqueda</param>
+            <param name="clientId">Filtro del cliente</param>
+            <param name="rangeStatus">Filtro de estado</param>
+            <param name="page">Paginado</param>
+            <param name="pageSize">Cantidad por pagina</param>
+            <returns>Lista de rangos</returns>
+        </member>
+        <member name="M:VCashApp.Services.Range.RangeService.PrepareCreateAsync">
+            <summary>
+            Prepara el formulario para crear rangos.
+            </summary>
+            <returns>Formulario de creacion</returns>
+        </member>
+        <member name="M:VCashApp.Services.Range.RangeService.CreateAsync(VCashApp.Models.ViewModels.Range.RangeFormViewModel)">
+            <summary>
+            Metodo para crear un nuevo rango en la base de datos.
+            </summary>
+            <returns>Inserta los rangos en la base de datos</returns>
+        </member>
+        <member name="M:VCashApp.Services.Range.RangeService.PrepareEditAsync(System.Int32)">
+            <summary>
+            Prepara el formulario para editar un rango existente.
+            </summary>
+            <returns>Formulario de edicion</returns>
+        </member>
+        <member name="M:VCashApp.Services.Range.RangeService.GetByIdAsync(System.Int32)">
+            <summary>
+            Método auxiliar para obtener entidad con todos los datos relacionados.
+            </summary>
         </member>
         <member name="M:VCashApp.Services.Service.CgsService.GetLocationDetailsByCodeAsync(System.String,System.Int32,System.Boolean)">
             <inheritdoc/>

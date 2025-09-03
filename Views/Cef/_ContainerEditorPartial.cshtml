@@ -66,21 +66,13 @@
         </div>
 
         <input type="hidden" asp-for="ParentContainerId" />
-
-        <div class="col-12 col-lg-3">
-            <div class="form-floating">
-                <input asp-for="DeclaredValue" type="number" step="1" class="form-control" placeholder="Valor declarado" />
-                <label>Valor declarado (opcional)</label>
-            </div>
-        </div>
     </div>
 
     <!-- ====== Sección BOLSA ====== -->
     <div class="sec-bolsa mt-3" style="display:@(!esSobre ? "block" : "none")">
 
         <div class="row g-3">
-            <!-- ===== Billetes ===== -->
-            <div class="col-12 col-xl-6">
+            <div class="col-12">
                 <div class="card">
                     <div class="card-header d-flex align-items-center justify-content-between">
                         <h6 class="mb-0">💵 Bolsa — Billetes</h6>
@@ -147,7 +139,7 @@
             </div>
 
             <!-- ===== Monedas ===== -->
-            <div class="col-12 col-xl-6">
+            <div class="col-12">
                 <div class="card">
                     <div class="card-header d-flex align-items-center justify-content-between">
                         <h6 class="mb-0">💰 Bolsa — Monedas</h6>
@@ -347,7 +339,7 @@
         </div>
 
         <!-- Sobre: DOCUMENTOS/VOUCHERS -->
-        <div class="sec-sobre-docs" style="display:@(Model.SobreMode?.ToString() == "Documento" ? "block" : "none")">
+        <div class="sec-sobre-docs" style="display:@(Model.EnvelopeSubType == CefEnvelopeSubTypeEnum.Documento ? "block" : "none")">
             <div class="card">
                 <div class="card-header"><h6 class="mb-0">📄 Sobre — Documentos/Vouchers</h6></div>
                 <div class="card-body">
@@ -378,10 +370,11 @@
                     <table class="table table-sm align-middle js-details-table" data-detail-scope="sobre-docs">
                         <thead>
                             <tr>
-                                <th>Tipo</th>
-                                <th>Cantidad</th>
-                                <th>Monto</th>
-                                <th></th>
+                                <th style="width:100px">Tipo</th>
+                                <th style="width:140px">Cantidad</th>
+                                <th style="width:200px">Valor</th>
+                                <th style="width:200px">Monto</th>
+                                <th style="width:60px"></th>
                             </tr>
                         </thead>
                         <tbody>
@@ -394,15 +387,34 @@
                                     <td style="display:none;">
                                         <input type="hidden" name="@($"{prefix}.ValueDetails.Index")" value="@key" />
                                         <input type="hidden" name="@($"{prefixDetail}.Id")" value="@d.Id" />
+                                        <input type="hidden" name="@($"{prefixDetail}.ValueType")" value="Documento" class="js-vtype" />
                                     </td>
+
                                     <td>
-                                        <select name="@($"{prefixDetail}.ValueType")" class="form-select form-select-sm js-vtype">
-                                            @Html.Raw($"<option value=\"Documento\" {(d.ValueType == CefValueTypeEnum.Documento ? "selected" : "")}>Documento</option>")
-                                        </select>
+                                        <input name="@($"{prefixDetail}.Quantity")"
+                                               type="number"
+                                               class="form-control form-control-sm js-calc"
+                                               value="@(d.Quantity > 0 ? d.Quantity : 1)" />
                                     </td>
-                                    <td><input name="@($"{prefixDetail}.Quantity")" type="number" class="form-control form-control-sm js-calc" value="@d.Quantity" /></td>
-                                    <td><input name="@($"{prefixDetail}.CalculatedAmount")" type="number" step="0.01" class="form-control form-control-sm" value="@d.CalculatedAmount" readonly /></td>
-                                    <td><button type="button" class="btn btn-sm btn-outline-danger js-remove-detail">×</button></td>
+
+                                    <td>
+                                        <input name="@($"{prefixDetail}.UnitValue")"
+                                               type="number" step="1"
+                                               class="form-control form-control-sm js-calc"
+                                               value="@(d.UnitValue ?? 0)" />
+                                    </td>
+
+                                    <td>
+                                        <input name="@($"{prefixDetail}.CalculatedAmount")"
+                                               type="number" step="1"
+                                               class="form-control form-control-sm"
+                                               value="@(d.CalculatedAmount)"
+                                               readonly />
+                                    </td>
+
+                                    <td>
+                                        <button type="button" class="btn btn-sm btn-outline-danger js-remove-detail">×</button>
+                                    </td>
                                 </tr>
                             }
                         </tbody>
@@ -418,7 +430,7 @@
         </div>
 
         <!-- Sobre: CHEQUES -->
-        <div class="sec-sobre-cheque" style="display:@(Model.SobreMode?.ToString() == "Cheque" ? "block" : "none")">
+        <div class="sec-sobre-cheque" style="display:@(Model.EnvelopeSubType == CefEnvelopeSubTypeEnum.Cheque ? "block" : "none")">
             <div class="card">
                 <div class="card-header"><h6 class="mb-0">🏦 Sobre — Cheques</h6></div>
                 <div class="card-body">

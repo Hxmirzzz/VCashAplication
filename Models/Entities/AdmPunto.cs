@@ -1,6 +1,7 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using VCashApp.Models.AdmEntities;
 
 namespace VCashApp.Models.Entities
 {
@@ -163,10 +164,9 @@ namespace VCashApp.Models.Entities
         public string? RiskLevel { get; set; }
 
         [Column("CodigoRango")]
-        [StringLength(255)]
-        public string? RangeCode { get; set; }
-        // [ForeignKey("CodigoRango")] // Comentado ya que no hay AdmRango en DbContext
-        // public virtual AdmRango? RangoAtencion { get; set; }
+        [ForeignKey("CodigoRango")]
+        public int? RangeCode { get; set; }
+        public virtual AdmRange? Range { get; set; }
 
         [Column("InfoRangoAtencion")]
         [StringLength(255)]

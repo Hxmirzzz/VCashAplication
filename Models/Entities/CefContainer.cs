@@ -38,9 +38,6 @@ namespace VCashApp.Models.Entities
         [Column("TipoSobre")]
         public string? EnvelopeSubType { get; set; } // null para Bolsa; 'Efectivo' | 'Documento' | 'Cheque' para Sobre
 
-        [Column("ValorDeclarado", TypeName = "DECIMAL(18,0)")]
-        public decimal? DeclaredValue { get; set; } // Valor declarado para este contenedor (si aplica)
-
         [Column("ValorContado", TypeName = "DECIMAL(18,0)")]
         public decimal? CountedValue { get; set; } // Valor contado real, calculado de los detalles
 

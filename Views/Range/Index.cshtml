@@ -1,0 +1,138 @@
+﻿@model VCashApp.Models.ViewModels.Range.RangeDashboardViewModel
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = "Rangos";
+
+    string currentSearchTerm = Model.SearchTerm ?? "";
+    int currentPage = ViewBag.CurrentPage ?? 1;
+    int pageSize = ViewBag.PageSize ?? 15;
+}
+
+<div class="main-content-container">
+    <div class="section-header">
+        <div class="alert-container">
+            @if (TempData["SuccessMessage"] != null)
+            {
+                <div class="alert alert-success mt-2" role="alert">@TempData["SuccessMessage"]</div>
+            }
+            @if (TempData["ErrorMessage"] != null)
+            {
+                <div class="alert alert-danger mt-2" role="alert">@TempData["ErrorMessage"]</div>
+            }
+        </div>
+    </div>
+
+    <div class="search-container">
+        <div class="table-controls">
+            <input type="text" id="tableSearch" class="form-control form-control-sm" placeholder="Buscar..." value="@currentSearchTerm">
+            <div class="table-buttons">
+                <div class="control-button-wrapper">
+                    <a href="@Url.Action("Create", "Range")" class="control-button-icon" id="addRangeButton" title="Registrar Nuevo Rango">
+                        <img src="/assets/icon-img/add.png" alt="Registrar Rango">
+                    </a>
+                </div>
+                <div class="control-button-wrapper">
+                    <img src="/assets/icon-img/download.png" alt="Descargar" class="control-button-icon" id="downloadButton">
+                </div>
+                <div class="control-button-wrapper">
+                    <img src="/assets/icon-img/filter-on.png" alt="Filtros" class="control-button-icon" id="filterButton">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="filter-sidebar" id="filterSidebar">
+        <div class="filter-sidebar-content">
+            <h3>Filtros Avanzados</h3>
+            <div class="row g-3">
+                <div class="col-12 col-lg-12">
+                    <div class="form-floating">
+                        <select id="filterClientId" name="clientId" class="form-select" asp-items="Model.AvailableClients">
+                            <option value="">-- Todos --</option>
+                        </select>
+                        <label for="filterClientId">Cliente:</label>
+                    </div>
+                </div>
+                <div class="col-12 col-lg-12">
+                    <div class="form-floating">
+                        <select id="filterStatus" class="form-select" name="rangeStatus">
+                            <option value="">-- Selecciona --</option>
+                            <option value="True">Activo</option>
+                            <option value="False">Inactivo</option>
+                        </select>
+                        <label for="filterStatus">Estado:</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="filter-buttons">
+                <div class="cancel-filter-btn" id="clearFilters" title="Limpiar Filtros">
+                    <img src="~/assets/icon-img/filter-off.png" alt="Limpiar Filtros" />
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="dataTablePartial">
+        @await Html.PartialAsync("_RangeTablePartial", Model.Ranges, new ViewDataDictionary(ViewData))
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    <script>
+        $(document).ready(function () {
+            setupTablePaginationAndFilters({
+                tableContainerId: 'dataTablePartial',
+                controllerName: 'Range',
+                actionName: 'Index',
+                searchInputId: 'tableSearch',
+                filterInputsSelector: '#filterClientId, #filterStatus',
+                clearFiltersButtonId: 'clearFilters',
+                defaultPageSize: @pageSize
+            });
+
+            $('#downloadButton').on('click', function () {
+                showConfirmationModal(
+                    "Seleccione el formato de exportación deseado:",
+                    function (format) {
+                        if (!format) {
+                            alert("No se seleccionó un formato de exportación.");
+                            return;
+                        }
+
+                        var form = $('<form>', {
+                            'action': '@Url.Action("ExportTransactions", "Cef")',
+                            'method': 'GET',
+                            'target': '_blank', // Abrir en nueva pestaña
+                            'style': 'display:none;'
+                        }).appendTo('body');
+
+                        // Recolectar los filtros actuales
+                        var search = $("#tableSearch").val();
+                        var branchId = $("#filterBranchId").val();
+                        var startDate = $("#filterStartDate").val();
+                        var endDate = $("#filterEndDate").val();
+                        var status = $("#filterStatus").val();
+
+                        form.append($('<input>', { name: 'search', value: search }));
+                        form.append($('<input>', { name: 'branchId', value: branchId }));
+                        form.append($('<input>', { name: 'startDate', value: startDate }));
+                        form.append($('<input>', { name: 'endDate', value: endDate }));
+                        form.append($('<input>', { name: 'status', value: status }));
+                        form.append($('<input>', { name: 'exportFormat', value: format }));
+
+                        form.submit();
+                        form.remove();
+                    },
+                    "Exportar Datos CEF", // Título del modal
+                    null, // Aquí irían las opciones de formato si no son fijas (Excel, CSV, PDF)
+                    "btn-primary", // Clase del botón de acción
+                    true // Mostrar input de selección de formato (si tu modal lo soporta)
+                );
+            });
+        });
+    </script>
+}

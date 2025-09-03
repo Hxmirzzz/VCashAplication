@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using VCashApp.Data;
 
@@ -11,9 +12,11 @@ using VCashApp.Data;
 namespace VCashApp.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250902123007_SetValidationToAdmRangeTable")]
+    partial class SetValidationToAdmRangeTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -412,15 +415,13 @@ namespace VCashApp.Migrations
                         .ValueGeneratedOnAddOrUpdate()
                         .HasColumnType("nvarchar(450)")
                         .HasColumnName("schedule_key")
-                        .HasComputedColumnSql("CONVERT(VARCHAR(20), [CodCliente]) + ':' + (IIF([Lunes]=1,'1','0')+':'+ISNULL(LEFT(CONVERT(CHAR(8), [Lr1Hi], 108), 5), '00:00')+'-'+ISNULL(LEFT(CONVERT(CHAR(8), [Lr1Hf], 108), 5), '00:00')+','+ISNULL(LEFT(CONVERT(CHAR(8), [Lr2Hi], 108), 5), '00:00')+'-'+ISNULL(LEFT(CONVERT(CHAR(8), [Lr2Hf], 108), 5), '00:00')+','+ISNULL(LEFT(CONVERT(CHAR(8), [Lr3Hi], 108), 5), '00:00')+'-'+ISNULL(LEFT(CONVERT(CHAR(8), [Lr3Hf], 108), 5), '00:00')+'|'+IIF([Martes]=1,'1','0')+':'+ISNULL(LEFT(CONVERT(CHAR(8), [Mr1Hi], 108), 5), '00:00')+'-'+ISNULL(LEFT(CONVERT(CHAR(8), [Mr1Hf], 108), 5), '00:00')+','+ISNULL(LEFT(CONVERT(CHAR(8), [Mr2Hi], 108), 5), '00:00')+'-'+ISNULL(LEFT(CONVERT(CHAR(8), [Mr2Hf], 108), 5), '00:00')+','+ISNULL(LEFT(CONVERT(CHAR(8), [Mr3Hi], 108), 5), '00:00')+'-'+ISNULL(LEFT(CONVERT(CHAR(8), [Mr3Hf], 108), 5), '00:00')+'|'+IIF([Miercoles]=1,'1','0')+':'+ISNULL(LEFT(CONVERT(CHAR(8), [Wr1Hi], 108), 5), '00:00')+'-'+ISNULL(LEFT(CONVERT(CHAR(8), [Wr1Hf], 108), 5), '00:00')+','+ISNULL(LEFT(CONVERT(CHAR(8), [Wr2Hi], 108), 5), '00:00')+'-'+ISNULL(LEFT(CONVERT(CHAR(8), [Wr2Hf], 108), 5), '00:00')+','+ISNULL(LEFT(CONVERT(CHAR(8), [Wr3Hi], 108), 5), '00:00')+'-'+ISNULL(LEFT(CONVERT(CHAR(8), [Wr3Hf], 108), 5), '00:00')+'|'+IIF([Jueves]=1,'1','0')+':'+ISNULL(LEFT(CONVERT(CHAR(8), [Jr1Hi], 108), 5), '00:00')+'-'+ISNULL(LEFT(CONVERT(CHAR(8), [Jr1Hf], 108), 5), '00:00')+','+ISNULL(LEFT(CONVERT(CHAR(8), [Jr2Hi], 108), 5), '00:00')+'-'+ISNULL(LEFT(CONVERT(CHAR(8), [Jr2Hf], 108), 5), '00:00')+','+ISNULL(LEFT(CONVERT(CHAR(8), [Jr3Hi], 108), 5), '00:00')+'-'+ISNULL(LEFT(CONVERT(CHAR(8), [Jr3Hf], 108), 5), '00:00')+'|'+IIF([Viernes]=1,'1','0')+':'+ISNULL(LEFT(CONVERT(CHAR(8), [Vr1Hi], 108), 5), '00:00')+'-'+ISNULL(LEFT(CONVERT(CHAR(8), [Vr1Hf], 108), 5), '00:00')+','+ISNULL(LEFT(CONVERT(CHAR(8), [Vr2Hi], 108), 5), '00:00')+'-'+ISNULL(LEFT(CONVERT(CHAR(8), [Vr2Hf], 108), 5), '00:00')+','+ISNULL(LEFT(CONVERT(CHAR(8), [Vr3Hi], 108), 5), '00:00')+'-'+ISNULL(LEFT(CONVERT(CHAR(8), [Vr3Hf], 108), 5), '00:00')+'|'+IIF([Sabado]=1,'1','0')+':'+ISNULL(LEFT(CONVERT(CHAR(8), [Sr1Hi], 108), 5), '00:00')+'-'+ISNULL(LEFT(CONVERT(CHAR(8), [Sr1Hf], 108), 5), '00:00')+','+ISNULL(LEFT(CONVERT(CHAR(8), [Sr2Hi], 108), 5), '00:00')+'-'+ISNULL(LEFT(CONVERT(CHAR(8), [Sr2Hf], 108), 5), '00:00')+','+ISNULL(LEFT(CONVERT(CHAR(8), [Sr3Hi], 108), 5), '00:00')+'-'+ISNULL(LEFT(CONVERT(CHAR(8), [Sr3Hf], 108), 5), '00:00')+'|'+IIF([Domingo]=1,'1','0')+':'+ISNULL(LEFT(CONVERT(CHAR(8), [Dr1Hi], 108), 5), '00:00')+'-'+ISNULL(LEFT(CONVERT(CHAR(8), [Dr1Hf], 108), 5), '00:00')+','+ISNULL(LEFT(CONVERT(CHAR(8), [Dr2Hi], 108), 5), '00:00')+'-'+ISNULL(LEFT(CONVERT(CHAR(8), [Dr2Hf], 108), 5), '00:00')+','+ISNULL(LEFT(CONVERT(CHAR(8), [Dr3Hi], 108), 5), '00:00')+'-'+ISNULL(LEFT(CONVERT(CHAR(8), [Dr3Hf], 108), 5), '00:00')+'|'+IIF([Festivo]=1,'1','0')+':'+ISNULL(LEFT(CONVERT(CHAR(8), [Fr1Hi], 108), 5), '00:00')+'-'+ISNULL(LEFT(CONVERT(CHAR(8), [Fr1Hf], 108), 5), '00:00')+','+ISNULL(LEFT(CONVERT(CHAR(8), [Fr2Hi], 108), 5), '00:00')+'-'+ISNULL(LEFT(CONVERT(CHAR(8), [Fr2Hf], 108), 5), '00:00')+','+ISNULL(LEFT(CONVERT(CHAR(8), [Fr3Hi], 108), 5), '00:00')+'-'+ISNULL(LEFT(CONVERT(CHAR(8), [Fr3Hf], 108), 5), '00:00'))", true);
+                        .HasComputedColumnSql("(IIF([Lunes]=1,'1','0')+':'+ISNULL(LEFT(CONVERT(CHAR(8), [Lr1Hi], 108), 5), '00:00')+'-'+ISNULL(LEFT(CONVERT(CHAR(8), [Lr1Hf], 108), 5), '00:00')+','+ISNULL(LEFT(CONVERT(CHAR(8), [Lr2Hi], 108), 5), '00:00')+'-'+ISNULL(LEFT(CONVERT(CHAR(8), [Lr2Hf], 108), 5), '00:00')+','+ISNULL(LEFT(CONVERT(CHAR(8), [Lr3Hi], 108), 5), '00:00')+'-'+ISNULL(LEFT(CONVERT(CHAR(8), [Lr3Hf], 108), 5), '00:00')+'|'+IIF([Martes]=1,'1','0')+':'+ISNULL(LEFT(CONVERT(CHAR(8), [Mr1Hi], 108), 5), '00:00')+'-'+ISNULL(LEFT(CONVERT(CHAR(8), [Mr1Hf], 108), 5), '00:00')+','+ISNULL(LEFT(CONVERT(CHAR(8), [Mr2Hi], 108), 5), '00:00')+'-'+ISNULL(LEFT(CONVERT(CHAR(8), [Mr2Hf], 108), 5), '00:00')+','+ISNULL(LEFT(CONVERT(CHAR(8), [Mr3Hi], 108), 5), '00:00')+'-'+ISNULL(LEFT(CONVERT(CHAR(8), [Mr3Hf], 108), 5), '00:00')+'|'+IIF([Miercoles]=1,'1','0')+':'+ISNULL(LEFT(CONVERT(CHAR(8), [Wr1Hi], 108), 5), '00:00')+'-'+ISNULL(LEFT(CONVERT(CHAR(8), [Wr1Hf], 108), 5), '00:00')+','+ISNULL(LEFT(CONVERT(CHAR(8), [Wr2Hi], 108), 5), '00:00')+'-'+ISNULL(LEFT(CONVERT(CHAR(8), [Wr2Hf], 108), 5), '00:00')+','+ISNULL(LEFT(CONVERT(CHAR(8), [Wr3Hi], 108), 5), '00:00')+'-'+ISNULL(LEFT(CONVERT(CHAR(8), [Wr3Hf], 108), 5), '00:00')+'|'+IIF([Jueves]=1,'1','0')+':'+ISNULL(LEFT(CONVERT(CHAR(8), [Jr1Hi], 108), 5), '00:00')+'-'+ISNULL(LEFT(CONVERT(CHAR(8), [Jr1Hf], 108), 5), '00:00')+','+ISNULL(LEFT(CONVERT(CHAR(8), [Jr2Hi], 108), 5), '00:00')+'-'+ISNULL(LEFT(CONVERT(CHAR(8), [Jr2Hf], 108), 5), '00:00')+','+ISNULL(LEFT(CONVERT(CHAR(8), [Jr3Hi], 108), 5), '00:00')+'-'+ISNULL(LEFT(CONVERT(CHAR(8), [Jr3Hf], 108), 5), '00:00')+'|'+IIF([Viernes]=1,'1','0')+':'+ISNULL(LEFT(CONVERT(CHAR(8), [Vr1Hi], 108), 5), '00:00')+'-'+ISNULL(LEFT(CONVERT(CHAR(8), [Vr1Hf], 108), 5), '00:00')+','+ISNULL(LEFT(CONVERT(CHAR(8), [Vr2Hi], 108), 5), '00:00')+'-'+ISNULL(LEFT(CONVERT(CHAR(8), [Vr2Hf], 108), 5), '00:00')+','+ISNULL(LEFT(CONVERT(CHAR(8), [Vr3Hi], 108), 5), '00:00')+'-'+ISNULL(LEFT(CONVERT(CHAR(8), [Vr3Hf], 108), 5), '00:00')+'|'+IIF([Sabado]=1,'1','0')+':'+ISNULL(LEFT(CONVERT(CHAR(8), [Sr1Hi], 108), 5), '00:00')+'-'+ISNULL(LEFT(CONVERT(CHAR(8), [Sr1Hf], 108), 5), '00:00')+','+ISNULL(LEFT(CONVERT(CHAR(8), [Sr2Hi], 108), 5), '00:00')+'-'+ISNULL(LEFT(CONVERT(CHAR(8), [Sr2Hf], 108), 5), '00:00')+','+ISNULL(LEFT(CONVERT(CHAR(8), [Sr3Hi], 108), 5), '00:00')+'-'+ISNULL(LEFT(CONVERT(CHAR(8), [Sr3Hf], 108), 5), '00:00')+'|'+IIF([Domingo]=1,'1','0')+':'+ISNULL(LEFT(CONVERT(CHAR(8), [Dr1Hi], 108), 5), '00:00')+'-'+ISNULL(LEFT(CONVERT(CHAR(8), [Dr1Hf], 108), 5), '00:00')+','+ISNULL(LEFT(CONVERT(CHAR(8), [Dr2Hi], 108), 5), '00:00')+'-'+ISNULL(LEFT(CONVERT(CHAR(8), [Dr2Hf], 108), 5), '00:00')+','+ISNULL(LEFT(CONVERT(CHAR(8), [Dr3Hi], 108), 5), '00:00')+'-'+ISNULL(LEFT(CONVERT(CHAR(8), [Dr3Hf], 108), 5), '00:00')+'|'+IIF([Festivo]=1,'1','0')+':'+ISNULL(LEFT(CONVERT(CHAR(8), [Fr1Hi], 108), 5), '00:00')+'-'+ISNULL(LEFT(CONVERT(CHAR(8), [Fr1Hf], 108), 5), '00:00')+','+ISNULL(LEFT(CONVERT(CHAR(8), [Fr2Hi], 108), 5), '00:00')+'-'+ISNULL(LEFT(CONVERT(CHAR(8), [Fr2Hf], 108), 5), '00:00')+','+ISNULL(LEFT(CONVERT(CHAR(8), [Fr3Hi], 108), 5), '00:00')+'-'+ISNULL(LEFT(CONVERT(CHAR(8), [Fr3Hf], 108), 5), '00:00'))", true);
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ClientId");
-
-                    b.HasIndex("schedule_key")
+                    b.HasIndex("ClientId", "schedule_key")
                         .IsUnique()
-                        .HasDatabaseName("UX_AdmRangos_ScheduleKey")
+                        .HasDatabaseName("UX_AdmRangos_Cliente_Schedule")
                         .HasFilter("[RangeStatus] = 1");
 
                     b.ToTable("AdmRangos");
@@ -1608,6 +1609,10 @@ namespace VCashApp.Migrations
                     b.Property<decimal?>("CountedValue")
                         .HasColumnType("DECIMAL(18,0)")
                         .HasColumnName("ValorContado");
+
+                    b.Property<decimal?>("DeclaredValue")
+                        .HasColumnType("DECIMAL(18,0)")
+                        .HasColumnName("ValorDeclarado");
 
                     b.Property<string>("EnvelopeSubType")
                         .HasMaxLength(20)

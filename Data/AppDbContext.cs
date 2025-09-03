@@ -2,12 +2,9 @@
 using Microsoft.EntityFrameworkCore;
 using VCashApp.Models;
 using VCashApp.Models.Entities; 
-using System;
-using System.Collections.Generic;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.DataProtection.EntityFrameworkCore;
-using System.Data;
-using Microsoft.Data.SqlClient;
+using VCashApp.Models.AdmEntities;
 
 namespace VCashApp.Data
 {
@@ -34,6 +31,7 @@ namespace VCashApp.Data
         public DbSet<AdmFondo> AdmFondos { get; set; }
         public DbSet<AdmPunto> AdmPuntos { get; set; }
         public DbSet<AdmRuta> AdmRutas { get; set; }
+        public DbSet<AdmRange> AdmRangos { get; set; }
         public DbSet<SegRegistroEmpleado> SegRegistroEmpleados { get; set; }
         public DbSet<AdmConcepto> AdmConceptos { get; set; }
         public DbSet<AdmConsecutivo> AdmConsecutivos { get; set; }
@@ -221,6 +219,99 @@ namespace VCashApp.Data
                 entity.HasOne(p => p.City).WithMany().HasForeignKey(p => p.CityCode).OnDelete(DeleteBehavior.Restrict);
                 entity.HasOne(p => p.Fund).WithMany().HasForeignKey(p => p.FundCode).IsRequired(false).OnDelete(DeleteBehavior.Restrict);
                 entity.HasOne(p => p.Route).WithMany().HasForeignKey(p => p.RouteBranchCode).IsRequired().OnDelete(DeleteBehavior.Restrict);
+                entity.HasOne(p => p.Range).WithMany().HasForeignKey(p => p.RangeCode).IsRequired(false).OnDelete(DeleteBehavior.Restrict);
+            });
+
+            builder.Entity<AdmRange>(entity => {
+                entity.HasKey(r => r.Id);
+                entity.Property(r => r.Id).ValueGeneratedOnAdd();
+
+                entity.Property(r => r.CodRange).IsRequired();
+                entity.Property(r => r.RangeInformation);
+
+                entity.Property(r => r.Lr1Hi).HasColumnType("TIME(0)");
+                entity.Property(r => r.Lr1Hf).HasColumnType("TIME(0)");
+                entity.Property(r => r.Lr2Hi).HasColumnType("TIME(0)");
+                entity.Property(r => r.Lr2Hf).HasColumnType("TIME(0)");
+                entity.Property(r => r.Lr3Hi).HasColumnType("TIME(0)");
+                entity.Property(r => r.Lr3Hf).HasColumnType("TIME(0)");
+
+                entity.Property(r => r.Mr1Hi).HasColumnType("TIME(0)");
+                entity.Property(r => r.Mr1Hf).HasColumnType("TIME(0)");
+                entity.Property(r => r.Mr2Hi).HasColumnType("TIME(0)");
+                entity.Property(r => r.Mr2Hf).HasColumnType("TIME(0)");
+                entity.Property(r => r.Mr3Hi).HasColumnType("TIME(0)");
+                entity.Property(r => r.Mr3Hf).HasColumnType("TIME(0)");
+
+                entity.Property(r => r.Wr1Hi).HasColumnType("TIME(0)");
+                entity.Property(r => r.Wr1Hf).HasColumnType("TIME(0)");
+                entity.Property(r => r.Wr2Hi).HasColumnType("TIME(0)");
+                entity.Property(r => r.Wr2Hf).HasColumnType("TIME(0)");
+                entity.Property(r => r.Wr3Hi).HasColumnType("TIME(0)");
+                entity.Property(r => r.Wr3Hf).HasColumnType("TIME(0)");
+
+                entity.Property(r => r.Jr1Hi).HasColumnType("TIME(0)");
+                entity.Property(r => r.Jr1Hf).HasColumnType("TIME(0)");
+                entity.Property(r => r.Jr2Hi).HasColumnType("TIME(0)");
+                entity.Property(r => r.Jr2Hf).HasColumnType("TIME(0)");
+                entity.Property(r => r.Jr3Hi).HasColumnType("TIME(0)");
+                entity.Property(r => r.Jr3Hf).HasColumnType("TIME(0)");
+
+                entity.Property(r => r.Vr1Hi).HasColumnType("TIME(0)");
+                entity.Property(r => r.Vr1Hf).HasColumnType("TIME(0)");
+                entity.Property(r => r.Vr2Hi).HasColumnType("TIME(0)");
+                entity.Property(r => r.Vr2Hf).HasColumnType("TIME(0)");
+                entity.Property(r => r.Vr3Hi).HasColumnType("TIME(0)");
+                entity.Property(r => r.Vr3Hf).HasColumnType("TIME(0)");
+
+                entity.Property(r => r.Sr1Hi).HasColumnType("TIME(0)");
+                entity.Property(r => r.Sr1Hf).HasColumnType("TIME(0)");
+                entity.Property(r => r.Sr2Hi).HasColumnType("TIME(0)");
+                entity.Property(r => r.Sr2Hf).HasColumnType("TIME(0)");
+                entity.Property(r => r.Sr3Hi).HasColumnType("TIME(0)");
+                entity.Property(r => r.Sr3Hf).HasColumnType("TIME(0)");
+
+                entity.Property(r => r.Dr1Hi).HasColumnType("TIME(0)");
+                entity.Property(r => r.Dr1Hf).HasColumnType("TIME(0)");
+                entity.Property(r => r.Dr2Hi).HasColumnType("TIME(0)");
+                entity.Property(r => r.Dr2Hf).HasColumnType("TIME(0)");
+                entity.Property(r => r.Dr3Hi).HasColumnType("TIME(0)");
+                entity.Property(r => r.Dr3Hf).HasColumnType("TIME(0)");
+
+                entity.Property(r => r.Fr1Hi).HasColumnType("TIME(0)");
+                entity.Property(r => r.Fr1Hf).HasColumnType("TIME(0)");
+                entity.Property(r => r.Fr2Hi).HasColumnType("TIME(0)");
+                entity.Property(r => r.Fr2Hf).HasColumnType("TIME(0)");
+                entity.Property(r => r.Fr3Hi).HasColumnType("TIME(0)");
+                entity.Property(r => r.Fr3Hf).HasColumnType("TIME(0)");
+
+                entity.HasOne(r => r.Client).WithMany().HasForeignKey(r => r.ClientId).OnDelete(DeleteBehavior.Restrict);
+
+                string HHMM(string col) => $"LEFT(CONVERT(CHAR(8), [{col}], 108), 5)";
+                string F(string col) => $"ISNULL({HHMM(col)}, '00:00')";
+                string D(string flag, string a1, string b1, string a2, string b2, string a3, string b3)
+                    => $"IIF([{flag}]=1,'1','0')+':'+{F(a1)}+'-'+{F(b1)}+','+{F(a2)}+'-'+{F(b2)}+','+{F(a3)}+'-'+{F(b3)}";
+
+                var scheduleBody =
+                    $"{D("Lunes", "Lr1Hi", "Lr1Hf", "Lr2Hi", "Lr2Hf", "Lr3Hi", "Lr3Hf")}+'|'+"
+                  + $"{D("Martes", "Mr1Hi", "Mr1Hf", "Mr2Hi", "Mr2Hf", "Mr3Hi", "Mr3Hf")}+'|'+"
+                  + $"{D("Miercoles", "Wr1Hi", "Wr1Hf", "Wr2Hi", "Wr2Hf", "Wr3Hi", "Wr3Hf")}+'|'+"
+                  + $"{D("Jueves", "Jr1Hi", "Jr1Hf", "Jr2Hi", "Jr2Hf", "Jr3Hi", "Jr3Hf")}+'|'+"
+                  + $"{D("Viernes", "Vr1Hi", "Vr1Hf", "Vr2Hi", "Vr2Hf", "Vr3Hi", "Vr3Hf")}+'|'+"
+                  + $"{D("Sabado", "Sr1Hi", "Sr1Hf", "Sr2Hi", "Sr2Hf", "Sr3Hi", "Sr3Hf")}+'|'+"
+                  + $"{D("Domingo", "Dr1Hi", "Dr1Hf", "Dr2Hi", "Dr2Hf", "Dr3Hi", "Dr3Hf")}+'|'+"
+                  + $"{D("Festivo", "Fr1Hi", "Fr1Hf", "Fr2Hi", "Fr2Hf", "Fr3Hi", "Fr3Hf")}";
+
+                var scheduleSql = $"CONVERT(VARCHAR(20), [CodCliente]) + ':' + ({scheduleBody})";
+
+                entity.Property<string>("schedule_key")
+                      .HasColumnName("schedule_key")
+                      .HasComputedColumnSql(scheduleSql, stored: true);
+
+                entity.HasIndex("schedule_key")
+                      .HasFilter("[RangeStatus] = 1")
+                      .IsUnique()
+                      .HasDatabaseName("UX_AdmRangos_ScheduleKey");
             });
 
             builder.Entity<AdmRuta>(entity => {
@@ -426,7 +517,6 @@ namespace VCashApp.Data
                 entity.Property(c => c.ContainerType).IsRequired().HasMaxLength(50);
                 entity.Property(c => c.EnvelopeSubType).HasMaxLength(20).IsUnicode(false).IsRequired(false);
                 entity.Property(c => c.ContainerCode).IsRequired().HasMaxLength(100);
-                entity.Property(c => c.DeclaredValue).HasColumnType("DECIMAL(18,0)");
                 entity.Property(c => c.CountedValue).HasColumnType("DECIMAL(18,0)");
                 // .HasComputedColumnSql("ISNULL((SELECT SUM(CVD.CalculatedAmount) FROM Cef_ValueDetails CVD WHERE CVD.CefContainerId = Cef_Containers.Id), 0)");
                 entity.Property(c => c.ContainerStatus).IsRequired().HasMaxLength(50);

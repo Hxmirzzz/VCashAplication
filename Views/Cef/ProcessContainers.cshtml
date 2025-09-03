@@ -1,132 +1,93 @@
 ﻿@model VCashApp.Models.ViewModels.CentroEfectivo.CefProcessContainersPageViewModel
 @using VCashApp.Enums;
 @{
-    ViewData["Title"] = "Procesar Contenedores";
+    ViewData["Title"] = "Procesamiento de Bolsas";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
 <div class="form-container">
     <div class="card">
-        <div class="card-header">
-            <h4 class="mb-0">Procesamiento de Contenedores</h4>
-        </div>
         <div class="card-body">
             <form id="form-containers" asp-action="ProcessContainers" asp-route-transactionId="@Model.CefTransactionId" method="post">
                 @Html.AntiForgeryToken()
                 <input type="hidden" asp-for="CefTransactionId" />
 
-                <!-- Stepper principal -->
                 <div class="progress-stepper" id="progressStepper">
                     <div class="step active" data-step="1">
                         <div class="step-number">1</div>
-                        <div class="step-label">Información General</div>
+                        <div class="step-label">Conteo y Detalles</div>
                     </div>
                     <div class="step" data-step="2">
                         <div class="step-number">2</div>
-                        <div class="step-label">Conteo y Detalles</div>
-                    </div>
-                    <div class="step" data-step="3">
-                        <div class="step-number">3</div>
                         <div class="step-label">Resumen</div>
                     </div>
                 </div>
 
                 <div class="tab-content" id="myTabContent">
-
-                    <!-- PASO 1: info general (solo lectura) -->
                     <div class="tab-pane fade show active" role="tabpanel" data-step="1">
                         <div class="step-content">
-                            <div class="card mb-4">
-                                <div class="card-header"><h5>📋 Cabecera del Servicio</h5></div>
-                                <div class="card-body">
-                                    <div class="row g-3">
-                                        <div class="col-12 col-lg-3">
-                                            <div class="form-floating">
-                                                <input class="form-control" value="@Model.Transaction.SlipNumber" readonly />
-                                                <label>Número de Planilla</label>
+                            <div class="card mb-3">
+                                <div class="row g-3 mb-3">
+                                    <div class="col-12 col-xl-7">
+                                        <div class="card h-100">
+                                            <div class="card-header"><h6 class="mb-0">📋 Información del Servicio</h6></div>
+                                            <div class="card-body">
+                                                <div class="row g-2 small">
+                                                    <div class="col-6 col-lg-4"><strong>Planilla:</strong> @Model.Transaction.SlipNumber</div>
+                                                    <div class="col-6 col-lg-4"><strong>Orden:</strong> @Model.Service.ServiceOrderId</div>
+                                                    <div class="col-6 col-lg-4"><strong>Sucursal:</strong> @Model.Service.BranchName</div>
+                                                    <div class="col-6 col-lg-4"><strong>Cliente:</strong> @Model.Service.ClientName</div>
+                                                    <div class="col-6 col-lg-4"><strong>Concepto:</strong> @Model.Service.ConceptName</div>
+                                                    <div class="col-6 col-lg-4"><strong>Divisa:</strong> @Model.Transaction.Currency</div>
+                                                    <div class="col-6"><strong>Origen:</strong> @Model.Service.OriginName</div>
+                                                    <div class="col-6"><strong>Destino:</strong> @Model.Service.DestinationName</div>
+                                                </div>
                                             </div>
                                         </div>
-                                        <div class="col-12 col-lg-3">
-                                            <div class="form-floating">
-                                                <input class="form-control" value="@Model.Service.ServiceOrderId" readonly />
-                                                <label>Orden de Servicio</label>
-                                            </div>
-                                        </div>
-                                        <div class="col-12 col-lg-3">
-                                            <div class="form-floating">
-                                                <input class="form-control" value="@Model.Service.BranchName" readonly />
-                                                <label>Sucursal</label>
-                                            </div>
-                                        </div>
-                                        <div class="col-12 col-lg-3">
-                                            <div class="form-floating">
-                                                <input class="form-control" value="@(Model.Service.ServiceDate?.ToString("yyyy-MM-dd") ?? "N/A")" readonly />
-                                                <label>Fecha de Servicio</label>
-                                            </div>
-                                        </div>
+                                    </div>
 
-                                        <div class="col-12 col-lg-4">
-                                            <div class="form-floating">
-                                                <input class="form-control" value="@Model.Service.ClientName" readonly />
-                                                <label>Cliente</label>
+                                    <div class="col-12 col-xl-5">
+                                        <div class="card h-100">
+                                            <div class="card-header d-flex align-items-center justify-content-between">
+                                                <h6 class="mb-0">📊 Totales</h6>
+                                                <small class="text-muted">Se actualiza en vivo</small>
                                             </div>
-                                        </div>
-                                        <div class="col-12 col-lg-4">
-                                            <div class="form-floating">
-                                                <input class="form-control" value="@Model.Service.ConceptName" readonly />
-                                                <label>Concepto</label>
-                                            </div>
-                                        </div>
-                                        <div class="col-12 col-lg-4">
-                                            <div class="form-floating">
-                                                <input class="form-control" value="@Model.Transaction.Currency" readonly />
-                                                <label>Divisa</label>
-                                            </div>
-                                        </div>
+                                            <div class="card-body">
+                                                <input type="hidden" id="declaredTransaction" value="@Model.TotalDeclaredAll" />
+                                                <div class="row g-3">
+                                                    <div class="col-12">
+                                                        <div class="d-flex justify-content-between">
+                                                            <span>Declarado:</span>
+                                                            <strong id="totDeclaredGlobal">@Model.TotalDeclaredAll.ToString("N0")</strong>
+                                                        </div>
+                                                        <hr class="my-2">
+                                                    </div>
+                                                    <div class="col-6">
+                                                        <div class="d-flex justify-content-between">
+                                                            <span>Contado total</span>
+                                                            <strong id="totCountedGlobal">@Model.TotalCountedAll.ToString("N0")</strong>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-6">
+                                                        <div class="d-flex justify-content-between">
+                                                            <span>Diferencia</span>
+                                                            <strong id="totDiffGlobal" class="tile-diff">@Model.DifferenceAll.ToString("N0")</strong>
+                                                        </div>
+                                                    </div>
+                                                </div>
 
-                                        <div class="col-12 col-lg-6">
-                                            <div class="form-floating">
-                                                <input class="form-control" value="@Model.Service.OriginName" readonly />
-                                                <label>Origen</label>
-                                            </div>
-                                        </div>
-                                        <div class="col-12 col-lg-6">
-                                            <div class="form-floating">
-                                                <input class="form-control" value="@Model.Service.DestinationName" readonly />
-                                                <label>Destino</label>
-                                            </div>
-                                        </div>
+                                                <hr class="my-3">
 
-                                        <div class="col-12 col-lg-4">
-                                            <div class="form-floating">
-                                                <input class="form-control" value="@Model.Transaction.TransactionType" readonly />
-                                                <label>Tipo de Transacción</label>
-                                            </div>
-                                        </div>
-                                        <div class="col-12 col-lg-4">
-                                            <div class="form-floating">
-                                                <input class="form-control" value="@Model.Transaction.Status" readonly />
-                                                <label>Estado</label>
-                                            </div>
-                                        </div>
-                                        <div class="col-12 col-lg-4">
-                                            <div class="form-floating">
-                                                <input class="form-control" value="@Model.Transaction.RegistrationDate.ToString("yyyy-MM-dd HH:mm")" readonly />
-                                                <label>Fecha Registro Transacción</label>
+                                                <div class="row g-2 small">
+                                                    <div class="col-6"><span class="text-muted"># Bolsas:</span> <strong id="countBagsHeader">0</strong></div>
+                                                    <div class="col-6"><span class="text-muted"># Sobres:</span> <strong id="countEnvelopesHeader">0</strong></div>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
-                            </div>                            
-                        </div>
-                    </div>
-
-                    <!-- PASO 2: Conteo y Detalles (solo Bolsas como pestañas; los Sobres viven dentro de cada Bolsa) -->
-                    <div class="tab-pane fade" role="tabpanel" data-step="2">
-                        <div class="step-content">
-                            <div class="card mb-3">
                                 <div class="card-header d-flex align-items-center justify-content-between">
-                                    <h5 class="mb-0">🧰 Contenedores (Bolsas y Sobres)</h5>
+                                    <h5 class="mb-0">🧰 Bolsas</h5>
                                     <div class="d-flex gap-2">
                                         <button type="button" class="btn btn-outline-primary" id="btnAddBag">+ Agregar Bolsa</button>
                                     </div>
@@ -154,10 +115,10 @@
                                                         <button class="nav-link @(b==0 ? "active" : "")" id="@($"{tabId}-btn")"
                                                                 data-bs-toggle="tab" data-bs-target="@($"#{tabId}")"
                                                                 type="button" role="tab">
-                                                          Bolsa @(@b + 1)
-                                                          <span class="badge bg-secondary ms-2 js-bag-badge-declared" title="Declarado">0</span>
-                                                          <span class="badge bg-info ms-1 js-bag-badge-counted"   title="Contado">0</span>
-                                                          <span class="badge bg-light text-dark ms-1 js-bag-badge-diff" title="Dif.">0</span>
+                                                            Bolsa @(@b + 1)
+                                                            <span class="badge bg-primary ms-2" title="Billetes">B: <span class="js-bag-badge-bills">0</span></span>
+                                                            <span class="badge bg-warning text-dark ms-1" title="Monedas">M: <span class="js-bag-badge-coins">0</span></span>
+                                                            <span class="badge bg-info ms-1" title="Total bolsa">T: <span class="js-bag-badge-total">0</span></span>
                                                         </button>
                                                     </li>
                                                 }
@@ -187,6 +148,13 @@
                                                 <div class="card mt-3">
                                                     <div class="card-header d-flex align-items-center justify-content-between">
                                                         <h6 class="mb-0">✉️ Sobres de esta Bolsa</h6>
+                                                        <div class="d-flex gap-2 align-items-center small js-env-badges mt-2">
+                                                            <span class="badge bg-primary">Billetes: <span class="js-env-bills">0</span></span>
+                                                            <span class="badge bg-warning text-dark">Monedas: <span class="js-env-coins">0</span></span>
+                                                            <span class="badge bg-secondary">Docs: <span class="js-env-docs">0</span></span>
+                                                            <span class="badge bg-info">Cheques: <span class="js-env-checks">0</span></span>
+                                                            <span class="ms-auto text-muted">Total: <strong class="js-env-total">0</strong></span>
+                                                        </div>
                                                         <button type="button" class="btn btn-outline-secondary btn-sm js-add-envelope-in-this-bag">
                                                             + Agregar Sobre
                                                         </button>
@@ -274,7 +242,7 @@
                     </div>
 
                     <!-- PASO 3: Resumen -->
-                    <div class="tab-pane fade" role="tabpanel" data-step="3">
+                    <div class="tab-pane fade" role="tabpanel" data-step="2">
                         <div class="step-content">
                             <div class="card mb-3">
                                 <div class="card-header d-flex align-items-center justify-content-between">
@@ -485,7 +453,7 @@
           $('#bag-template :input, #envelope-template :input, #incident-template :input, #container-template :input')
             .prop('disabled', true);
 
-          let currentStep = 1, totalSteps = 3;
+          let currentStep = 1, totalSteps = 2;
 
           const DENOMS = JSON.parse(document.getElementById('denoms-json')?.textContent || '{}');
           const QUALS  = JSON.parse(document.getElementById('qualities-json')?.textContent || '{}');
@@ -495,6 +463,7 @@
           const $next   = $('button[data-step-action="next"]');
           const $prev   = $('button[data-step-action="prev"]');
           const $submit = $('button[data-step-action="submit-final"]');
+          const DECLARED_TX = Number($('#declaredTransaction').val() || 0);
 
           let isDirty = false;
           let skipUnload = false;
@@ -656,9 +625,19 @@
             return parseInt(parts[parts.length - 1]) || 0;
           }
           function fmt(n){ return (Number(n)||0).toLocaleString(); }
+
           function setSectionEnabled($section, enabled) {
             $section.find(':input').prop('disabled', !enabled);
           }
+
+          function containerTypeOf($ce){
+            return String(
+              $ce.find('input[name$=".ContainerType"]').val() ||
+              $ce.find('.js-container-type').val() ||
+              ''
+            ).trim();
+          }
+
           function getRowKind($row) {
             const $sel = $row.find('.js-vtype');
             if ($sel.length && $sel.val()) return String($sel.val());
@@ -675,7 +654,7 @@
 
           function sumEditor($editor){
             let s = 0;
-            const typeVal = $editor.find('.js-container-type').val();
+            const typeVal = containerTypeOf($editor);
 
             if (typeVal === 'Bolsa') {
               $editor.find('.sec-bolsa .js-details-table tbody input[name$=".CalculatedAmount"]').each(function(){
@@ -718,7 +697,6 @@
             if (v == null) return 0;
             v = String(v).trim();
             if (v === '') return 0;
-            // quitar separadores de miles y normalizar decimal
             v = v.replace(/\./g,'').replace(',', '.');
             const n = Number(v);
             return isNaN(n) ? 0 : n;
@@ -758,7 +736,7 @@
 
           // Marca campos numéricos (ajusta/añade selectores si hace falta)
           function markNumericFields(){
-            $('input[name$=".DeclaredValue"], input[name$=".Quantity"], input[name$=".BundlesCount"], input[name$=".LoosePiecesCount"], input[name$=".UnitValue"], input[name$=".CalculatedAmount"]')
+            $('input[name$=".Quantity"], input[name$=".BundlesCount"], input[name$=".LoosePiecesCount"], input[name$=".UnitValue"], input[name$=".CalculatedAmount"]')
               .addClass('js-num js-num-int');
 
             // cambiar a text para permitir separador de miles visual (y teclado numérico en móvil)
@@ -770,6 +748,48 @@
           function unformatAllNumbers(){ $('.js-num').each(function(){ unformatInput($(this)); }); }
 
           function newRowKey(){ return 'k' + Date.now().toString(36) + Math.random().toString(36).slice(2,8); }
+
+          function sumInputs($scope, selector) {
+            let s = 0;
+            $scope.find(selector).each(function(){ s += toNumber($(this).val()); });
+            return s;
+          }
+
+          // Devuelve { bills, coins, docs, checks, total } para un editor (bolsa o sobre)
+          function breakdownForEditor($editor){
+            const isSobre = containerTypeOf($editor) === 'Sobre';
+
+            let bills = 0, coins = 0, docs = 0, checks = 0;
+
+            if (!isSobre) {
+              // Bolsa
+              bills = sumInputs($editor, '.sec-bolsa .js-details-table[data-detail-scope="bolsa-billete"] tbody input[name$=".CalculatedAmount"]');
+              coins = sumInputs($editor, '.sec-bolsa .js-details-table[data-detail-scope="bolsa-moneda"]  tbody input[name$=".CalculatedAmount"]');
+            } else {
+              // Sobre
+              // Efectivo:
+              bills = sumInputs($editor, '.sec-sobre-cash .js-details-table[data-detail-scope="sobre-billete"] tbody input[name$=".CalculatedAmount"]');
+              coins = sumInputs($editor, '.sec-sobre-cash .js-details-table[data-detail-scope="sobre-moneda"]  tbody input[name$=".CalculatedAmount"]');
+              // Docs:
+              docs  = sumInputs($editor, '.sec-sobre-docs .js-details-table[data-detail-scope="sobre-docs"] tbody input[name$=".CalculatedAmount"]');
+              // Cheques:
+              checks = sumInputs($editor, '.sec-sobre-cheque .js-cheques-table tbody input[name$=".CalculatedAmount"]');
+            }
+
+            const total = bills + coins + docs + checks;
+            return { bills, coins, docs, checks, total };
+          }
+
+          // Actualiza badges de una TARJETA de sobre
+          function updateEnvelopeBadges($envCard){
+            const $editor = $envCard.find('.container-editor').first();
+            const br = breakdownForEditor($editor);
+            $envCard.find('.js-env-bills').text(fmtInt(br.bills));
+            $envCard.find('.js-env-coins').text(fmtInt(br.coins));
+            $envCard.find('.js-env-docs').text(fmtInt(br.docs));
+            $envCard.find('.js-env-checks').text(fmtInt(br.checks));
+            $envCard.find('.js-env-total').text(fmtInt(br.total));
+          }
 
           // =====================================================================
           // 3) CATÁLOGOS (DENOM / CALIDAD)
@@ -939,11 +959,12 @@
             const isDocScope = $table.data('detail-scope') === 'sobre-docs';
 
             if (isDocScope) {
-              const $ce      = $row.closest('.container-editor');
-              const declared = toNumber($ce.find('input[name$=".DeclaredValue"]').val());
-              $calcInput.val(declared.toFixed(0));
+              const qty = toNumber($row.find('input[name$=".Quantity"]').val()) || 1;
+              const unitValue = toNumber($row.find('input[name$=".UnitValue"]').val());
+              const amt = qty * unitValue;
+              $calcInput.val(amt.toFixed(0));
               formatInput($calcInput);
-              updateContainerSubtotal($ce);
+              updateContainerSubtotal($row.closest('.container-editor'));
               return;
             }
 
@@ -985,7 +1006,7 @@
 
           function updateContainerSubtotal($ce) {
             let total = 0;
-            const typeVal = $ce.find('.js-container-type').val();
+            const typeVal = containerTypeOf($ce);
 
             if (typeVal === 'Bolsa') {
               $ce.find('.sec-bolsa .js-details-table tbody input[name$=".CalculatedAmount"]').each(function(){
@@ -1030,7 +1051,7 @@
             updateContainerSubtotal($containerEditor);
           }
           function toggleContainerSections($containerEditor) {
-            const typeVal = $containerEditor.find('.js-container-type').val();
+            const typeVal = containerTypeOf($containerEditor);
             const isSobre = (typeVal === 'Sobre');
 
             const $secBolsa = $containerEditor.find('.sec-bolsa');
@@ -1080,26 +1101,34 @@
           function updateBagBadgeFromPane($bagPane){
             const tabId   = $bagPane.attr('id');
             const $tabBtn = $(`#bagsTabs button[data-bs-target="#${tabId}"]`);
-            const bagIdx  = getPaneIndex($bagPane);
 
             const $bagEd  = $bagPane.find('.container-editor').first();
+            const brBag   = breakdownForEditor($bagEd);
 
-            // contado (bolsa + sobres)
-            let counted = sumEditor($bagEd);
+            let brEnv = { bills:0, coins:0, docs:0, checks:0, total:0 };
             $bagPane.find('.envelope-card').each(function(){
-              counted += sumEditor($(this));
+              const $envEd = $(this).find('.container-editor').first();
+              const b = breakdownForEditor($envEd);
+              brEnv.bills  += b.bills;
+              brEnv.coins  += b.coins;
+              brEnv.docs   += b.docs;
+              brEnv.checks += b.checks;
+              brEnv.total  += b.total;
+
+              updateEnvelopeBadges($(this));
             });
 
-            // declarado
-            const declared = toNumber($bagEd.find(`input[name="Containers[${bagIdx}].DeclaredValue"]`).val());
-            const diff     = counted - declared;
+            const billsTotal = brBag.bills + brEnv.bills;
+            const coinsTotal = brBag.coins + brEnv.coins;
+            const grandTotal = billsTotal + coinsTotal + brEnv.docs + brEnv.checks;
 
-            $tabBtn.find('.js-bag-badge-declared').text(fmt(declared));
-            $tabBtn.find('.js-bag-badge-counted').text(fmt(counted));
-            $tabBtn.find('.js-bag-badge-diff')    .text((diff>=0?'+':'') + fmt(diff));
+            $tabBtn.find('.js-bag-badge-bills').text(fmtInt(billsTotal));
+            $tabBtn.find('.js-bag-badge-coins').text(fmtInt(coinsTotal));
+            $tabBtn.find('.js-bag-badge-total') .text(fmtInt(grandTotal));
 
             updateTabsOverflowState();
           }
+
           function updateAllBagBadges(){
             $('#bagsTabContent .tab-pane[id^="bag-tab-"]').each(function(){
               updateBagBadgeFromPane($(this));
@@ -1131,45 +1160,27 @@
 
           // calcula conteos y montos "en vivo" a partir del DOM
           function computeLiveSummary(){
-            let declaredTotal = 0;
-            let countedTotal  = 0;
+            const declaredTotal = DECLARED_TX;
 
+            let countedTotal  = 0;
             let bills = 0, coins = 0, docs = 0, checks = 0;
             let bagsCount = 0, envCount = 0;
 
-            // Por cada editor (bolsa/sobre)
-            $('.container-editor').each(function(){
+            $('#bagsTabContent .tab-pane .container-editor').each(function(){
               const $ce = $(this);
-              const isSobre = $ce.find('.js-container-type').val() === 'Sobre';
+              const isSobre = containerTypeOf($ce) === 'Sobre';
+              const br = breakdownForEditor($ce);
 
-              // declarado: campo del contenedor
-              declaredTotal += toNumber($ce.find('input[name$=".DeclaredValue"]').val());
+              countedTotal += br.total;
+              bills        += br.bills;
+              coins        += br.coins;
+              docs         += br.docs;
+              checks       += br.checks;
 
-              // contado: usa tu sumEditor por tipo
-              const localCounted = sumEditor($ce);
-              countedTotal += localCounted;
-
-              // tipos
-              // Billetes/Monedas: sumar CalculatedAmount en tablas correspondientes
-              $ce.find('table.js-details-table[data-detail-scope$="billete"] tbody input[name$=".CalculatedAmount"]').each(function(){ bills += toNumber($(this).val()); });
-              $ce.find('table.js-details-table[data-detail-scope$="moneda"]  tbody input[name$=".CalculatedAmount"]').each(function(){ coins += toNumber($(this).val()); });
-
-              // Documentos: detalle en sobre-docs (monto = declarado del sobre, ya replicado)
-              $ce.find('table.js-details-table[data-detail-scope="sobre-docs"] tbody input[name$=".CalculatedAmount"]').each(function(){ docs += toNumber($(this).val()); });
-
-              // Cheques: tabla específica
-              $ce.find('.js-cheques-table tbody input[name$=".CalculatedAmount"]').each(function(){ checks += toNumber($(this).val()); });
-
-              // conteos de contenedores
-              if (!isSobre) bagsCount++;
-              else envCount++;
+              if (!isSobre) bagsCount++; else envCount++;
             });
 
-            return {
-              declaredTotal, countedTotal,
-              bills, coins, docs, checks,
-              bagsCount, envCount
-            };
+            return { declaredTotal, countedTotal, bills, coins, docs, checks, bagsCount, envCount };
           }
 
           // lista por bolsa (Declarado vs Contado)
@@ -1178,11 +1189,7 @@
 
             $('#bagsTabContent .tab-pane[id^="bag-tab-"]').each(function(idx){
               const $pane = $(this);
-              const i     = getPaneIndex($pane);
               const $bagEd = $pane.find('.container-editor').first();
-
-              // declarado de la bolsa
-              const declared = toNumber($bagEd.find(`input[name="Containers[${i}].DeclaredValue"]`).val());
 
               // contado bolsa + sobres hijos en la UI actual
               let counted = sumEditor($bagEd);
@@ -1191,11 +1198,7 @@
               const html = `
                 <div class="list-group-item d-flex justify-content-between align-items-center">
                   <span>Bolsa ${idx+1}</span>
-                  <span>
-                    <span class="badge bg-secondary me-1" title="Declarado">${fmtInt(declared)}</span>
-                    <span class="badge bg-info me-1" title="Contado">${fmtInt(counted)}</span>
-                    <span class="badge bg-light text-dark" title="Dif.">${(counted-declared>=0?'+':'')+fmtInt(counted - declared)}</span>
-                  </span>
+                  <span class="badge bg-info" title="Contado">${fmtInt(counted)}</span>
                 </div>`;
               $list.append(html);
             });
@@ -1205,18 +1208,32 @@
           function updateProcessSummary(){
             const s = computeLiveSummary();
 
-            setSummaryTotals(s.declaredTotal, s.countedTotal, s.countedTotal - s.declaredTotal);
+            // Panel superior (Paso 1)
+            $('#totDeclaredGlobal').text(fmtInt(s.declaredTotal));
+            $('#totCountedGlobal').text(fmtInt(s.countedTotal));
+            const diff = s.countedTotal - s.declaredTotal;
+            $('#totDiffGlobal').text((diff>=0?'+':'') + fmtInt(diff))
+              .removeClass('positive negative')
+              .addClass(diff < 0 ? 'negative' : 'positive');
+            $('#countBagsHeader').text(s.bagsCount);
+            $('#countEnvelopesHeader').text(s.envCount);
+
+            // Panel del PASO 2 (tu resumen existente)
+            $('#sumDeclaredAllDisplay').text(fmtInt(s.declaredTotal));
+            $('#sumCountedAllDisplay').text(fmtInt(s.countedTotal));
+            $('#sumDiffAllDisplay').text((diff>=0?'+':'') + fmtInt(diff))
+              .removeClass('positive negative')
+              .addClass(diff < 0 ? 'negative' : 'positive');
 
             $('#sumBillsCounted').text(fmtInt(s.bills));
             $('#sumCoinsCounted').text(fmtInt(s.coins));
             $('#sumDocsCounted').text(fmtInt(s.docs));
             $('#sumChecksCounted').text(fmtInt(s.checks));
             $('#sumTotalCountedDisplay').text(fmtInt(s.bills + s.coins + s.docs + s.checks));
-
             $('#countBags').text(s.bagsCount);
             $('#countEnvelopes').text(s.envCount);
 
-            renderPerBagList();
+            renderPerBagList(); // si la sigues usando (solo mostrará “contado” por bolsa)
           }
 
           // =====================================================================
@@ -1356,9 +1373,10 @@
             } else if (scope === 'bolsa-moneda' || scope === 'sobre-moneda') {
               fixedKind = 'Moneda';
             } else if (scope === 'sobre-docs') {
-              valueTypeOptions   = [{ value: 'Documento', text: 'Documento' }];
-              denomKindDefault   = 'Documento';
-              showDenom = false; showQuality = false; showBundleFields = false; showUnit = false;
+              valueTypeOptions = [{ value: 'Documento', text: 'Documento' }];
+              denomKindDefault = 'Documento';
+              showDenom = false; showQuality = false; showBundleFields = false;
+              showUnit = true;
             }
 
             const vtHtml    = valueTypeOptions.map(v => `<option value="${v.value}">${v.text}</option>`).join('');
@@ -1569,9 +1587,9 @@
                         data-bs-toggle="tab" data-bs-target="#${newId}"
                         type="button" role="tab">
                   Bolsa ${idxHuman}
-                  <span class="badge bg-secondary ms-2 js-bag-badge-declared" title="Declarado">0</span>
-                  <span class="badge bg-info ms-1 js-bag-badge-counted"   title="Contado">0</span>
-                  <span class="badge bg-light text-dark ms-1 js-bag-badge-diff" title="Dif.">0</span>
+                  <span class="badge bg-primary ms-2" title="Billetes">B: <span class="js-bag-badge-bills">0</span></span>
+                  <span class="badge bg-warning text-dark ms-1" title="Monedas">M: <span class="js-bag-badge-coins">0</span></span>
+                  <span class="badge bg-info ms-1" title="Total bolsa">T: <span class="js-bag-badge-total">0</span></span>
                 </button>
               </li>
             `);
@@ -1582,6 +1600,13 @@
                 <div class="card mt-3">
                   <div class="card-header d-flex align-items-center justify-content-between">
                     <h6 class="mb-0">✉️ Sobres de esta Bolsa</h6>
+                    <div class="d-flex gap-2 align-items-center small js-env-badges mt-2">
+                        <span class="badge bg-primary">Billetes: <span class="js-env-bills">0</span></span>
+                        <span class="badge bg-warning text-dark">Monedas: <span class="js-env-coins">0</span></span>
+                        <span class="badge bg-secondary">Docs: <span class="js-env-docs">0</span></span>
+                        <span class="badge bg-info">Cheques: <span class="js-env-checks">0</span></span>
+                        <span class="ms-auto text-muted">Total: <strong class="js-env-total">0</strong></span>
+                    </div>
                     <button type="button" class="btn btn-outline-secondary btn-sm js-add-envelope-in-this-bag">+ Agregar Sobre</button>
                   </div>
                   <div class="card-body">
@@ -1646,22 +1671,6 @@
             formatAllNumbers();
             refreshAllParentBagCombos();
             setTimeout(updateAllBagBadges, 0);
-          });
-
-          // Valor declarado (Documento/Voucher) -> actualizar monto de detalle
-          $(document).on('input change', 'input[name$=".DeclaredValue"]', function () {
-            const $ce = $(this).closest('.container-editor');
-            const declared = toNumber($(this).val());
-
-            $ce.find('.js-details-table[data-detail-scope="sobre-docs"] tbody tr').each(function () {
-              $(this).find('input[name$=".CalculatedAmount"]').val(declared.toFixed(0));
-            });
-
-            updateContainerSubtotal($ce);
-
-            const $pane = $(this).closest('.tab-pane[id^="bag-tab-"]');
-            if ($pane.length) updateBagBadgeFromPane($pane);
-            updateProcessSummary();
           });
 
           // Eliminar sobre (con confirmación si ya existe)

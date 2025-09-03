@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using VCashApp.Data;
 
@@ -11,9 +12,11 @@ using VCashApp.Data;
 namespace VCashApp.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250902184551_Fix_Range_ScheduleKey_WithClient")]
+    partial class Fix_Range_ScheduleKey_WithClient
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1608,6 +1611,10 @@ namespace VCashApp.Migrations
                     b.Property<decimal?>("CountedValue")
                         .HasColumnType("DECIMAL(18,0)")
                         .HasColumnName("ValorContado");
+
+                    b.Property<decimal?>("DeclaredValue")
+                        .HasColumnType("DECIMAL(18,0)")
+                        .HasColumnName("ValorDeclarado");
 
                     b.Property<string>("EnvelopeSubType")
                         .HasMaxLength(20)

@@ -1,0 +1,108 @@
+﻿@model IEnumerable<VCashApp.Models.ViewModels.Range.RangeSummaryViewModel>
+@{
+    int currentPage = ViewBag.CurrentPage ?? 1;
+    int totalPages = ViewBag.TotalPages ?? 1;
+    int totalData = ViewBag.TotalData ?? 0;
+    int pageSize = ViewBag.PageSize ?? 15;
+
+    bool canEdit = ViewBag.HasEdit ?? false;
+
+    const int maxPagesToShow = 5;
+    int halfPagesToShow = (maxPagesToShow - 1) / 2;
+
+    int startPage = Math.Max(1, currentPage - halfPagesToShow);
+    int endPage = Math.Min(totalPages, currentPage + halfPagesToShow);
+
+    if (endPage - startPage + 1 < maxPagesToShow)
+    {
+        if (startPage == 1)
+        {
+            endPage = Math.Min(totalPages, startPage + maxPagesToShow - 1);
+        }
+        else if (endPage == totalPages)
+        {
+            startPage = Math.Max(1, endPage - maxPagesToShow + 1);
+        }
+    }
+}
+
+<div class="table-section">
+    <div class="table-container">
+        <div class="table-wrapper">
+            <table class="table" id="dataTable">
+                <thead>
+                    <tr>
+                        <th>Código</th>
+                        <th>Cliente</th>
+                        <th>Información</th>
+                        <th>Días Activos</th>
+                        <th class="status-column-header">Estado</th>
+                        <th style="width: 80px;"><i class="ri-list-settings-fill"></i></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model != null && Model.Any())
+                    {
+                        @foreach (var r in Model)
+                        {
+                            <tr>
+                                <td>@r.CodRange</td>
+                                <td>@r.ClientName</td>
+                                <td>@(string.IsNullOrWhiteSpace(r.RangeInformation) ? "-" : r.RangeInformation)</td>
+                                <td>@(string.IsNullOrWhiteSpace(r.ActiveDays) ? "-" : r.ActiveDays.TrimEnd(','))</td>
+                                <td class="status-column">
+                                    @{
+                                        var badgeClass = r.RangeStatus ? "badge bg-success" : "badge bg-secondary";
+                                        var statusText = r.RangeStatus ? "Activo" : "Inactivo";
+                                    }
+                                    <span class="@badgeClass">@statusText</span>
+                                </td>
+                                <td>
+                                    <div class="action-buttons d-flex align-items-center justify-content-center">
+                                        <a asp-controller="Range" asp-action="Edit" asp-route-id="@r.Id" class="btn-edit" title="Editar">
+                                            <i class="ri-pencil-fill"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="6" class="text-center">No se encontraron rangos.</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="table-footer">
+        <div class="page-message">Página @currentPage de @totalPages (Total: @totalData registros)</div>
+        <div class="pagination">
+            <button class="page-link" data-page="1" @(currentPage == 1 ? "disabled" : "")>&laquo;</button>
+
+            <button class="page-link" data-page="@(currentPage - 1)" @(currentPage == 1 ? "disabled" : "")>&lt;</button>
+
+            @if (startPage > 1)
+            {
+                <button class="page-link" data-page="@(startPage - 1)">...</button>
+            }
+
+            @for (int i = startPage; i <= endPage; i++)
+            {
+                <button class="page-link @(currentPage == i ? "active-page" : "")" data-page="@i">@i</button>
+            }
+
+            @if (endPage < totalPages)
+            {
+                <button class="page-link" data-page="@(endPage + 1)">...</button>
+            }
+
+            <button class="page-link" data-page="@(currentPage + 1)" @(currentPage == totalPages ? "disabled" : "")>&gt;</button>
+
+            <button class="page-link" data-page="@totalPages" @(currentPage == totalPages ? "disabled" : "")>&raquo;</button>
+        </div>
+    </div>
+</div>

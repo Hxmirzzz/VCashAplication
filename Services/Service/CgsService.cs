@@ -378,7 +378,7 @@ namespace VCashApp.Services.Service
                 {
                     cityName = point.City?.NombreCiudad,
                     branchName = point.Branch?.NombreSucursal,
-                    rangeCode = point.RangeCode ?? "N/A",
+                    rangeCode = point.RangeCode,
                     rangeDetails = point.RangeAttentionInfo ?? "N/A"
                 } : null;
             }
