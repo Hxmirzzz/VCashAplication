@@ -49,7 +49,7 @@ namespace VCashApp.Models.Entities
         public decimal? CalculatedAmount { get; set; }
 
         [Column("EsAltaDenominacion")]
-        public bool? IsHighDenomination { get; set; }
+        public bool IsHighDenomination { get; set; }
 
         [Column("EntidadBancaria")]
         [ForeignKey("AdmBankEntitie")]
@@ -67,7 +67,7 @@ namespace VCashApp.Models.Entities
 
         [StringLength(255)]
         [Column("Observaciones")]
-        public string? Observations { get; set; } // Observaciones específicas del detalle
+        public string? Observations { get; set; }
 
         public virtual ICollection<CefIncident> Incidents { get; set; } = new List<CefIncident>(); // Novedades relacionadas con este detalle
     }

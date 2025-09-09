@@ -13,9 +13,13 @@
     var subtotalContado = (Model.ValueDetails?.Sum(v => v.CalculatedAmount) ?? 0M);
     }
     <div class="d-flex justify-content-end align-items-center mb-2">
-        <small class="text-muted me-2">Subtotal contado:</small>
+        <small class="text-muted me-2">Subtotal:</small>
         <span class="badge bg-light text-dark border">
             <strong class="js-container-subtotal" data-prefix="@prefix">@subtotalContado.ToString("N0")</strong>
+        </span>
+        <span class="m-2 d-inline-flex align-items-center gap-1 js-sub-bills-block" style="display: none;">
+            <span class="badge bg-primary">Alto Valor: <strong class="js-sub-bills-high">0</strong></span>
+            <span class="badge bg-secondary">Bajo Valor: <strong class="js-sub-bills-low">0</strong></span>
         </span>
     </div>
 
@@ -84,11 +88,12 @@
                     </div>
                     <div class="card-body">
                         <div class="table-container-responsive">
-                            <table class="table table-sm align-middle js-details-table" data-detail-scope="bolsa-billete">
+                            <table class="table table-sm align-middle js-details-table" data-detail-scope="bolsa-billete" data-has-high="true">
                                 <thead>
                                     <tr>
                                         <th>Denominación</th>
                                         <th class="col-calidad">Calidad</th>
+                                        <th>Valor</th>
                                         <th>Cantidad</th>
                                         <th>Fajos</th>
                                         <th>Picos</th>
@@ -103,7 +108,11 @@
                                         var idx = Model.ValueDetails.IndexOf(d);
                                         var key = (d.Id > 0 ? $"E{d.Id}" : $"NB{idx}");
                                         var prefixDetail = $"{prefix}.ValueDetails[{key}]";
-
+                                        bool? highFromDb = d.IsHighDenomination;
+                                        string highText = highFromDb.HasValue ? (highFromDb.Value ? "Alto" : "Bajo") : "—";
+                                        string highClass = highFromDb.HasValue
+                                        ? (highFromDb.Value ? "bg-primary" : "bg-secondary")
+                                        : "bg-light text-dark";
                                         <tr>
                                             <td style="display:none;">
                                                 <input type="hidden" name="@($"{prefix}.ValueDetails.Index")" value="@key" />
@@ -121,6 +130,17 @@
                                                         class="form-select form-select-sm js-quality"
                                                         data-selected="@d.QualityId">
                                                 </select>
+                                            </td>
+                                            <td class="text-center">
+                                                <span class="badge js-high-badge @highClass">@highText</span>
+                                                @if (highFromDb.HasValue)
+                                                {
+                                                    <input type="hidden" name="@($"{prefixDetail}.IsHighDenomination")" value="@(highFromDb.Value ? "true" : "false")" />
+                                                }
+                                                else
+                                                {
+                                                    <input type="hidden" name="@($"{prefixDetail}.IsHighDenomination")" value="" />
+                                                }
                                             </td>
                                             <td><input name="@($"{prefixDetail}.Quantity")" type="number" class="form-control form-control-sm js-calc" value="@d.Quantity" /></td>
                                             <td><input name="@($"{prefixDetail}.BundlesCount")" type="number" class="form-control form-control-sm js-calc" value="@d.BundlesCount" readonly /></td>
@@ -233,13 +253,12 @@
                             </button>
                         </div>
 
-                        <table class="table table-sm align-middle js-details-table"
-                               data-detail-scope="sobre-billete"
-                               data-fixed-kind="Billete">
+                        <table class="table table-sm align-middle js-details-table" data-detail-scope="sobre-billete" data-fixed-kind="Billete" data-has-high="true">
                             <thead>
                                 <tr>
                                     <th>Denominación</th>
                                     <th class="col-calidad">Calidad</th>
+                                    <th>Valor</th>
                                     <th>Cantidad</th>
                                     <th>Fajos</th>
                                     <th>Picos</th>
@@ -254,6 +273,11 @@
                                     var idx = Model.ValueDetails.IndexOf(d);
                                     var key = (d.Id > 0 ? $"E{d.Id}" : $"SB{idx}");
                                     var prefixDetail = $"{prefix}.ValueDetails[{key}]";
+                                    bool? highFromDb = d.IsHighDenomination;
+                                    string highText = highFromDb.HasValue ? (highFromDb.Value ? "Alto" : "Bajo") : "—";
+                                    string highClass = highFromDb.HasValue
+                                    ? (highFromDb.Value ? "bg-primary" : "bg-secondary")
+                                    : "bg-light text-dark";
                                     <tr>
                                         <td style="display:none;">
                                             <input type="hidden" name="@($"{prefix}.ValueDetails.Index")" value="@key" />
@@ -265,6 +289,17 @@
                                         </td>
                                         <td>
                                             <select name="@($"{prefixDetail}.QualityId")" class="form-select form-select-sm js-quality" data-selected="@d.QualityId"></select>
+                                        </td>
+                                        <td class="text-center">
+                                            <span class="badge js-high-badge @highClass">@highText</span>
+                                            @if (highFromDb.HasValue)
+                                            {
+                                                <input type="hidden" name="@($"{prefixDetail}.IsHighDenomination")" value="@(highFromDb.Value ? "true" : "false")" />
+                                            }
+                                            else
+                                            {
+                                                <input type="hidden" name="@($"{prefixDetail}.IsHighDenomination")" value="" />
+                                            }
                                         </td>
                                         <td><input name="@($"{prefixDetail}.Quantity")" type="number" class="form-control form-control-sm js-calc" value="@d.Quantity" /></td>
                                         <td><input name="@($"{prefixDetail}.BundlesCount")" type="number" class="form-control form-control-sm js-calc" value="@d.BundlesCount" readonly /></td>
@@ -370,11 +405,11 @@
                     <table class="table table-sm align-middle js-details-table" data-detail-scope="sobre-docs">
                         <thead>
                             <tr>
-                                <th style="width:100px">Tipo</th>
-                                <th style="width:140px">Cantidad</th>
-                                <th style="width:200px">Valor</th>
-                                <th style="width:200px">Monto</th>
-                                <th style="width:60px"></th>
+                                <th>Tipo</th>
+                                <th>Cantidad</th>
+                                <th>Valor</th>
+                                <th>Prueba</th>
+                                <th></th>
                             </tr>
                         </thead>
                         <tbody>
@@ -391,27 +426,28 @@
                                     </td>
 
                                     <td>
+                                        <select name="@($"{prefixDetail}.ValueType")" class="form-select form-select-sm" disabled>
+                                            <option value="Documento" selected>Documento</option>
+                                        </select>
+                                    </td>
+
+                                    <td>
                                         <input name="@($"{prefixDetail}.Quantity")"
                                                type="number"
                                                class="form-control form-control-sm js-calc"
                                                value="@(d.Quantity > 0 ? d.Quantity : 1)" />
                                     </td>
-
                                     <td>
                                         <input name="@($"{prefixDetail}.UnitValue")"
                                                type="number" step="1"
                                                class="form-control form-control-sm js-calc"
-                                               value="@(d.UnitValue ?? 0)" />
+                                               value="@d.UnitValue" />
                                     </td>
-
                                     <td>
                                         <input name="@($"{prefixDetail}.CalculatedAmount")"
-                                               type="number" step="1"
-                                               class="form-control form-control-sm"
-                                               value="@(d.CalculatedAmount)"
-                                               readonly />
+                                               type="number"
+                                               value="@d.CalculatedAmount" />
                                     </td>
-
                                     <td>
                                         <button type="button" class="btn btn-sm btn-outline-danger js-remove-detail">×</button>
                                     </td>

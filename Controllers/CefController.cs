@@ -445,14 +445,6 @@ namespace VCashApp.Controllers
             return View(pageVm);
         }
 
-        [HttpGet("ProcessTotals")]
-        [RequiredPermission(PermissionType.Edit, "CEF")]
-        public async Task<IActionResult> ProcessTotals(int transactionId)
-        {
-            var (declared, counted, diff) = await _cefContainerService.GetTransactionTotalsAsync(transactionId);
-            return Json(new { declared, counted, diff });
-        }
-
         [HttpPost("DeleteContainer")]
         [ValidateAntiForgeryToken]
         [RequiredPermission(PermissionType.Edit, "CEF")]

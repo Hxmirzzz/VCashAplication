@@ -44,6 +44,14 @@ namespace VCashApp.Models.ViewModels.CentroEfectivo
         /// Diferencia total entre valores declarados y contados.
         /// </summary>
         public decimal DifferenceAll { get; set; }
+
+        public decimal TotalOverallAll { get; set; }          // efectivo + cheques + documentos
+        public decimal CountedBillsAll { get; set; }          // solo billetes (alto+bajo)
+        public decimal CountedBillHighAll { get; set; }       // billete alta denominación
+        public decimal CountedBillLowAll { get; set; }        // billete baja denominación
+        public decimal CountedCoinsAll { get; set; }          // monedas
+        public decimal CountedDocsAll { get; set; }           // documentos
+        public decimal CountedChecksAll { get; set; }         // cheques
     }
 
     /// <summary>

@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using VCashApp.Data;
 
@@ -11,9 +12,11 @@ using VCashApp.Data;
 namespace VCashApp.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250903213855_AddNewTypeValueColumnToAdmDenominations")]
+    partial class AddNewTypeValueColumnToAdmDenominations
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1771,30 +1774,6 @@ namespace VCashApp.Migrations
                         .HasColumnType("int")
                         .HasColumnName("CodSucursal");
 
-                    b.Property<decimal>("CountedBillHighValue")
-                        .HasColumnType("DECIMAL(18,0)")
-                        .HasColumnName("ValorBilletesAltaContado");
-
-                    b.Property<decimal>("CountedBillLowValue")
-                        .HasColumnType("DECIMAL(18,0)")
-                        .HasColumnName("ValorBilletesBajaContado");
-
-                    b.Property<decimal>("CountedBillValue")
-                        .HasColumnType("DECIMAL(18,0)")
-                        .HasColumnName("ValorBilletesContado");
-
-                    b.Property<decimal>("CountedCheckValue")
-                        .HasColumnType("DECIMAL(18,0)")
-                        .HasColumnName("ValorChequesContado");
-
-                    b.Property<decimal>("CountedCoinValue")
-                        .HasColumnType("DECIMAL(18,0)")
-                        .HasColumnName("ValorMonedasContado");
-
-                    b.Property<decimal>("CountedDocumentValue")
-                        .HasColumnType("DECIMAL(18,0)")
-                        .HasColumnName("ValorDocumentosContado");
-
                     b.Property<DateTime?>("CountingEndDate")
                         .HasColumnType("DATETIME")
                         .HasColumnName("FechaFinConteo");
@@ -1876,15 +1855,6 @@ namespace VCashApp.Migrations
                         .HasMaxLength(450)
                         .HasColumnType("nvarchar(450)")
                         .HasColumnName("UsuarioUltimaActualizacionId");
-
-                    b.Property<decimal>("OverallCountedValue")
-                        .HasColumnType("DECIMAL(18,0)")
-                        .HasColumnName("ValorTotalGeneral");
-
-                    b.Property<string>("OverallCountedValueInWords")
-                        .HasMaxLength(255)
-                        .HasColumnType("nvarchar(255)")
-                        .HasColumnName("ValorTotalGeneralLetras");
 
                     b.Property<string>("ReceiverId")
                         .HasMaxLength(450)
@@ -2029,7 +1999,7 @@ namespace VCashApp.Migrations
                         .HasColumnType("nvarchar(10)")
                         .HasColumnName("EntidadBancaria");
 
-                    b.Property<bool>("IsHighDenomination")
+                    b.Property<bool?>("IsHighDenomination")
                         .HasColumnType("bit")
                         .HasColumnName("EsAltaDenominacion");
 

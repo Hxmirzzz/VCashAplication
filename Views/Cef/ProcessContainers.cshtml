@@ -27,7 +27,7 @@
                     <div class="tab-pane fade show active" role="tabpanel" data-step="1">
                         <div class="step-content">
                             <div class="card mb-3">
-                                <div class="row g-3 mb-3">
+                                <div class="row g-2 mb-3">
                                     <div class="col-12 col-xl-7">
                                         <div class="card h-100">
                                             <div class="card-header"><h6 class="mb-0">📋 Información del Servicio</h6></div>
@@ -54,7 +54,7 @@
                                             </div>
                                             <div class="card-body">
                                                 <input type="hidden" id="declaredTransaction" value="@Model.TotalDeclaredAll" />
-                                                <div class="row g-3">
+                                                <div class="row g-2">
                                                     <div class="col-12">
                                                         <div class="d-flex justify-content-between">
                                                             <span>Declarado:</span>
@@ -64,23 +64,29 @@
                                                     </div>
                                                     <div class="col-6">
                                                         <div class="d-flex justify-content-between">
-                                                            <span>Contado total</span>
+                                                            <span>Contado:</span>
                                                             <strong id="totCountedGlobal">@Model.TotalCountedAll.ToString("N0")</strong>
                                                         </div>
                                                     </div>
                                                     <div class="col-6">
                                                         <div class="d-flex justify-content-between">
-                                                            <span>Diferencia</span>
+                                                            <span>Diferencia:</span>
                                                             <strong id="totDiffGlobal" class="tile-diff">@Model.DifferenceAll.ToString("N0")</strong>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-12 mt-1">
+                                                        <div class="d-flex justify-content-between">
+                                                            <span>Total:</span>
+                                                            <strong id="totOverallGlobal">@Model.TotalOverallAll.ToString("N0")</strong>
                                                         </div>
                                                     </div>
                                                 </div>
 
-                                                <hr class="my-3">
+                                                <hr class="my-2">
 
                                                 <div class="row g-2 small">
-                                                    <div class="col-6"><span class="text-muted"># Bolsas:</span> <strong id="countBagsHeader">0</strong></div>
-                                                    <div class="col-6"><span class="text-muted"># Sobres:</span> <strong id="countEnvelopesHeader">0</strong></div>
+                                                    <div class="col-6"><span class="text-muted">Cant. Bolsas:</span> <strong id="countBagsHeader">0</strong></div>
+                                                    <div class="col-6"><span class="text-muted">Cant. Sobres:</span> <strong id="countEnvelopesHeader">0</strong></div>
                                                 </div>
                                             </div>
                                         </div>
@@ -241,7 +247,6 @@
                         </div>
                     </div>
 
-                    <!-- PASO 3: Resumen -->
                     <div class="tab-pane fade" role="tabpanel" data-step="2">
                         <div class="step-content">
                             <div class="card mb-3">
@@ -251,26 +256,32 @@
                                 </div>
                                 <div class="card-body">
                                     <div class="row g-3 stat-tiles">
-                                        <div class="col-12 col-md-4">
-                                          <div class="tile shadow-sm">
-                                            <div class="tile-label">Total declarado</div>
-                                            <div class="tile-value" id="sumDeclaredAllDisplay">@Model.TotalDeclaredAll.ToString("N0")</div>
-                                            <input type="hidden" id="sumDeclaredAll" value="@Model.TotalDeclaredAll.ToString("N0")" />
-                                          </div>
+                                        <div class="col-12 col-md-3">
+                                            <div class="tile shadow-sm">
+                                                <div class="tile-label">Total declarado</div>
+                                                <div class="tile-value" id="sumDeclaredAllDisplay">@Model.TotalDeclaredAll.ToString("N0")</div>
+                                                <input type="hidden" id="sumDeclaredAll" value="@Model.TotalDeclaredAll.ToString("N0")" />
+                                            </div>
                                         </div>
-                                        <div class="col-12 col-md-4">
-                                          <div class="tile shadow-sm">
-                                            <div class="tile-label">Total contado</div>
-                                            <div class="tile-value" id="sumCountedAllDisplay">@Model.TotalCountedAll.ToString("N0")</div>
-                                            <input type="hidden" id="sumCountedAll" value="@Model.TotalCountedAll.ToString("N0")" />
-                                          </div>
+                                        <div class="col-12 col-md-3">
+                                            <div class="tile shadow-sm">
+                                                <div class="tile-label">Total Contado</div>
+                                                <div class="tile-value" id="sumCountedAllDisplay">@Model.TotalCountedAll.ToString("N0")</div>
+                                                <input type="hidden" id="sumCountedAll" value="@Model.TotalCountedAll.ToString("N0")" />
+                                            </div>
                                         </div>
-                                        <div class="col-12 col-md-4">
-                                          <div class="tile shadow-sm">
-                                            <div class="tile-label">Diferencia</div>
-                                            <div class="tile-value tile-diff" id="sumDiffAllDisplay">@Model.DifferenceAll.ToString("N0")</div>
-                                            <input type="hidden" id="sumDiffAll" value="@Model.DifferenceAll.ToString("N0")" />
-                                          </div>
+                                        <div class="col-12 col-md-3">
+                                            <div class="tile shadow-sm">
+                                                <div class="tile-label">Diferencia</div>
+                                                <div class="tile-value tile-diff" id="sumDiffAllDisplay">@Model.DifferenceAll.ToString("N0")</div>
+                                                <input type="hidden" id="sumDiffAll" value="@Model.DifferenceAll.ToString("N0")" />
+                                            </div>
+                                        </div>
+                                        <div class="col-12 col-md-3">
+                                            <div class="tile shadow-sm">
+                                                <div class="tile-label">Total</div>
+                                                <div class="tile-value" id="sumOverallDisplay">@Model.TotalOverallAll.ToString("N0")</div>
+                                            </div>
                                         </div>
                                     </div>
                                     <hr class="my-4">
@@ -282,48 +293,53 @@
                                                     <ul class="list-group list-group-flush">
                                                         <li class="list-group-item d-flex justify-content-between align-items-center">
                                                             <span>Billetes</span>
-                                                            <span class="badge bg-primary rounded-pill" id="sumBillsCounted">0</span>
+                                                            <span class="badge bg-primary rounded-pill" id="sumBillsCounted">@Model.CountedBillsAll.ToString("N0")</span>
+                                                            <small class="text-muted ms-2 d-none d-md-inline">
+                                                                Alta: <strong id="sumBillHigh">@Model.CountedBillHighAll.ToString("N0")</strong>
+                                                            </small>
+                                                            <small class="text-muted ms-2 d-none d-md-inline">
+                                                                Baja: <strong id="sumBillLow">@Model.CountedBillLowAll.ToString("N0")</strong>
+                                                            </small>
                                                         </li>
                                                         <li class="list-group-item d-flex justify-content-between align-items-center">
                                                             <span>Monedas</span>
-                                                            <span class="badge bg-primary rounded-pill" id="sumCoinsCounted">0</span>
+                                                            <span class="badge bg-primary rounded-pill" id="sumCoinsCounted">@Model.CountedCoinsAll.ToString("N0")</span>
                                                         </li>
                                                         <li class="list-group-item d-flex justify-content-between align-items-center">
                                                             <span>Documentos/Voucher</span>
-                                                            <span class="badge bg-primary rounded-pill" id="sumDocsCounted">0</span>
+                                                            <span class="badge bg-primary rounded-pill" id="sumDocsCounted">@Model.CountedDocsAll.ToString("N0")</span>
                                                         </li>
                                                         <li class="list-group-item d-flex justify-content-between align-items-center">
                                                             <span>Cheques</span>
-                                                            <span class="badge bg-primary rounded-pill" id="sumChecksCounted">0</span>
+                                                            <span class="badge bg-primary rounded-pill" id="sumChecksCounted">@Model.CountedChecksAll.ToString("N0")</span>
                                                         </li>
                                                     </ul>
                                                     <div class="d-flex justify-content-between align-items-center mt-3">
-                                                        <small class="text-muted">Total contado (suma anterior)</small>
-                                                        <strong id="sumTotalCountedDisplay">0</strong>
+                                                        <small class="text-muted">Total</small>
+                                                        <strong id="sumTotalCountedDisplay">@Model.TotalOverallAll.ToString("N0")</strong>
                                                     </div>
                                                 </div>
                                             </div>
                                         </div>
 
-                                        <!-- Estructura de contenedores -->
                                         <div class="col-12 col-lg-6">
-                                          <div class="card h-100">
-                                            <div class="card-header"><h6 class="mb-0">🧰 Estructura de contenedores</h6></div>
-                                            <div class="card-body">
-                                              <div class="d-flex justify-content-between mb-2">
-                                                <span>Bolsas</span>
-                                                <span class="badge bg-secondary" id="countBags">0</span>
-                                              </div>
-                                              <div class="d-flex justify-content-between mb-3">
-                                                <span>Sobres</span>
-                                                <span class="badge bg-secondary" id="countEnvelopes">0</span>
-                                              </div>
+                                            <div class="card h-100">
+                                                <div class="card-header"><h6 class="mb-0">🧰 Estructura de bolsas</h6></div>
+                                                <div class="card-body">
+                                                    <div class="d-flex justify-content-between mb-2">
+                                                        <span>Bolsas</span>
+                                                        <span class="badge bg-secondary" id="countBags">0</span>
+                                                    </div>
+                                                    <div class="d-flex justify-content-between mb-3">
+                                                        <span>Sobres</span>
+                                                        <span class="badge bg-secondary" id="countEnvelopes">0</span>
+                                                    </div>
 
-                                              <div class="small text-muted mb-2">Por bolsa</div>
-                                              <div id="perBagList" class="list-group small">
-                                              </div>
+                                                    <div class="small text-muted mb-2">Por bolsa</div>
+                                                    <div id="perBagList" class="list-group small">
+                                                    </div>
+                                                </div>
                                             </div>
-                                          </div>
                                         </div>
                                     </div>
                                 </div>
@@ -619,12 +635,68 @@
           // =====================================================================
           // 2) UTILIDADES GENERALES
           // =====================================================================
-          function getPaneIndex($pane) {
-            const id = $pane.attr('id') || '';
-            const parts = id.split('-');
-            return parseInt(parts[parts.length - 1]) || 0;
+          function bagCount(){
+                return $('#bagsTabContent .tab-pane[id^="bag-tab-"]').length;
           }
-          function fmt(n){ return (Number(n)||0).toLocaleString(); }
+
+          function envelopeModesInBag($bagPane){
+              const modes = [];
+              $bagPane.find('.envelope-card').each(function(){
+                const mode = $(this).find('.container-editor .js-sobre-mode:checked').val();
+                if (mode) modes.push(mode);
+              });
+              return modes;
+          }
+
+          function nextAvailableEnvelopeType($bagPane){
+              const have = new Set(envelopeModesInBag($bagPane));
+              const order = ['Efectivo', 'Documento', 'Cheque'];
+              for (const t of order) if (!have.has(t)) return t;
+              return null;
+          }
+
+          function updateAddEnvelopeButtonState($bagPane){
+            const canAdd = !!nextAvailableEnvelopeType($bagPane);
+            const $btn = $bagPane.find('.js-add-envelope-in-this-bag');
+          
+            $btn.prop('disabled', !canAdd);
+          
+            if (!canAdd) {
+              $btn.attr('title','Ya tienes Efectivo, Documento y Cheque en esta bolsa');
+            } else {
+              $btn.removeAttr('title');
+            }
+          }
+
+          function getModeOwnerMap($bagPane){
+            const owners = {};
+            $bagPane.find('.envelope-card').each(function(){
+              const $card = $(this);
+              const mode = $card.find('.js-sobre-mode:checked').val();
+              if (mode) owners[mode] = $card;
+            });
+            return owners;
+          }
+
+          function updateEnvelopeModeRadios($bagPane){
+            const owners = getModeOwnerMap($bagPane);
+            const modes = ['Efectivo','Documento','Cheque'];
+
+            $bagPane.find('.envelope-card').each(function(){
+              const $card = $(this);
+              modes.forEach(m=>{
+                const $radio = $card.find(`.js-sobre-mode[value="${m}"]`);
+                if (!$radio.length) return;
+
+                const owner = owners[m];
+                const isOwner = owner && owner.get(0) === $card.get(0);
+
+                $radio.prop('disabled', !!owner && !isOwner);
+              });
+            });
+
+            updateAddEnvelopeButtonState($bagPane);
+          }
 
           function setSectionEnabled($section, enabled) {
             $section.find(':input').prop('disabled', !enabled);
@@ -737,9 +809,9 @@
           // Marca campos numéricos (ajusta/añade selectores si hace falta)
           function markNumericFields(){
             $('input[name$=".Quantity"], input[name$=".BundlesCount"], input[name$=".LoosePiecesCount"], input[name$=".UnitValue"], input[name$=".CalculatedAmount"]')
+              .filter(':not([type="hidden"])')
               .addClass('js-num js-num-int');
 
-            // cambiar a text para permitir separador de miles visual (y teclado numérico en móvil)
             $('.js-num').attr('type','text').attr('inputmode','numeric');
           }
 
@@ -755,24 +827,18 @@
             return s;
           }
 
-          // Devuelve { bills, coins, docs, checks, total } para un editor (bolsa o sobre)
           function breakdownForEditor($editor){
             const isSobre = containerTypeOf($editor) === 'Sobre';
 
             let bills = 0, coins = 0, docs = 0, checks = 0;
 
             if (!isSobre) {
-              // Bolsa
               bills = sumInputs($editor, '.sec-bolsa .js-details-table[data-detail-scope="bolsa-billete"] tbody input[name$=".CalculatedAmount"]');
               coins = sumInputs($editor, '.sec-bolsa .js-details-table[data-detail-scope="bolsa-moneda"]  tbody input[name$=".CalculatedAmount"]');
             } else {
-              // Sobre
-              // Efectivo:
               bills = sumInputs($editor, '.sec-sobre-cash .js-details-table[data-detail-scope="sobre-billete"] tbody input[name$=".CalculatedAmount"]');
               coins = sumInputs($editor, '.sec-sobre-cash .js-details-table[data-detail-scope="sobre-moneda"]  tbody input[name$=".CalculatedAmount"]');
-              // Docs:
               docs  = sumInputs($editor, '.sec-sobre-docs .js-details-table[data-detail-scope="sobre-docs"] tbody input[name$=".CalculatedAmount"]');
-              // Cheques:
               checks = sumInputs($editor, '.sec-sobre-cheque .js-cheques-table tbody input[name$=".CalculatedAmount"]');
             }
 
@@ -780,7 +846,6 @@
             return { bills, coins, docs, checks, total };
           }
 
-          // Actualiza badges de una TARJETA de sobre
           function updateEnvelopeBadges($envCard){
             const $editor = $envCard.find('.container-editor').first();
             const br = breakdownForEditor($editor);
@@ -791,15 +856,47 @@
             $envCard.find('.js-env-total').text(fmtInt(br.total));
           }
 
+          function setHighBadge($row, highVal) {
+            const $badge  = $row.find('.js-high-badge');
+            const $hidden = $row.find('input[name$=".IsHighDenomination"]');
+            if (!$badge.length || !$hidden.length) return;
+
+            if (highVal === null || typeof highVal === 'undefined') {
+              $badge.text('—')
+                .removeClass('bg-primary bg-secondary')
+                .addClass('bg-light text-dark');
+              $hidden.val('');
+            } else if (highVal) {
+              $badge.text('Alto')
+                .removeClass('bg-secondary bg-light text-dark')
+                .addClass('bg-primary');
+              $hidden.val('true');
+            } else {
+              $badge.text('Bajo')
+                .removeClass('bg-primary bg-light text-dark')
+                .addClass('bg-secondary');
+              $hidden.val('false');
+            }
+          }
+
+          function applyHighFromSelectedDenom($row) {
+            const $opt = $row.find('.js-denom option:selected');
+            if (!$opt.length) { setHighBadge($row, null); return; }
+            const attr = $opt.data('high');
+            const isHigh = (typeof attr === 'undefined') ? null : (String(attr) === 'true');
+            setHighBadge($row, isHigh);
+          }
+
           // =====================================================================
           // 3) CATÁLOGOS (DENOM / CALIDAD)
           // =====================================================================
           function getMoneyFlag(kind) {
             const k = (kind || '').toString().trim().toLowerCase();
-            if (k === 'billete' || k === 'billete') return 'B';
-            if (k === 'moneda' || k === 'moneda')  return 'M';
+            if (k === 'billete') return 'B';
+            if (k === 'moneda')  return 'M';
             return null;
           }
+
           function getDenomFamilyForRow($row) {
             const fam = $row.find('.js-denom option:selected').data('family');
             return (fam ? String(fam).toUpperCase() : 'T');
@@ -824,6 +921,7 @@
             const d = findDenom(kind, denomId);
             return d ? (d.family ?? d.familia ?? d.FamiliaDenominacion ?? d.fam ?? 'T') : 'T';
           }
+
           function denomOptionsHtml(kind, excludeValues = []) {
             const arr = (DENOMS && DENOMS[kind]) ? DENOMS[kind] : [];
             if (!arr.length) return '<option value="">-- Sin denominaciones --</option>';
@@ -834,8 +932,9 @@
               const value = d.value ?? d.valor ?? d.ValorDenominacion ?? d.valorDenominacion ?? '';
               const label = d.label ?? d.text ?? d.name ?? d.Denominacion ?? `${value}`;
               const fam   = (d.family ?? d.FamiliaDenominacion ?? 'T');
+              const high = !!(d.isHigh ?? d.AltaDenominacion);
               if (!excludeValues.includes(String(id))) {
-                html += `<option value="${id}" data-value="${value}" data-family="${fam}">${label}</option>`;
+                html += `<option value="${id}" data-value="${value}" data-family="${fam}" data-high="${high}">${label}</option>`;
               }
             });
             return html;
@@ -959,11 +1058,13 @@
             const isDocScope = $table.data('detail-scope') === 'sobre-docs';
 
             if (isDocScope) {
-              const qty = toNumber($row.find('input[name$=".Quantity"]').val()) || 1;
-              const unitValue = toNumber($row.find('input[name$=".UnitValue"]').val());
-              const amt = qty * unitValue;
-              $calcInput.val(amt.toFixed(0));
-              formatInput($calcInput);
+              const $unit = $row.find('input[name$=".UnitValue"]');
+              const unitVal = toNumber($unit.val());
+            
+              $calcInput.val(unitVal || '');
+            
+              formatInput($unit);
+            
               updateContainerSubtotal($row.closest('.container-editor'));
               return;
             }
@@ -1004,31 +1105,72 @@
             updateContainerSubtotal($ce);
           }
 
+          function billsHighLowForEditor($ce) {
+            let high = 0, low = 0;
+
+            const collect = ($scope) => {
+              $scope.find('tbody tr').each(function(){
+                const $r = $(this);
+                if (getRowKind($r) !== 'Billete') return;
+
+                const amt = toNumber($r.find('input[name$=".CalculatedAmount"]').val());
+                if (!amt) return;
+
+                let flag = $r.find('input[name$=".IsHighDenomination"]').val();
+
+                if (flag == null || flag === '') {
+                  const a = $r.find('.js-denom option:selected').data('high');
+                  if (typeof a !== 'undefined') flag = String(a);
+                }
+
+                if (String(flag) === 'true')      high += amt;
+                else if (String(flag) === 'false') low  += amt;
+              });
+            };
+
+            const typeVal = containerTypeOf($ce);
+            if (typeVal === 'Bolsa') {
+              collect($ce.find('.sec-bolsa .js-details-table[data-detail-scope="bolsa-billete"]'));
+            } else {
+              const mode = $ce.find('.js-sobre-mode:checked').val();
+              if (mode === 'Efectivo') {
+                collect($ce.find('.sec-sobre-cash .js-details-table[data-detail-scope="sobre-billete"]'));
+              }
+            }
+            return { high, low };
+          }
+
           function updateContainerSubtotal($ce) {
             let total = 0;
             const typeVal = containerTypeOf($ce);
 
             if (typeVal === 'Bolsa') {
-              $ce.find('.sec-bolsa .js-details-table tbody input[name$=".CalculatedAmount"]').each(function(){
-                total += toNumber($(this).val());
-              });
+              total += sumInputs($ce, '.sec-bolsa .js-details-table tbody input[name$=".CalculatedAmount"]');
             } else {
               const mode = $ce.find('.js-sobre-mode:checked').val();
               if (mode === 'Efectivo') {
-                $ce.find('.sec-sobre-cash .js-details-table tbody input[name$=".CalculatedAmount"]').each(function(){
-                  total += toNumber($(this).val());
-                });
+                total += sumInputs($ce, '.sec-sobre-cash .js-details-table tbody input[name$=".CalculatedAmount"]');
               } else if (mode === 'Documento') {
-                $ce.find('.sec-sobre-docs .js-details-table tbody input[name$=".CalculatedAmount"]').each(function(){
-                  total += toNumber($(this).val());
-                });
+                total += sumInputs($ce, '.sec-sobre-docs .js-details-table tbody input[name$=".CalculatedAmount"]');
               } else if (mode === 'Cheque') {
-                $ce.find('.sec-sobre-cheque .js-cheques-table tbody input[name$=".CalculatedAmount"]').each(function(){
-                  total += toNumber($(this).val());
-                });
+                total += sumInputs($ce, '.sec-sobre-cheque .js-cheques-table tbody input[name$=".CalculatedAmount"]');
               }
             }
-            $ce.find('.js-container-subtotal').text(Number(total).toLocaleString());
+
+            $ce.find('.js-container-subtotal').text(fmtInt(total));
+
+            const bl  = billsHighLowForEditor($ce);
+            const $blk = $ce.find('.js-sub-bills-block');
+
+            if ((bl.high + bl.low) > 0) {
+              $ce.find('.js-sub-bills-high, .js-bills-high').text(fmtInt(bl.high));
+              $ce.find('.js-sub-bills-low,  .js-bills-low').text(fmtInt(bl.low));
+              $blk.show();
+            } else {
+              $blk.hide();
+              $ce.find('.js-sub-bills-high, .js-bills-high').text('0');
+              $ce.find('.js-sub-bills-low,  .js-bills-low').text('0');
+            }
           }
 
           // =====================================================================
@@ -1074,24 +1216,34 @@
 
             updateContainerSubtotal($containerEditor);
           }
+
           function refreshAllParentBagCombos() {
             const bags = [];
             $('#bagsTabContent .tab-pane[id^="bag-tab-"]').each(function () {
-              const $bagPane = $(this);
-              const i = getPaneIndex($bagPane);
+              const $bagPane   = $(this);
               const $bagEditor = $bagPane.find('.container-editor').first();
-              const code = $bagEditor.find(`input[name="Containers[${i}].ContainerCode"]`).val() || '';
-              bags.push({ i, text: `Bolsa ${i + 1}${code ? ' — ' + code : ''}` });
+              const bagId = $bagEditor.find('input[name$=".Id"]').val() || '';
+              const code  = $bagEditor.find('input[name$=".ContainerCode"]').val() || '';
+              const idx   = $('#bagsTabContent .tab-pane[id^="bag-tab-"]').index($bagPane) + 1;
+              const label = code ? `Bolsa ${idx} — ${code}` : `Bolsa ${idx}`;
+              bags.push({ id: bagId, label });
             });
+
             $('.container-editor').each(function(){
               const $ce = $(this);
               if ($ce.find('.js-container-type').val() !== 'Sobre') return;
-              const prefix = $ce.data('prefix');
-              const $sel = $ce.find(`select[name="${prefix}.ParentContainerId"]`);
-              const selected = $sel.val();
-              $sel.empty().append($('<option/>', { value: '', text: '-- Seleccione bolsa --'}));
-              bags.forEach(b => $sel.append($('<option/>', { value: b.i, text: b.text })));
-              if (selected) $sel.val(selected);
+              const prefix   = $ce.data('prefix');
+              const $visible = $ce.find('.js-parent-bag-block select[name="VisibleBagName"]');
+              const $hidden  = $ce.find(`input[name="${prefix}.ParentContainerId"]`);
+
+              $visible.empty().append($('<option/>', { value:'', text:'-- Seleccione bolsa --' }));
+              bags.forEach(b => $visible.append($('<option/>', { value: b.id, text: b.label })));
+
+              if ($hidden.val()) $visible.val($hidden.val());
+
+              $visible.off('change.parentbag').on('change.parentbag', function(){
+                $hidden.val($(this).val() || '');
+              });
             });
           }
 
@@ -1101,6 +1253,7 @@
           function updateBagBadgeFromPane($bagPane){
             const tabId   = $bagPane.attr('id');
             const $tabBtn = $(`#bagsTabs button[data-bs-target="#${tabId}"]`);
+            const $envHdr = $bagPane.find('.js-env-badges');
 
             const $bagEd  = $bagPane.find('.container-editor').first();
             const brBag   = breakdownForEditor($bagEd);
@@ -1122,11 +1275,25 @@
             const coinsTotal = brBag.coins + brEnv.coins;
             const grandTotal = billsTotal + coinsTotal + brEnv.docs + brEnv.checks;
 
+            const envelopeBill = brEnv.bills;
+            const envelopeCoin = brEnv.coins;
+            const envelopeDoc  = brEnv.docs;
+            const envelopeCheck = brEnv.checks;
+            const envelopeTotal = envelopeBill + envelopeCoin + envelopeDoc + envelopeCheck;
+            
+
             $tabBtn.find('.js-bag-badge-bills').text(fmtInt(billsTotal));
             $tabBtn.find('.js-bag-badge-coins').text(fmtInt(coinsTotal));
             $tabBtn.find('.js-bag-badge-total') .text(fmtInt(grandTotal));
 
+            $envHdr.find('.js-env-bills').text(fmtInt(envelopeBill));
+            $envHdr.find('.js-env-coins').text(fmtInt(envelopeCoin));
+            $envHdr.find('.js-env-docs').text(fmtInt(envelopeDoc));
+            $envHdr.find('.js-env-checks').text(fmtInt(envelopeCheck));
+            $envHdr.find('.js-env-total').text(fmtInt(envelopeTotal));
+
             updateTabsOverflowState();
+            updateAddEnvelopeButtonState($bagPane);
           }
 
           function updateAllBagBadges(){
@@ -1162,8 +1329,7 @@
           function computeLiveSummary(){
             const declaredTotal = DECLARED_TX;
 
-            let countedTotal  = 0;
-            let bills = 0, coins = 0, docs = 0, checks = 0;
+            let bills = 0, coins = 0, docs = 0, checks = 0
             let bagsCount = 0, envCount = 0;
 
             $('#bagsTabContent .tab-pane .container-editor').each(function(){
@@ -1171,16 +1337,29 @@
               const isSobre = containerTypeOf($ce) === 'Sobre';
               const br = breakdownForEditor($ce);
 
-              countedTotal += br.total;
               bills        += br.bills;
               coins        += br.coins;
               docs         += br.docs;
               checks       += br.checks;
 
-              if (!isSobre) bagsCount++; else envCount++;
+              if(!isSobre) bagsCount++; else envCount++;
             });
 
-            return { declaredTotal, countedTotal, bills, coins, docs, checks, bagsCount, envCount };
+            const cashTotal = bills + coins;
+            const overallTotal = cashTotal + docs + checks;
+
+            return { declaredTotal, cashTotal, overallTotal, bills, coins, docs, checks, bagsCount, envCount };
+          }
+
+          // Suma global de billetes Alta/Baja a partir de todos los editores
+          function computeGlobalBillsHighLow(){
+            let high = 0, low = 0;
+            $('#bagsTabContent .container-editor').each(function(){
+              const bl = billsHighLowForEditor($(this));
+              high += bl.high;
+              low  += bl.low;
+            });
+            return { high, low };
           }
 
           // lista por bolsa (Declarado vs Contado)
@@ -1207,11 +1386,14 @@
           // pinta todo el resumen
           function updateProcessSummary(){
             const s = computeLiveSummary();
+            const bl = computeGlobalBillsHighLow();
 
             // Panel superior (Paso 1)
             $('#totDeclaredGlobal').text(fmtInt(s.declaredTotal));
-            $('#totCountedGlobal').text(fmtInt(s.countedTotal));
-            const diff = s.countedTotal - s.declaredTotal;
+            $('#totCountedGlobal').text(fmtInt(s.cashTotal));
+            $('#totOverallGlobal').text(fmtInt(s.overallTotal));
+
+            const diff = s.cashTotal - s.declaredTotal;
             $('#totDiffGlobal').text((diff>=0?'+':'') + fmtInt(diff))
               .removeClass('positive negative')
               .addClass(diff < 0 ? 'negative' : 'positive');
@@ -1220,20 +1402,30 @@
 
             // Panel del PASO 2 (tu resumen existente)
             $('#sumDeclaredAllDisplay').text(fmtInt(s.declaredTotal));
-            $('#sumCountedAllDisplay').text(fmtInt(s.countedTotal));
+            $('#sumCountedAllDisplay').text(fmtInt(s.cashTotal));
+            $('#sumOverallDisplay').text(fmtInt(s.overallTotal));
             $('#sumDiffAllDisplay').text((diff>=0?'+':'') + fmtInt(diff))
               .removeClass('positive negative')
               .addClass(diff < 0 ? 'negative' : 'positive');
+
+            $('#sumDeclaredAll').val(fmtInt(s.declaredTotal));
+            $('#sumCountedAll').val(fmtInt(s.cashTotal));
+            $('#sumDiffAll').val((diff>=0?'+':'') + fmtInt(diff));
 
             $('#sumBillsCounted').text(fmtInt(s.bills));
             $('#sumCoinsCounted').text(fmtInt(s.coins));
             $('#sumDocsCounted').text(fmtInt(s.docs));
             $('#sumChecksCounted').text(fmtInt(s.checks));
-            $('#sumTotalCountedDisplay').text(fmtInt(s.bills + s.coins + s.docs + s.checks));
+
+            $('#sumTotalCountedDisplay').text(fmtInt(s.overallTotal));
+
+            $('#sumBillHigh').text(fmtInt(bl.high));
+            $('#sumBillLow').text(fmtInt(bl.low));
+
             $('#countBags').text(s.bagsCount);
             $('#countEnvelopes').text(s.envCount);
 
-            renderPerBagList(); // si la sigues usando (solo mostrará “contado” por bolsa)
+            renderPerBagList();
           }
 
           // =====================================================================
@@ -1258,51 +1450,51 @@
               }
             }
           }
+
           function populateDenomsAndQuals() {
             document.querySelectorAll('table.js-details-table tbody tr').forEach(row => {
               const tipoSelect = row.querySelector('.js-vtype');
-              const tipo = tipoSelect?.value || "Billete";
+              const tipo = (tipoSelect?.value || 'Billete');
 
-              const denomSel = row.querySelector('.js-denom');
+              const denomSel   = row.querySelector('.js-denom');
               const qualitySel = row.querySelector('.js-quality');
-              if (!denomSel || !qualitySel || !DENOMS || !QUALS) return;
 
-              denomSel.innerHTML = "";
-              qualitySel.innerHTML = "";
+              if (!denomSel) return;
 
-              const denoms = DENOMS[tipo] || [];
-              denoms.forEach(d => {
-                const opt = document.createElement("option");
-                opt.value = d.id;
-                opt.textContent = d.label;
-                if (denomSel.dataset.selected == d.id.toString()) opt.selected = true;
-                denomSel.appendChild(opt);
-              });
+              denomSel.innerHTML = denomOptionsHtml(tipo);
+              if (denomSel.dataset.selected) {
+                denomSel.value = denomSel.dataset.selected;
+              }
 
-              const selectedDenomId = parseInt(denomSel.dataset.selected || denomSel.value);
-              const selectedDenom = denoms.find(x => x.id === selectedDenomId);
-              const family = selectedDenom?.family || "T";
+              if (qualitySel) {
+                qualitySel.innerHTML = '';
+                const denoms = (DENOMS && DENOMS[tipo]) ? DENOMS[tipo] : [];
+                const selectedDenomId = denomSel.dataset.selected || denomSel.value;
+                const selectedDenom = denoms.find(x => String(x.id) === String(selectedDenomId));
+                const family = (selectedDenom?.family || 'T').toString().toUpperCase();
 
-              let keepFamilies = [];
-              if (tipo === 'Billete' || tipo === 'Moneda') keepFamilies = ['N', 'A', 'T'];
-              else if (family === 'N') keepFamilies = ['N', 'T'];
-              else if (family === 'A') keepFamilies = ['A', 'T'];
-              else keepFamilies = ['T'];
+                let keepFamilies;
+                if (tipo === 'Billete' || tipo === 'Moneda') keepFamilies = ['N','A','T'];
+                else if (family === 'N') keepFamilies = ['N','T'];
+                else if (family === 'A') keepFamilies = ['A','T'];
+                else keepFamilies = ['T'];
 
-              const qualities = (QUALS[tipo.charAt(0)] || []).filter(q => {
-                const fam = (q.family ?? q.FamiliaDenominacion ?? 'T').toString().trim().toUpperCase();
-                return keepFamilies.includes(fam);
-              });
-              qualities.forEach(q => {
-                const opt = document.createElement("option");
-                opt.value = q.id;
-                opt.textContent = q.name;
-                if (qualitySel.dataset.selected == q.id.toString()) opt.selected = true;
-                qualitySel.appendChild(opt);
-              });
+                const arr = (QUALS && QUALS[tipo.charAt(0)]) ? QUALS[tipo.charAt(0)] : [];
+                arr
+                  .filter(q => keepFamilies.includes(String(q.family ?? q.FamiliaDenominacion ?? 'T').toUpperCase()))
+                  .forEach(q => {
+                    const opt = document.createElement('option');
+                    opt.value = q.id;
+                    opt.textContent = q.name ?? q.QualityName ?? '';
+                    if (qualitySel.dataset.selected == String(q.id)) opt.selected = true;
+                    qualitySel.appendChild(opt);
+                  });
+              }
             });
+
             setTimeout(initializeExistingData, 50);
           }
+
           function initializeExistingData() {
             $('table.js-details-table tbody tr').each(function() {
               const $row = $(this);
@@ -1314,6 +1506,14 @@
                   calculateBundlesAndLoose($row);
                 }
                 triggerAmountCalculation($row);
+              }
+              const $hid = $row.find('input[name$=".IsHighDenomination"]');
+              if (getRowKind($row) === 'Billete' && $row.find('.js-high-badge').length) {
+                if ($hid.length && $hid.val() !== undefined && $hid.val() !== '') {
+                  setHighBadge($row, $hid.val() === 'true');
+                } else {
+                  applyHighFromSelectedDenom($row);
+                }
               }
             });
           }
@@ -1385,6 +1585,8 @@
             const hasQualityColInTable = $table.find('thead th')
               .filter(function(){ return $(this).text().trim().toLowerCase().includes('calidad'); }).length > 0;
 
+            const hasHighColInTable = String($table.data('has-high')) === 'true';
+
             let cells = '';
 
             cells += `
@@ -1419,6 +1621,14 @@
                 </td>`;
             }
 
+            if ((fixedKind === 'Billete' || scope === 'sobre-billete' || scope === 'bolsa-billete') && hasHighColInTable) {
+              cells += `
+                <td class="text-center">
+                  <span class="badge js-high-badge bg-light text-dark">—</span>
+                  <input type="hidden" name="${name('IsHighDenomination')}" value="">
+                </td>`;
+            }
+
             cells += `
               <td><input name="${name('Quantity')}" type="number" class="form-control form-control-sm js-calc" /></td>`;
 
@@ -1429,16 +1639,26 @@
             }
 
             if (showUnit) {
+              const unitReadonly = (scope === 'sobre-docs') ? '' : ' readonly';
               cells += `
-                <td><input name="${name('UnitValue')}" type="number" step="1" class="form-control form-control-sm js-calc" readonly /></td>`;
+                <td><input name="${name('UnitValue')}" type="number" step="1"
+                           class="form-control form-control-sm js-calc"${unitReadonly} /></td>`;
             }
 
+            if (scope === 'sobre-docs') {
+              cells += `<td style="display:none;"><input name="${name('CalculatedAmount')}" type="hidden" /></td>`;
+            } else {
+              cells += `<td><input name="${name('CalculatedAmount')}" type="number" step="1" class="form-control form-control-sm" readonly /></td>`;
+            }
             cells += `
-              <td><input name="${name('CalculatedAmount')}" type="number" step="1" class="form-control form-control-sm" readonly /></td>
               <td><button type="button" class="btn btn-sm btn-outline-danger js-remove-detail">×</button></td>`;
 
             $table.find('tbody').append(`<tr>${cells}</tr>`);
             const $newRow = $table.find('tbody tr').last();
+
+            if (getRowKind($newRow) === 'Billete') {
+              applyHighFromSelectedDenom($newRow);
+            }
 
             if (hasQualityColInTable && showQuality) updateQualityForRow($newRow);
 
@@ -1533,16 +1753,21 @@
             updateAvailableDenominations($table);
             updateQualitiesInTable($table);
           });
+
           $(document).on('change', '.js-denom', function () {
             const $table = $(this).closest('table');
             const $row   = $(this).closest('tr');
 
             updateQualityForRow($row);
+            if (getRowKind($row) === 'Billete') {
+              applyHighFromSelectedDenom($row);
+            }
             updateQualitiesInTable($table);
 
             calculateBundlesAndLoose($row);
             triggerAmountCalculation($row);
           });
+
           $(document).on('change', '.js-quality', function(){
             const $table = $(this).closest('table');
             updateQualitiesInTable($table);
@@ -1573,6 +1798,11 @@
           // 10) BOLSAS Y SOBRES (AGREGAR/QUITAR/TOGGLES)
           // =====================================================================
           $('#btnAddBag').on('click', function () {
+            if (bagCount() >= 7) {
+              Swal.fire('Límite de bolsas', 'Solo puedes agregar hasta 7 bolsas en la transacción.', 'info');
+              return;
+            }
+
             const $tabs = $('#bagsTabs');
             const $contents = $('#bagsTabContent');
             const realTransactionId = $('#CefTransactionId').val();
@@ -1639,13 +1869,17 @@
 
           $(document).on('click', '.js-add-envelope-in-this-bag', function () {
             const $bagPane = $(this).closest('.tab-pane[id^="bag-tab-"]');
-            const bagIdx = getPaneIndex($bagPane);
+            const typeToUse = nextAvailableEnvelopeType($bagPane);
             const envIdx = nextIdx++;
             const realtransactionId = $('#CefTransactionId').val();
-
             const $bagEditor = $bagPane.find('.container-editor').first();
             const realBagId = $bagEditor.find('input[name$=".Id"]').val();
             const bagLabel  = $bagEditor.find('input[name$=".ContainerCode"]').val();
+
+            if (!typeToUse) {
+              Swal.fire('Límite de sobres', 'No puedes agregar más sobres a esta bolsa.', 'info');
+              return;
+            }
 
             let html = $('#envelope-template').html().replaceAll('__idx__', envIdx);
             const $card = $(html);
@@ -1664,12 +1898,14 @@
             $visualSelect.empty().append(`<option value="${realBagId}" selected>${bagLabel}</option>`);
 
             toggleContainerSections($envEditor);
-            $envEditor.find('.js-sobre-mode[value="Efectivo"]').prop('checked', true);
+            $envEditor.find(`.js-sobre-mode[value="${typeToUse}"]`).prop('checked', true);
             toggleSobreMode($envEditor);
 
             markNumericFields();
             formatAllNumbers();
             refreshAllParentBagCombos();
+            updateAddEnvelopeButtonState($bagPane);
+            updateEnvelopeModeRadios($bagPane);
             setTimeout(updateAllBagBadges, 0);
           });
 
@@ -1710,16 +1946,12 @@
                 }
               }).done(function (r) {
                 if (r && r.success) {
-                  $card.remove();
-                  refreshAllParentBagCombos();
-                  updateAllBagBadges();
-
-                  $.get('@Url.Action("ProcessTotals")', { transactionId: transactionId })
-                  .done(function(t) {
-                    setSummaryTotals(t.declared, t.counted, t.diff);
-                  });
-
-                  Swal.fire('Eliminado', 'El sobre fue eliminado correctamente.', 'success');
+                    Swal.fire('Eliminado', 'El sobre fue eliminado correctamente.', 'success')
+                    .then(() => {
+                        skipUnload = true;
+                        window.location.reload();
+                    });
+                    return;
                 } else {
                   Swal.fire('Atención', (r && r.message) || 'No se pudo eliminar el sobre.', 'info');
                 }
@@ -1740,8 +1972,11 @@
             toggleContainerSections($ce);
             refreshAllParentBagCombos();
           });
+
           $(document).on('change', '.js-sobre-mode', function () {
             const $ce = $(this).closest('.container-editor');
+            const $bagPane = $ce.closest('.tab-pane[id^="bag-tab-"]');
+
             toggleSobreMode($ce);
 
             const mode = $ce.find('.js-sobre-mode:checked').val();
@@ -1750,8 +1985,10 @@
                 triggerAmountCalculation($(this));
               });
             }
+
             updateContainerSubtotal($ce);
             updateProcessSummary();
+            updateEnvelopeModeRadios($bagPane);
           });
 
           // =====================================================================
@@ -1953,6 +2190,10 @@
               const selected = $sel.data('selected') || $sel.val() || '';
               $sel.html(bankOptionsHtml(selected));
             }
+          });
+          $('#bagsTabContent .tab-pane[id^="bag-tab-"]').each(function(){
+            updateAddEnvelopeButtonState($(this));
+            updateEnvelopeModeRadios($(this));
           });
           setTimeout(updateAllBagBadges, 150);
           updateProcessSummary();

@@ -83,15 +83,40 @@ namespace VCashApp.Models.Entities
         [Column("ValorTotalDeclaradoLetras")]
         public string? TotalDeclaredValueInWords { get; set; }
 
+        [Column("ValorBilletesAltaContado", TypeName = "DECIMAL(18,0)")]
+        public decimal CountedBillHighValue { get; set; }
+
+        [Column("ValorBilletesBajaContado", TypeName = "DECIMAL(18,0)")]
+        public decimal CountedBillLowValue { get; set; }
+
+        [Column("ValorBilletesContado", TypeName = "DECIMAL(18,0)")]
+        public decimal CountedBillValue { get; set; }
+
+        [Column("ValorMonedasContado", TypeName = "DECIMAL(18,0)")]
+        public decimal CountedCoinValue { get; set; }
+
         [Column("ValorTotalContado", TypeName = "DECIMAL(18,0)")]
-        public decimal TotalCountedValue { get; set; } // Calculado, no se persiste directamente si siempre es la suma de detalles
+        public decimal TotalCountedValue { get; set; }
 
         [StringLength(255)]
         [Column("ValorTotalContadoLetras")]
         public string? TotalCountedValueInWords { get; set; }
 
         [Column("DiferenciaValor", TypeName = "DECIMAL(18,0)")]
-        public decimal ValueDifference { get; set; } // Calculado
+        public decimal ValueDifference { get; set; }
+
+        [Column("ValorChequesContado", TypeName = "DECIMAL(18,0)")]
+        public decimal CountedCheckValue { get; set; }
+
+        [Column("ValorDocumentosContado", TypeName = "DECIMAL(18,0)")]
+        public decimal CountedDocumentValue { get; set; }
+
+        [Column("ValorTotalGeneral", TypeName = "DECIMAL(18,0)")]
+        public decimal OverallCountedValue { get; set; }
+
+        [StringLength(255)]
+        [Column("ValorTotalGeneralLetras")]
+        public string? OverallCountedValueInWords { get; set; }
 
         [StringLength(255)]
         [Column("NovedadInformativa")]

@@ -2065,6 +2065,54 @@
         <member name="M:VCashApp.Migrations.DeleteDeclaredValueColumnOfCefContainerTable.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
             <inheritdoc />
         </member>
+        <member name="T:VCashApp.Migrations.AddTypeValueColumnToAdmDenominations">
+            <inheritdoc />
+        </member>
+        <member name="M:VCashApp.Migrations.AddTypeValueColumnToAdmDenominations.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:VCashApp.Migrations.AddTypeValueColumnToAdmDenominations.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:VCashApp.Migrations.AddTypeValueColumnToAdmDenominations.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="T:VCashApp.Migrations.AddNewTypeValueColumnToAdmDenominations">
+            <inheritdoc />
+        </member>
+        <member name="M:VCashApp.Migrations.AddNewTypeValueColumnToAdmDenominations.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:VCashApp.Migrations.AddNewTypeValueColumnToAdmDenominations.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:VCashApp.Migrations.AddNewTypeValueColumnToAdmDenominations.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="T:VCashApp.Migrations.SetNotNullToIsHighDenominationToCefValueDetailsTable">
+            <inheritdoc />
+        </member>
+        <member name="M:VCashApp.Migrations.SetNotNullToIsHighDenominationToCefValueDetailsTable.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:VCashApp.Migrations.SetNotNullToIsHighDenominationToCefValueDetailsTable.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:VCashApp.Migrations.SetNotNullToIsHighDenominationToCefValueDetailsTable.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="T:VCashApp.Migrations.AddCashValuesToCefTransactionTable">
+            <inheritdoc />
+        </member>
+        <member name="M:VCashApp.Migrations.AddCashValuesToCefTransactionTable.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:VCashApp.Migrations.AddCashValuesToCefTransactionTable.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:VCashApp.Migrations.AddCashValuesToCefTransactionTable.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
         <member name="T:VCashApp.Models.ViewModels.BranchViewModel">
             <summary>
             Representa la información principal de una sucursal.
@@ -3057,13 +3105,6 @@
             Elimina un contenedor de efectivo y sus detalles asociados.
             </summary>
             <returns>true si se eliminó correctamente, false si no se encontró el contenedor.</returns>
-        </member>
-        <member name="M:VCashApp.Services.ICefContainerService.GetTransactionTotalsAsync(System.Int32)">
-            <summary>
-            Obtiene los totales de un contenedor de efectivo para una transacción específica.
-            </summary>
-            <param name="transactionId"></param>
-            <returns></returns>
         </member>
         <member name="M:VCashApp.Services.ICefContainerService.GetContainerWithDetailsAsync(System.Int32)">
             <summary>

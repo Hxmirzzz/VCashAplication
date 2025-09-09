@@ -25,5 +25,6 @@ namespace VCashApp.Models.Entities
         public string? TeclaAsociada { get; set; }
 
         public string? UnidadExistencias { get; set; }
+        public bool AltaDenominacion { get; set; }
     }
 }

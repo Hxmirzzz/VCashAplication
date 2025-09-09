@@ -32,13 +32,6 @@ namespace VCashApp.Services
         Task<bool> DeleteContainerAsync(int transactionId, int containerId);
 
         /// <summary>
-        /// Obtiene los totales de un contenedor de efectivo para una transacción específica.
-        /// </summary>
-        /// <param name="transactionId"></param>
-        /// <returns></returns>
-        Task<(decimal declared, decimal counted, decimal diff)> GetTransactionTotalsAsync(int transactionId);
-
-        /// <summary>
         /// Obtiene un contenedor de efectivo por su ID, incluyendo sus detalles de valores y novedades.
         /// </summary>
         /// <param name="containerId">ID del contenedor.</param>

@@ -565,7 +565,6 @@ namespace VCashApp.Data
                 entity.Property(v => v.UnitValue).HasColumnType("DECIMAL(18,0)");
                 entity.Property(v => v.CalculatedAmount).HasColumnType("DECIMAL(18,0)");
                 // .HasComputedColumnSql("ISNULL(d.Denomination, d.UnitValue) * d.Quantity", stored: true); // Almacenado para consistencia
-                entity.Property(v =>v.IsHighDenomination).IsRequired(false);
                 entity.Property(v => v.IssueDate).HasColumnType("DATE");
                 entity.Property(v => v.Observations).HasMaxLength(255);
 

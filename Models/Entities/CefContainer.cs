@@ -39,13 +39,13 @@ namespace VCashApp.Models.Entities
         public string? EnvelopeSubType { get; set; } // null para Bolsa; 'Efectivo' | 'Documento' | 'Cheque' para Sobre
 
         [Column("ValorContado", TypeName = "DECIMAL(18,0)")]
-        public decimal? CountedValue { get; set; } // Valor contado real, calculado de los detalles
+        public decimal? CountedValue { get; set; }
 
         [Required]
         [StringLength(50)]
         [Column("EstadoContenedor")]
         public string ContainerStatus { get; set; } // Estado: 'Pending', 'InProcess', 'Counted', 'Verified', 'WithIncident'
-
+        
         [StringLength(255)]
         [Column("Observaciones")]
         public string? Observations { get; set; } // Observaciones específicas del contenedor

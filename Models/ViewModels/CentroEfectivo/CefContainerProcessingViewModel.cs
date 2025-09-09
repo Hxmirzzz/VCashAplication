@@ -106,7 +106,7 @@ namespace VCashApp.Models.ViewModels.CentroEfectivo
         public decimal CalculatedAmount { get; set; }
 
         [Display(Name = "¿Es de Alta Denominación?")]
-        public bool? IsHighDenomination { get; set; }
+        public bool IsHighDenomination { get; set; }
 
         [Display(Name = "Entidad Bancaria")]
         public string? EntitieBankId { get; set; }
