@@ -870,6 +870,14 @@
             
             <returns>Vista de procesamiento de contenedores.</returns>
         </member>
+        <member name="M:VCashApp.Controllers.CefController.DeleteContainer(System.Int32,System.Int32)">
+            <summary>
+            Elimina un contenedor específico de una transacción CEF.
+            </summary>
+            <param name="transactionId">Id de la transaccion</param>
+            <param name="containerId">Id del contenedor</param>
+            <returns>Eliminar un contenedor seleccionado</returns>
+        </member>
         <member name="M:VCashApp.Controllers.CefController.ProcessContainers(System.Int32,VCashApp.Models.ViewModels.CentroEfectivo.CefProcessContainersPageViewModel)">
             <summary>
             Procesa el envío del formulario de procesamiento de contenedores (guardar detalles y novedades).
@@ -2925,6 +2933,23 @@
         <member name="M:VCashApp.Services.Cef.CefContainerService.SaveContainerAndDetailsAsync(VCashApp.Models.ViewModels.CentroEfectivo.CefContainerProcessingViewModel,System.String)">
             <inheritdoc/>
         </member>
+        <member name="M:VCashApp.Services.Cef.CefContainerService.GetPointCapsAsync(System.String)">
+            <summary>
+            Obtiene las capacidades de puntos para sobres, documentos y cheques.
+            </summary>
+            <param name="serviceOrderId">Identificador del servicio</param>
+            <returns>Tupla con capacidades (sobres, documentos, cheques)</returns>
+            <exception cref="T:System.InvalidOperationException"></exception>
+        </member>
+        <member name="M:VCashApp.Services.Cef.CefContainerService.DeleteContainerAsync(System.Int32,System.Int32)">
+            <summary>
+            Elimina un contenedor y sus detalles asociados.
+            </summary>
+            <param name="transactionId">Id de la transaccion</param>
+            <param name="containerId">Id del contenedor</param>
+            <returns></returns>
+            <exception cref="T:System.InvalidOperationException"></exception>
+        </member>
         <member name="M:VCashApp.Services.Cef.CefContainerService.GetContainerWithDetailsAsync(System.Int32)">
             <inheritdoc/>
         </member>
@@ -3139,6 +3164,7 @@
             </summary>
             <returns>Lista de las entidades bancarias.</returns>
         </member>
+        <!-- Badly formed XML comment ignored for member "M:VCashApp.Services.ICefContainerService.GetPointCapsAsync(System.String)" -->
         <member name="T:VCashApp.Services.ICefIncidentService">
             <summary>
             Define las operaciones de servicio para la gestión de Novedades de Centro de Efectivo.

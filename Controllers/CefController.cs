@@ -436,23 +436,54 @@ namespace VCashApp.Controllers
             await SetCommonViewBagsCefAsync(currentUser, "Procesar Contenedores CEF");
 
             var pageVm = await _cefContainerService.PrepareProcessContainersPageAsync(transactionId);
+            var caps = await _cefContainerService.GetPointCapsAsync(pageVm.Service.ServiceOrderId);
 
             ViewBag.IncidentTypes = (await _cefIncidentService.GetAllIncidentTypesAsync()).Select(it => new SelectListItem { Value = it.Code, Text = it.Description }).ToList();
             ViewBag.DenomsJson = await _cefContainerService.BuildDenomsJsonForTransactionAsync(transactionId);
             ViewBag.QualitiesJson = await _cefContainerService.BuildQualitiesJsonAsync();
             ViewBag.BanksJson = await _cefContainerService.BuildBankEntitiesJsonAsync();
+            ViewBag.PointCapsJson = System.Text.Json.JsonSerializer.Serialize(new
+            {
+                sobres = caps.sobres,
+                documentos = caps.documentos,
+                cheques = caps.cheques
+            }, new System.Text.Json.JsonSerializerOptions
+            {
+                PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase
+            });
 
             return View(pageVm);
         }
 
+
+        /// <summary>
+        /// Elimina un contenedor específico de una transacción CEF.
+        /// </summary>
+        /// <param name="transactionId">Id de la transaccion</param>
+        /// <param name="containerId">Id del contenedor</param>
+        /// <returns>Eliminar un contenedor seleccionado</returns>
         [HttpPost("DeleteContainer")]
         [ValidateAntiForgeryToken]
         [RequiredPermission(PermissionType.Edit, "CEF")]
         public async Task<IActionResult> DeleteContainer(int transactionId, int containerId)
         {
-            var ok = await _cefContainerService.DeleteContainerAsync(transactionId, containerId);
-            if (!ok) return NotFound();
-            return Json(new { success = true });
+            try
+            {
+                var ok = await _cefContainerService.DeleteContainerAsync(transactionId, containerId);
+                if (ok)
+                    return Json(new { success = true });
+
+                return Json(new { success = false, message = "No se pudo eliminar el contenedor. Verifique que no tenga datos asociados." });
+            }
+            catch (InvalidOperationException ex)
+            {
+                return Json(new { success = false, message = ex.Message });
+            }
+            catch (Exception)
+            {
+                return Json(new { success = false, message = "Ocurrió un error inesperado al eliminar el contenedor." });
+            }
+
         }
 
         /// <summary>

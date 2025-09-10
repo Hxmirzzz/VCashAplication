@@ -29,6 +29,7 @@
     --toggle-button-size: 40px;
     --sidebar-padding-x: 1.5rem; /* ~24px */
     --sidebar-vertical-padding: 20px; /* Top/bottom padding for the entire sidebar */
+    --bags-pane-h: 64vh;
     /* Theme Variables (Default/Light Theme Values) */
     --body-bg: linear-gradient(90deg, #e2e2e2, #c9d6ff); /* Used by html, body, app-wrapper */
     --div-bg: #fff; /* Used by sidebar, main-content, toggle-button, submenu */

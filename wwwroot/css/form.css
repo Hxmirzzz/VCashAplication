@@ -55,7 +55,7 @@ label {
     text-align: left;
     border-top-left-radius: .75rem;
     border-top-right-radius: .75rem;
-    padding: 1rem 1.25rem;
+    padding: .55rem .9rem;
     font-size: 1rem;
     font-weight: var(--font-semi-bold);
     display: flex;
@@ -707,6 +707,154 @@ textarea.form-control {
         margin-bottom: 0;
     }
 
+/* ================================================================
+   STEP 1: fijos arriba (Info + Totales) y scroll sólo en "Bolsas"
+   ================================================================= */
+
+.tab-pane[data-step="1"] .step-content > .card {
+    display: flex;
+    flex-direction: column;
+}
+
+    .tab-pane[data-step="1"] .step-content > .card > .card-body:last-child {
+        max-height: var(--bags-pane-h);
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+    }
+
+        .tab-pane[data-step="1"] .step-content > .card > .card-body:last-child .tabs-scroll-wrap {
+            position: sticky;
+            top: 0;
+            z-index: 3;
+            background: var(--div-bg);
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .tab-pane[data-step="1"] .step-content > .card > .card-body:last-child .tab-content {
+            flex: 1 1 auto;
+            overflow-y: auto;
+            min-height: 0;
+            padding-right: .5rem;
+        }
+            .tab-pane[data-step="1"] .step-content > .card > .card-body:last-child .tab-content::-webkit-scrollbar {
+                width: 8px;
+            }
+            .tab-pane[data-step="1"] .step-content > .card > .card-body:last-child .tab-content::-webkit-scrollbar-thumb {
+                border-radius: 8px;
+                background: rgba(0,0,0,.15);
+            }
+
+/* --- Ajuste de espacio: comprimimos un poco los cards superiores en step 1 --- */
+.tab-pane[data-step="1"] .row.g-2.mb-3 .card-header {
+    padding: .55rem .9rem;
+}
+
+.tab-pane[data-step="1"] .row.g-2.mb-3 .card-body {
+    padding: .75rem .9rem;
+}
+/* Reducir un poco el gap inferior del bloque superior para dar más cancha a Bolsas */
+.tab-pane[data-step="1"] .row.g-2.mb-3 {
+    margin-bottom: .5rem !important;
+}
+
+.top-summary .card-body {
+    padding: .6rem .75rem;
+}
+
+.meta-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: grid;
+    grid-template-columns: auto 1fr;
+    font-size: var(--smaller-font-size);
+    color: var(--text-color-main);
+    column-gap: .5rem;
+    row-gap: .15rem;
+}
+
+.meta-list li {
+    display: contents;
+}
+
+.meta-k {
+    font-weight: var(--font-semi-bold);
+    color: var(--text-color-main);
+}
+
+.meta-v {
+    color: var(--title-color-main);
+    font-weight: 600;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    column-gap: .75rem;
+    row-gap: .2rem;
+    align-items: baseline;
+}
+
+    .stats-grid .label {
+        color: var(--text-color-main);
+    }
+
+    .stats-grid .value {
+        color: var(--title-color-main);
+        font-weight: 700;
+        text-align: right;
+    }
+
+    .stats-grid .divider-xs {
+        grid-column: 1/-1;
+        height: 1px;
+        background: var(--border-color);
+        margin: .15rem 0;
+    }
+
+.chip-live {
+    font-size: var(--smaller-font-size);
+    padding: .15rem .45rem;
+    line-height: 1;
+    border-radius: 999px;
+    background: var(--hover-bg);
+    color: var(--text-color-main);
+}
+
+/* Tabs de Bolsas: cada li prepara espacio para el botón de cierre */
+#bagsTabs > li.nav-item {
+    position: relative;
+    padding-right: 0.1rem;
+}
+
+#bagsTabs .js-close-bag-tab {
+    z-index: 5;
+}
+
+#bagsTabs .nav-link {
+    position: relative;
+    padding-right: 0.5rem;
+}
+
+    #bagsTabs .nav-link .tab-close {
+        top: 50%;
+        right: .4rem;
+        font-size: .8rem;
+        color: var(--grey2);
+        cursor: pointer;
+        z-index: 1;
+        border-radius: 50%;
+        transition: background-color .2s ease, color .2s ease;
+    }
+
+        #bagsTabs .nav-link .tab-close:hover {
+            background-color: var(--hover-bg);
+            color: var(--text-color-main);
+            opacity: 1;
+        }
 
 /* ===================================================================
    MEDIA QUERIES (móvil / tablet)
@@ -758,6 +906,18 @@ textarea.form-control {
         .container-editor .table th, .container-editor .table td {
             padding: .4rem .5rem;
         }
+}
+
+@media (min-width: 1400px) {
+    .tab-pane[data-step="1"] .step-content > .card > .card-body:last-child {
+        --bags-pane-h: 72vh;
+    }
+}
+
+@media (max-width: 1199.98px) {
+    .tab-pane[data-step="1"] .step-content > .card > .card-body:last-child {
+        --bags-pane-h: 58vh;
+    }
 }
 
 /* ===================================================================

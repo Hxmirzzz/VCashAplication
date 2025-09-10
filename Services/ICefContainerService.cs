@@ -63,5 +63,12 @@ namespace VCashApp.Services
         /// </summary>
         /// <returns>Lista de las entidades bancarias.</returns>
         Task<string> BuildBankEntitiesJsonAsync();
+
+        /// <summary>
+        /// Obtiene las capacidades de puntos para sobres, documentos y cheques.
+        /// <param name="serviceOrderId">: ID de la orden de servicio.</param>
+        /// <remarks>Las capacidades se determinan según la configuración del punto de servicio asociado a la orden de servicio.</remarks>
+        /// <returns>Tupla con las capacidades (sobres, documentos, cheques).</returns>
+        Task<(bool sobres, bool documentos, bool cheques)> GetPointCapsAsync(string serviceOrderId);
     }
 }

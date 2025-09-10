@@ -27,20 +27,30 @@
                     <div class="tab-pane fade show active" role="tabpanel" data-step="1">
                         <div class="step-content">
                             <div class="card mb-3">
-                                <div class="row g-2 mb-3">
+                                <div class="row g-2 mb-2 top-summary">
                                     <div class="col-12 col-xl-7">
                                         <div class="card h-100">
-                                            <div class="card-header"><h6 class="mb-0">📋 Información del Servicio</h6></div>
-                                            <div class="card-body">
-                                                <div class="row g-2 small">
-                                                    <div class="col-6 col-lg-4"><strong>Planilla:</strong> @Model.Transaction.SlipNumber</div>
-                                                    <div class="col-6 col-lg-4"><strong>Orden:</strong> @Model.Service.ServiceOrderId</div>
-                                                    <div class="col-6 col-lg-4"><strong>Sucursal:</strong> @Model.Service.BranchName</div>
-                                                    <div class="col-6 col-lg-4"><strong>Cliente:</strong> @Model.Service.ClientName</div>
-                                                    <div class="col-6 col-lg-4"><strong>Concepto:</strong> @Model.Service.ConceptName</div>
-                                                    <div class="col-6 col-lg-4"><strong>Divisa:</strong> @Model.Transaction.Currency</div>
-                                                    <div class="col-6"><strong>Origen:</strong> @Model.Service.OriginName</div>
-                                                    <div class="col-6"><strong>Destino:</strong> @Model.Service.DestinationName</div>
+                                            <div class="card-header">
+                                                <h6 class="mb-0">📋 Información del Servicio</h6>
+                                            </div>
+                                            <div class="card-body p-2">
+                                                <div class="row gx-3 gy-1 small">
+                                                    <div class="col-12 col-lg-6">
+                                                        <ul class="meta-list">
+                                                            <li><span class="meta-k">Planilla</span><span class="meta-v">@Model.Transaction.SlipNumber</span></li>
+                                                            <li><span class="meta-k">Cliente</span><span class="meta-v">@Model.Service.ClientName</span></li>
+                                                            <li><span class="meta-k">Sucursal</span><span class="meta-v">@Model.Service.BranchName</span></li>
+                                                            <li><span class="meta-k">Concepto</span><span class="meta-v">@Model.Service.ConceptName</span></li>
+                                                        </ul>
+                                                    </div>
+                                                    <div class="col-12 col-lg-6">
+                                                        <ul class="meta-list">
+                                                            <li><span class="meta-k">Orden</span><span class="meta-v">@Model.Service.ServiceOrderId</span></li>
+                                                            <li><span class="meta-k">Divisa</span><span class="meta-v">@Model.Transaction.Currency</span></li>
+                                                            <li><span class="meta-k">Origen</span><span class="meta-v">@Model.Service.OriginName</span></li>
+                                                            <li><span class="meta-k">Destino</span><span class="meta-v">@Model.Service.DestinationName</span></li>
+                                                        </ul>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
@@ -48,50 +58,41 @@
 
                                     <div class="col-12 col-xl-5">
                                         <div class="card h-100">
-                                            <div class="card-header d-flex align-items-center justify-content-between">
+                                            <div class="card-header">
                                                 <h6 class="mb-0">📊 Totales</h6>
-                                                <small class="text-muted">Se actualiza en vivo</small>
+                                                <span class="chip-live ms-auto">En vivo</span>
                                             </div>
-                                            <div class="card-body">
+                                            <div class="card-body p-2">
                                                 <input type="hidden" id="declaredTransaction" value="@Model.TotalDeclaredAll" />
-                                                <div class="row g-2">
-                                                    <div class="col-12">
-                                                        <div class="d-flex justify-content-between">
-                                                            <span>Declarado:</span>
-                                                            <strong id="totDeclaredGlobal">@Model.TotalDeclaredAll.ToString("N0")</strong>
-                                                        </div>
-                                                        <hr class="my-2">
-                                                    </div>
-                                                    <div class="col-6">
-                                                        <div class="d-flex justify-content-between">
-                                                            <span>Contado:</span>
-                                                            <strong id="totCountedGlobal">@Model.TotalCountedAll.ToString("N0")</strong>
-                                                        </div>
-                                                    </div>
-                                                    <div class="col-6">
-                                                        <div class="d-flex justify-content-between">
-                                                            <span>Diferencia:</span>
-                                                            <strong id="totDiffGlobal" class="tile-diff">@Model.DifferenceAll.ToString("N0")</strong>
-                                                        </div>
-                                                    </div>
-                                                    <div class="col-12 mt-1">
-                                                        <div class="d-flex justify-content-between">
-                                                            <span>Total:</span>
-                                                            <strong id="totOverallGlobal">@Model.TotalOverallAll.ToString("N0")</strong>
-                                                        </div>
-                                                    </div>
+                                                <div class="stats-grid small">
+                                                    <div class="label">Declarado</div>
+                                                    <div class="value" id="totDeclaredGlobal">@Model.TotalDeclaredAll.ToString("N0")</div>
+
+                                                    <div class="label">Contado</div>
+                                                    <div class="value" id="totCountedGlobal">@Model.TotalCountedAll.ToString("N0")</div>
+
+                                                    <div class="label">Diferencia</div>
+                                                    <div class="value tile-diff" id="totDiffGlobal">@Model.DifferenceAll.ToString("N0")</div>
+
+                                                    <div class="divider-xs"></div>
+
+                                                    <div class="label">Total</div>
+                                                    <div class="value" id="totOverallGlobal">@Model.TotalOverallAll.ToString("N0")</div>
                                                 </div>
 
-                                                <hr class="my-2">
-
-                                                <div class="row g-2 small">
-                                                    <div class="col-6"><span class="text-muted">Cant. Bolsas:</span> <strong id="countBagsHeader">0</strong></div>
-                                                    <div class="col-6"><span class="text-muted">Cant. Sobres:</span> <strong id="countEnvelopesHeader">0</strong></div>
+                                                <div class="row gx-3 gy-1 mt-2 small">
+                                                    <div class="col-6 d-flex justify-content-between">
+                                                        <span class="text-muted">Bolsas</span><strong id="countBagsHeader">0</strong>
+                                                    </div>
+                                                    <div class="col-6 d-flex justify-content-between">
+                                                        <span class="text-muted">Sobres</span><strong id="countEnvelopesHeader">0</strong>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
+
                                 <div class="card-header d-flex align-items-center justify-content-between">
                                     <h5 class="mb-0">🧰 Bolsas</h5>
                                     <div class="d-flex gap-2">
@@ -117,14 +118,22 @@
                                                 {
                                                     var bagIdx = bagItems[b].idx;
                                                     var tabId = $"bag-tab-{bagIdx}";
+                                                    var bagId = bagItems[b].c.Id;
+
                                                     <li class="nav-item" role="presentation">
-                                                        <button class="nav-link @(b==0 ? "active" : "")" id="@($"{tabId}-btn")"
+                                                        <button class="nav-link @(b==0 ? "active" : "") d-inline-flex align-items-center gap-1" 
+                                                                id="@($"{tabId}-btn")"
                                                                 data-bs-toggle="tab" data-bs-target="@($"#{tabId}")"
                                                                 type="button" role="tab">
-                                                            Bolsa @(@b + 1)
+                                                            <span>Bolsa @(@b + 1)</span>
                                                             <span class="badge bg-primary ms-2" title="Billetes">B: <span class="js-bag-badge-bills">0</span></span>
                                                             <span class="badge bg-warning text-dark ms-1" title="Monedas">M: <span class="js-bag-badge-coins">0</span></span>
                                                             <span class="badge bg-info ms-1" title="Total bolsa">T: <span class="js-bag-badge-total">0</span></span>
+
+                                                            <span class="btn-close btn-close-sm tab-close js-close-bag-tab ms-1"
+                                                                role="button" aria-label="Eliminar bolsa" title="Eliminar bolsa"
+                                                                data-container-id="@bagId"
+                                                                data-bag-idx="@bagIdx"></span>
                                                         </button>
                                                     </li>
                                                 }
@@ -457,6 +466,11 @@
   @Html.Raw(ViewBag.BanksJson ?? "[]")
 </script>
 
+<script id="pointcaps-json" type="application/json">
+  @Html.Raw(ViewBag.PointCapsJson ?? "{\"sobres\":false,\"cheques\":false,\"documentos\":false}")
+</script>
+
+<div class="validation-scape"></div>
 
 @section Scripts {
     @{ await Html.RenderPartialAsync("_ValidationScriptsPartial"); }
@@ -474,6 +488,20 @@
           const DENOMS = JSON.parse(document.getElementById('denoms-json')?.textContent || '{}');
           const QUALS  = JSON.parse(document.getElementById('qualities-json')?.textContent || '{}');
           const BANKS = JSON.parse(document.getElementById('banks-json')?.textContent || '[]');
+          const CAPS = JSON.parse(document.getElementById('pointcaps-json')?.textContent || '{}');
+
+          const SOBRES_OK  = !!CAPS.sobres;
+          const CHEQUES_OK = !!CAPS.cheques;
+          const DOCS_OK    = !!CAPS.documentos;
+          
+          // Lista ordenada de modos permitidos por el punto
+          function allowedModesOrdered(){
+            const arr = [];
+            if (SOBRES_OK)  arr.push('Efectivo');  // Efectivo primero
+            if (DOCS_OK)    arr.push('Documento');
+            if (CHEQUES_OK) arr.push('Cheque');
+            return arr;
+          }
 
           const $form   = $('#form-containers');
           const $next   = $('button[data-step-action="next"]');
@@ -632,6 +660,16 @@
             if ($tabsUl.get(0))     ro.observe($tabsUl.get(0));
           }
 
+          // Renumera los textos "Bolsa N" en las pestañas
+          function renumberBagTabTitles(){
+            $('#bagsTabs li > button.nav-link').each(function(i){
+              const $btn = $(this);
+              const textNodes = $btn.contents().filter(function(){ return this.nodeType === 3; });
+              if (textNodes.length) textNodes[0].nodeValue = `Bolsa ${i+1} `;
+              else $btn.prepend(document.createTextNode(`Bolsa ${i+1} `));
+            });
+          }
+
           // =====================================================================
           // 2) UTILIDADES GENERALES
           // =====================================================================
@@ -650,7 +688,7 @@
 
           function nextAvailableEnvelopeType($bagPane){
               const have = new Set(envelopeModesInBag($bagPane));
-              const order = ['Efectivo', 'Documento', 'Cheque'];
+              const order = allowedModesOrdered();
               for (const t of order) if (!have.has(t)) return t;
               return null;
           }
@@ -668,6 +706,23 @@
             }
           }
 
+          function applyPointCapsUI(){
+            $('#bagsTabContent .tab-pane[id^="bag-tab-"]').each(function(){
+              const $pane = $(this);
+
+              // Botón "+ Agregar Sobre" de la bolsa
+              const $btn = $pane.find('.js-add-envelope-in-this-bag');
+              $btn.prop('disabled', !SOBRES_OK).toggleClass('disabled', !SOBRES_OK);
+
+              // (Opcional) ocultar toda la sección si el punto NO admite sobres:
+              $pane.find('.card:has(.js-add-envelope-in-this-bag)').toggleClass('d-none', !SOBRES_OK);
+
+              // Ajustar radios de sobres existentes (mostrar/ocultar segun CAPS)
+              updateEnvelopeModeRadios($pane);
+              updateAddEnvelopeButtonState($pane);
+            });
+          }
+
           function getModeOwnerMap($bagPane){
             const owners = {};
             $bagPane.find('.envelope-card').each(function(){
@@ -680,19 +735,43 @@
 
           function updateEnvelopeModeRadios($bagPane){
             const owners = getModeOwnerMap($bagPane);
-            const modes = ['Efectivo','Documento','Cheque'];
+            const allowed = new Set(allowedModesOrdered());
 
+            $bagPane.find('.envelope-card .js-sobre-mode').each(function(){
+                const val = $(this).val();
+                const ok = allowed.has(val);
+                $(this).prop('disabled', !ok);
+                const $wrap = $(this).closest('.form-check, .form-group, .col, label');
+                if ($wrap.length) $wrap.toggleClass('d-none', !ok);
+            });
+
+            const modes = ['Efectivo', 'Documento', 'Cheque'];
             $bagPane.find('.envelope-card').each(function(){
               const $card = $(this);
               modes.forEach(m=>{
                 const $radio = $card.find(`.js-sobre-mode[value="${m}"]`);
                 if (!$radio.length) return;
-
                 const owner = owners[m];
                 const isOwner = owner && owner.get(0) === $card.get(0);
 
-                $radio.prop('disabled', !!owner && !isOwner);
+                if (owner && !isOwner) $radio.prop('disabled', true);
               });
+            });
+
+            $bagPane.find('.envelope-card').each(function() {
+                const $card = $(this);
+                const $sel = $card.find('.js-sobre-mode:checked');
+                const isAllowed = $sel.length && allowed.has($sel.val());
+
+                if (!isAllowed) {
+                    const fallback = allowedModesOrdered().find(m => {
+                        const owner = owners[m];
+                        return !owner || owner.get(0) === $card.get(0);
+                    });
+                    if (fallback) {
+                        $card.find(`.js-sobre-mode[value="${fallback}"]`).prop('checked', true).trigger('change');
+                    }
+                }
             });
 
             updateAddEnvelopeButtonState($bagPane);
@@ -1813,13 +1892,17 @@
             const idxHuman = $contents.children('.tab-pane').length + 1;
             const $btn = $(`
               <li class="nav-item" role="presentation">
-                <button class="nav-link" id="${newId}-btn"
+                <button class="nav-link d-inline-flex align-items-center gap-1" id="${newId}-btn"
                         data-bs-toggle="tab" data-bs-target="#${newId}"
                         type="button" role="tab">
-                  Bolsa ${idxHuman}
+                  <span>Bolsa ${idxHuman}</span>
                   <span class="badge bg-primary ms-2" title="Billetes">B: <span class="js-bag-badge-bills">0</span></span>
                   <span class="badge bg-warning text-dark ms-1" title="Monedas">M: <span class="js-bag-badge-coins">0</span></span>
                   <span class="badge bg-info ms-1" title="Total bolsa">T: <span class="js-bag-badge-total">0</span></span>
+                  <span class="btn-close btn-close-sm tab-close js-close-bag-tab ms-1"
+                    role="button" aria-label="Eliminar bolsa" title="Eliminar bolsa"
+                    data-container-id="0"
+                    data-bag-idx="${bagIdx}"></span>
                 </button>
               </li>
             `);
@@ -1849,10 +1932,10 @@
 
             $tabs.find('button.nav-link').removeClass('active');
             $contents.find('.tab-pane').removeClass('show active');
-            $btn.addClass('active');
+            $btn.find('> .nav-link').addClass('active');
             $pane.addClass('show active');
 
-            scrollTabBtnIntoView($btn.get(0));
+            scrollTabBtnIntoView($btn.find('> .nav-link').get(0));
             updateTabsOverflowState();
 
             const $bagEditor = $pane.find('.container-editor').first();
@@ -1865,6 +1948,7 @@
             formatAllNumbers();
             refreshAllParentBagCombos();
             setTimeout(updateAllBagBadges, 0);
+            applyPointCapsUI();
           });
 
           $(document).on('click', '.js-add-envelope-in-this-bag', function () {
@@ -1875,6 +1959,11 @@
             const $bagEditor = $bagPane.find('.container-editor').first();
             const realBagId = $bagEditor.find('input[name$=".Id"]').val();
             const bagLabel  = $bagEditor.find('input[name$=".ContainerCode"]').val();
+
+            if (!SOBRES_OK) {
+              Swal.fire('No permitido','Este punto no admite sobres.','info');
+              return;
+            }
 
             if (!typeToUse) {
               Swal.fire('Límite de sobres', 'No puedes agregar más sobres a esta bolsa.', 'info');
@@ -1989,6 +2078,102 @@
             updateContainerSubtotal($ce);
             updateProcessSummary();
             updateEnvelopeModeRadios($bagPane);
+          });
+
+          // Eliminar bolsa clic en X
+          $(document).on('click', '.js-close-bag-tab', function(e){
+            e.stopPropagation();
+            e.preventDefault();
+          
+            const $close       = $(this);
+            const $btnTab      = $close.closest('button.nav-link');
+            const target       = $btnTab.attr('data-bs-target');
+            const $pane        = $(target);
+            const $li          = $btnTab.closest('li.nav-item');
+            const containerId  = parseInt($close.data('container-id') || 0, 10);
+          
+            // 1) Debe quedar al menos 1 bolsa
+            if (bagCount() <= 1) {
+              Swal.fire('No permitido', 'Debe existir al menos una bolsa en la transacción.', 'info');
+              return;
+            }
+          
+            // 2) Si tiene sobres hijos, bloquear (evita error por FK en backend)
+            const hasEnvelopes = $pane.find('.envelope-card').length > 0;
+            if (hasEnvelopes && containerId === 0) {
+              Swal.fire('No permitido', 'Esta bolsa tiene sobres asociados. Elimínelos primero.', 'info');
+              return;
+            }
+
+            function removeBagFromUI() {
+              const isActive = $btnTab.hasClass('active');
+          
+              $li.remove();
+              $pane.remove();
+          
+              if (isActive) {
+                const $firstBtn = $('#bagsTabs button.nav-link').first();
+                if ($firstBtn.length) {
+                  const t = new bootstrap.Tab($firstBtn[0]);
+                  t.show();
+                }
+              }
+          
+              refreshAllParentBagCombos();
+              updateTabsOverflowState();
+              updateAllBagBadges();
+              updateProcessSummary();
+            }
+          
+            // 3) Bolsa nueva (Id=0) -> borrar del DOM
+            if (!containerId || containerId === 0) {
+                removeBagFromUI();
+                Swal.fire('Eliminado', 'La bolsa (sin guardar) fue eliminada del formulario.', 'success');
+                return;
+            }
+          
+            // 4) Bolsa existente -> confirmar y eliminar por AJAX
+            const transactionId = $('#CefTransactionId').val();
+            const token         = $('input[name="__RequestVerificationToken"]').val();
+          
+            const preMsg = hasEnvelopes ? 'Esta bolsa tiene sobres asociados. Para eliminarla, primero debes eliminar todos sus sobres.' : '';
+            Swal.fire({
+              title: '¿Eliminar bolsa?',
+              text: 'Se eliminará la bolsa y sus detalles. Debe quedar al menos una bolsa.' + preMsg,
+              icon: 'warning',
+              showCancelButton: true,
+              confirmButtonText: 'Sí, eliminar',
+              cancelButtonText: 'Cancelar'
+            }).then((res) => {
+              if (!res.isConfirmed) return;
+          
+              $close.prop('disabled', true);
+          
+              $.ajax({
+                type: 'POST',
+                url: '@Url.Action("DeleteContainer")',
+                data: {
+                  transactionId: transactionId,
+                  containerId: containerId,
+                  __RequestVerificationToken: token
+                }
+              }).done(function (r) {
+                if (r && r.success) {
+                  Swal.fire('Eliminado', 'La bolsa fue eliminada correctamente.', 'success')
+                    .then(() => {
+                      skipUnload = true;
+                      window.location.reload();
+                    });
+                } else {
+                  Swal.fire('Atención', (r && r.message) || 'No se pudo eliminar la bolsa.', 'info');
+                }
+              }).fail(function (xhr) {
+                const msg = (xhr.responseJSON && xhr.responseJSON.message) || xhr.responseText || 'Error inesperado al eliminar.';
+                Swal.fire('Error', msg, 'error');
+              }).always(function () {
+                $xBtn.prop('disabled', false);
+              });
+            });
           });
 
           // =====================================================================

@@ -551,11 +551,74 @@ namespace VCashApp.Services.Cef
             return container;
         }
 
+        /// <summary>
+        /// Obtiene las capacidades de puntos para sobres, documentos y cheques.
+        /// </summary>
+        /// <param name="serviceOrderId">Identificador del servicio</param>
+        /// <returns>Tupla con capacidades (sobres, documentos, cheques)</returns>
+        /// <exception cref="InvalidOperationException"></exception>
+        public async Task<(bool sobres, bool documentos, bool cheques)> GetPointCapsAsync(string serviceOrderId)
+        {
+            var s = await _context.CgsServicios
+                .AsNoTracking()
+                .FirstOrDefaultAsync(s => s.ServiceOrderId == serviceOrderId)
+                ?? throw new InvalidOperationException($"Servicio {serviceOrderId} no existe.");
+
+            AdmPunto? p = null;
+
+            if (s.OriginIndicatorType == "P")
+            {
+                p = await _context.AdmPuntos
+                    .AsNoTracking()
+                    .FirstOrDefaultAsync(p => p.PointCode == s.OriginPointCode);
+            }
+            else if (s.DestinationIndicatorType == "P")
+            {
+                p = await _context.AdmPuntos
+                    .AsNoTracking()
+                    .FirstOrDefaultAsync(p => p.PointCode == s.DestinationPointCode);
+            }
+
+            return (
+                p?.PointEnvelopes ?? false,
+                p?.PointDocuments ?? false,
+                p?.PointChecks ?? false
+            );
+        }
+
+        /// <summary>
+        /// Elimina un contenedor y sus detalles asociados.
+        /// </summary>
+        /// <param name="transactionId">Id de la transaccion</param>
+        /// <param name="containerId">Id del contenedor</param>
+        /// <returns></returns>
+        /// <exception cref="InvalidOperationException"></exception>
         public async Task<bool> DeleteContainerAsync(int transactionId, int containerId)
         {
-            // Evita intento de borrar un "padre" con hijos (tu FK ParentContainerId está en RESTRICT)
+            var container = await _context.CefContainers
+                .AsNoTracking()
+                .FirstOrDefaultAsync(c => c.Id == containerId && c.CefTransactionId == transactionId);
+
+            if (container == null)
+                throw new InvalidOperationException($"Contenedor con ID {containerId} no encontrado en la transacción {transactionId}.");
+
+            bool isBag = string.Equals(container.ContainerType, CefContainerTypeEnum.Bolsa.ToString(), StringComparison.OrdinalIgnoreCase);
+
+            if (isBag)
+            {
+                var bagCount = await _context.CefContainers
+                    .AsNoTracking()
+                    .CountAsync(c => c.CefTransactionId == transactionId &&
+                                     c.ParentContainerId == null &&
+                                     c.ContainerType == CefContainerTypeEnum.Bolsa.ToString());
+                if (bagCount <= 1)
+                    throw new InvalidOperationException("No se puede eliminar la única bolsa de la transacción.");
+            }
+
             var hasChildren = await _context.CefContainers
+                .AsNoTracking()
                 .AnyAsync(c => c.ParentContainerId == containerId);
+
             if (hasChildren)
                 throw new InvalidOperationException("No se puede eliminar un contenedor padre porque tiene sobres hijos.");
 
@@ -563,34 +626,33 @@ namespace VCashApp.Services.Cef
                 .Where(c => c.Id == containerId && c.CefTransactionId == transactionId)
                 .ExecuteDeleteAsync();
 
-            if (rows > 0)
+            if (rows == 0) return false;
+
+            var tx = await _context.CefTransactions.FirstOrDefaultAsync(t => t.Id == transactionId);
+            if (tx != null)
             {
-                var tx = await _context.CefTransactions.FirstOrDefaultAsync(t => t.Id == transactionId);
-                if (tx != null)
-                {
-                    var totals = await GetTransactionTotalsAsync(transactionId);
+                var totals = await GetTransactionTotalsAsync(transactionId);
 
-                    tx.CountedBillHighValue = totals.BillHigh;
-                    tx.CountedBillLowValue = totals.BillLow;
-                    tx.CountedBillValue = totals.BillTotal;
-                    tx.CountedCoinValue = totals.CoinTotal;
+                tx.CountedBillHighValue = totals.BillHigh;
+                tx.CountedBillLowValue = totals.BillLow;
+                tx.CountedBillValue = totals.BillTotal;
+                tx.CountedCoinValue = totals.CoinTotal;
 
-                    tx.TotalCountedValue = totals.CashTotal;
-                    tx.ValueDifference = totals.Difference;
+                tx.TotalCountedValue = totals.CashTotal;
+                tx.ValueDifference = totals.Difference;
 
-                    tx.CountedCheckValue = totals.CheckTotal;
-                    tx.CountedDocumentValue = totals.DocTotal;
-                    tx.OverallCountedValue = totals.OverallTotal;
+                tx.CountedCheckValue = totals.CheckTotal;
+                tx.CountedDocumentValue = totals.DocTotal;
+                tx.OverallCountedValue = totals.OverallTotal;
 
-                    tx.TotalDeclaredValueInWords = AmountInWordsHelper.ToSpanishCurrency(tx.TotalCountedValue, tx.Currency);
-                    tx.TotalCountedValueInWords = AmountInWordsHelper.ToSpanishCurrency(tx.TotalCountedValue, tx.Currency);
-                    tx.OverallCountedValueInWords = AmountInWordsHelper.ToSpanishCurrency(tx.OverallCountedValue, tx.Currency);
+                tx.TotalDeclaredValueInWords = AmountInWordsHelper.ToSpanishCurrency(tx.TotalCountedValue, tx.Currency);
+                tx.TotalCountedValueInWords = AmountInWordsHelper.ToSpanishCurrency(tx.TotalCountedValue, tx.Currency);
+                tx.OverallCountedValueInWords = AmountInWordsHelper.ToSpanishCurrency(tx.OverallCountedValue, tx.Currency);
 
-                    tx.LastUpdateDate = DateTime.Now;
+                tx.LastUpdateDate = DateTime.Now;
 
-                    _context.CefTransactions.Update(tx);
-                    await _context.SaveChangesAsync();
-                }
+                _context.CefTransactions.Update(tx);
+                await _context.SaveChangesAsync();
             }
 
             return rows > 0;
