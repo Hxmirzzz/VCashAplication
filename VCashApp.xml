@@ -798,7 +798,31 @@
             <param name="pageName">El nombre de la página para el ViewBag.</param>
             <returns>Tarea asíncrona completada.</returns>
         </member>
-        <member name="M:VCashApp.Controllers.CefController.Index(System.Nullable{System.Int32},System.Nullable{System.DateOnly},System.Nullable{System.DateOnly},System.Nullable{VCashApp.Enums.CefTransactionStatusEnum},System.String,System.Int32,System.Int32)">
+        <member name="M:VCashApp.Controllers.CefController.Reception(System.Nullable{System.Int32},System.Nullable{System.DateOnly},System.Nullable{System.DateOnly},System.String,System.Int32,System.Int32)">
+            <summary>
+            Dashboard de Tesorería - Recepción (filtra por estado RegistroTesoreria).
+            Requiere permiso 'View' en TESORERIA.
+            </summary>
+        </member>
+        <member name="M:VCashApp.Controllers.CefController.Delivery(System.Nullable{System.Int32},System.Nullable{System.DateOnly},System.Nullable{System.DateOnly},System.String,System.Int32,System.Int32)">
+            <summary>
+            Dashboard de Tesorería - Entrega (filtra por estado ListoEntrega).
+            Requiere permiso 'View' en TESORERIA.
+            </summary>
+        </member>
+        <member name="M:VCashApp.Controllers.CefController.Collections(System.Nullable{System.Int32},System.Nullable{System.DateOnly},System.Nullable{System.DateOnly},System.String,System.Int32,System.Int32)">
+            <summary>
+            Dashboard CEF - Recolección (muestra transacciones de tipo recolección).
+            Requiere permiso 'View' en CEF.
+            </summary>
+        </member>
+        <member name="M:VCashApp.Controllers.CefController.Supplies(System.Nullable{System.Int32},System.Nullable{System.DateOnly},System.Nullable{System.DateOnly},System.String,System.Int32,System.Int32)">
+            <summary>
+            Dashboard CEF - Provisión (muestra transacciones de tipo provisión).
+            Requiere permiso 'View' en CEF.
+            </summary>
+        </member>
+        <member name="M:VCashApp.Controllers.CefController.Index(System.Nullable{System.Int32},System.Nullable{System.DateOnly},System.Nullable{System.DateOnly},System.Nullable{VCashApp.Enums.CefTransactionStatusEnum},System.String,System.Int32,System.Int32,System.Nullable{VCashApp.Enums.CefDashboardMode})">
             <summary>
             Muestra el dashboard principal del Centro de Efectivo, permitiendo filtrar y ver las transacciones.
             </summary>
@@ -813,6 +837,16 @@
             <param name="page">Número de página para paginación.</param>
             <param name="pageSize">Cantidad de registros por página.</param>
             <returns>Una vista con la lista de transacciones de CEF o un parcial si es una petición AJAX.</returns>
+        </member>
+        <member name="M:VCashApp.Controllers.CefController.BuildStatusListByMode(System.Nullable{VCashApp.Enums.CefDashboardMode},System.Nullable{VCashApp.Enums.CefTransactionStatusEnum})">
+            <summary>
+            Devuelve la lista de estados sugeridos según el modo y marca el seleccionado actual.
+            </summary>
+        </member>
+        <member name="M:VCashApp.Controllers.CefController.InferModeFromStatus(System.Nullable{VCashApp.Enums.CefTransactionStatusEnum})">
+            <summary>
+            Si alguien entra a /Cef/Index con un status fijo, inferimos un modo para la UI.
+            </summary>
         </member>
         <member name="M:VCashApp.Controllers.CefController.Checkin(System.String,System.String)">
             <summary>
@@ -2196,6 +2230,11 @@
             Colección de transacciones a mostrar.
             </summary>
         </member>
+        <member name="P:VCashApp.Models.ViewModels.CentroEfectivo.CefDashboardViewModel.Mode">
+            <summary>
+            Tipo de dashborad a mostrar.
+            </summary>
+        </member>
         <member name="P:VCashApp.Models.ViewModels.CentroEfectivo.CefDashboardViewModel.CurrentPage">
             <summary>
             Página actual de la paginación.
@@ -3053,7 +3092,7 @@
         <member name="M:VCashApp.Services.Cef.CefTransactionService.GetCefTransactionByIdAsync(System.Int32)">
             <inheritdoc/>
         </member>
-        <member name="M:VCashApp.Services.Cef.CefTransactionService.GetFilteredCefTransactionsAsync(System.String,System.Nullable{System.Int32},System.Nullable{System.DateOnly},System.Nullable{System.DateOnly},System.Nullable{VCashApp.Enums.CefTransactionStatusEnum},System.String,System.Int32,System.Int32,System.Boolean)">
+        <member name="M:VCashApp.Services.Cef.CefTransactionService.GetFilteredCefTransactionsAsync(System.String,System.Nullable{System.Int32},System.Nullable{System.DateOnly},System.Nullable{System.DateOnly},System.Nullable{VCashApp.Enums.CefTransactionStatusEnum},System.String,System.Int32,System.Int32,System.Boolean,System.Collections.Generic.IEnumerable{System.String})">
             <inheritdoc/>
         </member>
         <member name="M:VCashApp.Services.Cef.CefTransactionService.UpdateTransactionStatusAsync(System.Int32,VCashApp.Enums.CefTransactionStatusEnum,System.String)">
@@ -3345,7 +3384,7 @@
             <param name="transactionId">ID de la transacción de CEF.</param>
             <returns>La transacción de CEF si se encuentra, de lo contrario, null.</returns>
         </member>
-        <member name="M:VCashApp.Services.ICefTransactionService.GetFilteredCefTransactionsAsync(System.String,System.Nullable{System.Int32},System.Nullable{System.DateOnly},System.Nullable{System.DateOnly},System.Nullable{VCashApp.Enums.CefTransactionStatusEnum},System.String,System.Int32,System.Int32,System.Boolean)">
+        <member name="M:VCashApp.Services.ICefTransactionService.GetFilteredCefTransactionsAsync(System.String,System.Nullable{System.Int32},System.Nullable{System.DateOnly},System.Nullable{System.DateOnly},System.Nullable{VCashApp.Enums.CefTransactionStatusEnum},System.String,System.Int32,System.Int32,System.Boolean,System.Collections.Generic.IEnumerable{System.String})">
             <summary>
             Obtiene una lista paginada y filtrada de transacciones de Centro de Efectivo para el dashboard de Check-in o revisión.
             </summary>
@@ -3354,8 +3393,8 @@
             <param name="startDate">Fecha de inicio para el filtro.</param>
             <param name="endDate">Fecha de fin para el filtro.</param>
             <param name="status">Estado de la transacción para el filtro.</param>
-            <param name="searchTerm">Término de búsqueda.</param>
-            <param name="pageNumber">Número de página.</param>
+            <param name="search">Término de búsqueda.</param>
+            <param name="page">Número de página.</param>
             <param name="pageSize">Tamaño de la página.</param>
             <param name="isAdmin">Indica si el usuario es administrador.</param>
             <returns>Una tupla que contiene la lista de transacciones y el total de registros.</returns>

@@ -79,6 +79,7 @@
     </div>
 
     <div id="dataTablePartial">
+        <input type="hidden" id="dashboardMode" name="mode" value="@Model.Mode" />
         @await Html.PartialAsync("_TransactionTablePartial", Model.Transactions, new ViewDataDictionary(ViewData))
     </div>
 </div>
@@ -89,12 +90,14 @@
     }
     <script>
         $(document).ready(function () {
+            var currentAction = '@(ViewContext.RouteData.Values["action"]?.ToString() ?? "Index")';
+
             setupTablePaginationAndFilters({
                 tableContainerId: 'dataTablePartial',
                 controllerName: 'Cef',
-                actionName: 'Index',
+                actionName: currentAction,
                 searchInputId: 'tableSearch',
-                filterInputsSelector: '#filterBranchId, #filterStartDate, #filterEndDate, #filterStatus',
+                filterInputsSelector: '#dashboardMode, #filterBranchId, #filterStartDate, #filterEndDate, #filterStatus',
                 clearFiltersButtonId: 'clearFilters',
                 defaultPageSize: @pageSize
             });
@@ -128,6 +131,7 @@
                         form.append($('<input>', { name: 'endDate', value: endDate }));
                         form.append($('<input>', { name: 'status', value: status }));
                         form.append($('<input>', { name: 'exportFormat', value: format }));
+                        form.append($('<input>', { name: 'mode', value: $('#dashboardMode').val() }));
 
                         form.submit();
                         form.remove();

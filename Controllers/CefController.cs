@@ -79,6 +79,80 @@ namespace VCashApp.Controllers
             // ViewBag.HasDeletePermission = await HasPermisionForView(userRoles, "CEF", PermissionType.Delete);
         }
 
+        // =========== SECCION: TESORERIA OPERATIVA ===========
+
+        /// <summary>
+        /// Dashboard de Tesorería - Recepción (filtra por estado RegistroTesoreria).
+        /// Requiere permiso 'View' en TESORERIA.
+        /// </summary>
+        [HttpGet("Reception")]
+        [RequiredPermission(PermissionType.View, "TESORERIA")]
+        public Task<IActionResult> Reception(
+            int? branchId, DateOnly? startDate, DateOnly? endDate,
+            string? search, int page = 1, int pageSize = 15)
+        {
+            return Index(
+                branchId, startDate, endDate,
+                CefTransactionStatusEnum.RegistroTesoreria, // estado focal
+                search, page, pageSize,
+                CefDashboardMode.TesoreriaRecepcion         // MODO
+            );
+        }
+
+        /// <summary>
+        /// Dashboard de Tesorería - Entrega (filtra por estado ListoEntrega).
+        /// Requiere permiso 'View' en TESORERIA.
+        /// </summary>
+        [HttpGet("Delivery")]
+        [RequiredPermission(PermissionType.View, "TESORERIA")]
+        public Task<IActionResult> Delivery(
+            int? branchId, DateOnly? startDate, DateOnly? endDate,
+            string? search, int page = 1, int pageSize = 15)
+        {
+            return Index(
+                branchId, startDate, endDate,
+                CefTransactionStatusEnum.ListoParaEntrega,      // estado focal
+                search, page, pageSize,
+                CefDashboardMode.TesoreriaEntrega           // MODO
+            );
+        }
+
+        // =========== SECCION: CENTRO DE EFECTIVO ============
+        /// <summary>
+        /// Dashboard CEF - Recolección (muestra transacciones de tipo recolección).
+        /// Requiere permiso 'View' en CEF.
+        /// </summary>
+        [HttpGet("Collections")]
+        [RequiredPermission(PermissionType.View, "CEF")]
+        public Task<IActionResult> Collections(
+            int? branchId, DateOnly? startDate, DateOnly? endDate,
+            string? search, int page = 1, int pageSize = 15)
+        {
+            // Por ahora no forzamos status (el SP no filtra por concepto todavía)
+            return Index(branchId, startDate, endDate, null, search, page, pageSize, CefDashboardMode.CefRecoleccion);
+        }
+
+        /// <summary>
+        /// Dashboard CEF - Provisión (muestra transacciones de tipo provisión).
+        /// Requiere permiso 'View' en CEF.
+        /// </summary>
+        [HttpGet("Supplies")]
+        [RequiredPermission(PermissionType.View, "CEF")]
+        public Task<IActionResult> Supplies(
+            int? branchId, DateOnly? startDate, DateOnly? endDate,
+            string? search, int page = 1, int pageSize = 15)
+        {
+            // Igual que arriba, sin status fijo (hasta ajustar SP)
+            return Index(branchId, startDate, endDate, null, search, page, pageSize, CefDashboardMode.CefProvision);
+        }
+
+        static string[]? MapCodesByMode(CefDashboardMode? mode) => mode switch
+        {
+            CefDashboardMode.CefRecoleccion => new[] { "RC", "ET" },
+            CefDashboardMode.CefProvision => new[] { "PV", "PR" },
+            _ => null
+        };
+
         /// <summary>
         /// Muestra el dashboard principal del Centro de Efectivo, permitiendo filtrar y ver las transacciones.
         /// </summary>
@@ -97,24 +171,29 @@ namespace VCashApp.Controllers
         [RequiredPermission(PermissionType.View, "CEF")]
         public async Task<IActionResult> Index(
             int? branchId, DateOnly? startDate, DateOnly? endDate, CefTransactionStatusEnum? status,
-            string? search, int page = 1, int pageSize = 15)
+            string? search, int page = 1, int pageSize = 15, CefDashboardMode? mode = null)
         {
             var currentUser = await GetCurrentApplicationUserAsync();
             if (currentUser == null) return RedirectToPage("/Account/Login", new { area = "Identity" });
 
             await SetCommonViewBagsCefAsync(currentUser, "Tesoreria");
+
             bool isAdmin = ViewBag.IsAdmin;
 
+            var conceptTypeCodes = MapCodesByMode(mode);
+
             var (transactions, totalRecords) = await _cefTransactionService.GetFilteredCefTransactionsAsync(
-                currentUser.Id, branchId, startDate, endDate, status, search, page, pageSize, isAdmin);
+                currentUser.Id, branchId, startDate, endDate, status, search, page, pageSize, isAdmin, conceptTypeCodes);
 
-            var transactionStatuses = Enum.GetValues(typeof(CefTransactionStatusEnum))
-                .Cast<CefTransactionStatusEnum>()
-                .Select(e => new SelectListItem { Value = e.ToString(), Text = e.ToString().Replace("_", " ") })
-                .ToList();
-            transactionStatuses.Insert(0, new SelectListItem { Value = "", Text = "-- Seleccionar Estado --" });
+            var transactionStatuses = BuildStatusListByMode(mode, status);
+            var branches = (ViewBag.AvailableBranches as List<SelectListItem>) ?? new List<SelectListItem>();
+            if (branchId.HasValue)
+            {
+                foreach (var it in branches)
+                    it.Selected = (it.Value == branchId.Value.ToString());
+            }
 
-            var dashboardViewModel = new CefDashboardViewModel
+            var vm = new CefDashboardViewModel
             {
                 Transactions = transactions,
                 CurrentPage = page,
@@ -126,31 +205,73 @@ namespace VCashApp.Controllers
                 CurrentStartDate = startDate,
                 CurrentEndDate = endDate,
                 CurrentStatus = status,
-                AvailableBranches = ViewBag.AvailableBranches as List<SelectListItem>,
-                TransactionStatuses = ViewBag.TransactionStatuses as List<SelectListItem>
+                AvailableBranches = branches,
+                TransactionStatuses = transactionStatuses,
+                Mode = mode ?? InferModeFromStatus(status)
             };
 
             ViewBag.CurrentPage = page;
             ViewBag.PageSize = pageSize;
-            ViewBag.TotalPages = dashboardViewModel.TotalPages;
+            ViewBag.TotalPages = vm.TotalPages;
             ViewBag.TotalData = totalRecords;
-            ViewBag.SearchTerm = search;
-            ViewBag.CurrentBranchId = branchId;
-            ViewBag.CurrentStartDate = startDate?.ToString("yyyy-MM-dd");
-            ViewBag.CurrentEndDate = endDate?.ToString("yyyy-MM-dd");
-            ViewBag.CurrentStatus = status?.ToString();
             ViewBag.TransactionStatuses = transactionStatuses;
-
 
             _logger.LogInformation("Usuario: {Usuario} | IP: {IP} | Acción: Acceso a Dashboard CEF | Conteo: {Conteo} |",
                 currentUser.UserName, IpAddressForLogging, transactions.Count());
 
             if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
             {
+                ViewData["Mode"] = mode ?? InferModeFromStatus(status);
                 return PartialView("_TransactionTablePartial", transactions);
             }
 
-            return View(dashboardViewModel);
+
+            return View("Index", vm);
+        }
+        /// <summary>
+        /// Devuelve la lista de estados sugeridos según el modo y marca el seleccionado actual.
+        /// </summary>
+        [NonAction]
+        private static List<SelectListItem> BuildStatusListByMode(CefDashboardMode? mode, CefTransactionStatusEnum? selected)
+        {
+            var recep = new[] { "RegistroTesoreria", "EncoladoParaConteo", "Conteo", "PendienteRevision" };
+            var entrg = new[] { "ListoParaEntrega", "Aprobado" };
+
+            IEnumerable<string> set = mode switch
+            {
+                CefDashboardMode.TesoreriaRecepcion => recep,
+                CefDashboardMode.TesoreriaEntrega => entrg,
+                _ => Enum.GetNames(typeof(CefTransactionStatusEnum))
+            };
+
+            var list = set.Select(s => new SelectListItem
+            {
+                Value = s,
+                Text = s.Replace("_", " "),
+                Selected = selected.HasValue && s == selected.Value.ToString()
+            }).ToList();
+
+            // placeholder al inicio
+            list.Insert(0, new SelectListItem
+            {
+                Value = "",
+                Text = "-- Seleccionar Estado --",
+                Selected = !selected.HasValue
+            });
+
+            return list;
+        }
+
+        /// <summary>
+        /// Si alguien entra a /Cef/Index con un status fijo, inferimos un modo para la UI.
+        /// </summary>
+        [NonAction]
+        private static CefDashboardMode InferModeFromStatus(CefTransactionStatusEnum? status)
+        {
+            if (status == CefTransactionStatusEnum.RegistroTesoreria) return CefDashboardMode.TesoreriaRecepcion;
+            if (status == CefTransactionStatusEnum.ListoParaEntrega) return CefDashboardMode.TesoreriaEntrega;
+            // por defecto mostramos CEF general (puedes cambiar a Provision si prefieres)
+            return CefDashboardMode.CefRecoleccion;
         }
 
         /// <summary>

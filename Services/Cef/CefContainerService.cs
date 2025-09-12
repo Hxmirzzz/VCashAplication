@@ -114,6 +114,7 @@ namespace VCashApp.Services.Cef
             }
             else
             {
+                var parentMap = contenedores.ToDictionary(x => x.Id, x => x.ContainerCode);
                 vm.Containers = contenedores.Select(c => new CefContainerProcessingViewModel
                 {
                     Id = c.Id,
@@ -126,8 +127,9 @@ namespace VCashApp.Services.Cef
                     ClientCashierName = c.ClientCashierName,
                     ClientEnvelopeDate = c.ClientEnvelopeDate,
                     ParentContainerId = c.ParentContainerId,
-                    ParentContainerCode = contenedores.FirstOrDefault(p => p.Id == c.ParentContainerId)?.ContainerCode,
-
+                    ParentContainerCode = c.ParentContainerId.HasValue && parentMap.TryGetValue(c.ParentContainerId.Value, out var code)
+        ? code
+        : null,
                     ValueDetails = c.ValueDetails?.Select(d => new CefValueDetailViewModel
                     {
                         Id = d.Id,
@@ -174,10 +176,7 @@ namespace VCashApp.Services.Cef
                 ?? throw new InvalidOperationException($"La transacción CEF con ID {viewModel.CefTransactionId} no existe.");
 
             if (transaction.TransactionStatus != CefTransactionStatusEnum.EncoladoParaConteo.ToString() &&
-                transaction.TransactionStatus != CefTransactionStatusEnum.ConteoBilletes.ToString() &&
-                transaction.TransactionStatus != CefTransactionStatusEnum.ConteoMonedas.ToString() &&
-                transaction.TransactionStatus != CefTransactionStatusEnum.ConteoCheques.ToString() &&
-                transaction.TransactionStatus != CefTransactionStatusEnum.ConteoDocumentos.ToString())
+                transaction.TransactionStatus != CefTransactionStatusEnum.Conteo.ToString())
             {
                 throw new InvalidOperationException($"La transacción {transaction.Id} no está en un estado válido para procesar contenedores.");
             }
@@ -222,26 +221,6 @@ namespace VCashApp.Services.Cef
 
             // 2) Normalizar detalles
             var detailsVms = viewModel.ValueDetails ?? new List<CefValueDetailViewModel>();
-
-            // Documento/Voucher: garantizar exactamente 1 detalle (si no hay, crear; si hay >1, error)
-            if (isDoc)
-            {
-                if (detailsVms.Count == 0)
-                {
-                    detailsVms = new List<CefValueDetailViewModel>
-            {
-                new CefValueDetailViewModel
-                {
-                    ValueType = CefValueTypeEnum.Documento,
-                    Quantity  = 1
-                }
-            };
-                }
-                else if (detailsVms.Count > 1)
-                {
-                    throw new InvalidOperationException("El sobre de Documento/Voucher debe tener exactamente un detalle.");
-                }
-            }
 
             // Duplicados solo aplican a Billete/Moneda
             var dupPairs = detailsVms
@@ -506,16 +485,9 @@ namespace VCashApp.Services.Cef
             // 6) Avanzar estado de la transacción
             if (transaction.TransactionStatus == CefTransactionStatusEnum.EncoladoParaConteo.ToString())
             {
-                var hasBillsOrCoins = detailsVms.Any(d => d.ValueType == CefValueTypeEnum.Billete || d.ValueType == CefValueTypeEnum.Moneda);
-                var hasChecks = detailsVms.Any(d => d.ValueType == CefValueTypeEnum.Cheque);
-                var hasDocs = detailsVms.Any(d => d.ValueType == CefValueTypeEnum.Documento);
-
-                if (hasBillsOrCoins)
-                    transaction.TransactionStatus = CefTransactionStatusEnum.ConteoBilletes.ToString();
-                else if (hasChecks)
-                    transaction.TransactionStatus = CefTransactionStatusEnum.ConteoCheques.ToString();
-                else if (hasDocs)
-                    transaction.TransactionStatus = CefTransactionStatusEnum.ConteoDocumentos.ToString();
+                var hasAny = detailsVms.Any(); // si llegó cualquier detalle, ya estás en Conteo
+                if (hasAny)
+                    transaction.TransactionStatus = CefTransactionStatusEnum.Conteo.ToString();
 
                 if (transaction.TransactionStatus != CefTransactionStatusEnum.EncoladoParaConteo.ToString())
                 {
@@ -622,6 +594,10 @@ namespace VCashApp.Services.Cef
             if (hasChildren)
                 throw new InvalidOperationException("No se puede eliminar un contenedor padre porque tiene sobres hijos.");
 
+            await _context.CefValueDetails
+                .Where(d => d.CefContainerId == containerId)
+                .ExecuteDeleteAsync();
+
             var rows = await _context.CefContainers
                 .Where(c => c.Id == containerId && c.CefTransactionId == transactionId)
                 .ExecuteDeleteAsync();
@@ -645,7 +621,7 @@ namespace VCashApp.Services.Cef
                 tx.CountedDocumentValue = totals.DocTotal;
                 tx.OverallCountedValue = totals.OverallTotal;
 
-                tx.TotalDeclaredValueInWords = AmountInWordsHelper.ToSpanishCurrency(tx.TotalCountedValue, tx.Currency);
+                tx.TotalDeclaredValueInWords = AmountInWordsHelper.ToSpanishCurrency(tx.TotalDeclaredValue, tx.Currency);
                 tx.TotalCountedValueInWords = AmountInWordsHelper.ToSpanishCurrency(tx.TotalCountedValue, tx.Currency);
                 tx.OverallCountedValueInWords = AmountInWordsHelper.ToSpanishCurrency(tx.OverallCountedValue, tx.Currency);
 

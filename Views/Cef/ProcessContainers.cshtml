@@ -126,14 +126,24 @@
                                                                 data-bs-toggle="tab" data-bs-target="@($"#{tabId}")"
                                                                 type="button" role="tab">
                                                             <span>Bolsa @(@b + 1)</span>
-                                                            <span class="badge bg-primary ms-2" title="Billetes">B: <span class="js-bag-badge-bills">0</span></span>
-                                                            <span class="badge bg-warning text-dark ms-1" title="Monedas">M: <span class="js-bag-badge-coins">0</span></span>
-                                                            <span class="badge bg-info ms-1" title="Total bolsa">T: <span class="js-bag-badge-total">0</span></span>
+
+                                                            <span class="badge bg-primary ms-2 tab-badge" title="Billetes">
+                                                                <i class="ri-money-dollar-box-line"></i>
+                                                                <span class="js-bag-badge-bills">0</span>
+                                                            </span>
+                                                            <span class="badge bg-warning text-dark ms-1 tab-badge" title="Monedas">
+                                                                <i class="ri-coins-line"></i>
+                                                                <span class="js-bag-badge-coins">0</span>
+                                                            </span>
+                                                            <span class="badge bg-info ms-1 tab-badge" title="Total bolsa">
+                                                                <i class="ri-equalizer-line"></i>
+                                                                <span class="js-bag-badge-total">0</span>
+                                                            </span>
 
                                                             <span class="btn-close btn-close-sm tab-close js-close-bag-tab ms-1"
-                                                                role="button" aria-label="Eliminar bolsa" title="Eliminar bolsa"
-                                                                data-container-id="@bagId"
-                                                                data-bag-idx="@bagIdx"></span>
+                                                                  role="button" aria-label="Eliminar bolsa" title="Eliminar bolsa"
+                                                                  data-container-id="@bagId"
+                                                                  data-bag-idx="@bagIdx"></span>
                                                         </button>
                                                     </li>
                                                 }
@@ -715,7 +725,7 @@
               $btn.prop('disabled', !SOBRES_OK).toggleClass('disabled', !SOBRES_OK);
 
               // (Opcional) ocultar toda la sección si el punto NO admite sobres:
-              $pane.find('.card:has(.js-add-envelope-in-this-bag)').toggleClass('d-none', !SOBRES_OK);
+              //$pane.find('.card:has(.js-add-envelope-in-this-bag)').toggleClass('d-none', !SOBRES_OK);
 
               // Ajustar radios de sobres existentes (mostrar/ocultar segun CAPS)
               updateEnvelopeModeRadios($pane);
@@ -906,6 +916,13 @@
             return s;
           }
 
+          // ======== PESOS (solo para textos) ========
+          function fmtPeso(n){
+            const x = Number(n) || 0;
+            if (x < 0) return '-$ ' + NF_INT.format(Math.abs(x)); // signo antes del $
+            return '$ ' + NF_INT.format(x);
+          }
+
           function breakdownForEditor($editor){
             const isSobre = containerTypeOf($editor) === 'Sobre';
 
@@ -928,11 +945,12 @@
           function updateEnvelopeBadges($envCard){
             const $editor = $envCard.find('.container-editor').first();
             const br = breakdownForEditor($editor);
-            $envCard.find('.js-env-bills').text(fmtInt(br.bills));
-            $envCard.find('.js-env-coins').text(fmtInt(br.coins));
-            $envCard.find('.js-env-docs').text(fmtInt(br.docs));
-            $envCard.find('.js-env-checks').text(fmtInt(br.checks));
-            $envCard.find('.js-env-total').text(fmtInt(br.total));
+
+            $envCard.find('.js-env-bills').text(fmtPeso(br.bills));
+            $envCard.find('.js-env-coins').text(fmtPeso(br.coins));
+            $envCard.find('.js-env-docs').text(fmtPeso(br.docs));
+            $envCard.find('.js-env-checks').text(fmtPeso(br.checks));
+            $envCard.find('.js-env-total').text(fmtPeso(br.total));
           }
 
           function setHighBadge($row, highVal) {
@@ -1236,19 +1254,19 @@
               }
             }
 
-            $ce.find('.js-container-subtotal').text(fmtInt(total));
+            $ce.find('.js-container-subtotal').text(fmtPeso(total));
 
             const bl  = billsHighLowForEditor($ce);
             const $blk = $ce.find('.js-sub-bills-block');
 
             if ((bl.high + bl.low) > 0) {
-              $ce.find('.js-sub-bills-high, .js-bills-high').text(fmtInt(bl.high));
-              $ce.find('.js-sub-bills-low,  .js-bills-low').text(fmtInt(bl.low));
+              $ce.find('.js-sub-bills-high, .js-bills-high').text(fmtPeso(bl.high));
+              $ce.find('.js-sub-bills-low,  .js-bills-low').text(fmtPeso(bl.low));
               $blk.show();
             } else {
               $blk.hide();
-              $ce.find('.js-sub-bills-high, .js-bills-high').text('0');
-              $ce.find('.js-sub-bills-low,  .js-bills-low').text('0');
+              $ce.find('.js-sub-bills-high, .js-bills-high').text('$ 0');
+              $ce.find('.js-sub-bills-low,  .js-bills-low').text('$ 0');
             }
           }
 
@@ -1361,15 +1379,15 @@
             const envelopeTotal = envelopeBill + envelopeCoin + envelopeDoc + envelopeCheck;
             
 
-            $tabBtn.find('.js-bag-badge-bills').text(fmtInt(billsTotal));
-            $tabBtn.find('.js-bag-badge-coins').text(fmtInt(coinsTotal));
-            $tabBtn.find('.js-bag-badge-total') .text(fmtInt(grandTotal));
+            $tabBtn.find('.js-bag-badge-bills').text(fmtPeso(billsTotal));
+            $tabBtn.find('.js-bag-badge-coins').text(fmtPeso(coinsTotal));
+            $tabBtn.find('.js-bag-badge-total').text(fmtPeso(grandTotal));
 
-            $envHdr.find('.js-env-bills').text(fmtInt(envelopeBill));
-            $envHdr.find('.js-env-coins').text(fmtInt(envelopeCoin));
-            $envHdr.find('.js-env-docs').text(fmtInt(envelopeDoc));
-            $envHdr.find('.js-env-checks').text(fmtInt(envelopeCheck));
-            $envHdr.find('.js-env-total').text(fmtInt(envelopeTotal));
+            $envHdr.find('.js-env-bills').text(fmtPeso(envelopeBill));
+            $envHdr.find('.js-env-coins').text(fmtPeso(envelopeCoin));
+            $envHdr.find('.js-env-docs').text(fmtPeso(envelopeDoc));
+            $envHdr.find('.js-env-checks').text(fmtPeso(envelopeCheck));
+            $envHdr.find('.js-env-total').text(fmtPeso(envelopeTotal));
 
             updateTabsOverflowState();
             updateAddEnvelopeButtonState($bagPane);
@@ -1384,27 +1402,6 @@
           // =====================================================================
           // X) RESUMEN (UI)
           // =====================================================================
-
-          // helper: setea totales en inputs ocultos y displays visibles
-          function setSummaryTotals(declared, counted, diff){
-            const fmtD = fmtInt(declared);
-            const fmtC = fmtInt(counted);
-            const fmtF = (diff>=0?'+':'') + fmtInt(diff);
-
-            // inputs "compatibilidad" (tu código antiguo hacía .val())
-            $('#sumDeclaredAll').val(fmtD);
-            $('#sumCountedAll').val(fmtC);
-            $('#sumDiffAll').val(fmtF);
-
-            // displays visibles
-            $('#sumDeclaredAllDisplay').text(fmtD);
-            $('#sumCountedAllDisplay').text(fmtC);
-            $('#sumDiffAllDisplay').text(fmtF)
-              .removeClass('positive negative')
-              .addClass(diff < 0 ? 'negative' : 'positive');
-          }
-
-          // calcula conteos y montos "en vivo" a partir del DOM
           function computeLiveSummary(){
             const declaredTotal = DECLARED_TX;
 
@@ -1456,7 +1453,7 @@
               const html = `
                 <div class="list-group-item d-flex justify-content-between align-items-center">
                   <span>Bolsa ${idx+1}</span>
-                  <span class="badge bg-info" title="Contado">${fmtInt(counted)}</span>
+                  <span class="badge bg-info" title="Contado">${fmtPeso(counted)}</span>
                 </div>`;
               $list.append(html);
             });
@@ -1468,22 +1465,22 @@
             const bl = computeGlobalBillsHighLow();
 
             // Panel superior (Paso 1)
-            $('#totDeclaredGlobal').text(fmtInt(s.declaredTotal));
-            $('#totCountedGlobal').text(fmtInt(s.cashTotal));
-            $('#totOverallGlobal').text(fmtInt(s.overallTotal));
+            $('#totDeclaredGlobal').text(fmtPeso(s.declaredTotal));
+            $('#totCountedGlobal').text(fmtPeso(s.cashTotal));
+            $('#totOverallGlobal').text(fmtPeso(s.overallTotal));
 
             const diff = s.cashTotal - s.declaredTotal;
-            $('#totDiffGlobal').text((diff>=0?'+':'') + fmtInt(diff))
+            $('#totDiffGlobal').text((diff>=0?'+':'') + fmtPeso(diff))
               .removeClass('positive negative')
               .addClass(diff < 0 ? 'negative' : 'positive');
             $('#countBagsHeader').text(s.bagsCount);
             $('#countEnvelopesHeader').text(s.envCount);
 
             // Panel del PASO 2 (tu resumen existente)
-            $('#sumDeclaredAllDisplay').text(fmtInt(s.declaredTotal));
-            $('#sumCountedAllDisplay').text(fmtInt(s.cashTotal));
-            $('#sumOverallDisplay').text(fmtInt(s.overallTotal));
-            $('#sumDiffAllDisplay').text((diff>=0?'+':'') + fmtInt(diff))
+            $('#sumDeclaredAllDisplay').text(fmtPeso(s.declaredTotal));
+            $('#sumCountedAllDisplay').text(fmtPeso(s.cashTotal));
+            $('#sumOverallDisplay').text(fmtPeso(s.overallTotal));
+            $('#sumDiffAllDisplay').text((diff>=0?'+':'') + fmtPeso(diff))
               .removeClass('positive negative')
               .addClass(diff < 0 ? 'negative' : 'positive');
 
@@ -1491,15 +1488,15 @@
             $('#sumCountedAll').val(fmtInt(s.cashTotal));
             $('#sumDiffAll').val((diff>=0?'+':'') + fmtInt(diff));
 
-            $('#sumBillsCounted').text(fmtInt(s.bills));
-            $('#sumCoinsCounted').text(fmtInt(s.coins));
-            $('#sumDocsCounted').text(fmtInt(s.docs));
-            $('#sumChecksCounted').text(fmtInt(s.checks));
+            $('#sumBillsCounted').text(fmtPeso(s.bills));
+            $('#sumCoinsCounted').text(fmtPeso(s.coins));
+            $('#sumDocsCounted').text(fmtPeso(s.docs));
+            $('#sumChecksCounted').text(fmtPeso(s.checks));
 
-            $('#sumTotalCountedDisplay').text(fmtInt(s.overallTotal));
+            $('#sumTotalCountedDisplay').text(fmtPeso(s.overallTotal));
 
-            $('#sumBillHigh').text(fmtInt(bl.high));
-            $('#sumBillLow').text(fmtInt(bl.low));
+            $('#sumBillHigh').text(fmtPeso(bl.high));
+            $('#sumBillLow').text(fmtPeso(bl.low));
 
             $('#countBags').text(s.bagsCount);
             $('#countEnvelopes').text(s.envCount);
@@ -1896,9 +1893,9 @@
                         data-bs-toggle="tab" data-bs-target="#${newId}"
                         type="button" role="tab">
                   <span>Bolsa ${idxHuman}</span>
-                  <span class="badge bg-primary ms-2" title="Billetes">B: <span class="js-bag-badge-bills">0</span></span>
-                  <span class="badge bg-warning text-dark ms-1" title="Monedas">M: <span class="js-bag-badge-coins">0</span></span>
-                  <span class="badge bg-info ms-1" title="Total bolsa">T: <span class="js-bag-badge-total">0</span></span>
+                  <span class="badge bg-primary ms-2 tab-badge" title="Billetes"><i class="ri-money-dollar-box-line"></i><span class="js-bag-badge-bills">0</span></span>
+                  <span class="badge bg-warning text-dark ms-1 tab-badge" title="Monedas"><i class="ri-coins-line"></i><span class="js-bag-badge-coins">0</span></span>
+                  <span class="badge bg-info ms-1 tab-badge" title="Total bolsa"><i class="ri-equalizer-line"></i><span class="js-bag-badge-total">0</span></span>
                   <span class="btn-close btn-close-sm tab-close js-close-bag-tab ms-1"
                     role="button" aria-label="Eliminar bolsa" title="Eliminar bolsa"
                     data-container-id="0"
@@ -2382,6 +2379,7 @@
           });
           setTimeout(updateAllBagBadges, 150);
           updateProcessSummary();
+          applyPointCapsUI();
         });
     </script>
 }

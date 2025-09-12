@@ -13,6 +13,11 @@ namespace VCashApp.Models.ViewModels.CentroEfectivo
         /// Colección de transacciones a mostrar.
         /// </summary>
         public IEnumerable<CefTransactionSummaryViewModel> Transactions { get; set; } = new List<CefTransactionSummaryViewModel>();
+        
+        /// <summary>
+        /// Tipo de dashborad a mostrar.
+        /// </summary>
+        public CefDashboardMode Mode { get; set; }
 
         /// <summary>
         /// Página actual de la paginación.

@@ -44,14 +44,14 @@ namespace VCashApp.Services
         /// <param name="startDate">Fecha de inicio para el filtro.</param>
         /// <param name="endDate">Fecha de fin para el filtro.</param>
         /// <param name="status">Estado de la transacción para el filtro.</param>
-        /// <param name="searchTerm">Término de búsqueda.</param>
-        /// <param name="pageNumber">Número de página.</param>
+        /// <param name="search">Término de búsqueda.</param>
+        /// <param name="page">Número de página.</param>
         /// <param name="pageSize">Tamaño de la página.</param>
         /// <param name="isAdmin">Indica si el usuario es administrador.</param>
         /// <returns>Una tupla que contiene la lista de transacciones y el total de registros.</returns>
         Task<Tuple<List<CefTransactionSummaryViewModel>, int>> GetFilteredCefTransactionsAsync(
             string currentUserId, int? branchId, DateOnly? startDate, DateOnly? endDate, CefTransactionStatusEnum? status,
-            string? search, int page, int pageSize, bool isAdmin);
+            string? search, int page, int pageSize, bool isAdmin, IEnumerable<string>? conceptTypeCodes = null);
 
         /// <summary>
         /// Obtiene las listas de dropdowns necesarias para el dashboard de CEF.

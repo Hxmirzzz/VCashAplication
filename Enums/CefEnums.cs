@@ -23,18 +23,30 @@
 
     public enum CefTransactionStatusEnum
     {
-        RegistroTesoreria,        // Checkin
-        EncoladoParaConteo,       // EnqueuedForCounting
-        ConteoBilletes,           // BillCounting
-        ConteoMonedas,            // CoinCounting
-        ConteoCheques,            // CheckCounting
-        ConteoDocumentos,         // DocumentCounting
-        PendienteRevision,        // PendingReview
-        Aprobado,                 // Approved
-        Rechazado,                // Rejected
-        Cancelado                 // Cancelled
+        RegistroTesoreria,
+        EncoladoParaConteo,
+
+        // Unificado
+        Conteo,
+
+        PendienteRevision,
+        Aprobado,
+        Rechazado,
+        Cancelado,
+
+        // Provisión / Entrega
+        ProvisionEnProceso,
+        ListoParaEntrega,
+        Entregado
     }
 
+    public enum CefDashboardMode
+    {
+        TesoreriaRecepcion,
+        TesoreriaEntrega,
+        CefRecoleccion,
+        CefProvision
+    }
 
     public enum CefContainerTypeEnum
     {

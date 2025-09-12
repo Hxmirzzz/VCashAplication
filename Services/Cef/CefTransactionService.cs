@@ -1,12 +1,13 @@
-﻿using Microsoft.AspNetCore.Mvc.Rendering;
+﻿using DocumentFormat.OpenXml.Math;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using System.Data;
-using VCashApp.Utils;
 using VCashApp.Data;
 using VCashApp.Enums;
 using VCashApp.Models.Entities;
 using VCashApp.Models.ViewModels.CentroEfectivo;
+using VCashApp.Utils;
 
 namespace VCashApp.Services.Cef
 {
@@ -254,9 +255,9 @@ namespace VCashApp.Services.Cef
         /// <inheritdoc/>
         public async Task<Tuple<List<CefTransactionSummaryViewModel>, int>> GetFilteredCefTransactionsAsync(
             string currentUserId, int? branchId, DateOnly? startDate, DateOnly? endDate, CefTransactionStatusEnum? status,
-            string? search, int page, int pageSize, bool isAdmin)
+            string? search, int page, int pageSize, bool isAdmin, IEnumerable<string>? conceptTypeCodes = null)
         {
-            var permittedBranches = new List<int>();
+            List<int> permittedBranches = new();
             if (!isAdmin)
             {
                 permittedBranches = await _context.UserClaims
@@ -265,77 +266,101 @@ namespace VCashApp.Services.Cef
                     .ToListAsync();
             }
 
-            var tvpTable = new DataTable();
-            tvpTable.Columns.Add("Value", typeof(int));
-            foreach (int id in permittedBranches)
-            {
-                tvpTable.Rows.Add(id);
-            }
+            DateTime? start = startDate?.ToDateTime(TimeOnly.MinValue);
+            DateTime? end = endDate?.ToDateTime(TimeOnly.MaxValue);
 
-            var pPermittedBranchIds = new SqlParameter("@PermittedBranchIds", tvpTable)
-            {
-                TypeName = "dbo.IntListType",
-                SqlDbType = SqlDbType.Structured
-            };
+            var txBase = _context.CefTransactions.AsNoTracking();
 
-            var pBranchIdFilter = new SqlParameter("@BranchIdFilter", branchId ?? (object)DBNull.Value);
-            var pStartDate = new SqlParameter("@StartDate", startDate.HasValue ? (object)startDate.Value.ToDateTime(TimeOnly.MinValue) : DBNull.Value);
-            var pEndDate = new SqlParameter("@EndDate", endDate.HasValue ? (object)endDate.Value.ToDateTime(TimeOnly.MaxValue) : DBNull.Value);
-            var pStatus = new SqlParameter("@Status", status.HasValue ? (object)status.Value.ToString() : DBNull.Value);
-            var pSearchTerm = new SqlParameter("@SearchTerm", string.IsNullOrEmpty(search) ? (object)DBNull.Value : search);
-            var pPage = new SqlParameter("@Page", page);
-            var pPageSize = new SqlParameter("@PageSize", pageSize);
-
-            var transactionsSummary = new List<CefTransactionSummaryViewModel>();
-            var totalRecords = 0;
-
-            using (var command = _context.Database.GetDbConnection().CreateCommand())
-            {
-                command.CommandText = "dbo.GetFilteredCefTransactions";
-                command.CommandType = CommandType.StoredProcedure;
-                command.Parameters.AddRange(new[] {
-            pPermittedBranchIds, pBranchIdFilter, pStartDate, pEndDate, pStatus,
-            pSearchTerm, pPage, pPageSize
-        });
-
-                await _context.Database.OpenConnectionAsync();
-
-                using (var reader = await command.ExecuteReaderAsync())
+            var query =
+                from t in txBase
+                join s in _context.CgsServicios.AsNoTracking()
+                    on t.ServiceOrderId equals s.ServiceOrderId into sj
+                from s in sj.DefaultIfEmpty()
+                join con in _context.AdmConceptos.AsNoTracking()
+                    on s.ConceptCode equals con.CodConcepto into conj
+                from con in conj.DefaultIfEmpty()
+                join su in _context.AdmSucursales.AsNoTracking()
+                    on t.BranchCode equals su.CodSucursal into suj
+                from su in suj.DefaultIfEmpty()
+                join rd in _context.TdvRutasDiarias.AsNoTracking()
+                    on t.RouteId equals rd.Id into rdj
+                from rd in rdj.DefaultIfEmpty()
+                join jt in _context.AdmEmpleados.AsNoTracking()
+                    on rd.CedulaJT equals jt.CodCedula into jtj
+                from jt in jtj.DefaultIfEmpty()
+                select new
                 {
-                    if (await reader.ReadAsync())
-                    {
-                        totalRecords = reader.GetInt32(0);
-                    }
-                    await reader.NextResultAsync();
+                    T = t,
+                    BranchName = su != null ? su.NombreSucursal : "",
+                    HeadOfShiftName = jt != null ? jt.NombreCompleto : "",
+                    ConceptType = con != null ? con.TipoConcepto : null
+                };
 
-                    while (await reader.ReadAsync())
-                    {
-                        transactionsSummary.Add(new CefTransactionSummaryViewModel
-                        {
-                            Id = reader.GetInt32(reader.GetOrdinal("Id")),
-                            ServiceOrderId = reader.IsDBNull(reader.GetOrdinal("OrdenServicio")) ? string.Empty : reader.GetString(reader.GetOrdinal("OrdenServicio")),
-                            SlipNumber = reader.GetInt32(reader.GetOrdinal("NumeroPlanilla")),
-                            Currency = reader.IsDBNull(reader.GetOrdinal("Divisa")) ? string.Empty : reader.GetString(reader.GetOrdinal("Divisa")),
-                            TransactionType = reader.IsDBNull(reader.GetOrdinal("TipoTransaccion")) ? string.Empty : reader.GetString(reader.GetOrdinal("TipoTransaccion")),
-                            TotalDeclaredValue = reader.GetDecimal(reader.GetOrdinal("ValorTotalDeclarado")),
-                            TotalCountedValue = reader.GetDecimal(reader.GetOrdinal("ValorTotalContado")),
-                            ValueDifference = reader.GetDecimal(reader.GetOrdinal("DiferenciaValor")),
-                            TransactionStatus = reader.IsDBNull(reader.GetOrdinal("EstadoTransaccion"))
-                                ? string.Empty
-                                : reader.GetString(reader.GetOrdinal("EstadoTransaccion")),
-                            RegistrationDate = reader.GetDateTime(reader.GetOrdinal("FechaRegistro")),
-                            BranchName = reader.IsDBNull(reader.GetOrdinal("BranchName"))
-                                ? string.Empty
-                                : reader.GetString(reader.GetOrdinal("BranchName")),
-                            HeadOfShiftName = reader.IsDBNull(reader.GetOrdinal("HeadOfShiftName"))
-                                ? string.Empty
-                                : reader.GetString(reader.GetOrdinal("HeadOfShiftName"))
-                        });
-                    }
-                }
+            // 5) Filtros
+            if (!isAdmin && permittedBranches.Count > 0)
+                query = query.Where(x => permittedBranches.Contains(x.T.BranchCode));
+
+            if (branchId.HasValue)
+                query = query.Where(x => x.T.BranchCode == branchId.Value);
+
+            if (start.HasValue)
+                query = query.Where(x => x.T.RegistrationDate >= start.Value);
+
+            if (end.HasValue)
+                query = query.Where(x => x.T.RegistrationDate <= end.Value);
+
+            if (status.HasValue)
+                query = query.Where(x => x.T.TransactionStatus == status.Value.ToString());
+
+            if (conceptTypeCodes != null && conceptTypeCodes.Any())
+            {
+                var codes = conceptTypeCodes
+                    .Select(c => c.Trim().ToUpper())
+                    .ToArray();
+
+                query = query.Where(x =>
+                    codes.Contains(((x.ConceptType ?? "").Trim().ToUpper()))
+                    || codes.Contains(((x.T.TransactionType ?? "").Trim().ToUpper()))
+                );
             }
 
-            return Tuple.Create(transactionsSummary, totalRecords);
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                var term = search.Trim();
+                bool isNumeric = int.TryParse(term, out var slipNo);
+
+                query = query.Where(x =>
+                    x.T.ServiceOrderId.Contains(term) ||
+                    ((x.T.Currency ?? "").Contains(term)) ||
+                    ((x.T.TransactionType ?? "").Contains(term)) ||
+                    (isNumeric && x.T.SlipNumber == slipNo)
+                );
+            }
+
+            int total = await query.CountAsync();
+
+            var rows = await query
+                .OrderByDescending(x => x.T.RegistrationDate)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .Select(x => new CefTransactionSummaryViewModel
+                {
+                    Id = x.T.Id,
+                    ServiceOrderId = x.T.ServiceOrderId ?? string.Empty,
+                    SlipNumber = x.T.SlipNumber,
+                    Currency = x.T.Currency ?? string.Empty,
+                    TransactionType = x.T.TransactionType ?? (x.ConceptType ?? string.Empty),
+                    TotalDeclaredValue = x.T.TotalDeclaredValue,
+                    TotalCountedValue = x.T.TotalCountedValue,
+                    ValueDifference = x.T.ValueDifference,
+                    TransactionStatus = x.T.TransactionStatus ?? string.Empty,
+                    RegistrationDate = x.T.RegistrationDate,
+                    BranchName = x.BranchName,
+                    HeadOfShiftName = x.HeadOfShiftName
+                })
+                .ToListAsync();
+
+            return Tuple.Create(rows, total);
         }
 
         /// <inheritdoc/>

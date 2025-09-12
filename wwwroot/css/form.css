@@ -856,6 +856,22 @@ textarea.form-control {
             opacity: 1;
         }
 
+/* Badges dentro de tabs */
+.nav-tabs .nav-link .tab-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: .35rem;
+    font-size: .9rem; /* más grande que el .75em por defecto */
+    line-height: 1;
+    padding: .20rem .3rem;
+}
+
+    .nav-tabs .nav-link .tab-badge i {
+        font-size: 1rem; /* icono un pelín más grande */
+        line-height: 1;
+        font-weight: 300;
+    }   
+
 /* ===================================================================
    MEDIA QUERIES (móvil / tablet)
    =================================================================== */
