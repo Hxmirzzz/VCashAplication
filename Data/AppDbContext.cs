@@ -493,7 +493,7 @@ namespace VCashApp.Data
                 entity.Property(t => t.RegistrationIP).HasMaxLength(50);
 
                 // Relaciones
-                entity.HasOne<CgsService>().WithMany().HasForeignKey(t => t.ServiceOrderId).HasPrincipalKey(s => s.ServiceOrderId).OnDelete(DeleteBehavior.Restrict);
+                entity.HasOne(t => t.Service).WithMany(s => s.CefTransactions).HasForeignKey(t => t.ServiceOrderId).HasPrincipalKey(s => s.ServiceOrderId).OnDelete(DeleteBehavior.Restrict);
                 entity.HasOne<TdvRutaDiaria>().WithMany().HasForeignKey(t => t.RouteId).HasPrincipalKey(r => r.Id).IsRequired(false).OnDelete(DeleteBehavior.Restrict);
                 entity.HasOne(t => t.Branch).WithMany().HasForeignKey(t => t.BranchCode).OnDelete(DeleteBehavior.Restrict);
 

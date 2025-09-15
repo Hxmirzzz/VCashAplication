@@ -26,75 +26,75 @@
                 <div class="tab-content" id="myTabContent">
                     <div class="tab-pane fade show active" role="tabpanel" data-step="1">
                         <div class="step-content">
-                            <div class="card mb-3">
-                                <div class="row g-2 mb-2 top-summary">
-                                    <div class="col-12 col-xl-7">
-                                        <div class="card h-100">
-                                            <div class="card-header">
-                                                <h6 class="mb-0">📋 Información del Servicio</h6>
-                                            </div>
-                                            <div class="card-body p-2">
-                                                <div class="row gx-3 gy-1 small">
-                                                    <div class="col-12 col-lg-6">
-                                                        <ul class="meta-list">
-                                                            <li><span class="meta-k">Planilla</span><span class="meta-v">@Model.Transaction.SlipNumber</span></li>
-                                                            <li><span class="meta-k">Cliente</span><span class="meta-v">@Model.Service.ClientName</span></li>
-                                                            <li><span class="meta-k">Sucursal</span><span class="meta-v">@Model.Service.BranchName</span></li>
-                                                            <li><span class="meta-k">Concepto</span><span class="meta-v">@Model.Service.ConceptName</span></li>
-                                                        </ul>
-                                                    </div>
-                                                    <div class="col-12 col-lg-6">
-                                                        <ul class="meta-list">
-                                                            <li><span class="meta-k">Orden</span><span class="meta-v">@Model.Service.ServiceOrderId</span></li>
-                                                            <li><span class="meta-k">Divisa</span><span class="meta-v">@Model.Transaction.Currency</span></li>
-                                                            <li><span class="meta-k">Origen</span><span class="meta-v">@Model.Service.OriginName</span></li>
-                                                            <li><span class="meta-k">Destino</span><span class="meta-v">@Model.Service.DestinationName</span></li>
-                                                        </ul>
-                                                    </div>
-                                                </div>
-                                            </div>
+                            <div class="row g-2 mb-2 top-summary">
+                                <div class="col-12 col-xl-7">
+                                    <div class="card h-100">
+                                        <div class="card-header">
+                                            <h6 class="mb-0"><i class="ri-survey-fill"></i> Información del Servicio</h6>
                                         </div>
-                                    </div>
-
-                                    <div class="col-12 col-xl-5">
-                                        <div class="card h-100">
-                                            <div class="card-header">
-                                                <h6 class="mb-0">📊 Totales</h6>
-                                                <span class="chip-live ms-auto">En vivo</span>
-                                            </div>
-                                            <div class="card-body p-2">
-                                                <input type="hidden" id="declaredTransaction" value="@Model.TotalDeclaredAll" />
-                                                <div class="stats-grid small">
-                                                    <div class="label">Declarado</div>
-                                                    <div class="value" id="totDeclaredGlobal">@Model.TotalDeclaredAll.ToString("N0")</div>
-
-                                                    <div class="label">Contado</div>
-                                                    <div class="value" id="totCountedGlobal">@Model.TotalCountedAll.ToString("N0")</div>
-
-                                                    <div class="label">Diferencia</div>
-                                                    <div class="value tile-diff" id="totDiffGlobal">@Model.DifferenceAll.ToString("N0")</div>
-
-                                                    <div class="divider-xs"></div>
-
-                                                    <div class="label">Total</div>
-                                                    <div class="value" id="totOverallGlobal">@Model.TotalOverallAll.ToString("N0")</div>
+                                        <div class="card-body p-2">
+                                            <div class="row gx-3 gy-1 small">
+                                                <div class="col-12 col-lg-6">
+                                                    <ul class="meta-list">
+                                                        <li><span class="meta-k">Planilla</span><span class="meta-v">@Model.Transaction.SlipNumber</span></li>
+                                                        <li><span class="meta-k">Cliente</span><span class="meta-v">@Model.Service.ClientName</span></li>
+                                                        <li><span class="meta-k">Sucursal</span><span class="meta-v">@Model.Service.BranchName</span></li>
+                                                        <li><span class="meta-k">Concepto</span><span class="meta-v">@Model.Service.ConceptName</span></li>
+                                                    </ul>
                                                 </div>
-
-                                                <div class="row gx-3 gy-1 mt-2 small">
-                                                    <div class="col-6 d-flex justify-content-between">
-                                                        <span class="text-muted">Bolsas</span><strong id="countBagsHeader">0</strong>
-                                                    </div>
-                                                    <div class="col-6 d-flex justify-content-between">
-                                                        <span class="text-muted">Sobres</span><strong id="countEnvelopesHeader">0</strong>
-                                                    </div>
+                                                <div class="col-12 col-lg-6">
+                                                    <ul class="meta-list">
+                                                        <li><span class="meta-k">Orden</span><span class="meta-v">@Model.Service.ServiceOrderId</span></li>
+                                                        <li><span class="meta-k">Divisa</span><span class="meta-v">@Model.Transaction.Currency</span></li>
+                                                        <li><span class="meta-k">Origen</span><span class="meta-v">@Model.Service.OriginName</span></li>
+                                                        <li><span class="meta-k">Destino</span><span class="meta-v">@Model.Service.DestinationName</span></li>
+                                                    </ul>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
 
+                                <div class="col-12 col-xl-5">
+                                    <div class="card h-100">
+                                        <div class="card-header">
+                                            <h6 class="mb-0"><i class="ri-list-check"></i> Totales</h6>
+                                            <span class="chip-live ms-auto">En vivo</span>
+                                        </div>
+                                        <div class="card-body p-2">
+                                            <input type="hidden" id="declaredTransaction" value="@Model.TotalDeclaredAll" />
+                                            <div class="stats-grid small">
+                                                <div class="label">Declarado</div>
+                                                <div class="value" id="totDeclaredGlobal">@Model.TotalDeclaredAll.ToString("N0")</div>
+
+                                                <div class="label">Contado</div>
+                                                <div class="value" id="totCountedGlobal">@Model.TotalCountedAll.ToString("N0")</div>
+
+                                                <div class="label">Diferencia</div>
+                                                <div class="value tile-diff" id="totDiffGlobal">@Model.DifferenceAll.ToString("N0")</div>
+
+                                                <div class="divider-xs"></div>
+
+                                                <div class="label">Total</div>
+                                                <div class="value" id="totOverallGlobal">@Model.TotalOverallAll.ToString("N0")</div>
+                                            </div>
+
+                                            <div class="row gx-3 gy-1 mt-2 small">
+                                                <div class="col-6 d-flex justify-content-between">
+                                                    <span class="text-muted">Bolsas</span><strong id="countBagsHeader">0</strong>
+                                                </div>
+                                                <div class="col-6 d-flex justify-content-between">
+                                                    <span class="text-muted">Sobres</span><strong id="countEnvelopesHeader">0</strong>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="card">
                                 <div class="card-header d-flex align-items-center justify-content-between">
-                                    <h5 class="mb-0">🧰 Bolsas</h5>
+                                    <h5 class="mb-0"><i class="ri-shopping-bag-3-fill"></i> Bolsas</h5>
                                     <div class="d-flex gap-2">
                                         <button type="button" class="btn btn-outline-primary" id="btnAddBag">+ Agregar Bolsa</button>
                                     </div>
@@ -373,6 +373,9 @@
                     <button type="button" class="btn btn-primary" data-step-action="next">Continuar</button>
                     <button type="submit" class="btn btn-primary" data-step-action="submit-final" style="display:none;">Guardar</button>
                     <a asp-action="Index" class="btn btn-danger js-cancel">Cancelar</a>
+                    <button type="button" class="btn btn-success js-finalize-counting">
+                        <i class="ri-check-fill"></i> Finalizar
+                    </button>
                 </div>
             </form>
         </div>
@@ -2275,6 +2278,40 @@
               }
             });
           });
+
+$(document).on('click', '.js-finalize-counting', function (e) {
+  e.preventDefault();
+
+  if (typeof isDirty !== 'undefined' && isDirty) {
+    Swal.fire({
+      icon: 'warning',
+      title: 'Cambios sin guardar',
+      text: 'Tienes Cambios sin guardar. Guarda antes de finalizar el conteo.',
+      confirmButtonText: 'Entendido'
+    });
+    return;
+  }
+
+  Swal.fire({
+    title: '¿Finalizar el conteo?',
+    text: 'Se enviará la transacción a revisión.',
+    icon: 'question',
+    showCancelButton: true,
+    confirmButtonText: 'Si, finalizar',
+    cancelButtonText: 'Cancelar'
+  }).then(res => {
+    if (!res.isConfirmed) return;
+
+    const token  = $('input[name="__RequestVerificationToken"]').first().val() || '';
+    const action = '@Url.Action("FinalizeCounting","Cef", new { transactionId = Model.CefTransactionId })';
+
+    const $tmp = $('<form>', { method: 'post', action: action, style: 'display:none' });
+    $tmp.append($('<input>', { type: 'hidden', name: '__RequestVerificationToken', value: token }));
+    $('body').append($tmp);
+    $tmp.trigger('submit');
+  });
+});
+
 
           $form.on('submit', function (e) {
             e.preventDefault();

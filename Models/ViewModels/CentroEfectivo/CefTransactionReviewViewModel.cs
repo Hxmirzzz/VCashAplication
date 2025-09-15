@@ -32,6 +32,18 @@ namespace VCashApp.Models.ViewModels.CentroEfectivo
         public CefTransactionTypeEnum TransactionType { get; set; }
 
         /// <summary>
+        /// Codigo de la transacción
+        /// </summary>
+        [Display(Name = "Codigo de Transacción")]
+        public string? TransactionTypeCode { get; set; }
+
+        /// <summary>
+        /// Nombre de la transacción
+        /// </summary>
+        [Display(Name = "Nombre de la Transacción")]
+        public string? TransactionTypeName { get; set; }
+
+        /// <summary>
         /// Divisa en la que se realiza la transacción.
         /// </summary>
         [Display(Name = "Divisa")]

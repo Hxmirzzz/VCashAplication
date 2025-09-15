@@ -182,5 +182,7 @@ namespace VCashApp.Models.Entities
         [Column("ArchivoDetalle")]
         [StringLength(450)]
         public string? DetailFile { get; set; }
+
+        public virtual ICollection<CefTransaction> CefTransactions { get; set; } = new List<CefTransaction>();
     }
 }

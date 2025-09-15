@@ -3,14 +3,16 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
-using VCashApp.Utils;
+using System.Net;
 using VCashApp.Data;
 using VCashApp.Enums;
+using VCashApp.Extensions;
 using VCashApp.Filters;
 using VCashApp.Models;
 using VCashApp.Models.ViewModels.CentroEfectivo;
 using VCashApp.Services;
 using VCashApp.Services.DTOs;
+using VCashApp.Utils;
 
 namespace VCashApp.Controllers
 {
@@ -79,8 +81,16 @@ namespace VCashApp.Controllers
             // ViewBag.HasDeletePermission = await HasPermisionForView(userRoles, "CEF", PermissionType.Delete);
         }
 
-        // =========== SECCION: TESORERIA OPERATIVA ===========
+        private static string PageTitleForMode(CefDashboardMode? mode) => mode switch
+        {
+            CefDashboardMode.TesoreriaRecepcion => "Tesoreria - Recepción",
+            CefDashboardMode.TesoreriaEntrega => "Tesoreria - Entrega",
+            CefDashboardMode.CefRecoleccion => "CEF - Recolecciones",
+            CefDashboardMode.CefProvision => "CEF - Provisiones",
+            _ => "Centro de Efectivo"
+        };
 
+        // =========== SECCION: TESORERIA OPERATIVA ===========
         /// <summary>
         /// Dashboard de Tesorería - Recepción (filtra por estado RegistroTesoreria).
         /// Requiere permiso 'View' en TESORERIA.
@@ -111,9 +121,9 @@ namespace VCashApp.Controllers
         {
             return Index(
                 branchId, startDate, endDate,
-                CefTransactionStatusEnum.ListoParaEntrega,      // estado focal
+                CefTransactionStatusEnum.ListoParaEntrega,
                 search, page, pageSize,
-                CefDashboardMode.TesoreriaEntrega           // MODO
+                CefDashboardMode.TesoreriaEntrega
             );
         }
 
@@ -128,7 +138,6 @@ namespace VCashApp.Controllers
             int? branchId, DateOnly? startDate, DateOnly? endDate,
             string? search, int page = 1, int pageSize = 15)
         {
-            // Por ahora no forzamos status (el SP no filtra por concepto todavía)
             return Index(branchId, startDate, endDate, null, search, page, pageSize, CefDashboardMode.CefRecoleccion);
         }
 
@@ -150,7 +159,15 @@ namespace VCashApp.Controllers
         {
             CefDashboardMode.CefRecoleccion => new[] { "RC", "ET" },
             CefDashboardMode.CefProvision => new[] { "PV", "PR" },
+            CefDashboardMode.TesoreriaRecepcion => new[] { "RC" },
             _ => null
+        };
+
+        static string[] ExcludedStatusesByMode(CefDashboardMode? mode) => mode switch
+        {
+            CefDashboardMode.CefRecoleccion => new[] { nameof(CefTransactionStatusEnum.RegistroTesoreria) },
+            CefDashboardMode.CefProvision => new[] { nameof(CefTransactionStatusEnum.RegistroTesoreria) },
+            _ => Array.Empty<string>()
         };
 
         /// <summary>
@@ -176,14 +193,19 @@ namespace VCashApp.Controllers
             var currentUser = await GetCurrentApplicationUserAsync();
             if (currentUser == null) return RedirectToPage("/Account/Login", new { area = "Identity" });
 
-            await SetCommonViewBagsCefAsync(currentUser, "Tesoreria");
+            var effectiveMode = mode ?? InferModeFromStatus(status);
+            var pageTitle = PageTitleForMode(effectiveMode);
+            await SetCommonViewBagsCefAsync(currentUser, pageTitle);
+
+            ViewData["Title"] = pageTitle;
+            ViewData["Mode"] = effectiveMode;
 
             bool isAdmin = ViewBag.IsAdmin;
-
-            var conceptTypeCodes = MapCodesByMode(mode);
+            var conceptTypeCodes = MapCodesByMode(effectiveMode);
+            var excludedStatuses = ExcludedStatusesByMode(effectiveMode);
 
             var (transactions, totalRecords) = await _cefTransactionService.GetFilteredCefTransactionsAsync(
-                currentUser.Id, branchId, startDate, endDate, status, search, page, pageSize, isAdmin, conceptTypeCodes);
+                currentUser.Id, branchId, startDate, endDate, status, search, page, pageSize, isAdmin, conceptTypeCodes, excludedStatuses);
 
             var transactionStatuses = BuildStatusListByMode(mode, status);
             var branches = (ViewBag.AvailableBranches as List<SelectListItem>) ?? new List<SelectListItem>();
@@ -790,7 +812,8 @@ namespace VCashApp.Controllers
         /// <param name="transactionId">ID de la transacción a finalizar.</param>
         /// <returns>Redirección al dashboard de revisión.</returns>
         [HttpPost("FinalizeCounting/{transactionId}")]
-        [RequiredPermission(PermissionType.Edit, "CEF")] // Solo supervisores pueden finalizar y enviar a revisión
+        [ValidateAntiForgeryToken]
+        [RequiredPermission(PermissionType.Edit, "CEF")]
         public async Task<IActionResult> FinalizeCounting(int transactionId)
         {
             var currentUser = await GetCurrentApplicationUserAsync();
@@ -803,39 +826,41 @@ namespace VCashApp.Controllers
                 {
                     throw new InvalidOperationException("No se han registrado contenedores para esta transacción. No se puede finalizar el conteo.");
                 }
-                if (containers.Any(c => c.ContainerStatus == CefContainerStatusEnum.InProcess.ToString() || c.ContainerStatus == CefContainerStatusEnum.Pending.ToString()))
+                if (containers.Any(c => 
+                String.Equals(c.ContainerStatus, CefContainerStatusEnum.InProcess.ToString(), StringComparison.OrdinalIgnoreCase) ||
+                String.Equals(c.ContainerStatus, CefContainerStatusEnum.Pending.ToString(), StringComparison.OrdinalIgnoreCase)))
                 {
                     throw new InvalidOperationException("No todos los contenedores han sido procesados. Por favor, complete el conteo de todos los contenedores.");
                 }
 
-                var success = await _cefTransactionService.UpdateTransactionStatusAsync(transactionId, CefTransactionStatusEnum.PendienteRevision, currentUser.Id); // <-- CORREGIDO AQUÍ
+                var ok = await _cefTransactionService.UpdateTransactionStatusAsync(transactionId, CefTransactionStatusEnum.PendienteRevision, currentUser.Id);
 
-                if (success)
+                if (ok)
                 {
                     TempData["SuccessMessage"] = $"Transacción {transactionId} finalizada para conteo y enviada a revisión.";
                     _logger.LogInformation("Usuario: {Usuario} | IP: {IP} | Acción: Transacción CEF finalizada y enviada a revisión | ID Transacción: {TransactionId}.",
                         currentUser.UserName, IpAddressForLogging, transactionId);
 
-                    return RedirectToAction(nameof(ReviewTransaction), new { transactionId = transactionId });
+                    return RedirectToAction(nameof(ReviewTransaction), new { transactionId });
                 }
                 else
                 {
                     TempData["ErrorMessage"] = "No se pudo finalizar el conteo de la transacción. Verifique el estado.";
                     _logger.LogWarning("Usuario: {Usuario} | IP: {IP} | Acción: Fallo al finalizar conteo | ID Transacción: {TransactionId}.", currentUser.UserName, IpAddressForLogging, transactionId);
-                    return RedirectToAction(nameof(ProcessContainers), new { transactionId = transactionId });
+                    return RedirectToAction(nameof(ProcessContainers), new { transactionId });
                 }
             }
             catch (InvalidOperationException ex)
             {
                 TempData["ErrorMessage"] = ex.Message;
                 _logger.LogError(ex, "Usuario: {Usuario} | IP: {IP} | Acción: Error al finalizar conteo | Mensaje: {ErrorMessage}.", currentUser.UserName, IpAddressForLogging, ex.Message);
-                return RedirectToAction(nameof(ProcessContainers), new { transactionId = transactionId });
+                return RedirectToAction(nameof(ProcessContainers), new { transactionId });
             }
             catch (Exception ex)
             {
                 TempData["ErrorMessage"] = "Ocurrió un error inesperado al finalizar el conteo.";
                 _logger.LogError(ex, "Usuario: {Usuario} | IP: {IP} | Acción: Error inesperado al finalizar conteo.", currentUser.UserName, IpAddressForLogging);
-                return RedirectToAction(nameof(ProcessContainers), new { transactionId = transactionId });
+                return RedirectToAction(nameof(ProcessContainers), new { transactionId });
             }
         }
 
@@ -857,22 +882,29 @@ namespace VCashApp.Controllers
 
             await SetCommonViewBagsCefAsync(currentUser, "Revisión CEF");
 
-            var viewModel = await _cefTransactionService.PrepareReviewViewModelAsync(transactionId);
-            if (viewModel == null)
+            var vm = await _cefTransactionService.PrepareReviewViewModelAsync(transactionId);
+            if (vm == null)
             {
                 TempData["ErrorMessage"] = "Transacción de Centro de Efectivo no encontrada para revisión.";
                 return RedirectToAction(nameof(Index));
             }
 
-            if (viewModel.CurrentStatus != CefTransactionStatusEnum.PendienteRevision)
+            if (vm.CurrentStatus != CefTransactionStatusEnum.PendienteRevision)
             {
-                TempData["ErrorMessage"] = $"La transacción {viewModel.SlipNumber} no está en estado 'Pendiente de Revisión'. Estado actual: {viewModel.CurrentStatus.ToString().Replace("_", " ")}.";
+                TempData["ErrorMessage"] = $"La transacción {vm.SlipNumber} no está en estado 'Pendiente de Revisión'. Estado actual: {vm.CurrentStatus.ToString().Replace("_", " ")}.";
                 return RedirectToAction(nameof(Index));
             }
+
+            vm.AvailableStatuses = new List<SelectListItem>
+            {
+                new SelectListItem{ Text = "Aprobada", Value = CefTransactionStatusEnum.Aprobado.ToString() },
+                new SelectListItem{ Text = "Rechazada", Value = CefTransactionStatusEnum.Rechazado.ToString() }
+            };
+
             ViewBag.CanReview = await HasPermisionForView(await _userManager.GetRolesAsync(currentUser), "CEF", PermissionType.Edit);
 
             _logger.LogInformation("Usuario: {Usuario} | IP: {IP} | Acción: Acceso a revisión de Transacción | ID Transacción: {TransactionId}.", currentUser.UserName, IpAddressForLogging, transactionId);
-            return View(viewModel);
+            return View(vm);
         }
 
         /// <summary>
@@ -895,36 +927,43 @@ namespace VCashApp.Controllers
 
             viewModel.AvailableStatuses = new List<SelectListItem>
             {
-                new (CefTransactionStatusEnum.Aprobado.ToString(), "Aprobada"),
-                new (CefTransactionStatusEnum.Rechazado.ToString(), "Rechazada")
+                new("Aprobada",  CefTransactionStatusEnum.Aprobado.ToString()),
+                new("Rechazada", CefTransactionStatusEnum.Rechazado.ToString())
             };
+
             ViewBag.CanReview = await HasPermisionForView(await _userManager.GetRolesAsync(currentUser), "CEF", PermissionType.Edit);
 
 
             if (!ModelState.IsValid)
             {
-                var fieldErrors = ModelState.Where(kvp => kvp.Value.Errors.Any()).ToDictionary(
+                var errors = ModelState.Where(kvp => kvp.Value.Errors.Any()).ToDictionary(
                         kvp => kvp.Key,
                         kvp => kvp.Value.Errors.Select(e => e.ErrorMessage).ToArray()
                     );
-                _logger.LogWarning("Usuario: {Usuario} | IP: {IP} | Acción: Revisión de Transacción - Modelo Inválido | Errores: {@Errores} |",
-                    currentUser.UserName, IpAddressForLogging, fieldErrors);
 
-                var currentViewModelData = await _cefTransactionService.PrepareReviewViewModelAsync(viewModel.Id);
-                if (currentViewModelData != null)
+                _logger.LogWarning("Usuario: {Usuario} | IP: {IP} | Acción: Revisión de Transacción - Modelo Inválido | Errores: {@Errores} |",
+                    currentUser.UserName, IpAddressForLogging, errors);
+
+                if (Request.IsAjaxRequest())
                 {
-                    viewModel.ServiceOrderId = currentViewModelData.ServiceOrderId;
-                    viewModel.SlipNumber = currentViewModelData.SlipNumber;
-                    viewModel.TransactionType = currentViewModelData.TransactionType;
-                    viewModel.Currency = currentViewModelData.Currency;
-                    viewModel.TotalDeclaredValue = currentViewModelData.TotalDeclaredValue;
-                    viewModel.TotalCountedValue = currentViewModelData.TotalCountedValue;
-                    viewModel.ValueDifference = currentViewModelData.ValueDifference;
-                    viewModel.CurrentStatus = currentViewModelData.CurrentStatus;
-                    viewModel.ReviewerUserName = currentViewModelData.ReviewerUserName;
-                    viewModel.ReviewDate = currentViewModelData.ReviewDate;
-                    viewModel.ContainerSummaries = currentViewModelData.ContainerSummaries;
-                    viewModel.IncidentSummaries = currentViewModelData.IncidentSummaries;
+                    return Json(new { success = false, message = "Datos incompletos o inválidos.", errors });
+                }
+
+                var currentData = await _cefTransactionService.PrepareReviewViewModelAsync(viewModel.Id);
+                if (currentData != null)
+                {
+                    viewModel.ServiceOrderId = currentData.ServiceOrderId;
+                    viewModel.SlipNumber = currentData.SlipNumber;
+                    viewModel.TransactionType = currentData.TransactionType;
+                    viewModel.Currency = currentData.Currency;
+                    viewModel.TotalDeclaredValue = currentData.TotalDeclaredValue;
+                    viewModel.TotalCountedValue = currentData.TotalCountedValue;
+                    viewModel.ValueDifference = currentData.ValueDifference;
+                    viewModel.CurrentStatus = currentData.CurrentStatus;
+                    viewModel.ReviewerUserName = currentData.ReviewerUserName;
+                    viewModel.ReviewDate = currentData.ReviewDate;
+                    viewModel.ContainerSummaries = currentData.ContainerSummaries;
+                    viewModel.IncidentSummaries = currentData.IncidentSummaries;
                 }
                 return View(viewModel);
             }
@@ -934,84 +973,99 @@ namespace VCashApp.Controllers
                 var success = await _cefTransactionService.ProcessReviewApprovalAsync(viewModel, currentUser.Id);
                 if (success)
                 {
-                    TempData["SuccessMessage"] = $"Transacción {viewModel.SlipNumber} {viewModel.NewStatus.ToString().Replace("_", " ")} exitosamente.";
+                    var msg = $"Transacción {viewModel.SlipNumber} {viewModel.NewStatus.ToString().Replace("_", " ")} exitosamente.";
                     _logger.LogInformation("Usuario: {Usuario} | IP: {IP} | Acción: Transacción CEF {Status} | ID Transacción: {TransactionId}.",
                         currentUser.UserName, IpAddressForLogging, viewModel.NewStatus, viewModel.Id);
+
+                    if (Request.IsAjaxRequest())
+                    {
+                        return Json(new
+                        {
+                            success = true,
+                            message = msg,
+                            data = new { redirectUrl = Url.Action(nameof(Index)) }
+                        });
+                    }
+
+                    TempData["SuccessMessage"] = msg;
                     return RedirectToAction(nameof(Index));
                 }
                 else
                 {
-                    ModelState.AddModelError("", "No se pudo procesar la revisión de la transacción. Verifique el estado.");
-                    _logger.LogWarning("Usuario: {Usuario} | IP: {IP} | Acción: Fallo al procesar revisión de Transacción | ID Transacción: {TransactionId}.", currentUser.UserName, IpAddressForLogging, viewModel.Id);
+                    _logger.LogWarning("Usuario: {Usuario} | IP: {IP} | Acción: Fallo al procesar revisión de Transacción | ID Transacción: {TransactionId}.",
+                        currentUser.UserName, IpAddressForLogging, viewModel.Id);
 
-                    var currentViewModelData = await _cefTransactionService.PrepareReviewViewModelAsync(viewModel.Id);
-                    if (currentViewModelData != null)
+                    if (Request.IsAjaxRequest())
                     {
-                        viewModel.ContainerSummaries = currentViewModelData.ContainerSummaries;
-                        viewModel.IncidentSummaries = currentViewModelData.IncidentSummaries;
-                        viewModel.TotalDeclaredValue = currentViewModelData.TotalDeclaredValue;
-                        viewModel.TotalCountedValue = currentViewModelData.TotalCountedValue;
-                        viewModel.ValueDifference = currentViewModelData.ValueDifference;
-                        viewModel.TransactionType = currentViewModelData.TransactionType;
-                        viewModel.Currency = currentViewModelData.Currency;
-                        viewModel.SlipNumber = currentViewModelData.SlipNumber;
-                        viewModel.ServiceOrderId = currentViewModelData.ServiceOrderId;
-                        viewModel.CurrentStatus = currentViewModelData.CurrentStatus;
-                        viewModel.ReviewerUserName = currentViewModelData.ReviewerUserName;
-                        viewModel.ReviewDate = currentViewModelData.ReviewDate;
+                        return BadRequest(new
+                        {
+                            success = false,
+                            message = "No se pudo procesar la revisión de la transacción. Verifique el estado."
+                        });
                     }
 
+                    ModelState.AddModelError("", "No se pudo procesar la revisión de la transacción. Verifique el estado.");
                     return View(viewModel);
                 }
             }
             catch (InvalidOperationException ex)
             {
-                ModelState.AddModelError("", ex.Message);
                 _logger.LogError(ex, "Usuario: {Usuario} | IP: {IP} | Acción: Error de operación inválida al revisar Transacción | Mensaje: {ErrorMessage}.", currentUser.UserName, IpAddressForLogging, ex.Message);
 
-                // --- INICIO DE LA CORRECCIÓN EN EL CATCH (para InvalidOperationException) ---
-                var currentViewModelData = await _cefTransactionService.PrepareReviewViewModelAsync(viewModel.Id);
-                if (currentViewModelData != null)
+                if (Request.IsAjaxRequest())
                 {
-                    viewModel.ContainerSummaries = currentViewModelData.ContainerSummaries;
-                    viewModel.IncidentSummaries = currentViewModelData.IncidentSummaries;
-                    viewModel.TotalDeclaredValue = currentViewModelData.TotalDeclaredValue;
-                    viewModel.TotalCountedValue = currentViewModelData.TotalCountedValue;
-                    viewModel.ValueDifference = currentViewModelData.ValueDifference;
-                    viewModel.TransactionType = currentViewModelData.TransactionType;
-                    viewModel.Currency = currentViewModelData.Currency;
-                    viewModel.SlipNumber = currentViewModelData.SlipNumber;
-                    viewModel.ServiceOrderId = currentViewModelData.ServiceOrderId;
-                    viewModel.CurrentStatus = currentViewModelData.CurrentStatus;
-                    viewModel.ReviewerUserName = currentViewModelData.ReviewerUserName;
-                    viewModel.ReviewDate = currentViewModelData.ReviewDate;
+                    return BadRequest(new { success = false, message = ex.Message });
                 }
-                // --- FIN DE LA CORRECCIÓN ---
+
+                ModelState.AddModelError("", ex.Message);
+                
+                var currentData = await _cefTransactionService.PrepareReviewViewModelAsync(viewModel.Id);
+                if (currentData != null)
+                {
+                    viewModel.ContainerSummaries = currentData.ContainerSummaries;
+                    viewModel.IncidentSummaries = currentData.IncidentSummaries;
+                    viewModel.TotalDeclaredValue = currentData.TotalDeclaredValue;
+                    viewModel.TotalCountedValue = currentData.TotalCountedValue;
+                    viewModel.ValueDifference = currentData.ValueDifference;
+                    viewModel.TransactionType = currentData.TransactionType;
+                    viewModel.Currency = currentData.Currency;
+                    viewModel.SlipNumber = currentData.SlipNumber;
+                    viewModel.ServiceOrderId = currentData.ServiceOrderId;
+                    viewModel.CurrentStatus = currentData.CurrentStatus;
+                    viewModel.ReviewerUserName = currentData.ReviewerUserName;
+                    viewModel.ReviewDate = currentData.ReviewDate;
+                }
+
                 return View(viewModel);
             }
             catch (Exception ex)
             {
-                ModelState.AddModelError("", "Ocurrió un error inesperado al revisar la transacción.");
                 _logger.LogError(ex, "Usuario: {Usuario} | IP: {IP} | Acción: Error inesperado al revisar Transacción.", currentUser.UserName, IpAddressForLogging);
 
-                // --- INICIO DE LA CORRECCIÓN EN EL CATCH (para Excepción general) ---
-                var currentViewModelData = await _cefTransactionService.PrepareReviewViewModelAsync(viewModel.Id);
-                if (currentViewModelData != null)
+                const string msg = "Ocurrió un error inesperado al revisar la transacción.";
+                if (Request.IsAjaxRequest())
                 {
-                    viewModel.ContainerSummaries = currentViewModelData.ContainerSummaries;
-                    viewModel.IncidentSummaries = currentViewModelData.IncidentSummaries;
-                    viewModel.TotalDeclaredValue = currentViewModelData.TotalDeclaredValue;
-                    viewModel.TotalCountedValue = currentViewModelData.TotalCountedValue;
-                    viewModel.ValueDifference = currentViewModelData.ValueDifference;
-                    viewModel.TransactionType = currentViewModelData.TransactionType;
-                    viewModel.Currency = currentViewModelData.Currency;
-                    viewModel.SlipNumber = currentViewModelData.SlipNumber;
-                    viewModel.ServiceOrderId = currentViewModelData.ServiceOrderId;
-                    viewModel.CurrentStatus = currentViewModelData.CurrentStatus;
-                    viewModel.ReviewerUserName = currentViewModelData.ReviewerUserName;
-                    viewModel.ReviewDate = currentViewModelData.ReviewDate;
+                    return Json(new { success = false, message = msg });
                 }
-                // --- FIN DE LA CORRECCIÓN ---
+
+                ModelState.AddModelError("", "Ocurrió un error inesperado al revisar la transacción.");
+                var currentData = await _cefTransactionService.PrepareReviewViewModelAsync(viewModel.Id);
+                if (currentData != null)
+                {
+                    viewModel.ContainerSummaries = currentData.ContainerSummaries;
+                    viewModel.IncidentSummaries = currentData.IncidentSummaries;
+                    viewModel.TotalDeclaredValue = currentData.TotalDeclaredValue;
+                    viewModel.TotalCountedValue = currentData.TotalCountedValue;
+                    viewModel.ValueDifference = currentData.ValueDifference;
+                    viewModel.TransactionType = currentData.TransactionType;
+                    viewModel.Currency = currentData.Currency;
+                    viewModel.SlipNumber = currentData.SlipNumber;
+                    viewModel.ServiceOrderId = currentData.ServiceOrderId;
+                    viewModel.CurrentStatus = currentData.CurrentStatus;
+                    viewModel.ReviewerUserName = currentData.ReviewerUserName;
+                    viewModel.ReviewDate = currentData.ReviewDate;
+                }
+
                 return View(viewModel);
             }
         }

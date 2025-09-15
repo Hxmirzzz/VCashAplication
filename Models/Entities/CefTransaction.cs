@@ -15,7 +15,6 @@ namespace VCashApp.Models.Entities
         [Column("OrdenServicio")]
         [ForeignKey("CgsService")]
         public string ServiceOrderId { get; set; }
-        [NotMapped]
         public virtual CgsService Service { get; set; }
 
         [Column("CodSucursal")]

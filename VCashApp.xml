@@ -2457,6 +2457,16 @@
             Tipo de transacción realizada.
             </summary>
         </member>
+        <member name="P:VCashApp.Models.ViewModels.CentroEfectivo.CefTransactionReviewViewModel.TransactionTypeCode">
+            <summary>
+            Codigo de la transacción
+            </summary>
+        </member>
+        <member name="P:VCashApp.Models.ViewModels.CentroEfectivo.CefTransactionReviewViewModel.TransactionTypeName">
+            <summary>
+            Nombre de la transacción
+            </summary>
+        </member>
         <member name="P:VCashApp.Models.ViewModels.CentroEfectivo.CefTransactionReviewViewModel.Currency">
             <summary>
             Divisa en la que se realiza la transacción.
@@ -3092,7 +3102,7 @@
         <member name="M:VCashApp.Services.Cef.CefTransactionService.GetCefTransactionByIdAsync(System.Int32)">
             <inheritdoc/>
         </member>
-        <member name="M:VCashApp.Services.Cef.CefTransactionService.GetFilteredCefTransactionsAsync(System.String,System.Nullable{System.Int32},System.Nullable{System.DateOnly},System.Nullable{System.DateOnly},System.Nullable{VCashApp.Enums.CefTransactionStatusEnum},System.String,System.Int32,System.Int32,System.Boolean,System.Collections.Generic.IEnumerable{System.String})">
+        <member name="M:VCashApp.Services.Cef.CefTransactionService.GetFilteredCefTransactionsAsync(System.String,System.Nullable{System.Int32},System.Nullable{System.DateOnly},System.Nullable{System.DateOnly},System.Nullable{VCashApp.Enums.CefTransactionStatusEnum},System.String,System.Int32,System.Int32,System.Boolean,System.Collections.Generic.IEnumerable{System.String},System.Collections.Generic.IEnumerable{System.String})">
             <inheritdoc/>
         </member>
         <member name="M:VCashApp.Services.Cef.CefTransactionService.UpdateTransactionStatusAsync(System.Int32,VCashApp.Enums.CefTransactionStatusEnum,System.String)">
@@ -3384,7 +3394,7 @@
             <param name="transactionId">ID de la transacción de CEF.</param>
             <returns>La transacción de CEF si se encuentra, de lo contrario, null.</returns>
         </member>
-        <member name="M:VCashApp.Services.ICefTransactionService.GetFilteredCefTransactionsAsync(System.String,System.Nullable{System.Int32},System.Nullable{System.DateOnly},System.Nullable{System.DateOnly},System.Nullable{VCashApp.Enums.CefTransactionStatusEnum},System.String,System.Int32,System.Int32,System.Boolean,System.Collections.Generic.IEnumerable{System.String})">
+        <member name="M:VCashApp.Services.ICefTransactionService.GetFilteredCefTransactionsAsync(System.String,System.Nullable{System.Int32},System.Nullable{System.DateOnly},System.Nullable{System.DateOnly},System.Nullable{VCashApp.Enums.CefTransactionStatusEnum},System.String,System.Int32,System.Int32,System.Boolean,System.Collections.Generic.IEnumerable{System.String},System.Collections.Generic.IEnumerable{System.String})">
             <summary>
             Obtiene una lista paginada y filtrada de transacciones de Centro de Efectivo para el dashboard de Check-in o revisión.
             </summary>

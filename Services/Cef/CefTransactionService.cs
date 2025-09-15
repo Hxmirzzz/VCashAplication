@@ -251,11 +251,11 @@ namespace VCashApp.Services.Cef
                                  .Include(t => t.Incidents)
                                  .FirstOrDefaultAsync(t => t.Id == transactionId);
         }
-
+ 
         /// <inheritdoc/>
         public async Task<Tuple<List<CefTransactionSummaryViewModel>, int>> GetFilteredCefTransactionsAsync(
             string currentUserId, int? branchId, DateOnly? startDate, DateOnly? endDate, CefTransactionStatusEnum? status,
-            string? search, int page, int pageSize, bool isAdmin, IEnumerable<string>? conceptTypeCodes = null)
+            string? search, int page, int pageSize, bool isAdmin, IEnumerable<string>? conceptTypeCodes = null, IEnumerable<string>? excludeStatuses = null)
         {
             List<int> permittedBranches = new();
             if (!isAdmin)
@@ -322,6 +322,12 @@ namespace VCashApp.Services.Cef
                     codes.Contains(((x.ConceptType ?? "").Trim().ToUpper()))
                     || codes.Contains(((x.T.TransactionType ?? "").Trim().ToUpper()))
                 );
+            }
+
+            if (excludeStatuses != null && excludeStatuses.Any())
+            {
+                var ex = excludeStatuses.ToArray();
+                query = query.Where(x => !ex.Contains(x.T.TransactionStatus));
             }
 
             if (!string.IsNullOrWhiteSpace(search))
@@ -397,6 +403,8 @@ namespace VCashApp.Services.Cef
         public async Task<CefTransactionReviewViewModel?> PrepareReviewViewModelAsync(int transactionId)
         {
             var transaction = await _context.CefTransactions
+                                            .Include(t => t.Service)
+                                                .ThenInclude(s => s.Concept)
                                             .Include(t => t.Containers)
                                                 .ThenInclude(c => c.ValueDetails)
                                                     .ThenInclude(vd => vd.Incidents)
@@ -407,6 +415,8 @@ namespace VCashApp.Services.Cef
 
             if (transaction == null) return null;
 
+            var conceptCode = transaction.Service?.Concept?.TipoConcepto;
+            var conceptName = transaction.Service?.Concept?.NombreConcepto;
             var service = await _context.CgsServicios.FirstOrDefaultAsync(s => s.ServiceOrderId == transaction.ServiceOrderId);
             var userRegistro = await _context.Users.FirstOrDefaultAsync(u => u.Id == transaction.RegistrationUser);
             var userRevisor = await _context.Users.FirstOrDefaultAsync(u => u.Id == transaction.ReviewerUserId);
@@ -416,8 +426,9 @@ namespace VCashApp.Services.Cef
                 Id = transaction.Id,
                 ServiceOrderId = transaction.ServiceOrderId,
                 SlipNumber = transaction.SlipNumber,
-                TransactionType = Enum.Parse<CefTransactionTypeEnum>(transaction.TransactionType),
-                Currency = transaction.Currency,
+                TransactionTypeCode = conceptCode ?? transaction.TransactionType,
+                TransactionTypeName = conceptName ?? conceptCode ?? "N/A",
+                Currency = transaction.Currency ?? "N/A",
                 TotalDeclaredValue = transaction.TotalDeclaredValue,
                 TotalCountedValue = transaction.TotalCountedValue,
                 ValueDifference = transaction.ValueDifference,
