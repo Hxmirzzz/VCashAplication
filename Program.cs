@@ -22,60 +22,63 @@ using VCashApp.Services.Range;
 var builder = WebApplication.CreateBuilder(args);
 Log.Logger = new LoggerConfiguration()
     .MinimumLevel.Information()
+    .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
+    .MinimumLevel.Override("System", LogEventLevel.Warning)
+    .Enrich.FromLogContext()
+    .Enrich.WithProperty("Application", "VCashApp")
     .WriteTo.Console(outputTemplate: "[{Timestamp:HH:mm:ss} {Level:u3}] {Message:lj}{NewLine}{Exception}")
-    .WriteTo.MSSqlServer(
-        connectionString: builder.Configuration.GetConnectionString("DefaultConnection"),
-        sinkOptions: new MSSqlServerSinkOptions
-        {
-            TableName = "AppLogs",
-            AutoCreateSqlTable = true
-        },
-        columnOptions: new ColumnOptions
-        {
-            TimeStamp = { ColumnName = "Timestamp", DataType = SqlDbType.DateTimeOffset, NonClusteredIndex = true },
-            Level = { ColumnName = "Level", DataType = SqlDbType.NVarChar, DataLength = 12 },
-            Message = { ColumnName = "Message", DataType = SqlDbType.NVarChar, DataLength = -1 },
-            Exception = { ColumnName = "Exception", DataType = SqlDbType.NVarChar, DataLength = -1 },
-            Properties = { ColumnName = "Properties", DataType = SqlDbType.NVarChar, DataLength = -1 },
 
-            AdditionalColumns = new List<SqlColumn>
+    // Sublogger a SQL: sólo auditoría (IsAudit=true) o Warning+
+    .WriteTo.Logger(lc => lc
+        .Filter.ByIncludingOnly(e =>
+            e.Level >= LogEventLevel.Warning ||
+            (e.Properties.ContainsKey("IsAudit") && e.Properties["IsAudit"].ToString() == "True"))
+        .WriteTo.MSSqlServer(
+            connectionString: builder.Configuration.GetConnectionString("DefaultConnection"),
+            sinkOptions: new MSSqlServerSinkOptions
             {
-                // SourceContext se añade automáticamente por ILogger<T>
-                new SqlColumn("SourceContext", SqlDbType.NVarChar) { ColumnName = "SourceContext", DataLength = 255, AllowNull = true },
+                TableName = "AppLogs",
+                AutoCreateSqlTable = true
+            },
+            columnOptions: new ColumnOptions
+            {
+                TimeStamp = { ColumnName = "Timestamp", DataType = SqlDbType.DateTimeOffset, NonClusteredIndex = true },
+                Level = { ColumnName = "Level", DataType = SqlDbType.NVarChar, DataLength = 12 },
+                Message = { ColumnName = "Message", DataType = SqlDbType.NVarChar, DataLength = -1 },
+                Exception = { ColumnName = "Exception", DataType = SqlDbType.NVarChar, DataLength = -1 },
+                Properties = { ColumnName = "Properties", DataType = SqlDbType.NVarChar, DataLength = -1 },
 
-                new SqlColumn{ ColumnName = "Username", PropertyName = "Usuario", DataType = SqlDbType.NVarChar, DataLength = 255, AllowNull = true },
-                new SqlColumn{ ColumnName = "IpAddress", PropertyName = "IpAddress", DataType = SqlDbType.NVarChar, DataLength = 45, AllowNull = true },
-                new SqlColumn{ ColumnName = "Action", PropertyName = "Accion", DataType = SqlDbType.NVarChar, DataLength = 255, AllowNull = true },
+                AdditionalColumns = new List<SqlColumn>
+                {
+                    new SqlColumn("SourceContext", SqlDbType.NVarChar) { DataLength = 255, AllowNull = true },
 
-                new SqlColumn("Resultado", SqlDbType.NVarChar) { ColumnName = "Result", DataLength = 255, AllowNull = true },
-                new SqlColumn("Conteo", SqlDbType.Int, true) { ColumnName = "Count" },
-                new SqlColumn("TipoEntidad", SqlDbType.NVarChar) { ColumnName = "EntityType", DataLength = 50, AllowNull = true },
-                new SqlColumn("ID_Entidad", SqlDbType.NVarChar) { ColumnName = "EntityId", DataLength = 450, AllowNull = true },
-                new SqlColumn("FormatoExportacion", SqlDbType.NVarChar) { ColumnName = "ExportFormat", DataLength = 50, AllowNull = true },
-                new SqlColumn("Mensaje", SqlDbType.NVarChar) { ColumnName = "DetailMessage", DataLength = -1, AllowNull = true },
-                new SqlColumn("IdURL", SqlDbType.NVarChar) { ColumnName = "UrlId", DataLength = 450, AllowNull = true },
-                new SqlColumn("IdModelo", SqlDbType.NVarChar) { ColumnName = "ModelId", DataLength = 450, AllowNull = true },
-    
-                // Columnas adicionales para filtros de permisos
-                new SqlColumn("RolNombre", SqlDbType.NVarChar) { ColumnName = "RoleNameFilter", DataLength = 255, AllowNull = true },
-                new SqlColumn("IdRolDB", SqlDbType.NVarChar) { ColumnName = "RoleIdFilter", DataLength = 450, AllowNull = true },
-                new SqlColumn("CodigoVista", SqlDbType.NVarChar) { ColumnName = "ViewCodeFilter", DataLength = 50, AllowNull = true },
-                new SqlColumn("PuedeVer", SqlDbType.Bit, true) { ColumnName = "CanViewFilter" },
-                new SqlColumn("PuedeCrear", SqlDbType.Bit, true) { ColumnName = "CanCreateFilter" },
-                new SqlColumn("PuedeEditar", SqlDbType.Bit, true) { ColumnName = "CanEditFilter" },
-                new SqlColumn("TipoPermiso", SqlDbType.NVarChar) { ColumnName = "PermissionTypeFilter", DataLength = 50, AllowNull = true },
-                new SqlColumn("RolesUsuario", SqlDbType.NVarChar) { ColumnName = "UserRolesFilter", DataLength = -1, AllowNull = true },
-            }
-        },
-        restrictedToMinimumLevel: LogEventLevel.Information
+                    // Propiedades principales de auditoría:
+                    new SqlColumn("IsAudit",     SqlDbType.Bit)        { AllowNull = true }, // del scope
+                    new SqlColumn("Action",      SqlDbType.NVarChar)   { DataLength = 255, AllowNull = true },
+                    new SqlColumn("Username",    SqlDbType.NVarChar)   { DataLength = 255, AllowNull = true },
+                    new SqlColumn("IpAddress",   SqlDbType.NVarChar)   { DataLength = 45,  AllowNull = true },
+                    new SqlColumn("UrlPath",     SqlDbType.NVarChar)   { DataLength = 512, AllowNull = true },
+                    new SqlColumn("Result",      SqlDbType.NVarChar)   { DataLength = 255, AllowNull = true },
+                    new SqlColumn("DetailMessage", SqlDbType.NVarChar) { DataLength = -1,  AllowNull = true },
+
+                    // Contexto de dominio:
+                    new SqlColumn("EntityType",  SqlDbType.NVarChar)   { DataLength = 50,  AllowNull = true },
+                    new SqlColumn("EntityId",    SqlDbType.NVarChar)   { DataLength = 450, AllowNull = true },
+                    new SqlColumn("UrlId",       SqlDbType.NVarChar)   { DataLength = 450, AllowNull = true },
+                    new SqlColumn("ModelId",     SqlDbType.NVarChar)   { DataLength = 450, AllowNull = true }
+                }
+            },
+            restrictedToMinimumLevel: LogEventLevel.Information
+        )
     )
-    .Filter.ByExcluding(e => e.MessageTemplate.Text.Contains("Request starting")) // Filtra el inicio de solicitudes HTTP
-    .Filter.ByExcluding(e => e.MessageTemplate.Text.Contains("Request finished")) // Filtra el fin de solicitudes HTTP
-    .Filter.ByExcluding(e => e.MessageTemplate.Text.Contains("Route matched with")) // Mensajes de enrutamiento
-    .Filter.ByExcluding(e => e.MessageTemplate.Text.Contains("Executed DbCommand")) // Consultas SQL generadas por EF Core
-    .Filter.ByExcluding(e => e.MessageTemplate.Text.Contains("Executing ViewResult")) // Ejecución de vistas MVC
+
+    .Filter.ByExcluding(e => e.MessageTemplate.Text.Contains("Request starting"))
+    .Filter.ByExcluding(e => e.MessageTemplate.Text.Contains("Request finished"))
+    .Filter.ByExcluding(e => e.MessageTemplate.Text.Contains("Route matched with"))
+    .Filter.ByExcluding(e => e.MessageTemplate.Text.Contains("Executed DbCommand"))
+    .Filter.ByExcluding(e => e.MessageTemplate.Text.Contains("Executing ViewResult"))
     .Filter.ByExcluding(e => e.MessageTemplate.Text.Contains("Executed ViewResult"))
-    .Filter.ByExcluding(e => e.MessageTemplate.Text.Contains("Executed action")) // Detalle de acciones ejecutadas
+    .Filter.ByExcluding(e => e.MessageTemplate.Text.Contains("Executed action"))
     .Filter.ByExcluding(e => e.MessageTemplate.Text.Contains("Executed endpoint"))
     .Filter.ByExcluding(e => e.MessageTemplate.Text.Contains("Start processing HTTP request"))
     .Filter.ByExcluding(e => e.MessageTemplate.Text.Contains("Sending HTTP request"))
@@ -158,6 +161,8 @@ builder.Services.AddResponseCompression(options =>
         new[] { "application/json", "text/plain", "application/javascript", "text/css", "application/x-font-woff", "application/font-sfnt", "application/font-ttf", "application/font-otf", "image/svg+xml" });
 });
 
+builder.Services.AddHttpContextAccessor();
+
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IEmployeeService, EmployeeService>();
 builder.Services.AddScoped<IEmployeeLogService, EmployeeLogService>();
@@ -169,10 +174,15 @@ builder.Services.AddScoped<ICefIncidentService, CefIncidentService>();
 builder.Services.AddScoped<ICefServiceCreationService, CefServiceCreationService>(); // TEMPORAL
 builder.Services.AddScoped<ICgsServiceService, CgsService>();
 builder.Services.AddScoped<IRangeService, RangeService>();
+builder.Services.AddScoped<VCashApp.Services.Logging.IAuditLogger, VCashApp.Services.Logging.AuditLogger>();
+builder.Services.AddScoped<AuditActionFilter>();
 
 builder.Services.AddHttpClient();
 
-builder.Services.AddControllersWithViews();
+builder.Services.AddControllersWithViews(o =>
+{
+    o.Filters.AddService<AuditActionFilter>();
+});
 builder.Services.AddRazorPages();
 
 builder.Services.AddSwaggerGen(c =>
@@ -251,13 +261,10 @@ else
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseResponseCompression();
-app.UseMiddleware<LogIpMiddleware>();
-
-
 app.UseRouting();
-
 app.UseSession();
 app.UseAuthentication();
+app.UseMiddleware<LogIpMiddleware>();
 app.UseAuthorization();
 
 using (var scope = app.Services.CreateScope())

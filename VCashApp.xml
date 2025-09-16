@@ -944,13 +944,14 @@
             <param name="transactionId">ID de la transacción a revisar.</param>
             <returns>Vista de revisión de transacción.</returns>
         </member>
-        <member name="M:VCashApp.Controllers.CefController.ReviewTransaction(VCashApp.Models.ViewModels.CentroEfectivo.CefTransactionReviewViewModel)">
+        <member name="M:VCashApp.Controllers.CefController.ReviewTransaction(System.Nullable{System.Int32},VCashApp.Models.ViewModels.CentroEfectivo.CefTransactionReviewViewModel)">
             <summary>
             Procesa la aprobación o rechazo final de una transacción de Centro de Efectivo.
             </summary>
             <remarks>
             Requiere permiso 'Edit' para el módulo "CEF".
             </remarks>
+            <param name="transactionId">Identificador de la transacción.</param>
             <param name="viewModel">ViewModel con el ID de la transacción y el nuevo estado (Aprobada/Rechazada).</param>
             <returns>Redirección al dashboard de CEF.</returns>
         </member>
@@ -3112,7 +3113,13 @@
             <inheritdoc/>
         </member>
         <member name="M:VCashApp.Services.Cef.CefTransactionService.ProcessReviewApprovalAsync(VCashApp.Models.ViewModels.CentroEfectivo.CefTransactionReviewViewModel,System.String)">
-            <inheritdoc/>
+            <summary>
+            
+            </summary>
+            <param name="viewModel"></param>
+            <param name="reviewerUserId"></param>
+            <returns></returns>
+            <exception cref="T:System.InvalidOperationException"></exception>
         </member>
         <member name="M:VCashApp.Services.Cef.CefTransactionService.GetValueDetailDescription(VCashApp.Models.Entities.CefValueDetail)">
             <summary>
@@ -3124,6 +3131,27 @@
             Obtiene las divisas disponibles para los dropdowns.
             </summary>
             <returns>Lista de SelectListItem para las divisas</returns>
+        </member>
+        <member name="T:VCashApp.Services.Cef.CefTransitionPolicy">
+            <summary>
+            Reglas de transición para Recolección + mapeo a estados de Servicio (0..7).
+            </summary>
+        </member>
+        <member name="M:VCashApp.Services.Cef.CefTransitionPolicy.EnsureAllowedRecoleccion(System.String,VCashApp.Enums.CefTransactionStatusEnum,System.Nullable{System.Int32})">
+            <summary>
+            Lanza InvalidOperationException si la transición no es válida para Recolección.
+            </summary>
+        </member>
+        <member name="M:VCashApp.Services.Cef.CefTransitionPolicy.MapServiceStatusRecoleccion(VCashApp.Enums.CefTransactionStatusEnum)">
+            <summary>
+            Mapea estado de transacción (Recolección) a CodEstado del Servicio (0..7).
+            </summary>
+        </member>
+        <member name="M:VCashApp.Services.Cef.CefTransitionPolicy.SyncServiceIfAdvanceAsync(VCashApp.Data.AppDbContext,System.String,VCashApp.Enums.CefTransactionStatusEnum)">
+            <summary>
+            Sube el estado del Servicio si corresponde (no retrocede, salvo terminales).
+            Llama sólo si QUIERES que esta clase sincronice; si ya lo haces inline, no la llames.
+            </summary>
         </member>
         <member name="T:VCashApp.Services.EmployeeLog.EmployeeLogService">
             <summary>
@@ -4099,6 +4127,11 @@
             <param name="selectedRoleFilter">Filtro por nombre de rol.</param>
             <param name="selectedBranchFilter">Filtro por ID de sucursal.</param>
             <returns>Una colección de UserViewModel con todos los datos necesarios para la exportación.</returns>
+        </member>
+        <member name="T:VCashApp.Services.Logging.AuditLogger">
+            <summary>
+            Emite eventos con la marca IsAudit=true y propiedades uniformes para AppLogs.
+            </summary>
         </member>
         <member name="M:VCashApp.Services.Range.RangeService.GetClientsForDropdownAsync(System.Nullable{System.Int32})">
             <summary>

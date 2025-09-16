@@ -873,7 +873,7 @@ namespace VCashApp.Controllers
         /// </remarks>
         /// <param name="transactionId">ID de la transacción a revisar.</param>
         /// <returns>Vista de revisión de transacción.</returns>
-        [HttpGet("Review/{transactionId}")]
+        [HttpGet("ReviewTransaction/{transactionId}")]
         [RequiredPermission(PermissionType.View, "CEF")] // Los supervisores pueden ver la revisión
         public async Task<IActionResult> ReviewTransaction(int transactionId)
         {
@@ -913,15 +913,19 @@ namespace VCashApp.Controllers
         /// <remarks>
         /// Requiere permiso 'Edit' para el módulo "CEF".
         /// </remarks>
+        /// <param name="transactionId">Identificador de la transacción.</param>
         /// <param name="viewModel">ViewModel con el ID de la transacción y el nuevo estado (Aprobada/Rechazada).</param>
         /// <returns>Redirección al dashboard de CEF.</returns>
-        [HttpPost("Review")]
+        [HttpPost("ReviewTransaction/{transactionId?}")]
         [ValidateAntiForgeryToken]
         [RequiredPermission(PermissionType.Edit, "CEF")]
-        public async Task<IActionResult> ReviewTransaction(CefTransactionReviewViewModel viewModel)
+        public async Task<IActionResult> ReviewTransaction(int? transactionId, CefTransactionReviewViewModel viewModel)
         {
             var currentUser = await GetCurrentApplicationUserAsync();
             if (currentUser == null) return Unauthorized();
+
+            if ((viewModel?.Id ?? 0) <= 0 && transactionId.HasValue)
+                viewModel!.Id = transactionId.Value;
 
             await SetCommonViewBagsCefAsync(currentUser, "Procesando Revisión CEF");
 

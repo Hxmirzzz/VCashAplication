@@ -1,6 +1,4 @@
-﻿using DocumentFormat.OpenXml.Math;
-using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.Data.SqlClient;
+﻿using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using System.Data;
 using VCashApp.Data;
@@ -8,6 +6,7 @@ using VCashApp.Enums;
 using VCashApp.Models.Entities;
 using VCashApp.Models.ViewModels.CentroEfectivo;
 using VCashApp.Utils;
+using VCashApp.Services.Logging;
 
 namespace VCashApp.Services.Cef
 {
@@ -17,10 +16,12 @@ namespace VCashApp.Services.Cef
     public class CefTransactionService : ICefTransactionService
     {
         private readonly AppDbContext _context;
+        private readonly IAuditLogger _audit;
 
-        public CefTransactionService(AppDbContext context)
+        public CefTransactionService(AppDbContext context, IAuditLogger audit)
         {
             _context = context;
+            _audit = audit;
         }
 
         /// <inheritdoc/>
@@ -229,6 +230,7 @@ namespace VCashApp.Services.Cef
             tx.IsCustody = viewModel.IsCustody;
             tx.IsPointToPoint = viewModel.IsPointToPoint;
             tx.InformativeIncident = viewModel.InformativeIncident;
+            CefTransitionPolicy.EnsureAllowedRecoleccion(tx.TransactionStatus, CefTransactionStatusEnum.EncoladoParaConteo, tx.Id);
             tx.TransactionStatus = CefTransactionStatusEnum.EncoladoParaConteo.ToString();
 
             // Si tienes campos de auditoría de última actualización en tu entidad, setéalos aquí:
@@ -237,6 +239,32 @@ namespace VCashApp.Services.Cef
             // tx.LastUpdatedIP   = currentIP;
 
             await _context.SaveChangesAsync();
+
+            _audit.Info(
+                action: "CEF.Checkin",
+                detailMessage: $"Check-in OS {tx.ServiceOrderId}, Planilla {tx.SlipNumber}.",
+                result: "EncoladoParaConteo",
+                entityType: "CefTransaction",
+                entityId: tx.Id.ToString(),
+                urlId: tx.ServiceOrderId,
+                modelId: tx.Id.ToString()
+            );
+
+            _audit.Info(
+                action: "CGS.ServiceStatus",
+                detailMessage: $"Servicio {service.ServiceOrderId} → Confirmado (1).",
+                result: "OK",
+                entityType: "CgsServicio",
+                entityId: service.ServiceOrderId
+            );
+
+            if (service != null && service.StatusCode < 1)
+            {
+                service.StatusCode = 1; // Confirmado
+                _context.CgsServicios.Update(service);
+                await _context.SaveChangesAsync();
+            }
+
             return tx;
         }
 
@@ -407,7 +435,7 @@ namespace VCashApp.Services.Cef
                                                 .ThenInclude(s => s.Concept)
                                             .Include(t => t.Containers)
                                                 .ThenInclude(c => c.ValueDetails)
-                                                    .ThenInclude(vd => vd.Incidents)
+                                                    .ThenInclude(vd => vd.AdmDenominacion)
                                             .Include(t => t.Containers)
                                                 .ThenInclude(c => c.Incidents)
                                             .Include(t => t.Incidents)
@@ -513,16 +541,22 @@ namespace VCashApp.Services.Cef
             return viewModel;
         }
 
-        /// <inheritdoc/>
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="viewModel"></param>
+        /// <param name="reviewerUserId"></param>
+        /// <returns></returns>
+        /// <exception cref="InvalidOperationException"></exception>
         public async Task<bool> ProcessReviewApprovalAsync(CefTransactionReviewViewModel viewModel, string reviewerUserId)
         {
             var transaction = await _context.CefTransactions.FirstOrDefaultAsync(t => t.Id == viewModel.Id);
             if (transaction == null) return false;
 
-            if (transaction.TransactionStatus == CefTransactionStatusEnum.PendienteRevision.ToString())
-            {
+            if (transaction.TransactionStatus != CefTransactionStatusEnum.PendienteRevision.ToString())
                 throw new InvalidOperationException($"La transacción {transaction.Id} no está en estado 'Pendiente de Revisión' para ser aprobada o rechazada.");
-            }
+
+            CefTransitionPolicy.EnsureAllowedRecoleccion(transaction.TransactionStatus, viewModel.NewStatus, transaction.Id);
 
             transaction.TransactionStatus = viewModel.NewStatus.ToString();
             transaction.InformativeIncident = viewModel.FinalObservations;
@@ -531,6 +565,37 @@ namespace VCashApp.Services.Cef
 
             _context.CefTransactions.Update(transaction);
             await _context.SaveChangesAsync();
+
+            _audit.Info(
+                action: "CEF.Review",
+                detailMessage: $"Transacción {transaction.Id} revisada → {viewModel.NewStatus}.",
+                result: viewModel.NewStatus.ToString(),
+                entityType: "CefTransaction",
+                entityId: transaction.Id.ToString(),
+                urlId: transaction.ServiceOrderId
+            );
+
+            var service = await _context.CgsServicios.FirstOrDefaultAsync(s => s.ServiceOrderId == transaction.ServiceOrderId);
+            if (service != null)
+            {
+                switch (viewModel.NewStatus)
+                {
+                    case CefTransactionStatusEnum.Aprobado: service.StatusCode = 5; break; // Finalizado
+                    case CefTransactionStatusEnum.Rechazado: service.StatusCode = 2; break; // Rechazado
+                    case CefTransactionStatusEnum.Cancelado: service.StatusCode = 6; break; // Cancelado
+                }
+                _context.CgsServicios.Update(service);
+                await _context.SaveChangesAsync();
+
+                _audit.Info(
+                    action: "CGS.ServiceStatus",
+                    detailMessage: $"Servicio {service.ServiceOrderId} → {service.StatusCode}.",
+                    result: "OK",
+                    entityType: "CgsServicio",
+                    entityId: service.ServiceOrderId
+                );
+            }
+
             return true;
         }
 
@@ -539,12 +604,13 @@ namespace VCashApp.Services.Cef
         /// </summary>
         private string GetValueDetailDescription(CefValueDetail vd)
         {
-            return vd.ValueType switch
-            {
-                nameof(CefValueTypeEnum.Billete) => $"{vd.DenominationId?.ToString("N0")} x {vd.Quantity} ({vd.CalculatedAmount?.ToString("N0")})",
-                nameof(CefValueTypeEnum.Moneda) => $"{vd.DenominationId?.ToString("N0")} x {vd.Quantity} ({vd.CalculatedAmount?.ToString("N0")})",
-                _ => "Detalle Desconocido"
-            };
+            var etiqueta = vd.AdmDenominacion?.TipoDenominacion
+                           ?? (vd.DenominationId.HasValue ? vd.DenominationId.Value.ToString("N0") : "Sin denom.");
+
+            var cantidad = vd.Quantity;
+            var monto = (vd.CalculatedAmount ?? 0m).ToString("N0");
+
+            return $"{etiqueta} x {cantidad} ({monto})";
         }
 
         /// <summary>

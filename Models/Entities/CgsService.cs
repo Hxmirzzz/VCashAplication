@@ -47,6 +47,7 @@ namespace VCashApp.Models.Entities
 
         [Column("CodEstado")]
         public int StatusCode { get; set; }
+
         [ForeignKey("StatusCode")]
         public virtual AdmState? Status { get; set; }
 

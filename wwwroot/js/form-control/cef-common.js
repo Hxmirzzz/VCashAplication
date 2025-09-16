@@ -98,6 +98,34 @@ window.CEF = window.CEF || (function () {
         });
     }
 
+    // === NUEVO: Formateo para elementos de TEXTO (no inputs) ===
+    function formatTextEl($el) {
+        // Prioriza data-num si viene del servidor; si no, parsea el texto visible
+        const raw = ($el.data('num') !== undefined && $el.data('num') !== null)
+            ? Number($el.data('num'))
+            : toNumber($el.text());
+
+        const fmt = ($el.data('format') || '').toString().toLowerCase(); // 'int' | 'dec' | 'peso'
+        const d = Number($el.data('decimals') || 2);
+
+        let out = '';
+        if (fmt === 'peso') out = fmtPeso(raw);
+        else if (fmt === 'dec') out = fmtDec(raw, d);
+        else out = fmtInt(raw); // default entero
+
+        $el.text(out);
+
+        // Si el elemento representa diferencia, pintamos positivo/negativo
+        if ($el.hasClass('js-diff')) {
+            $el.toggleClass('positive', raw > 0).toggleClass('negative', raw < 0);
+        }
+    }
+
+    function formatAllTextNumbers($root) {
+        const $scope = $root ? $($root) : $(document);
+        $scope.find('.js-num-txt').each(function () { formatTextEl($(this)); });
+    }
+
     // Helper para "valor en palabras"
     async function amountInWords(url, value, currency, includeCents) {
         try {
@@ -113,6 +141,7 @@ window.CEF = window.CEF || (function () {
         markNumericFields($root);
         bindNumericUXDelegates();
         formatAllNumbers($root);
+        formatAllTextNumbers($root);
     }
 
     // Auto-inicialización cuando el DOM esté listo
@@ -127,6 +156,6 @@ window.CEF = window.CEF || (function () {
         formatAllNumbers, unformatAllNumbers,
         bindNumericUXDelegates,
         amountInWords,
-        init
+        init, formatAllTextNumbers
     };
 })();

@@ -1,6 +1,4 @@
-﻿using DocumentFormat.OpenXml.Math;
-using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using System.Globalization;
 using System.Text.Json;
 using VCashApp.Data;
@@ -8,6 +6,7 @@ using VCashApp.Enums;
 using VCashApp.Models.Entities;
 using VCashApp.Models.ViewModels.CentroEfectivo;
 using VCashApp.Utils;
+using VCashApp.Services.Logging;
 
 namespace VCashApp.Services.Cef
 {
@@ -17,10 +16,12 @@ namespace VCashApp.Services.Cef
     public class CefContainerService : ICefContainerService
     {
         private readonly AppDbContext _context;
+        private readonly IAuditLogger _audit;
 
-        public CefContainerService(AppDbContext context)
+        public CefContainerService(AppDbContext context, IAuditLogger audit)
         {
             _context = context;
+            _audit = audit;
         }
 
         /// <inheritdoc/>
@@ -485,16 +486,46 @@ namespace VCashApp.Services.Cef
             // 6) Avanzar estado de la transacción
             if (transaction.TransactionStatus == CefTransactionStatusEnum.EncoladoParaConteo.ToString())
             {
-                var hasAny = detailsVms.Any(); // si llegó cualquier detalle, ya estás en Conteo
+                var hasAny = detailsVms.Any();
+
                 if (hasAny)
+                {
+                    // Validar transición y promover a Conteo
+                    CefTransitionPolicy.EnsureAllowedRecoleccion(transaction.TransactionStatus, CefTransactionStatusEnum.Conteo, transaction.Id);
                     transaction.TransactionStatus = CefTransactionStatusEnum.Conteo.ToString();
 
-                if (transaction.TransactionStatus != CefTransactionStatusEnum.EncoladoParaConteo.ToString())
-                {
                     _context.CefTransactions.Update(transaction);
                     await _context.SaveChangesAsync();
+
+                    _audit.Info(
+                        action: "CEF.Counting",
+                        detailMessage: $"Tx {transaction.Id} movida a CONTEO.",
+                        result: "Conteo",
+                        entityType: "CefTransaction",
+                        entityId: transaction.Id.ToString(),
+                        urlId: transaction.ServiceOrderId
+                    );
+
+                    // Recolección: al entrar en Conteo => Servicio 4 (Atención)
+                    var service = await _context.CgsServicios
+                        .FirstOrDefaultAsync(s => s.ServiceOrderId == transaction.ServiceOrderId);
+
+                    if (service != null && service.StatusCode != 4)
+                    {
+                        service.StatusCode = 4; // Atención
+                        _context.CgsServicios.Update(service);
+                        await _context.SaveChangesAsync();
+                    }
                 }
+                _audit.Warn(
+                    action: "CEF.Counting",
+                    detailMessage: $"Intento de mover Tx {transaction.Id} a Conteo sin detalles.",
+                    result: "NoOp",
+                    entityType: "CefTransaction",
+                    entityId: transaction.Id.ToString()
+                );
             }
+
 
             var totals = await GetTransactionTotalsAsync(transaction.Id);
 
