@@ -778,7 +778,7 @@
             Maneja el flujo de Check-in, conteo de contenedores y revisión de transacciones.
             </summary>
         </member>
-        <member name="M:VCashApp.Controllers.CefController.#ctor(VCashApp.Services.ICefTransactionService,VCashApp.Services.ICefContainerService,VCashApp.Services.ICefIncidentService,VCashApp.Services.ICefServiceCreationService,VCashApp.Data.AppDbContext,Microsoft.AspNetCore.Identity.UserManager{VCashApp.Models.ApplicationUser},Microsoft.Extensions.Logging.ILogger{VCashApp.Controllers.CefController})">
+        <member name="M:VCashApp.Controllers.CefController.#ctor(VCashApp.Services.ICefTransactionService,VCashApp.Services.ICefContainerService,VCashApp.Services.ICefIncidentService,VCashApp.Services.ICefServiceCreationService,VCashApp.Data.AppDbContext,Microsoft.AspNetCore.Identity.UserManager{VCashApp.Models.ApplicationUser},VCashApp.Services.Logging.IAuditLogger,Microsoft.Extensions.Logging.ILogger{VCashApp.Controllers.CefController})">
             <summary>
             Constructor del controlador CefController.
             </summary>
@@ -2156,6 +2156,18 @@
         <member name="M:VCashApp.Migrations.AddCashValuesToCefTransactionTable.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
             <inheritdoc />
         </member>
+        <member name="T:VCashApp.Migrations.SetNewColumnDenominationIdToCefIncidents">
+            <inheritdoc />
+        </member>
+        <member name="M:VCashApp.Migrations.SetNewColumnDenominationIdToCefIncidents.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:VCashApp.Migrations.SetNewColumnDenominationIdToCefIncidents.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:VCashApp.Migrations.SetNewColumnDenominationIdToCefIncidents.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
         <member name="T:VCashApp.Models.ViewModels.BranchViewModel">
             <summary>
             Representa la información principal de una sucursal.
@@ -3020,6 +3032,13 @@
             Implementación del servicio para la gestión de Novedades de Centro de Efectivo.
             </summary>
         </member>
+        <member name="M:VCashApp.Services.Cef.CefIncidentService.#ctor(VCashApp.Data.AppDbContext)">
+            <summary>
+            Initializes a new instance of the <see cref="T:VCashApp.Services.Cef.CefIncidentService"/> class.
+            </summary>
+            <param name="context">The database context used to interact with the application's data store.  This parameter cannot be <see
+            langword="null"/>.</param>
+        </member>
         <member name="M:VCashApp.Services.Cef.CefIncidentService.RegisterIncidentAsync(VCashApp.Models.ViewModels.CentroEfectivo.CefIncidentViewModel,System.String)">
             <inheritdoc/>
         </member>
@@ -3153,6 +3172,12 @@
             Llama sólo si QUIERES que esta clase sincronice; si ya lo haces inline, no la llames.
             </summary>
         </member>
+        <member name="M:VCashApp.Services.Cef.IncidentCategoryExtensions.EffectSign(VCashApp.Enums.CefIncidentTypeCategoryEnum)">
+            <summary>
+            Devuelve +1 si “explica faltante” (Faltante/False/MezclaFaltante),
+            -1 si “explica sobrante” (Sobrante/MezclaSobrante).
+            </summary>
+        </member>
         <member name="T:VCashApp.Services.EmployeeLog.EmployeeLogService">
             <summary>
             Servicio de negocio para Registro de Empleados (Entrada/Salida),
@@ -3242,6 +3267,11 @@
             <returns>Lista de las entidades bancarias.</returns>
         </member>
         <!-- Badly formed XML comment ignored for member "M:VCashApp.Services.ICefContainerService.GetPointCapsAsync(System.String)" -->
+        <member name="M:VCashApp.Services.ICefContainerService.SumCountedValueAsync(System.Int32)">
+            <summary>
+            Suma el valor contado (preferentemente desde detalles) para toda la transacción.
+            </summary>
+        </member>
         <member name="T:VCashApp.Services.ICefIncidentService">
             <summary>
             Define las operaciones de servicio para la gestión de Novedades de Centro de Efectivo.
@@ -3285,6 +3315,17 @@
             Obtiene todos los tipos de novedad disponibles desde la tabla maestra `Adm_TiposNovedad`.
             </summary>
             <returns>Lista de entidades AdmTipoNovedad.</returns>
+        </member>
+        <member name="M:VCashApp.Services.ICefIncidentService.SumApprovedEffectByTransactionAsync(System.Int32)">
+            <summary>
+            Asynchronously calculates the total approved effect for a specific transaction.
+            </summary>
+            <remarks>This method retrieves and sums the approved effects associated with the specified
+            transaction. Ensure that the transaction ID provided corresponds to a valid transaction in the
+            system.</remarks>
+            <param name="transactionId">The unique identifier of the transaction for which the approved effect is to be summed.</param>
+            <returns>A task that represents the asynchronous operation. The task result contains the total approved effect as a
+            decimal value.</returns>
         </member>
         <member name="T:VCashApp.Services.ICefServiceCreationService">
             <summary>
@@ -3466,6 +3507,14 @@
             <param name="viewModel">El ViewModel con los datos de revisión y el nuevo estado.</param>
             <param name="reviewerUserId">ID del usuario revisor.</param>
             <returns>Verdadero si el proceso fue exitoso, de lo contrario, falso.</returns>
+        </member>
+        <member name="M:VCashApp.Services.ICefTransactionService.RecalcTotalsAndNetDiffAsync(System.Int32)">
+            <summary>
+            Recalcula TotalCountedValue, aplica el efecto de novedades aprobadas y
+            actualiza ValueDifference de la transacción.
+            </summary>
+            <param name="cefTransactionId">ID de la transacción CEF.</param>
+            <returns>true si se actualizó; false si no existe.</returns>
         </member>
         <member name="M:VCashApp.Services.ICefTransactionService.GetCurrenciesForDropdownAsync">
             <summary>

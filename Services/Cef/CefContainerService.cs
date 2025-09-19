@@ -928,56 +928,28 @@ namespace VCashApp.Services.Cef
             decimal DocDeclared
         );
 
-        // NOTA: Este breakdown NO se debe recalcular en el flujo de proceso/conteo.
-        // Úsese solo en el flujo donde el usuario declara valores (check-in).
-        /*private async Task<DeclaredBreakdown> ComputeDeclaredBreakdownAsync(int transactionId)
+        public async Task<decimal> SumCountedValueAsync(int cefTransactionId)
         {
-            // Conteos de contenedores
-            var bagCount = await _context.CefContainers
-                .CountAsync(c => c.CefTransactionId == transactionId &&
-                                 c.ContainerType == CefContainerTypeEnum.Bolsa.ToString());
+            // 1) Intento preferido: sumar por detalles (evita doble conteo si hay sobres)
+            // from c in Containers (de esa tx)
+            // from vd in c.ValueDetails
+            // sum(vd.CalculatedAmount)
+            var detailsSum = await (
+                from c in _context.CefContainers
+                where c.CefTransactionId == cefTransactionId
+                from vd in c.ValueDetails
+                select (decimal?)(vd.CalculatedAmount ?? 0m)
+            ).SumAsync() ?? 0m;
 
-            var envelopeCount = await _context.CefContainers
-                .CountAsync(c => c.CefTransactionId == transactionId &&
-                                 c.ContainerType == CefContainerTypeEnum.Sobre.ToString());
+            if (detailsSum > 0m)
+                return detailsSum;
 
-            // Proyección de detalles por transacción (join por Container)
-            var details = from vd in _context.CefValueDetails
-                          join c in _context.CefContainers on vd.CefContainerId equals c.Id
-                          where c.CefTransactionId == transactionId
-                          select vd;
+            // 2) Fallback: si aún no hay detalles persistidos, suma CountedValue a nivel contenedor
+            var containersSum = await _context.CefContainers
+                .Where(c => c.CefTransactionId == cefTransactionId)
+                .SumAsync(c => (decimal?)(c.CountedValue ?? 0m)) ?? 0m;
 
-            // Cantidades (usa Quantity por si documentos/cheques traen más de 1)
-            var checkCount = await details
-                .Where(vd => vd.ValueType == CefValueTypeEnum.Cheque.ToString())
-                .SumAsync(vd => (int?)vd.Quantity) ?? 0;
-
-            var documentCount = await details
-                .Where(vd => vd.ValueType == CefValueTypeEnum.Documento.ToString())
-                .SumAsync(vd => (int?)vd.Quantity) ?? 0;
-
-            // Valores declarados por tipo (tomados de CalculatedAmount)
-            var billDeclared = await details
-                .Where(vd => vd.ValueType == CefValueTypeEnum.Billete.ToString())
-                .SumAsync(vd => (decimal?)(vd.CalculatedAmount ?? 0m)) ?? 0m;
-
-            var coinDeclared = await details
-                .Where(vd => vd.ValueType == CefValueTypeEnum.Moneda.ToString())
-                .SumAsync(vd => (decimal?)(vd.CalculatedAmount ?? 0m)) ?? 0m;
-
-            var docDeclared = await details
-                .Where(vd => vd.ValueType == CefValueTypeEnum.Documento.ToString())
-                .SumAsync(vd => (decimal?)(vd.CalculatedAmount ?? 0m)) ?? 0m;
-
-            return new DeclaredBreakdown(
-                bagCount,
-                envelopeCount,
-                checkCount,
-                documentCount,
-                billDeclared,
-                coinDeclared,
-                docDeclared
-            );
-        }*/
+            return containersSum;
+        }
     }
 }

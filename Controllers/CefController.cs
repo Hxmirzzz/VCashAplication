@@ -1,9 +1,9 @@
 ﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
-using System.Net;
 using VCashApp.Data;
 using VCashApp.Enums;
 using VCashApp.Extensions;
@@ -11,7 +11,9 @@ using VCashApp.Filters;
 using VCashApp.Models;
 using VCashApp.Models.ViewModels.CentroEfectivo;
 using VCashApp.Services;
+using VCashApp.Services.Cef;
 using VCashApp.Services.DTOs;
+using VCashApp.Services.Logging;
 using VCashApp.Utils;
 
 namespace VCashApp.Controllers
@@ -29,6 +31,7 @@ namespace VCashApp.Controllers
         private readonly ICefIncidentService _cefIncidentService;
         private readonly ICefServiceCreationService _cefServiceCreationService; //TEMPORAL
         private readonly IExportService _exportService;
+        private readonly IAuditLogger _audit;
         private readonly ILogger<CefController> _logger;
 
         /// <summary>
@@ -47,6 +50,7 @@ namespace VCashApp.Controllers
             ICefServiceCreationService cefServiceCreationService,
             AppDbContext context,
             UserManager<ApplicationUser> userManager,
+            IAuditLogger audit,
             ILogger<CefController> logger)
             : base(context, userManager)
         {
@@ -54,6 +58,7 @@ namespace VCashApp.Controllers
             _cefContainerService = cefContainerService;
             _cefIncidentService = cefIncidentService;
             _cefServiceCreationService = cefServiceCreationService; //TEMPORAL
+            _audit = audit;
             _logger = logger;
         }
 
@@ -247,6 +252,23 @@ namespace VCashApp.Controllers
                 return PartialView("_TransactionTablePartial", transactions);
             }
 
+            _audit.Info(
+                action: "CEF.Dashboard",
+                detailMessage: "Acceso a dashboard CEF",
+                result: "OK",
+                entityType: "Dashboard",
+                entityId: null,
+                extra: new Dictionary<string, object>
+                {
+                    ["Mode"] = (ViewData["Mode"] ?? "").ToString(),
+                    ["BranchId"] = branchId,
+                    ["Status"] = status?.ToString(),
+                    ["Search"] = search ?? "",
+                    ["Page"] = page,
+                    ["PageSize"] = pageSize,
+                    ["TotalRecords"] = totalRecords
+                }
+            );
 
             return View("Index", vm);
         }
@@ -324,6 +346,13 @@ namespace VCashApp.Controllers
                 catch (InvalidOperationException ex)
                 {
                     TempData["ErrorMessage"] = ex.Message;
+                    _audit.Warn(
+                        action: "CEF.Checkin.Open",
+                        detailMessage: ex.Message,
+                        result: "InvalidOperation",
+                        entityType: "CgsServicio",
+                        entityId: serviceOrderId
+                    );
                     _logger.LogError(ex, "Usuario: {Usuario} | IP: {IP} | Acción: Error al preparar Check-in para OS {ServiceOrderId}.", currentUser.UserName, IpAddressForLogging, serviceOrderId);
                     return RedirectToAction(nameof(Index));
                 }
@@ -349,6 +378,15 @@ namespace VCashApp.Controllers
                                            }).ToList()
                 };
             }
+
+            _audit.Info(
+                action: "CEF.Checkin.Open",
+                detailMessage: "Apertura de formulario de Check-in",
+                result: "OK",
+                entityType: "CefTransaction",
+                entityId: null,
+                urlId: serviceOrderId
+            );
 
             _logger.LogInformation("Usuario: {Usuario} | IP: {IP} | Acción: Acceso a formulario Check-in | OS: {ServiceOrderId}.", currentUser.UserName, IpAddressForLogging, serviceOrderId ?? "N/A");
             return View(viewModel);
@@ -386,6 +424,7 @@ namespace VCashApp.Controllers
                         kvp => kvp.Key,
                         kvp => kvp.Value.Errors.Select(e => e.ErrorMessage).ToArray()
                     );
+
                 _logger.LogWarning("Usuario: {Usuario} | IP: {IP} | Acción: Check-in - Modelo Inválido | Errores: {@Errores} |",
                     currentUser.UserName, IpAddressForLogging, fieldErrors);
 
@@ -402,6 +441,22 @@ namespace VCashApp.Controllers
                 _logger.LogInformation("Usuario: {Usuario} | IP: {IP} | Acción: Check-in Exitoso | Transacción ID: {TransactionId} | Planilla: {PlanillaNumber}.",
                     currentUser.UserName, IpAddressForLogging, newTransaction.Id, newTransaction.SlipNumber);
 
+                _audit.Info(
+                    action: "CEF.Checkin",
+                    entityType: "CefTransaction",
+                    entityId: newTransaction.Id.ToString(),
+                    detailMessage: "Check-in registrado",
+                    result: "OK",
+                    urlId: newTransaction.ServiceOrderId,
+                    extra: new Dictionary<string, object>
+                    {
+                        ["SlipNumber"] = newTransaction.SlipNumber,
+                        ["ServiceOrderId"] = newTransaction.ServiceOrderId,
+                        ["Currency"] = newTransaction.Currency ?? "N/A",
+                        ["DeclaredTotal"] = newTransaction.TotalDeclaredValue
+                    }
+                );
+
                 if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
                 {
                     var url = Url.Action(nameof(ProcessContainers), "Cef", new { transactionId = newTransaction.Id });
@@ -412,6 +467,15 @@ namespace VCashApp.Controllers
             catch (InvalidOperationException ex)
             {
                 ModelState.AddModelError("", ex.Message);
+
+                _audit.Warn(
+                    action: "CEF.Checkin",
+                    detailMessage: ex.Message,
+                    result: "InvalidOperation",
+                    entityType: "CefTransaction",
+                    entityId: null
+                );
+
                 _logger.LogError(ex, "Usuario: {Usuario} | IP: {IP} | Acción: Error al procesar Check-in | Mensaje: {ErrorMessage}.", currentUser.UserName, IpAddressForLogging, ex.Message);
 
                 if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
@@ -423,6 +487,15 @@ namespace VCashApp.Controllers
             catch (Exception ex)
             {
                 ModelState.AddModelError("", "Ocurrió un error inesperado al registrar el Check-in.");
+
+                _audit.Error(
+                    action: "CEF.Checkin",
+                    ex: ex,
+                    detailMessage: "Error inesperado en Check-in",
+                    entityType: "CefTransaction",
+                    entityId: null
+                );
+
                 _logger.LogError(ex, "Usuario: {Usuario} | IP: {IP} | Acción: Error inesperado en Check-in.", currentUser.UserName, IpAddressForLogging);
 
                 if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
@@ -595,6 +668,15 @@ namespace VCashApp.Controllers
                 PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase
             });
 
+            _audit.Info(
+                action: "CEF.Containers.Open",
+                detailMessage: "Apertura de pantalla de procesamiento de contenedores",
+                result: "OK",
+                entityType: "CefTransaction",
+                entityId: transactionId.ToString(),
+                urlId: pageVm.Service?.ServiceOrderId
+            );
+
             return View(pageVm);
         }
 
@@ -629,6 +711,7 @@ namespace VCashApp.Controllers
 
         }
 
+
         /// <summary>
         /// Procesa el envío del formulario de procesamiento de contenedores (guardar detalles y novedades).
         /// </summary>
@@ -648,10 +731,8 @@ namespace VCashApp.Controllers
 
             await SetCommonViewBagsCefAsync(currentUser, "Procesando Contenedores CEF");
 
-            // Asegura el id de la transacción en el VM
             viewModel.CefTransactionId = transactionId;
 
-            // Catálogos por si hay que re-renderizar
             ViewBag.IncidentTypes = (await _cefIncidentService.GetAllIncidentTypesAsync())
                 .Select(it => new SelectListItem { Value = it.Code, Text = it.Description })
                 .ToList();
@@ -697,7 +778,13 @@ namespace VCashApp.Controllers
                             kvp => kvp.Key,
                             kvp => kvp.Value.Errors.Select(e => e.ErrorMessage).ToArray()
                         );
-
+                    _audit.Warn(
+                        action: "CEF.Containers.Save",
+                        detailMessage: "Modelo inválido al guardar contenedores",
+                        result: "ValidationFailed",
+                        entityType: "CefTransaction",
+                        entityId: transactionId.ToString()
+                    );
                     return Json(ServiceResult.FailureResult("Hay errores en el formulario.", errors: errorDict));
                 }
 
@@ -764,12 +851,38 @@ namespace VCashApp.Controllers
                             foreach (var inc in containerVm.Incidents)
                             {
                                 inc.CefContainerId = savedEnv.Id;
-                                await _cefIncidentService.RegisterIncidentAsync(inc, currentUser.Id);
+                                var created = await _cefIncidentService.RegisterIncidentAsync(inc, currentUser.Id);
+
+                                _audit.Info(
+                                    action: "CEF.Incident.Reported",
+                                    entityType: "CefIncident",
+                                    entityId: created.Id.ToString(),
+                                    result: "Reported",
+                                    urlId: created.CefTransactionId?.ToString(),
+                                    modelId: created.CefContainerId?.ToString(),
+                                    extra: new Dictionary<string, object>
+                                    {
+                                        ["IncidentType"] = inc.IncidentType.ToString(),
+                                        ["AffectedAmount"] = inc.AffectedAmount != 0 ? inc.AffectedAmount : inc.AffectedDenomination * inc.AffectedQuantity,
+                                        ["Description"] = inc.Description ?? ""
+                                    }
+                                );
                             }
                         }
                     }
 
                     await tx.CommitAsync();
+                    _audit.Info(
+                        action: "CEF.Containers.Save",
+                        detailMessage: "Contenedores guardados correctamente",
+                        result: "OK",
+                        entityType: "CefTransaction",
+                        entityId: transactionId.ToString(),
+                        extra: new Dictionary<string, object>
+                        {
+                            ["ContainersCount"] = viewModel.Containers?.Count ?? 0
+                        }
+                    );
                 }
 
                 if (isAjax)
@@ -787,16 +900,30 @@ namespace VCashApp.Controllers
                     return Json(ServiceResult.FailureResult(ex.Message));
 
                 ModelState.AddModelError("", ex.Message);
+                _audit.Warn(
+                    action: "CEF.Containers.Save",
+                    detailMessage: ex.Message,
+                    result: "InvalidOperation",
+                    entityType: "CefTransaction",
+                    entityId: transactionId.ToString()
+                );
                 var pageVm = await _cefContainerService.PrepareProcessContainersPageAsync(transactionId);
                 pageVm.Containers = viewModel.Containers ?? new List<CefContainerProcessingViewModel>();
                 return View(pageVm);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
                 if (isAjax)
                     return Json(ServiceResult.FailureResult("Ocurrió un error inesperado al guardar los contenedores."));
 
                 ModelState.AddModelError("", "Ocurrió un error inesperado al guardar los contenedores.");
+                _audit.Error(
+                    action: "CEF.Containers.Save",
+                    ex: ex,
+                    detailMessage: "Error inesperado al guardar contenedores",
+                    entityType: "CefTransaction",
+                    entityId: transactionId.ToString()
+                );
                 var pageVm = await _cefContainerService.PrepareProcessContainersPageAsync(transactionId);
                 pageVm.Containers = viewModel.Containers ?? new List<CefContainerProcessingViewModel>();
                 return View(pageVm);
@@ -833,6 +960,24 @@ namespace VCashApp.Controllers
                     throw new InvalidOperationException("No todos los contenedores han sido procesados. Por favor, complete el conteo de todos los contenedores.");
                 }
 
+                // 1) No debe haber novedades pendientes
+                if (await _cefIncidentService.HasPendingIncidentsByTransactionAsync(transactionId))
+                {
+                    throw new InvalidOperationException("Hay novedades pendientes de aprobación. Debe aprobarlas antes de finalizar el conteo.");
+                }
+
+                // 2) Recalcula neto y valida que sea 0
+                await _cefTransactionService.RecalcTotalsAndNetDiffAsync(transactionId);
+
+                var tx = await _cefTransactionService.GetCefTransactionByIdAsync(transactionId);
+                if (tx == null) throw new InvalidOperationException("Transacción no encontrada.");
+
+                if ((tx.ValueDifference) != 0m)
+                {
+                    var dif = tx.ValueDifference;
+                    throw new InvalidOperationException($"La transacción aún presenta diferencia neta {dif:N0}. Debe quedar en 0 para finalizar.");
+                }
+
                 var ok = await _cefTransactionService.UpdateTransactionStatusAsync(transactionId, CefTransactionStatusEnum.PendienteRevision, currentUser.Id);
 
                 if (ok)
@@ -840,13 +985,26 @@ namespace VCashApp.Controllers
                     TempData["SuccessMessage"] = $"Transacción {transactionId} finalizada para conteo y enviada a revisión.";
                     _logger.LogInformation("Usuario: {Usuario} | IP: {IP} | Acción: Transacción CEF finalizada y enviada a revisión | ID Transacción: {TransactionId}.",
                         currentUser.UserName, IpAddressForLogging, transactionId);
-
+                    _audit.Info(
+                        action: "CEF.FinalizeCounting",
+                        detailMessage: "Transacción enviada a revisión",
+                        result: "SentToReview",
+                        entityType: "CefTransaction",
+                        entityId: transactionId.ToString()
+                    );
                     return RedirectToAction(nameof(ReviewTransaction), new { transactionId });
                 }
                 else
                 {
                     TempData["ErrorMessage"] = "No se pudo finalizar el conteo de la transacción. Verifique el estado.";
                     _logger.LogWarning("Usuario: {Usuario} | IP: {IP} | Acción: Fallo al finalizar conteo | ID Transacción: {TransactionId}.", currentUser.UserName, IpAddressForLogging, transactionId);
+                    _audit.Warn(
+                        action: "CEF.FinalizeCounting",
+                        detailMessage: "No se pudo finalizar el conteo (estado no válido)",
+                        result: "TransitionDenied",
+                        entityType: "CefTransaction",
+                        entityId: transactionId.ToString()
+                    );
                     return RedirectToAction(nameof(ProcessContainers), new { transactionId });
                 }
             }
@@ -854,12 +1012,26 @@ namespace VCashApp.Controllers
             {
                 TempData["ErrorMessage"] = ex.Message;
                 _logger.LogError(ex, "Usuario: {Usuario} | IP: {IP} | Acción: Error al finalizar conteo | Mensaje: {ErrorMessage}.", currentUser.UserName, IpAddressForLogging, ex.Message);
+                _audit.Warn(
+                    action: "CEF.FinalizeCounting",
+                    detailMessage: ex.Message,
+                    result: "InvalidOperation",
+                    entityType: "CefTransaction",
+                    entityId: transactionId.ToString()
+                );
                 return RedirectToAction(nameof(ProcessContainers), new { transactionId });
             }
             catch (Exception ex)
             {
                 TempData["ErrorMessage"] = "Ocurrió un error inesperado al finalizar el conteo.";
                 _logger.LogError(ex, "Usuario: {Usuario} | IP: {IP} | Acción: Error inesperado al finalizar conteo.", currentUser.UserName, IpAddressForLogging);
+                _audit.Error(
+                    action: "CEF.FinalizeCounting",
+                    ex: ex,
+                    detailMessage: "Error inesperado al finalizar conteo",
+                    entityType: "CefTransaction",
+                    entityId: transactionId.ToString()
+                );
                 return RedirectToAction(nameof(ProcessContainers), new { transactionId });
             }
         }
@@ -892,6 +1064,13 @@ namespace VCashApp.Controllers
             if (vm.CurrentStatus != CefTransactionStatusEnum.PendienteRevision)
             {
                 TempData["ErrorMessage"] = $"La transacción {vm.SlipNumber} no está en estado 'Pendiente de Revisión'. Estado actual: {vm.CurrentStatus.ToString().Replace("_", " ")}.";
+                _audit.Warn(
+                    action: "CEF.Review.Open",
+                    detailMessage: $"Estado actual: {vm.CurrentStatus}",
+                    result: "WrongState",
+                    entityType: "CefTransaction",
+                    entityId: transactionId.ToString()
+                );
                 return RedirectToAction(nameof(Index));
             }
 
@@ -904,6 +1083,14 @@ namespace VCashApp.Controllers
             ViewBag.CanReview = await HasPermisionForView(await _userManager.GetRolesAsync(currentUser), "CEF", PermissionType.Edit);
 
             _logger.LogInformation("Usuario: {Usuario} | IP: {IP} | Acción: Acceso a revisión de Transacción | ID Transacción: {TransactionId}.", currentUser.UserName, IpAddressForLogging, transactionId);
+            _audit.Info(
+                action: "CEF.Review.Open",
+                detailMessage: "Apertura de pantalla de revisión",
+                result: "OK",
+                entityType: "CefTransaction",
+                entityId: transactionId.ToString(),
+                urlId: vm.ServiceOrderId
+            );
             return View(vm);
         }
 
@@ -992,6 +1179,13 @@ namespace VCashApp.Controllers
                     }
 
                     TempData["SuccessMessage"] = msg;
+                    _audit.Info(
+                        action: "CEF.Review.ControllerAck",
+                        detailMessage: $"Revisión aplicada ({viewModel.NewStatus})",
+                        result: "OK",
+                        entityType: "CefTransaction",
+                        entityId: viewModel.Id.ToString()
+                    );
                     return RedirectToAction(nameof(Index));
                 }
                 else
@@ -1009,6 +1203,13 @@ namespace VCashApp.Controllers
                     }
 
                     ModelState.AddModelError("", "No se pudo procesar la revisión de la transacción. Verifique el estado.");
+                    _audit.Warn(
+                        action: "CEF.Review",
+                        detailMessage: "No se pudo procesar la revisión",
+                        result: "Failed",
+                        entityType: "CefTransaction",
+                        entityId: viewModel.Id.ToString()
+                    );
                     return View(viewModel);
                 }
             }
@@ -1039,7 +1240,13 @@ namespace VCashApp.Controllers
                     viewModel.ReviewerUserName = currentData.ReviewerUserName;
                     viewModel.ReviewDate = currentData.ReviewDate;
                 }
-
+                _audit.Warn(
+                    action: "CEF.Review",
+                    detailMessage: ex.Message,
+                    result: "InvalidOperation",
+                    entityType: "CefTransaction",
+                    entityId: viewModel.Id.ToString()
+                );
                 return View(viewModel);
             }
             catch (Exception ex)
@@ -1069,7 +1276,13 @@ namespace VCashApp.Controllers
                     viewModel.ReviewerUserName = currentData.ReviewerUserName;
                     viewModel.ReviewDate = currentData.ReviewDate;
                 }
-
+                _audit.Error(
+                    action: "CEF.Review",
+                    ex: ex,
+                    detailMessage: "Error inesperado en revisión",
+                    entityType: "CefTransaction",
+                    entityId: viewModel.Id.ToString()
+                );
                 return View(viewModel);
             }
         }
@@ -1094,6 +1307,7 @@ namespace VCashApp.Controllers
             }
 
             var items = await _cefServiceCreationService.GetLocationsForDropdownAsync(clientId, branchId, typeEnum, serviceConceptCode);
+
             return Json(items);
         }
 
@@ -1170,6 +1384,99 @@ namespace VCashApp.Controllers
         {
             var words = AmountInWordsHelper.ToSpanishCurrency(value, currency);
             return Json(new { words });
+        }
+
+        [HttpGet("ListIncidents")]
+        public async Task<IActionResult> ListIncidents(int transactionId, int? containerId)
+        {
+            var list = await _cefIncidentService.GetIncidentsAsync(transactionId, containerId, null);
+            // Devuelve JSON simple para pintar en el front
+            var data = list.Select(i => new {
+                i.Id,
+                Type = _context.CefIncidentTypes.FirstOrDefault(t => t.Id == i.IncidentTypeId)!.Code,
+                i.Description,
+                i.AffectedAmount,
+                i.AffectedDenomination,
+                i.AffectedQuantity,
+                i.IncidentStatus,
+                Date = i.IncidentDate.ToString("yyyy-MM-dd HH:mm")
+            });
+            return Json(new { ok = true, data });
+        }
+
+        [HttpPost("CreateIncident")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> CreateIncident([FromForm] CefIncidentViewModel vm)
+        {
+            try
+            {
+                var currentUser = await GetCurrentApplicationUserAsync();
+                if (currentUser == null) return Unauthorized();
+
+                if (vm == null)
+                    return BadRequest(new { ok = false, message = "Datos incompletos para registrar novedad." });
+
+                if (!vm.CefTransactionId.HasValue && !vm.CefContainerId.HasValue && !vm.CefValueDetailId.HasValue)
+                    return BadRequest(new { ok = false, message = "Debe especificar al menos una transacción, contenedor o detalle." });
+
+                if (Request.Form.TryGetValue("IncidentTypeCode", out var code) && !string.IsNullOrWhiteSpace(code))
+                {
+                    if (IncidentTypeCodeMap.TryFromCode(code, out var parsedType))
+                    {
+                        vm.IncidentType = parsedType;
+                    }
+                    else
+                    {
+                        return BadRequest(new { ok = false, message = $"Código de tipo de novedad no válido: {code}" });
+                    }
+                }
+
+                var inc = await _cefIncidentService.RegisterIncidentAsync(vm, currentUser.Id);
+                if (inc.CefTransactionId.HasValue)
+                    await _cefTransactionService.RecalcTotalsAndNetDiffAsync(inc.CefTransactionId.Value);
+
+                return Json(new { ok = true, message = "Novedad registrada." });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { ok = false, message = ex.Message });
+            }
+        }
+
+        [HttpPost("ResolveIncident")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ResolveIncident(int id, string newStatus = "Adjusted")
+        {
+            var ok = await _cefIncidentService.ResolveIncidentAsync(id, newStatus);
+            if (!ok) return BadRequest(new { ok = false, message = "No se pudo resolver la novedad." });
+
+            // localiza transacción para recalcular
+            var inc = await _cefIncidentService.GetIncidentByIdAsync(id);
+            if (inc?.CefTransactionId != null)
+                await _cefTransactionService.RecalcTotalsAndNetDiffAsync(inc.CefTransactionId.Value);
+
+            return Json(new { ok = true, message = "Novedad actualizada." });
+        }
+
+        [HttpGet("CheckPendingIncidents")]
+        public async Task<IActionResult> CheckPendingIncidents(int transactionId)
+        {
+            var hasPending = await _cefIncidentService.HasPendingIncidentsByTransactionAsync(transactionId);
+            return Json(new { ok = true, hasPending });
+        }
+
+        [HttpGet("GetTotals")]
+        public async Task<IActionResult> GetTotals(int transactionId)
+        {
+            var tx = await _cefTransactionService.GetCefTransactionByIdAsync(transactionId);
+            if (tx == null) return NotFound(new { ok = false });
+            return Json(new
+            {
+                ok = true,
+                totalDeclared = tx.TotalDeclaredValue,
+                totalCounted = tx.TotalCountedValue,
+                netDiff = tx.ValueDifference
+            });
         }
     }
 }

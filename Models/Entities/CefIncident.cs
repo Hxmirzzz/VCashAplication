@@ -36,8 +36,10 @@ namespace VCashApp.Models.Entities
         [Column("MontoAfectado", TypeName = "DECIMAL(18,0)")]
         public decimal AffectedAmount { get; set; }
 
-        [Column("DenominacionAfectada", TypeName = "DECIMAL(18,0)")]
-        public decimal? AffectedDenomination { get; set; }
+        [Column("DenominacionAfectada")]
+        [ForeignKey("Denominacion")]
+        public int? AffectedDenomination { get; set; }
+        public virtual AdmDenominacion? Denominacion { get; set; }
 
         [Column("CantidadAfectada")]
         public int? AffectedQuantity { get; set; }

@@ -585,7 +585,7 @@ namespace VCashApp.Data
 
                 entity.Property(i => i.IncidentTypeId).IsRequired();
                 entity.Property(i => i.AffectedAmount).IsRequired().HasColumnType("DECIMAL(18,0)");
-                entity.Property(i => i.AffectedDenomination).IsRequired().HasColumnType("DECIMAL(18,0)");
+                entity.Property(i => i.AffectedDenomination).IsRequired(false);
                 entity.Property(i => i.AffectedQuantity).IsRequired(false);
                 entity.Property(i => i.Description).IsRequired().HasMaxLength(255);
                 entity.Property(i => i.ReportedUserId).IsRequired().HasMaxLength(450);
@@ -596,6 +596,7 @@ namespace VCashApp.Data
                 entity.HasOne(i => i.CefTransaction).WithMany(t => t.Incidents).HasForeignKey(i => i.CefTransactionId).IsRequired(false).OnDelete(DeleteBehavior.Restrict);
                 entity.HasOne(i => i.CefContainer).WithMany(c => c.Incidents).HasForeignKey(i => i.CefContainerId).IsRequired(false).OnDelete(DeleteBehavior.Restrict);
                 entity.HasOne(i => i.CefValueDetail).WithMany(vd => vd.Incidents).HasForeignKey(i => i.CefValueDetailId).IsRequired(false).OnDelete(DeleteBehavior.Restrict);
+                entity.HasOne(i => i.Denominacion).WithMany().HasForeignKey(i => i.AffectedDenomination).OnDelete(DeleteBehavior.Restrict);
                 entity.HasOne(i => i.IncidentType).WithMany().HasForeignKey(i => i.IncidentTypeId).OnDelete(DeleteBehavior.Restrict);
                 entity.HasOne<ApplicationUser>().WithMany().HasForeignKey(i => i.ReportedUserId).HasPrincipalKey(u => u.Id).OnDelete(DeleteBehavior.Restrict);
                 entity.Property(i => i.IncidentStatus).HasConversion<string>();

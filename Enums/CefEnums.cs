@@ -73,13 +73,11 @@
 
     public enum CefIncidentTypeCategoryEnum
     {
-        Overload,
-        Shortage,
-        Fake,
-        Damaged,
-        CountingError,
-        ContainerInconsistency,
-        Other
+        Sobrante,
+        Faltante,
+        False,
+        MezclaSobrante,
+        MezclaFaltante
     }
 
     public enum AppliesToEnum

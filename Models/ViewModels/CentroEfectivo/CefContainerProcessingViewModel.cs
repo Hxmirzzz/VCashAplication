@@ -181,8 +181,8 @@ namespace VCashApp.Models.ViewModels.CentroEfectivo
         public decimal AffectedAmount { get; set; }
 
         [Display(Name = "Denominación Afectada")]
-        [Range(0.00, (double)decimal.MaxValue, ErrorMessage = "Debe ser un valor válido.")]
-        public decimal? AffectedDenomination { get; set; }
+        [Required(ErrorMessage = "La denominación es obligatoría.")]
+        public int? AffectedDenomination { get; set; }
 
         [Display(Name = "Cantidad Afectada")]
         [Range(0, int.MaxValue, ErrorMessage = "Debe ser una cantidad válida.")]

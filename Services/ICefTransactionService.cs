@@ -84,6 +84,14 @@ namespace VCashApp.Services
         Task<bool> ProcessReviewApprovalAsync(CefTransactionReviewViewModel viewModel, string reviewerUserId);
 
         /// <summary>
+        /// Recalcula TotalCountedValue, aplica el efecto de novedades aprobadas y
+        /// actualiza ValueDifference de la transacción.
+        /// </summary>
+        /// <param name="cefTransactionId">ID de la transacción CEF.</param>
+        /// <returns>true si se actualizó; false si no existe.</returns>
+        Task<bool> RecalcTotalsAndNetDiffAsync(int cefTransactionId);
+
+        /// <summary>
         /// Obtiene las divisas de servicio disponibles para los dropdowns.
         /// </summary>
         /// <returns>Lista de SelectListItem para divisas de servicio.</returns>

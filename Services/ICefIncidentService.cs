@@ -47,5 +47,19 @@ namespace VCashApp.Services
         /// </summary>
         /// <returns>Lista de entidades AdmTipoNovedad.</returns>
         Task<List<CefIncidentType>> GetAllIncidentTypesAsync();
+
+        /// <summary>
+        /// Asynchronously calculates the total approved effect for a specific transaction.
+        /// </summary>
+        /// <remarks>This method retrieves and sums the approved effects associated with the specified
+        /// transaction. Ensure that the transaction ID provided corresponds to a valid transaction in the
+        /// system.</remarks>
+        /// <param name="transactionId">The unique identifier of the transaction for which the approved effect is to be summed.</param>
+        /// <returns>A task that represents the asynchronous operation. The task result contains the total approved effect as a
+        /// decimal value.</returns>
+        Task<decimal> SumApprovedEffectByTransactionAsync(int transactionId);
+        Task<bool> HasPendingIncidentsByTransactionAsync(int cefTransactionId);
+        Task<decimal> SumApprovedEffectByContainerAsync(int containerId);
+
     }
 }

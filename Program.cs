@@ -277,6 +277,7 @@ using (var scope = app.Services.CreateScope())
     await IdentitySeedData.SeedUsersAsync(userManager, roleManager, dbContext);
     await IdentitySeedData.SeedBranchPermissionsAsync(dbContext, userManager);
     await IdentitySeedData.SeedPermissionsAsync(dbContext, roleManager);
+    await IdentitySeedData.SeedCefIncidentTypesAsync(dbContext);
 }
 
 app.MapControllerRoute(

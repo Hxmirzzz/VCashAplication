@@ -21,6 +21,10 @@
                         <div class="step-number">2</div>
                         <div class="step-label">Resumen</div>
                     </div>
+                    <div class="step" data-step="3">
+                        <div class="step-number">3</div>
+                        <div class="step-label">Novedades</div>
+                    </div>
                 </div>
 
                 <div class="tab-content" id="myTabContent">
@@ -106,7 +110,6 @@
                                             .Select((c, idx) => new { c, idx })
                                             .Where(x => x.c.ParentContainerId == null && x.c.ContainerType == VCashApp.Enums.CefContainerTypeEnum.Bolsa)
                                             .ToList();
-
                                     }
 
                                     <div class="tabs-scroll-wrap">
@@ -140,6 +143,14 @@
                                                                 <span class="js-bag-badge-total">0</span>
                                                             </span>
 
+                                                            <span class="tab-action js-go-incidents ms-1"
+                                                                    role="button" title="Novedades"
+                                                                    data-transaction-id="@Model.CefTransactionId"
+                                                                    data-container-id="@bagId"
+                                                                    data-bag-label="Bolsa @(@b + 1)- @bagItems[b].c.ContainerCode">
+                                                                <i class="ri-information-2-fill"></i>
+                                                            </span>
+
                                                             <span class="btn-close btn-close-sm tab-close js-close-bag-tab ms-1"
                                                                   role="button" aria-label="Eliminar bolsa" title="Eliminar bolsa"
                                                                   data-container-id="@bagId"
@@ -166,7 +177,6 @@
                                                     var vddBag = new ViewDataDictionary(ViewData);
                                                     vddBag.TemplateInfo.HtmlFieldPrefix = $"Containers[{bagIdx}]";
                                                 }
-                                                <!-- Editor de la Bolsa (una sola) -->
                                                 @Html.Partial("_ContainerEditorPartial", Model.Containers[bagIdx], vddBag)
 
                                                 <!-- ====== Sobres de esta bolsa ====== -->
@@ -365,17 +375,92 @@
                             </div>
                         </div>
                     </div>
+                    <div class="tab-pane fade" role="tabpanel" data-step="3">
+                        <div class="step-content">
+                            <div class="row g-3">
+                                <div class="col-12 col-lg-5">
+                                    <div class="card">
+                                        <div class="card-header"><h6 class="mb-0">Registrar novedad</h6></div>
+                                        <div class="card-body">
+                                            <div id="formIncident3" data-action="@Url.Action("CreateIncident","Cef")">
+                                                @Html.AntiForgeryToken()
+                                                <input type="hidden" name="CefTransactionId" id="incTxId3" value="@Model.CefTransactionId" />
+                                                <input type="hidden" name="CefContainerId" id="incContainerId3" />
+                                                <input type="hidden" name="CefValueDetailId" id="incDetailId3" />
+
+                                                <div class="mb-2">
+                                                    <label class="form-label">Tipo de novedad</label>
+                                                    <select class="form-select" name="IncidentTypeCode" required>
+                                                        @foreach (var t in (List<SelectListItem>)ViewBag.IncidentTypes)
+                                                        { <option value="@t.Value">@t.Text</option> }
+                                                    </select>
+                                                </div>
+
+                                                <div class="row g-2">
+                                                    <div class="col-6">
+                                                        <label class="form-label">Denominación</label>
+                                                        <select class="form-select" name="AffectedDenomination" id="incDenom3"></select>
+                                                    </div>
+                                                    <div class="col-6">
+                                                        <label class="form-label">Cantidad</label>
+                                                        <input type="number" step="1" class="form-control" name="AffectedQuantity" id="incQty3" />
+                                                    </div>
+                                                </div>
+
+                                                <div class="mt-2">
+                                                    <label class="form-label">Monto afectado (opcional)</label>
+                                                    <input type="number" step="1" class="form-control" name="AffectedAmount" id="incAmount3" />
+                                                    <small class="text-muted">Si lo dejas vacío, se calcula con (Denominación × Cantidad).</small>
+                                                </div>
+
+                                                <div class="mt-2">
+                                                    <label class="form-label">Descripción</label>
+                                                    <textarea class="form-control" name="Description" rows="3" required></textarea>
+                                                </div>
+
+                                                <div class="mt-3 d-flex gap-2">
+                                                    <button type="button" id="btnSaveIncident3" class="btn btn-primary">Guardar novedad</button>
+                                                    <button type="button" class="btn btn-light" data-step-action="back-to-bags">Volver a bolsas</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-12 col-lg-7">
+                                    <div class="card">
+                                        <div class="card-header d-flex align-items-center justify-content-between">
+                                            <h6 class="mb-0">Novedades de la bolsa seleccionada</h6>
+                                            <div class="small text-muted">
+                                                Bolsa actual:
+                                                <select id="incCurrentBagSelect" class="form-select form-select-sm d-inline-block" style="width: auto; display: inline-block;"></select>
+                                            </div> 
+                                        </div>
+                                        <div class="card-body">
+                                            <table class="table table-sm table-bordered align-middle">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Fecha</th><th>Tipo</th><th>Descripción</th>
+                                                        <th class="text-end">Monto</th><th>Estado</th><th style="width:120px">Acciones</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody id="inc-table-body-step3"><!-- AJAX --></tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 <div class="submit-container-spacer"></div>
                 <div class="submit-container form-group col-12 mt-4 fixed">
                     <button type="button" class="btn btn-secondary" data-step-action="prev" style="display:none;">Anterior</button>
                     <button type="button" class="btn btn-primary" data-step-action="next">Continuar</button>
-                    <button type="submit" class="btn btn-primary" data-step-action="submit-final" style="display:none;">Guardar</button>
+                    <button type="submit" class="btn btn-primary" data-step-action="save" style="display:none;">Guardar</button>
+                    <button type="button" class="btn btn-success js-finalize-counting" style="display:none;">Finalizar</button>
                     <a asp-action="Index" class="btn btn-danger js-cancel">Cancelar</a>
-                    <button type="button" class="btn btn-success js-finalize-counting">
-                        <i class="ri-check-fill"></i> Finalizar
-                    </button>
                 </div>
             </form>
         </div>
@@ -390,75 +475,6 @@
     @Html.Partial("_ContainerEditorPartial",
     new VCashApp.Models.ViewModels.CentroEfectivo.CefContainerProcessingViewModel(),
         vddT)
-</div>
-
-<div id="incident-template" class="d-none">
-    <div class="incident-row card mt-3" data-cidx="__cidx__" data-iidx="__iidx__">
-        <div class="card-body">
-            <div class="row g-3">
-                <div class="col-12 col-lg-4">
-                    <div class="form-floating has-validation">
-                        <select name="Containers[__cidx__].Incidents[__iidx__].IncidentType" class="form-select">
-                            <option value="">Seleccionar tipo...</option>
-                            @foreach (var it in (IEnumerable<SelectListItem>)ViewBag.IncidentTypes ?? new List<SelectListItem>())
-                                                        {
-                                <option value="@it.Value">@it.Text</option>
-                            }
-                        </select>
-                        <label>Tipo de Novedad</label>
-                        <div class="invalid-feedback">⚠ Requerido</div>
-                        <div class="valid-feedback">✓ Correcto</div>
-                    </div>
-                </div>
-
-                <div class="col-12 col-lg-3">
-                    <div class="form-floating has-validation">
-                        <input type="number" step="0.01"
-                               name="Containers[__cidx__].Incidents[__iidx__].AffectedAmount"
-                               class="form-control" placeholder="Monto afectado" />
-                        <label>Monto afectado</label>
-                        <div class="invalid-feedback">⚠ Requerido</div>
-                        <div class="valid-feedback">✓ Correcto</div>
-                    </div>
-                </div>
-
-                <div class="col-12 col-lg-3">
-                    <div class="form-floating">
-                        <input type="number" step="0.01"
-                               name="Containers[__cidx__].Incidents[__iidx__].AffectedDenomination"
-                               class="form-control" placeholder="Denominación afectada" />
-                        <label>Denominación afectada</label>
-                    </div>
-                </div>
-
-                <div class="col-12 col-lg-2">
-                    <div class="form-floating">
-                        <input type="number"
-                               name="Containers[__cidx__].Incidents[__iidx__].AffectedQuantity"
-                               class="form-control" placeholder="Cantidad" />
-                        <label>Cantidad</label>
-                    </div>
-                </div>
-
-                <div class="col-12">
-                    <div class="form-floating has-validation">
-                        <textarea name="Containers[__cidx__].Incidents[__iidx__].Description"
-                                  class="form-control" placeholder="Descripción"
-                                  style="height: 80px;"></textarea>
-                        <label>Descripción</label>
-                        <div class="invalid-feedback">⚠ Requerido</div>
-                        <div class="valid-feedback">✓ Correcto</div>
-                    </div>
-                </div>
-
-                <div class="col-12 d-flex justify-content-end">
-                    <button type="button" class="btn btn-outline-danger btn-sm js-remove-incident">
-                        Eliminar novedad
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
 </div>
 
 <script id="denoms-json" type="application/json">
@@ -493,15 +509,24 @@
           // =====================================================================
           // 0) BOOT / CONSTANTES / CACHÉS / DIRTY STATE
           // =====================================================================
-          $('#bag-template :input, #envelope-template :input, #incident-template :input, #container-template :input')
+          $('#bag-template :input, #envelope-template :input, #container-template :input')
             .prop('disabled', true);
 
-          let currentStep = 1, totalSteps = 2;
+          let currentStep = 1, totalSteps = 3;
 
           const DENOMS = JSON.parse(document.getElementById('denoms-json')?.textContent || '{}');
           const QUALS  = JSON.parse(document.getElementById('qualities-json')?.textContent || '{}');
           const BANKS = JSON.parse(document.getElementById('banks-json')?.textContent || '[]');
           const CAPS = JSON.parse(document.getElementById('pointcaps-json')?.textContent || '{}');
+
+          // === INCIDENCIAS: rutas backend ===
+          const IncidentRoutes = {
+            list: '@Url.Action("ListIncidents","Cef")',
+            create: '@Url.Action("CreateIncident","Cef")',
+            resolve: '@Url.Action("ResolveIncident","Cef")',
+            checkPending: '@Url.Action("CheckPendingIncidents","Cef")',
+            totals: '@Url.Action("GetTotals","Cef")'
+          };
 
           const SOBRES_OK  = !!CAPS.sobres;
           const CHEQUES_OK = !!CAPS.cheques;
@@ -538,6 +563,30 @@
           // =====================================================================
           // 1) STEPPER + VALIDACIÓN
           // =====================================================================
+          function updateStepButtons() {
+            const $prev = $('button[data-step-action="prev"]');
+            const $next = $('button[data-step-action="next"]');
+            const $submit = $('button[data-step-action="save"]');
+            const $final = $('.js-finalize-counting');
+
+            $prev.hide();
+            $next.hide();
+            $submit.hide();
+            $final.hide();
+
+            if (currentStep === 1) {
+                $next.show();
+            }
+            else if (currentStep === 2) {
+                $prev.show();
+                $submit.show();
+                $final.show();
+            }
+            else if (currentStep === 3) {
+                $prev.show();
+            }
+          }
+
           function updateStepper() {
             $('.progress-stepper .step').removeClass('active completed');
             for (let i = 1; i <= totalSteps; i++) {
@@ -547,6 +596,7 @@
               else { $s.find('.step-number').text(i); }
             }
             showCurrentStep();
+            updateStepButtons();
           }
           function showCurrentStep() {
             $('#myTabContent .tab-pane[data-step]').removeClass('show active');
@@ -554,6 +604,10 @@
             $prev.toggle(currentStep > 1);
             $next.toggle(currentStep < totalSteps);
             $submit.toggle(currentStep === totalSteps);
+
+            if (currentStep ===3) {
+                fillBagSelectorStep3();
+            }
           }
           function validateField($f) {
             if ($f.prop('disabled')) { $f.removeClass('is-invalid is-valid'); return true; }
@@ -2055,7 +2109,7 @@
             });
           });
 
-          // Toggles de tipo contenedor / modo sobre
+          // Toggles de tipo bolsa / modo sobre
           $(document).on('change', '.js-container-type', function () {
             const $ce = $(this).closest('.container-editor');
             toggleContainerSections($ce);
@@ -2243,6 +2297,226 @@
           });
 
           // =====================================================================
+          // 12.5) NOVEDADES (abrir, crear, listar, ajustar) + refresco de totales
+          // =====================================================================
+          function buildDenomOptionsFromJson(){
+            const kinds = ['Billete','Moneda'];
+            let html = '<option value="">-- Seleccione denominación --</option>';
+            kinds.forEach(k=>{
+                const arr = (DENOMS && DENOMS[k]) ? DENOMS[k] : [];
+                arr.forEach(d=>{
+                    const id    = d.id ?? d.codDenominacion ?? d.CodDenominacion;
+                    const label = d.label ?? d.text ?? d.name ?? d.Denominacion ?? `${d.valor ?? d.value ?? ''}`;
+                    const value = d.value ?? d.valor ?? d.ValorDenominacion ?? d.valorDenominacion ?? 0;
+                    html += `<option value="${id}" data-value="${value}">${label}</option>`;
+                });
+            });
+            return html;
+          }
+
+          function getDenomValueById(denomId){
+            if (!denomId) return 0;
+              const kinds = ['Billete', 'Moneda'];
+              for (const k of kinds) {
+                const arr = (DENOMS && DENOMS[k]) ? DENOMS[k] : [];
+                const d = arr.find(x =>
+                  String((x.id ?? x.codDenominacion ?? x.CodDenominacion)) === String(denomId)
+                );
+                if (d) return Number(d.value ?? d.valor ?? d.ValorDenominacion ?? d.valorDenominacion ?? 0) || 0;
+              }
+              return 0;
+          }
+
+          function fetchIncidentStep3(transactionId, containerId) {
+            $.get(IncidentRoutes.list, { transactionId, containerId }, function(r){
+              const $tb = $('#inc-table-body-step3').empty();
+              if (!r || !r.ok) return;
+
+              // normaliza casing
+              const rows = (r.data || []).map(x => ({
+                Id: x.Id ?? x.id,
+                Type: x.Type ?? x.type,
+                Description: x.Description ?? x.description,
+                AffectedAmount: x.AffectedAmount ?? x.affectedAmount,
+                AffectedDenomination: x.AffectedDenomination ?? x.affectedDenomination,
+                AffectedQuantity: x.AffectedQuantity ?? x.affectedQuantity,
+                IncidentStatus: x.IncidentStatus ?? x.incidentStatus,
+                Date: x.Date ?? x.date
+              }));
+
+              rows.forEach(x => {
+                const fallback = getDenomValueById(x.AffectedDenomination) * (Number(x.AffectedQuantity || 0));
+                const amt = Number((x.AffectedAmount ?? 0)) || fallback || 0;
+
+                const showApprove = (x.IncidentStatus === 'Reported' || x.IncidentStatus === "UnderReview");
+                const approveBtn = showApprove
+                  ? `<button type="button" class="btn btn-success btn-sm js-inc-approve"
+                       data-id="${x.Id}" data-tx="${transactionId}" data-cont="${containerId}">Ajustar</button>`
+                  : '';
+
+                $tb.append(`
+                  <tr>
+                    <td>${x.Date ?? ''}</td>
+                    <td>${x.Type ?? ''}</td>
+                    <td>${x.Description ?? ''}</td>
+                    <td class="text-end">${amt.toLocaleString('es-CO')}</td>
+                    <td>${x.IncidentStatus ?? ''}</td>
+                    <td>${approveBtn}</td>
+                  </tr>
+                `);
+              });
+            });
+          }
+
+          $(document).on('click', '.js-go-incidents', function(e){
+              e.preventDefault();
+              e.stopPropagation();
+
+              const txId  = $(this).data('transaction-id');
+              const contId= $(this).data('container-id');
+              const label= $(this).data('bag-label') || '';
+
+              $('#incTxId3').val(txId);
+              $('#incContainerId3').val(contId);
+              $('#incDetailId3').val('');
+              $('#incCurrentBagLabel').text(label);
+
+              if (contId && Number(contId) > 0) {
+                  fetchIncidentStep3(txId, contId);
+              } else {
+                  $('#inc-table-body-step3').html(
+                      `<tr><td colspan="6" class="text-center text-muted">Guarda la bolsa para asociar novedades...</td></tr>`
+                  );
+              }
+              
+              currentStep = 3;
+              updateStepper();
+              fillBagSelectorStep3();
+          });
+
+          function fillBagSelectorStep3() {
+              const bags = [];
+              $('#bagsTabContent .tab-pane[id^="bag-tab-"]').each(function(idx){
+                    const $pane = $(this);
+                    const $ce   = $pane.find('.container-editor').first();
+                    const id    = $ce.find('input[name$=".Id"]').val() || '';
+                    const code  = $ce.find('input[name$=".ContainerCode"]').val() || '';
+                    const label = code ? `Bolsa ${idx + 1} - (${code})` : `Bolsa ${idx + 1} (sin guardar)`;
+                    bags.push({ id, label });
+              });
+
+              const $select = $('#incCurrentBagSelect');
+              $select.empty();
+              bags.forEach((b, i) => {
+                  $select.append($('<option>', {value: b.id, text: b.label }));
+              });
+
+              if (bags.length > 0) {
+                $select.val(bags[0].id);
+                $('#incContainerId3').val(bags[0].id);
+                fetchIncidentStep3($('#incTxId3').val(), bags[0].id);
+              }
+          }
+
+          $(document).on('change', '#incCurrentBagSelect', function(){
+              const contId = $(this).val() || '';
+              $('#incContainerId3').val(contId);
+              fetchIncidentStep3($('#incTxId3').val(), contId);
+          });
+
+          function tryAutoAmountStep3(){
+              const unit = Number($('#incDenom3 option:selected').data('value') || 0);
+              const qty = Number($('#incQty3').val() || 0);
+              if (!$('#incAmount3').val()) {
+                  $('#incAmount3').attr('placeholder', unit && qty ? String(unit * qty) : '');
+              }
+          }
+          $(document).on('input change', '#incDenom3, #incQty3', tryAutoAmountStep3);
+          
+          // Crear novedad (POST)
+          $('#btnSaveIncident3').on('click', function () {
+            const $box  = $('#formIncident3');
+            const url   = $box.data('action') || IncidentRoutes.create;
+
+            const token = $('input[name="__RequestVerificationToken"]').first().val() || '';
+
+            const data  = $box.find(':input').serialize()
+                         + '&__RequestVerificationToken=' + encodeURIComponent(token);
+
+            $.post({
+              url,
+              data,
+              success: function (r) {
+                if (!r || !r.ok) { Swal.fire('Error', (r && r.message) || 'Error al registrar novedad'); return; }
+                const txId = $('#incTxId3').val();
+                const cont = $('#incContainerId3').val();
+                fetchIncidentStep3(txId, cont);
+                refreshTotalsFromServer(txId);
+                Swal.fire('OK', 'Novedad registrada', 'success');
+                // limpiar
+                $box.find('textarea[name="Description"]').val('');
+                $box.find('input[name="AffectedAmount"]').val('');
+                $box.find('input[name="AffectedQuantity"]').val('');
+                $box.find('select[name="AffectedDenomination"]').val('');
+                tryAutoAmountStep3();
+              },
+              error: function(){ Swal.fire('Error', 'No se pudo guardar.', 'error'); }
+            });
+          });
+          
+          // Aprobar/Ajustar novedad
+          $(document).on('click', '.js-inc-approve', function(){
+            const id   = $(this).data('id');
+            const txId = $(this).data('tx');
+            const cont = $(this).data('cont');
+          
+            if (!confirm('¿Ajustar esta novedad? Se aplicará al cálculo de la diferencia.')) return;
+          
+            $.post({
+              url: IncidentRoutes.resolve,
+              data: {
+                id: id,
+                newStatus: 'Adjusted',
+                __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').first().val()
+              },
+              success: function(r){
+                if(!r || !r.ok) { alert((r && r.message) || 'No se pudo ajustar.'); return; }
+                fetchIncidentStep3(txId, cont);
+                refreshTotalsFromServer(txId);
+              },
+              error: function(){ alert('Error al ajustar novedad.'); }
+            });
+          });
+          
+          // Refrescar totales desde servidor (incluye efecto de novedades)
+          function refreshTotalsFromServer(transactionId){
+            $.get(IncidentRoutes.totals, { transactionId }, function(r){
+              if(!r || !r.ok) return;
+              const fmt = (n) => (Number(n)||0).toLocaleString('es-CO');
+              const sign = (n) => (Number(n) >= 0 ? '+' : '');
+          
+              // Paso 1 (arriba a la derecha)
+              $('#totDeclaredGlobal').text(fmt(r.totalDeclared));
+              $('#totCountedGlobal').text(fmt(r.totalCounted));
+              $('#totDiffGlobal').text(sign(r.netDiff) + fmt(r.netDiff));
+          
+              // Paso 2 (Resumen)
+              $('#sumDeclaredAllDisplay').text(fmt(r.totalDeclared));
+              $('#sumCountedAllDisplay').text(fmt(r.totalCounted));
+              $('#sumDiffAllDisplay').text(sign(r.netDiff) + fmt(r.netDiff));
+            });
+          }
+
+          $('#incDenom3').html(buildDenomOptionsFromJson());
+          tryAutoAmountStep3();
+          
+          // Cargar novedades de todas las bolsas renderizadas al iniciar
+          $(document).on('click', '[data-step-action="back-to-bags"]', function(){
+              currentStep = 1;
+              updateStepper();
+          });
+
+          // =====================================================================
           // 13) SUBMIT / NAVEGACIÓN
           // =====================================================================
           $('button[data-step-action="submit-final"]').on('click', function (e) {
@@ -2279,39 +2553,51 @@
             });
           });
 
-$(document).on('click', '.js-finalize-counting', function (e) {
-  e.preventDefault();
+          $(document).on('click', '.js-finalize-counting', function (e) {
+            e.preventDefault();
 
-  if (typeof isDirty !== 'undefined' && isDirty) {
-    Swal.fire({
-      icon: 'warning',
-      title: 'Cambios sin guardar',
-      text: 'Tienes Cambios sin guardar. Guarda antes de finalizar el conteo.',
-      confirmButtonText: 'Entendido'
-    });
-    return;
-  }
+            if (typeof isDirty !== 'undefined' && isDirty) {
+              Swal.fire({
+                icon: 'warning',
+                title: 'Cambios sin guardar',
+                text: 'Tienes cambios sin guardar. Guarda antes de finalizar el conteo.',
+                confirmButtonText: 'Entendido'
+              });
+              return;
+            }
 
-  Swal.fire({
-    title: '¿Finalizar el conteo?',
-    text: 'Se enviará la transacción a revisión.',
-    icon: 'question',
-    showCancelButton: true,
-    confirmButtonText: 'Si, finalizar',
-    cancelButtonText: 'Cancelar'
-  }).then(res => {
-    if (!res.isConfirmed) return;
+            // 1) Validar novedades pendientes
+            $.get(IncidentRoutes.checkPending, { transactionId: '@Model.CefTransactionId' }, function (r) {
+              if (!r || !r.ok) {
+                Swal.fire('Error', 'No se pudo validar novedades. Intenta de nuevo.', 'error');
+                return;
+              }
+              if (r.hasPending) {
+                Swal.fire('Novedades pendientes', 'Hay novedades sin ajustar/cerrar. Debes resolverlas antes de finalizar.', 'info');
+                return;
+              }
 
-    const token  = $('input[name="__RequestVerificationToken"]').first().val() || '';
-    const action = '@Url.Action("FinalizeCounting","Cef", new { transactionId = Model.CefTransactionId })';
+              // 2) Confirmar y finalizar
+              Swal.fire({
+                title: '¿Finalizar el conteo?',
+                text: 'Se enviará la transacción a revisión.',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonText: 'Sí, finalizar',
+                cancelButtonText: 'Cancelar'
+              }).then(res => {
+                if (!res.isConfirmed) return;
 
-    const $tmp = $('<form>', { method: 'post', action: action, style: 'display:none' });
-    $tmp.append($('<input>', { type: 'hidden', name: '__RequestVerificationToken', value: token }));
-    $('body').append($tmp);
-    $tmp.trigger('submit');
-  });
-});
+                const token  = $('input[name="__RequestVerificationToken"]').first().val() || '';
+                const action = '@Url.Action("FinalizeCounting","Cef", new { transactionId = Model.CefTransactionId })';
 
+                const $tmp = $('<form>', { method: 'post', action: action, style: 'display:none' });
+                $tmp.append($('<input>', { type: 'hidden', name: '__RequestVerificationToken', value: token }));
+                $('body').append($tmp);
+                $tmp.trigger('submit');
+              });
+            });
+          });
 
           $form.on('submit', function (e) {
             e.preventDefault();
@@ -2322,7 +2608,7 @@ $(document).on('click', '.js-finalize-counting', function (e) {
             }
 
             Swal.fire({
-              title: '¿Guardar contenedores?',
+              title: '¿Guardar bolsas?',
               text: 'Se guardará toda la información capturada.',
               icon: 'question',
               showCancelButton: true,
@@ -2343,7 +2629,7 @@ $(document).on('click', '.js-finalize-counting', function (e) {
               $form.find('input[name$=".BundlesCount"], input[name$=".LoosePiecesCount"]').each(function(){
                 if ($.trim($(this).val()) === '') $(this).val('0');
               });
-              $('#bag-template :input, #envelope-template :input, #incident-template :input, #container-template :input')
+              $('#bag-template :input, #envelope-template :input, #container-template :input')
                 .prop('disabled', true);
               $form.find('[name*="Containers[__idx__]"]').remove();
               unformatAllNumbers();

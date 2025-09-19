@@ -856,6 +856,15 @@ textarea.form-control {
             opacity: 1;
         }
 
+        .tab-action {
+            cursor: pointer;
+            opacity: .8;
+        }
+
+        .tab-action:hover {
+            opacity: .1;
+        }
+
 /* Badges dentro de tabs */
 .nav-tabs .nav-link .tab-badge {
     display: inline-flex;

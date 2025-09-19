@@ -17,11 +17,15 @@ namespace VCashApp.Services.Cef
     {
         private readonly AppDbContext _context;
         private readonly IAuditLogger _audit;
+        private readonly ICefContainerService _cefContainerService;
+        private readonly ICefIncidentService _cefIncidentService;
 
-        public CefTransactionService(AppDbContext context, IAuditLogger audit)
+        public CefTransactionService(AppDbContext context, IAuditLogger audit, ICefContainerService cefContainerService, ICefIncidentService cefIncidentService)
         {
             _context = context;
             _audit = audit;
+            _cefContainerService = cefContainerService;
+            _cefIncidentService = cefIncidentService;
         }
 
         /// <inheritdoc/>
@@ -487,7 +491,10 @@ namespace VCashApp.Services.Cef
                         IncidentList = c.Incidents.Select(ni => new CefIncidentSummaryViewModel
                         {
                             Id = ni.Id,
-                            IncidentType = Enum.Parse<CefIncidentTypeCategoryEnum>(_context.CefIncidentTypes.FirstOrDefault(it => it.Id == ni.IncidentTypeId)?.Code ?? "Other"),
+                            IncidentType = IncidentTypeCodeMap.TryFromCode(
+                                _context.CefIncidentTypes.FirstOrDefault(it => it.Id == ni.IncidentTypeId)?.Code,
+                                out var cat
+                            ) ? cat : CefIncidentTypeCategoryEnum.Sobrante,
                             Description = ni.Description,
                             AffectedAmount = ni.AffectedAmount,
                             ReportingUserName = _context.Users.FirstOrDefault(u => u.Id == ni.ReportedUserId)?.NombreUsuario ?? "N/A"
@@ -515,7 +522,10 @@ namespace VCashApp.Services.Cef
                                 IncidentList = ch.Incidents.Select(ni => new CefIncidentSummaryViewModel
                                 {
                                     Id = ni.Id,
-                                    IncidentType = Enum.Parse<CefIncidentTypeCategoryEnum>(_context.CefIncidentTypes.FirstOrDefault(it => it.Id == ni.IncidentTypeId)?.Code ?? "Other"),
+                                    IncidentType = IncidentTypeCodeMap.TryFromCode(
+                                        _context.CefIncidentTypes.FirstOrDefault(it => it.Id == ni.IncidentTypeId)?.Code,
+                                        out var cat
+                                    ) ? cat : CefIncidentTypeCategoryEnum.Sobrante,
                                     Description = ni.Description,
                                     AffectedAmount = ni.AffectedAmount,
                                     ReportingUserName = _context.Users.FirstOrDefault(u => u.Id == ni.ReportedUserId)?.NombreUsuario ?? "N/A"
@@ -525,7 +535,10 @@ namespace VCashApp.Services.Cef
                 IncidentSummaries = transaction.Incidents.Select(ni => new CefIncidentSummaryViewModel
                 {
                     Id = ni.Id,
-                    IncidentType = Enum.Parse<CefIncidentTypeCategoryEnum>(_context.CefIncidentTypes.FirstOrDefault(it => it.Id == ni.IncidentTypeId)?.Code ?? "Other"),
+                    IncidentType = IncidentTypeCodeMap.TryFromCode(
+                        _context.CefIncidentTypes.FirstOrDefault(it => it.Id == ni.IncidentTypeId)?.Code,
+                        out var cat
+                    ) ? cat : CefIncidentTypeCategoryEnum.Sobrante,
                     Description = ni.Description,
                     AffectedAmount = ni.AffectedAmount,
                     ReportingUserName = _context.Users.FirstOrDefault(u => u.Id == ni.ReportedUserId)?.NombreUsuario ?? "N/A"
@@ -611,6 +624,26 @@ namespace VCashApp.Services.Cef
             var monto = (vd.CalculatedAmount ?? 0m).ToString("N0");
 
             return $"{etiqueta} x {cantidad} ({monto})";
+        }
+
+        public async Task<bool> RecalcTotalsAndNetDiffAsync(int cefTransactionId)
+        {
+            var tx = await _context.CefTransactions.FirstOrDefaultAsync(t => t.Id == cefTransactionId);
+            if (tx == null) return false;
+
+            // 1) TotalContado = suma de detalles guardados (usa lo que ya tienes)
+            var counted = await _cefContainerService.SumCountedValueAsync(cefTransactionId);
+            tx.TotalCountedValue = counted;
+
+            // 2) Efecto aprobado de novedades
+            var effect = await _cefIncidentService.SumApprovedEffectByTransactionAsync(cefTransactionId);
+
+            // 3) Diferencia neta
+            tx.ValueDifference = (tx.TotalCountedValue - tx.TotalDeclaredValue) + effect;
+
+            _context.CefTransactions.Update(tx);
+            await _context.SaveChangesAsync();
+            return true;
         }
 
         /// <summary>

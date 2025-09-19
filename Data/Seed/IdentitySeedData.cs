@@ -1,12 +1,12 @@
 ﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
+using Serilog; // Para logging
+using System;
+using System.Linq;
+using System.Security.Claims; // Para Claims
+using System.Threading.Tasks;
 using VCashApp.Models; // Para ApplicationUser
 using VCashApp.Models.Entities; // Para AdmSucursal, PermisosPerfil, AdmVista
-using System.Linq;
-using System.Threading.Tasks;
-using System;
-using Serilog; // Para logging
-using Microsoft.EntityFrameworkCore;
-using System.Security.Claims; // Para Claims
 
 namespace VCashApp.Data.Seed
 {
@@ -511,6 +511,32 @@ namespace VCashApp.Data.Seed
             {
                 Log.Error(ex, "[SeedData] ERROR durante el seeding de permisos de perfiles y vistas: {ErrorMessage}", ex.Message);
             }
+        }
+
+        public static async Task SeedCefIncidentTypesAsync(AppDbContext context)
+        {
+            // Evita duplicados si ya se sembró antes
+            if (await context.CefIncidentTypes.AnyAsync())
+            {
+                Serilog.Log.Information("[SeedData] CefIncidentTypes ya tenía datos. Omitiendo seeding.");
+                return;
+            }
+
+            // NOTA: tu entidad CefIncidentType tiene: Id, Code, Description, AppliesTo (string)
+            // Usamos AppliesTo="Both" para que a futuro sirvan tanto a Bolsa como a Sobre.
+            var tipos = new[]
+            {
+                new CefIncidentType { Code = "SOB",   Description = "Sobrante",         AppliesTo = "Both" },
+                new CefIncidentType { Code = "FAL",   Description = "Faltante",         AppliesTo = "Both" },
+                new CefIncidentType { Code = "FALSO", Description = "Billete Falso",    AppliesTo = "Both" },
+                new CefIncidentType { Code = "MS",    Description = "Mezcla Sobrante",  AppliesTo = "Both" },
+                new CefIncidentType { Code = "MF",    Description = "Mezcla Faltante",  AppliesTo = "Both" },
+            };
+
+            await context.CefIncidentTypes.AddRangeAsync(tipos);
+            await context.SaveChangesAsync();
+
+            Serilog.Log.Information("[SeedData] Catálogo de CefIncidentTypes sembrado (SOB, FAL, FALSO, MS, MF).");
         }
     }
 }

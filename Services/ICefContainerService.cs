@@ -70,5 +70,10 @@ namespace VCashApp.Services
         /// <remarks>Las capacidades se determinan según la configuración del punto de servicio asociado a la orden de servicio.</remarks>
         /// <returns>Tupla con las capacidades (sobres, documentos, cheques).</returns>
         Task<(bool sobres, bool documentos, bool cheques)> GetPointCapsAsync(string serviceOrderId);
+
+        /// <summary>
+        /// Suma el valor contado (preferentemente desde detalles) para toda la transacción.
+        /// </summary>
+        Task<decimal> SumCountedValueAsync(int cefTransactionId);
     }
 }

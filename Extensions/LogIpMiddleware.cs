@@ -11,7 +11,6 @@ namespace VCashApp.Extentions
 
         public async Task InvokeAsync(HttpContext context)
         {
-            // OJO: Username sólo existe después de UseAuthentication
             var username = (context.User?.Identity?.IsAuthenticated ?? false)
                 ? (context.User?.Identity?.Name ?? "anon")
                 : "anon";
@@ -19,7 +18,7 @@ namespace VCashApp.Extentions
             var ip = context.Connection.RemoteIpAddress?.MapToIPv4().ToString() ?? "Desconocida";
             var urlPath = context.Request?.Path.Value ?? "";
             var method = context.Request?.Method ?? "";
-            var requestId = context.TraceIdentifier; // útil para correlacionar
+            var requestId = context.TraceIdentifier;
 
             using (LogContext.PushProperty("Username", username))
             using (LogContext.PushProperty("IpAddress", ip))
