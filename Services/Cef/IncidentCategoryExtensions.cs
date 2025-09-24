@@ -11,10 +11,10 @@ namespace VCashApp.Services.Cef
         public static int EffectSign(this CefIncidentTypeCategoryEnum cat) => cat switch
         {
             CefIncidentTypeCategoryEnum.Faltante => +1,
-            CefIncidentTypeCategoryEnum.False => +1,
             CefIncidentTypeCategoryEnum.MezclaFaltante => +1,
             CefIncidentTypeCategoryEnum.Sobrante => -1,
             CefIncidentTypeCategoryEnum.MezclaSobrante => -1,
+            CefIncidentTypeCategoryEnum.False => +1,
             _ => 0
         };
     }

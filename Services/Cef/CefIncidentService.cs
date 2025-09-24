@@ -106,7 +106,7 @@ namespace VCashApp.Services.Cef
                     var counted = tx.TotalCountedValue;
                     var declared = tx.TotalDeclaredValue;
 
-                    tx.ValueDifference = (counted + effects) - declared;
+                    tx.ValueDifference = (counted - effects) + declared;
 
                     _context.CefTransactions.Update(tx);
                     await _context.SaveChangesAsync();
@@ -153,6 +153,11 @@ namespace VCashApp.Services.Cef
             return await _context.CefIncidentTypes.ToListAsync();
         }
 
+        /// <summary>
+        /// Suma el efecto aprobado por una transacción específica.
+        /// </summary>
+        /// <param name="transactionId">Identificador de la transacción.</param>
+        /// <returns></returns>
         public async Task<decimal> SumApprovedEffectByTransactionAsync(int transactionId)
         {
             var incidents = await _context.CefIncidents
@@ -160,14 +165,12 @@ namespace VCashApp.Services.Cef
                 .Where(i => i.CefTransactionId == transactionId && i.IncidentStatus == "Adjusted")
                 .ToListAsync();
 
-            // 1) IDs de denominación usados en las novedades
             var denomIds = incidents
                 .Where(i => i.AffectedDenomination.HasValue)
                 .Select(i => (int)i.AffectedDenomination!.Value)
                 .Distinct()
                 .ToList();
 
-            // 2) Carga valores faciales por ID (ajusta el DbSet/campos a tu modelo real)
             var denomMap = await _context.Set<AdmDenominacion>()
                 .Where(d => denomIds.Contains(d.CodDenominacion))
                 .Select(d => new { d.CodDenominacion, d.ValorDenominacion })
@@ -263,6 +266,77 @@ namespace VCashApp.Services.Cef
             }
 
             return sum;
+        }
+
+        /// <summary>
+        /// Actualiza una novedad que se encuentra en estado 'Reported'.
+        /// </summary>
+        /// <param name="id">Indicador de la novedad.</param>
+        /// <param name="newTypeId">Nuevo tipo (opcional, si se proporciona, ignora newType).</param>
+        /// <param name="newType">Nuevo tipo.</param>
+        /// <param name="newDenominationId">Nueva denominacion.</param>
+        /// <param name="newQuantity">Nueva cantidad.</param>
+        /// <param name="newAmount">Nuevo monto.</param>
+        /// <param name="newDescription">Nueva descripcion</param>
+        /// <remarks>Solo se pueden modificar las novedades en estado 'Reported'.</remarks>
+        /// <returns>Verdadero si la novedad fue actualizada exitosamente, de lo contrario, falso.</returns>
+        /// <exception cref="InvalidOperationException"></exception>
+        public async Task<bool> UpdateReportedIncidentAsync(
+            int id,
+            int? newTypeId,
+            CefIncidentTypeCategoryEnum? newType,
+            int? newDenominationId,
+            int? newQuantity,
+            decimal? newAmount,
+            string? newDescription)
+        {
+            var inc = await _context.CefIncidents.Include(i => i.IncidentType).FirstOrDefaultAsync(i => i.Id == id);
+            if (inc == null) return false;
+            if (!string.Equals(inc.IncidentStatus, "Reported", StringComparison.OrdinalIgnoreCase))
+                throw new InvalidOperationException("Solo se pueden modificar las novedades en estado 'Reported'.");
+
+            if (newTypeId.HasValue)
+            {
+                var tipo = await _context.CefIncidentTypes.FirstOrDefaultAsync(t => t.Id == newTypeId.Value);
+                if (tipo == null) throw new InvalidOperationException($"Tipo de novedad Id={newTypeId} no existe.");
+                inc.IncidentTypeId = tipo.Id;
+            }
+            else if (newType.HasValue)
+            {
+                var code = IncidentTypeCodeMap.ToMasterCode(newType.Value);
+                var tipo = await _context.CefIncidentTypes.FirstOrDefaultAsync(it => it.Code == code || it.Code == newType.Value.ToString());
+                if (tipo == null)
+                    throw new InvalidOperationException($"El tipo de novedad '{newType}' no está configurado (falta '{code}' en la tabla maestra).");
+                inc.IncidentTypeId = tipo.Id;
+            }
+
+            if (newDenominationId.HasValue) inc.AffectedDenomination = newDenominationId.Value;
+            if (newQuantity.HasValue) inc.AffectedQuantity = newQuantity.Value;
+            if (newAmount.HasValue) inc.AffectedAmount = newAmount.Value;
+            if (!string.IsNullOrWhiteSpace(newDescription))
+                inc.Description = newDescription.Trim();
+
+            _context.CefIncidents.Update(inc);
+            await _context.SaveChangesAsync();
+            return true;
+        }
+
+        /// <summary>
+        /// Elimina una novedad que se encuentra en estado 'Reported'.
+        /// </summary>
+        /// <param name="id">Identificador de la novedad.</param>
+        /// <returns>Verdadero si la novedad fue eliminada exitosamente, de lo contrario, falso.</returns>
+        /// <exception cref="InvalidOperationException"></exception>
+        public async Task<bool> DeleteReportedIncidentAsync(int id)
+        {
+            var inc = await _context.CefIncidents.FirstOrDefaultAsync(i => i.Id == id);
+            if (inc == null) return false;
+            if (!string.Equals(inc.IncidentStatus, "Reported", StringComparison.OrdinalIgnoreCase))
+                throw new InvalidOperationException("Solo se pueden eliminar las novedades en estado 'Reported'.");
+
+            _context.CefIncidents.Remove(inc);
+            await _context.SaveChangesAsync();
+            return true;
         }
     }
 }

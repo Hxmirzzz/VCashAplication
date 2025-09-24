@@ -61,5 +61,24 @@ namespace VCashApp.Services
         Task<bool> HasPendingIncidentsByTransactionAsync(int cefTransactionId);
         Task<decimal> SumApprovedEffectByContainerAsync(int containerId);
 
+        /// <summary>
+        /// Actualiza los detalles de una novedad reportada.
+        /// </summary>
+        /// <param name="id"></param>
+        /// <param name="newTypeId"></param>
+        /// <param name="newType"></param>
+        /// <param name="newDenominationId"></param>
+        /// <param name="newQuantity"></param>
+        /// <param name="newAmount"></param>
+        /// <param name="newDescription"></param>
+        /// <returns></returns>
+        Task<bool> UpdateReportedIncidentAsync(int id, int? newTypeId, CefIncidentTypeCategoryEnum? newType,int? newDenominationId, int? newQuantity, decimal? newAmount, string? newDescription);
+
+        /// <summary>
+        /// Elimina una novedad reportada por su ID.
+        /// </summary>
+        /// <param name="id">Identificador de la novedad.</param>
+        /// <returns>Verdadero si la novedad fue eliminada exitosamente, de lo contrario, falso.</returns>
+        Task<bool> DeleteReportedIncidentAsync(int id);
     }
 }

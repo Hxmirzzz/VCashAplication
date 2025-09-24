@@ -182,7 +182,7 @@
                                                 <!-- ====== Sobres de esta bolsa ====== -->
                                                 <div class="card mt-3">
                                                     <div class="card-header d-flex align-items-center justify-content-between">
-                                                        <h6 class="mb-0">✉️ Sobres de esta Bolsa</h6>
+                                                        <h6 class="mb-0"><i class="ri-mail-fill"></i> Sobres de esta Bolsa</h6>
                                                         <div class="d-flex gap-2 align-items-center small js-env-badges mt-2">
                                                             <span class="badge bg-primary">Billetes: <span class="js-env-bills">0</span></span>
                                                             <span class="badge bg-warning text-dark">Monedas: <span class="js-env-coins">0</span></span>
@@ -280,7 +280,7 @@
                         <div class="step-content">
                             <div class="card mb-3">
                                 <div class="card-header d-flex align-items-center justify-content-between">
-                                    <h5 class="mb-0">📊 Resumen de la transacción</h5>
+                                    <h5 class="mb-0"><i class="ri-list-check"></i> Resumen de la transacción</h5>
                                     <small class="sub-title">Se actualiza en vivo con lo que capturas</small>
                                 </div>
                                 <div class="card-body">
@@ -317,7 +317,7 @@
                                     <div class="row g-3">
                                         <div class="col-12 col-lg-6">
                                             <div class="card h-100">
-                                                <div class="card-header"><h6 class="mb-0">💰 Desglose por tipo (conteo)</h6></div>
+                                                <div class="card-header"><h6 class="mb-0"><i class="ri-shopping-bag-3-fill"></i> Desglose por tipo (conteo)</h6></div>
                                                 <div class="card-body">
                                                     <ul class="list-group list-group-flush">
                                                         <li class="list-group-item d-flex justify-content-between align-items-center">
@@ -353,7 +353,7 @@
 
                                         <div class="col-12 col-lg-6">
                                             <div class="card h-100">
-                                                <div class="card-header"><h6 class="mb-0">🧰 Estructura de bolsas</h6></div>
+                                                <div class="card-header"><h6 class="mb-0"><i class="ri-shopping-bag-3-fill"></i> Estructura de bolsas</h6></div>
                                                 <div class="card-body">
                                                     <div class="d-flex justify-content-between mb-2">
                                                         <span>Bolsas</span>
@@ -501,6 +501,54 @@
 
 <div class="validation-scape"></div>
 
+<div class="modal fade" id="incEditModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <form id="incEditForm" data-action-update="@Url.Action("UpdateIncident","Cef")">
+                @Html.AntiForgeryToken()
+                <div class="modal-header">
+                  <h6 class="modal-title">Editar novedad</h6>
+                  <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" name="Id" id="incEditId" />
+                    <div class="mb-2">
+                        <label class="form-label">Tipo</label>
+                        <select class="form-select" name="IncidentTypeId" id="incEditType" required>
+                            @foreach (var t in (List<SelectListItem>)ViewBag.IncidentTypesForEdit)
+                            {
+                                <option value="@t.Value">@t.Text</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="mb-2">
+                        <label class="form-label">Denominación</label>
+                        <select class="form-select" name="AffectedDenomination" id="incEditDenom"></select>
+                    </div>
+                    <div class="row g-2">
+                        <div class="col-6">
+                            <label class="form-label">Cantidad</label>
+                            <input type="number" class="form-control" name="AffectedQuantity" id="incEditQty" />
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label">Monto</label>
+                            <input type="number" class="form-control" name="AffectedAmount" id="incEditAmount" />
+                        </div>
+                    </div>
+                    <div class="mt-2">
+                        <label class="form-label">Descripción</label>
+                        <textarea class="form-control" name="Description" id="incEditDesc" rows="2"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer flex-nowrap">
+                    <button type="submit" class="btn btn-primary">Guardar</button>
+                    <button type="button" class="btn btn-exit" data-bs-dismiss="modal">Cancelar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 @section Scripts {
     @{ await Html.RenderPartialAsync("_ValidationScriptsPartial"); }
 
@@ -513,6 +561,7 @@
             .prop('disabled', true);
 
           let currentStep = 1, totalSteps = 3;
+          let INCIDENT_EFFECT = 0;
 
           const DENOMS = JSON.parse(document.getElementById('denoms-json')?.textContent || '{}');
           const QUALS  = JSON.parse(document.getElementById('qualities-json')?.textContent || '{}');
@@ -525,7 +574,10 @@
             create: '@Url.Action("CreateIncident","Cef")',
             resolve: '@Url.Action("ResolveIncident","Cef")',
             checkPending: '@Url.Action("CheckPendingIncidents","Cef")',
-            totals: '@Url.Action("GetTotals","Cef")'
+            totals: '@Url.Action("GetTotals","Cef")',
+            get: '@Url.Action("GetIncident","Cef")',
+            update: '@Url.Action("UpdateIncident","Cef")',
+            delete: '@Url.Action("DeleteIncident","Cef")'
           };
 
           const SOBRES_OK  = !!CAPS.sobres;
@@ -557,7 +609,6 @@
             '.js-add-detail,.js-remove-detail,.js-add-cheque,.js-remove-cheque,.js-add-envelope-in-this-bag,#btnAddBag,.js-remove-envelope-card',
             function(){ isDirty = true; });
 
-          // índice global para Containers[__idx__]
           let nextIdx = @Model.Containers.Count;
 
           // =====================================================================
@@ -1516,45 +1567,43 @@
             });
           }
 
-          // pinta todo el resumen
           function updateProcessSummary(){
-            const s = computeLiveSummary();
+            const s  = computeLiveSummary();
             const bl = computeGlobalBillsHighLow();
 
-            // Panel superior (Paso 1)
-            $('#totDeclaredGlobal').text(fmtPeso(s.declaredTotal));
-            $('#totCountedGlobal').text(fmtPeso(s.cashTotal));
-            $('#totOverallGlobal').text(fmtPeso(s.overallTotal));
+            const declared = DECLARED_TX;
+            const diff = (s.cashTotal - declared) + (Number(INCIDENT_EFFECT) || 0);
 
-            const diff = s.cashTotal - s.declaredTotal;
-            $('#totDiffGlobal').text((diff>=0?'+':'') + fmtPeso(diff))
+            $('#totDeclaredGlobal').text(fmtPeso(declared));
+            $('#totCountedGlobal').text(fmtPeso(s.cashTotal));
+            $('#totDiffGlobal')
+              .text((diff>=0?'+':'') + fmtPeso(diff))
               .removeClass('positive negative')
               .addClass(diff < 0 ? 'negative' : 'positive');
+            $('#totOverallGlobal').text(fmtPeso(s.overallTotal));
             $('#countBagsHeader').text(s.bagsCount);
             $('#countEnvelopesHeader').text(s.envCount);
 
-            // Panel del PASO 2 (tu resumen existente)
-            $('#sumDeclaredAllDisplay').text(fmtPeso(s.declaredTotal));
+            if (document.getElementById('totIncidentsEffectGlobal')) {
+              $('#totIncidentsEffectGlobal').text(
+                (INCIDENT_EFFECT>=0?'+':'') + fmtPeso(INCIDENT_EFFECT)
+              );
+            }
+
+            $('#sumDeclaredAllDisplay').text(fmtPeso(declared));
             $('#sumCountedAllDisplay').text(fmtPeso(s.cashTotal));
-            $('#sumOverallDisplay').text(fmtPeso(s.overallTotal));
-            $('#sumDiffAllDisplay').text((diff>=0?'+':'') + fmtPeso(diff))
+            $('#sumDiffAllDisplay')
+              .text((diff>=0?'+':'') + fmtPeso(diff))
               .removeClass('positive negative')
               .addClass(diff < 0 ? 'negative' : 'positive');
-
-            $('#sumDeclaredAll').val(fmtInt(s.declaredTotal));
-            $('#sumCountedAll').val(fmtInt(s.cashTotal));
-            $('#sumDiffAll').val((diff>=0?'+':'') + fmtInt(diff));
 
             $('#sumBillsCounted').text(fmtPeso(s.bills));
             $('#sumCoinsCounted').text(fmtPeso(s.coins));
             $('#sumDocsCounted').text(fmtPeso(s.docs));
             $('#sumChecksCounted').text(fmtPeso(s.checks));
-
             $('#sumTotalCountedDisplay').text(fmtPeso(s.overallTotal));
-
             $('#sumBillHigh').text(fmtPeso(bl.high));
             $('#sumBillLow').text(fmtPeso(bl.low));
-
             $('#countBags').text(s.bagsCount);
             $('#countEnvelopes').text(s.envCount);
 
@@ -2285,7 +2334,7 @@
           });
 
           // =====================================================================
-          // 12) CÁLCULO EN CAMBIO (REACCIONES GENÉRICAS)
+          // 12) CÁLCULOS EN CAMBIO (REACCIONES GENÉRICAS)
           // =====================================================================
           $(document).on('input change', '.js-calc, .js-denom', function () {
             const $row  = $(this).closest('tr');
@@ -2320,8 +2369,8 @@
               for (const k of kinds) {
                 const arr = (DENOMS && DENOMS[k]) ? DENOMS[k] : [];
                 const d = arr.find(x =>
-                  String((x.id ?? x.codDenominacion ?? x.CodDenominacion)) === String(denomId)
-                );
+                  String((x.id ?? x.codDenominacion ?? x.CodDenominacion)) === String(denomId))
+                ;
                 if (d) return Number(d.value ?? d.valor ?? d.ValorDenominacion ?? d.valorDenominacion ?? 0) || 0;
               }
               return 0;
@@ -2350,8 +2399,25 @@
 
                 const showApprove = (x.IncidentStatus === 'Reported' || x.IncidentStatus === "UnderReview");
                 const approveBtn = showApprove
-                  ? `<button type="button" class="btn btn-success btn-sm js-inc-approve"
-                       data-id="${x.Id}" data-tx="${transactionId}" data-cont="${containerId}">Ajustar</button>`
+                  ? `<button type="button" class="btn btn-success btn-sm p-2 js-inc-approve"
+                       data-id="${x.Id}" data-tx="${transactionId}" data-cont="${containerId}">
+                       <i class="ri-check-double-line"></i>
+                     </button>`
+                  : '';
+
+                const canEdit = (x.IncidentStatus === 'Reported');
+                const editBtn = canEdit
+                  ? `<button type="button" class="btn btn-outline-primary btn-sm p-2 js-inc-edit"
+                       data-id="${x.Id}" data-tx="${transactionId}" data-cont="${containerId}">
+                       <i class="ri-edit-box-line"></i>
+                     </button>`
+                  : '';
+
+                const delBtn = canEdit
+                  ? `<button type="button" class="btn btn-outline-danger btn-sm p-2 js-inc-delete"
+                       data-id="${x.Id}" data-tx="${transactionId}" data-cont="${containerId}">
+                       <i class="ri-delete-bin-line"></i>
+                     </button>`
                   : '';
 
                 $tb.append(`
@@ -2361,7 +2427,7 @@
                     <td>${x.Description ?? ''}</td>
                     <td class="text-end">${amt.toLocaleString('es-CO')}</td>
                     <td>${x.IncidentStatus ?? ''}</td>
-                    <td>${approveBtn}</td>
+                    <td class="d-flex gap-1">${approveBtn} ${editBtn} ${delBtn}</td>
                   </tr>
                 `);
               });
@@ -2514,6 +2580,179 @@
           $(document).on('click', '[data-step-action="back-to-bags"]', function(){
               currentStep = 1;
               updateStepper();
+          });
+
+          function incidentSignByCode(code){
+            const c = String(code || '').toUpperCase();
+            if (c === 'FAL' || c === 'MF') return +1; 
+            if (c === 'SOB' || c === 'MS') return -1;
+            return 0;
+          }
+
+          function incidentAmount(x){
+            const explicit = Number(x.AffectedAmount || 0);
+            if (explicit) return explicit;
+            const face = getDenomValueById(x.AffectedDenomination) || 0;
+            const qty  = Number(x.AffectedQuantity || 0);
+            return face * qty;
+          }
+
+          function refreshIncidentEffectAll(transactionId){
+            return $.get(IncidentRoutes.list, { transactionId }, function(r){
+              if (!r || !r.ok) { INCIDENT_EFFECT = 0; updateProcessSummary(); return; }
+
+              const rows = (r.data || []).map(x => ({
+                Type: x.Type ?? x.type,
+                Status: x.IncidentStatus ?? x.incidentStatus,
+                AffectedAmount: x.AffectedAmount ?? x.affectedAmount,
+                AffectedDenomination: x.AffectedDenomination ?? x.affectedDenomination,
+                AffectedQuantity: x.AffectedQuantity ?? x.affectedQuantity
+              }));
+
+              let effect = 0;
+              rows.forEach(x => {
+                if (String(x.Status) !== 'Adjusted') return;
+                const sign = incidentSignByCode(x.Type);
+                const amt  = incidentAmount(x);
+                effect += sign * (Number(amt) || 0);
+              });
+
+              INCIDENT_EFFECT = effect;
+              updateProcessSummary();
+            });
+          }
+
+          let incEditAmountTouched = false;
+
+          $(document).on('input', '#incEditAmount', function () {
+            // Si el usuario escribe algo, no volvemos a auto-llenar
+            incEditAmountTouched = $.trim($(this).val()).length > 0;
+          });
+
+          function calcEditAmount() {
+            const unit = Number($('#incEditDenom option:selected').data('value') || 0);
+            const qty  = Number($('#incEditQty').val() || 0);
+            return unit * qty;
+          }
+
+          function tryAutoAmountEdit() {
+            if (!incEditAmountTouched) {
+              const amt = calcEditAmount();
+              // Escribe el valor (no placeholder) para que viaje en el POST
+              $('#incEditAmount').val(amt ? String(Math.round(amt)) : '');
+            } 
+          }
+
+          $(document).on('input change', '#incEditDenom, #incEditQty', tryAutoAmountEdit);
+
+          $(document).on('click', '.js-inc-edit', function () {
+            const id   = $(this).data('id');
+            const txId = $(this).data('tx');
+            const cont = $(this).data('cont');
+
+            $.get(IncidentRoutes.get, { id }, function (r) {
+              if (!r || !r.ok) { Swal.fire('Error', (r && r.message) || 'No se pudo cargar la novedad.'); return; }
+
+              const d = r.data || {};
+              const typeId = d.IncidentTypeId ?? d.incidentTypeId ?? '';
+              $('#incEditType').val(typeId);
+
+              $('#incEditId').val(d.Id ?? d.id);
+              $('#incEditDenom').html(buildDenomOptionsFromJson());
+              if (d.AffectedDenomination != null || d.affectedDenomination != null) {
+                const denom = String(d.AffectedDenomination ?? d.affectedDenomination);
+                $('#incEditDenom').val(denom);
+              } else {
+                $('#incEditDenom').val('');
+              }
+              $('#incEditQty').val(d.AffectedQuantity ?? d.affectedQuantity ?? '');
+              $('#incEditAmount').val(d.AffectedAmount ?? d.affectedAmount ?? '');
+              $('#incEditDesc').val(d.Description ?? d.description ?? '');
+
+              if (typeof tryAutoAmountEdit === 'function') tryAutoAmountEdit();
+
+              const $m = $('#incEditModal');
+              $m.data('tx', txId);
+              $m.data('cont', cont);
+              bootstrap.Modal.getOrCreateInstance($m[0]).show();
+            });
+          });
+
+          $(document).on('submit', '#incEditForm', function (e) {
+            e.preventDefault();
+
+            let amount = Number($('#incEditAmount').val() || 0);
+            if (!amount) {
+              const denom = Number($('#incEditDenom').val() || 0);
+              const qty   = Number($('#incEditQty').val()   || 0);
+              const face  = getDenomValueById(denom) || 0;
+              amount = face * qty;
+              $('#incEditAmount').val(amount ? String(Math.round(amount)) : '0');
+            }
+
+            const $form = $('#incEditForm');
+            const url   = $form.data('action-update');
+            if (!url) { Swal.fire('Error', 'Ruta de actualización no definida.'); return; }
+
+            const data = $form.serialize();
+
+            $.post({
+              url,
+              data,
+              success: function (r) {
+                if (!r || !r.ok) {
+                  Swal.fire('Error', (r && r.message) || 'No se pudo actualizar.');
+                  return;
+                }
+                const txId = $('#incEditModal').data('tx');
+                const cont = $('#incEditModal').data('cont');
+
+                const modal = bootstrap.Modal.getOrCreateInstance(document.getElementById('incEditModal'));
+                modal.hide();
+
+                fetchIncidentStep3(txId, cont);
+                refreshTotalsFromServer(txId);
+                Swal.fire('OK', 'Novedad actualizada', 'success');
+              },
+              error: function (xhr) {
+                const msg = (xhr.responseJSON && xhr.responseJSON.message) || xhr.responseText || 'Error inesperado.';
+                console.error('UpdateIncident ERROR:', msg);
+                Swal.fire('Error', msg, 'error');
+              }
+            });
+          });
+
+          $(document).on('click', '.js-inc-delete', function(){
+              const id   = $(this).data('id');
+              const txId = $(this).data('tx');
+              const cont = $(this).data('cont');
+              const token = $('input[name="__RequestVerificationToken"]').first().val() || '';
+
+              Swal.fire({
+                  title: '¿Eliminar novedad?',
+                  text: 'Se eliminará la novedad de la transacción.',
+                  icon: 'warning',
+                  showCancelButton: true,
+                  confirmButtonText: 'Sí, eliminar',
+                  cancelButtonText: 'Cancelar'
+              }).then((res) => {
+                  if (!res.isConfirmed) return;
+
+                  $.post({
+                      url: IncidentRoutes.delete,
+                      data: {
+                          id: id,
+                          __RequestVerificationToken: token
+                      },
+                      success: function(r){
+                          if (!r || !r.ok) { Swal.fire('Error', (r && r.message) || 'No se pudo eliminar.'); return; }
+                          fetchIncidentStep3(txId, cont);
+                          refreshTotalsFromServer(txId);
+                          Swal.fire('OK', 'Novedad eliminada', 'success');
+                      },
+                      error: function(){ Swal.fire('Error', 'No se pudo eliminar.', 'error'); }
+                  });
+              });
           });
 
           // =====================================================================
@@ -2703,6 +2942,8 @@
           setTimeout(updateAllBagBadges, 150);
           updateProcessSummary();
           applyPointCapsUI();
+          refreshIncidentEffectAll('@Model.CefTransactionId');
+          $('#incEditDenom').html(buildDenomOptionsFromJson());
         });
     </script>
 }

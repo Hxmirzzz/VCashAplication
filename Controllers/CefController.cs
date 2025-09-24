@@ -1,5 +1,4 @@
 ﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -654,7 +653,15 @@ namespace VCashApp.Controllers
             var pageVm = await _cefContainerService.PrepareProcessContainersPageAsync(transactionId);
             var caps = await _cefContainerService.GetPointCapsAsync(pageVm.Service.ServiceOrderId);
 
-            ViewBag.IncidentTypes = (await _cefIncidentService.GetAllIncidentTypesAsync()).Select(it => new SelectListItem { Value = it.Code, Text = it.Description }).ToList();
+            ViewBag.IncidentTypesForEdit =
+                (await _cefIncidentService.GetAllIncidentTypesAsync())
+                .Select(it => new SelectListItem
+                {
+                    Value = it.Id.ToString(),
+                    Text = it.Description
+                })
+                .ToList();
+            ViewBag.IncidentTypes = (await _cefIncidentService.GetAllIncidentTypesAsync()).Select(it => new SelectListItem { Value = (it.Code ?? "").Trim(), Text = it.Description }).ToList();
             ViewBag.DenomsJson = await _cefContainerService.BuildDenomsJsonForTransactionAsync(transactionId);
             ViewBag.QualitiesJson = await _cefContainerService.BuildQualitiesJsonAsync();
             ViewBag.BanksJson = await _cefContainerService.BuildBankEntitiesJsonAsync();
@@ -953,7 +960,7 @@ namespace VCashApp.Controllers
                 {
                     throw new InvalidOperationException("No se han registrado contenedores para esta transacción. No se puede finalizar el conteo.");
                 }
-                if (containers.Any(c => 
+                if (containers.Any(c =>
                 String.Equals(c.ContainerStatus, CefContainerStatusEnum.InProcess.ToString(), StringComparison.OrdinalIgnoreCase) ||
                 String.Equals(c.ContainerStatus, CefContainerStatusEnum.Pending.ToString(), StringComparison.OrdinalIgnoreCase)))
                 {
@@ -1223,7 +1230,7 @@ namespace VCashApp.Controllers
                 }
 
                 ModelState.AddModelError("", ex.Message);
-                
+
                 var currentData = await _cefTransactionService.PrepareReviewViewModelAsync(viewModel.Id);
                 if (currentData != null)
                 {
@@ -1391,7 +1398,8 @@ namespace VCashApp.Controllers
         {
             var list = await _cefIncidentService.GetIncidentsAsync(transactionId, containerId, null);
             // Devuelve JSON simple para pintar en el front
-            var data = list.Select(i => new {
+            var data = list.Select(i => new
+            {
                 i.Id,
                 Type = _context.CefIncidentTypes.FirstOrDefault(t => t.Id == i.IncidentTypeId)!.Code,
                 i.Description,
@@ -1477,6 +1485,114 @@ namespace VCashApp.Controllers
                 totalCounted = tx.TotalCountedValue,
                 netDiff = tx.ValueDifference
             });
+        }
+
+        /// <summary>
+        /// Obtiene los detalles de una novedad por su ID.
+        /// </summary>
+        /// <param name="id">Identificador del incidente.</param>
+        /// <returns>JSON con los detalles del incidente o error si no se encuentra.</returns>
+        [HttpGet("GetIncident")]
+        public async Task<IActionResult> GetIncident(int id)
+        {
+            var inc = await _cefIncidentService.GetIncidentByIdAsync(id);
+            if (inc == null) return NotFound(new { ok = false });
+
+            var typeCode = await _context.CefIncidentTypes
+                .Where(t => t.Id == inc.IncidentTypeId)
+                .Select(t => t.Code)
+                .FirstOrDefaultAsync() ?? "";
+
+            return Json(new
+            {
+                ok = true,
+                data = new
+                {
+                    inc.Id,
+                    inc.CefTransactionId,
+                    inc.CefContainerId,
+                    IncidentTypeId = inc.IncidentTypeId,
+                    IncTypeCode = typeCode,
+                    inc.Description,
+                    inc.AffectedDenomination,
+                    inc.AffectedQuantity,
+                    inc.AffectedAmount,
+                    inc.IncidentStatus
+                }
+            });
+        }
+
+        /// <summary>
+        /// Actualiza los detalles de una novedad reportada.
+        /// </summary>
+        /// <param name="id">Identificador de la novedad.</param>
+        /// <returns>JSON indicando éxito o error.</returns>
+        [HttpPost("UpdateIncident")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> UpdateIncident(int id)
+        {
+            try
+            {
+                int? typeId = int.TryParse(Request.Form["IncidentTypeId"], out var ti) ? ti : null;
+                string? typeCode = Request.Form["IncidentTypeCode"];
+                int? denomId = int.TryParse(Request.Form["AffectedDenomination"], out var dd) ? dd : null;
+                int? qty = int.TryParse(Request.Form["AffectedQuantity"], out var qq) ? qq : null;
+                decimal? amount = decimal.TryParse(Request.Form["AffectedAmount"], out var aa) ? aa : null;
+                string? desc = Request.Form["Description"];
+
+                CefIncidentTypeCategoryEnum? typeEnum = null;
+                if (!string.IsNullOrWhiteSpace(typeCode))
+                {
+                    if (!IncidentTypeCodeMap.TryFromCode(typeCode, out var parsedType))
+                        return BadRequest(new { ok = false, message = $"Código de tipo de novedad no válido: {typeCode}" });
+                    typeEnum = parsedType;
+                }
+
+                var ok = await _cefIncidentService.UpdateReportedIncidentAsync(
+                    id,
+                    newTypeId: typeId,
+                    newType: typeEnum,
+                    newDenominationId: denomId,
+                    newQuantity: qty,
+                    newAmount: amount,
+                    newDescription: desc
+                );
+
+                // 4) Recalcula totales
+                var inc = await _cefIncidentService.GetIncidentByIdAsync(id);
+                if (inc?.CefTransactionId != null)
+                    await _cefTransactionService.RecalcTotalsAndNetDiffAsync(inc.CefTransactionId.Value);
+
+                return Json(new { ok });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { ok = false, message = ex.Message });
+            }
+        }
+
+        /// <summary>
+        /// Elimina una novedad reportada por su ID.
+        /// </summary>
+        /// <param name="id">Identificador de la novedad.</param>
+        /// <returns>JSON indicando éxito o error.</returns>
+        [HttpPost("DeleteIncident")]
+        public async Task<IActionResult> DeleteIncident(int id)
+        {
+            try
+            {
+                var inc = await _cefIncidentService.GetIncidentByIdAsync(id);
+                if (inc == null) return NotFound(new { ok = false, message = "Novedad no encontrada." });
+
+                var ok = await _cefIncidentService.DeleteReportedIncidentAsync(id);
+                if (inc.CefTransactionId.HasValue)
+                    await _cefTransactionService.RecalcTotalsAndNetDiffAsync(inc.CefTransactionId.Value);
+                return Json(new { ok });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { ok = false, message = ex.Message });
+            }
         }
     }
 }
