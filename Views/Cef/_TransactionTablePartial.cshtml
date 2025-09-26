@@ -1,9 +1,5 @@
 ﻿@model IEnumerable<VCashApp.Models.ViewModels.CentroEfectivo.CefTransactionSummaryViewModel>
 @using VCashApp.Enums;
-@if (ViewData["Mode"] != null)
-{
-    <input type="hidden" id="dashboardMode" name="mode" value="@ViewData["Mode"]" />
-}
 @{
     int currentPage = ViewBag.CurrentPage ?? 1;
     int totalPages = ViewBag.TotalPages ?? 1;

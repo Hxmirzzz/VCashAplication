@@ -68,20 +68,34 @@ namespace VCashApp.Controllers
         /// <param name="currentUser">El usuario actual autenticado.</param>
         /// <param name="pageName">El nombre de la página para el ViewBag.</param>
         /// <returns>Tarea asíncrona completada.</returns>
-        private async Task SetCommonViewBagsCefAsync(ApplicationUser currentUser, string pageName)
+        private async Task SetCommonViewBagsCefAsync(ApplicationUser currentUser, string pageName, params string[] codVistas)
         {
             await base.SetCommonViewBagsBaseAsync(currentUser, pageName);
             bool isAdmin = ViewBag.IsAdmin;
 
             var (sucursales, estados) = await _cefTransactionService.GetDropdownListsAsync(currentUser.Id, isAdmin);
-
             ViewBag.AvailableBranches = sucursales;
             ViewBag.TransactionStatuses = estados;
 
+            var vistas = (codVistas != null && codVistas.Length > 0)
+                ? codVistas
+                : new[] { "CEF_REC", "CEF_DEL", "CEF_COL", "CEF_SUP" };
+
             var userRoles = await _userManager.GetRolesAsync(currentUser);
-            ViewBag.HasCreate = await HasPermisionForView(userRoles, "CEF", PermissionType.Create);
-            ViewBag.HasEdit = await HasPermisionForView(userRoles, "CEF", PermissionType.Edit);
-            ViewBag.HasView = await HasPermisionForView(userRoles, "CEF", PermissionType.View);
+
+            async Task<bool> HasAsync(PermissionType p)
+            {
+                foreach (var v in vistas)
+                {
+                    if (await HasPermisionForView(userRoles, v, p))
+                        return true;
+                }
+                return false;
+            }
+
+            ViewBag.HasCreate = await HasAsync(PermissionType.Create);
+            ViewBag.HasEdit = await HasAsync(PermissionType.Edit);
+            ViewBag.HasView = await HasAsync(PermissionType.View);
             // ViewBag.HasDeletePermission = await HasPermisionForView(userRoles, "CEF", PermissionType.Delete);
         }
 
@@ -94,13 +108,31 @@ namespace VCashApp.Controllers
             _ => "Centro de Efectivo"
         };
 
+        private static string ViewForMode(CefDashboardMode? mode) => mode switch
+        {
+            CefDashboardMode.TesoreriaRecepcion => "Reception",
+            CefDashboardMode.TesoreriaEntrega => "Delivery",
+            CefDashboardMode.CefRecoleccion => "Collections",
+            CefDashboardMode.CefProvision => "Supplies",
+            _ => "Index"
+        };
+
+        private async Task SetCountingAndIncidentsFlagsAsync(ApplicationUser user)
+        {
+            ViewBag.CanCountBills = await _userManager.IsInRoleAsync(user, "ContadorBilleteCEF");
+            ViewBag.CanCountCoins = await _userManager.IsInRoleAsync(user, "ContadorMonedaCEF");
+
+            var roles = await _userManager.GetRolesAsync(user);
+            ViewBag.CanApproveIncindents = await HasPermisionForView(roles, "CEF_SUP", PermissionType.Edit);
+        }
+
         // =========== SECCION: TESORERIA OPERATIVA ===========
         /// <summary>
         /// Dashboard de Tesorería - Recepción (filtra por estado RegistroTesoreria).
         /// Requiere permiso 'View' en TESORERIA.
         /// </summary>
         [HttpGet("Reception")]
-        [RequiredPermission(PermissionType.View, "TESORERIA")]
+        [RequiredPermission(PermissionType.View, "CEF_REC")]
         public Task<IActionResult> Reception(
             int? branchId, DateOnly? startDate, DateOnly? endDate,
             string? search, int page = 1, int pageSize = 15)
@@ -118,7 +150,7 @@ namespace VCashApp.Controllers
         /// Requiere permiso 'View' en TESORERIA.
         /// </summary>
         [HttpGet("Delivery")]
-        [RequiredPermission(PermissionType.View, "TESORERIA")]
+        [RequiredPermission(PermissionType.View, "CEF_DEL")]
         public Task<IActionResult> Delivery(
             int? branchId, DateOnly? startDate, DateOnly? endDate,
             string? search, int page = 1, int pageSize = 15)
@@ -137,7 +169,7 @@ namespace VCashApp.Controllers
         /// Requiere permiso 'View' en CEF.
         /// </summary>
         [HttpGet("Collections")]
-        [RequiredPermission(PermissionType.View, "CEF")]
+        [RequiredPermission(PermissionType.View, "CEF_COL")]
         public Task<IActionResult> Collections(
             int? branchId, DateOnly? startDate, DateOnly? endDate,
             string? search, int page = 1, int pageSize = 15)
@@ -150,7 +182,7 @@ namespace VCashApp.Controllers
         /// Requiere permiso 'View' en CEF.
         /// </summary>
         [HttpGet("Supplies")]
-        [RequiredPermission(PermissionType.View, "CEF")]
+        [RequiredPermission(PermissionType.View, "CEF_SUP")]
         public Task<IActionResult> Supplies(
             int? branchId, DateOnly? startDate, DateOnly? endDate,
             string? search, int page = 1, int pageSize = 15)
@@ -189,7 +221,7 @@ namespace VCashApp.Controllers
         /// <param name="pageSize">Cantidad de registros por página.</param>
         /// <returns>Una vista con la lista de transacciones de CEF o un parcial si es una petición AJAX.</returns>
         [HttpGet("Index")]
-        [RequiredPermission(PermissionType.View, "CEF")]
+        [RequiredPermission(PermissionType.View, "CEF_REC", "CEF_DEL", "CEF_COL", "CEF_SUP")]
         public async Task<IActionResult> Index(
             int? branchId, DateOnly? startDate, DateOnly? endDate, CefTransactionStatusEnum? status,
             string? search, int page = 1, int pageSize = 15, CefDashboardMode? mode = null)
@@ -199,7 +231,16 @@ namespace VCashApp.Controllers
 
             var effectiveMode = mode ?? InferModeFromStatus(status);
             var pageTitle = PageTitleForMode(effectiveMode);
-            await SetCommonViewBagsCefAsync(currentUser, pageTitle);
+            var codVista = effectiveMode switch
+            {
+                CefDashboardMode.TesoreriaRecepcion => "CEF_REC",
+                CefDashboardMode.TesoreriaEntrega => "CEF_DEL",
+                CefDashboardMode.CefRecoleccion => "CEF_COL",
+                CefDashboardMode.CefProvision => "CEF_SUP",
+                _ => "CEF_REC"
+            };
+
+            await SetCommonViewBagsCefAsync(currentUser, pageTitle, codVista);
 
             ViewData["Title"] = pageTitle;
             ViewData["Mode"] = effectiveMode;
@@ -327,13 +368,13 @@ namespace VCashApp.Controllers
         /// <param name="routeId">ID de Ruta Diaria opcional para precargar datos.</param>
         /// <returns>Vista del formulario de Check-in.</returns>
         [HttpGet("Checkin")]
-        [RequiredPermission(PermissionType.Create, "CEF")] // Solo si el usuario puede "Crear" en "CEF"
+        [RequiredPermission(PermissionType.Create, "CEF_REC")]
         public async Task<IActionResult> Checkin(string? serviceOrderId, string? routeId)
         {
             var currentUser = await GetCurrentApplicationUserAsync();
             if (currentUser == null) return RedirectToPage("/Account/Login", new { area = "Identity" });
 
-            await SetCommonViewBagsCefAsync(currentUser, "Check-in CEF"); // Configura ViewBags comunes
+            await SetCommonViewBagsCefAsync(currentUser, "Check-in CEF", "CEF_REC");
 
             CefTransactionCheckinViewModel viewModel;
             if (!string.IsNullOrEmpty(serviceOrderId))
@@ -402,13 +443,13 @@ namespace VCashApp.Controllers
         /// <returns>Redirección al dashboard o a la vista de procesamiento de contenedores.</returns>
         [HttpPost("Checkin")]
         [ValidateAntiForgeryToken]
-        [RequiredPermission(PermissionType.Create, "CEF")]
+        [RequiredPermission(PermissionType.Create, "CEF_REC")]
         public async Task<IActionResult> Checkin(CefTransactionCheckinViewModel viewModel)
         {
             var currentUser = await GetCurrentApplicationUserAsync();
             if (currentUser == null) return Unauthorized();
 
-            await SetCommonViewBagsCefAsync(currentUser, "Procesando Check-in CEF");
+            await SetCommonViewBagsCefAsync(currentUser, "Procesando Check-in CEF", "CEF_REC");
 
             viewModel.Currencies = new List<SelectListItem> { new("COP", "COP"), new("USD", "USD") };
             viewModel.TransactionTypes = Enum.GetValues(typeof(CefTransactionTypeEnum)).Cast<CefTransactionTypeEnum>().Select(e => new SelectListItem { Value = e.ToString(), Text = e.ToString().Replace("_", " ") }).ToList();
@@ -518,7 +559,7 @@ namespace VCashApp.Controllers
         /// <param name="serviceConceptCode">Código del concepto de servicio (ej: "RC" para Recolección Oficinas).</param>
         /// <returns>Vista del formulario de creación unificada.</returns>
         [HttpGet("CreateServiceAndCefTransaction/{serviceConceptCode?}")]
-        [RequiredPermission(PermissionType.Create, "CEF")]
+        [RequiredPermission(PermissionType.Create, "CEF_REC", "CEF_DEL", "CEF_COL", "CEF_SUP")]
         public async Task<IActionResult> CreateServiceAndCefTransaction(string? serviceConceptCode)
         {
             var currentUser = await GetCurrentApplicationUserAsync();
@@ -558,7 +599,7 @@ namespace VCashApp.Controllers
         /// <returns>JSON ServiceResult o redirección.</returns>
         [HttpPost("CreateServiceAndCefTransaction")]
         [ValidateAntiForgeryToken]
-        [RequiredPermission(PermissionType.Create, "CEF")]
+        [RequiredPermission(PermissionType.Create, "CEF_REC", "CEF_DEL", "CEF_COL", "CEF_SUP")]
         public async Task<IActionResult> CreateServiceAndCefTransaction(CefServiceCreationViewModel viewModel)
         {
             var currentUser = await GetCurrentApplicationUserAsync();
@@ -642,25 +683,38 @@ namespace VCashApp.Controllers
         /// 
         /// <returns>Vista de procesamiento de contenedores.</returns>
         [HttpGet("ProcessContainers/{transactionId}")]
-        [RequiredPermission(PermissionType.Edit, "CEF")]
+        [RequiredPermission(PermissionType.Edit, "CEF_REC", "CEF_COL")]
         public async Task<IActionResult> ProcessContainers(int transactionId, int? containerId = null)
         {
             var currentUser = await GetCurrentApplicationUserAsync();
             if (currentUser == null) return RedirectToPage("/Account/Login", new { area = "Identity" });
 
-            await SetCommonViewBagsCefAsync(currentUser, "Procesar Contenedores CEF");
+            await SetCommonViewBagsCefAsync(currentUser, "Procesar Contenedores CEF", "CEF_REC", "CEF_COL");
+            await SetCountingAndIncidentsFlagsAsync(currentUser);
 
+            var user = await _userManager.GetUserAsync(User);
+            var roles = await _userManager.GetRolesAsync(user);
+            var canBills =
+                   roles.Contains("ContadorBillete")
+                || roles.Contains("SupervisorCEF")
+                || await HasPermisionForView(roles, "CEF_REC", PermissionType.Edit)
+                || await HasPermisionForView(roles, "CEF_COL", PermissionType.Edit);
+
+            var canCoins =
+                   roles.Contains("ContadorMoneda")
+                || roles.Contains("SupervisorCEF")
+                || await HasPermisionForView(roles, "CEF_SUP", PermissionType.Edit);
+
+            var canSupInc =
+                   roles.Contains("SupervisorCEF")
+                || await HasPermisionForView(roles, "CEF_SUP", PermissionType.Edit)
+                || await HasPermisionForView(roles, "CEF_DEL", PermissionType.Edit);
+
+            await _cefTransactionService.RecalcTotalsAndNetDiffAsync(transactionId);
             var pageVm = await _cefContainerService.PrepareProcessContainersPageAsync(transactionId);
             var caps = await _cefContainerService.GetPointCapsAsync(pageVm.Service.ServiceOrderId);
 
-            ViewBag.IncidentTypesForEdit =
-                (await _cefIncidentService.GetAllIncidentTypesAsync())
-                .Select(it => new SelectListItem
-                {
-                    Value = it.Id.ToString(),
-                    Text = it.Description
-                })
-                .ToList();
+            ViewBag.IncidentTypesForEdit = (await _cefIncidentService.GetAllIncidentTypesAsync()).Select(it => new SelectListItem{ Value = it.Id.ToString(), Text = it.Description }).ToList();
             ViewBag.IncidentTypes = (await _cefIncidentService.GetAllIncidentTypesAsync()).Select(it => new SelectListItem { Value = (it.Code ?? "").Trim(), Text = it.Description }).ToList();
             ViewBag.DenomsJson = await _cefContainerService.BuildDenomsJsonForTransactionAsync(transactionId);
             ViewBag.QualitiesJson = await _cefContainerService.BuildQualitiesJsonAsync();
@@ -674,6 +728,9 @@ namespace VCashApp.Controllers
             {
                 PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase
             });
+            ViewBag.CanCountBills = canBills;
+            ViewBag.CanCountCoins = canCoins;
+            ViewBag.CanApproveIncidents = canSupInc;
 
             _audit.Info(
                 action: "CEF.Containers.Open",
@@ -696,7 +753,7 @@ namespace VCashApp.Controllers
         /// <returns>Eliminar un contenedor seleccionado</returns>
         [HttpPost("DeleteContainer")]
         [ValidateAntiForgeryToken]
-        [RequiredPermission(PermissionType.Edit, "CEF")]
+        [RequiredPermission(PermissionType.Edit, "CEF_REC", "CEF_COL")]
         public async Task<IActionResult> DeleteContainer(int transactionId, int containerId)
         {
             try
@@ -730,13 +787,13 @@ namespace VCashApp.Controllers
         /// <returns>Un JSON ServiceResult o redirección a la misma vista para continuar o al dashboard.</returns>
         [HttpPost("ProcessContainers/{transactionId:int}")]
         [ValidateAntiForgeryToken]
-        [RequiredPermission(PermissionType.Edit, "CEF")]
+        [RequiredPermission(PermissionType.Edit, "CEF_REC", "CEF_COL")]
         public async Task<IActionResult> ProcessContainers(int transactionId, CefProcessContainersPageViewModel viewModel)
         {
             var currentUser = await GetCurrentApplicationUserAsync();
             if (currentUser == null) return Unauthorized();
 
-            await SetCommonViewBagsCefAsync(currentUser, "Procesando Contenedores CEF");
+            await SetCommonViewBagsCefAsync(currentUser, "Procesando Contenedores CEF", "CEF_REC", "CEF_COL");
 
             viewModel.CefTransactionId = transactionId;
 
@@ -744,13 +801,32 @@ namespace VCashApp.Controllers
                 .Select(it => new SelectListItem { Value = it.Code, Text = it.Description })
                 .ToList();
             ViewBag.DenomsJson = await _cefContainerService.BuildDenomsJsonForTransactionAsync(transactionId);
+
             ViewBag.QualitiesJson = await _cefContainerService.BuildQualitiesJsonAsync();
 
             // Validaciones mínimas
             if (viewModel?.Containers == null || viewModel.Containers.Count == 0)
                 ModelState.AddModelError("", "No se recibieron contenedores para guardar.");
 
-            // Duplicados por contenedor SOLO para Billete/Moneda
+            var canBills = (bool)(ViewBag.CanCountBills ?? false);
+            var canCoins = (bool)(ViewBag.CanCountCoins ?? false);
+
+            if (viewModel?.Containers != null)
+            {
+                foreach (var c in viewModel.Containers)
+                {
+                    if (c?.ValueDetails == null) continue;
+
+                    if (!canBills && c.ValueDetails.Any(v => v.ValueType == CefValueTypeEnum.Billete))
+                        ModelState.AddModelError("", "No tiene permiso para capturar/editar BILLETES.");
+
+                    if (!canCoins && c.ValueDetails.Any(v => v.ValueType == CefValueTypeEnum.Moneda))
+                        ModelState.AddModelError("", "No tiene permiso para capturar/editar MONEDAS.");
+                }
+            }
+            if (!ModelState.IsValid) return Json(new { success = false, message = "Permisos insuficientes", errors = ModelState });
+
+
             if (viewModel?.Containers != null)
             {
                 for (int cIdx = 0; cIdx < viewModel.Containers.Count; cIdx++)
@@ -947,7 +1023,7 @@ namespace VCashApp.Controllers
         /// <returns>Redirección al dashboard de revisión.</returns>
         [HttpPost("FinalizeCounting/{transactionId}")]
         [ValidateAntiForgeryToken]
-        [RequiredPermission(PermissionType.Edit, "CEF")]
+        [RequiredPermission(PermissionType.Edit, "CEF_REC", "CEF_COL")]
         public async Task<IActionResult> FinalizeCounting(int transactionId)
         {
             var currentUser = await GetCurrentApplicationUserAsync();
@@ -1053,13 +1129,13 @@ namespace VCashApp.Controllers
         /// <param name="transactionId">ID de la transacción a revisar.</param>
         /// <returns>Vista de revisión de transacción.</returns>
         [HttpGet("ReviewTransaction/{transactionId}")]
-        [RequiredPermission(PermissionType.View, "CEF")] // Los supervisores pueden ver la revisión
+        [RequiredPermission(PermissionType.View, "CEF_REC", "CEF_DEL", "CEF_COL", "CEF_SUP")]
         public async Task<IActionResult> ReviewTransaction(int transactionId)
         {
             var currentUser = await GetCurrentApplicationUserAsync();
             if (currentUser == null) return RedirectToAction("Login", "Account");
 
-            await SetCommonViewBagsCefAsync(currentUser, "Revisión CEF");
+            await SetCommonViewBagsCefAsync(currentUser, "Revisión CEF", "CEF_REC", "CEF_DEL", "CEF_COL", "CEF_SUP");
 
             var vm = await _cefTransactionService.PrepareReviewViewModelAsync(transactionId);
             if (vm == null)
@@ -1087,7 +1163,13 @@ namespace VCashApp.Controllers
                 new SelectListItem{ Text = "Rechazada", Value = CefTransactionStatusEnum.Rechazado.ToString() }
             };
 
-            ViewBag.CanReview = await HasPermisionForView(await _userManager.GetRolesAsync(currentUser), "CEF", PermissionType.Edit);
+            {
+                var roles = await _userManager.GetRolesAsync(currentUser);
+                var vistas = new[] { "CEF_REC", "CEF_DEL", "CEF_COL", "CEF_SUP" };
+                async Task<bool> HasEdit(string v) => await HasPermisionForView(roles, v, PermissionType.Edit);
+                ViewBag.CanReview = (await Task.WhenAll(vistas.Select(HasEdit))).Any(x => x);
+            }
+
 
             _logger.LogInformation("Usuario: {Usuario} | IP: {IP} | Acción: Acceso a revisión de Transacción | ID Transacción: {TransactionId}.", currentUser.UserName, IpAddressForLogging, transactionId);
             _audit.Info(
@@ -1112,7 +1194,7 @@ namespace VCashApp.Controllers
         /// <returns>Redirección al dashboard de CEF.</returns>
         [HttpPost("ReviewTransaction/{transactionId?}")]
         [ValidateAntiForgeryToken]
-        [RequiredPermission(PermissionType.Edit, "CEF")]
+        [RequiredPermission(PermissionType.Edit, "CEF_REC", "CEF_DEL", "CEF_COL", "CEF_SUP")]
         public async Task<IActionResult> ReviewTransaction(int? transactionId, CefTransactionReviewViewModel viewModel)
         {
             var currentUser = await GetCurrentApplicationUserAsync();
@@ -1121,7 +1203,7 @@ namespace VCashApp.Controllers
             if ((viewModel?.Id ?? 0) <= 0 && transactionId.HasValue)
                 viewModel!.Id = transactionId.Value;
 
-            await SetCommonViewBagsCefAsync(currentUser, "Procesando Revisión CEF");
+            await SetCommonViewBagsCefAsync(currentUser, "Procesando Revisión CEF", "CEF_REC", "CEF_DEL", "CEF_COL", "CEF_SUP");
 
             viewModel.AvailableStatuses = new List<SelectListItem>
             {
@@ -1473,19 +1555,38 @@ namespace VCashApp.Controllers
             return Json(new { ok = true, hasPending });
         }
 
+        /// <summary>
+        /// Obtiene los totales declarados, contados y la diferencia neta de una transacción.
+        /// </summary>
+        /// <param name="transactionId">Identificador de la transacción</param>
+        /// <returns>JSON con los totales o error si no se encuentra la transacción.</returns>
         [HttpGet("GetTotals")]
         public async Task<IActionResult> GetTotals(int transactionId)
         {
-            var tx = await _cefTransactionService.GetCefTransactionByIdAsync(transactionId);
-            if (tx == null) return NotFound(new { ok = false });
+            var tx = await _context.CefTransactions
+                .AsNoTracking()
+                .FirstOrDefaultAsync(t => t.Id == transactionId);
+
+            if (tx == null)
+                return NotFound(new { ok = false, message = "Transacción no encontrada." });
+
+            var effect = await _cefIncidentService.SumApprovedEffectByTransactionAsync(transactionId);
+            var totalDeclared = tx.TotalDeclaredValue;
+            var totalCounted = tx.TotalCountedValue;
+            var totalOverall = tx.TotalDeclaredValue + tx.TotalCountedValue;
+            var netDiff = (totalCounted - totalDeclared) + effect;
+
             return Json(new
             {
                 ok = true,
-                totalDeclared = tx.TotalDeclaredValue,
-                totalCounted = tx.TotalCountedValue,
-                netDiff = tx.ValueDifference
+                totalDeclared,
+                totalCounted,
+                totalOverall,
+                effect,
+                netDiff
             });
         }
+
 
         /// <summary>
         /// Obtiene los detalles de una novedad por su ID.

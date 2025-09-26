@@ -789,7 +789,7 @@
             <param name="userManager">Administrador de usuarios de Identity.</param>
             <param name="logger">Servicio de logging para el controlador.</param>
         </member>
-        <member name="M:VCashApp.Controllers.CefController.SetCommonViewBagsCefAsync(VCashApp.Models.ApplicationUser,System.String)">
+        <member name="M:VCashApp.Controllers.CefController.SetCommonViewBagsCefAsync(VCashApp.Models.ApplicationUser,System.String,System.String[])">
             <summary>
             Método auxiliar para configurar ViewBags comunes específicos de CEF.
             Hereda y extiende el SetCommonViewBagsBaseAsync del BaseController.
@@ -989,6 +989,13 @@
             <param name="branchId">ID de la sucursal.</param>
             <param name="positionId">ID del cargo a filtrar (ej. 64 para JT).</param>
             <returns>JSON con lista de SelectListItem.</returns>
+        </member>
+        <member name="M:VCashApp.Controllers.CefController.GetTotals(System.Int32)">
+            <summary>
+            Obtiene los totales declarados, contados y la diferencia neta de una transacción.
+            </summary>
+            <param name="transactionId">Identificador de la transacción</param>
+            <returns>JSON con los totales o error si no se encuentra la transacción.</returns>
         </member>
         <member name="M:VCashApp.Controllers.CefController.GetIncident(System.Int32)">
             <summary>
@@ -1708,6 +1715,26 @@
             <param name="selectedRoleFilter">Opcional. Filtro por nombre de rol.</param>
             <param name="selectedBranchFilter">Opcional. Filtro por ID de sucursal.</param>
             <returns>Un <see cref="T:Microsoft.AspNetCore.Mvc.IActionResult"/> que devuelve un archivo para descarga en caso de éxito.</returns>
+        </member>
+        <member name="T:VCashApp.Filters.RequiredPermissionAttribute">
+            <summary>
+            Attribute para exigir permisos por vista(s). OR entre las vistas recibidas.
+            </summary>
+        </member>
+        <member name="T:VCashApp.Filters.RequiredPermissionFilter">
+            <summary>
+            Filtro de autorización que valida contra PermisosPerfil.
+            - Admin: acceso total.
+            - Para el resto: OR entre TODAS las combinaciones (rol del usuario × codVista).
+              Si cualquier combinación concede el permiso, se autoriza.
+            </summary>
+        </member>
+        <member name="M:VCashApp.Filters.RequiredPermissionFilter.OnAuthorizationAsync(Microsoft.AspNetCore.Mvc.Filters.AuthorizationFilterContext)">
+            <summary>
+            Aplica la lógica de autorización basada en permisos.
+            </summary>
+            <param name="context">Contexto del filtro de autorización.</param>
+            <returns>Una tarea que representa la operación asincrónica.</returns>
         </member>
         <member name="T:VCashApp.Migrations.InitialFullCleanSchemaFinal">
             <inheritdoc />

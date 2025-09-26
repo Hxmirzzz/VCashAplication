@@ -21,10 +21,6 @@
                         <div class="step-number">2</div>
                         <div class="step-label">Origen y Destino</div>
                     </div>
-                    <div class="step" data-step="3">
-                        <div class="step-number">3</div>
-                        <div class="step-label">Detalles del Dinero</div>
-                    </div>
                 </div>
 
                 <div class="tab-content" id="myTabContent">
@@ -32,7 +28,7 @@
                         <div class="step-content">
                             <div class="card mb-4">
                                 <div class="card-header">
-                                    <h5>📋 Información General</h5>
+                                    <h5><i class="ri-survey-fill"></i> Información General</h5>
                                 </div>
                                 <div class="card-body">
                                     <div class="row g-3">
@@ -144,7 +140,7 @@
                         <div class="step-content">
                             <div class="card mb-4">
                                 <div class="card-header">
-                                    <h5>📍 Origen</h5>
+                                    <h5>Origen</h5>
                                 </div>
                                 <div class="card-body">
                                     <div class="row g-3">
@@ -212,7 +208,7 @@
 
                             <div class="card mb-4">
                                 <div class="card-header">
-                                    <h5>➡️ Destino</h5>
+                                    <h5>Destino</h5>
                                 </div>
                                 <div class="card-body">
                                     <div class="row g-3">
@@ -278,14 +274,9 @@
                                     </div>
                                 </div>
                             </div>
-                        </div>
-                    </div>
-
-                    <div class="tab-pane fade" id="detalles-dinero" role="tabpanel" aria-labelledby="detalles-dinero-tab" data-step="3">
-                        <div class="step-content">
                             <div class="card mb-4">
                                 <div class="card-header">
-                                    <h5>💰 Cantidades y Valores Declarados</h5>
+                                    <h5><i class="ri-money-dollar-circle-fill"></i> Cantidades y Valores Declarados</h5>
                                 </div>
                                 <div class="card-body">
                                     <div class="row g-3">
@@ -319,7 +310,7 @@
                                         </div>
                                         <div class="col-12 col-lg-3">
                                             <div class="form-floating">
-                                                <input asp-for="ServiceValue" type="number" class="form-control calculate-total-declared" placeholder="Valor Total"/>
+                                                <input asp-for="ServiceValue" type="number" class="form-control calculate-total-declared" placeholder="Valor Total" />
                                                 <label for="ServiceValue">Valor Total</label>
                                             </div>
                                             <span asp-validation-for="ServiceValue" class="text-danger"></span>
@@ -328,7 +319,7 @@
                                     <div class="row g-3 mt-3">
                                         <div class="col-12">
                                             <div class="calculation-panel mt-3">
-                                                <h6>💰 Resumen</h6>
+                                                <h6>Resumen</h6>
                                                 <div class="calculation-total">
                                                     <span>Total Declarado:</span>
                                                     <span class="total-value" id="totalValue">$0</span>
@@ -345,7 +336,7 @@
                 <div class="step-content" id="failedReasonSection" style="display:none;">
                     <div class="card mb-4">
                         <div class="card-header">
-                            <h5>🚨 Detalles del Fallo</h5>
+                            <h5><i class="ri-error-warning-fill"></i> Detalles del Fallo</h5>
                         </div>
                         <div class="card-body">
                             <div class="row g-3">
@@ -377,7 +368,7 @@
                 <div class="form-section mt-4">
                     <div class="card">
                         <div class="card-header">
-                            <h5>⚙️ Datos del Operador</h5>
+                            <h5><i class="ri-account-circle-fill"></i> Datos del Operador</h5>
                         </div>
                         <div class="card-body">
                             <div class="row g-3">
@@ -416,7 +407,7 @@
     <script>
         $(document).ready(function () {
             let currentStep = 1;
-            const totalSteps = 3;
+            const totalSteps = 2;
             const $form = $('#cgsServiceForm');
 
             const $nextButton = $('button[data-step-action="next"]');

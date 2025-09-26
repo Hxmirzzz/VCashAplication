@@ -2,6 +2,8 @@
 @{
     ViewData["Title"] = "Tesorería";
     Layout = "~/Views/Shared/_Layout.cshtml";
+
+    bool canCreate = ViewBag.HasCreate ?? false;
 }
 
 <div class="form-container">
@@ -184,9 +186,14 @@
                     </div>
                 </div>
 
-                <!-- ===== Botones ===== -->
                 <div class="submit-container form-group col-12 mt-3">
-                    <button type="submit" class="btn btn-primary" data-step-action="submit-final">Guardar</button>
+                    @if (!canCreate)
+                    {
+                        <button type="submit" class="btn btn-primary" data-step-action="submit-final">Guardar</button>
+                    } else
+                    {
+                        <button type="button" class="btn btn-primary" disabled title="No tiene permiso para crear">Guardar</button>
+                    }
                     <a asp-action="Reception" class="btn btn-danger">Cancelar</a>
                 </div>
             </form>

@@ -89,20 +89,10 @@ namespace VCashApp.Models.ViewModels.CentroEfectivo
         [Required(ErrorMessage = "El código de cliente origen es requerido.")]
         public int OriginClientId { get; set; }
 
-        [Display(Name = "Nombre Cliente Origen")]
-        [Required(ErrorMessage = "El nombre de cliente origen es requerido.")]
-        [StringLength(255, ErrorMessage = "El nombre de cliente origen no puede exceder los 255 caracteres.")]
-        public string OriginClientName { get; set; } = string.Empty;
-
         [Display(Name = "Código Origen")]
         [Required(ErrorMessage = "El código de origen es requerido.")]
         [StringLength(25, ErrorMessage = "El código de origen no puede exceder los 25 caracteres.")]
         public string OriginCode { get; set; } = string.Empty;
-
-        [Display(Name = "Nombre Origen")]
-        [Required(ErrorMessage = "El nombre de origen es requerido.")]
-        [StringLength(255, ErrorMessage = "El nombre de origen no puede exceder los 255 caracteres.")]
-        public string OriginName { get; set; } = string.Empty;
 
         [Display(Name = "Código Ciudad Origen")]
         public int? OriginCityId { get; set; }
@@ -124,21 +114,11 @@ namespace VCashApp.Models.ViewModels.CentroEfectivo
         [Display(Name = "Código Cliente Destino")]
         [Required(ErrorMessage = "El código de cliente destino es requerido.")]
         public int DestinationClientId { get; set; }
-
-        [Display(Name = "Nombre Cliente Destino")]
-        [Required(ErrorMessage = "El nombre de cliente destino es requerido.")]
-        [StringLength(255, ErrorMessage = "El nombre de cliente destino no puede exceder los 255 caracteres.")]
-        public string DestinationClientName { get; set; } = string.Empty;
-
+            
         [Display(Name = "Código Destino")]
         [Required(ErrorMessage = "El código de destino es requerido.")]
         [StringLength(255, ErrorMessage = "El código de destino no puede exceder los 255 caracteres.")]
         public string DestinationCode { get; set; } = string.Empty;
-
-        [Display(Name = "Nombre Destino")]
-        [Required(ErrorMessage = "El nombre de destino es requerido.")]
-        [StringLength(255, ErrorMessage = "El nombre de destino no puede exceder los 255 caracteres.")]
-        public string DestinationName { get; set; } = string.Empty;
 
         [Display(Name = "Código Ciudad Destino")]
         public int? DestinationCityId { get; set; }

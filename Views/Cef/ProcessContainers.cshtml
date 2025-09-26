@@ -1,8 +1,12 @@
 ﻿@model VCashApp.Models.ViewModels.CentroEfectivo.CefProcessContainersPageViewModel
 @using VCashApp.Enums;
 @{
-    ViewData["Title"] = "Procesamiento de Bolsas";
     Layout = "~/Views/Shared/_Layout.cshtml";
+
+    bool canEdit = ViewBag.HasEdit ?? false;
+    bool canBills  = ViewBag.CanCountBills ?? false;
+    bool canCoins  = ViewBag.CanCountCoins ?? false;
+    bool canSupInc = ViewBag.CanApproveIncidents ?? false;
 }
 
 <div class="form-container">
@@ -10,7 +14,7 @@
         <div class="card-body">
             <form id="form-containers" asp-action="ProcessContainers" asp-route-transactionId="@Model.CefTransactionId" method="post">
                 @Html.AntiForgeryToken()
-                <input type="hidden" asp-for="CefTransactionId" />
+                <input type="hidden" id="txIdGlobal" asp-for="CefTransactionId" />
 
                 <div class="progress-stepper" id="progressStepper">
                     <div class="step active" data-step="1">
@@ -377,6 +381,25 @@
                     </div>
                     <div class="tab-pane fade" role="tabpanel" data-step="3">
                         <div class="step-content">
+                                                        <div class="card mb-3">
+                                <div class="card-header d-flex align-items-center">
+                                    <h6 class="mb-0"><i class="ri-list-check"></i> Totales de la transacción</h6>
+                                    <span class="chip-live ms-auto">En vivo</span>
+                                </div>
+                                <div class="card-body p-2">
+                                    <div class="stats-grid small">
+                                        <div class="label">Declarado</div>
+                                        <div class="value" id="totDeclaredStep3">@Model.TotalDeclaredAll.ToString("N0")</div>
+                                        <div class="label">Contado</div>
+                                        <div class="value" id="totCountedStep3">@Model.TotalCountedAll.ToString("N0")</div>
+                                        <div class="label">Diferencia</div>
+                                        <div class="value tile-diff" id="totDiffStep3">@Model.DifferenceAll.ToString("N0")</div>
+                                        <div class="divider-xs"></div>
+                                        <div class="label">Total</div>
+                                        <div class="value" id="totOverallStep3">@Model.TotalOverallAll.ToString("N0")</div>
+                                    </div>
+                                </div>
+                            </div>
                             <div class="row g-3">
                                 <div class="col-12 col-lg-5">
                                     <div class="card">
@@ -437,19 +460,22 @@
                                             </div> 
                                         </div>
                                         <div class="card-body">
-                                            <table class="table table-sm table-bordered align-middle">
-                                                <thead>
-                                                    <tr>
-                                                        <th>Fecha</th><th>Tipo</th><th>Descripción</th>
-                                                        <th class="text-end">Monto</th><th>Estado</th><th style="width:120px">Acciones</th>
-                                                    </tr>
-                                                </thead>
-                                                <tbody id="inc-table-body-step3"><!-- AJAX --></tbody>
-                                            </table>
+                                            <div class="table-container-responsive">
+                                                <table class="table table-sm align-middle">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Fecha</th><th>Tipo</th><th>Descripción</th>
+                                                            <th class="text-end">Monto</th><th>Estado</th><th style="width:120px">Acciones</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody id="inc-table-body-step3"><!-- AJAX --></tbody>
+                                                </table>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
+
                         </div>
                     </div>
                 </div>
@@ -457,9 +483,15 @@
                 <div class="submit-container-spacer"></div>
                 <div class="submit-container form-group col-12 mt-4 fixed">
                     <button type="button" class="btn btn-secondary" data-step-action="prev" style="display:none;">Anterior</button>
-                    <button type="button" class="btn btn-primary" data-step-action="next">Continuar</button>
-                    <button type="submit" class="btn btn-primary" data-step-action="save" style="display:none;">Guardar</button>
-                    <button type="button" class="btn btn-success js-finalize-counting" style="display:none;">Finalizar</button>
+                    @if (canEdit) {
+                        <button type="button" class="btn btn-primary" data-step-action="next">Continuar</button>
+                        <button type="submit" class="btn btn-primary" data-step-action="save" style="display:none;">Guardar</button>
+                        <button type="button" class="btn btn-success js-finalize-counting" style="display:none;">Finalizar</button>
+                    } else {
+                        <button type="button" class="btn btn-primary" disabled title="No tiene permiso">Continuar</button>
+                        <button type="button" class="btn btn-primary" disabled style="display:none;">Guardar</button>
+                        <button type="button" class="btn btn-success" disabled style="display:none;">Finalizar</button>
+                    }
                     <a asp-action="Index" class="btn btn-danger js-cancel">Cancelar</a>
                 </div>
             </form>
@@ -497,6 +529,13 @@
 
 <script id="pointcaps-json" type="application/json">
   @Html.Raw(ViewBag.PointCapsJson ?? "{\"sobres\":false,\"cheques\":false,\"documentos\":false}")
+</script>
+
+<script>
+  window.CEF = window.CEF || {};
+  window.CEF.canCountBills       = @(canBills  ? "true":"false");
+  window.CEF.canCountCoins       = @(canCoins  ? "true":"false");
+  window.CEF.canApproveIncidents = @(canSupInc ? "true":"false");
 </script>
 
 <div class="validation-scape"></div>
@@ -611,6 +650,10 @@
 
           let nextIdx = @Model.Containers.Count;
 
+          const CAN_BILLS = !!(window.CEF && window.CEF.canCountBills);
+          const CAN_COINS = !!(window.CEF && window.CEF.canCountCoins);
+          const CAN_INC_APPROVE = !!(window.CEF && window.CEF.canApproveIncidents);
+
           // =====================================================================
           // 1) STEPPER + VALIDACIÓN
           // =====================================================================
@@ -658,6 +701,7 @@
 
             if (currentStep ===3) {
                 fillBagSelectorStep3();
+                refreshTotalsFromServer();
             }
           }
           function validateField($f) {
@@ -1090,6 +1134,25 @@
             const attr = $opt.data('high');
             const isHigh = (typeof attr === 'undefined') ? null : (String(attr) === 'true');
             setHighBadge($row, isHigh);
+          }
+
+          function applyCountingPermissionsUI(scope){
+            const $root = scope ? $(scope) : $(document);
+
+            $root.find('table.js-details-table[data-detail-scope="bolsa-billete"], table.js-details-table[data-detail-scope="sobre-billete"]').each(function(){
+              const $tbl = $(this);
+              $tbl.closest('.card, .mb-3').find('.js-add-detail[data-detail-scope$="billete"]').prop('disabled', !CAN_BILLS).toggleClass('disabled', !CAN_BILLS);
+              $tbl.find(':input').prop('disabled', !CAN_BILLS);
+            });
+
+            $root.find('table.js-details-table[data-detail-scope="bolsa-moneda"], table.js-details-table[data-detail-scope="sobre-moneda"]').each(function(){
+              const $tbl = $(this);
+              $tbl.closest('.card').find('.js-add-detail[data-detail-scope$="moneda"]').prop('disabled', !CAN_COINS).toggleClass('disabled', !CAN_COINS);
+              $tbl.find(':input').prop('disabled', !CAN_COINS);
+            });
+                    // Si quieres ocultar por completo las secciones (opcional):
+            // $root.find('.card:has([data-detail-scope="bolsa-billete"]), .card:has([data-detail-scope="sobre-billete"])').toggle(CAN_BILLS);
+            // $root.find('.card:has([data-detail-scope="bolsa-moneda"]),  .card:has([data-detail-scope="sobre-moneda"])').toggle(CAN_COINS);
           }
 
           // =====================================================================
@@ -1857,6 +1920,7 @@
             markNumericFields();
             formatAllNumbers();
             updateProcessSummary();
+            applyCountingPermissionsUI($(this).closest('.container-editor'));
           });
 
           // -> Eliminar fila detalle
@@ -2046,7 +2110,7 @@
             $bagEditor.find('.js-container-type').val('Bolsa');
             $bagEditor.find('input[name$=".CefTransactionId"]').val(realTransactionId);
             toggleContainerSections($bagEditor);
-
+            applyCountingPermissionsUI($pane);
             markNumericFields();
             formatAllNumbers();
             refreshAllParentBagCombos();
@@ -2092,7 +2156,7 @@
             toggleContainerSections($envEditor);
             $envEditor.find(`.js-sobre-mode[value="${typeToUse}"]`).prop('checked', true);
             toggleSobreMode($envEditor);
-
+            applyCountingPermissionsUI($card);
             markNumericFields();
             formatAllNumbers();
             refreshAllParentBagCombos();
@@ -2318,6 +2382,7 @@
             markNumericFields();
             formatAllNumbers();
             updateProcessSummary();
+            applyCountingPermissionsUI($(this).closest('.container-editor'));
           });
 
           $(document).on('click', '.js-remove-cheque', function () {
@@ -2381,7 +2446,6 @@
               const $tb = $('#inc-table-body-step3').empty();
               if (!r || !r.ok) return;
 
-              // normaliza casing
               const rows = (r.data || []).map(x => ({
                 Id: x.Id ?? x.id,
                 Type: x.Type ?? x.type,
@@ -2397,15 +2461,15 @@
                 const fallback = getDenomValueById(x.AffectedDenomination) * (Number(x.AffectedQuantity || 0));
                 const amt = Number((x.AffectedAmount ?? 0)) || fallback || 0;
 
-                const showApprove = (x.IncidentStatus === 'Reported' || x.IncidentStatus === "UnderReview");
-                const approveBtn = showApprove
+                const canApprove = CAN_INC_APPROVE && (x.IncidentStatus === 'Reported' || x.IncidentStatus === "UnderReview");
+                const approveBtn = canApprove
                   ? `<button type="button" class="btn btn-success btn-sm p-2 js-inc-approve"
                        data-id="${x.Id}" data-tx="${transactionId}" data-cont="${containerId}">
                        <i class="ri-check-double-line"></i>
                      </button>`
                   : '';
-
-                const canEdit = (x.IncidentStatus === 'Reported');
+                
+                const canEdit = CAN_INC_APPROVE && (x.IncidentStatus === 'Reported' || x.IncidentStatus === 'Adjusted');
                 const editBtn = canEdit
                   ? `<button type="button" class="btn btn-outline-primary btn-sm p-2 js-inc-edit"
                        data-id="${x.Id}" data-tx="${transactionId}" data-cont="${containerId}">
@@ -2464,9 +2528,9 @@
               const bags = [];
               $('#bagsTabContent .tab-pane[id^="bag-tab-"]').each(function(idx){
                     const $pane = $(this);
-                    const $ce   = $pane.find('.container-editor').first();
-                    const id    = $ce.find('input[name$=".Id"]').val() || '';
-                    const code  = $ce.find('input[name$=".ContainerCode"]').val() || '';
+                    const $bagEd = $pane.find('.container-editor').first();
+                    const id    = $bagEd.find('input[name$=".Id"]').val() || '';
+                    const code  = $bagEd.find('input[name$=".ContainerCode"]').val() || '';
                     const label = code ? `Bolsa ${idx + 1} - (${code})` : `Bolsa ${idx + 1} (sin guardar)`;
                     bags.push({ id, label });
               });
@@ -2554,29 +2618,67 @@
             });
           });
           
-          // Refrescar totales desde servidor (incluye efecto de novedades)
-          function refreshTotalsFromServer(transactionId){
-            $.get(IncidentRoutes.totals, { transactionId }, function(r){
-              if(!r || !r.ok) return;
-              const fmt = (n) => (Number(n)||0).toLocaleString('es-CO');
+          function refreshTotalsFromServer(transactionId) {
+            const txId = Number(
+              transactionId
+              || $('#txIdGlobal').val()
+              || $('#incTxId3').val()
+              || 0
+            );
+
+            if (!txId) {
+              console.warn('[GetTotals] Sin transactionId. No llamo al backend.');
+              return;
+            }
+
+            $.get(IncidentRoutes.totals, { transactionId: txId }, function (r) {
+              if (!r || !r.ok) { 
+                console.warn('GetTotals error:', r && r.message);
+                return; 
+              }
+
+              const fmt  = (n) => (Number(n)||0).toLocaleString('es-CO');
               const sign = (n) => (Number(n) >= 0 ? '+' : '');
-          
-              // Paso 1 (arriba a la derecha)
+              const cls  = (n) => (Number(n) < 0 ? 'negative' : 'positive');
+
+              // ==== Paso 1 ====
               $('#totDeclaredGlobal').text(fmt(r.totalDeclared));
               $('#totCountedGlobal').text(fmt(r.totalCounted));
-              $('#totDiffGlobal').text(sign(r.netDiff) + fmt(r.netDiff));
-          
-              // Paso 2 (Resumen)
+              $('#totDiffGlobal')
+                .text(sign(r.netDiff) + fmt(r.netDiff))
+                .removeClass('positive negative')
+                .addClass(cls(r.netDiff));
+              if (typeof r.totalOverall !== 'undefined') {
+                $('#totOverallGlobal').text(fmt(r.totalOverall));
+              }
+
+              // ==== Paso 2 ====
               $('#sumDeclaredAllDisplay').text(fmt(r.totalDeclared));
               $('#sumCountedAllDisplay').text(fmt(r.totalCounted));
-              $('#sumDiffAllDisplay').text(sign(r.netDiff) + fmt(r.netDiff));
+              $('#sumDiffAllDisplay')
+                .text(sign(r.netDiff) + fmt(r.netDiff))
+                .removeClass('positive negative')
+                .addClass(cls(r.netDiff));
+              if (typeof r.totalOverall !== 'undefined') {
+                $('#sumOverallDisplay').text(fmt(r.totalOverall));
+              }
+
+              // ==== Paso 3 ====
+              $('#totDeclaredStep3').text(fmt(r.totalDeclared));
+              $('#totCountedStep3').text(fmt(r.totalCounted));
+              $('#totDiffStep3')
+                .text(sign(r.netDiff) + fmt(r.netDiff))
+                .removeClass('positive negative')
+                .addClass(cls(r.netDiff));
+              if (typeof r.totalOverall !== 'undefined') {
+                $('#totOverallStep3').text(fmt(r.totalOverall));
+              }
             });
           }
 
           $('#incDenom3').html(buildDenomOptionsFromJson());
           tryAutoAmountStep3();
           
-          // Cargar novedades de todas las bolsas renderizadas al iniciar
           $(document).on('click', '[data-step-action="back-to-bags"]', function(){
               currentStep = 1;
               updateStepper();
@@ -2944,6 +3046,15 @@
           applyPointCapsUI();
           refreshIncidentEffectAll('@Model.CefTransactionId');
           $('#incEditDenom').html(buildDenomOptionsFromJson());
+          applyCountingPermissionsUI();
+          if (!CAN_INC_APPROVE) {
+            $('#formIncident3 :input').prop('disabled', true);
+            $('#btnSaveIncident3').prop('disabled', true).addClass('disabled');
+
+            $(document).on('DOMNodeInserted', function(e){
+              $(e.target).find('.js-inc-approve, .js-inc-edit, .js-inc-delete').remove();
+            });
+          }
         });
     </script>
 }

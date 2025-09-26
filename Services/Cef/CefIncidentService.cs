@@ -106,7 +106,7 @@ namespace VCashApp.Services.Cef
                     var counted = tx.TotalCountedValue;
                     var declared = tx.TotalDeclaredValue;
 
-                    tx.ValueDifference = (counted - effects) + declared;
+                    tx.ValueDifference = (counted - declared) + effects;
 
                     _context.CefTransactions.Update(tx);
                     await _context.SaveChangesAsync();
@@ -292,8 +292,8 @@ namespace VCashApp.Services.Cef
         {
             var inc = await _context.CefIncidents.Include(i => i.IncidentType).FirstOrDefaultAsync(i => i.Id == id);
             if (inc == null) return false;
-            if (!string.Equals(inc.IncidentStatus, "Reported", StringComparison.OrdinalIgnoreCase))
-                throw new InvalidOperationException("Solo se pueden modificar las novedades en estado 'Reported'.");
+            /*if (!string.Equals(inc.IncidentStatus, "Reported", StringComparison.OrdinalIgnoreCase))
+                throw new InvalidOperationException("Solo se pueden modificar las novedades en estado 'Reported'.");*/
 
             if (newTypeId.HasValue)
             {
@@ -331,8 +331,8 @@ namespace VCashApp.Services.Cef
         {
             var inc = await _context.CefIncidents.FirstOrDefaultAsync(i => i.Id == id);
             if (inc == null) return false;
-            if (!string.Equals(inc.IncidentStatus, "Reported", StringComparison.OrdinalIgnoreCase))
-                throw new InvalidOperationException("Solo se pueden eliminar las novedades en estado 'Reported'.");
+            /*if (!string.Equals(inc.IncidentStatus, "Reported", StringComparison.OrdinalIgnoreCase))
+                throw new InvalidOperationException("Solo se pueden eliminar las novedades en estado 'Reported'.");*/
 
             _context.CefIncidents.Remove(inc);
             await _context.SaveChangesAsync();

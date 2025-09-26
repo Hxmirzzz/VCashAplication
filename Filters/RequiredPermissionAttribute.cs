@@ -25,34 +25,53 @@ namespace VCashApp.Filters
         Edit
     }
 
+    /// <summary>
+    /// Attribute para exigir permisos por vista(s). OR entre las vistas recibidas.
+    /// </summary>
     public class RequiredPermissionAttribute : TypeFilterAttribute
     {
         public RequiredPermissionAttribute(PermissionType permissionType, string codVista)
             : base(typeof(RequiredPermissionFilter))
         {
-            Arguments = new object[] { permissionType, codVista };
+            Arguments = new object[] { permissionType, new[] { codVista } };
+        }
+        public RequiredPermissionAttribute(PermissionType permissionType, params string[] codVistas)
+            : base(typeof(RequiredPermissionFilter))
+        {
+            Arguments = new object[] { permissionType, codVistas ?? Array.Empty<string>() };
         }
     }
 
+    /// <summary>
+    /// Filtro de autorización que valida contra PermisosPerfil.
+    /// - Admin: acceso total.
+    /// - Para el resto: OR entre TODAS las combinaciones (rol del usuario × codVista).
+    ///   Si cualquier combinación concede el permiso, se autoriza.
+    /// </summary>
     public class RequiredPermissionFilter : IAsyncAuthorizationFilter
     {
         private readonly PermissionType _permissionType;
-        private readonly string _codVista;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly AppDbContext _dbContext;
+        private readonly string[] _codVistas;
 
         public RequiredPermissionFilter(
             PermissionType permissionType,
-            string codVista,
+            string[] codVistas,
             UserManager<ApplicationUser> userManager,
             AppDbContext dbContext)
         {
             _permissionType = permissionType;
-            _codVista = codVista;
+            _codVistas = codVistas ?? Array.Empty<string>();
             _userManager = userManager;
             _dbContext = dbContext;
         }
 
+        /// <summary>
+        /// Aplica la lógica de autorización basada en permisos.
+        /// </summary>
+        /// <param name="context">Contexto del filtro de autorización.</param>
+        /// <returns>Una tarea que representa la operación asincrónica.</returns>
         public async Task OnAuthorizationAsync(AuthorizationFilterContext context)
         {
             var user = context.HttpContext.User;
@@ -60,103 +79,115 @@ namespace VCashApp.Filters
             string ipAddress = context.HttpContext.Connection.RemoteIpAddress?.MapToIPv4().ToString() ?? "Desconocida";
             string userName = user.Identity?.Name ?? "NoAutenticado";
 
-            // Usamos LogContext.PushProperty para añadir propiedades que Serilog capturará.
-            // Los nombres aquí son los que el sink de MSSQLServer buscará en AdditionalColumns.
-            // Pushing las propiedades generales que tus controladores usan.
             using (LogContext.PushProperty("IpAddress", ipAddress))
             using (LogContext.PushProperty("Usuario", userName))
             using (LogContext.PushProperty("Accion", actionName))
             {
-                // 1. Verificar autenticación
-                if (!user.Identity.IsAuthenticated)
+                // 1) Requiere autenticación
+                if (!user.Identity?.IsAuthenticated ?? true)
                 {
-                    Log.Warning("Usuario: {Usuario} | IP: {IP} | Acción: {Accion} | Resultado: {Resultado} |",
-                        userName, ipAddress, "Filtro de Autorización", "No autenticado. Redirigiendo a Login.");
+                    Log.Warning("Usuario: {Usuario} | IP: {IP} | Acción: {Accion} | Resultado: No autenticado. Redirigiendo a Login.",
+                        userName, ipAddress, "Filtro de Autorización");
                     context.Result = new RedirectToPageResult("/Account/Login", new { area = "Identity" });
                     return;
                 }
 
-                // 2. Obtener el ApplicationUser completo
+                // 2) Cargar ApplicationUser
                 var applicationUser = await _userManager.GetUserAsync(user);
                 if (applicationUser == null)
                 {
-                    Log.Warning("Usuario: {Usuario} | IP: {IP} | Acción: {Accion} | Resultado: {Resultado} |",
-                        userName, ipAddress, "Filtro de Autorización", "Acceso denegado (usuario Identity no encontrado).");
+                    Log.Warning("Usuario: {Usuario} | IP: {IP} | Acción: {Accion} | Resultado: Acceso denegado (usuario Identity no encontrado).",
+                        userName, ipAddress, "Filtro de Autorización");
                     context.Result = new ForbidResult();
                     return;
                 }
 
-                // 3. Verificar si es Administrador (rol "Admin" tiene acceso total)
+                // 3) Admin => acceso total
                 if (await _userManager.IsInRoleAsync(applicationUser, "Admin"))
                 {
-                    Log.Information("Usuario: {Usuario} | IP: {IP} | Acción: {Accion} | Resultado: {Resultado} |",
-                        applicationUser.UserName, ipAddress, "Filtro de Autorización", "Acceso concedido (es Admin).");
-                    return; // Los administradores tienen acceso total
+                    Log.Information("Usuario: {Usuario} | IP: {IP} | Acción: {Accion} | Resultado: Acceso concedido (es Admin).",
+                        applicationUser.UserName, ipAddress, "Filtro de Autorización");
+                    return;
                 }
 
-                // *** INICIO DE LA LÓGICA DE PERMISOS DATA-DRIVEN ***
-                bool hasPermission = false;
-                var userRoles = await _userManager.GetRolesAsync(applicationUser); // Obtener TODOS los nombres de roles del usuario
-
-                // Log con nombres de propiedades estandarizados
-                Log.Information("Usuario: {Usuario} | IP: {IP} | Acción: {Accion} | Roles de usuario para permiso: {RolesUsuario}.",
+                // 4) Roles del usuario
+                var userRoles = await _userManager.GetRolesAsync(applicationUser);
+                Log.Information("Usuario: {Usuario} | IP: {IP} | Acción: {Accion} | Roles: {RolesUsuario}",
                     applicationUser.UserName, ipAddress, "Filtro de Autorización", string.Join(", ", userRoles));
+
+                if (!_codVistas.Any())
+                {
+                    // Si no se pasó ningún codVista, por seguridad negar
+                    Log.Warning("Usuario: {Usuario} | IP: {IP} | Acción: {Accion} | Resultado: Acceso denegado (sin codVistas).",
+                        applicationUser.UserName, ipAddress, "Filtro de Autorización");
+                    context.Result = new ForbidResult();
+                    return;
+                }
+
+                // 5) OR global: si cualquier (rol × vista) concede el permiso, permitir
+                bool hasPermission = false;
 
                 foreach (var roleName in userRoles)
                 {
+                    // Busca id de rol por Name (si manejas NormalizedName en mayúsculas, puedes usar ToUpperInvariant)
                     var roleIdFromDb = await _dbContext.Roles.AsNoTracking()
-                                                             .Where(r => r.Name == roleName)
-                                                             .Select(r => r.Id)
-                                                             .FirstOrDefaultAsync();
+                        .Where(r => r.Name == roleName || r.NormalizedName == roleName.ToUpper())
+                        .Select(r => r.Id)
+                        .FirstOrDefaultAsync();
 
                     if (string.IsNullOrEmpty(roleIdFromDb))
                     {
-                        Log.Warning("Usuario: {Usuario} | IP: {IP} | Acción: {Accion} | ID de rol '{RolNombre}' no encontrado en la base de datos para PermisosPerfil.",
+                        Log.Warning("Usuario: {Usuario} | IP: {IP} | Acción: {Accion} | ID de rol '{RolNombre}' no encontrado en la base de datos.",
                             applicationUser.UserName, ipAddress, "Filtro de Autorización", roleName);
                         continue;
                     }
 
-                    var permisosDelPerfil = await _dbContext.PermisosPerfil.AsNoTracking()
-                        .Where(p => p.CodPerfilId == roleIdFromDb && p.CodVista == _codVista)
-                        .FirstOrDefaultAsync();
-
-                    if (permisosDelPerfil != null)
+                    foreach (var codVista in _codVistas)
                     {
-                        // Log con nombres de propiedades estandarizados
-                        Log.Information("Usuario: {Usuario} | IP: {IP} | Acción: {Accion} | Permiso de perfil encontrado para RolId: {IdRolDB}, CodVista: {CodigoVista}. PuedeVer: {PuedeVer}, PuedeCrear: {PuedeCrear}, PuedeEditar: {PuedeEditar}.",
-                            applicationUser.UserName, ipAddress, "Filtro de Autorización", roleIdFromDb, _codVista, permisosDelPerfil.PuedeVer, permisosDelPerfil.PuedeCrear, permisosDelPerfil.PuedeEditar);
+                        var permiso = await _dbContext.PermisosPerfil
+                            .AsNoTracking()
+                            .FirstOrDefaultAsync(p => p.CodPerfilId == roleIdFromDb && p.CodVista == codVista);
 
-                        switch (_permissionType)
+                        if (permiso == null)
                         {
-                            case PermissionType.View:
-                                if (permisosDelPerfil.PuedeVer) hasPermission = true;
-                                break;
-                            case PermissionType.Create:
-                                if (permisosDelPerfil.PuedeCrear) hasPermission = true;
-                                break;
-                            case PermissionType.Edit:
-                                if (permisosDelPerfil.PuedeEditar) hasPermission = true;
-                                break;
+                            Log.Warning("Usuario: {Usuario} | IP: {IP} | Acción: {Accion} | No se encontró permiso en PermisosPerfil para RolId: {IdRolDB} y CodVista: {CodigoVista}.",
+                                applicationUser.UserName, ipAddress, "Filtro de Autorización", roleIdFromDb, codVista);
+                            continue;
                         }
-                        if (hasPermission) break;
+
+                        Log.Information("Usuario: {Usuario} | IP: {IP} | Acción: {Accion} | Permiso hallado | RolId:{IdRolDB} CodVista:{CodigoVista} Ver:{PuedeVer} Crear:{PuedeCrear} Edit:{PuedeEditar}",
+                            applicationUser.UserName, ipAddress, "Filtro de Autorización",
+                            roleIdFromDb, codVista, permiso.PuedeVer, permiso.PuedeCrear, permiso.PuedeEditar);
+
+                        hasPermission =
+                            (_permissionType == PermissionType.View && permiso.PuedeVer) ||
+                            (_permissionType == PermissionType.Create && permiso.PuedeCrear) ||
+                            (_permissionType == PermissionType.Edit && permiso.PuedeEditar);
+
+                        if (hasPermission)
+                            break; // basta un match por rol×vista
                     }
-                    else
-                    {
-                        Log.Warning("Usuario: {Usuario} | IP: {IP} | Acción: {Accion} | No se encontró permiso de perfil en PermisosPerfil para RolId: {IdRolDB} y CodVista: {CodigoVista} con el permiso requerido.",
-                            applicationUser.UserName, ipAddress, "Filtro de Autorización", roleIdFromDb, _codVista);
-                    }
+
+                    if (hasPermission)
+                        break; // basta un rol que conceda
                 }
 
+                // 6) Decisión final
                 if (!hasPermission)
                 {
-                    Log.Warning("Usuario: {Usuario} | IP: {IP} | Acción: {Accion} | Resultado: {Resultado} | PermisoRequerido: {TipoPermiso}. Vista: '{CodigoVista}'. Roles del usuario: {RolesUsuario}.",
-                        applicationUser.UserName, ipAddress, "Filtro de Autorización", "Acceso denegado", _permissionType.ToString(), _codVista, string.Join(", ", userRoles));
+                    Log.Warning("Usuario: {Usuario} | IP: {IP} | Acción: {Accion} | Resultado: Acceso denegado | Permiso: {TipoPermiso}. Vistas requeridas (OR): {CodVistas} | Roles: {RolesUsuario}.",
+                        applicationUser.UserName, ipAddress, "Filtro de Autorización",
+                        _permissionType.ToString(),
+                        string.Join(",", _codVistas),
+                        string.Join(", ", userRoles));
                     context.Result = new ForbidResult();
                     return;
                 }
 
-                Log.Information("Usuario: {Usuario} | IP: {IP} | Acción: {Accion} | Resultado: {Resultado} | PermisoConcedido: {TipoPermiso}. Vista: '{CodigoVista}'. Roles del usuario: {RolesUsuario}.",
-                    applicationUser.UserName, ipAddress, "Filtro de Autorización", "Acceso concedido", _permissionType.ToString(), _codVista, string.Join(", ", userRoles));
+                Log.Information("Usuario: {Usuario} | IP: {IP} | Acción: {Accion} | Resultado: Acceso concedido | Permiso: {TipoPermiso}. Vistas OK (OR): {CodVistas}.",
+                    applicationUser.UserName, ipAddress, "Filtro de Autorización",
+                    _permissionType.ToString(),
+                    string.Join(",", _codVistas));
             }
         }
     }
