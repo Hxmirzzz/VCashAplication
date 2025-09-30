@@ -16,8 +16,8 @@ namespace VCashApp.Models.Entities
         public int? CefTransactionId { get; set; }
         public virtual CefTransaction? CefTransaction { get; set; }
 
-        [Column("IdContenedorCef")]
-        [ForeignKey("CefContainer")]
+        [Column("IdBolsaCef")]
+        [ForeignKey("CefBag")]
         public int? CefContainerId { get; set; }
         public virtual CefContainer? CefContainer { get; set; }
 
@@ -63,6 +63,6 @@ namespace VCashApp.Models.Entities
         [Required]
         [StringLength(50)]
         [Column("EstadoNovedad")]
-        public string IncidentStatus { get; set; } // Estado: 'Reported', 'UnderReview', 'Adjusted', 'Closed'
+        public string IncidentStatus { get; set; }
     }
 }

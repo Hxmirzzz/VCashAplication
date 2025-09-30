@@ -96,5 +96,12 @@ namespace VCashApp.Services
         /// </summary>
         /// <returns>Lista de SelectListItem para divisas de servicio.</returns>
         Task<List<SelectListItem>> GetCurrenciesForDropdownAsync();
+
+        /// <summary>
+        /// Prepara el ViewModel detallado para la vista de detalles de una transacción de Centro de Efectivo.
+        /// </summary>
+        /// <param name="transactionId">Identificador de la transacción</param>
+        /// <returns>El ViewModel detallado de la transacción, o null si no se encuentra.</returns>
+        Task<CefTransactionDetailViewModel?> PrepareDetailViewModelAsync(int transactionId);
     }
 }

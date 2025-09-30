@@ -12,8 +12,8 @@ namespace VCashApp.Models.Entities
         public int Id { get; set; }
 
         [Required]
-        [Column("IdContenedorCef")]
-        [ForeignKey("CefContainer")]
+        [Column("IdBolsaCef")]
+        [ForeignKey("CefBag")]
         public int CefContainerId { get; set; }
         public virtual CefContainer CefContainer { get; set; } = null!;
 

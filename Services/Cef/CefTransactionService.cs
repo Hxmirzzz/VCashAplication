@@ -659,5 +659,200 @@ namespace VCashApp.Services.Cef
                 new SelectListItem { Value = "EUR", Text = "EUR" }
             });
         }
+
+        /// <summary>
+        /// Prepara un modelo detallado de transacción para revisión.
+        /// </summary>
+        /// <param name="transactionId">Identificador de la transacción.</param>
+        /// <returns>Modelo detallado o null si no se encuentra.</returns>
+        public async Task<CefTransactionDetailViewModel?> PrepareDetailViewModelAsync(int transactionId)
+        {
+            var tx = await _context.CefTransactions
+                .AsNoTracking()
+                .AsSplitQuery()
+                .Include(t => t.Service)
+                    .ThenInclude(s => s.Concept)
+                .Include(t => t.Branch)
+                .Include(t => t.Containers)
+                    .ThenInclude(c => c.ValueDetails)
+                        .ThenInclude(vd => vd.AdmDenominacion)
+                .Include(t => t.Containers)
+                    .ThenInclude(c => c.ValueDetails)
+                        .ThenInclude(vd => vd.AdmQuality)
+                .Include(t => t.Containers)
+                    .ThenInclude(c => c.Incidents)
+                .Include(t => t.Incidents)
+                .FirstOrDefaultAsync(t => t.Id == transactionId);
+
+            if (tx == null) return null;
+
+            var userId = new HashSet<string>();
+            if (!string.IsNullOrEmpty(tx.RegistrationUser))userId.Add(tx.RegistrationUser);
+            foreach (var inc in tx.Incidents)
+            {
+                if (!string.IsNullOrEmpty(inc.ReportedUserId)) userId.Add(inc.ReportedUserId);
+            }
+
+            var user = await _context.Users
+                .AsNoTracking()
+                .Where(u => userId.Contains(u.Id))
+                .Select(u => new { u.Id, u.NombreUsuario })
+                .ToDictionaryAsync(u => u.Id, u => u.NombreUsuario);
+
+            var typeId = tx.Incidents.Select(i => i.IncidentTypeId).Where(id => id != null).Distinct().ToList();
+            var incTypes = await _context.CefIncidentTypes
+                .AsNoTracking()
+                .Where(it => typeId.Contains(it.Id))
+                .Select(it => new { it.Id, it.Code })
+                .ToDictionaryAsync(it => it.Id, it => it.Code);
+
+            decimal billsHigh = 0, billsLow = 0, coins = 0, docs = 0, checks = 0;
+
+            var byId = tx.Containers.ToDictionary(c => c.Id, c => c);
+            string ParentLabel(int? pid)
+            {
+                if (pid == null || !byId.ContainsKey(pid.Value)) return "";
+                var onlyBags = tx.Containers
+                                 .Where(c => c.ContainerType == CefContainerTypeEnum.Bolsa.ToString())
+                                 .OrderBy(c => c.Id)
+                                 .ToList();
+                var idx = onlyBags.FindIndex(c => c.Id == pid.Value);
+                var code = byId[pid.Value].ContainerCode ?? "";
+                return $"Bolsa {(idx >= 0 ? idx + 1 : 0)} — {code}";
+            }
+
+            var vm = new CefTransactionDetailViewModel
+            {
+                CefTransactionId = tx.Id,
+                SlipNumber = tx.SlipNumber.ToString() ?? "N/A",
+                CurrentStatus = tx.TransactionStatus ?? "N/A",
+                ServiceOrderId = tx.ServiceOrderId ?? "N/A",
+                ServiceConcept = tx.Service?.Concept?.NombreConcepto ?? "N/A",
+                BranchName = tx.Branch?.NombreSucursal ?? "N/A",
+                RegistrationDate = tx.RegistrationDate,
+                RegisteredByName = (tx.RegistrationUser != null && user.TryGetValue(tx.RegistrationUser, out var uName)) ? uName : null
+            };
+
+            foreach (var c in tx.Containers.OrderBy(x => x.ParentContainerId.HasValue).ThenBy(x => x.Id))
+            {
+                var cvm = new DetailContainerVM
+                {
+                    Id = c.Id,
+                    ContainerType = c.ContainerType ?? "N/A",
+                    ContainerCode = c.ContainerCode ?? "N/A",
+                    ParentContainerId = c.ParentContainerId,
+                    ParentLabel = ParentLabel(c.ParentContainerId)
+                };
+
+                if (c.ValueDetails != null)
+                {
+                    foreach (var v in c.ValueDetails.OrderBy(v => v.ValueType).ThenBy(v => v.DenominationId))
+                    {
+                        string denomLabel =
+                            v.AdmDenominacion?.Denominacion
+                            ?? (v.AdmDenominacion?.ValorDenominacion > 0
+                                ? v.AdmDenominacion!.ValorDenominacion?.ToString("N0")
+                                : (v.UnitValue ?? 0m).ToString("N0"));
+
+                        string qualityName = v.AdmQuality?.QualityName ?? "N/A";
+
+                        bool? isHigh = null;
+                        if (string.Equals(v.ValueType, "Billete", StringComparison.OrdinalIgnoreCase))
+                            isHigh = v.IsHighDenomination;
+
+                        int bundleSize = v.AdmDenominacion?.CantidadUnidadAgrupamiento ?? 1;
+
+                        int bundles = v.BundlesCount ?? 0;
+                        int loose = v.LoosePiecesCount ?? 0;
+
+                        int quantity = v.Quantity ?? (bundles * bundleSize + loose);
+
+                        decimal unitValue = v.UnitValue
+                                            ?? v.AdmDenominacion?.ValorDenominacion
+                                            ?? 0m;
+
+                        decimal amount = v.CalculatedAmount ?? (quantity * unitValue);
+
+
+                        var row = new DetailValueRowVM
+                        {
+                            ValueType = v.ValueType ?? "",
+                            DenominationName = denomLabel,
+                            QualityName = qualityName,
+                            IsHighDenomination = isHigh,
+                            Quantity = quantity,
+                            Bundles = bundles,
+                            Loose = loose,
+                            UnitValue = unitValue,
+                            CalculatedAmount = amount
+                        };
+                        cvm.Values.Add(row);
+
+                        // Totales por tipo
+                        if (row.ValueType.Equals("Billete", StringComparison.OrdinalIgnoreCase))
+                        {
+                            if (row.IsHighDenomination == true) billsHigh += amount;
+                            else billsLow += amount;
+                        }
+                        else if (row.ValueType.Equals("Moneda", StringComparison.OrdinalIgnoreCase))
+                        {
+                            coins += amount;
+                        }
+                        else if (row.ValueType.Equals("Documento", StringComparison.OrdinalIgnoreCase))
+                        {
+                            docs += amount;
+                        }
+                        else if (row.ValueType.Equals("Cheque", StringComparison.OrdinalIgnoreCase))
+                        {
+                            checks += amount;
+                        }
+
+                        cvm.Subtotal += amount;
+                    }
+                }
+
+                vm.Containers.Add(cvm);
+            }
+
+            foreach (var inc in tx.Incidents.OrderBy(i => i.IncidentDate))
+            {
+                decimal amount = inc.AffectedAmount;
+                if (amount == 0m && inc.AffectedDenomination.HasValue && inc.AffectedQuantity.HasValue)
+                {
+                    var face = await _context.AdmDenominaciones
+                        .AsNoTracking()
+                        .Where(d => d.CodDenominacion == inc.AffectedDenomination.Value)
+                        .Select(d => (decimal?)d.ValorDenominacion)
+                        .FirstOrDefaultAsync() ?? 0m;
+                    amount = face * inc.AffectedQuantity.Value;
+                }
+
+                vm.Incidents.Add(new DetailIncidentVM
+                {
+                    Id = inc.Id,
+                    Code = (inc.IncidentTypeId != null && incTypes.TryGetValue(inc.IncidentTypeId, out var code)) ? code : "",
+                    Description = inc.Description,
+                    Status = inc.IncidentStatus ?? "",
+                    ReportedBy = (inc.ReportedUserId != null && user.TryGetValue(inc.ReportedUserId, out var rname)) ? rname : null,
+                    ReportedAt = inc.IncidentDate,
+                    AffectedAmount = amount,
+                    AffectedDenomination = inc.AffectedDenomination,
+                    AffectedQuantity = inc.AffectedQuantity
+                });
+            }
+
+            var computed = billsHigh + billsLow + coins + docs + checks;
+            vm.TotalDeclared = tx.TotalDeclaredValue;
+            vm.TotalCounted = (tx.TotalCountedValue != 0) ? tx.TotalCountedValue : computed;
+            vm.NetDiff = vm.TotalCounted - vm.TotalDeclared;
+
+            vm.BillsHigh = billsHigh;
+            vm.BillsLow = billsLow;
+            vm.CoinsTotal = coins;
+            vm.DocsTotal = docs;
+            vm.ChecksTotal = checks;
+
+            return vm;
+        }
     }
 }

@@ -5,7 +5,7 @@ using System;
 
 namespace VCashApp.Models.Entities
 {
-    [Table("CefContenedores")]
+    [Table("CefBolsas")]
     public class CefContainer
     {
         [Key]
@@ -18,20 +18,20 @@ namespace VCashApp.Models.Entities
         public int CefTransactionId { get; set; }
         public virtual CefTransaction CefTransaction { get; set; } = null!;
 
-        [Column("IdContenedorPadre")]
-        [ForeignKey("ParentContainer")]
+        [Column("IdBolsaPadre")]
+        [ForeignKey("ParentBag")]
         public int? ParentContainerId { get; set; }
         public virtual CefContainer? ParentContainer { get; set; } // Propiedad de navegación al padre
         public virtual ICollection<CefContainer> ChildContainers { get; set; } = new List<CefContainer>(); // Colección de hijos
 
         [Required]
         [StringLength(50)]
-        [Column("TipoContenedor")]
+        [Column("TipoBolsa")]
         public string ContainerType { get; set; } // Tipo de contenedor: 'Bolsa', 'Sobre'
 
         [Required]
         [StringLength(100)]
-        [Column("CodigoContenedor")]
+        [Column("CodigoBolsa")]
         public string ContainerCode { get; set; } // Número de Sello / Número de la Bolsa
 
         [StringLength(20)]
@@ -43,7 +43,7 @@ namespace VCashApp.Models.Entities
 
         [Required]
         [StringLength(50)]
-        [Column("EstadoContenedor")]
+        [Column("EstadoBolsa")]
         public string ContainerStatus { get; set; } // Estado: 'Pending', 'InProcess', 'Counted', 'Verified', 'WithIncident'
         
         [StringLength(255)]

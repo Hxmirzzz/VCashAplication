@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using VCashApp.Data;
 
@@ -11,9 +12,11 @@ using VCashApp.Data;
 namespace VCashApp.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250926215137_RenameCefContenedoresTableToCefBolsasTable")]
+    partial class RenameCefContenedoresTableToCefBolsasTable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1594,19 +1597,19 @@ namespace VCashApp.Migrations
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)")
-                        .HasColumnName("CodigoBolsa");
+                        .HasColumnName("CodigoContenedor");
 
                     b.Property<string>("ContainerStatus")
                         .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)")
-                        .HasColumnName("EstadoBolsa");
+                        .HasColumnName("EstadoContenedor");
 
                     b.Property<string>("ContainerType")
                         .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("nvarchar(50)")
-                        .HasColumnName("TipoBolsa");
+                        .HasColumnName("TipoContenedor");
 
                     b.Property<decimal?>("CountedValue")
                         .HasColumnType("DECIMAL(18,0)")
@@ -1625,7 +1628,7 @@ namespace VCashApp.Migrations
 
                     b.Property<int?>("ParentContainerId")
                         .HasColumnType("int")
-                        .HasColumnName("IdBolsaPadre");
+                        .HasColumnName("IdContenedorPadre");
 
                     b.Property<DateTime?>("ProcessingDate")
                         .HasColumnType("DATETIME")
@@ -1646,9 +1649,9 @@ namespace VCashApp.Migrations
 
                     b.ToTable("CefBolsas", null, t =>
                         {
-                            t.HasCheckConstraint("CK_CEF_SOBRE_Padre", "(([TipoBolsa] = 'Sobre' AND [IdBolsaPadre] IS NOT NULL) OR  ([TipoBolsa] <> 'Sobre' AND [IdBolsaPadre] IS NULL))");
+                            t.HasCheckConstraint("CK_CEF_SOBRE_Padre", "(([TipoContenedor] = 'Sobre' AND [IdContenedorPadre] IS NOT NULL) OR  ([TipoContenedor] <> 'Sobre' AND [IdContenedorPadre] IS NULL))");
 
-                            t.HasCheckConstraint("CK_CEF_SOBRE_TipoSobreValido", "([TipoBolsa] <> 'Sobre') OR ([TipoSobre] IN ('Efectivo','Documento','Cheque'))");
+                            t.HasCheckConstraint("CK_CEF_SOBRE_TipoSobreValido", "([TipoContenedor] <> 'Sobre') OR ([TipoSobre] IN ('Efectivo','Documento','Cheque'))");
                         });
                 });
 
@@ -1675,7 +1678,7 @@ namespace VCashApp.Migrations
 
                     b.Property<int?>("CefContainerId")
                         .HasColumnType("int")
-                        .HasColumnName("IdBolsaCef");
+                        .HasColumnName("IdContenedorCef");
 
                     b.Property<int?>("CefTransactionId")
                         .HasColumnType("int")
@@ -2017,7 +2020,7 @@ namespace VCashApp.Migrations
 
                     b.Property<int>("CefContainerId")
                         .HasColumnType("int")
-                        .HasColumnName("IdBolsaCef");
+                        .HasColumnName("IdContenedorCef");
 
                     b.Property<int?>("CheckNumber")
                         .HasColumnType("int")

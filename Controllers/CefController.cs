@@ -692,20 +692,27 @@ namespace VCashApp.Controllers
             await SetCommonViewBagsCefAsync(currentUser, "Procesar Contenedores CEF", "CEF_REC", "CEF_COL");
             await SetCountingAndIncidentsFlagsAsync(currentUser);
 
-            var user = await _userManager.GetUserAsync(User);
-            var roles = await _userManager.GetRolesAsync(user);
+            var roles = await _userManager.GetRolesAsync(currentUser);
             var canBills =
-                   roles.Contains("ContadorBillete")
-                || roles.Contains("SupervisorCEF")
-                || await HasPermisionForView(roles, "CEF_REC", PermissionType.Edit)
-                || await HasPermisionForView(roles, "CEF_COL", PermissionType.Edit);
+                   roles.Contains("ContadorBilleteCEF")
+                || roles.Contains("SupervisorCEF");
 
             var canCoins =
-                   roles.Contains("ContadorMoneda")
-                || roles.Contains("SupervisorCEF")
-                || await HasPermisionForView(roles, "CEF_SUP", PermissionType.Edit);
+                   roles.Contains("ContadorMonedaCEF")
+                || roles.Contains("SupervisorCEF");
 
-            var canSupInc =
+            var canIncCreateEdit =
+                   roles.Contains("ContadorBilleteCEF")
+                || roles.Contains("ContadorMonedaCEF")
+                || await HasPermisionForView(roles, "CEF_COL", PermissionType.Edit)
+                || await HasPermisionForView(roles, "CEF_REC", PermissionType.Edit);
+
+            var canIncApprove =
+                   roles.Contains("SupervisorCEF")
+                || await HasPermisionForView(roles, "CEF_SUP", PermissionType.Edit)
+                || await HasPermisionForView(roles, "CEF_DEL", PermissionType.Edit);
+
+            var canFinalize =
                    roles.Contains("SupervisorCEF")
                 || await HasPermisionForView(roles, "CEF_SUP", PermissionType.Edit)
                 || await HasPermisionForView(roles, "CEF_DEL", PermissionType.Edit);
@@ -730,7 +737,10 @@ namespace VCashApp.Controllers
             });
             ViewBag.CanCountBills = canBills;
             ViewBag.CanCountCoins = canCoins;
-            ViewBag.CanApproveIncidents = canSupInc;
+            ViewBag.CanIncCreateEdit = canIncCreateEdit;
+            ViewBag.CanIncApprove = canIncApprove;
+            ViewBag.CanFinalize = canFinalize;
+            ViewData["Title"] = $"Procesamiento de Bolsas";
 
             _audit.Info(
                 action: "CEF.Containers.Open",
@@ -795,6 +805,21 @@ namespace VCashApp.Controllers
 
             await SetCommonViewBagsCefAsync(currentUser, "Procesando Contenedores CEF", "CEF_REC", "CEF_COL");
 
+            var roles = await _userManager.GetRolesAsync(currentUser);
+
+            bool canBills =
+                   roles.Contains("ContadorBilleteCef")
+                || roles.Contains("SupervisorCEF")
+                || await HasPermisionForView(roles, "CEF_REC", PermissionType.Edit)
+                || await HasPermisionForView(roles, "CEF_COL", PermissionType.Edit);
+
+            bool canCoins =
+                   roles.Contains("ContadorMonedaCef")
+                || roles.Contains("SupervisorCEF")
+                || await HasPermisionForView(roles, "CEF_REC", PermissionType.Edit)
+                || await HasPermisionForView(roles, "CEF_COL", PermissionType.Edit)
+                || await HasPermisionForView(roles, "CEF_SUP", PermissionType.Edit);
+
             viewModel.CefTransactionId = transactionId;
 
             ViewBag.IncidentTypes = (await _cefIncidentService.GetAllIncidentTypesAsync())
@@ -807,9 +832,6 @@ namespace VCashApp.Controllers
             // Validaciones mínimas
             if (viewModel?.Containers == null || viewModel.Containers.Count == 0)
                 ModelState.AddModelError("", "No se recibieron contenedores para guardar.");
-
-            var canBills = (bool)(ViewBag.CanCountBills ?? false);
-            var canCoins = (bool)(ViewBag.CanCountCoins ?? false);
 
             if (viewModel?.Containers != null)
             {
@@ -835,9 +857,10 @@ namespace VCashApp.Controllers
                     if (c?.ValueDetails == null) continue;
 
                     var dup = c.ValueDetails
-                        .Where(v => v.ValueType == CefValueTypeEnum.Billete || v.ValueType == CefValueTypeEnum.Moneda)
+                        .Where(v => (v.ValueType == CefValueTypeEnum.Billete || v.ValueType == CefValueTypeEnum.Moneda)
+                                 && v.DenominationId != null && v.QualityId != null)
                         .GroupBy(v => new { v.ValueType, v.DenominationId, v.QualityId })
-                        .FirstOrDefault(g => g.Count() > 1);
+                        .FirstOrDefault(g => g.Select(v => v.Id).Distinct().Count() > 1);
 
                     if (dup != null)
                     {
@@ -937,10 +960,10 @@ namespace VCashApp.Controllers
                                 var created = await _cefIncidentService.RegisterIncidentAsync(inc, currentUser.Id);
 
                                 _audit.Info(
-                                    action: "CEF.Incident.Reported",
+                                    action: "CEF.Incident.Reportada",
                                     entityType: "CefIncident",
                                     entityId: created.Id.ToString(),
-                                    result: "Reported",
+                                    result: "Reportada",
                                     urlId: created.CefTransactionId?.ToString(),
                                     modelId: created.CefContainerId?.ToString(),
                                     extra: new Dictionary<string, object>
@@ -1137,6 +1160,19 @@ namespace VCashApp.Controllers
 
             await SetCommonViewBagsCefAsync(currentUser, "Revisión CEF", "CEF_REC", "CEF_DEL", "CEF_COL", "CEF_SUP");
 
+            var roles = await _userManager.GetRolesAsync(currentUser);
+            var vistas = new[] { "CEF_REC", "CEF_DEL", "CEF_COL", "CEF_SUP" };
+            bool canReview = false;
+
+            foreach (var v in vistas)
+            {
+                if (await HasPermisionForView(roles, v, PermissionType.Edit))
+                {
+                    canReview = true;
+                    break;
+                }
+            }
+
             var vm = await _cefTransactionService.PrepareReviewViewModelAsync(transactionId);
             if (vm == null)
             {
@@ -1163,13 +1199,7 @@ namespace VCashApp.Controllers
                 new SelectListItem{ Text = "Rechazada", Value = CefTransactionStatusEnum.Rechazado.ToString() }
             };
 
-            {
-                var roles = await _userManager.GetRolesAsync(currentUser);
-                var vistas = new[] { "CEF_REC", "CEF_DEL", "CEF_COL", "CEF_SUP" };
-                async Task<bool> HasEdit(string v) => await HasPermisionForView(roles, v, PermissionType.Edit);
-                ViewBag.CanReview = (await Task.WhenAll(vistas.Select(HasEdit))).Any(x => x);
-            }
-
+            ViewBag.CanReview = canReview;
 
             _logger.LogInformation("Usuario: {Usuario} | IP: {IP} | Acción: Acceso a revisión de Transacción | ID Transacción: {TransactionId}.", currentUser.UserName, IpAddressForLogging, transactionId);
             _audit.Info(
@@ -1376,6 +1406,44 @@ namespace VCashApp.Controllers
             }
         }
 
+        /// <summary>
+        /// Muestra el detalle de un contenedor específico, incluyendo su desglose por denominaciones y calidades.
+        /// </summary>
+        /// <param name="transactionId">Identificador de la transacción.</param>
+        /// <returns>Vista con el detalle de la transacción.</returns>
+        [HttpGet("Detail/{transactionId}")]
+        [RequiredPermission(PermissionType.View, "CEF_REC", "CEF_DEL", "CEF_COL", "CEF_SUP")]
+        public async Task<IActionResult> Detail(int transactionId)
+        {
+            var currentUser = await GetCurrentApplicationUserAsync();
+            if (currentUser == null) return RedirectToAction("Login", "Account");
+
+            await SetCommonViewBagsCefAsync(currentUser, "Detalle de Transacción CEF", "CEF_REC", "CEF_DEL", "CEF_COL", "CEF_SUP");
+
+            var vm = await _cefTransactionService.PrepareDetailViewModelAsync(transactionId);
+            if (vm == null)
+            {
+                TempData["ErrorMessage"] = "Transacción de Centro de Efectivo no encontrado.";
+                return RedirectToAction(nameof(Index));
+            }
+
+            ViewData["Title"] = $"Detalle de Transacción CEF #{vm.SlipNumber}";
+
+            var roles = await _userManager.GetRolesAsync(currentUser);
+            ViewBag.CanReview = await HasPermisionForView(roles, "CEF_SUP", PermissionType.Edit);
+
+            _logger.LogInformation("Usuario: {Usuario} | IP: {IP} | Acción: Acceso a detalle de Contenedor | ID Contenedor: {ContainerId}.", currentUser.UserName, IpAddressForLogging, transactionId);
+            _audit.Info(
+                action: "CEF.Container.Detail",
+                detailMessage: "Apertura de pantalla de detalle de contenedor",
+                result: "OK",
+                entityType: "CefContainer",
+                entityId: transactionId.ToString(),
+                urlId: vm.CefTransactionId.ToString()
+            );
+            return View("Detail", vm);
+        }
+
         // --- NUEVAS ACCIONES AJAX PARA DROPDOWNS DINÁMICOS (DEL TEMPORAL) ---
         /// <summary>
         /// Obtiene una lista de ubicaciones (puntos, ATMs o fondos) para dropdowns dinámicos.
@@ -1535,7 +1603,7 @@ namespace VCashApp.Controllers
 
         [HttpPost("ResolveIncident")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> ResolveIncident(int id, string newStatus = "Adjusted")
+        public async Task<IActionResult> ResolveIncident(int id, string newStatus = "Ajustada")
         {
             var ok = await _cefIncidentService.ResolveIncidentAsync(id, newStatus);
             if (!ok) return BadRequest(new { ok = false, message = "No se pudo resolver la novedad." });

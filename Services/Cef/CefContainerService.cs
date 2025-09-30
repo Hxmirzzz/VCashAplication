@@ -223,16 +223,16 @@ namespace VCashApp.Services.Cef
             // 2) Normalizar detalles
             var detailsVms = viewModel.ValueDetails ?? new List<CefValueDetailViewModel>();
 
-            // Duplicados solo aplican a Billete/Moneda
             var dupPairs = detailsVms
-                .Where(d => d.ValueType == CefValueTypeEnum.Billete || d.ValueType == CefValueTypeEnum.Moneda)
-                .Where(d => d.DenominationId != null && d.QualityId != null)
+                .Where(d => (d.ValueType == CefValueTypeEnum.Billete || d.ValueType == CefValueTypeEnum.Moneda)
+                         && d.DenominationId != null && d.QualityId != null)
                 .GroupBy(d => new { d.DenominationId, d.QualityId })
-                .Where(g => g.Count() > 1)
+                .Where(g => g.Select(d => d.Id).Distinct().Count() > 1)
                 .ToList();
 
             if (dupPairs.Any())
                 throw new InvalidOperationException("Hay filas repetidas con la misma combinación Denominación + Calidad. Verifique los detalles.");
+
 
             // 3) Crear o cargar contenedor
             CefContainer container;

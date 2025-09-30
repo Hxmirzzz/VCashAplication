@@ -509,7 +509,7 @@ namespace VCashApp.Data
 
             builder.Entity<CefContainer>(entity =>
             {
-                entity.ToTable("CefContenedores");
+                entity.ToTable("CefBolsas");
                 entity.HasKey(c => c.Id);
                 entity.Property(c => c.Id).ValueGeneratedOnAdd();
 
@@ -542,12 +542,12 @@ namespace VCashApp.Data
                 {
                     t.HasCheckConstraint(
                         "CK_CEF_SOBRE_TipoSobreValido",
-                        "([TipoContenedor] <> 'Sobre') OR ([TipoSobre] IN ('Efectivo','Documento','Cheque'))");
+                        "([TipoBolsa] <> 'Sobre') OR ([TipoSobre] IN ('Efectivo','Documento','Cheque'))");
 
                     t.HasCheckConstraint(
                         "CK_CEF_SOBRE_Padre",
-                        "(([TipoContenedor] = 'Sobre' AND [IdContenedorPadre] IS NOT NULL) OR " +
-                        " ([TipoContenedor] <> 'Sobre' AND [IdContenedorPadre] IS NULL))");
+                        "(([TipoBolsa] = 'Sobre' AND [IdBolsaPadre] IS NOT NULL) OR " +
+                        " ([TipoBolsa] <> 'Sobre' AND [IdBolsaPadre] IS NULL))");
                 });
             });
 

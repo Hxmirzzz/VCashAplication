@@ -955,6 +955,13 @@
             <param name="viewModel">ViewModel con el ID de la transacción y el nuevo estado (Aprobada/Rechazada).</param>
             <returns>Redirección al dashboard de CEF.</returns>
         </member>
+        <member name="M:VCashApp.Controllers.CefController.Detail(System.Int32)">
+            <summary>
+            Muestra el detalle de un contenedor específico, incluyendo su desglose por denominaciones y calidades.
+            </summary>
+            <param name="transactionId">Identificador de la transacción.</param>
+            <returns>Vista con el detalle de la transacción.</returns>
+        </member>
         <member name="M:VCashApp.Controllers.CefController.GetPointsOrFundsForDropdown(System.Int32,System.Nullable{System.Int32},System.String,System.String)">
             <summary>
             Obtiene una lista de ubicaciones (puntos, ATMs o fondos) para dropdowns dinámicos.
@@ -2216,6 +2223,30 @@
         <member name="M:VCashApp.Migrations.SetNewColumnDenominationIdToCefIncidents.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
             <inheritdoc />
         </member>
+        <member name="T:VCashApp.Migrations.RenameCefContenedoresTableToCefBolsasTable">
+            <inheritdoc />
+        </member>
+        <member name="M:VCashApp.Migrations.RenameCefContenedoresTableToCefBolsasTable.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:VCashApp.Migrations.RenameCefContenedoresTableToCefBolsasTable.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:VCashApp.Migrations.RenameCefContenedoresTableToCefBolsasTable.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="T:VCashApp.Migrations.SetBagNameToCefColumns">
+            <inheritdoc />
+        </member>
+        <member name="M:VCashApp.Migrations.SetBagNameToCefColumns.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:VCashApp.Migrations.SetBagNameToCefColumns.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:VCashApp.Migrations.SetBagNameToCefColumns.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
         <member name="T:VCashApp.Models.ViewModels.BranchViewModel">
             <summary>
             Representa la información principal de una sucursal.
@@ -3229,6 +3260,13 @@
             </summary>
             <returns>Lista de SelectListItem para las divisas</returns>
         </member>
+        <member name="M:VCashApp.Services.Cef.CefTransactionService.PrepareDetailViewModelAsync(System.Int32)">
+            <summary>
+            Prepara un modelo detallado de transacción para revisión.
+            </summary>
+            <param name="transactionId">Identificador de la transacción.</param>
+            <returns>Modelo detallado o null si no se encuentra.</returns>
+        </member>
         <member name="T:VCashApp.Services.Cef.CefTransitionPolicy">
             <summary>
             Reglas de transición para Recolección + mapeo a estados de Servicio (0..7).
@@ -3619,6 +3657,13 @@
             Obtiene las divisas de servicio disponibles para los dropdowns.
             </summary>
             <returns>Lista de SelectListItem para divisas de servicio.</returns>
+        </member>
+        <member name="M:VCashApp.Services.ICefTransactionService.PrepareDetailViewModelAsync(System.Int32)">
+            <summary>
+            Prepara el ViewModel detallado para la vista de detalles de una transacción de Centro de Efectivo.
+            </summary>
+            <param name="transactionId">Identificador de la transacción</param>
+            <returns>El ViewModel detallado de la transacción, o null si no se encuentra.</returns>
         </member>
         <member name="T:VCashApp.Services.ICgsServiceService">
             <summary>

@@ -33,19 +33,22 @@ namespace VCashApp.Services.Cef
             }
 
             var desiredCode = IncidentTypeCodeMap.ToMasterCode(incidentViewModel.IncidentType);
-
             var tipoNovedadEntity = await _context.CefIncidentTypes
-                .FirstOrDefaultAsync(it =>
-                    it.Code == desiredCode ||
-                    it.Code == incidentViewModel.IncidentType.ToString()
-                );
+                .FirstOrDefaultAsync(it => it.Code == desiredCode || it.Code == incidentViewModel.IncidentType.ToString())
+                ?? throw new InvalidOperationException($"El tipo de novedad '{incidentViewModel.IncidentType}' no está configurado.");
 
-            if (tipoNovedadEntity == null)
+
+            decimal affectedAmount = incidentViewModel.AffectedAmount;
+            if (affectedAmount <= 0m
+                && incidentViewModel.AffectedDenomination.HasValue
+                && incidentViewModel.AffectedQuantity.HasValue)
             {
-                throw new InvalidOperationException(
-                    $"El tipo de novedad '{incidentViewModel.IncidentType}' no está configurado. " +
-                    $"Falta el código '{desiredCode}' en la tabla maestra."
-                );
+                var face = await _context.AdmDenominaciones
+                    .Where(d => d.CodDenominacion == incidentViewModel.AffectedDenomination.Value)
+                    .Select(d => d.ValorDenominacion)
+                    .FirstOrDefaultAsync() ?? 0m;
+
+                affectedAmount = face * incidentViewModel.AffectedQuantity.Value;
             }
 
             var incident = new CefIncident
@@ -54,13 +57,13 @@ namespace VCashApp.Services.Cef
                 CefContainerId = incidentViewModel.CefContainerId,
                 CefValueDetailId = incidentViewModel.CefValueDetailId,
                 IncidentTypeId = tipoNovedadEntity.Id,
-                AffectedAmount = incidentViewModel.AffectedAmount,
+                AffectedAmount = affectedAmount,
                 AffectedDenomination = incidentViewModel.AffectedDenomination,
                 AffectedQuantity = incidentViewModel.AffectedQuantity,
                 Description = incidentViewModel.Description,
                 ReportedUserId = reportedUserId,
                 IncidentDate = DateTime.Now,
-                IncidentStatus = "Reported"
+                IncidentStatus = "Reportada"
             };
 
             if (!incidentViewModel.CefTransactionId.HasValue && incidentViewModel.CefContainerId.HasValue)
@@ -85,10 +88,10 @@ namespace VCashApp.Services.Cef
 
             if (inc == null) return false;
 
-            if (newStatus != "Adjusted" && newStatus != "Closed")
-                throw new InvalidOperationException($"El estado '{newStatus}' no es válido. Use 'Adjusted' o 'Closed'.");
+            if (newStatus != "Ajustada" && newStatus != "Closed")
+                throw new InvalidOperationException($"El estado '{newStatus}' no es válido. Use 'Ajustada' o 'Closed'.");
 
-            if (inc.IncidentStatus != "Reported" && inc.IncidentStatus != "UnderReview")
+            if (inc.IncidentStatus != "Reportada" && inc.IncidentStatus != "UnderReview")
                 return false;
 
             inc.IncidentStatus = newStatus;
@@ -162,7 +165,7 @@ namespace VCashApp.Services.Cef
         {
             var incidents = await _context.CefIncidents
                 .Include(i => i.IncidentType)
-                .Where(i => i.CefTransactionId == transactionId && i.IncidentStatus == "Adjusted")
+                .Where(i => i.CefTransactionId == transactionId && i.IncidentStatus == "Ajustada")
                 .ToListAsync();
 
             var denomIds = incidents
@@ -216,14 +219,14 @@ namespace VCashApp.Services.Cef
                 .AnyAsync(i =>
                     (i.CefTransactionId == cefTransactionId ||
                      (i.CefContainer != null && i.CefContainer.CefTransactionId == cefTransactionId))
-                    && (i.IncidentStatus == "Reported" || i.IncidentStatus == "UnderReview"));
+                    && (i.IncidentStatus == "Reportada" || i.IncidentStatus == "UnderReview"));
         }
 
         public async Task<decimal> SumApprovedEffectByContainerAsync(int containerId)
         {
             var incidents = await _context.CefIncidents
                 .Include(i => i.IncidentType)
-                .Where(i => i.CefContainerId == containerId && i.IncidentStatus == "Adjusted")
+                .Where(i => i.CefContainerId == containerId && i.IncidentStatus == "Ajustada")
                 .ToListAsync();
             
             var denoms = incidents

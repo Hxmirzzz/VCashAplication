@@ -8,6 +8,10 @@
     bool canCoins  = ViewBag.CanCountCoins ?? false;
     bool canSupInc = ViewBag.CanApproveIncidents ?? false;
 }
+<style>
+  .readonly-locked { background-color:#f5f6f8 !important; pointer-events:none; }
+  .disabled { pointer-events:none; opacity:.6; }
+</style>
 
 <div class="form-container">
     <div class="card">
@@ -381,7 +385,7 @@
                     </div>
                     <div class="tab-pane fade" role="tabpanel" data-step="3">
                         <div class="step-content">
-                                                        <div class="card mb-3">
+                            <div class="card mb-3">
                                 <div class="card-header d-flex align-items-center">
                                     <h6 class="mb-0"><i class="ri-list-check"></i> Totales de la transacción</h6>
                                     <span class="chip-live ms-auto">En vivo</span>
@@ -533,9 +537,11 @@
 
 <script>
   window.CEF = window.CEF || {};
-  window.CEF.canCountBills       = @(canBills  ? "true":"false");
-  window.CEF.canCountCoins       = @(canCoins  ? "true":"false");
-  window.CEF.canApproveIncidents = @(canSupInc ? "true":"false");
+  window.CEF.canCountBills = @( (ViewBag.CanCountBills ?? false) ? "true" : "false");
+  window.CEF.canCountCoins = @( (ViewBag.CanCountCoins ?? false) ? "true" : "false");
+  window.CEF.canIncCreateEdit = @( (ViewBag.CanIncCreateEdit ?? false) ? "true" : "false");
+  window.CEF.canIncApprove = @( (ViewBag.CanIncApprove ?? false) ? "true" : "false");
+  window.CEF.canFinalize = @( (ViewBag.CanFinalize ?? false) ? "true" : "false");
 </script>
 
 <div class="validation-scape"></div>
@@ -652,7 +658,9 @@
 
           const CAN_BILLS = !!(window.CEF && window.CEF.canCountBills);
           const CAN_COINS = !!(window.CEF && window.CEF.canCountCoins);
-          const CAN_INC_APPROVE = !!(window.CEF && window.CEF.canApproveIncidents);
+          const CAN_INC_CREATE_EDIT = !!(window.CEF && window.CEF.canIncCreateEdit);
+          const CAN_INC_APPROVE     = !!(window.CEF && window.CEF.canIncApprove);
+          const CAN_FINALIZE = !!(window.CEF && window.CEF.canFinalize);
 
           // =====================================================================
           // 1) STEPPER + VALIDACIÓN
@@ -674,7 +682,7 @@
             else if (currentStep === 2) {
                 $prev.show();
                 $submit.show();
-                $final.show();
+                if (CAN_FINALIZE) $final.show();
             }
             else if (currentStep === 3) {
                 $prev.show();
@@ -1136,23 +1144,49 @@
             setHighBadge($row, isHigh);
           }
 
+          function lockCountingTable($tbl, lock) {
+            $tbl.find('input, textarea')
+                .prop('readonly', lock)
+                .toggleClass('readonly-locked', lock);
+
+            $tbl.find('select').each(function () {
+              const $sel = $(this);
+              const name = $sel.attr('name');
+
+              if (lock) {
+                if (name && !$sel.next('input.mirror-hidden').length) {
+                  $('<input type="hidden" class="mirror-hidden">')
+                    .attr('name', name)
+                    .val($sel.val())
+                    .insertAfter($sel);
+                }
+                $sel.prop('disabled', true)
+                    .on('change.mirror', function(){ $(this).next('input.mirror-hidden').val($(this).val()); });
+                $sel.addClass('readonly-locked');
+              } else {
+                $sel.prop('disabled', false).off('change.mirror').removeClass('readonly-locked');
+                if ($sel.next('input.mirror-hidden').length) $sel.next('input.mirror-hidden').remove();
+              }
+            });
+
+            $tbl.closest('.card, .mb-3')
+                .find('.js-add-detail, .js-remove-detail, .js-add-cheque, .js-remove-cheque')
+                .prop('disabled', lock)
+                .toggleClass('disabled', lock);
+          }
+
           function applyCountingPermissionsUI(scope){
             const $root = scope ? $(scope) : $(document);
 
             $root.find('table.js-details-table[data-detail-scope="bolsa-billete"], table.js-details-table[data-detail-scope="sobre-billete"]').each(function(){
               const $tbl = $(this);
-              $tbl.closest('.card, .mb-3').find('.js-add-detail[data-detail-scope$="billete"]').prop('disabled', !CAN_BILLS).toggleClass('disabled', !CAN_BILLS);
-              $tbl.find(':input').prop('disabled', !CAN_BILLS);
+              lockCountingTable($tbl, !CAN_BILLS);
             });
 
             $root.find('table.js-details-table[data-detail-scope="bolsa-moneda"], table.js-details-table[data-detail-scope="sobre-moneda"]').each(function(){
               const $tbl = $(this);
-              $tbl.closest('.card').find('.js-add-detail[data-detail-scope$="moneda"]').prop('disabled', !CAN_COINS).toggleClass('disabled', !CAN_COINS);
-              $tbl.find(':input').prop('disabled', !CAN_COINS);
+              lockCountingTable($tbl, !CAN_COINS);
             });
-                    // Si quieres ocultar por completo las secciones (opcional):
-            // $root.find('.card:has([data-detail-scope="bolsa-billete"]), .card:has([data-detail-scope="sobre-billete"])').toggle(CAN_BILLS);
-            // $root.find('.card:has([data-detail-scope="bolsa-moneda"]),  .card:has([data-detail-scope="sobre-moneda"])').toggle(CAN_COINS);
           }
 
           // =====================================================================
@@ -2460,29 +2494,48 @@
               rows.forEach(x => {
                 const fallback = getDenomValueById(x.AffectedDenomination) * (Number(x.AffectedQuantity || 0));
                 const amt = Number((x.AffectedAmount ?? 0)) || fallback || 0;
+                const status = String(x.IncidentStatus || '').trim();
 
-                const canApprove = CAN_INC_APPROVE && (x.IncidentStatus === 'Reported' || x.IncidentStatus === "UnderReview");
-                const approveBtn = canApprove
-                  ? `<button type="button" class="btn btn-success btn-sm p-2 js-inc-approve"
-                       data-id="${x.Id}" data-tx="${transactionId}" data-cont="${containerId}">
-                       <i class="ri-check-double-line"></i>
-                     </button>`
-                  : '';
-                
-                const canEdit = CAN_INC_APPROVE && (x.IncidentStatus === 'Reported' || x.IncidentStatus === 'Adjusted');
-                const editBtn = canEdit
-                  ? `<button type="button" class="btn btn-outline-primary btn-sm p-2 js-inc-edit"
-                       data-id="${x.Id}" data-tx="${transactionId}" data-cont="${containerId}">
-                       <i class="ri-edit-box-line"></i>
-                     </button>`
-                  : '';
+                // helper para aceptar español/inglés
+                function isStatus(s, ...values){
+                  const map = {
+                    Reportada: ['Reportada','Reported'],
+                    Ajustada:  ['Ajustada','Adjusted'],
+                    Aprobada:  ['Aprobada','Approved'],
+                    Revision:  ['En revisión','UnderReview','Under Review']
+                  };
+                  const flat = values.flatMap(v => map[v] || [v]);
+                  return flat.some(v => s === v);
+                }
 
-                const delBtn = canEdit
-                  ? `<button type="button" class="btn btn-outline-danger btn-sm p-2 js-inc-delete"
-                       data-id="${x.Id}" data-tx="${transactionId}" data-cont="${containerId}">
-                       <i class="ri-delete-bin-line"></i>
-                     </button>`
-                  : '';
+                // reglas por rol/estado
+                const canApprove = CAN_INC_APPROVE && (isStatus(status,'Reportada') || isStatus(status,'Revision'));
+
+                const canEdit = (CAN_INC_CREATE_EDIT && isStatus(status,'Reportada')) || CAN_INC_APPROVE;
+
+                const canDelete =
+                  // Contadores pueden borrar si está Reportada
+                  (CAN_INC_CREATE_EDIT && isStatus(status,'Reportada')) ||
+                  // Supervisor puede borrar si está Ajustada o Aprobada
+                  (CAN_INC_APPROVE && (isStatus(status,'Ajustada') || isStatus(status,'Aprobada')));
+
+                const approveBtn = canApprove ? `
+                  <button type="button" class="btn btn-success btn-sm p-2 js-inc-approve"
+                    data-id="${x.Id}" data-tx="${transactionId}" data-cont="${containerId}">
+                    <i class="ri-check-double-line"></i>
+                  </button>` : '';
+
+                const editBtn = canEdit ? `
+                  <button type="button" class="btn btn-outline-primary btn-sm p-2 js-inc-edit"
+                    data-id="${x.Id}" data-tx="${transactionId}" data-cont="${containerId}">
+                    <i class="ri-edit-box-line"></i>
+                  </button>` : '';
+
+                const delBtn = canDelete ? `
+                  <button type="button" class="btn btn-outline-danger btn-sm p-2 js-inc-delete"
+                    data-id="${x.Id}" data-tx="${transactionId}" data-cont="${containerId}">
+                    <i class="ri-delete-bin-line"></i>
+                  </button>` : '';
 
                 $tb.append(`
                   <tr>
@@ -2606,7 +2659,7 @@
               url: IncidentRoutes.resolve,
               data: {
                 id: id,
-                newStatus: 'Adjusted',
+                newStatus: 'Ajustada',
                 __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').first().val()
               },
               success: function(r){
@@ -2713,7 +2766,7 @@
 
               let effect = 0;
               rows.forEach(x => {
-                if (String(x.Status) !== 'Adjusted') return;
+                if (String(x.Status) !== 'Ajustada') return;
                 const sign = incidentSignByCode(x.Type);
                 const amt  = incidentAmount(x);
                 effect += sign * (Number(amt) || 0);
@@ -2895,7 +2948,7 @@
           });
 
           $(document).on('click', '.js-finalize-counting', function (e) {
-            e.preventDefault();
+            if (!CAN_FINALIZE) { e.preventDefault(); return; }
 
             if (typeof isDirty !== 'undefined' && isDirty) {
               Swal.fire({
@@ -3047,13 +3100,9 @@
           refreshIncidentEffectAll('@Model.CefTransactionId');
           $('#incEditDenom').html(buildDenomOptionsFromJson());
           applyCountingPermissionsUI();
-          if (!CAN_INC_APPROVE) {
+          if (!CAN_INC_CREATE_EDIT) {
             $('#formIncident3 :input').prop('disabled', true);
             $('#btnSaveIncident3').prop('disabled', true).addClass('disabled');
-
-            $(document).on('DOMNodeInserted', function(e){
-              $(e.target).find('.js-inc-approve, .js-inc-edit, .js-inc-delete').remove();
-            });
           }
         });
     </script>

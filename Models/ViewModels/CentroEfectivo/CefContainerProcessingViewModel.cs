@@ -200,7 +200,7 @@ namespace VCashApp.Models.ViewModels.CentroEfectivo
         public string ReportingUserName { get; set; } = string.Empty;
 
         [Display(Name = "Estado de la Novedad")]
-        public string IncidentStatus { get; set; } = "Reported";
+        public string IncidentStatus { get; set; } = "Reportada";
 
         public List<SelectListItem>? IncidentTypes { get; set; }
     }

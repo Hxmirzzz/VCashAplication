@@ -1,0 +1,143 @@
+﻿@model VCashApp.Models.ViewModels.CentroEfectivo.DetailContainerVM
+
+@if (Model == null)
+{
+    <div class="text-muted">Sin datos del contenedor.</div>
+    return;
+}
+
+<div class="mb-2">
+    <div class="small text-muted">Código contenedor</div>
+    <div><strong>@Model.ContainerCode</strong></div>
+    @if (!string.IsNullOrWhiteSpace(Model.ParentLabel))
+    {
+        <div class="small text-muted">Padre: @Model.ParentLabel</div>
+    }
+</div>
+
+@{
+    var bills = Model.Values?.Where(v => v.ValueType.Equals("Billete", StringComparison.OrdinalIgnoreCase)).ToList() ?? new();
+    var coins = Model.Values?.Where(v => v.ValueType.Equals("Moneda", StringComparison.OrdinalIgnoreCase)).ToList() ?? new();
+    var docs = Model.Values?.Where(v => v.ValueType.Equals("Documento", StringComparison.OrdinalIgnoreCase)).ToList() ?? new();
+    var checks = Model.Values?.Where(v => v.ValueType.Equals("Cheque", StringComparison.OrdinalIgnoreCase)).ToList() ?? new();
+}
+
+@if (bills.Any())
+{
+    <div class="mb-3">
+        <h6>Billetes</h6>
+        <div class="table-responsive">
+            <table class="table table-sm">
+                <thead>
+                    <tr>
+                        <th>Denominación</th>
+                        <th>Calidad</th>
+                        <th class="text-end">Cantidad</th>
+                        <th class="text-end">Valor unit.</th>
+                        <th class="text-end">Monto</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var r in bills)
+                    {
+                        <tr>
+                            <td>@r.DenominationName</td>
+                            <td>@r.QualityName</td>
+                            <td class="text-end">@r.Quantity.ToString("N0")</td>
+                            <td class="text-end">@r.UnitValue.ToString("N0")</td>
+                            <td class="text-end">@r.CalculatedAmount.ToString("N0")</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+}
+
+@if (coins.Any())
+{
+    <div class="mb-3">
+        <h6>Monedas</h6>
+        <div class="table-responsive">
+            <table class="table table-sm">
+                <thead>
+                    <tr>
+                        <th>Denominación</th>
+                        <th>Calidad</th>
+                        <th class="text-end">Cantidad</th>
+                        <th class="text-end">Valor unit.</th>
+                        <th class="text-end">Monto</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var r in coins)
+                    {
+                        <tr>
+                            <td>@r.DenominationName</td>
+                            <td>@r.QualityName</td>
+                            <td class="text-end">@r.Quantity.ToString("N0")</td>
+                            <td class="text-end">@r.UnitValue.ToString("N0")</td>
+                            <td class="text-end">@r.CalculatedAmount.ToString("N0")</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+}
+
+@if (docs.Any())
+{
+    <div class="mb-3">
+        <h6>Documentos/Voucher</h6>
+        <div class="table-responsive">
+            <table class="table table-sm">
+                <thead>
+                    <tr>
+                        <th>Descripción / Denominación</th>
+                        <th class="text-end">Monto</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var r in docs)
+                    {
+                        <tr>
+                            <td>@r.DenominationName</td>
+                            <td class="text-end">@r.CalculatedAmount.ToString("N0")</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+}
+
+@if (checks.Any())
+{
+    <div class="mb-3">
+        <h6>Cheques</h6>
+        <div class="table-responsive">
+            <table class="table table-sm">
+                <thead>
+                    <tr>
+                        <th>Descripción</th>
+                        <th class="text-end">Monto</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var r in checks)
+                    {
+                        <tr>
+                            <td>@r.DenominationName</td>
+                            <td class="text-end">@r.CalculatedAmount.ToString("N0")</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+}
+
+<div class="d-flex justify-content-end">
+    <span class="badge bg-info">Subtotal contenedor: @Model.Subtotal.ToString("N0")</span>
+</div>
