@@ -876,7 +876,7 @@ namespace VCashApp.Services.Cef
                         value = d.value,
                         label = FormatLabel(d.label, d.value),
                         bundleSize = d.bundleSize ?? DefaultBundle(d.money),
-                        family = "T" // cheques no discriminan familia
+                        family = "T"
                     })
             };
 
@@ -917,7 +917,6 @@ namespace VCashApp.Services.Cef
             return JsonSerializer.Serialize(data);
         }
 
-        // Puedes moverlo al final de la clase si prefieres.
         private sealed record DeclaredBreakdown(
             int BagCount,
             int EnvelopeCount,
@@ -930,10 +929,6 @@ namespace VCashApp.Services.Cef
 
         public async Task<decimal> SumCountedValueAsync(int cefTransactionId)
         {
-            // 1) Intento preferido: sumar por detalles (evita doble conteo si hay sobres)
-            // from c in Containers (de esa tx)
-            // from vd in c.ValueDetails
-            // sum(vd.CalculatedAmount)
             var detailsSum = await (
                 from c in _context.CefContainers
                 where c.CefTransactionId == cefTransactionId
@@ -944,7 +939,6 @@ namespace VCashApp.Services.Cef
             if (detailsSum > 0m)
                 return detailsSum;
 
-            // 2) Fallback: si aún no hay detalles persistidos, suma CountedValue a nivel contenedor
             var containersSum = await _context.CefContainers
                 .Where(c => c.CefTransactionId == cefTransactionId)
                 .SumAsync(c => (decimal?)(c.CountedValue ?? 0m)) ?? 0m;

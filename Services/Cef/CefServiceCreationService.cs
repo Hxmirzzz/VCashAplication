@@ -128,7 +128,6 @@ namespace VCashApp.Services.Cef
             return viewModel;
         }
 
-        // Reemplaza el método existente en CefServiceCreationService.cs
 
         /// <inheritdoc/>
         public async Task<string> ProcessCefServiceCreationAsync(CefServiceCreationViewModel viewModel, string currentUserId, string currentIP)
@@ -143,6 +142,13 @@ namespace VCashApp.Services.Cef
             {
                 throw new InvalidOperationException("Código de concepto de servicio no válido.");
             }
+
+            string cefEstadoTemp =
+                (serviceConcept.CodConcepto == 1 || serviceConcept.CodConcepto == 4)
+                    ? nameof(CefTransactionStatusEnum.RegistroTesoreria)
+                    : (serviceConcept.CodConcepto == 2 || serviceConcept.CodConcepto == 3)
+                        ? nameof(CefTransactionStatusEnum.ProvisionEnProceso)
+                        : nameof(CefTransactionStatusEnum.RegistroTesoreria);
 
             var parameters = new List<SqlParameter>
             {
@@ -212,7 +218,7 @@ namespace VCashApp.Services.Cef
                 new SqlParameter("@CefNovedadInformativa", (object)viewModel.InformativeIncident ?? DBNull.Value),
                 new SqlParameter("@CefEsCustodia", viewModel.IsCustody),
                 new SqlParameter("@CefEsPuntoAPunto", viewModel.IsPointToPoint),
-                new SqlParameter("@CefEstadoTransaccion", CefTransactionStatusEnum.RegistroTesoreria.ToString()),
+                new SqlParameter("@CefEstadoTransaccion", cefEstadoTemp),
                 new SqlParameter("@CefFechaRegistro", DateTime.Now),
                 new SqlParameter("@CefUsuarioRegistroId", currentUserId),
                 new SqlParameter("@CefIPRegistro", (object)currentIP ?? DBNull.Value),

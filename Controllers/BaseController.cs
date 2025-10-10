@@ -1,16 +1,10 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Identity;
-using System.Threading.Tasks;
-using VCashApp.Models;
-using VCashApp.Data;
-using System.Security.Claims;
-using Serilog;
-using VCashApp.Enums;
-using System.Linq;
-using System.Collections.Generic;
+﻿using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using VCashApp.Data;
 using VCashApp.Filters;
-using Microsoft.Extensions.Logging;
+using VCashApp.Models;
+using VCashApp.Utils;
 
 namespace VCashApp.Controllers
 {
@@ -127,6 +121,79 @@ namespace VCashApp.Controllers
             ViewBag.NombreCompleto = currentUser.NombreUsuario ?? currentUser.UserName ?? "N/A";
             ViewBag.IsAdmin = isAdmin;
             ViewBag.CurrentCodPerfil = currentCodPerfil;
+        }
+
+        // NUEVA ACTUALIZACIÓN: MÉTODOS BASADOS EN ROLE ID (GUID)
+
+        /// <summary>
+        /// IDs (GUID) de roles del usuario actual.
+        /// </summary>
+        protected async Task<List<string>> GetUserRoleIdsAsync(string userId)
+        {
+            return await _context.UserRoles
+                                 .Where(ur => ur.UserId == userId)
+                                 .Select(ur => ur.RoleId)
+                                 .ToListAsync();
+        }
+
+        /// <summary>
+        /// ¿El usuario pertenece al rol (por GUID)?
+        /// </summary>
+        protected Task<bool> IsInRoleIdAsync(ApplicationUser user, string roleId)
+        {
+            return _context.UserRoles
+                .AsNoTracking()
+                .AnyAsync(ur => ur.UserId == user.Id && ur.RoleId == roleId);
+        }
+
+        /// <summary>
+        /// Versión por GUID: evalúa permisos de vista según PermisosPerfil.CodPerfilId (GUID de rol).
+        /// </summary>
+        protected async Task<bool> HasPermisionForViewByRoleIds(IEnumerable<string> roleIds, string codView, PermissionType permissionType)
+        {
+            if (roleIds == null) return false;
+            if (roleIds.Contains(RoleIds.Admin))
+                return true;
+
+            var q = _context.PermisosPerfil.AsNoTracking()
+                .Where(p => roleIds.Contains(p.CodPerfilId) && p.CodVista == codView);
+
+            return permissionType switch
+            {
+                PermissionType.View => await q.AnyAsync(p => p.PuedeVer),
+                PermissionType.Create => await q.AnyAsync(p => p.PuedeCrear),
+                PermissionType.Edit => await q.AnyAsync(p => p.PuedeEditar),
+                _ => false
+            };
+        }
+
+        protected async Task<CefCaps> GetCefCapsAsync(ApplicationUser user)
+        {
+            var roleIds = await GetUserRoleIdsAsync(user.Id);
+            var roleNames = await _userManager.GetRolesAsync(user); // sólo para HasPermisionForView
+
+            bool Has(string id) => roleIds.Contains(id);
+
+            var canBills = Has(RoleIds.ContadorBilleteCEF) || Has(RoleIds.SupervisorCEF);
+            var canCoins = Has(RoleIds.ContadorMonedaCEF) || Has(RoleIds.SupervisorCEF);
+
+            var canIncCreateEdit =
+                   Has(RoleIds.ContadorBilleteCEF)
+                || Has(RoleIds.ContadorMonedaCEF)
+                || await HasPermisionForView(roleNames, "CEF_COL", PermissionType.Edit)
+                || await HasPermisionForView(roleNames, "CEF_REC", PermissionType.Edit);
+
+            var canIncApprove =
+                   Has(RoleIds.SupervisorCEF)
+                || await HasPermisionForView(roleNames, "CEF_SUP", PermissionType.Edit)
+                || await HasPermisionForView(roleNames, "CEF_DEL", PermissionType.Edit);
+
+            var canFinalize =
+                   Has(RoleIds.SupervisorCEF)
+                || await HasPermisionForView(roleNames, "CEF_SUP", PermissionType.Edit)
+                || await HasPermisionForView(roleNames, "CEF_DEL", PermissionType.Edit);
+
+            return new CefCaps(canBills, canCoins, canIncCreateEdit, canIncApprove, canFinalize);
         }
     }
 }

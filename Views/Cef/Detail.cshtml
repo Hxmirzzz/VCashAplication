@@ -1,192 +1,241 @@
 ﻿@model VCashApp.Models.ViewModels.CentroEfectivo.CefTransactionDetailViewModel
 @{
     Layout = "_Layout";
-    var diffClass = Model.NetDiff < 0 ? "title-diff negative" : "title-diff positive";
+    var diffClass = Model.NetDiff < 0 ? "text-danger" : "text-success";
+    var diffIconClass = Model.NetDiff < 0 ? "ri-arrow-down-s-line" : "ri-arrow-up-s-line";
+    var diffIconMod = Model.NetDiff < 0 ? "metric-icon--diff-down" : "metric-icon--diff-up";
+    var statusColor = Model.CurrentStatus == "Completado" ? "success" :
+                      Model.CurrentStatus == "En proceso" ? "warning" : "secondary";
 }
 
-<div class="card mb-3">
-    <div class="card-body d-flex align-items-center justify-content-between">
+<div class="transaction-header">
+    <div class="d-flex justify-content-between align-items-start">
         <div>
-            <h4 class="mb-1">Transacción @Model.SlipNumber</h4>
-            <ul class="meta-list">
-                <li class="meta-k">OS: </li><li class="meta-v">@Model.ServiceOrderId</li>
-                <li class="meta-k">Concepto: </li><li class="meta-v">@Model.ServiceConcept</li>
-                <li class="meta-k">Sucursal: </li><li class="meta-v">@Model.BranchName</li>
-                <li class="meta-k">Registro: </li><li class="meta-v">@Model.RegistrationDate.ToString("yyyy-MM-dd HH:mm")</li>
-                <li class="meta-k">Registrado por: </li><li class="meta-v">@(!string.IsNullOrWhiteSpace(Model.RegisteredByName) ? Model.RegisteredByName : "—")</li>
-            </ul>
+            <div class="d-flex align-items-center gap-3 mb-2">
+                <h2 class="mb-0">Transacción @Model.SlipNumber</h2>
+                <span class="status-badge">
+                    <span class="badge bg-@statusColor">@Model.CurrentStatus</span>
+                </span>
+            </div>
+            <p class="mb-0 opacity-75">Orden de Servicio: <strong>@Model.ServiceOrderId</strong></p>
         </div>
-        <div class="d-flex align-items gap-2">
-            <span class="badge bg-secondary">Estado: @Model.CurrentStatus</span>
-            <a class="btn btn-outline-secondary" asp-action="Index">Volver</a>
+        <div class="action-buttons">
+            <button class="btn btn-outline-modern btn-modern">Exportar</button>
+            <a class="btn btn-outline-modern btn-modern" asp-action="Index">← Volver</a>
+        </div>
+    </div>
+
+    <div class="transaction-meta">
+        <div class="meta-item">
+            <div class="meta-label">Concepto</div>
+            <div class="meta-value">@Model.ServiceConcept</div>
+        </div>
+        <div class="meta-item">
+            <div class="meta-label">Sucursal</div>
+            <div class="meta-value">@Model.BranchName</div>
+        </div>
+        <div class="meta-item">
+            <div class="meta-label">Fecha Registro</div>
+            <div class="meta-value">@((Model.RegistrationDate.ToString("dd/MM/yyyy HH:mm")) ?? "—")</div>
+        </div>
+        <div class="meta-item">
+            <div class="meta-label">Registrado por</div>
+            <div class="meta-value">@(!string.IsNullOrWhiteSpace(Model.RegisteredByName) ? Model.RegisteredByName : "—")</div>
         </div>
     </div>
 </div>
 
-<div class="row g-3">
-    <div class="col-12 col-xl-4 order-xl-2">
+<!-- Métricas Principales -->
+<div class="row g-3 mb-4">
+    <div class="col-12 col-lg-4">
+        <div class="metric-card">
+            <div class="metric-header">
+                <span class="metric-label">Declarado</span>
+                <div class="metric-icon"><i class="ri-money-dollar-circle-fill"></i></div>
+            </div>
+            <div class="metric-value"><span style="opacity:.8;margin-right:4px">$</span>@Model.TotalDeclared.ToString("N0")</div>
+            <div class="metric-comparison">Monto esperado</div>
+        </div>
+    </div>
 
-        <ul class="nav nav-tabs" id="detailTabs" role="tablist">
-            <li class="nav-item" role="presentation">
-                <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tab-resumen" type="button" role="tab">Resumen</button>
-            </li>
-            <li class="nav-item" role="presentation">
-                <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-contenedores" type="button" role="tab">Bolsas y Sobres</button>
-            </li>
-            <li class="nav-item" role="presentation">
-                <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tab-novedades" type="button" role="tab">Novedades</button>
-            </li>
-        </ul>
+    <div class="col-12 col-lg-4">
+        <div class="metric-card">
+            <div class="metric-header">
+                <span class="metric-label">Contado</span>
+                <div class="metric-icon"><i class="ri-checkbox-circle-fill"></i></div>
+            </div>
+            <div class="metric-value"><span style="opacity:.8;margin-right:4px">$</span>@Model.TotalCounted.ToString("N0")</div>
+            <div class="metric-comparison">Monto verificado</div>
+        </div>
+    </div>
 
-        <div class="tab-content border border-top-0 rounded-bottom p-3">
-            <!-- Resumen -->
-            <div class="tab-pane fade show active" id="tab-resumen" role="tabpanel">
-                <div class="row g-3">
-                    <div class="col-12 col-md-6">
-                        <div class="card h-100">
-                            <div class="card-body">
-                                <h6 class="text-uppercase text-muted">Totales</h6>
-                                <div class="d-flex justify-content-between"><span>Declarado</span><strong>@Model.TotalDeclared.ToString("N0")</strong></div>
-                                <div class="d-flex justify-content-between"><span>Contado</span><strong>@Model.TotalCounted.ToString("N0")</strong></div>
-                                <hr />
-                                <div class="d-flex justify-content-between">
-                                    <span>Diferencia neta</span>
-                                    <strong class="@(Model.NetDiff < 0 ? "text-danger" : "text-success")">
-                                        @((Model.NetDiff >= 0 ? "+" : "") + Model.NetDiff.ToString("N0"))
-                                    </strong>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-12 col-md-6">
-                        <div class="card h-100">
-                            <div class="card-body">
-                                <h6 class="text-uppercase text-muted">Fechas & Usuarios</h6>
-                                <div class="mb-1">
-                                    <small class="text-muted d-block">Registrado por</small>
-                                    <strong>@(Model.RegisteredByName ?? "—")</strong>
-                                </div>
-                                <div>
-                                    <small class="text-muted d-block">Fecha de registro</small>
-                                    <strong>@Model.RegistrationDate.ToString("yyyy-MM-dd HH:mm")</strong>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <hr class="my-3" />
-
-                <div class="row g-3">
-                    <div class="col-12 col-md-6">
-                        <div class="card">
-                            <div class="card-body">
-                                <h6 class="text-uppercase text-muted">Desglose efectivo</h6>
-                                <div class="d-flex justify-content-between"><span>Billete Alto</span><strong>@Model.BillsHigh.ToString("N0")</strong></div>
-                                <div class="d-flex justify-content-between"><span>Billete Bajo</span><strong>@Model.BillsLow.ToString("N0")</strong></div>
-                                <div class="d-flex justify-content-between"><span>Monedas</span><strong>@Model.CoinsTotal.ToString("N0")</strong></div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-12 col-md-6">
-                        <div class="card">
-                            <div class="card-body">
-                                <h6 class="text-uppercase text-muted">Otros</h6>
-                                <div class="d-flex justify-content-between"><span>Documentos/Voucher</span><strong>@Model.DocsTotal.ToString("N0")</strong></div>
-                                <div class="d-flex justify-content-between"><span>Cheques</span><strong>@Model.ChecksTotal.ToString("N0")</strong></div>
-                            </div>
-                        </div>
-                    </div>
+    <div class="col-12 col-lg-4">
+        <div class="metric-card highlight">
+            <div class="metric-header">
+                <span class="metric-label">Diferencia Neta</span>
+                <div class="metric-icon @diffIconMod">
+                    <i class="@diffIconClass"></i>
                 </div>
             </div>
+            <div class="metric-value @diffClass">
+                @((Model.NetDiff >= 0 ? "+" : "") + "$" + Model.NetDiff.ToString("N0"))
+            </div>
+            <div class="metric-comparison @(Model.NetDiff >= 0 ? "positive" : "negative")">
+                @if (Model.NetDiff == 0)      { <text>✓ Balance perfecto</text>; }
+                else if (Model.NetDiff > 0)   { <text>⬆ Excedente detectado</text>; }
+                else                          { <text>⬇ Faltante detectado</text>; }
+            </div>
+        </div>
+    </div>
+</div>
 
-            <!-- Bolsas y Sobres -->
-            <div class="tab-pane fade" id="tab-contenedores" role="tabpanel">
-                @if (Model.Containers?.Any() == true)
-                {
-                    <div class="accordion" id="accBags">
-                        @for (int i = 0; i < Model.Containers.Count; i++)
-                        {
-                            var bag = Model.Containers[i];
-                            var accId = $"bag{i}";
-                            <div class="accordion-item mb-2">
-                                <h2 class="accordion-header" id="h-@accId">
-                                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#c-@accId">
-                                        @((bag.ContainerType?.Equals("Bolsa", StringComparison.OrdinalIgnoreCase) ?? false) ? $"Bolsa {i + 1}" : "Sobre")
-                                        — @bag.ContainerCode
-                                        @if (!string.IsNullOrWhiteSpace(bag.ParentLabel))
-                                        {
-                                            <span class="ms-2 small text-muted">(@bag.ParentLabel)</span>
-                                        }
-                                        <span class="ms-auto badge bg-info">Subtotal: @bag.Subtotal.ToString("N0")</span>
-                                    </button>
-                                </h2>
-                                <div id="c-@accId" class="accordion-collapse collapse" data-bs-parent="#accBags">
-                                    <div class="accordion-body">
-                                        @await Html.PartialAsync("_ContainerSummaryReadOnly", bag)
-                                    </div>
-                                </div>
+<!-- Detalle por Tipo -->
+<div class="row g-3 mb-4">
+    <div class="col-12">
+        <div class="detail-grid">
+            <div class="detail-grid-title">Composición del Efectivo</div>
+
+            <div class="detail-row">
+                <div class="detail-label">Billetes Alta Denominación</div>
+                <div class="detail-value">$@Model.BillsHigh.ToString("N0")</div>
+            </div>
+
+            <div class="detail-row">
+                <div class="detail-label">Billetes Baja Denominación</div>
+                <div class="detail-value">$@Model.BillsLow.ToString("N0")</div>
+            </div>
+
+            <div class="detail-row">
+                <div class="detail-label">Monedas</div>
+                <div class="detail-value">$@Model.CoinsTotal.ToString("N0")</div>
+            </div>
+
+            <div class="detail-row">
+                <div class="detail-label">Documentos / Vouchers</div>
+                <div class="detail-value">$@Model.DocsTotal.ToString("N0")</div>
+            </div>
+
+            <div class="detail-row">
+                <div class="detail-label">Cheques</div>
+                <div class="detail-value">$@Model.ChecksTotal.ToString("N0")</div>
+            </div>
+
+            <div class="detail-row" style="border-top: 2px solid #e5e7eb; margin-top: 0.5rem; padding-top: 1rem;">
+                <div class="detail-label">Total Bolsas</div>
+                <div class="detail-value" style="color:#667eea;">@Model.Containers.Count</div>
+            </div>
+
+            <div class="detail-row">
+                <div class="detail-label">Novedades Registradas</div>
+                <div class="detail-value" style="color:#ef4444;">@Model.Incidents.Count</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Tabs Modernos -->
+<div class="tabs-modern">
+    <button class="tab-modern active" onclick="switchTab(event,'contenedores')">Bolsas y Sobres (@Model.Containers.Count)</button>
+    <button class="tab-modern" onclick="switchTab(event,'novedades')">Novedades (@Model.Incidents.Count)</button>
+</div>
+
+<!-- Contenido Tabs -->
+<div id="tab-contenedores" class="tab-content-modern">
+    @if (Model.Containers?.Any() == true)
+    {
+        var bagCounter = 0;
+        foreach (var c in Model.Containers)
+        {
+            var isBag = c.ContainerType == "Bolsa";
+            var contIconClass = isBag ? "ri-shopping-bag-3-line" : "ri-mail-open-line";
+            var contIconMod = isBag ? "container-icon--bag" : "container-icon--env";
+            if (isBag) bagCounter++;
+
+            <div class="container-card @(isBag ? "" : "envelope")" onclick="toggleContainer(this)">
+                <div class="container-header">
+                    <div class="container-title">
+                        <div class="container-icon @contIconMod">
+                            <i class="@contIconClass"></i>
+                        </div>                        <div>
+                            <div style="font-weight:600;">
+                                @(isBag ? $"Bolsa {bagCounter}" : "Sobre")
                             </div>
+                            <div style="font-size:.875rem;color:#6b7280;">@c.ContainerCode</div>
+                        </div>
+                        @if (!string.IsNullOrWhiteSpace(c.ParentLabel))
+                        {
+                            <span class="container-badge">@c.ParentLabel</span>
                         }
                     </div>
-                }
-                else
-                {
-                    <div class="text-muted">Sin contenedores registrados.</div>
-                }
-            </div>
+                    <div class="container-amount">$@c.Subtotal.ToString("N0")</div>
+                </div>
 
-            <!-- Novedades -->
-            <div class="tab-pane fade" id="tab-novedades" role="tabpanel">
-                @if (Model.Incidents?.Any() == true)
-                {
-                    <div class="table-responsive">
-                        <table class="table table-sm align-middle">
-                            <thead>
-                                <tr>
-                                    <th>Fecha</th>
-                                    <th>Tipo</th>
-                                    <th>Descripción</th>
-                                    <th class="text-end">Monto afectado</th>
-                                    <th>Estado</th>
-                                    <th>Reportado por</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach (var inc in Model.Incidents)
-                                {
-                                    <tr>
-                                        <td>@inc.ReportedAt.ToString("yyyy-MM-dd HH:mm")</td>
-                                        <td>@inc.Code</td>
-                                        <td>@inc.Description</td>
-                                        <td class="text-end">@inc.AffectedAmount.ToString("N0")</td>
-                                        <td><span class="badge bg-secondary">@inc.Status</span></td>
-                                        <td>@(inc.ReportedBy ?? "—")</td>
-                                    </tr>
-                                }
-                            </tbody>
-                        </table>
-                    </div>
-                }
-                else
-                {
-                    <div class="text-muted">Sin novedades registradas.</div>
-                }
+                <div class="container-details">
+                    @await Html.PartialAsync("_ContainerSummaryReadOnly", c)
+                </div>
             </div>
+        }
+    }
+    else
+    {
+        <div class="empty-state">
+            <div class="empty-state-icon"><i class="ri-shopping-bag-3-fill"></i></div>
+            <p>No hay bolsas registradas en esta transacción</p>
         </div>
-
-    </div>
-
-    <!-- Sidebar con KPIs -->
-    <div class="col-12 col-lg-4">
-        <div class="card">
-            <div class="card-body">
-                <h6 class="text-uppercase text-muted">KPIs Rápidos</h6>
-                <div class="d-flex justify-content-between"><span>Contenedores</span><strong>@(Model.Containers?.Count ?? 0)</strong></div>
-                <div class="d-flex justify-content-between"><span>Novedades</span><strong>@(Model.Incidents?.Count ?? 0)</strong></div>
-                <hr />
-                <div class="small text-muted">Solo lectura • Para editar, usa “Procesar Contenedores”.</div>
-            </div>
-        </div>
-    </div>
+    }
 </div>
+
+<div id="tab-novedades" class="tab-content-modern" style="display:none;">
+    @if (Model.Incidents?.Any() == true)
+    {
+        foreach (var inc in Model.Incidents)
+        {
+            <div class="incident-card">
+                <div class="incident-header">
+                    <div class="incident-type">
+                        <div class="incident-icon"><i class="ri-alert-fill"></i></div>
+                        <div>
+                            <div>@inc.Code</div>
+                            <div style="font-size:.75rem;color:#9ca3af;font-weight:normal;">
+                                @inc.ReportedAt.ToString("dd/MM/yyyy HH:mm")
+                            </div>
+                        </div>
+                    </div>
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="incident-status">@inc.Status</span>
+                        <span class="incident-amount">$@inc.AffectedAmount.ToString("N0")</span>
+                    </div>
+                </div>
+
+                @if (!string.IsNullOrWhiteSpace(inc.Description))
+                {
+                    <div class="incident-description">@inc.Description</div>
+                }
+
+                <div class="incident-footer">
+                    <span><i class="ri-user-fill"></i> @(string.IsNullOrWhiteSpace(inc.ReportedBy) ? "Sin asignar" : inc.ReportedBy)</span>
+                </div>
+            </div>
+        }
+    }
+    else
+    {
+        <div class="empty-state">
+            <div class="empty-state-icon"><i class="ri-checkbox-circle-fill"></i></div>
+            <p>No hay novedades registradas en esta transacción</p>
+        </div>
+    }
+</div>
+
+<script>
+    function switchTab(e, tabName) {
+        // Actualizar botones
+        document.querySelectorAll('.tab-modern').forEach(t => t.classList.remove('active'));
+        if (e && e.currentTarget) e.currentTarget.classList.add('active');
+
+        // Mostrar contenido
+        document.querySelectorAll('.tab-content-modern').forEach(c => c.style.display = 'none');
+        document.getElementById('tab-' + tabName).style.display = 'block';
+    }
+    function toggleContainer(el) { el.classList.toggle('expanded'); }
+</script>

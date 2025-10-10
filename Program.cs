@@ -15,9 +15,12 @@ using VCashApp.Extentions;
 using VCashApp.Models;
 using VCashApp.Services;
 using VCashApp.Services.Cef;
-using VCashApp.Services.Service;
+using VCashApp.Services.CentroEfectivo.Provision.Application;
+using VCashApp.Services.CentroEfectivo.Provision.Domain;
+using VCashApp.Services.CentroEfectivo.Provision.Infrastructure;
 using VCashApp.Services.EmployeeLog;
 using VCashApp.Services.Range;
+using VCashApp.Services.Service;
 
 var builder = WebApplication.CreateBuilder(args);
 Log.Logger = new LoggerConfiguration()
@@ -176,6 +179,21 @@ builder.Services.AddScoped<ICgsServiceService, CgsService>();
 builder.Services.AddScoped<IRangeService, RangeService>();
 builder.Services.AddScoped<VCashApp.Services.Logging.IAuditLogger, VCashApp.Services.Logging.AuditLogger>();
 builder.Services.AddScoped<AuditActionFilter>();
+
+// Application
+builder.Services.AddScoped<IProvisionService, ProvisionService>();
+builder.Services.AddScoped<IProvisionReadService, ProvisionReadService>();
+
+// Domain policies
+builder.Services.AddSingleton<IProvisionStateMachine, ProvisionStateMachine>();
+builder.Services.AddSingleton<IAllowedValueTypesPolicy, ProvisionAllowedValueTypesPolicy>();
+builder.Services.AddSingleton<IEnvelopePolicy>(_ => new ProvisionEnvelopePolicy { AllowEnvelopes = true });
+builder.Services.AddSingleton<ITolerancePolicy>(_ => new ZeroTolerancePolicy(0m)); // o tolerancia > 0
+
+// Infra repos (adapters a tus servicios/DbContext)
+builder.Services.AddScoped<ICefTransactionRepository, CefTransactionRepository>();
+builder.Services.AddScoped<ICefContainerRepository, CefContainerRepository>();
+builder.Services.AddScoped<IUnitOfWork, EfUnitOfWork>();
 
 builder.Services.AddHttpClient();
 

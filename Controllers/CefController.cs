@@ -8,6 +8,7 @@ using VCashApp.Enums;
 using VCashApp.Extensions;
 using VCashApp.Filters;
 using VCashApp.Models;
+using VCashApp.Models.Entities;
 using VCashApp.Models.ViewModels.CentroEfectivo;
 using VCashApp.Services;
 using VCashApp.Services.Cef;
@@ -116,15 +117,6 @@ namespace VCashApp.Controllers
             CefDashboardMode.CefProvision => "Supplies",
             _ => "Index"
         };
-
-        private async Task SetCountingAndIncidentsFlagsAsync(ApplicationUser user)
-        {
-            ViewBag.CanCountBills = await _userManager.IsInRoleAsync(user, "ContadorBilleteCEF");
-            ViewBag.CanCountCoins = await _userManager.IsInRoleAsync(user, "ContadorMonedaCEF");
-
-            var roles = await _userManager.GetRolesAsync(user);
-            ViewBag.CanApproveIncindents = await HasPermisionForView(roles, "CEF_SUP", PermissionType.Edit);
-        }
 
         // =========== SECCION: TESORERIA OPERATIVA ===========
         /// <summary>
@@ -674,73 +666,52 @@ namespace VCashApp.Controllers
         //////////// TEMPORAL ///////////////////
 
         /// <summary>
-        /// Muestra la vista para procesar (contar) los contenedores de una transacción de CEF.
+        /// Muestra el formulario para procesar los contenedores de una transacción CEF.
         /// </summary>
-        /// <remarks>
-        /// Requiere permiso 'Edit' para el módulo "CEF".
-        /// </remarks>
-        /// <param name="transactionId">ID de la transacción CEF a procesar.</param>
-        /// 
-        /// <returns>Vista de procesamiento de contenedores.</returns>
+        /// <param name="transactionId">Identificador de la transacción.</param>
+        /// <param name="containerId">Identificador de la bolsa.</param>
+        /// <returns>Vista del formulario de procesamiento de contenedores.</returns>
         [HttpGet("ProcessContainers/{transactionId}")]
         [RequiredPermission(PermissionType.Edit, "CEF_REC", "CEF_COL")]
         public async Task<IActionResult> ProcessContainers(int transactionId, int? containerId = null)
         {
             var currentUser = await GetCurrentApplicationUserAsync();
-            if (currentUser == null) return RedirectToPage("/Account/Login", new { area = "Identity" });
+            if (currentUser == null)
+                return RedirectToPage("/Account/Login", new { area = "Identity" });
 
             await SetCommonViewBagsCefAsync(currentUser, "Procesar Contenedores CEF", "CEF_REC", "CEF_COL");
-            await SetCountingAndIncidentsFlagsAsync(currentUser);
 
-            var roles = await _userManager.GetRolesAsync(currentUser);
-            var canBills =
-                   roles.Contains("ContadorBilleteCEF")
-                || roles.Contains("SupervisorCEF");
-
-            var canCoins =
-                   roles.Contains("ContadorMonedaCEF")
-                || roles.Contains("SupervisorCEF");
-
-            var canIncCreateEdit =
-                   roles.Contains("ContadorBilleteCEF")
-                || roles.Contains("ContadorMonedaCEF")
-                || await HasPermisionForView(roles, "CEF_COL", PermissionType.Edit)
-                || await HasPermisionForView(roles, "CEF_REC", PermissionType.Edit);
-
-            var canIncApprove =
-                   roles.Contains("SupervisorCEF")
-                || await HasPermisionForView(roles, "CEF_SUP", PermissionType.Edit)
-                || await HasPermisionForView(roles, "CEF_DEL", PermissionType.Edit);
-
-            var canFinalize =
-                   roles.Contains("SupervisorCEF")
-                || await HasPermisionForView(roles, "CEF_SUP", PermissionType.Edit)
-                || await HasPermisionForView(roles, "CEF_DEL", PermissionType.Edit);
+            var caps = await GetCefCapsAsync(currentUser);
+            ViewBag.CanCountBills = caps.CanCountBills;
+            ViewBag.CanCountCoins = caps.CanCountCoins;
+            ViewBag.CanIncCreateEdit = caps.CanIncCreateEdit;
+            ViewBag.CanIncApprove = caps.CanIncApprove;
+            ViewBag.CanFinalize = caps.CanFinalize;
 
             await _cefTransactionService.RecalcTotalsAndNetDiffAsync(transactionId);
             var pageVm = await _cefContainerService.PrepareProcessContainersPageAsync(transactionId);
-            var caps = await _cefContainerService.GetPointCapsAsync(pageVm.Service.ServiceOrderId);
 
-            ViewBag.IncidentTypesForEdit = (await _cefIncidentService.GetAllIncidentTypesAsync()).Select(it => new SelectListItem{ Value = it.Id.ToString(), Text = it.Description }).ToList();
-            ViewBag.IncidentTypes = (await _cefIncidentService.GetAllIncidentTypesAsync()).Select(it => new SelectListItem { Value = (it.Code ?? "").Trim(), Text = it.Description }).ToList();
+            var pointCaps = await _cefContainerService.GetPointCapsAsync(pageVm.Service.ServiceOrderId);
+            ViewBag.PointCapsJson = System.Text.Json.JsonSerializer.Serialize(new
+            {
+                sobres = pointCaps.sobres,
+                documentos = pointCaps.documentos,
+                cheques = pointCaps.cheques
+            }, new System.Text.Json.JsonSerializerOptions { PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase });
+
+            ViewBag.IncidentTypesForEdit = (await _cefIncidentService.GetAllIncidentTypesAsync())
+                .Select(it => new SelectListItem { Value = it.Id.ToString(), Text = it.Description })
+                .ToList();
+
+            ViewBag.IncidentTypes = (await _cefIncidentService.GetAllIncidentTypesAsync())
+                .Select(it => new SelectListItem { Value = (it.Code ?? "").Trim(), Text = it.Description })
+                .ToList();
+
             ViewBag.DenomsJson = await _cefContainerService.BuildDenomsJsonForTransactionAsync(transactionId);
             ViewBag.QualitiesJson = await _cefContainerService.BuildQualitiesJsonAsync();
             ViewBag.BanksJson = await _cefContainerService.BuildBankEntitiesJsonAsync();
-            ViewBag.PointCapsJson = System.Text.Json.JsonSerializer.Serialize(new
-            {
-                sobres = caps.sobres,
-                documentos = caps.documentos,
-                cheques = caps.cheques
-            }, new System.Text.Json.JsonSerializerOptions
-            {
-                PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase
-            });
-            ViewBag.CanCountBills = canBills;
-            ViewBag.CanCountCoins = canCoins;
-            ViewBag.CanIncCreateEdit = canIncCreateEdit;
-            ViewBag.CanIncApprove = canIncApprove;
-            ViewBag.CanFinalize = canFinalize;
-            ViewData["Title"] = $"Procesamiento de Bolsas";
+
+            ViewData["Title"] = "Procesamiento de Bolsas";
 
             _audit.Info(
                 action: "CEF.Containers.Open",
@@ -753,7 +724,6 @@ namespace VCashApp.Controllers
 
             return View(pageVm);
         }
-
 
         /// <summary>
         /// Elimina un contenedor específico de una transacción CEF.
@@ -793,6 +763,7 @@ namespace VCashApp.Controllers
         /// Este endpoint es llamado vía HTTP POST.
         /// Requiere permiso 'Edit' para el módulo "CEF".
         /// </remarks>
+        /// <param name="transactionId">Identificador de la transacción.</param>
         /// <param name="viewModel">ViewModel con los datos del contenedor, detalles y novedades.</param>
         /// <returns>Un JSON ServiceResult o redirección a la misma vista para continuar o al dashboard.</returns>
         [HttpPost("ProcessContainers/{transactionId:int}")]
@@ -805,58 +776,47 @@ namespace VCashApp.Controllers
 
             await SetCommonViewBagsCefAsync(currentUser, "Procesando Contenedores CEF", "CEF_REC", "CEF_COL");
 
-            var roles = await _userManager.GetRolesAsync(currentUser);
-
-            bool canBills =
-                   roles.Contains("ContadorBilleteCef")
-                || roles.Contains("SupervisorCEF")
-                || await HasPermisionForView(roles, "CEF_REC", PermissionType.Edit)
-                || await HasPermisionForView(roles, "CEF_COL", PermissionType.Edit);
-
-            bool canCoins =
-                   roles.Contains("ContadorMonedaCef")
-                || roles.Contains("SupervisorCEF")
-                || await HasPermisionForView(roles, "CEF_REC", PermissionType.Edit)
-                || await HasPermisionForView(roles, "CEF_COL", PermissionType.Edit)
-                || await HasPermisionForView(roles, "CEF_SUP", PermissionType.Edit);
+            // === Caps centralizados (mismo criterio que el GET) ===
+            var caps = await GetCefCapsAsync(currentUser);
+            bool canBills = caps.CanCountBills;
+            bool canCoins = caps.CanCountCoins;
 
             viewModel.CefTransactionId = transactionId;
 
+            // Catálogos mínimos para la vista en caso de volver con errores
             ViewBag.IncidentTypes = (await _cefIncidentService.GetAllIncidentTypesAsync())
-                .Select(it => new SelectListItem { Value = it.Code, Text = it.Description })
-                .ToList();
+                .Select(it => new SelectListItem { Value = it.Code, Text = it.Description }).ToList();
             ViewBag.DenomsJson = await _cefContainerService.BuildDenomsJsonForTransactionAsync(transactionId);
-
             ViewBag.QualitiesJson = await _cefContainerService.BuildQualitiesJsonAsync();
 
-            // Validaciones mínimas
+            // ===== Validaciones mínimas del modelo =====
             if (viewModel?.Containers == null || viewModel.Containers.Count == 0)
                 ModelState.AddModelError("", "No se recibieron contenedores para guardar.");
 
+            // ===== Validación de permisos SOLO sobre nuevos/cambiados =====
             if (viewModel?.Containers != null)
             {
-                foreach (var c in viewModel.Containers)
+                // Pre-carga de detalles existentes por contenedor para poder comparar
+                var existingByContainer = new Dictionary<int, List<CefValueDetail>>();
+                var existingIds = viewModel.Containers.Select(c => c?.Id ?? 0).Where(id => id > 0).Distinct().ToList();
+                if (existingIds.Count > 0)
                 {
-                    if (c?.ValueDetails == null) continue;
+                    var persisted = await _context.CefContainers
+                        .Include(c => c.ValueDetails)
+                        .Where(c => existingIds.Contains(c.Id))
+                        .ToListAsync();
 
-                    if (!canBills && c.ValueDetails.Any(v => v.ValueType == CefValueTypeEnum.Billete))
-                        ModelState.AddModelError("", "No tiene permiso para capturar/editar BILLETES.");
-
-                    if (!canCoins && c.ValueDetails.Any(v => v.ValueType == CefValueTypeEnum.Moneda))
-                        ModelState.AddModelError("", "No tiene permiso para capturar/editar MONEDAS.");
+                    foreach (var c in persisted)
+                        existingByContainer[c.Id] = c.ValueDetails?.ToList() ?? new List<CefValueDetail>();
                 }
-            }
-            if (!ModelState.IsValid) return Json(new { success = false, message = "Permisos insuficientes", errors = ModelState });
 
-
-            if (viewModel?.Containers != null)
-            {
                 for (int cIdx = 0; cIdx < viewModel.Containers.Count; cIdx++)
                 {
-                    var c = viewModel.Containers[cIdx];
-                    if (c?.ValueDetails == null) continue;
+                    var cVm = viewModel.Containers[cIdx];
+                    if (cVm?.ValueDetails == null) continue;
 
-                    var dup = c.ValueDetails
+                    // 1) Duplicados Denom+Quality (solo Billete/Moneda)
+                    var dup = cVm.ValueDetails
                         .Where(v => (v.ValueType == CefValueTypeEnum.Billete || v.ValueType == CefValueTypeEnum.Moneda)
                                  && v.DenominationId != null && v.QualityId != null)
                         .GroupBy(v => new { v.ValueType, v.DenominationId, v.QualityId })
@@ -869,6 +829,34 @@ namespace VCashApp.Controllers
                             $"Hay filas duplicadas (Tipo:{dup.Key.ValueType}, Denom:{dup.Key.DenominationId}, Calidad:{dup.Key.QualityId})."
                         );
                     }
+
+                    // 2) Permisos SOLO si es nuevo o cambió
+                    var existing = (cVm.Id > 0 && existingByContainer.TryGetValue(cVm.Id, out var list)) ? list : new List<CefValueDetail>();
+
+                    foreach (var vd in cVm.ValueDetails)
+                    {
+                        // si no es Billete/Moneda, no entra en esta validación de permisos de conteo
+                        bool isBill = vd.ValueType == CefValueTypeEnum.Billete;
+                        bool isCoin = vd.ValueType == CefValueTypeEnum.Moneda;
+
+                        if (!isBill && !isCoin) continue;
+
+                        var persisted = (vd.Id > 0) ? existing.FirstOrDefault(x => x.Id == vd.Id) : null;
+                        bool isNew = vd.Id == 0;
+                        bool isChanged = !isNew && persisted != null && DetailChanged(vd, persisted);
+
+                        if (isNew || isChanged)
+                        {
+                            if (isBill && !canBills)
+                                ModelState.AddModelError("", "No tiene permiso para capturar/editar BILLETES.");
+                            if (isCoin && !canCoins)
+                                ModelState.AddModelError("", "No tiene permiso para capturar/editar MONEDAS.");
+                        }
+                    }
+
+                    // Nota: si “solo moneda” elimina filas de billetes existentes, NO lo bloqueamos aquí.
+                    // Si quisieras bloquear eliminación de billetes por “solo moneda”, agrega una verificación
+                    // de “faltantes” vs existing y marca error.
                 }
             }
 
@@ -884,6 +872,7 @@ namespace VCashApp.Controllers
                             kvp => kvp.Key,
                             kvp => kvp.Value.Errors.Select(e => e.ErrorMessage).ToArray()
                         );
+
                     _audit.Warn(
                         action: "CEF.Containers.Save",
                         detailMessage: "Modelo inválido al guardar contenedores",
@@ -891,6 +880,7 @@ namespace VCashApp.Controllers
                         entityType: "CefTransaction",
                         entityId: transactionId.ToString()
                     );
+
                     return Json(ServiceResult.FailureResult("Hay errores en el formulario.", errors: errorDict));
                 }
 
@@ -899,21 +889,20 @@ namespace VCashApp.Controllers
                 return View(pageVm);
             }
 
+            // ======= Persistencia (sin cambios respecto a tu flujo) =======
             try
             {
                 using (var tx = await _context.Database.BeginTransactionAsync())
                 {
                     var bagIndexToId = new Dictionary<int, int>();
 
+                    // 1) Bolsas primero
                     for (int idx = 0; idx < viewModel.Containers.Count; idx++)
                     {
                         var containerVm = viewModel.Containers[idx];
                         if (containerVm == null) continue;
 
-                        var esBolsa = containerVm.ContainerType == CefContainerTypeEnum.Bolsa;
-                        var esSobre = containerVm.ContainerType == CefContainerTypeEnum.Sobre;
-
-                        if (esBolsa)
+                        if (containerVm.ContainerType == CefContainerTypeEnum.Bolsa)
                         {
                             containerVm.ParentContainerId = null;
                             var savedBag = await _cefContainerService.SaveContainerAndDetailsAsync(containerVm, currentUser.Id);
@@ -921,14 +910,11 @@ namespace VCashApp.Controllers
                         }
                     }
 
-                    // 3) Guardar luego SOBRES (ParentContainerId es un ÍNDICE de bolsa en la vista)
+                    // 2) Luego sobres (resolver ParentContainerId por índice/Id)
                     for (int idx = 0; idx < viewModel.Containers.Count; idx++)
                     {
                         var containerVm = viewModel.Containers[idx];
-                        if (containerVm == null) continue;
-
-                        var esSobre = containerVm.ContainerType == CefContainerTypeEnum.Sobre;
-                        if (!esSobre) continue;
+                        if (containerVm == null || containerVm.ContainerType != CefContainerTypeEnum.Sobre) continue;
 
                         if (containerVm.ParentContainerId == null)
                             throw new InvalidOperationException("Los sobres deben tener asignada una bolsa padre.");
@@ -936,22 +922,15 @@ namespace VCashApp.Controllers
                         var parentIndex = containerVm.ParentContainerId.Value;
 
                         if (bagIndexToId.ContainsValue(parentIndex))
-                        {
-                            containerVm.ParentContainerId = parentIndex;
-                        }
+                            containerVm.ParentContainerId = parentIndex; // ya venía como Id real
                         else if (bagIndexToId.TryGetValue(parentIndex, out var realParentId))
-                        {
-                            containerVm.ParentContainerId = realParentId;
-                        }
+                            containerVm.ParentContainerId = realParentId; // venía como índice
                         else
-                        {
-                            Console.WriteLine($"Índice o ID de bolsa no encontrado: {parentIndex}");
                             throw new InvalidOperationException($"No se encontró la bolsa padre para el sobre (índice o ID {parentIndex}).");
-                        }
 
                         var savedEnv = await _cefContainerService.SaveContainerAndDetailsAsync(containerVm, currentUser.Id);
 
-                        // Novedades (incidents) de sobre
+                        // Incidentes del sobre
                         if (containerVm.Incidents != null)
                         {
                             foreach (var inc in containerVm.Incidents)
@@ -978,6 +957,7 @@ namespace VCashApp.Controllers
                     }
 
                     await tx.CommitAsync();
+
                     _audit.Info(
                         action: "CEF.Containers.Save",
                         detailMessage: "Contenedores guardados correctamente",
@@ -1002,8 +982,7 @@ namespace VCashApp.Controllers
             }
             catch (InvalidOperationException ex)
             {
-                if (isAjax)
-                    return Json(ServiceResult.FailureResult(ex.Message));
+                if (isAjax) return Json(ServiceResult.FailureResult(ex.Message));
 
                 ModelState.AddModelError("", ex.Message);
                 _audit.Warn(
@@ -1019,8 +998,7 @@ namespace VCashApp.Controllers
             }
             catch (Exception ex)
             {
-                if (isAjax)
-                    return Json(ServiceResult.FailureResult("Ocurrió un error inesperado al guardar los contenedores."));
+                if (isAjax) return Json(ServiceResult.FailureResult("Ocurrió un error inesperado al guardar los contenedores."));
 
                 ModelState.AddModelError("", "Ocurrió un error inesperado al guardar los contenedores.");
                 _audit.Error(
@@ -1034,6 +1012,24 @@ namespace VCashApp.Controllers
                 pageVm.Containers = viewModel.Containers ?? new List<CefContainerProcessingViewModel>();
                 return View(pageVm);
             }
+        }
+
+        /// <summary>
+        /// Devuelve true si el detalle (POST) difiere del persistido en campos relevantes.
+        /// </summary>
+        private static bool DetailChanged(CefValueDetailViewModel posted, CefValueDetail? persisted)
+        {
+            if (persisted == null) return true;
+
+            return
+                !string.Equals(posted.ValueType.ToString(), persisted.ValueType, StringComparison.OrdinalIgnoreCase) ||
+                (posted.DenominationId ?? 0) != (persisted.DenominationId ?? 0) ||
+                (posted.Quantity ?? 0) != (persisted.Quantity ?? 0) ||
+                (posted.BundlesCount ?? 0) != (persisted.BundlesCount ?? 0) ||
+                (posted.LoosePiecesCount ?? 0) != (persisted.LoosePiecesCount ?? 0) ||
+                (decimal.Round(posted.UnitValue ?? 0m, 2) != decimal.Round(persisted.UnitValue ?? 0m, 2)) ||
+                (posted.QualityId ?? 0) != (persisted.QualityId ?? 0) ||
+                (posted.IsHighDenomination) != (persisted.IsHighDenomination);
         }
 
         /// <summary>

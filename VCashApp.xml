@@ -772,6 +772,21 @@
                 directly from your code. This API may change or be removed in future releases.
             </summary>
         </member>
+        <member name="M:VCashApp.Controllers.BaseController.GetUserRoleIdsAsync(System.String)">
+            <summary>
+            IDs (GUID) de roles del usuario actual.
+            </summary>
+        </member>
+        <member name="M:VCashApp.Controllers.BaseController.IsInRoleIdAsync(VCashApp.Models.ApplicationUser,System.String)">
+            <summary>
+            ¿El usuario pertenece al rol (por GUID)?
+            </summary>
+        </member>
+        <member name="M:VCashApp.Controllers.BaseController.HasPermisionForViewByRoleIds(System.Collections.Generic.IEnumerable{System.String},System.String,VCashApp.Filters.PermissionType)">
+            <summary>
+            Versión por GUID: evalúa permisos de vista según PermisosPerfil.CodPerfilId (GUID de rol).
+            </summary>
+        </member>
         <member name="T:VCashApp.Controllers.CefController">
             <summary>
             Controlador para la gestión de operaciones de Centro de Efectivo (CEF).
@@ -895,14 +910,11 @@
         </member>
         <member name="M:VCashApp.Controllers.CefController.ProcessContainers(System.Int32,System.Nullable{System.Int32})">
             <summary>
-            Muestra la vista para procesar (contar) los contenedores de una transacción de CEF.
+            Muestra el formulario para procesar los contenedores de una transacción CEF.
             </summary>
-            <remarks>
-            Requiere permiso 'Edit' para el módulo "CEF".
-            </remarks>
-            <param name="transactionId">ID de la transacción CEF a procesar.</param>
-            
-            <returns>Vista de procesamiento de contenedores.</returns>
+            <param name="transactionId">Identificador de la transacción.</param>
+            <param name="containerId">Identificador de la bolsa.</param>
+            <returns>Vista del formulario de procesamiento de contenedores.</returns>
         </member>
         <member name="M:VCashApp.Controllers.CefController.DeleteContainer(System.Int32,System.Int32)">
             <summary>
@@ -920,8 +932,14 @@
             Este endpoint es llamado vía HTTP POST.
             Requiere permiso 'Edit' para el módulo "CEF".
             </remarks>
+            <param name="transactionId">Identificador de la transacción.</param>
             <param name="viewModel">ViewModel con los datos del contenedor, detalles y novedades.</param>
             <returns>Un JSON ServiceResult o redirección a la misma vista para continuar o al dashboard.</returns>
+        </member>
+        <member name="M:VCashApp.Controllers.CefController.DetailChanged(VCashApp.Models.ViewModels.CentroEfectivo.CefValueDetailViewModel,VCashApp.Models.Entities.CefValueDetail)">
+            <summary>
+            Devuelve true si el detalle (POST) difiere del persistido en campos relevantes.
+            </summary>
         </member>
         <member name="M:VCashApp.Controllers.CefController.FinalizeCounting(System.Int32)">
             <summary>
@@ -3294,6 +3312,70 @@
             -1 si “explica sobrante” (Sobrante/MezclaSobrante).
             </summary>
         </member>
+        <member name="T:VCashApp.Services.CentroEfectivo.Provision.Application.IProvisionReadService">
+            <summary>Consultas para vistas (queries).</summary>
+        </member>
+        <member name="T:VCashApp.Services.CentroEfectivo.Provision.Application.IProvisionService">
+            <summary>Casos de uso de Provisión (commands).</summary>
+        </member>
+        <member name="T:VCashApp.Services.CentroEfectivo.Provision.Application.ProvisionReadService">
+            <summary>
+            Read Service adaptado al VM de detalle: CefTransactionDetailViewModel.
+            Solo consulta y mapea para la UI.
+            </summary>
+        </member>
+        <member name="M:VCashApp.Services.CentroEfectivo.Provision.Application.ProvisionReadService.GetProcessPageAsync(System.Int32)">
+            <summary>
+            ***Puente para compatibilidad con el controlador antiguo.***
+            En vez de usar este, migra a GetDetailAsync(int).
+            </summary>
+        </member>
+        <member name="M:VCashApp.Services.CentroEfectivo.Provision.Application.ProvisionReadService.GetDetailAsync(System.Int32)">
+            <summary>
+            Carga la página de proceso/detalle de la provisión (VM nuevo).
+            </summary>
+        </member>
+        <member name="T:VCashApp.Services.CentroEfectivo.Provision.Application.ProvisionService">
+            <summary>
+            Orquesta reglas de negocio para la Provisión. No conoce EF ni UI.
+            </summary>
+        </member>
+        <member name="M:VCashApp.Services.CentroEfectivo.Provision.Domain.IProvisionStateMachine.EnsureCanMove(System.String,System.String,System.Int32)">
+            <summary>Valida si current → next es permitida.</summary>
+        </member>
+        <member name="T:VCashApp.Services.CentroEfectivo.Provision.Domain.ProvisionAllowedValueTypesPolicy">
+            <summary>En provisión solo se permite Billete y Moneda.</summary>
+        </member>
+        <member name="T:VCashApp.Services.CentroEfectivo.Provision.Domain.ProvisionEnvelopePolicy">
+            <summary>Sobres permitidos sólo si son sub-tipo Efectivo.</summary>
+        </member>
+        <member name="T:VCashApp.Services.CentroEfectivo.Provision.Domain.ProvisionStateMachine">
+            <summary>Transiciones válidas para el ciclo de provisión.</summary>
+        </member>
+        <member name="T:VCashApp.Services.CentroEfectivo.Provision.Domain.ZeroTolerancePolicy">
+            <summary>Tolerancia absoluta (por defecto 0).</summary>
+        </member>
+        <member name="T:VCashApp.Services.CentroEfectivo.Provision.Infrastructure.CefContainerRepository">
+            <summary>Repositorio EF para contenedores y detalles de valor.</summary>
+        </member>
+        <member name="T:VCashApp.Services.CentroEfectivo.Provision.Infrastructure.CefTransactionRepository">
+            <summary>Repositorio EF para CefTransaction en el contexto de Provisión.</summary>
+        </member>
+        <member name="M:VCashApp.Services.CentroEfectivo.Provision.Infrastructure.CefTransactionRepository.RecalculateTotalsAsync(System.Int32)">
+            <summary>Recalcula totales del encabezado a partir de detalles.</summary>
+        </member>
+        <member name="T:VCashApp.Services.CentroEfectivo.Provision.Infrastructure.IUnitOfWork">
+            <summary>UoW mínimo usando AppDbContext.</summary>
+        </member>
+        <member name="T:VCashApp.Services.CentroEfectivo.Provision.Infrastructure.CefTransactionNewArgs">
+            <summary>Argumentos para crear transacción de provisión.</summary>
+        </member>
+        <member name="T:VCashApp.Services.CentroEfectivo.Provision.Infrastructure.ICefTransactionRepository">
+            <summary>Acceso a transacciones CEF para provisión.</summary>
+        </member>
+        <member name="T:VCashApp.Services.CentroEfectivo.Provision.Infrastructure.IAuditLogger">
+            <summary>Logger de auditoría simple (puedes apuntarlo a Serilog sinks).</summary>
+        </member>
         <member name="T:VCashApp.Services.EmployeeLog.EmployeeLogService">
             <summary>
             Servicio de negocio para Registro de Empleados (Entrada/Salida),
@@ -4463,6 +4545,11 @@
         <member name="M:VCashApp.Services.UserService.GetExportableUsersAsync(System.String,System.String,System.Nullable{System.Int32})">
             <summary>
             Obtiene una colección COMPLETA de usuarios filtrados para propósitos de exportación, sin paginación.
+            </summary>
+        </member>
+        <member name="T:VCashApp.Utils.RoleIds">
+            <summary>
+            GUIDs de roles estructurales. Renombrar el rol no afecta su Id.
             </summary>
         </member>
     </members>

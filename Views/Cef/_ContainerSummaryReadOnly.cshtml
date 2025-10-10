@@ -2,25 +2,21 @@
 
 @if (Model == null)
 {
-    <div class="text-muted">Sin datos del contenedor.</div>
+    <div class="text-muted">Sin datos de la bolsa.</div>
     return;
 }
 
-<div class="mb-2">
-    <div class="small text-muted">Código contenedor</div>
-    <div><strong>@Model.ContainerCode</strong></div>
-    @if (!string.IsNullOrWhiteSpace(Model.ParentLabel))
-    {
-        <div class="small text-muted">Padre: @Model.ParentLabel</div>
-    }
-</div>
-
 @{
-    var bills = Model.Values?.Where(v => v.ValueType.Equals("Billete", StringComparison.OrdinalIgnoreCase)).ToList() ?? new();
-    var coins = Model.Values?.Where(v => v.ValueType.Equals("Moneda", StringComparison.OrdinalIgnoreCase)).ToList() ?? new();
-    var docs = Model.Values?.Where(v => v.ValueType.Equals("Documento", StringComparison.OrdinalIgnoreCase)).ToList() ?? new();
-    var checks = Model.Values?.Where(v => v.ValueType.Equals("Cheque", StringComparison.OrdinalIgnoreCase)).ToList() ?? new();
+    var bills = Model.Values?.Where(v => string.Equals(v.ValueType, "Billete", StringComparison.OrdinalIgnoreCase)).ToList() ?? new List<VCashApp.Models.ViewModels.CentroEfectivo.DetailValueRowVM>();
+    var coins = Model.Values?.Where(v => string.Equals(v.ValueType, "Moneda", StringComparison.OrdinalIgnoreCase)).ToList() ?? new List<VCashApp.Models.ViewModels.CentroEfectivo.DetailValueRowVM>();
+    var docs = Model.Values?.Where(v => string.Equals(v.ValueType, "Documento", StringComparison.OrdinalIgnoreCase)).ToList() ?? new List<VCashApp.Models.ViewModels.CentroEfectivo.DetailValueRowVM>();
+    var checks = Model.Values?.Where(v => string.Equals(v.ValueType, "Cheque", StringComparison.OrdinalIgnoreCase)).ToList() ?? new List<VCashApp.Models.ViewModels.CentroEfectivo.DetailValueRowVM>();
 }
+
+<div class="mb-2">
+    <div class="small text-muted">Código bolsa</div>
+    <div><strong>@Model.ContainerCode</strong></div>
+</div>
 
 @if (bills.Any())
 {
@@ -32,7 +28,10 @@
                     <tr>
                         <th>Denominación</th>
                         <th>Calidad</th>
+                        <th class="text-center">Alta/Baja</th>
                         <th class="text-end">Cantidad</th>
+                        <th class="text-end">Fajos</th>
+                        <th class="text-end">Picos</th>
                         <th class="text-end">Valor unit.</th>
                         <th class="text-end">Monto</th>
                     </tr>
@@ -42,8 +41,26 @@
                     {
                         <tr>
                             <td>@r.DenominationName</td>
-                            <td>@r.QualityName</td>
+                            <td>@(string.IsNullOrWhiteSpace(r.QualityName) ? "—" : r.QualityName)</td>
+                            <td class="text-center">
+                                @if (r.IsHighDenomination == null)
+                                {
+                                    <span class="badge bg-light text-dark">—</span>
+                                }
+                                else if (r.IsHighDenomination == true)
+                                {
+
+                                    <span class="badge bg-primary">Alta</span>
+                                }
+                                else
+                                {
+
+                                    <span class="badge bg-secondary">Baja</span>
+                                }
+                            </td>
                             <td class="text-end">@r.Quantity.ToString("N0")</td>
+                            <td class="text-end">@r.Bundles.ToString("N0")</td>
+                            <td class="text-end">@r.Loose.ToString("N0")</td>
                             <td class="text-end">@r.UnitValue.ToString("N0")</td>
                             <td class="text-end">@r.CalculatedAmount.ToString("N0")</td>
                         </tr>
@@ -74,7 +91,7 @@
                     {
                         <tr>
                             <td>@r.DenominationName</td>
-                            <td>@r.QualityName</td>
+                            <td>@(string.IsNullOrWhiteSpace(r.QualityName) ? "—" : r.QualityName)</td>
                             <td class="text-end">@r.Quantity.ToString("N0")</td>
                             <td class="text-end">@r.UnitValue.ToString("N0")</td>
                             <td class="text-end">@r.CalculatedAmount.ToString("N0")</td>
@@ -94,7 +111,7 @@
             <table class="table table-sm">
                 <thead>
                     <tr>
-                        <th>Descripción / Denominación</th>
+                        <th>Descripción</th>
                         <th class="text-end">Monto</th>
                     </tr>
                 </thead>
@@ -102,7 +119,7 @@
                     @foreach (var r in docs)
                     {
                         <tr>
-                            <td>@r.DenominationName</td>
+                            <td>@(string.IsNullOrWhiteSpace(r.DenominationName) ? "Documento" : r.DenominationName)</td>
                             <td class="text-end">@r.CalculatedAmount.ToString("N0")</td>
                         </tr>
                     }
@@ -120,7 +137,10 @@
             <table class="table table-sm">
                 <thead>
                     <tr>
-                        <th>Descripción</th>
+                        <th>Banco</th>
+                        <th>Nro. Cuenta</th>
+                        <th>Nro. Cheque</th>
+                        <th>Fecha</th>
                         <th class="text-end">Monto</th>
                     </tr>
                 </thead>
@@ -128,7 +148,10 @@
                     @foreach (var r in checks)
                     {
                         <tr>
-                            <td>@r.DenominationName</td>
+                            <td>@(string.IsNullOrWhiteSpace(r.QualityName) ? "—" : r.QualityName)</td>
+                            <td>—</td>
+                            <td>—</td>
+                            <td>—</td>
                             <td class="text-end">@r.CalculatedAmount.ToString("N0")</td>
                         </tr>
                     }
@@ -139,5 +162,5 @@
 }
 
 <div class="d-flex justify-content-end">
-    <span class="badge bg-info">Subtotal contenedor: @Model.Subtotal.ToString("N0")</span>
+    <span class="badge bg-info">Subtotal: @Model.Subtotal.ToString("N0")</span>
 </div>

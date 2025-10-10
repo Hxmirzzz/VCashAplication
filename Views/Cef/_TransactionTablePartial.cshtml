@@ -96,7 +96,7 @@
                                             @if (transaction.TransactionStatus == nameof(CefTransactionStatusEnum.EncoladoParaConteo) ||
                                                 transaction.TransactionStatus == nameof(CefTransactionStatusEnum.Conteo))
                                             {
-                                                <a asp-action="ProcessContainers" asp-route-transactionId="@transaction.Id" class="btn-detail" title="Procesar Contenedores">
+                                                <a asp-action="ProcessContainers" asp-route-transactionId="@transaction.Id" class="btn-detail" title="Procesar Bolsas">
                                                     <i class="ri-money-dollar-circle-fill"></i>
                                                 </a>
                                             }
@@ -105,6 +105,21 @@
                                                 <a asp-action="ReviewTransaction" asp-route-transactionId="@transaction.Id" class="btn-edit ml-1" title="Revisar Transacción">
                                                     <i class="ri-check-double-line"></i>
                                                 </a>
+                                            }
+                                            @if (transaction.TransactionStatus == nameof(CefTransactionStatusEnum.ProvisionEnProceso))
+                                            {
+                                                <a href="@Url.Action("Process", "Provision", new { txId = transaction.Id })" class="btn-detail" title="Preparar Provisión">
+                                                    <i class="ri-shopping-bag-3-fill"></i>
+                                                </a>
+                                            }
+                                            @if (transaction.TransactionStatus == nameof(CefTransactionStatusEnum.ListoParaEntrega))
+                                            {
+                                                <form asp-action="Deliver" asp-controller="Provision" asp-route-txId="@transaction.Id" method="post" class="d-inline">
+                                                    @Html.AntiForgeryToken()
+                                                    <button type="submit" class="btn btn-success" title="Entregar">
+                                                        <i class="ri-hand-coin-fill"></i>
+                                                    </button>
+                                                </form>
                                             }
                                         }
                                     </div>

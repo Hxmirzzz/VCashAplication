@@ -2,10 +2,11 @@
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using System.Data;
-using VCashApp.Utils;
 using VCashApp.Data;
+using VCashApp.Enums;
 using VCashApp.Models.ViewModels.Servicio;
 using VCashApp.Services.DTOs;
+using VCashApp.Utils;
 
 namespace VCashApp.Services.Service
 {
@@ -79,6 +80,13 @@ namespace VCashApp.Services.Service
                 .Select(s => s.NombreSucursal)
                 .FirstOrDefaultAsync();
 
+            string cefEstado =
+                (viewModel.ConceptCode == 1 || viewModel.ConceptCode == 4)
+                    ? nameof(CefTransactionStatusEnum.RegistroTesoreria)
+                    : (viewModel.ConceptCode == 2 || viewModel.ConceptCode == 3)
+                        ? nameof(CefTransactionStatusEnum.ProvisionEnProceso)
+                        : nameof(CefTransactionStatusEnum.RegistroTesoreria);
+
             // === Validaciones ===
             if (viewModel.ConceptCode == 5 && (viewModel.TransferType != "I" && viewModel.TransferType != "T"))
                 return ServiceResult.FailureResult("Para TRASLADO, Tipo de Traslado debe ser 'Interno' o 'Transportadora'.");
@@ -107,8 +115,6 @@ namespace VCashApp.Services.Service
             var declaredEnv = 0;
             var declaredChecks = 0;
             var declaredDocsCt = 0;
-
-            var cefEstado = "RegistroTesoreria";
             int cefPlanilla = 0;
             var acceptanceDate = DateOnly.FromDateTime(DateTime.Now);
             var acceptanceTime = TimeOnly.FromDateTime(DateTime.Now);

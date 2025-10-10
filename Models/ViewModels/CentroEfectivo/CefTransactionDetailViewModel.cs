@@ -1,9 +1,4 @@
-﻿// Models/ViewModels/CentroEfectivo/CefTransactionDetailViewModel.cs
-using System;
-using System.Collections.Generic;
-using Microsoft.AspNetCore.Mvc.Rendering;
-
-namespace VCashApp.Models.ViewModels.CentroEfectivo
+﻿namespace VCashApp.Models.ViewModels.CentroEfectivo
 {
     public class CefTransactionDetailViewModel
     {
