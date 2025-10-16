@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Mvc.Rendering;
 using System.ComponentModel.DataAnnotations;
 
 namespace VCashApp.Models.ViewModels.CentroEfectivo
@@ -52,6 +53,10 @@ namespace VCashApp.Models.ViewModels.CentroEfectivo
         public decimal CountedCoinsAll { get; set; }          // monedas
         public decimal CountedDocsAll { get; set; }           // documentos
         public decimal CountedChecksAll { get; set; }         // cheques
+
+        public string? Currency { get; set; }                    // valor actual (ej. "COP")
+        public IEnumerable<SelectListItem> Currencies { get; set; } = Enumerable.Empty<SelectListItem>();
+
     }
 
     /// <summary>

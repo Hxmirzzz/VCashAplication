@@ -27,7 +27,7 @@ namespace VCashApp.Models.Entities
         public int? DenominationId { get; set; }
         public virtual AdmDenominacion? AdmDenominacion { get; set; } = null!;
 
-        [Column("Calidad")]
+        [Column("Calidad")] 
         [ForeignKey("AdmQuality")]
         public int? QualityId { get; set; }
         public virtual AdmQuality? AdmQuality { get; set; } = null!;

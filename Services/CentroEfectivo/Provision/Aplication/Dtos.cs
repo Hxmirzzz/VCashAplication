@@ -12,7 +12,11 @@ namespace VCashApp.Services.CentroEfectivo.Provision.Application
         string? Observations);
 
     public sealed record SaveProvisionContainersCmd(
-        IReadOnlyList<CefContainerProcessingViewModel> Containers);
+        IReadOnlyList<CefContainerProcessingViewModel> Containers,
+        string? Currency,
+        int? SlipNumber
+        //string? Observations
+    );
 
     // Query VMs (puedes mapear con AutoMapper si ya usas)
     public sealed record ProvisionPageVm(

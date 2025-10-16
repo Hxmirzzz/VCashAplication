@@ -59,6 +59,24 @@ namespace VCashApp.Services.CentroEfectivo.Provision.Application
             return txId;
         }
 
+        public async Task SaveHeaderAsync(int txId, int slipNumber, string currency, string userId)
+        {
+            var tx = await _txRepo.GetAsync(txId) ?? throw new InvalidOperationException("Tx no existe.");
+
+            if (!string.IsNullOrEmpty(currency))
+                tx.Currency = currency.Trim().ToUpperInvariant();
+
+            tx.SlipNumber = slipNumber;
+            tx.Currency = currency;
+            tx.LastUpdateUser = userId;
+            tx.LastUpdateDate = DateTime.Now;
+
+            await _txRepo.UpdateAsync(tx);
+            await _uow.SaveChangesAsync();
+
+            _audit.Info("CEF.Provision.SaveHeader", "Cabecera actualizada", "OK", "CefTransaction", txId.ToString(), tx.ServiceOrderId);
+        }
+
         public async Task SaveContainersAsync(int txId, SaveProvisionContainersCmd cmd, string userId)
         {
             var tx = await _txRepo.GetAsync(txId) ?? throw new InvalidOperationException("Tx no existe.");

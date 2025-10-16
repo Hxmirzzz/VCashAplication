@@ -2,6 +2,7 @@
 @using VCashApp.Enums;
 @{
     Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewData["Title"] = "Create";
 
     bool canEdit  = ViewBag.HasEdit ?? false;
     bool canBills = ViewBag.CanCountBills ?? false;
@@ -61,31 +62,31 @@
                                         </div>
                                     </div>
                                 </div>
-                
+                            
                                 <div class="col-12 col-xl-5">
                                     <div class="card h-100">
                                         <div class="card-header">
-                                            <h6 class="mb-0"><i class="ri-list-check"></i> Totales</h6>
-                                            <span class="chip-live ms-auto">En vivo</span>
+                                          <h6 class="mb-0"><i class="ri-list-check"></i> Totales</h6>
+                                          <span class="chip-live ms-auto">En vivo</span>
                                         </div>
                                         <div class="card-body p-2">
                                             <input type="hidden" id="declaredTransaction" value="@Model.TotalDeclaredAll" />
                                             <div class="stats-grid small">
                                                 <div class="label">Declarado</div>
                                                 <div class="value" id="totDeclaredGlobal">@Model.TotalDeclaredAll.ToString("N0")</div>
-                
+                                            
                                                 <div class="label">Contado</div>
                                                 <div class="value" id="totCountedGlobal">@Model.TotalCountedAll.ToString("N0")</div>
-                
+                                            
                                                 <div class="label">Diferencia</div>
                                                 <div class="value tile-diff" id="totDiffGlobal">@Model.DifferenceAll.ToString("N0")</div>
-                
+                                            
                                                 <div class="divider-xs"></div>
-                
+                                            
                                                 <div class="label">Total</div>
                                                 <div class="value" id="totOverallGlobal">@Model.TotalOverallAll.ToString("N0")</div>
                                             </div>
-                
+                                        
                                             <div class="row gx-3 gy-1 mt-2 small">
                                                 <div class="col-6 d-flex justify-content-between">
                                                     <span class="text-muted">Bolsas</span><strong id="countBagsHeader">0</strong>
@@ -98,261 +99,293 @@
                                     </div>
                                 </div>
                             </div>
-                
-                            <div class="card">
-                                <div class="card-header d-flex align-items-center justify-content-between">
-                                    <h5 class="mb-0"><i class="ri-shopping-bag-3-fill"></i> Bolsas</h5>
-                                    <div class="d-flex gap-2">
-                                        <button type="button" class="btn btn-outline-primary" id="btnAddBag">+ Agregar Bolsa</button>
-                                    </div>
-                                </div>
-                
+
+                            <div class="card mb-2">
                                 <div class="card-body">
-                                    @{
-                                        var bagItems = Model.Containers
-                                            .Select((c, idx) => new { c, idx })
-                                            .Where(x => x.c.ParentContainerId == null && x.c.ContainerType == VCashApp.Enums.CefContainerTypeEnum.Bolsa)
-                                            .ToList();
-                                    }
-                
-                                    <div class="tabs-scroll-wrap">
-                                        <button class="tabs-arrow tabs-arrow--left" type="button" aria-label="Desplazar tabs a la izquierda">‹</button>
-                
-                                        <div class="tabs-viewport">
-                                            <ul class="nav nav-tabs" id="bagsTabs" role="tablist">
-                                                @for (var b = 0; b < bagItems.Count; b++)
-                                                {
-                                                    var bagIdx = bagItems[b].idx;
-                                                    var tabId = $"bag-tab-{bagIdx}";
-                                                    var bagId = bagItems[b].c.Id;
-                
-                                                    <li class="nav-item" role="presentation">
-                                                        <button class="nav-link @(b==0 ? "active" : "") d-inline-flex align-items-center gap-1"
-                                                                  id="@($"{tabId}-btn")"
-                                                                  data-bs-toggle="tab" data-bs-target="@($"#{tabId}")"
-                                                                  type="button" role="tab">
-                                                            <span>Bolsa @(@b + 1)</span>
-                
-                                                            <span class="badge bg-primary ms-2 tab-badge" title="Billetes">
-                                                                <i class="ri-money-dollar-box-line"></i>
-                                                                <span class="js-bag-badge-bills">0</span>
-                                                            </span>
-                                                            <span class="badge bg-warning text-dark ms-1 tab-badge" title="Monedas">
-                                                                <i class="ri-coins-line"></i>
-                                                                <span class="js-bag-badge-coins">0</span>
-                                                            </span>
-                                                            <span class="badge bg-info ms-1 tab-badge" title="Total bolsa">
-                                                                <i class="ri-equalizer-line"></i>
-                                                                <span class="js-bag-badge-total">0</span>
-                                                            </span>
-                
-                                                            <span class="btn-close btn-close-sm tab-close js-close-bag-tab ms-1"
-                                                                  role="button" aria-label="Eliminar bolsa" title="Eliminar bolsa"
-                                                                  data-container-id="@bagId"
-                                                                  data-bag-idx="@bagIdx"></span>
-                                                        </button>
-                                                    </li>
-                                                }
-                                            </ul>
-                                        </div>
-                
-                                        <button class="tabs-arrow tabs-arrow--right" type="button" aria-label="Desplazar tabs a la derecha">›</button>
-                
-                                        <span class="tabs-shadow tabs-shadow--left"></span>
-                                        <span class="tabs-shadow tabs-shadow--right"></span>
-                                        div>
-                
-                                        iv class="tab-content mt-3" id="bagsTabContent">
-                                        @for (var b = 0; b < bagItems.Count; b++)
-                                        {
-                                            var bagIdx = bagItems[b].idx;
-                                            var tabId = $"bag-tab-{bagIdx}";
-                                            <div class="tab-pane fade @(b==0 ? "show active" : "")" id="@tabId" role="tabpanel" data-bag-idx="@bagIdx">
-                                              @{
-                                                  var vddBag = new ViewDataDictionary(ViewData);
-                                                  vddBag.TemplateInfo.HtmlFieldPrefix = $"Containers[{bagIdx}]";
-                                              }
-                                              @Html.Partial(
-                                                "~/Views/Cef/_ContainerEditorPartial.cshtml",
-                                                Model.Containers[bagIdx],
-                                                vddBag
-                                              )
-                
-                                              <!-- ====== Sobres de esta bolsa ====== -->
-                                              <div class="card mt-3">
-                                                <div class="card-header d-flex align-items-center justify-content-between">
-                                                  <h6 class="mb-0"><i class="ri-mail-fill"></i> Sobres de esta Bolsa</h6>
-                                                  <div class="d-flex gap-2 align-items-center small js-env-badges mt-2">
-                                                    <span class="badge bg-primary">Billetes: <span class="js-env-bills">0</span></span>
-                                                    <span class="badge bg-warning text-dark">Monedas: <span class="js-env-coins">0</span></span>
-                                                    <span class="badge bg-secondary">Docs: <span class="js-env-docs">0</span></span>
-                                                    <span class="badge bg-info">Cheques: <span class="js-env-checks">0</span></span>
-                                                    <span class="ms-auto text-muted">Total: <strong class="js-env-total">0</strong></span>
-                                                  </div>
-                                                  <button type="button" class="btn btn-outline-secondary btn-sm js-add-envelope-in-this-bag">
-                                                    + Agregar Sobre
-                                                  </button>
-                                                </div>
-                                                <div class="card-body">
-                                                  <div class="small text-muted">Puedes añadir varios sobres; cada sobre puede ser Efectivo, Documentos/Voucher o Cheques.</div>
-                                                  <div class="bag-envelopes-list mt-3">
-                                                    @{
-                                                        var bagId = Model.Containers[bagIdx].Id;
-                                                        var childEnvelopes = Model.Containers
-                                                            .Select((c, idx) => new { c, idx })
-                                                            .Where(x => x.c.ParentContainerId == bagId && x.c.ContainerType == CefContainerTypeEnum.Sobre)
-                                                            .ToList();
-                                                    }
-                                                    @for (var e = 0; e < childEnvelopes.Count; e++)
+                                    <div class="row g-3">
+                                        <div class="col-12 col-lg-6">
+                                            <div class="form-floating has-validation">
+                                                <select name="Currency" class="form-select" required>
+                                                    @foreach (var opt in Html.GetEnumSelectList<CurrencyEnum>())
                                                     {
-                                                        var envIdx = childEnvelopes[e].idx;
-                                                        var env = Model.Containers[envIdx];
-                                                        <div class="envelope-card mb-3"
-                                                             data-env-idx="@envIdx"
-                                                             data-container-id="@env.Id">
-                                                          @{
-                                                              var vddEnv = new ViewDataDictionary(ViewData);
-                                                              vddEnv.TemplateInfo.HtmlFieldPrefix = $"Containers[{envIdx}]";
-                                                          }
-                                                          @Html.Partial(
-                                                              "~/Views/Cef/_ContainerEditorPartial.cshtml",
-                                                              env,
-                                                              vddEnv
-                                                          )
-                                                          <div class="d-flex justify-content-end pt-2">
-                                                            <button type="button"
-                                                                    class="btn btn-outline-danger btn-sm js-remove-envelope-card"
-                                                                    data-env-idx="@envIdx"
-                                                                    data-container-id="@env.Id">
-                                                              Eliminar sobre
-                                                            </button>
-                                                          </div>
-                                                        </div>
+                                                        var val = opt.Text;
+                                                        var isSelected = string.Equals(val, Model.Transaction.Currency, StringComparison.OrdinalIgnoreCase);
+                                                        <option value="@val" selected="@(isSelected ? "selected" : null)">@opt.Text</option>
                                                     }
-                                                  </div>
-                                                </div>
-                                              </div>
+                                                </select>
+                                                <label asp-for="Currency" class="required">Divisa</label>
+                                                <div class="invalid-feedback">⚠ Este campo es requerido</div>
                                             </div>
-                                        }
+                                        </div>
+                                        <div class="col-12 col-lg-6">
+                                            <div class="form-floating has-validation">
+                                                <input type="number" name="SlipNumber" class="form-control" value="@Model.Transaction.SlipNumber" required />
+                                                <label class="required">Planilla</label>
+                                                <div class="invalid-feedback">⚠ Requerido</div>
+                                                <div class="valid-feedback">✓ Correcto</div>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
+                            </div>
+                        
+                            <!-- ===== Bolsas / Sobres (idéntico al original, sin botón de “Novedades”) ===== -->
+                            <div class="card">
+                              <div class="card-header d-flex align-items-center justify-content-between">
+                                <h5 class="mb-0"><i class="ri-shopping-bag-3-fill"></i> Bolsas</h5>
+                                <div class="d-flex gap-2">
+                                  <button type="button" class="btn btn-outline-primary" id="btnAddBag">+ Agregar Bolsa</button>
+                                </div>
+                              </div>
+                        
+                              <div class="card-body">
+                                @{
+                                    var bagItems = Model.Containers
+                                        .Select((c, idx) => new { c, idx })
+                                        .Where(x => x.c.ParentContainerId == null && x.c.ContainerType == VCashApp.Enums.CefContainerTypeEnum.Bolsa)
+                                        .ToList();
+                                }
+                        
+                                <div class="tabs-scroll-wrap">
+                                  <button class="tabs-arrow tabs-arrow--left" type="button" aria-label="Desplazar tabs a la izquierda">‹</button>
+                        
+                                  <div class="tabs-viewport">
+                                    <ul class="nav nav-tabs" id="bagsTabs" role="tablist">
+                                      @for (var b = 0; b < bagItems.Count; b++)
+                                      {
+                                          var bagIdx = bagItems[b].idx;
+                                          var tabId = $"bag-tab-{bagIdx}";
+                                          var bagId = bagItems[b].c.Id;
+                        
+                                          <li class="nav-item" role="presentation">
+                                            <button class="nav-link @(b==0 ? "active" : "") d-inline-flex align-items-center gap-1"
+                                                    id="@($"{tabId}-btn")"
+                                                    data-bs-toggle="tab" data-bs-target="@($"#{tabId}")"
+                                                    type="button" role="tab">
+                                              <span>Bolsa @(@b + 1)</span>
+                        
+                                              <span class="badge bg-primary ms-2 tab-badge" title="Billetes">
+                                                <i class="ri-money-dollar-box-line"></i>
+                                                <span class="js-bag-badge-bills">0</span>
+                                              </span>
+                                              <span class="badge bg-warning text-dark ms-1 tab-badge" title="Monedas">
+                                                <i class="ri-coins-line"></i>
+                                                <span class="js-bag-badge-coins">0</span>
+                                              </span>
+                                              <span class="badge bg-info ms-1 tab-badge" title="Total bolsa">
+                                                <i class="ri-equalizer-line"></i>
+                                                <span class="js-bag-badge-total">0</span>
+                                              </span>
+                        
+                                              <!-- ❌ eliminado: icono de “Novedades” -->
+                                              <span class="btn-close btn-close-sm tab-close js-close-bag-tab ms-1"
+                                                    role="button" aria-label="Eliminar bolsa" title="Eliminar bolsa"
+                                                    data-container-id="@bagId"
+                                                    data-bag-idx="@bagIdx"></span>
+                                            </button>
+                                          </li>
+                                      }
+                                    </ul>
+                                  </div>
+                        
+                                  <button class="tabs-arrow tabs-arrow--right" type="button" aria-label="Desplazar tabs a la derecha">›</button>
+                        
+                                  <span class="tabs-shadow tabs-shadow--left"></span>
+                                  <span class="tabs-shadow tabs-shadow--right"></span>
+                                </div>
+                        
+                                <div class="tab-content mt-3" id="bagsTabContent">
+                                  @for (var b = 0; b < bagItems.Count; b++)
+                                  {
+                                      var bagIdx = bagItems[b].idx;
+                                      var tabId = $"bag-tab-{bagIdx}";
+                                      <div class="tab-pane fade @(b==0 ? "show active" : "")" id="@tabId" role="tabpanel" data-bag-idx="@bagIdx">
+                                        @{
+                                            var vddBag = new ViewDataDictionary(ViewData);
+                                            vddBag.TemplateInfo.HtmlFieldPrefix = $"Containers[{bagIdx}]";
+                                        }
+                                        @Html.Partial(
+                                          "~/Views/Cef/_ContainerEditorPartial.cshtml",
+                                          Model.Containers[bagIdx],
+                                          vddBag
+                                        )
+                        
+                                        <!-- ====== Sobres de esta bolsa ====== -->
+                                        <div class="card mt-3">
+                                          <div class="card-header d-flex align-items-center justify-content-between">
+                                            <h6 class="mb-0"><i class="ri-mail-fill"></i> Sobres de esta Bolsa</h6>
+                                            <div class="d-flex gap-2 align-items-center small js-env-badges mt-2">
+                                              <span class="badge bg-primary">Billetes: <span class="js-env-bills">0</span></span>
+                                              <span class="badge bg-warning text-dark">Monedas: <span class="js-env-coins">0</span></span>
+                                              <span class="badge bg-secondary">Docs: <span class="js-env-docs">0</span></span>
+                                              <span class="badge bg-info">Cheques: <span class="js-env-checks">0</span></span>
+                                              <span class="ms-auto text-muted">Total: <strong class="js-env-total">0</strong></span>
+                                            </div>
+                                            <button type="button" class="btn btn-outline-secondary btn-sm js-add-envelope-in-this-bag">
+                                              + Agregar Sobre
+                                            </button>
+                                          </div>
+                                          <div class="card-body">
+                                            <div class="small text-muted">Puedes añadir varios sobres; cada sobre puede ser Efectivo, Documentos/Voucher o Cheques.</div>
+                                            <div class="bag-envelopes-list mt-3">
+                                              @{
+                                                  var bagId = Model.Containers[bagIdx].Id;
+                                                  var childEnvelopes = Model.Containers
+                                                      .Select((c, idx) => new { c, idx })
+                                                      .Where(x => x.c.ParentContainerId == bagId && x.c.ContainerType == CefContainerTypeEnum.Sobre)
+                                                      .ToList();
+                                              }
+                                              @for (var e = 0; e < childEnvelopes.Count; e++)
+                                              {
+                                                  var envIdx = childEnvelopes[e].idx;
+                                                  var env = Model.Containers[envIdx];
+                                                  <div class="envelope-card mb-3"
+                                                       data-env-idx="@envIdx"
+                                                       data-container-id="@env.Id">
+                                                    @{
+                                                        var vddEnv = new ViewDataDictionary(ViewData);
+                                                        vddEnv.TemplateInfo.HtmlFieldPrefix = $"Containers[{envIdx}]";
+                                                    }
+                                                    @Html.Partial(
+                                                        "~/Views/Cef/_ContainerEditorPartial.cshtml",
+                                                        env,
+                                                        vddEnv
+                                                    )
+                                                    <div class="d-flex justify-content-end pt-2">
+                                                      <button type="button"
+                                                              class="btn btn-outline-danger btn-sm js-remove-envelope-card"
+                                                              data-env-idx="@envIdx"
+                                                              data-container-id="@env.Id">
+                                                        Eliminar sobre
+                                                      </button>
+                                                    </div>
+                                                  </div>
+                                              }
+                                            </div>
+                                          </div>
+                                        </div>
+                                      </div>
+                                  }
+                                </div>
+                              </div>
                             </div>
                         </div>
                     </div>
                 
+                    <!-- ===== PASO 2: RESUMEN (igual que el original, sin referencias a incidentes) ===== -->
                     <div class="tab-pane fade" role="tabpanel" data-step="2">
-                        <div class="step-content">
-                            <div class="card mb-3">
-                                <div class="card-header d-flex align-items-center justify-content-between">
-                                    <h5 class="mb-0"><i class="ri-list-check"></i> Resumen de la transacción</h5>
-                                    <small class="sub-title">Se actualiza en vivo con lo que capturas</small>
+                      <div class="step-content">
+                        <div class="card mb-3">
+                          <div class="card-header d-flex align-items-center justify-content-between">
+                            <h5 class="mb-0"><i class="ri-list-check"></i> Resumen de la transacción</h5>
+                            <small class="sub-title">Se actualiza en vivo con lo que capturas</small>
+                          </div>
+                          <div class="card-body">
+                            <div class="row g-3 stat-tiles">
+                              <div class="col-12 col-md-3">
+                                <div class="tile shadow-sm">
+                                  <div class="tile-label">Total declarado</div>
+                                  <div class="tile-value" id="sumDeclaredAllDisplay">@Model.TotalDeclaredAll.ToString("N0")</div>
+                                  <input type="hidden" id="sumDeclaredAll" value="@Model.TotalDeclaredAll.ToString("N0")" />
                                 </div>
-                                <div class="card-body">
-                                    <div class="row g-3 stat-tiles">
-                                        <div class="col-12 col-md-3">
-                                            <div class="tile shadow-sm">
-                                                <div class="tile-label">Total declarado</div>
-                                                <div class="tile-value" id="sumDeclaredAllDisplay">@Model.TotalDeclaredAll.ToString("N0")</div>
-                                                <input type="hidden" id="sumDeclaredAll" value="@Model.TotalDeclaredAll.ToString("N0")" />
-                                            </div>
-                                        </div>
-                                        <div class="col-12 col-md-3">
-                                            <div class="tile shadow-sm">
-                                                <div class="tile-label">Total Contado</div>
-                                                <div class="tile-value" id="sumCountedAllDisplay">@Model.TotalCountedAll.ToString("N0")</div>
-                                                <input type="hidden" id="sumCountedAll" value="@Model.TotalCountedAll.ToString("N0")" />
-                                            </div>
-                                        </div>
-                                        <div class="col-12 col-md-3">
-                                            <div class="tile shadow-sm">
-                                                <div class="tile-label">Diferencia</div>
-                                                <div class="tile-value tile-diff" id="sumDiffAllDisplay">@Model.DifferenceAll.ToString("N0")</div>
-                                                <input type="hidden" id="sumDiffAll" value="@Model.DifferenceAll.ToString("N0")" />
-                                            </div>
-                                        </div>
-                                        <div class="col-12 col-md-3">
-                                            <div class="tile shadow-sm">
-                                                <div class="tile-label">Total</div>
-                                                <div class="tile-value" id="sumOverallDisplay">@Model.TotalOverallAll.ToString("N0")</div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <hr class="my-4">
-                                    <div class="row g-3">
-                                        <div class="col-12 col-lg-6">
-                                            <div class="card h-100">
-                                                <div class="card-header"><h6 class="mb-0"><i class="ri-shopping-bag-3-fill"></i> Desglose por tipo (conteo)</h6></div>
-                                                <div class="card-body">
-                                                    <ul class="list-group list-group-flush">
-                                                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                                                            <span>Billetes</span>
-                                                            <span class="badge bg-primary rounded-pill" id="sumBillsCounted">@Model.CountedBillsAll.ToString("N0")</span>
-                                                            <small class="text-muted ms-2 d-none d-md-inline">
-                                                                Alta: <strong id="sumBillHigh">@Model.CountedBillHighAll.ToString("N0")</strong>
-                                                            </small>
-                                                            <small class="text-muted ms-2 d-none d-md-inline">
-                                                                Baja: <strong id="sumBillLow">@Model.CountedBillLowAll.ToString("N0")</strong>
-                                                            </small>
-                                                        </li>
-                                                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                                                            <span>Monedas</span>
-                                                            <span class="badge bg-primary rounded-pill" id="sumCoinsCounted">@Model.CountedCoinsAll.ToString("N0")</span>
-                                                        </li>
-                                                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                                                            <span>Documentos/Voucher</span>
-                                                            <span class="badge bg-primary rounded-pill" id="sumDocsCounted">@Model.CountedDocsAll.ToString("N0")</span>
-                                                        </li>
-                                                        <li class="list-group-item d-flex justify-content-between align-items-center">
-                                                            <span>Cheques</span>
-                                                            <span class="badge bg-primary rounded-pill" id="sumChecksCounted">@Model.CountedChecksAll.ToString("N0")</span>
-                                                        </li>
-                                                    </ul>
-                                                    <div class="d-flex justify-content-between align-items-center mt-3">
-                                                        <small class="text-muted">Total</small>
-                                                        <strong id="sumTotalCountedDisplay">@Model.TotalOverallAll.ToString("N0")</strong>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    
-                                        <div class="col-12 col-lg-6">
-                                            <div class="card h-100">
-                                                <div class="card-header"><h6 class="mb-0"><i class="ri-shopping-bag-3-fill"></i> Estructura de bolsas</h6></div>
-                                                <div class="card-body">
-                                                    <div class="d-flex justify-content-between mb-2">
-                                                        <span>Bolsas</span>
-                                                        <span class="badge bg-secondary" id="countBags">0</span>
-                                                    </div>
-                                                    <div class="d-flex justify-content-between mb-3">
-                                                        <span>Sobres</span>
-                                                        <span class="badge bg-secondary" id="countEnvelopes">0</span>
-                                                    </div>
-                                                
-                                                    <div class="small text-muted mb-2">Por bolsa</div>
-                                                    <div id="perBagList" class="list-group small"></div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
+                              </div>
+                              <div class="col-12 col-md-3">
+                                <div class="tile shadow-sm">
+                                  <div class="tile-label">Total Contado</div>
+                                  <div class="tile-value" id="sumCountedAllDisplay">@Model.TotalCountedAll.ToString("N0")</div>
+                                  <input type="hidden" id="sumCountedAll" value="@Model.TotalCountedAll.ToString("N0")" />
                                 </div>
+                              </div>
+                              <div class="col-12 col-md-3">
+                                <div class="tile shadow-sm">
+                                  <div class="tile-label">Diferencia</div>
+                                  <div class="tile-value tile-diff" id="sumDiffAllDisplay">@Model.DifferenceAll.ToString("N0")</div>
+                                  <input type="hidden" id="sumDiffAll" value="@Model.DifferenceAll.ToString("N0")" />
+                                </div>
+                              </div>
+                              <div class="col-12 col-md-3">
+                                <div class="tile shadow-sm">
+                                  <div class="tile-label">Total</div>
+                                  <div class="tile-value" id="sumOverallDisplay">@Model.TotalOverallAll.ToString("N0")</div>
+                                </div>
+                              </div>
                             </div>
+                            <hr class="my-4">
+                            <div class="row g-3">
+                              <div class="col-12 col-lg-6">
+                                <div class="card h-100">
+                                  <div class="card-header"><h6 class="mb-0"><i class="ri-shopping-bag-3-fill"></i> Desglose por tipo (conteo)</h6></div>
+                                  <div class="card-body">
+                                    <ul class="list-group list-group-flush">
+                                      <li class="list-group-item d-flex justify-content-between align-items-center">
+                                        <span>Billetes</span>
+                                        <span class="badge bg-primary rounded-pill" id="sumBillsCounted">@Model.CountedBillsAll.ToString("N0")</span>
+                                        <small class="text-muted ms-2 d-none d-md-inline">
+                                          Alta: <strong id="sumBillHigh">@Model.CountedBillHighAll.ToString("N0")</strong>
+                                        </small>
+                                        <small class="text-muted ms-2 d-none d-md-inline">
+                                          Baja: <strong id="sumBillLow">@Model.CountedBillLowAll.ToString("N0")</strong>
+                                        </small>
+                                      </li>
+                                      <li class="list-group-item d-flex justify-content-between align-items-center">
+                                        <span>Monedas</span>
+                                        <span class="badge bg-primary rounded-pill" id="sumCoinsCounted">@Model.CountedCoinsAll.ToString("N0")</span>
+                                      </li>
+                                      <li class="list-group-item d-flex justify-content-between align-items-center">
+                                        <span>Documentos/Voucher</span>
+                                        <span class="badge bg-primary rounded-pill" id="sumDocsCounted">@Model.CountedDocsAll.ToString("N0")</span>
+                                      </li>
+                                      <li class="list-group-item d-flex justify-content-between align-items-center">
+                                        <span>Cheques</span>
+                                        <span class="badge bg-primary rounded-pill" id="sumChecksCounted">@Model.CountedChecksAll.ToString("N0")</span>
+                                      </li>
+                                    </ul>
+                                    <div class="d-flex justify-content-between align-items-center mt-3">
+                                      <small class="text-muted">Total</small>
+                                      <strong id="sumTotalCountedDisplay">@Model.TotalOverallAll.ToString("N0")</strong>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                
+                              <div class="col-12 col-lg-6">
+                                <div class="card h-100">
+                                  <div class="card-header"><h6 class="mb-0"><i class="ri-shopping-bag-3-fill"></i> Estructura de bolsas</h6></div>
+                                  <div class="card-body">
+                                    <div class="d-flex justify-content-between mb-2">
+                                      <span>Bolsas</span>
+                                      <span class="badge bg-secondary" id="countBags">0</span>
+                                    </div>
+                                    <div class="d-flex justify-content-between mb-3">
+                                      <span>Sobres</span>
+                                      <span class="badge bg-secondary" id="countEnvelopes">0</span>
+                                    </div>
+                
+                                    <div class="small text-muted mb-2">Por bolsa</div>
+                                    <div id="perBagList" class="list-group small"></div>
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
                         </div>
+                      </div>
                     </div>
                 </div>
             
                 <div class="submit-container-spacer"></div>
                 <div class="submit-container form-group col-12 mt-4 fixed">
-                    <button type="button" class="btn btn-secondary" data-step-action="prev" style="display:none;">Anterior</button>
-                    @if (canEdit) {
-                        <button type="button" class="btn btn-primary" data-step-action="next">Continuar</button>
-                        <button type="submit" class="btn btn-primary" data-step-action="save" style="display:none;">Guardar</button>
-                        <button type="button" class="btn btn-success js-finalize-counting" style="display:none;">Finalizar</button>
-                    } else {
-                        <button type="button" class="btn btn-primary" disabled title="No tiene permiso">Continuar</button>
-                        <button type="button" class="btn btn-primary" disabled style="display:none;">Guardar</button>
-                        <button type="button" class="btn btn-success" disabled style="display:none;">Finalizar</button>
-                    }
-                    <a asp-action="Index" asp-controller="Cef" class="btn btn-danger js-cancel">Cancelar</a>
+                  <button type="button" class="btn btn-secondary" data-step-action="prev" style="display:none;">Anterior</button>
+                  @if (canEdit) {
+                      <button type="button" class="btn btn-primary" data-step-action="next">Continuar</button>
+                      <button type="submit" class="btn btn-primary" data-step-action="save" style="display:none;">Guardar</button>
+                      <button type="button" class="btn btn-success js-finalize-counting" style="display:none;">Finalizar</button>
+                  } else {
+                      <button type="button" class="btn btn-primary" disabled title="No tiene permiso">Continuar</button>
+                      <button type="button" class="btn btn-primary" disabled style="display:none;">Guardar</button>
+                      <button type="button" class="btn btn-success" disabled style="display:none;">Finalizar</button>
+                  }
+                  <a asp-action="Supplies" asp-controller="Cef" class="btn btn-danger js-cancel">Cancelar</a>
                 </div>
             </form>
         </div>
@@ -419,6 +452,9 @@
 <script id="banks-json" type="application/json">
   @Html.Raw(ViewBag.BanksJson ?? "[]")
 </script>
+<script id="pointcaps-json" type="application/json">
+  @Html.Raw(ViewBag.PointCapsJson ?? "{\"sobres\":false,\"cheques\":false,\"documentos\":false}")
+</script>
 
 <script>
   window.CEF = window.CEF || {};
@@ -429,7 +465,7 @@
 
 <div class="validation-scape"></div>
 
-  @section Scripts {
+@section Scripts {
     @{ await Html.RenderPartialAsync("_ValidationScriptsPartial"); }
     <script>
     $(function () {
@@ -439,18 +475,12 @@
       $('#bag-template :input, #envelope-template :input, #container-template :input')
         .prop('disabled', true);
 
-      let currentStep = 1, totalSteps = 2; // 👈 solo 2 pasos en Provisión
+      let currentStep = 1, totalSteps = 2;
 
       const DENOMS = JSON.parse(document.getElementById('denoms-json')?.textContent || '{}');
       const QUALS  = JSON.parse(document.getElementById('qualities-json')?.textContent || '{}');
       const BANKS  = JSON.parse(document.getElementById('banks-json')?.textContent || '[]');
-
-      // CAPS opcional (si no existe pointcaps-json, todo habilitado)
-      let CAPS = { sobres: true, cheques: true, documentos: true };
-      const capsEl = document.getElementById('pointcaps-json');
-      if (capsEl) {
-        try { CAPS = Object.assign(CAPS, JSON.parse(capsEl.textContent || '{}')); } catch { /* noop */ }
-      }
+      const CAPS = JSON.parse(document.getElementById('pointcaps-json')?.textContent || '{}');
 
       const SOBRES_OK  = !!CAPS.sobres;
       const CHEQUES_OK = !!CAPS.cheques;
@@ -534,11 +564,56 @@
         $c.find('.valid-feedback')[ok ? 'show' : 'hide']();
         return ok;
       }
+      function isEmptyDetailRow($row) {
+          const kind = getRowKind($row);
+          if (kind === 'Billete' || kind === 'Moneda') {
+              const denom = String($row.find('select[name$=".DenominationId"]').val() || '');
+              const qty = toNumber($row.find('input[name$=".Quality"]').val());
+              return !denom && qty === 0;
+          }
+          if (kind === 'Documento') {
+              const unit = toNumber($row.find('input[name$=".UnitValue"]').val());
+              return unit === 0;
+          }
+          if (kind === 'Cheque') {
+              const bank = String($row.find('select[name$=".EntitieBankId"]').val() || '');
+              const unit = toNumber($row.find('input[name$=".UnitValue"]').val());
+              return !bank && unit === 0;
+          }
+          return true;
+      }
+
+      function rowHasErrors($row) {
+          const kind = getRowKind($row);
+          if (isEmptyDetailRow($row)) return false;
+
+          if (kind === 'Billete' || kind === 'Moneda') {
+              const denomOk = !!$row.find('select[name$=".DenominationId"]').val();
+              const qtyOk = toNumber($row.find('input[name$=".Quantity"]').val()) > 0;
+              return !(denomOk && qtyOk);
+          }
+          if (kind === 'Documento') {
+              return !(toNumber($row.find('input[name$=".UnitValue"]').val()) > 0);
+          }
+          if (kind === 'Cheque') {
+              const bankOk = !!$row.find('select[name$=".EntitieBankId"]').val();
+              const valOk = toNumber($row.find('input[name$=".UnitValue"]').val()) > 0;
+              return !(bankOk  && valOk);
+          }
+          return false;
+      }
       function validateCurrentStep() {
         let ok = true;
-        $('#myTabContent .tab-pane[data-step].active :input[required]').each(function(){
-          if (!$(this).is(':disabled')) ok = validateField($(this)) && ok;
+        const $active = $('#myTabContent .tab-pane[data-step].active');
+
+        $active.find(':input[required]').each(function(){
+            if (!$(this).is(':disabled')) ok = validateField($(this)) && ok;
         });
+
+        $active.find('table.js-details-table tbody tr').each(function() {
+            if (rowHasErrors($(this))) ok = false;
+        });
+
         return ok;
       }
 
@@ -1352,22 +1427,23 @@
           cells += `<td><select name="${name('ValueType')}" class="form-select form-select-sm js-vtype">${vtHtml}</select></td>`;
         }
         if (showDenom) {
-          cells += `<td><select name="${name('DenominationId')}" class="form-select form-select-sm js-denom">${denomHtml}</select></td>`;
+          cells += `<td><select name="${name('DenominationId')}" class="form-select form-select-sm js-denom" required>${denomHtml}</select></td>`;
         }
         if (hasQualityColInTable && showQuality) {
-          cells += `<td><select name="${name('QualityId')}" class="form-select form-select-sm js-quality"><option value="">-- Seleccione calidad --</option></select></td>`;
+          cells += `<td><select name="${name('QualityId')}" class="form-select form-select-sm js-quality" required><option value="">-- Seleccione calidad --</option></select></td>`;
         }
         if ((fixedKind === 'Billete' || scope === 'sobre-billete' || scope === 'bolsa-billete') && hasHighColInTable) {
           cells += `<td class="text-center"><span class="badge js-high-badge bg-light text-dark">—</span><input type="hidden" name="${name('IsHighDenomination')}" value=""></td>`;
         }
-        cells += `<td><input name="${name('Quantity')}" type="number" class="form-control form-control-sm js-calc" /></td>`;
+        cells += `<td><input name="${name('Quantity')}" type="number" class="form-control form-control-sm js-calc" required/></td>`;
         if (showBundleFields) {
           cells += `<td><input name="${name('BundlesCount')}" type="number" class="form-control form-control-sm js-calc" readonly /></td>
                    <td><input name="${name('LoosePiecesCount')}" type="number" class="form-control form-control-sm js-calc" readonly /></td>`;
         }
         if (showUnit) {
           const unitReadonly = (scope === 'sobre-docs') ? '' : ' readonly';
-          cells += `<td><input name="${name('UnitValue')}" type="number" step="1" class="form-control form-control-sm js-calc"${unitReadonly} /></td>`;
+          const unitReq = (scope === 'sobre-docs') ? 'required min="1"' : '';
+          cells += `<td><input name="${name('UnitValue')}" type="number" step="1" class="form-control form-control-sm js-calc"${unitReadonly} ${unitReq} /></td>`;
         }
         if (scope === 'sobre-docs') cells += `<td style="display:none;"><input name="${name('CalculatedAmount')}" type="hidden" /></td>`;
         else cells += `<td><input name="${name('CalculatedAmount')}" type="number" step="1" class="form-control form-control-sm" readonly /></td>`;
@@ -1716,14 +1792,14 @@
               <input type="hidden" name="${name('ValueType')}" value="Cheque" />
             </td>
             <td>
-              <select name="${name('EntitieBankId')}" class="form-select form-select-sm js-bank">
+              <select name="${name('EntitieBankId')}" class="form-select form-select-sm js-bank" required>
                 ${bankOptionsHtml()}
               </select>
             </td>
-            <td><input name="${name('AccountNumber')}" class="form-control form-control-sm" /></td>
-            <td><input name="${name('CheckNumber')}"   class="form-control form-control-sm" /></td>
-            <td><input name="${name('IssueDate')}"     type="date" class="form-control form-control-sm" /></td>
-            <td><input name="${name('UnitValue')}"     type="number" step="1" class="form-control form-control-sm js-calc" /></td>
+            <td><input name="${name('AccountNumber')}" class="form-control form-control-sm" required/></td>
+            <td><input name="${name('CheckNumber')}"   class="form-control form-control-sm" required/></td>
+            <td><input name="${name('IssueDate')}"     type="date" class="form-control form-control-sm" required/></td>
+            <td><input name="${name('UnitValue')}"     type="number" step="1" class="form-control form-control-sm js-calc" required/></td>
             <td style="display:none;"><input name="${name('CalculatedAmount')}" type="number" step="1" class="form-control form-control-sm" readonly /></td>
             <td><button type="button" class="btn btn-sm btn-outline-danger js-remove-cheque">×</button></td>
           </tr>`;
@@ -1800,7 +1876,7 @@
         }).then(res => {
           if (!res.isConfirmed) return;
           const token  = $('input[name="__RequestVerificationToken"]').first().val() || '';
-          const action = '@Url.Action("Finalize","Provision", new { txId = Model.CefTransactionId })'; // 👈 Provision.Finalize
+          const action = '@Url.Action("Finalize","Provision", new { txId = Model.CefTransactionId })';
           const $tmp = $('<form>', { method: 'post', action: action, style: 'display:none' });
           $tmp.append($('<input>', { type: 'hidden', name: '__RequestVerificationToken', value: token }));
           $('body').append($tmp);
@@ -1826,10 +1902,14 @@
           Swal.fire({ title: 'Guardando...', allowOutsideClick: false, didOpen: () => Swal.showLoading() });
 
           $form.find('input[name$=".BundlesCount"], input[name$=".LoosePiecesCount"]').each(function(){
-            if ($.trim($(this).val()) === '') $(this).val('0');
+            if ($.trim($(this).val()) === '') $(this).val('0'); 
           });
           $('#bag-template :input, #envelope-template :input, #container-template :input').prop('disabled', true);
           $form.find('[name*="Containers[__idx__]"]').remove();
+          $('table.js-details-table tbody tr').each(function() {
+              const $r = $(this);
+              if (isEmptyDetailRow($r)) $r.remove();
+          });
           unformatAllNumbers();
           const payload = $form.serialize();
           formatAllNumbers();

@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using DocumentFormat.OpenXml.InkML;
+using Microsoft.EntityFrameworkCore;
 using VCashApp.Data;
 using VCashApp.Enums;
 using VCashApp.Models.ViewModels.CentroEfectivo;
@@ -22,6 +23,7 @@ namespace VCashApp.Services.CentroEfectivo.Provision.Application
         {
             var tx = await _db.CefTransactions
                 .AsNoTracking()
+                .Include(t => t.Service).ThenInclude(s => s.Client)
                 .Include(t => t.Service).ThenInclude(s => s.Concept)
                 .Include(t => t.Branch)
                 .Include(t => t.Containers).ThenInclude(c => c.ValueDetails)
@@ -30,11 +32,22 @@ namespace VCashApp.Services.CentroEfectivo.Provision.Application
 
             if (tx is null) return null;
 
+            string originName = tx.Service.OriginIndicatorType == "P"
+                ? await _db.AdmPuntos.AsNoTracking()
+                    .Where(p => p.PointCode == tx.Service.OriginPointCode).Select(p => p.PointName).FirstOrDefaultAsync() ?? $"{tx.Service.OriginIndicatorType}-{tx.Service.OriginPointCode}"
+                : await _db.AdmFondos.AsNoTracking()
+                    .Where(f => f.FundCode == tx.Service.OriginPointCode).Select(f => f.FundName).FirstOrDefaultAsync() ?? $"{tx.Service.OriginIndicatorType}-{tx.Service.OriginPointCode}";
+
+            string destinationName = tx.Service.DestinationIndicatorType == "P"
+                ? await _db.AdmPuntos.AsNoTracking()
+                    .Where(p => p.PointCode == tx.Service.DestinationPointCode).Select(p => p.PointName).FirstOrDefaultAsync() ?? $"{tx.Service.DestinationIndicatorType}-{tx.Service.DestinationPointCode}"
+                : await _db.AdmFondos.AsNoTracking()
+                    .Where(f => f.FundCode == tx.Service.DestinationPointCode).Select(f => f.FundName).FirstOrDefaultAsync() ?? $"{tx.Service.DestinationIndicatorType}-{tx.Service.DestinationPointCode}";
+
             var vm = new CefProcessContainersPageViewModel
             {
                 CefTransactionId = tx.Id,
 
-                // 👇 Usa los tipos top-level, no anidados
                 Service = new ServiceHeaderVM
                 {
                     ServiceOrderId = tx.ServiceOrderId ?? tx.Service?.ServiceOrderId ?? string.Empty,
@@ -43,17 +56,17 @@ namespace VCashApp.Services.CentroEfectivo.Provision.Application
                     ServiceDate = tx.Service?.ProgrammingDate,
                     ServiceTime = tx.Service?.ProgrammingTime,
                     ConceptName = tx.Service?.Concept?.NombreConcepto ?? tx.Service?.Concept.NombreConcepto ?? "N/A",
-                    OriginName = tx.Service?.OriginPointCode ?? "N/A",
-                    DestinationName = tx.Service?.DestinationPointCode ?? "N/A",
+                    OriginName = originName,
+                    DestinationName = destinationName,
                     ClientName = tx.Service?.Client?.ClientName ?? tx.Service?.Client?.ClientName ?? "N/A",
                 },
 
                 Transaction = new TransactionHeaderVM
                 {
                     Id = tx.Id,
-                    SlipNumber = tx.SlipNumber,                  // int?
-                    Currency = tx.Currency,                    // string?
-                    TransactionType = tx.TransactionType,             // si existe, si no deja null
+                    SlipNumber = tx.SlipNumber,
+                    Currency = tx.Currency,
+                    TransactionType = tx.TransactionType,
                     Status = tx.TransactionStatus ?? "N/A",
                     RegistrationDate = tx.RegistrationDate,
                     RegistrationUserName = await _db.Users
@@ -109,9 +122,7 @@ namespace VCashApp.Services.CentroEfectivo.Provision.Application
                 .ToList();
 
             // ===== Totales para los tiles =====
-            var declaredBills = tx.DeclaredBillValue;
-            var declaredCoins = tx.DeclaredCoinValue;
-            var declaredCash = declaredBills + declaredCoins;
+            var declaredCash = tx.TotalDeclaredValue;
 
             decimal countedBills = 0m, countedCoins = 0m, docs = 0m, checks = 0m;
 
@@ -143,6 +154,28 @@ namespace VCashApp.Services.CentroEfectivo.Provision.Application
 
             vm.CountedBillHighAll = 0m; // si aún no aplicas regla de alta/baja
             vm.CountedBillLowAll = 0m;
+
+            bool hasAnyBag = vm.Containers.Any(c => c.ParentContainerId == null
+                                                  && c.ContainerType == CefContainerTypeEnum.Bolsa);
+
+            if (!hasAnyBag)
+            {
+                vm.Containers.Insert(0, new CefContainerProcessingViewModel
+                {
+                    Id = 0,
+                    CefTransactionId = tx.Id,
+                    ContainerType = CefContainerTypeEnum.Bolsa,
+                    ParentContainerId = null,
+                    ContainerCode = string.Empty,
+                    Observations = string.Empty,
+                    ClientCashierId = null,
+                    ClientCashierName = null,
+                    ClientEnvelopeDate = null,
+                    ContainerStatus = CefContainerStatusEnum.InProcess,
+                    ValueDetails = new List<CefValueDetailViewModel>()
+                });
+            }
+
 
             return vm;
         }

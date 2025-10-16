@@ -87,5 +87,11 @@
         Both
     }
 
-    // Tu EstadoRuta existente si se sigue usando en el módulo de rutas
+    public enum CurrencyEnum
+    {
+        COP,
+        USD,
+        EUR,
+        CAD
+    }
 }
