@@ -2,7 +2,6 @@
 using VCashApp.Models.ViewModels.CentroEfectivo;
 using VCashApp.Services.CentroEfectivo.Provision.Domain;
 using VCashApp.Services.CentroEfectivo.Provision.Infrastructure;
-using VCashApp.Services.Logging;
 using LoggingAudit = VCashApp.Services.Logging.IAuditLogger;
 
 namespace VCashApp.Services.CentroEfectivo.Provision.Application
@@ -43,7 +42,6 @@ namespace VCashApp.Services.CentroEfectivo.Provision.Application
 
         public async Task<int> CreateProvisionAsync(CreateProvisionCmd cmd, string userId)
         {
-            // Crea transacción en estado ProvisionEnProceso
             var txId = await _txRepo.AddProvisionAsync(new CefTransactionNewArgs
             {
                 ServiceOrderId = cmd.ServiceOrderId,
@@ -59,15 +57,12 @@ namespace VCashApp.Services.CentroEfectivo.Provision.Application
             return txId;
         }
 
-        public async Task SaveHeaderAsync(int txId, int slipNumber, string currency, string userId)
+        public async Task SaveHeaderAsync(int txId, int slipNumber, string informativeincident, string userId)
         {
             var tx = await _txRepo.GetAsync(txId) ?? throw new InvalidOperationException("Tx no existe.");
 
-            if (!string.IsNullOrEmpty(currency))
-                tx.Currency = currency.Trim().ToUpperInvariant();
-
             tx.SlipNumber = slipNumber;
-            tx.Currency = currency;
+            tx.InformativeIncident = informativeincident;
             tx.LastUpdateUser = userId;
             tx.LastUpdateDate = DateTime.Now;
 
@@ -112,26 +107,35 @@ namespace VCashApp.Services.CentroEfectivo.Provision.Application
             if (!_tolPolicy.IsWithinTolerance(tx.TotalDeclaredValue, tx.TotalCountedValue))
                 throw new InvalidOperationException("Conteo fuera de tolerancia.");
 
-            _sm.EnsureCanMove(tx.TransactionStatus, nameof(CefTransactionStatusEnum.ListoParaEntrega), txId);
-            tx.TransactionStatus = nameof(CefTransactionStatusEnum.ListoParaEntrega);
+            _sm.EnsureCanMove(tx.TransactionStatus, nameof(CefTransactionStatusEnum.PendienteRevision), txId);
+            tx.TransactionStatus = nameof(CefTransactionStatusEnum.PendienteRevision);
             tx.LastUpdateUser = userId; tx.LastUpdateDate = DateTime.Now;
 
             await _txRepo.UpdateAsync(tx);
             await _uow.SaveChangesAsync();
-            _audit.Info("CEF.Provision.Finalize", "Lista para entrega", "OK", "CefTransaction", txId.ToString(), tx.ServiceOrderId);
+            _audit.Info("CEF.Provision.Finalize", "Pendiente de revisión", "OK", "CefTransaction", txId.ToString(), tx.ServiceOrderId);
         }
 
-        public async Task DeliverAsync(int txId, string userId)
+        public async Task DeliverAsync(int txId, string delivererUserId, string receiverUserId)
         {
             var tx = await _txRepo.GetAsync(txId) ?? throw new InvalidOperationException("Tx no existe.");
             _sm.EnsureCanMove(tx.TransactionStatus, nameof(CefTransactionStatusEnum.Entregado), txId);
 
+            tx.DelivererId = delivererUserId;
+            tx.ReceiverId = receiverUserId;
             tx.TransactionStatus = nameof(CefTransactionStatusEnum.Entregado);
-            tx.LastUpdateUser = userId; tx.LastUpdateDate = DateTime.Now;
+            tx.LastUpdateUser = delivererUserId; tx.LastUpdateDate = DateTime.Now;
 
             await _txRepo.UpdateAsync(tx);
             await _uow.SaveChangesAsync();
-            _audit.Info("CEF.Provision.Deliver", "Entregado", "OK", "CefTransaction", txId.ToString(), tx.ServiceOrderId);
+            _audit.Info(
+                "CEF.Provision.Deliver",
+                $"Entregado a ReceiverId={receiverUserId}",
+                "OK",
+                "CefTransaction",
+                txId.ToString(),
+                tx.ServiceOrderId
+            );
         }
     }
 }

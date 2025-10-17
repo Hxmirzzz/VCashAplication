@@ -112,14 +112,12 @@
                                                     <i class="ri-shopping-bag-3-fill"></i>
                                                 </a>
                                             }
-                                            @if (transaction.TransactionStatus == nameof(CefTransactionStatusEnum.ListoParaEntrega))
+                                            @if ((ViewBag.ShowDeliverActions as bool? == true) 
+                                                && transaction.TransactionStatus == nameof(CefTransactionStatusEnum.ListoParaEntrega))
                                             {
-                                                <form asp-action="Deliver" asp-controller="Provision" asp-route-txId="@transaction.Id" method="post" class="d-inline">
-                                                    @Html.AntiForgeryToken()
-                                                    <button type="submit" class="btn btn-success" title="Entregar">
-                                                        <i class="ri-hand-coin-fill"></i>
-                                                    </button>
-                                                </form>
+                                                <a href="@Url.Action("Deliver", "Provision", new { txId = transaction.Id })" class="btn-detail" title="Entregar">
+                                                    <i class="ri-hand-coin-fill"></i>
+                                                </a>
                                             }
                                         }
                                     </div>

@@ -1,5 +1,4 @@
-﻿using System;
-using VCashApp.Enums;
+﻿using VCashApp.Enums;
 
 namespace VCashApp.Services.CentroEfectivo.Provision.Domain
 {
@@ -9,10 +8,16 @@ namespace VCashApp.Services.CentroEfectivo.Provision.Domain
         public void EnsureCanMove(string current, string next, int txId)
         {
             if (current == nameof(CefTransactionStatusEnum.ProvisionEnProceso)
+                && next == nameof(CefTransactionStatusEnum.PendienteRevision)) return;
+
+            if (current == nameof(CefTransactionStatusEnum.PendienteRevision)
                 && next == nameof(CefTransactionStatusEnum.ListoParaEntrega)) return;
 
             if (current == nameof(CefTransactionStatusEnum.ListoParaEntrega)
                 && next == nameof(CefTransactionStatusEnum.Entregado)) return;
+
+            if (current == nameof(CefTransactionStatusEnum.PendienteRevision)
+                && next == nameof(CefTransactionStatusEnum.ProvisionEnProceso)) return;
 
             throw new InvalidOperationException($"Transición inválida {current} → {next} (tx {txId}).");
         }

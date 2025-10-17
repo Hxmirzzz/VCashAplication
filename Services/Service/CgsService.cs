@@ -37,6 +37,8 @@ namespace VCashApp.Services.Service
             };
             viewModel.AvailableFailedResponsibles = await GetFailedResponsiblesForDropdown();
             viewModel.AvailableServiceModalities = await GetServiceModalitiesForDropdownAsync();
+            viewModel.AvailableCurrencies = GetCurrenciesForDropdown();
+            viewModel.Currency = nameof(CurrencyEnum.COP);
 
             var currentUser = await _context.Users.FirstOrDefaultAsync(u => u.Id == currentUserId);
             viewModel.CgsOperatorUserName = currentUser?.NombreUsuario ?? "Desconocido";
@@ -181,7 +183,7 @@ namespace VCashApp.Services.Service
                 // ===== CefTransacciones =====
                 new SqlParameter("@CefCodRuta",                    (object?)DBNull.Value),
                 new SqlParameter("@CefNumeroPlanilla",             cefPlanilla),
-                new SqlParameter("@CefDivisa",                     (object?)DBNull.Value),
+                new SqlParameter("@CefDivisa",                     (object?)viewModel.Currency ?? DBNull.Value),
                 new SqlParameter("@CefTipoTransaccion",            serviceConcept.TipoConcepto),
                 new SqlParameter("@CefNumeroMesaConteo",           (object?)DBNull.Value),
                 new SqlParameter("@CefCantidadBolsasDeclaradas",   declaredBags),
@@ -493,6 +495,13 @@ namespace VCashApp.Services.Service
                 new SelectListItem { Value = "A", Text = "ATM" },
                 new SelectListItem { Value = "F", Text = "Fondo" }
             };
+        }
+
+        private static List<SelectListItem> GetCurrenciesForDropdown()
+        {
+            return Enum.GetNames(typeof(CurrencyEnum))
+                .Select(code => new SelectListItem { Value = code, Text = code })
+                .ToList();
         }
     }
 }

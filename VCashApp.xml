@@ -2531,6 +2531,11 @@
             Usuario que registró la transacción.
             </summary>
         </member>
+        <member name="P:VCashApp.Models.ViewModels.CentroEfectivo.TransactionHeaderVM.InformativeIncident">
+            <summary>
+            Observaciones de la transacción.
+            </summary>
+        </member>
         <member name="T:VCashApp.Models.ViewModels.CentroEfectivo.CefServiceCreationViewModel">
             <summary>
             ViewModel temporal para la creación unificada de un Servicio y su Transacción CEF inicial.
@@ -3223,12 +3228,6 @@
              <returns>Lista de SelectListItem para modalidades de servicio.</returns>
             
         </member>
-        <member name="M:VCashApp.Services.Cef.CefServiceCreationService.GetCurrenciesForDropdownAsync">
-            <summary>
-            Obtiene las divisas disponibles para los dropdowns.
-            </summary>
-            <returns>Lista de SelectListItem para las divisas</returns>
-        </member>
         <member name="M:VCashApp.Services.Cef.CefServiceCreationService.GetFailedResponsiblesForDropdown">
             <summary>
             Obtiene las opciones de responsables al fallo del servicio para los dropdowns.
@@ -3638,12 +3637,6 @@
             Obtiene las modalidades de servicio disponibles para los dropdowns.
             </summary>
             <returns>Lista de SelectListItem para modalidades de servicio.</returns>
-        </member>
-        <member name="M:VCashApp.Services.ICefServiceCreationService.GetCurrenciesForDropdownAsync">
-            <summary>
-            Obtiene las divisas de servicio disponibles para los dropdowns.
-            </summary>
-            <returns>Lista de SelectListItem para divisas de servicio.</returns>
         </member>
         <member name="M:VCashApp.Services.ICefServiceCreationService.GetFailedResponsiblesForDropdown">
             <summary>

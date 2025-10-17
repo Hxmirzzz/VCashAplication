@@ -2870,8 +2870,7 @@
                 Swal.fire('OK', 'Novedad actualizada', 'success');
               },
               error: function (xhr) {
-                const msg = (xhr.responseJSON && xhr.responseJSO
-                    N.message) || xhr.responseText || 'Error inesperado.';
+                const msg = (xhr.responseJSON && xhr.responseJSON.message) || xhr.responseText || 'Error inesperado.';
                 console.error('UpdateIncident ERROR:', msg);
                 Swal.fire('Error', msg, 'error');
               }

@@ -59,14 +59,14 @@
                                             </div>
                                             <span asp-validation-for="ClientOrderNumber" class="text-danger"></span>
                                         </div>
-                                        <div class="col-12 col-lg-6">
+                                        <div class="col-12 col-lg-4">
                                             <div class="form-floating">
                                                 <input asp-for="ClientServiceOrderCode" class="form-control" placeholder="Código Orden Servicio Cliente" />
                                                 <label for="ClientServiceOrderCode">Código Orden Servicio Cliente</label>
                                             </div>
                                             <span asp-validation-for="ClientServiceOrderCode" class="text-danger"></span>
                                         </div>
-                                        <div class="col-12 col-lg-6">
+                                        <div class="col-12 col-lg-4">
                                             <div class="form-floating has-validation">
                                                 <select asp-for="BranchId" asp-items="Model.AvailableBranches" class="form-select" id="branchId" required aria-required="true">
                                                     <option value="">Seleccionar sucursal...</option>
@@ -76,6 +76,16 @@
                                                 <div class="valid-feedback">✓ Correcto</div>
                                             </div>
                                             <span asp-validation-for="BranchId" class="text-danger"></span>
+                                        </div>
+                                        <div class="col-12 col-lg-4">
+                                            <div class="form-floating has-validation">
+                                                <select asp-for="Currency" asp-items="Model.AvailableCurrencies" class="form-control">
+                                                    <option value="">-- Selecciona --</option>
+                                                </select>
+                                                <label class="required">Divisa</label>
+                                                <div class="invalid-feedback">⚠ Este campo es requerido</div>
+                                                <div class="valid-feedback">✓ Correcto</div>
+                                            </div>
                                         </div>
                                         <div class="col-12 col-lg-2">
                                             <div class="form-floating has-validation">

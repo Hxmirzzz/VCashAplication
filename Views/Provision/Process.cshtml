@@ -105,24 +105,16 @@
                                     <div class="row g-3">
                                         <div class="col-12 col-lg-6">
                                             <div class="form-floating has-validation">
-                                                <select name="Currency" class="form-select" required>
-                                                    @foreach (var opt in Html.GetEnumSelectList<CurrencyEnum>())
-                                                    {
-                                                        var val = opt.Text;
-                                                        var isSelected = string.Equals(val, Model.Transaction.Currency, StringComparison.OrdinalIgnoreCase);
-                                                        <option value="@val" selected="@(isSelected ? "selected" : null)">@opt.Text</option>
-                                                    }
-                                                </select>
-                                                <label asp-for="Currency" class="required">Divisa</label>
-                                                <div class="invalid-feedback">⚠ Este campo es requerido</div>
+                                                <input type="number" name="SlipNumber" class="form-control" value="@Model.Transaction.SlipNumber" required />
+                                                <label for="SlipNumber" class="required">Planilla</label>
+                                                <div class="invalid-feedback">⚠ Requerido</div>
+                                                <div class="valid-feedback">✓ Correcto</div>
                                             </div>
                                         </div>
                                         <div class="col-12 col-lg-6">
                                             <div class="form-floating has-validation">
-                                                <input type="number" name="SlipNumber" class="form-control" value="@Model.Transaction.SlipNumber" required />
-                                                <label class="required">Planilla</label>
-                                                <div class="invalid-feedback">⚠ Requerido</div>
-                                                <div class="valid-feedback">✓ Correcto</div>
+                                                <input type="text" name="InformativeIncident" class="form-control" value="@Model.Transaction.InformativeIncident"/>
+                                                <label for="InformativeIncident">Observaciones</label>
                                             </div>
                                         </div>
                                     </div>
@@ -1352,13 +1344,18 @@
           if ($denomSelect.val()) {
             ensureDenomDataValue($row);
             const qty = toNumber($row.find('input[name$=".Quantity"]').val());
-            if (qty > 0) calculateBundlesAndLoose($row);
+            if (qty > 0) {
+              calculateBundlesAndLoose($row);
+            }
             triggerAmountCalculation($row);
           }
           const $hid = $row.find('input[name$=".IsHighDenomination"]');
           if (getRowKind($row) === 'Billete' && $row.find('.js-high-badge').length) {
-            if ($hid.length && $hid.val() !== undefined && $hid.val() !== '') setHighBadge($row, $hid.val() === 'true');
-            else applyHighFromSelectedDenom($row);
+            if ($hid.length && $hid.val() !== undefined && $hid.val() !== '') {
+              setHighBadge($row, $hid.val() === 'true');
+            } else {
+              applyHighFromSelectedDenom($row);
+            }
           }
         });
       }

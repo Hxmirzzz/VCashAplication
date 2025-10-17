@@ -287,6 +287,9 @@ namespace VCashApp.Controllers
                 new SelectListItem { Value = "T", Text = "Transportadora" }
             };
             viewModel.AvailableServiceModalities = await _cgsService.GetServiceModalitiesForDropdownAsync();
+            viewModel.AvailableCurrencies = typeof(CgsService)
+                .GetMethod("GetCurrenciesForDropdown", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static)!
+                .Invoke(null, null) as List<SelectListItem>;
         }
     }
 }

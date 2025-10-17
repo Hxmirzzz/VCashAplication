@@ -116,7 +116,8 @@ namespace VCashApp.Services.Cef
                 AvailableEmployees = new List<SelectListItem>(),
                 AvailableVehicles = new List<SelectListItem>(),
                 AvailableServiceModalities = await GetServiceModalitiesForDropdownAsync(),
-                AvailableCurrencies = await GetCurrenciesForDropdownAsync(),
+                AvailableCurrencies = GetCurrenciesForDropdown(),
+                Currency = nameof(CurrencyEnum.COP),
                 AvailableFailedResponsibles = await GetFailedResponsiblesForDropdown()
             };
 
@@ -203,7 +204,7 @@ namespace VCashApp.Services.Cef
                 // Parámetros para CefTransacciones
                 new SqlParameter("@CefCodRuta", DBNull.Value),
                 new SqlParameter("@CefNumeroPlanilla", viewModel.SlipNumber),
-                new SqlParameter("@CefDivisa", viewModel.Currency),
+                new SqlParameter("@CefDivisa", (object?)viewModel.Currency ?? DBNull.Value),
                 new SqlParameter("@CefTipoTransaccion", viewModel.ServiceConceptCode),
                 new SqlParameter("@CefNumeroMesaConteo", DBNull.Value),
                 new SqlParameter("@CefCantidadBolsasDeclaradas", viewModel.DeclaredBagCount),
@@ -471,20 +472,6 @@ namespace VCashApp.Services.Cef
         }
 
         /// <summary>
-        /// Obtiene las divisas disponibles para los dropdowns.
-        /// </summary>
-        /// <returns>Lista de SelectListItem para las divisas</returns>
-        public async Task<List<SelectListItem>> GetCurrenciesForDropdownAsync()
-        {
-            return await Task.FromResult(new List<SelectListItem>
-            {
-                new SelectListItem { Value = "COP", Text = "COP" },
-                new SelectListItem { Value = "USD", Text = "USD" },
-                new SelectListItem { Value = "EUR", Text = "EUR" }
-            });
-        }
-
-        /// <summary>
         /// Obtiene las opciones de responsables al fallo del servicio para los dropdowns.
         /// </summary>
         /// <returns>Lista de SelectListItem para los responsables del fallo del servicio</returns>
@@ -495,6 +482,13 @@ namespace VCashApp.Services.Cef
                 new SelectListItem { Value = "Cliente", Text = "Cliente" },
                 new SelectListItem { Value = "Vatco", Text = "Vatco" }
             });
+        }
+
+        private static List<SelectListItem> GetCurrenciesForDropdown()
+        {
+            return Enum.GetNames(typeof(CurrencyEnum))
+                .Select(code => new SelectListItem { Value = code, Text = code })
+                .ToList();
         }
     }
 }

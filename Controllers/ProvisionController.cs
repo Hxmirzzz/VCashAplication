@@ -1,9 +1,11 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using DocumentFormat.OpenXml.Bibliography;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.IdentityModel.Tokens;
+using VCashApp.Data;
 using VCashApp.Enums;
+using VCashApp.Filters;
 using VCashApp.Models;
 using VCashApp.Models.ViewModels.CentroEfectivo;
 using VCashApp.Services;
@@ -14,18 +16,21 @@ namespace VCashApp.Controllers
 {
     [Authorize]
     [Route("Provision")]
-    public sealed class ProvisionController : Controller
+    public sealed class ProvisionController : BaseController
     {
         private readonly IProvisionService _svc;
         private readonly IProvisionReadService _read;
         private readonly UserManager<ApplicationUser> _um;
         private readonly ICefContainerService _cefContainerService;
 
-        public ProvisionController(IProvisionService svc, 
-            IProvisionReadService read,
+        public ProvisionController(
+            AppDbContext context,
             UserManager<ApplicationUser> um,
+            IProvisionService svc, 
+            IProvisionReadService read,
             ICefContainerService cefContainerService,
-            ICefIncidentService cefIncidentService)
+            ICefIncidentService cefIncidentService
+        ): base(context, um)
         { 
             _svc = svc; 
             _read = read; 
@@ -34,21 +39,26 @@ namespace VCashApp.Controllers
         }
 
         [HttpGet("Process/{txId:int}")]
+        [RequiredPermission(PermissionType.Edit, "CEF_SUP")]
         public async Task<IActionResult> Process(int txId)
         {
-            var user = await _um.GetUserAsync(User);
-            if (user is null) return RedirectToPage("/Account/Login", new { area = "Identity" });
+            var currentUser = await GetCurrentApplicationUserAsync();
+            if (currentUser is null) return RedirectToPage("/Account/Login", new { area = "Identity" });
+
+            await SetCommonViewBagsBaseAsync(currentUser, "CEF - Provisión");
+
+            var roleNames = await _userManager.GetRolesAsync(currentUser);
+            ViewBag.HasEdit = await HasPermisionForView(roleNames, "CEF_SUP", PermissionType.Edit);
+
+            var caps = await GetCefCapsAsync(currentUser);
+            ViewBag.CanCountBills = caps.CanCountBills;
+            ViewBag.CanCountCoins = caps.CanCountCoins;
+            ViewBag.CanIncCreateEdit = caps.CanIncCreateEdit;
+            ViewBag.CanIncApprove = caps.CanIncApprove;
+            ViewBag.CanFinalize = caps.CanFinalize;
 
             var vm = await _read.GetProcessPageAsync(txId);
             if (vm is null) return NotFound();
-
-            ViewBag.Mode = "Provision";
-            ViewBag.HasEdit = true;
-            ViewBag.CanCountBills = true;
-            ViewBag.CanCountCoins = true;
-            ViewBag.CanIncCreateEdit = false;
-            ViewBag.CanIncApprove = false;
-            ViewBag.CanFinalize = true;
 
             ViewBag.DenomsJson = await _cefContainerService.BuildDenomsJsonForTransactionAsync(txId);
             ViewBag.QualitiesJson = await _cefContainerService.BuildQualitiesJsonAsync();
@@ -79,10 +89,11 @@ namespace VCashApp.Controllers
 
         [HttpPost("Process/{txId:int}")]
         [ValidateAntiForgeryToken]
+        [RequiredPermission(PermissionType.Edit, "CEF_SUP")]
         public async Task<IActionResult> Process([FromRoute] int txId, [FromForm] SaveProvisionContainersCmd cmd)
         {
-            var user = await _um.GetUserAsync(User);
-            if (user is null) return Unauthorized();
+            var currentUser = await GetCurrentApplicationUserAsync();
+            if (currentUser is null) return Unauthorized();
 
             var page = await _read.GetProcessPageAsync(txId);
             if (page is null) return NotFound();
@@ -111,7 +122,7 @@ namespace VCashApp.Controllers
 
             var errors = new List<string>();
 
-            if (string.IsNullOrWhiteSpace(cmd.Currency))
+            if (string.IsNullOrWhiteSpace(cmd.InformativeIncident))
                 errors.Add("La divisa es obligatoria.");
 
             if (!(cmd.SlipNumber.HasValue && cmd.SlipNumber.Value > 0))
@@ -146,31 +157,74 @@ namespace VCashApp.Controllers
                     ["Cabecera"] = errors.ToArray()
                 }));
 
-            await _svc.SaveHeaderAsync(txId, cmd.SlipNumber!.Value, cmd.Currency!, user.Id);
-            await _svc.SaveContainersAsync(txId, cmd, user.Id);
+            await _svc.SaveHeaderAsync(txId, cmd.SlipNumber!.Value, cmd.InformativeIncident!, currentUser.Id);
+            await _svc.SaveContainersAsync(txId, cmd, currentUser.Id);
             return Json(ServiceResult.SuccessResult("Guardado."));
         }
 
         [HttpPost("Finalize/{txId:int}")]
         [ValidateAntiForgeryToken]
+        [RequiredPermission(PermissionType.Edit, "CEF_SUP")]
         public async Task<IActionResult> Finalize(int txId)
         {
             var user = await _um.GetUserAsync(User);
             if (user is null) return Unauthorized();
 
             await _svc.FinalizeAsync(txId, user.Id);
-            return Json(ServiceResult.SuccessResult("Provisión lista para entrega."));
+            return RedirectToAction("Supplies", "Cef");
+        }
+
+        [HttpGet("Deliver/{txId:int}")]
+        [RequiredPermission(PermissionType.Edit, "CEF_SUP")]
+        public async Task<IActionResult> Deliver([FromRoute] int txId, [FromQuery] string? returnUrl = null)
+        {
+            var currentUser = await GetCurrentApplicationUserAsync();
+            if (currentUser is null) return RedirectToPage("/Account/Login", new { area = "Identity"});
+
+            await SetCommonViewBagsBaseAsync(currentUser, "CEF - Provision - Entrega");
+
+            var vm = await _read.GetDeliveryAsync(txId, returnUrl);
+            if (vm is null)
+            {
+                TempData["ErrorMessage"] = "La transacción no está lista para entrega o no existe.";
+                return RedirectToAction("Supplies", "Cef");
+            }
+
+            return View("~/Views/Provision/Deliver.cshtml", vm);
         }
 
         [HttpPost("Deliver/{txId:int}")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Deliver(int txId)
+        [RequiredPermission(PermissionType.Edit, "CEF_SUP")]
+        public async Task<IActionResult> Deliver([FromRoute] int txId, CefProvisionDeliveryViewModel model)
         {
             var user = await _um.GetUserAsync(User);
             if (user is null) return Unauthorized();
 
-            await _svc.DeliverAsync(txId, user.Id);
-            return Json(ServiceResult.SuccessResult("Entregado."));
+            if (txId != model.TransactionId)
+                ModelState.AddModelError("", "Identificador inválido de transacción.");
+
+            if (!ModelState.IsValid)
+            {
+                var refreshed = await _read.GetDeliveryAsync(txId, model.ReturnUrl);
+                if (refreshed != null)
+                {
+                    model.JtUsers = refreshed.JtUsers;
+                    model.ServiceOrderId = refreshed.ServiceOrderId;
+                    model.SlipNumber = refreshed.SlipNumber;
+                    model.Currency = refreshed.Currency;
+                    model.BranchName = refreshed.BranchName;
+                    model.TotalCountedValue = refreshed.TotalCountedValue;
+                    model.CurrentStatus = refreshed.CurrentStatus;
+                }
+                return View("~/Views/Provision/Deliver.cshtml", model);
+            }
+
+            await _svc.DeliverAsync(txId, user.Id, model.ReceiverUserId!);
+
+            TempData["SuccessMessage"] = "Entrega registrada correctamente.";
+            var back = string.IsNullOrWhiteSpace(model.ReturnUrl) ? Url.Action("Delivery", "Cef")! : model.ReturnUrl!;
+            return Redirect(back);
         }
     }
 }

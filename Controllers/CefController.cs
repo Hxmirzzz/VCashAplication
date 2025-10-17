@@ -234,6 +234,7 @@ namespace VCashApp.Controllers
 
             await SetCommonViewBagsCefAsync(currentUser, pageTitle, codVista);
 
+            ViewBag.ShowDeliverActions = (effectiveMode == CefDashboardMode.TesoreriaEntrega);
             ViewData["Title"] = pageTitle;
             ViewData["Mode"] = effectiveMode;
 
@@ -1094,7 +1095,7 @@ namespace VCashApp.Controllers
                         entityType: "CefTransaction",
                         entityId: transactionId.ToString()
                     );
-                    return RedirectToAction(nameof(ReviewTransaction), new { transactionId });
+                    return RedirectToAction(nameof(Collections));
                 }
                 else
                 {
@@ -1153,7 +1154,7 @@ namespace VCashApp.Controllers
         {
             var currentUser = await GetCurrentApplicationUserAsync();
             if (currentUser == null) return RedirectToAction("Login", "Account");
-
+                
             await SetCommonViewBagsCefAsync(currentUser, "Revisión CEF", "CEF_REC", "CEF_DEL", "CEF_COL", "CEF_SUP");
 
             var roles = await _userManager.GetRolesAsync(currentUser);
@@ -1196,6 +1197,12 @@ namespace VCashApp.Controllers
             };
 
             ViewBag.CanReview = canReview;
+
+            bool isProvision = string.Equals(vm.TransactionTypeCode, "PV", StringComparison.OrdinalIgnoreCase)
+                            || string.Equals(vm.TransactionTypeCode, "PR", StringComparison.OrdinalIgnoreCase);
+
+            ViewBag.BackController = "Cef";
+            ViewBag.BackAction = isProvision ? "Supplies" : "Collections";
 
             _logger.LogInformation("Usuario: {Usuario} | IP: {IP} | Acción: Acceso a revisión de Transacción | ID Transacción: {TransactionId}.", currentUser.UserName, IpAddressForLogging, transactionId);
             _audit.Info(
@@ -1276,6 +1283,11 @@ namespace VCashApp.Controllers
 
             try
             {
+                bool isProvision = string.Equals(viewModel.TransactionTypeCode, "PV", StringComparison.OrdinalIgnoreCase)
+                                || string.Equals(viewModel.TransactionTypeCode, "PR", StringComparison.OrdinalIgnoreCase);
+                var redirectAction = isProvision ? "Supplies" : "Collections";
+                var redirectUrl = Url.Action(redirectAction, "Cef");
+
                 var success = await _cefTransactionService.ProcessReviewApprovalAsync(viewModel, currentUser.Id);
                 if (success)
                 {
@@ -1289,7 +1301,7 @@ namespace VCashApp.Controllers
                         {
                             success = true,
                             message = msg,
-                            data = new { redirectUrl = Url.Action(nameof(Index)) }
+                            data = new { redirectUrl }
                         });
                     }
 
@@ -1301,7 +1313,7 @@ namespace VCashApp.Controllers
                         entityType: "CefTransaction",
                         entityId: viewModel.Id.ToString()
                     );
-                    return RedirectToAction(nameof(Index));
+                    return Redirect(redirectUrl);
                 }
                 else
                 {

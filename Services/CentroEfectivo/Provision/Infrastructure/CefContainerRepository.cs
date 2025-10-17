@@ -24,19 +24,17 @@ namespace VCashApp.Services.CentroEfectivo.Provision.Infrastructure
                     .ThenInclude(c => c.ValueDetails)
                 .FirstOrDefaultAsync(t => t.Id == txId) ?? throw new InvalidOperationException("Tx no existe.");
 
-            // Índices para búsquedas rápidas por código
             var existingByCode = tx.Containers.ToDictionary(c => c.ContainerCode, c => c, StringComparer.OrdinalIgnoreCase);
 
             foreach (var vm in containers ?? Array.Empty<CefContainerProcessingViewModel>())
             {
-                // Upsert de contenedor por código (preferible a Id en escenarios mixtos)
                 if (!existingByCode.TryGetValue(vm.ContainerCode, out var entity))
                 {
                     entity = new CefContainer
                     {
                         CefTransactionId = txId,
                         ContainerCode = vm.ContainerCode,
-                        ContainerType = vm.ContainerType.ToString(), // enums a string en tu mapeo
+                        ContainerType = vm.ContainerType.ToString(),
                         EnvelopeSubType = vm.EnvelopeSubType?.ToString(),
                         ContainerStatus = "Procesado",
                         Observations = vm.Observations,
@@ -55,8 +53,6 @@ namespace VCashApp.Services.CentroEfectivo.Provision.Infrastructure
                     entity.ProcessingDate = DateTime.Now;
                 }
 
-                // Reemplazo controlado de detalles (simple, consistente)
-                // Si quieres "merge" en vez de "replace", avísame y lo cambio.
                 var oldDetails = entity.ValueDetails?.ToList() ?? new List<CefValueDetail>();
                 if (oldDetails.Count > 0) _db.CefValueDetails.RemoveRange(oldDetails);
 
@@ -82,6 +78,7 @@ namespace VCashApp.Services.CentroEfectivo.Provision.Infrastructure
                         Observations = d.Observations,
                         DenominationId = d.DenominationId,
                         QualityId = d.QualityId,
+                        IsHighDenomination = d.IsHighDenomination,
                         EntitieBankId = d.EntitieBankId
                     });
                 }

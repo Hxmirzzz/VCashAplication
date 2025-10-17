@@ -476,7 +476,7 @@ namespace VCashApp.Services.Cef
                  container.ContainerStatus == CefContainerStatusEnum.Pending.ToString()) &&
                 countedTotal > 0)
             {
-                container.ContainerStatus = CefContainerStatusEnum.Counted.ToString();
+                container.ContainerStatus = CefContainerStatusEnum.Procesado.ToString();
                 container.ProcessingDate = DateTime.Now;
             }
 

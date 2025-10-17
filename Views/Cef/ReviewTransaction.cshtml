@@ -3,6 +3,9 @@
 @{
     ViewData["Title"] = "Revisión Transacción CEF";
     Layout = "~/Views/Shared/_Layout.cshtml";
+
+    var backController = (string)(ViewBag.BackController ?? "Cef");
+    var backAction = (string)(ViewBag.BackAction ?? "Collections");
 }
 
 <div class="form-container">
@@ -12,6 +15,7 @@
                 @Html.AntiForgeryToken()
                 <input type="hidden" asp-for="Id" />
                 <input type="hidden" asp-for="CurrentStatus" />
+                <input type="hidden" asp-for="TransactionTypeCode" id="txTypeCode"/>
 
                 <div class="progress-stepper" id="progressStepper">
                     <div class="step active" data-step="1">
@@ -318,7 +322,7 @@
                         <button type="button" class="btn btn-success" disabled style="display:none;">Procesar Revisión</button>
                     }
 
-                    <a asp-action="Index" class="btn btn-danger js-cancel">Volver</a>
+                    <a asp-controller="@backController" asp-action="@backAction" class="btn btn-danger js-cancel">Volver</a>
                 </div>
             </form>
         </div>
@@ -360,7 +364,6 @@
                 $submit.toggle(currentStep === totalSteps);
             }
             function validateCurrentStep() {
-                // Usa unobtrusive/HTML5
                 let ok = true;
                 $('#tabReview .tab-pane[data-step].active :input[required]').each(function () {
                     if (this.disabled) return;
@@ -423,7 +426,6 @@
                                     title: 'No se pudo procesar',
                                     html: (response?.message ?? 'Error') + (flatErrors.length ? '<br>' + flatErrors.join('<br>') : '')
                                 });
-                                // Pinta errores por campo si vienen
                                 if (response?.errors) {
                                     $('.field-validation-error').text('').hide();
                                     $.each(response.errors, function (key, value) {

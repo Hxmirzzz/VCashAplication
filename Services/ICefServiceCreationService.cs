@@ -100,12 +100,6 @@ namespace VCashApp.Services
         Task<List<SelectListItem>> GetServiceModalitiesForDropdownAsync();
 
         /// <summary>
-        /// Obtiene las divisas de servicio disponibles para los dropdowns.
-        /// </summary>
-        /// <returns>Lista de SelectListItem para divisas de servicio.</returns>
-        Task<List<SelectListItem>> GetCurrenciesForDropdownAsync();
-
-        /// <summary>
         /// Obtiene la lista de responsables de fallos para los dropdowns.
         /// </summary>
         Task<List<SelectListItem>> GetFailedResponsiblesForDropdown();

@@ -1,7 +1,10 @@
-﻿using DocumentFormat.OpenXml.InkML;
+﻿using Microsoft.AspNetCore.Identity;
+using VCashApp.Utils;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using VCashApp.Data;
 using VCashApp.Enums;
+using VCashApp.Models;
 using VCashApp.Models.ViewModels.CentroEfectivo;
 
 namespace VCashApp.Services.CentroEfectivo.Provision.Application
@@ -13,7 +16,13 @@ namespace VCashApp.Services.CentroEfectivo.Provision.Application
     public sealed class ProvisionReadService : IProvisionReadService
     {
         private readonly AppDbContext _db;
-        public ProvisionReadService(AppDbContext db) => _db = db;
+        private readonly UserManager<ApplicationUser> _userManager;
+
+        public ProvisionReadService(AppDbContext db, UserManager<ApplicationUser> userManager)
+        {
+            _db = db;
+            _userManager = userManager;
+        } 
 
         /// <summary>
         /// ***Puente para compatibilidad con el controlador antiguo.***
@@ -67,6 +76,7 @@ namespace VCashApp.Services.CentroEfectivo.Provision.Application
                     SlipNumber = tx.SlipNumber,
                     Currency = tx.Currency,
                     TransactionType = tx.TransactionType,
+                    InformativeIncident = tx.InformativeIncident ?? "N/A",
                     Status = tx.TransactionStatus ?? "N/A",
                     RegistrationDate = tx.RegistrationDate,
                     RegistrationUserName = await _db.Users
@@ -78,7 +88,7 @@ namespace VCashApp.Services.CentroEfectivo.Provision.Application
 
             // ===== Contenedores -> CefContainerProcessingViewModel =====
             vm.Containers = (tx.Containers ?? Enumerable.Empty<Models.Entities.CefContainer>())
-                .OrderBy(c => c.ParentContainerId.HasValue ? 1 : 0) // bolsas primero
+                .OrderBy(c => c.ParentContainerId.HasValue ? 1 : 0)
                 .ThenBy(c => c.Id)
                 .Select(c => new CefContainerProcessingViewModel
                 {
@@ -325,8 +335,48 @@ namespace VCashApp.Services.CentroEfectivo.Provision.Application
             );
         }
 
-        // ===== Helpers =====
+        public async Task<CefProvisionDeliveryViewModel?> GetDeliveryAsync(int txId, string? returnUrl)
+        {
+            var tx = await _db.CefTransactions
+                .AsNoTracking()
+                .Include(t => t.Service)
+                .Include(t => t.Branch)
+                .FirstOrDefaultAsync(t => t.Id == txId);
 
+            if (tx is null) return null;
+
+            var statusOk = string.Equals(
+                tx.TransactionStatus,
+                CefTransactionStatusEnum.ListoParaEntrega.ToString(),
+                StringComparison.OrdinalIgnoreCase);
+
+            if (!statusOk) return null;
+
+            var jt = await GetUsersInRoleIdAsync(RoleIds.JefeTripulacion);
+            var jtSelect = jt
+                .OrderBy(u => u.NombreUsuario ?? u.UserName)
+                .Select(u => new SelectListItem
+                {
+                    Text = (u.NombreUsuario ?? u.UserName) ?? u.Id,
+                    Value = u.Id
+                })
+                .ToList();
+
+            return new CefProvisionDeliveryViewModel
+            {
+                TransactionId = tx.Id,
+                ServiceOrderId = tx.ServiceOrderId ?? tx.Service?.ServiceOrderId ?? string.Empty,
+                SlipNumber = tx.SlipNumber,
+                Currency = tx.Currency ?? string.Empty,
+                BranchName = tx.Branch?.NombreSucursal ?? tx.Service?.CgsBranchName ?? "N/A",
+                TotalCountedValue = tx.TotalCountedValue,
+                CurrentStatus = tx.TransactionStatus,
+                JtUsers = jtSelect,
+                ReturnUrl = string.IsNullOrWhiteSpace(returnUrl) ? null : returnUrl
+            };
+        }
+
+        // ===== Helpers =====
         private static TEnum SafeParseEnum<TEnum>(string? value) where TEnum : struct
             => (!string.IsNullOrWhiteSpace(value) && Enum.TryParse<TEnum>(value, true, out var e)) ? e : default;
 
@@ -350,5 +400,12 @@ namespace VCashApp.Services.CentroEfectivo.Provision.Application
             => vm.Containers.Sum(c =>
                    c.Values.Where(v => string.Equals(v.ValueType, type.ToString(), StringComparison.OrdinalIgnoreCase))
                            .Sum(v => v.CalculatedAmount));
+
+        private async Task<IList<ApplicationUser>> GetUsersInRoleIdAsync(string roleId)
+        {
+            var role = await _db.Roles.AsNoTracking().FirstOrDefaultAsync(r => r.Id == roleId);
+            if (role == null) return new List<ApplicationUser>();
+            return await _userManager.GetUsersInRoleAsync(role.Name);
+        }
     }
 }

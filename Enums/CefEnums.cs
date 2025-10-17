@@ -58,7 +58,7 @@
     {
         Pending,
         InProcess,
-        Counted,
+        Procesado,
         Verified,
         WithIncident
     }

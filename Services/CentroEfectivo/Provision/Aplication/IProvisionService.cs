@@ -6,7 +6,7 @@
         Task<int> CreateProvisionAsync(CreateProvisionCmd cmd, string userId);
         Task SaveContainersAsync(int txId, SaveProvisionContainersCmd cmd, string userId);
         Task FinalizeAsync(int txId, string userId);
-        Task DeliverAsync(int txId, string userId);
-        Task SaveHeaderAsync(int txId, int slipNumber, string currency, string userId);
+        Task DeliverAsync(int txId, string delivererUserId, string receiverUserId);
+        Task SaveHeaderAsync(int txId, int slipNumber, string informativeincident, string userId);
     }
 }

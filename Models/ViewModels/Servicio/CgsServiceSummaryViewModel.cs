@@ -1,7 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Mvc.Rendering;
-using System.Collections.Generic;
-using System;
+using VCashApp.Enums;
 
 namespace VCashApp.Models.ViewModels.Servicio
 {
@@ -104,7 +103,11 @@ namespace VCashApp.Models.ViewModels.Servicio
         public int SlipNumber { get; set; }
 
         [Display(Name = "Divisa")]
+        [Required(ErrorMessage = "La divisa es requerida.")]
+        [EnumDataType(typeof(CurrencyEnum), ErrorMessage = "La divisa seleccionada no es válida.")]
         public string? Currency { get; set; } = null;
+
+        public List<SelectListItem>? AvailableCurrencies { get; set; }
 
         // ORIGIN FIELDS
         [Display(Name = "Cliente de Origen")]
@@ -346,6 +349,7 @@ namespace VCashApp.Models.ViewModels.Servicio
             AvailableOriginFunds = new List<SelectListItem>();
             AvailableDestinationPoints = new List<SelectListItem>();
             AvailableDestinationFunds = new List<SelectListItem>();
+            AvailableCurrencies = new List<SelectListItem>();
 
             RequestDate = DateOnly.FromDateTime(DateTime.Now);
             RequestTime = TimeOnly.FromDateTime(DateTime.Now);

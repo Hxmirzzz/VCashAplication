@@ -42,6 +42,15 @@ namespace VCashApp.Services.Cef
             }
         }
 
+        public static void EnsureAllowedProvision(string current, CefTransactionStatusEnum next, int txId)
+        {
+            if (current == nameof(CefTransactionStatusEnum.PendienteRevision) &&
+                (next == CefTransactionStatusEnum.ListoParaEntrega || next == CefTransactionStatusEnum.Rechazado || next == CefTransactionStatusEnum.Cancelado))
+                return;
+
+            throw new InvalidOperationException($"Transición inválida (Prov) {current} → {next} (tx {txId}).");
+        }
+
         /// <summary>
         /// Mapea estado de transacción (Recolección) a CodEstado del Servicio (0..7).
         /// </summary>

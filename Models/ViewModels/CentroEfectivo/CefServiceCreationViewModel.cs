@@ -17,8 +17,8 @@ namespace VCashApp.Models.ViewModels.CentroEfectivo
 
         [Display(Name = "Divisa")]
         [Required(ErrorMessage = "La divisa es requerida.")]
-        [StringLength(3, ErrorMessage = "La divisa debe tener 3 caracteres.")]
-        public string Currency { get; set; } = "COP";
+        [EnumDataType(typeof(CurrencyEnum), ErrorMessage = "La divisa seleccionada no es válida.")]
+        public string? Currency { get; set; } = null;
 
         [Display(Name = "Tipo de Servicio")]
         [Required(ErrorMessage = "El tipo de servicio es requerido.")]

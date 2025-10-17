@@ -569,9 +569,19 @@ namespace VCashApp.Services.Cef
             if (transaction.TransactionStatus != CefTransactionStatusEnum.PendienteRevision.ToString())
                 throw new InvalidOperationException($"La transacción {transaction.Id} no está en estado 'Pendiente de Revisión' para ser aprobada o rechazada.");
 
-            CefTransitionPolicy.EnsureAllowedRecoleccion(transaction.TransactionStatus, viewModel.NewStatus, transaction.Id);
+            var typeCode = (viewModel.TransactionTypeCode ?? transaction.TransactionType)?.Trim().ToUpperInvariant();
+            var isProvision = typeCode == "PV" || typeCode == "PR";
 
-            transaction.TransactionStatus = viewModel.NewStatus.ToString();
+            var nextStatus = viewModel.NewStatus;
+            if (isProvision && viewModel.NewStatus == CefTransactionStatusEnum.Aprobado)
+                nextStatus = CefTransactionStatusEnum.ListoParaEntrega;
+
+            if (isProvision)
+                CefTransitionPolicy.EnsureAllowedProvision(transaction.TransactionStatus, nextStatus, transaction.Id);
+            else
+                CefTransitionPolicy.EnsureAllowedRecoleccion(transaction.TransactionStatus, nextStatus, transaction.Id);
+
+            transaction.TransactionStatus = nextStatus.ToString();
             transaction.InformativeIncident = viewModel.FinalObservations;
             transaction.ReviewerUserId = reviewerUserId;
             transaction.CountingEndDate = DateTime.Now;
@@ -581,8 +591,8 @@ namespace VCashApp.Services.Cef
 
             _audit.Info(
                 action: "CEF.Review",
-                detailMessage: $"Transacción {transaction.Id} revisada → {viewModel.NewStatus}.",
-                result: viewModel.NewStatus.ToString(),
+                detailMessage: $"Transacción {transaction.Id} revisada → {nextStatus}.",
+                result: nextStatus.ToString(),
                 entityType: "CefTransaction",
                 entityId: transaction.Id.ToString(),
                 urlId: transaction.ServiceOrderId
@@ -591,12 +601,25 @@ namespace VCashApp.Services.Cef
             var service = await _context.CgsServicios.FirstOrDefaultAsync(s => s.ServiceOrderId == transaction.ServiceOrderId);
             if (service != null)
             {
-                switch (viewModel.NewStatus)
+                if (isProvision)
                 {
-                    case CefTransactionStatusEnum.Aprobado: service.StatusCode = 5; break; // Finalizado
-                    case CefTransactionStatusEnum.Rechazado: service.StatusCode = 2; break; // Rechazado
-                    case CefTransactionStatusEnum.Cancelado: service.StatusCode = 6; break; // Cancelado
+                    switch (nextStatus)
+                    {
+                        case CefTransactionStatusEnum.ListoParaEntrega: service.StatusCode = 4; break;
+                        case CefTransactionStatusEnum.Rechazado: service.StatusCode = 2; break;
+                        case CefTransactionStatusEnum.Cancelado: service.StatusCode = 6; break;
+                    }
                 }
+                else
+                {
+                    switch (nextStatus)
+                    {
+                        case CefTransactionStatusEnum.Aprobado: service.StatusCode = 5; break;
+                        case CefTransactionStatusEnum.Rechazado: service.StatusCode = 2; break;
+                        case CefTransactionStatusEnum.Cancelado: service.StatusCode = 6; break;
+                    }
+                }
+
                 _context.CgsServicios.Update(service);
                 await _context.SaveChangesAsync();
 

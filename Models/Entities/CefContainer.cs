@@ -44,7 +44,7 @@ namespace VCashApp.Models.Entities
         [Required]
         [StringLength(50)]
         [Column("EstadoBolsa")]
-        public string ContainerStatus { get; set; } // Estado: 'Pending', 'InProcess', 'Counted', 'Verified', 'WithIncident'
+        public string ContainerStatus { get; set; } // Estado: 'Pending', 'InProcess', 'Procesado', 'Verified', 'WithIncident'
         
         [StringLength(255)]
         [Column("Observaciones")]

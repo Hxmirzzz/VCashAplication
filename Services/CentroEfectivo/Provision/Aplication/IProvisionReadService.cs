@@ -8,5 +8,6 @@ namespace VCashApp.Services.CentroEfectivo.Provision.Application
         Task<CefProcessContainersPageViewModel?> GetProcessPageAsync(int txId);
         Task<CefTransactionDetailViewModel> GetDetailAsync(int txId);
         Task<ProvisionSummaryVm> GetSummaryAsync(int txId);
+        Task<CefProvisionDeliveryViewModel?> GetDeliveryAsync(int txId, string? returnUrl);
     }
 }

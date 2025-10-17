@@ -1,0 +1,80 @@
+﻿@model VCashApp.Models.ViewModels.CentroEfectivo.CefProvisionDeliveryViewModel
+@{
+    ViewData["Title"] = "Entrega de Provisión";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="form-container">
+    <div class="card">
+        <div class="card-body">
+            <form asp-action="Deliver" asp-controller="Provision" asp-route-txId="@Model.TransactionId" method="post">
+                @Html.AntiForgeryToken()
+                <input type="hidden" asp-for="TransactionId" />
+                <input type="hidden" asp-for="ReturnUrl" />
+
+                <div class="row g-2 mb-2">
+                    <div class="col-12 col-xl-7">
+                        <div class="card h-100">
+                            <div class="card-header d-flex align-items-center">
+                                <h6 class="mb-0"><i class="ri-survey-fill"></i> Información del Servicio</h6>
+                                <span class="badge bg-info ms-auto">Planilla @Model.SlipNumber</span>
+                            </div>
+                            <div class="card-body p-2">
+                                <div class="row gx-3 gy-1 small">
+                                    <div class="col-12 col-lg-6">
+                                        <ul class="meta-list">
+                                            <li><span class="meta-k">Orden</span><span class="meta-v">@Model.ServiceOrderId</span></li>
+                                            <li><span class="meta-k">Divisa</span><span class="meta-v">@Model.Currency</span></li>
+                                            <li><span class="meta-k">Sucursal</span><span class="meta-v">@Model.BranchName</span></li>
+                                        </ul>
+                                    </div>
+                                    <div class="col-12 col-lg-6">
+                                        <ul class="meta-list">
+                                            <li><span class="meta-k">Estado actual</span><span class="meta-v"><span class="badge bg-warning text-dark">@Model.CurrentStatus</span></span></li>
+                                            <li><span class="meta-k">Contado</span><span class="meta-v">@Model.TotalCountedValue.ToString("N0")</span></li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-12 col-xl-5">
+                        <div class="card h-100">
+                            <div class="card-header">
+                                <h6 class="mb-0"><i class="ri-hand-heart-fill"></i> Entrega</h6>
+                            </div>
+                            <div class="card-body p-2">
+                                <div class="form-floating has-validation mb-2">
+                                    <select asp-for="ReceiverUserId" asp-items="Model.JtUsers" class="form-select" required>
+                                        <option value="">-- Seleccione empleado JT receptor --</option>
+                                    </select>
+                                    <label asp-for="ReceiverUserId">Empleado JT que recibe</label>
+                                    <span asp-validation-for="ReceiverUserId" class="invalid-feedback d-block"></span>
+                                </div>
+
+                                <div class="alert alert-info small mb-0">
+                                    Al confirmar, la transacción quedará en estado <strong>Entregado</strong>.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="submit-container-spacer"></div>
+                <div class="submit-container form-group col-12 mt-4 fixed">
+                    <a class="btn btn-secondary" href="@(Model.ReturnUrl ?? Url.Action("Supplies", "Cef"))">Cancelar</a>
+                    <button type="submit" class="btn btn-success">
+                        <i class="ri-check-fill"></i> Confirmar Entrega
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

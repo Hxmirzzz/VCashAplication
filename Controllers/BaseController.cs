@@ -170,7 +170,7 @@ namespace VCashApp.Controllers
         protected async Task<CefCaps> GetCefCapsAsync(ApplicationUser user)
         {
             var roleIds = await GetUserRoleIdsAsync(user.Id);
-            var roleNames = await _userManager.GetRolesAsync(user); // sólo para HasPermisionForView
+            var roleNames = await _userManager.GetRolesAsync(user);
 
             bool Has(string id) => roleIds.Contains(id);
 

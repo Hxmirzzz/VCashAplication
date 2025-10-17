@@ -13,7 +13,7 @@ namespace VCashApp.Services.CentroEfectivo.Provision.Application
 
     public sealed record SaveProvisionContainersCmd(
         IReadOnlyList<CefContainerProcessingViewModel> Containers,
-        string? Currency,
+        string? InformativeIncident,
         int? SlipNumber
         //string? Observations
     );
