@@ -793,7 +793,7 @@
             Maneja el flujo de Check-in, conteo de contenedores y revisión de transacciones.
             </summary>
         </member>
-        <member name="M:VCashApp.Controllers.CefController.#ctor(VCashApp.Services.ICefTransactionService,VCashApp.Services.ICefContainerService,VCashApp.Services.ICefIncidentService,VCashApp.Services.ICefServiceCreationService,VCashApp.Data.AppDbContext,Microsoft.AspNetCore.Identity.UserManager{VCashApp.Models.ApplicationUser},VCashApp.Services.Logging.IAuditLogger,Microsoft.Extensions.Logging.ILogger{VCashApp.Controllers.CefController})">
+        <member name="M:VCashApp.Controllers.CefController.#ctor(VCashApp.Services.ICefTransactionService,VCashApp.Services.ICefContainerService,VCashApp.Services.ICefIncidentService,VCashApp.Services.ICefServiceCreationService,VCashApp.Data.AppDbContext,Microsoft.AspNetCore.Identity.UserManager{VCashApp.Models.ApplicationUser},VCashApp.Services.Logging.IAuditLogger,Microsoft.Extensions.Logging.ILogger{VCashApp.Controllers.CefController},VCashApp.Infrastructure.Branches.IBranchContext)">
             <summary>
             Constructor del controlador CefController.
             </summary>
@@ -803,6 +803,7 @@
             <param name="context">Contexto de la base de datos de la aplicación.</param>
             <param name="userManager">Administrador de usuarios de Identity.</param>
             <param name="logger">Servicio de logging para el controlador.</param>
+            <param name="branchContext">Contexto de sucursal actual.</param>
         </member>
         <member name="M:VCashApp.Controllers.CefController.SetCommonViewBagsCefAsync(VCashApp.Models.ApplicationUser,System.String,System.String[])">
             <summary>

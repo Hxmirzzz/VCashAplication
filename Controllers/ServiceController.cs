@@ -3,11 +3,6 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using VCashApp.Data;
 using VCashApp.Filters;
 using VCashApp.Models;
@@ -15,6 +10,7 @@ using VCashApp.Models.ViewModels.Servicio;
 using VCashApp.Services;
 using VCashApp.Services.Service;
 using VCashApp.Services.DTOs;
+using VCashApp.Infrastructure.Branches;
 
 namespace VCashApp.Controllers
 {
@@ -27,16 +23,19 @@ namespace VCashApp.Controllers
     {
         private readonly ICgsServiceService _cgsService;
         private readonly ILogger<ServiceController> _logger;
+        private readonly IBranchContext _branchContext;
 
         public ServiceController(
             ICgsServiceService cgsService,
             AppDbContext context,
             UserManager<ApplicationUser> userManager,
-            ILogger<ServiceController> logger)
+            ILogger<ServiceController> logger,
+            IBranchContext branchContext)
             : base(context, userManager)
         {
             _cgsService = cgsService;
             _logger = logger;
+            _branchContext = branchContext;
         }
 
         private async Task SetCommonViewBagsCgsAsync(ApplicationUser currentUser, string pageName)

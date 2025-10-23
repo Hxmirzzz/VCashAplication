@@ -1221,7 +1221,18 @@ input:checked + .slider:before {
         }
 
 /* ===== LOGIN dentro de .main-content (sin 100vh, sin grids extra) ===== */
-.main-content .login-page {
+body.auth {
+    display: flex;
+    justify-content: center;
+}
+
+body.auth .main-content {
+    margin: 0 !important;
+    padding: 0 !important;
+    min-height: 100vh;
+}
+
+.login-page {
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -1230,11 +1241,10 @@ input:checked + .slider:before {
     height: 100%;
     padding: 0;
     margin: 0;
-    border-radius: 150px; +
+    border-radius: 150px;
 }
 
-/* NO convertir .login-card en grid: ya es .row g-0 (Bootstrap) */
-.main-content .login-card {
+.login-card {
     flex: 1;
     width: 100%;
     height: 100%;
@@ -1245,7 +1255,7 @@ input:checked + .slider:before {
 }
 
 /* Columna marca (la izquierda), SOLO estilo visual, el ancho lo define .col-lg-5 */
-.main-content .login-brand {
+.login-brand {
     background: radial-gradient(1200px 600px at -10% -20%, rgba(255,255,255,0.15) 0%, rgba(255,255,255,0) 50%), linear-gradient(135deg, var(--first-color) 0%, #2c6bb3 100%);
     color: #fff;
     padding: clamp(24px, 4vw, 48px);
@@ -1254,44 +1264,44 @@ input:checked + .slider:before {
     justify-content: space-between;
 }
 
-.main-content .login-brand__content {
+.login-brand__content {
     display: grid;
     align-content: center;
     gap: 18px;
 }
 
-.main-content .login-logo {
+.login-logo {
     width: clamp(120px, 28vw, 180px);
     height: auto;
     filter: drop-shadow(0 8px 24px rgba(0,0,0,.25));
 }
 
-.main-content .login-brand__title {
+.login-brand__title {
     font-weight: 700;
     margin: 0;
 }
 
-.main-content .login-brand__subtitle {
+.login-brand__subtitle {
     margin: 0;
     opacity: .95;
 }
 
-body.dark-theme .main-content .login-brand {
+body.dark-theme .login-brand {
     background: radial-gradient(1200px 600px at -10% -20%, rgba(255,255,255,0.07) 0%, rgba(255,255,255,0) 50%), linear-gradient(135deg, var(--first-color) 0%, #275e9d 100%);
 }
 
 /* Columna formulario (la derecha), su ancho lo da .col-lg-7 */
-.main-content .login-form__title {
+.login-form__title {
     color: var(--title-color-main);
     font-weight: 700;
 }
 
-.main-content .login-form__subtitle {
+.login-form__subtitle {
     color: var(--text-color-main);
 }
 
-.main-content .login-form__title,
-.main-content .login-form__subtitle {
+.login-form__title,
+.login-form__subtitle {
     text-align: center;
 }
 

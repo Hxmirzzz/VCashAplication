@@ -15,6 +15,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Logging;
 using VCashApp.Models;
+using VCashApp.Infrastructure.Branches;
 
 namespace VCashApp.Areas.Identity.Pages.Account
 {
@@ -22,11 +23,15 @@ namespace VCashApp.Areas.Identity.Pages.Account
     {
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly ILogger<LoginModel> _logger;
+        private readonly UserManager<ApplicationUser> _userManager;
 
-        public LoginModel(SignInManager<ApplicationUser> signInManager, ILogger<LoginModel> logger)
+        public LoginModel(SignInManager<ApplicationUser> signInManager,
+            ILogger<LoginModel> logger,
+            UserManager<ApplicationUser> userManager)
         {
             _signInManager = signInManager;
             _logger = logger;
+            _userManager = userManager;
         }
 
         /// <summary>
@@ -106,36 +111,57 @@ namespace VCashApp.Areas.Identity.Pages.Account
         public async Task<IActionResult> OnPostAsync(string returnUrl = null)
         {
             returnUrl ??= Url.Content("~/");
-
             ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
 
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
+                return Page();
+
+            var result = await _signInManager.PasswordSignInAsync(Input.UserName, Input.Password, Input.RememberMe, lockoutOnFailure: false);
+            if (result.Succeeded)
             {
-                // This doesn't count login failures towards account lockout
-                // To enable password failures to trigger account lockout, set lockoutOnFailure: true
-                var result = await _signInManager.PasswordSignInAsync(Input.UserName, Input.Password, Input.RememberMe, lockoutOnFailure: false);
-                if (result.Succeeded)
+                _logger.LogInformation("User logged in.");
+
+                var user = await _userManager.FindByNameAsync(Input.UserName);
+                if (user != null)
                 {
-                    _logger.LogInformation("User logged in.");
-                    return LocalRedirect(returnUrl);
+                    var claims = await _userManager.GetClaimsAsync(user);
+                    var activeBranch = claims.FirstOrDefault(c => c.Type == BranchClaimTypes.ActiveBranch)?.Value;
+                    var assignedBranches = claims.Where(c => c.Type == BranchClaimTypes.AssignedBranch)
+                                                 .Select(c => c.Value)
+                                                 .ToList();
+
+                    bool hasActive = int.TryParse(activeBranch, out _);
+                    int assignedCount = assignedBranches.Count;
+
+                    if (!hasActive && assignedCount == 1 && int.TryParse(assignedBranches[0], out var onlyBranchId))
+                    {
+                        var existingActive = claims.FirstOrDefault(c => c.Type == BranchClaimTypes.ActiveBranch);
+                        if (existingActive != null)
+                            await _userManager.RemoveClaimAsync(user, existingActive);
+
+                        await _userManager.AddClaimAsync(user, new System.Security.Claims.Claim(BranchClaimTypes.ActiveBranch, onlyBranchId.ToString()));
+                        await _signInManager.RefreshSignInAsync(user);
+
+                        return LocalRedirect(returnUrl);
+                    }
+                    if (!hasActive || assignedCount > 1)
+                    {
+                        return RedirectToAction("SelectBranch", "Account", new { returnUrl });
+                    }
                 }
-                if (result.RequiresTwoFactor)
-                {
-                    return RedirectToPage("./LoginWith2fa", new { ReturnUrl = returnUrl, RememberMe = Input.RememberMe });
-                }
-                if (result.IsLockedOut)
-                {
-                    _logger.LogWarning("User account locked out.");
-                    return RedirectToPage("./Lockout");
-                }
-                else
-                {
-                    ModelState.AddModelError(string.Empty, "Invalid login attempt.");
-                    return Page();
-                }
+                return LocalRedirect(returnUrl);
+            }
+            if (result.RequiresTwoFactor)
+            {
+                return RedirectToPage("./LoginWith2fa", new { ReturnUrl = returnUrl, RememberMe = Input.RememberMe });
+            }
+            if (result.IsLockedOut)
+            {
+                _logger.LogWarning("User account locked out.");
+                return RedirectToPage("./Lockout");
             }
 
-            // If we got this far, something failed, redisplay form
+            ModelState.AddModelError(string.Empty, "Intento de inicio de sesión inválido.");
             return Page();
         }
     }

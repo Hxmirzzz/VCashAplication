@@ -15,6 +15,7 @@ using VCashApp.Services.Cef;
 using VCashApp.Services.DTOs;
 using VCashApp.Services.Logging;
 using VCashApp.Utils;
+using VCashApp.Infrastructure.Branches;
 
 namespace VCashApp.Controllers
 {
@@ -33,6 +34,7 @@ namespace VCashApp.Controllers
         private readonly IExportService _exportService;
         private readonly IAuditLogger _audit;
         private readonly ILogger<CefController> _logger;
+        private readonly IBranchContext _branchContext;
 
         /// <summary>
         /// Constructor del controlador CefController.
@@ -43,6 +45,7 @@ namespace VCashApp.Controllers
         /// <param name="context">Contexto de la base de datos de la aplicación.</param>
         /// <param name="userManager">Administrador de usuarios de Identity.</param>
         /// <param name="logger">Servicio de logging para el controlador.</param>
+        /// <param name="branchContext">Contexto de sucursal actual.</param>
         public CefController(
             ICefTransactionService cefTransactionService,
             ICefContainerService cefContainerService,
@@ -51,7 +54,8 @@ namespace VCashApp.Controllers
             AppDbContext context,
             UserManager<ApplicationUser> userManager,
             IAuditLogger audit,
-            ILogger<CefController> logger)
+            ILogger<CefController> logger,
+            IBranchContext branchContext)
             : base(context, userManager)
         {
             _cefTransactionService = cefTransactionService;
@@ -60,6 +64,7 @@ namespace VCashApp.Controllers
             _cefServiceCreationService = cefServiceCreationService; //TEMPORAL
             _audit = audit;
             _logger = logger;
+            _branchContext = branchContext;
         }
 
         /// <summary>
@@ -221,6 +226,7 @@ namespace VCashApp.Controllers
             var currentUser = await GetCurrentApplicationUserAsync();
             if (currentUser == null) return RedirectToPage("/Account/Login", new { area = "Identity" });
 
+            int? effectiveBranch = branchId ?? _branchContext.CurrentBranchId;
             var effectiveMode = mode ?? InferModeFromStatus(status);
             var pageTitle = PageTitleForMode(effectiveMode);
             var codVista = effectiveMode switch
@@ -247,10 +253,10 @@ namespace VCashApp.Controllers
 
             var transactionStatuses = BuildStatusListByMode(mode, status);
             var branches = (ViewBag.AvailableBranches as List<SelectListItem>) ?? new List<SelectListItem>();
-            if (branchId.HasValue)
+            if (effectiveBranch.HasValue)
             {
                 foreach (var it in branches)
-                    it.Selected = (it.Value == branchId.Value.ToString());
+                    it.Selected = (it.Value == effectiveBranch.Value.ToString());
             }
 
             var vm = new CefDashboardViewModel
@@ -305,6 +311,7 @@ namespace VCashApp.Controllers
 
             return View("Index", vm);
         }
+
         /// <summary>
         /// Devuelve la lista de estados sugeridos según el modo y marca el seleccionado actual.
         /// </summary>

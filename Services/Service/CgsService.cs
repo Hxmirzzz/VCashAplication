@@ -7,16 +7,22 @@ using VCashApp.Enums;
 using VCashApp.Models.ViewModels.Servicio;
 using VCashApp.Services.DTOs;
 using VCashApp.Utils;
+using VCashApp.Infrastructure.Branches;
 
 namespace VCashApp.Services.Service
 {
     public class CgsService : ICgsServiceService
     {
         private readonly AppDbContext _context;
+        private readonly IBranchContext _branchContext;
 
-        public CgsService(AppDbContext context)
+        public CgsService(
+            AppDbContext context,
+            IBranchContext branchContext
+            )
         {
             _context = context;
+            _branchContext = branchContext;
         }
 
         public async Task<CgsServiceRequestViewModel> PrepareServiceRequestViewModelAsync(string currentUserId, string currentIP)
@@ -44,16 +50,13 @@ namespace VCashApp.Services.Service
             viewModel.CgsOperatorUserName = currentUser?.NombreUsuario ?? "Desconocido";
             viewModel.OperatorIpAddress = currentIP;
 
-            var operatorBranchCodeClaim = await _context.UserClaims
-                .Where(uc => uc.UserId == currentUserId && uc.ClaimType == "SucursalId")
-                .Select(uc => uc.ClaimValue)
-                .FirstOrDefaultAsync();
-
-            if (int.TryParse(operatorBranchCodeClaim, out int operatorBranchCode))
+            var activeBranch = _branchContext.CurrentBranchId;
+            if (activeBranch.HasValue)
             {
                 var operatorBranch = await _context.AdmSucursales
-                    .FirstOrDefaultAsync(s => s.CodSucursal == operatorBranchCode);
+                    .FirstOrDefaultAsync(s => s.CodSucursal == activeBranch.Value);
                 viewModel.OperatorBranchName = operatorBranch?.NombreSucursal ?? "N/A";
+                viewModel.BranchCode = activeBranch.Value; // si tu VM tiene esa propiedad
             }
             else
             {
@@ -286,89 +289,78 @@ namespace VCashApp.Services.Service
             string? search, int? clientCode, int? branchCode, int? conceptCode, DateOnly? startDate, DateOnly? endDate, int? status,
             int page = 1, int pageSize = 10, string? currentUserId = null, bool isAdmin = false)
         {
-            var permittedBranchIds = new List<int>();
-            if (!isAdmin && !string.IsNullOrEmpty(currentUserId))
-            {
-                permittedBranchIds = await _context.UserClaims
-                    .Where(uc => uc.UserId == currentUserId && uc.ClaimType == "SucursalId")
-                    .Select(uc => int.Parse(uc.ClaimValue))
-                    .ToListAsync();
-            }
+            int? effectiveBranch = branchCode ?? _branchContext.CurrentBranchId;
 
-            var tvpTable = new DataTable();
-            tvpTable.Columns.Add("Value", typeof(int));
-            if (permittedBranchIds.Any())
-            {
-                foreach (int id in permittedBranchIds)
+            DateTime? start = startDate?.ToDateTime(TimeOnly.MinValue);
+            DateTime? end = endDate?.ToDateTime(TimeOnly.MaxValue);
+
+            var q = 
+                from s in _context.CgsServicios.AsNoTracking()
+                join c in _context.AdmClientes.AsNoTracking() on s.ClientCode equals c.ClientCode into cj
+                from c in cj.DefaultIfEmpty()
+                join b in _context.AdmSucursales.AsNoTracking() on s.BranchCode equals b.CodSucursal into bj
+                from b in bj.DefaultIfEmpty()
+                join cc in _context.AdmConceptos.AsNoTracking() on s.ConceptCode equals cc.CodConcepto into ccj
+                from cc in ccj.DefaultIfEmpty()
+                select new
                 {
-                    tvpTable.Rows.Add(id);
-                }
+                    S = s,
+                    ClientName = c != null ? c.ClientName : "",
+                    BranchName = b != null ? b.NombreSucursal : "",
+                    ConceptName = cc != null ? cc.NombreConcepto : ""
+                };
+            
+            if (!isAdmin && effectiveBranch.HasValue)
+            {
+                q = q.Where(x => x.S.BranchCode == effectiveBranch.Value);
             }
 
-            var pPermittedBranchIds = new SqlParameter("@PermittedBranchIds", tvpTable)
+            if (isAdmin && effectiveBranch.HasValue)
+                q = q.Where(x => x.S.BranchCode == effectiveBranch.Value);
+
+            if (clientCode.HasValue) q = q.Where(x => x.S.ClientCode == clientCode.Value);
+            if (conceptCode.HasValue) q = q.Where(x => x.S.ConceptCode == conceptCode.Value);
+            if (status.HasValue) q = q.Where(x => x.S.StatusCode == status.Value);
+
+            if (start.HasValue) q = q.Where(x => x.S.RequestDate >= DateOnly.FromDateTime(start.Value));
+            if (end.HasValue) q = q.Where(x => x.S.RequestDate <= DateOnly.FromDateTime(end.Value));
+
+            if (!string.IsNullOrWhiteSpace(search))
             {
-                TypeName = "dbo.IntListType",
-                SqlDbType = SqlDbType.Structured
-            };
-            if (!permittedBranchIds.Any() && !isAdmin)
-            {
-                pPermittedBranchIds.Value = DBNull.Value;
+                var term = search.Trim();
+                q = q.Where(x =>
+                    x.S.ServiceOrderId.Contains(term) ||
+                    x.ClientName.Contains(term) ||
+                    x.BranchName.Contains(term) ||
+                    x.ConceptName.Contains(term));
             }
 
-            var pBranchIdFilter = new SqlParameter("@BranchIdFilter", branchCode ?? (object)DBNull.Value);
-            var pClientCode = new SqlParameter("@ClientCode", clientCode ?? (object)DBNull.Value);
-            var pConcepto = new SqlParameter("@Concepto", conceptCode ?? (object)DBNull.Value);
-            var pStartDate = new SqlParameter("@StartDate", startDate.HasValue ? (object)startDate.Value.ToDateTime(TimeOnly.MinValue) : DBNull.Value);
-            var pEndDate = new SqlParameter("@EndDate", endDate.HasValue ? (object)endDate.Value.ToDateTime(TimeOnly.MaxValue) : DBNull.Value);
-            var pStatus = new SqlParameter("@Status", status ?? (object)DBNull.Value);
-            var pSearchTerm = new SqlParameter("@SearchTerm", string.IsNullOrEmpty(search) ? (object)DBNull.Value : search);
-            var pPage = new SqlParameter("@Page", page);
-            var pPageSize = new SqlParameter("@PageSize", pageSize);
+            int total = await q.CountAsync();
 
-            var servicesSummary = new List<CgsServiceSummaryViewModel>();
-            var totalRecords = 0;
-
-            using (var command = _context.Database.GetDbConnection().CreateCommand())
-            {
-                command.CommandText = "dbo.GetFilteredCgsServices";
-                command.CommandType = CommandType.StoredProcedure;
-                command.Parameters.AddRange(new[] {
-                    pPermittedBranchIds, pBranchIdFilter, pClientCode, pConcepto,
-                    pStartDate, pEndDate, pStatus, pSearchTerm, pPage, pPageSize
-                });
-
-                await _context.Database.OpenConnectionAsync();
-
-                using (var reader = await command.ExecuteReaderAsync())
+            var rows = await q
+                .OrderByDescending(x => x.S.RequestDate)
+                .ThenByDescending(x => x.S.RequestTime)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .Select(x => new CgsServiceSummaryViewModel
                 {
-                    if (await reader.ReadAsync())
-                    {
-                        totalRecords = reader.GetInt32(0);
-                    }
-                    await reader.NextResultAsync();
+                    ServiceOrderId = x.S.ServiceOrderId,
+                    KeyValue = x.S.KeyValue ?? 0,
+                    ClientName = x.ClientName,
+                    BranchName = x.BranchName,
+                    OriginPointName = x.S.OriginPointCode,
+                    DestinationPointName = x.S.DestinationPointCode,
+                    ConceptName = x.ConceptName,
+                    RequestDate = x.S.RequestDate,
+                    RequestTime = x.S.RequestTime,
+                    ProgrammingDate = x.S.ProgrammingDate,
+                    ProgrammingTime = x.S.ProgrammingTime,
+                    StatusCode = x.S.StatusCode,
+                    StatusName = x.S.StatusCode.ToString()
+                })
+                .ToListAsync();
 
-                    while (await reader.ReadAsync())
-                    {
-                        servicesSummary.Add(new CgsServiceSummaryViewModel
-                        {
-                            ServiceOrderId = reader.IsDBNull(reader.GetOrdinal("ServiceOrderId")) ? string.Empty : reader.GetString(reader.GetOrdinal("ServiceOrderId")),
-                            KeyValue = reader.IsDBNull(reader.GetOrdinal("KeyValue")) ? 0 : reader.GetInt32(reader.GetOrdinal("KeyValue")),
-                            ClientName = reader.IsDBNull(reader.GetOrdinal("ClientName")) ? string.Empty : reader.GetString(reader.GetOrdinal("ClientName")),
-                            BranchName = reader.IsDBNull(reader.GetOrdinal("BranchName")) ? string.Empty : reader.GetString(reader.GetOrdinal("BranchName")),
-                            OriginPointName = reader.IsDBNull(reader.GetOrdinal("OriginPointName")) ? string.Empty : reader.GetString(reader.GetOrdinal("OriginPointName")),
-                            DestinationPointName = reader.IsDBNull(reader.GetOrdinal("DestinationPointName")) ? string.Empty : reader.GetString(reader.GetOrdinal("DestinationPointName")),
-                            ConceptName = reader.IsDBNull(reader.GetOrdinal("ConceptName")) ? string.Empty : reader.GetString(reader.GetOrdinal("ConceptName")),
-                            RequestDate = DateOnly.FromDateTime(reader.GetDateTime(reader.GetOrdinal("RequestDate"))),
-                            RequestTime = TimeOnly.FromTimeSpan(reader.GetFieldValue<TimeSpan>(reader.GetOrdinal("RequestTime"))),
-                            ProgrammingDate = reader.IsDBNull(reader.GetOrdinal("ProgrammingDate")) ? null : DateOnly.FromDateTime(reader.GetDateTime(reader.GetOrdinal("ProgrammingDate"))),
-                            ProgrammingTime = reader.IsDBNull(reader.GetOrdinal("ProgrammingTime")) ? null : TimeOnly.FromTimeSpan(reader.GetFieldValue<TimeSpan>(reader.GetOrdinal("ProgrammingTime"))),
-                            StatusCode = reader.IsDBNull(reader.GetOrdinal("StatusCode")) ? 0 : reader.GetInt32(reader.GetOrdinal("StatusCode")),
-                            StatusName = reader.IsDBNull(reader.GetOrdinal("StatusName")) ? string.Empty : reader.GetString(reader.GetOrdinal("StatusName"))
-                        });
-                    }
-                }
-            }
-            return Tuple.Create(servicesSummary, totalRecords);
+            return Tuple.Create(rows, total);
         }
 
         // --- MÉTODOS PARA POPULAR DROPDOWNS --

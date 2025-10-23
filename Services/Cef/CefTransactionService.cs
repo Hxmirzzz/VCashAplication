@@ -7,6 +7,7 @@ using VCashApp.Models.Entities;
 using VCashApp.Models.ViewModels.CentroEfectivo;
 using VCashApp.Utils;
 using VCashApp.Services.Logging;
+using VCashApp.Infrastructure.Branches;
 
 namespace VCashApp.Services.Cef
 {
@@ -16,13 +17,20 @@ namespace VCashApp.Services.Cef
     public class CefTransactionService : ICefTransactionService
     {
         private readonly AppDbContext _context;
+        private readonly IBranchContext _branchContext;
         private readonly IAuditLogger _audit;
         private readonly ICefContainerService _cefContainerService;
         private readonly ICefIncidentService _cefIncidentService;
 
-        public CefTransactionService(AppDbContext context, IAuditLogger audit, ICefContainerService cefContainerService, ICefIncidentService cefIncidentService)
+        public CefTransactionService(
+            AppDbContext context,
+            IBranchContext branchContext,
+            IAuditLogger audit,
+            ICefContainerService cefContainerService,
+            ICefIncidentService cefIncidentService)
         {
             _context = context;
+            _branchContext = branchContext;
             _audit = audit;
             _cefContainerService = cefContainerService;
             _cefIncidentService = cefIncidentService;
@@ -287,16 +295,10 @@ namespace VCashApp.Services.Cef
         /// <inheritdoc/>
         public async Task<Tuple<List<CefTransactionSummaryViewModel>, int>> GetFilteredCefTransactionsAsync(
             string currentUserId, int? branchId, DateOnly? startDate, DateOnly? endDate, CefTransactionStatusEnum? status,
-            string? search, int page, int pageSize, bool isAdmin, IEnumerable<string>? conceptTypeCodes = null, IEnumerable<string>? excludeStatuses = null)
+            string? search, int page, int pageSize, bool isAdmin, IEnumerable<string>? conceptTypeCodes = null,
+            IEnumerable<string>? excludeStatuses = null)
         {
-            List<int> permittedBranches = new();
-            if (!isAdmin)
-            {
-                permittedBranches = await _context.UserClaims
-                    .Where(uc => uc.UserId == currentUserId && uc.ClaimType == "SucursalId")
-                    .Select(uc => int.Parse(uc.ClaimValue))
-                    .ToListAsync();
-            }
+            int? effectiveBranch = branchId ?? _branchContext.CurrentBranchId;
 
             DateTime? start = startDate?.ToDateTime(TimeOnly.MinValue);
             DateTime? end = endDate?.ToDateTime(TimeOnly.MaxValue);
@@ -328,12 +330,11 @@ namespace VCashApp.Services.Cef
                     ConceptType = con != null ? con.TipoConcepto : null
                 };
 
-            // 5) Filtros
-            if (!isAdmin && permittedBranches.Count > 0)
-                query = query.Where(x => permittedBranches.Contains(x.T.BranchCode));
+            if (!isAdmin && effectiveBranch.HasValue)
+                query = query.Where(x => x.T.BranchCode == effectiveBranch.Value);
 
-            if (branchId.HasValue)
-                query = query.Where(x => x.T.BranchCode == branchId.Value);
+            if (effectiveBranch.HasValue && isAdmin)
+                query = query.Where(x => x.T.BranchCode == effectiveBranch.Value);
 
             if (start.HasValue)
                 query = query.Where(x => x.T.RegistrationDate >= start.Value);

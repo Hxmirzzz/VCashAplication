@@ -12,6 +12,8 @@ using System.IO;
 using VCashApp.Data;
 using VCashApp.Data.Seed;
 using VCashApp.Extentions;
+using VCashApp.Infrastructure.Branches;
+using VCashApp.Infrastructure.Middleware;
 using VCashApp.Models;
 using VCashApp.Services;
 using VCashApp.Services.Cef;
@@ -166,6 +168,9 @@ builder.Services.AddResponseCompression(options =>
 
 builder.Services.AddHttpContextAccessor();
 
+builder.Services.AddScoped<IBranchContext, BranchContext>();
+builder.Services.AddScoped<IBranchResolver, BranchResolver>();
+
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IEmployeeService, EmployeeService>();
 builder.Services.AddScoped<IEmployeeLogService, EmployeeLogService>();
@@ -282,6 +287,7 @@ app.UseResponseCompression();
 app.UseRouting();
 app.UseSession();
 app.UseAuthentication();
+app.UseMiddleware<BranchContextMiddleware>();
 app.UseMiddleware<LogIpMiddleware>();
 app.UseAuthorization();
 

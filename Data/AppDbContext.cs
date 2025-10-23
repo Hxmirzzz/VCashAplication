@@ -5,14 +5,17 @@ using VCashApp.Models.Entities;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.DataProtection.EntityFrameworkCore;
 using VCashApp.Models.AdmEntities;
+using VCashApp.Infrastructure.Branches;
 
 namespace VCashApp.Data
 {
     public class AppDbContext : IdentityDbContext<ApplicationUser>, IDataProtectionKeyContext
     {
-        public AppDbContext(DbContextOptions<AppDbContext> options)
+        private readonly IBranchContext? _branchContext;
+        public AppDbContext(DbContextOptions<AppDbContext> options, IBranchContext? branchContext = null)
             : base(options)
         {
+            _branchContext = branchContext;
         }
         public DbSet<DataProtectionKey> DataProtectionKeys { get; set; }
         public DbSet<PermisoPerfil> PermisosPerfil { get; set; }
@@ -46,7 +49,6 @@ namespace VCashApp.Data
         public DbSet<AdmQuality> AdmCalidad { get; set; }
         public DbSet<TdvRutaDiaria> TdvRutasDiarias { get; set; }
         // public DbSet<TdvRutaDetallePunto> TdvRutaDetallePuntos { get; set; }
-
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
@@ -670,6 +672,17 @@ namespace VCashApp.Data
                 entity.HasOne(e => e.SucursalPunto).WithMany().HasForeignKey(e => e.CodSucursal).IsRequired(false);
                 entity.HasOne(e => e.UsuarioAtencionObj).WithMany().HasForeignKey(e => e.UsuarioAtencion).IsRequired(false);
             });*/ 
+
+            if (_branchContext != null)
+            {
+                builder.Entity<CgsService>()
+                    .HasQueryFilter(s => !_branchContext.CurrentBranchId.HasValue
+                    || s.BranchCode == _branchContext.CurrentBranchId.Value);
+
+                builder.Entity<CefTransaction>()
+                    .HasQueryFilter(t => !_branchContext.CurrentBranchId.HasValue
+                    || t.BranchCode == _branchContext.CurrentBranchId.Value);
+            }
         }
     }
 }
