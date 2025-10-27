@@ -1,6 +1,6 @@
 ﻿using VCashApp.Data;
 using VCashApp.Models.Entities;
-using VCashApp.Models.ViewModels.CentroEfectivo;
+using VCashApp.Models.ViewModels.CentroEfectivo.Shared;
 using VCashApp.Enums;
 using VCashApp.Services;
 using Microsoft.EntityFrameworkCore;

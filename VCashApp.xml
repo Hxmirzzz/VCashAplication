@@ -875,7 +875,7 @@
             <param name="routeId">ID de Ruta Diaria opcional para precargar datos.</param>
             <returns>Vista del formulario de Check-in.</returns>
         </member>
-        <member name="M:VCashApp.Controllers.CefController.Checkin(VCashApp.Models.ViewModels.CentroEfectivo.CefTransactionCheckinViewModel)">
+        <member name="M:VCashApp.Controllers.CefController.Checkin(VCashApp.Models.ViewModels.CentroEfectivo.Shared.CefTransactionCheckinViewModel)">
             <summary>
             Procesa el envío del formulario de Check-in y crea la transacción de CEF.
             </summary>
@@ -898,7 +898,7 @@
             <param name="serviceConceptCode">Código del concepto de servicio (ej: "RC" para Recolección Oficinas).</param>
             <returns>Vista del formulario de creación unificada.</returns>
         </member>
-        <member name="M:VCashApp.Controllers.CefController.CreateServiceAndCefTransaction(VCashApp.Models.ViewModels.CentroEfectivo.CefServiceCreationViewModel)">
+        <member name="M:VCashApp.Controllers.CefController.CreateServiceAndCefTransaction(VCashApp.Models.ViewModels.CentroEfectivo.Shared.CefServiceCreationViewModel)">
             <summary>
             Procesa el envío del formulario unificado para crear un nuevo Servicio y Transacción CEF.
             </summary>
@@ -925,7 +925,7 @@
             <param name="containerId">Id del contenedor</param>
             <returns>Eliminar un contenedor seleccionado</returns>
         </member>
-        <member name="M:VCashApp.Controllers.CefController.ProcessContainers(System.Int32,VCashApp.Models.ViewModels.CentroEfectivo.CefProcessContainersPageViewModel)">
+        <member name="M:VCashApp.Controllers.CefController.ProcessContainers(System.Int32,VCashApp.Models.ViewModels.CentroEfectivo.Shared.CefProcessContainersPageViewModel)">
             <summary>
             Procesa el envío del formulario de procesamiento de contenedores (guardar detalles y novedades).
             </summary>
@@ -937,7 +937,7 @@
             <param name="viewModel">ViewModel con los datos del contenedor, detalles y novedades.</param>
             <returns>Un JSON ServiceResult o redirección a la misma vista para continuar o al dashboard.</returns>
         </member>
-        <member name="M:VCashApp.Controllers.CefController.DetailChanged(VCashApp.Models.ViewModels.CentroEfectivo.CefValueDetailViewModel,VCashApp.Models.Entities.CefValueDetail)">
+        <member name="M:VCashApp.Controllers.CefController.DetailChanged(VCashApp.Models.ViewModels.CentroEfectivo.Shared.CefValueDetailViewModel,VCashApp.Models.Entities.CefValueDetail)">
             <summary>
             Devuelve true si el detalle (POST) difiere del persistido en campos relevantes.
             </summary>
@@ -963,7 +963,7 @@
             <param name="transactionId">ID de la transacción a revisar.</param>
             <returns>Vista de revisión de transacción.</returns>
         </member>
-        <member name="M:VCashApp.Controllers.CefController.ReviewTransaction(System.Nullable{System.Int32},VCashApp.Models.ViewModels.CentroEfectivo.CefTransactionReviewViewModel)">
+        <member name="M:VCashApp.Controllers.CefController.ReviewTransaction(System.Nullable{System.Int32},VCashApp.Models.ViewModels.CentroEfectivo.Shared.CefTransactionReviewViewModel)">
             <summary>
             Procesa la aprobación o rechazo final de una transacción de Centro de Efectivo.
             </summary>
@@ -2316,514 +2316,514 @@
             Texto de búsqueda auxiliar para filtrar sucursales.
             </summary>
         </member>
-        <member name="T:VCashApp.Models.ViewModels.CentroEfectivo.CefContainerProcessingViewModel">
+        <member name="T:VCashApp.Models.ViewModels.CentroEfectivo.Shared.CefContainerProcessingViewModel">
             <summary>
             ViewModel para la entrada de datos durante el conteo de un contenedor de efectivo.
             </summary>
         </member>
-        <member name="T:VCashApp.Models.ViewModels.CentroEfectivo.CefValueDetailViewModel">
+        <member name="T:VCashApp.Models.ViewModels.CentroEfectivo.Shared.CefValueDetailViewModel">
             <summary>
             ViewModel para la entrada de datos de un detalle de valor (billete, moneda, cheque, documento) dentro de un contenedor.
             </summary>
         </member>
-        <member name="T:VCashApp.Models.ViewModels.CentroEfectivo.CefIncidentViewModel">
+        <member name="T:VCashApp.Models.ViewModels.CentroEfectivo.Shared.CefIncidentViewModel">
             <summary>
             ViewModel para la entrada de datos de una novedad asociada a un contenedor o detalle de valor.
             </summary>
         </member>
-        <member name="T:VCashApp.Models.ViewModels.CentroEfectivo.CefDashboardViewModel">
+        <member name="T:VCashApp.Models.ViewModels.CentroEfectivo.Shared.CefDashboardViewModel">
             <summary>
             ViewModel para los filtros y paginación del dashboard de Centro de Efectivo.
             </summary>
         </member>
-        <member name="P:VCashApp.Models.ViewModels.CentroEfectivo.CefDashboardViewModel.Transactions">
+        <member name="P:VCashApp.Models.ViewModels.CentroEfectivo.Shared.CefDashboardViewModel.Transactions">
             <summary>
             Colección de transacciones a mostrar.
             </summary>
         </member>
-        <member name="P:VCashApp.Models.ViewModels.CentroEfectivo.CefDashboardViewModel.Mode">
+        <member name="P:VCashApp.Models.ViewModels.CentroEfectivo.Shared.CefDashboardViewModel.Mode">
             <summary>
             Tipo de dashborad a mostrar.
             </summary>
         </member>
-        <member name="P:VCashApp.Models.ViewModels.CentroEfectivo.CefDashboardViewModel.CurrentPage">
+        <member name="P:VCashApp.Models.ViewModels.CentroEfectivo.Shared.CefDashboardViewModel.CurrentPage">
             <summary>
             Página actual de la paginación.
             </summary>
         </member>
-        <member name="P:VCashApp.Models.ViewModels.CentroEfectivo.CefDashboardViewModel.PageSize">
+        <member name="P:VCashApp.Models.ViewModels.CentroEfectivo.Shared.CefDashboardViewModel.PageSize">
             <summary>
             Cantidad de registros por página.
             </summary>
         </member>
-        <member name="P:VCashApp.Models.ViewModels.CentroEfectivo.CefDashboardViewModel.TotalPages">
+        <member name="P:VCashApp.Models.ViewModels.CentroEfectivo.Shared.CefDashboardViewModel.TotalPages">
             <summary>
             Total de páginas disponibles.
             </summary>
         </member>
-        <member name="P:VCashApp.Models.ViewModels.CentroEfectivo.CefDashboardViewModel.TotalData">
+        <member name="P:VCashApp.Models.ViewModels.CentroEfectivo.Shared.CefDashboardViewModel.TotalData">
             <summary>
             Total de registros filtrados.
             </summary>
         </member>
-        <member name="P:VCashApp.Models.ViewModels.CentroEfectivo.CefDashboardViewModel.SearchTerm">
+        <member name="P:VCashApp.Models.ViewModels.CentroEfectivo.Shared.CefDashboardViewModel.SearchTerm">
             <summary>
             Término de búsqueda actual.
             </summary>
         </member>
-        <member name="P:VCashApp.Models.ViewModels.CentroEfectivo.CefDashboardViewModel.CurrentBranchId">
+        <member name="P:VCashApp.Models.ViewModels.CentroEfectivo.Shared.CefDashboardViewModel.CurrentBranchId">
             <summary>
             Identificador de sucursal utilizado como filtro.
             </summary>
         </member>
-        <member name="P:VCashApp.Models.ViewModels.CentroEfectivo.CefDashboardViewModel.CurrentStartDate">
+        <member name="P:VCashApp.Models.ViewModels.CentroEfectivo.Shared.CefDashboardViewModel.CurrentStartDate">
             <summary>
             Fecha inicial del rango de búsqueda.
             </summary>
         </member>
-        <member name="P:VCashApp.Models.ViewModels.CentroEfectivo.CefDashboardViewModel.CurrentEndDate">
+        <member name="P:VCashApp.Models.ViewModels.CentroEfectivo.Shared.CefDashboardViewModel.CurrentEndDate">
             <summary>
             Fecha final del rango de búsqueda.
             </summary>
         </member>
-        <member name="P:VCashApp.Models.ViewModels.CentroEfectivo.CefDashboardViewModel.CurrentStatus">
+        <member name="P:VCashApp.Models.ViewModels.CentroEfectivo.Shared.CefDashboardViewModel.CurrentStatus">
             <summary>
             Estado actual seleccionado como filtro.
             </summary>
         </member>
-        <member name="P:VCashApp.Models.ViewModels.CentroEfectivo.CefDashboardViewModel.AvailableBranches">
+        <member name="P:VCashApp.Models.ViewModels.CentroEfectivo.Shared.CefDashboardViewModel.AvailableBranches">
             <summary>
             Lista de sucursales disponibles para filtrar.
             </summary>
         </member>
-        <member name="P:VCashApp.Models.ViewModels.CentroEfectivo.CefDashboardViewModel.TransactionStatuses">
+        <member name="P:VCashApp.Models.ViewModels.CentroEfectivo.Shared.CefDashboardViewModel.TransactionStatuses">
             <summary>
             Lista de estados de transacción disponibles para filtrar.
             </summary>
         </member>
-        <member name="T:VCashApp.Models.ViewModels.CentroEfectivo.CefProcessContainersPageViewModel">
+        <member name="T:VCashApp.Models.ViewModels.CentroEfectivo.Shared.CefProcessContainersPageViewModel">
             <summary>
             ViewModel que agrupa la información necesaria para procesar contenedores
             de una transacción de efectivo.
             </summary>
         </member>
-        <member name="P:VCashApp.Models.ViewModels.CentroEfectivo.CefProcessContainersPageViewModel.CefTransactionId">
+        <member name="P:VCashApp.Models.ViewModels.CentroEfectivo.Shared.CefProcessContainersPageViewModel.CefTransactionId">
             <summary>
             Identificador de la transacción de efectivo asociada.
             </summary>
         </member>
-        <member name="P:VCashApp.Models.ViewModels.CentroEfectivo.CefProcessContainersPageViewModel.Service">
+        <member name="P:VCashApp.Models.ViewModels.CentroEfectivo.Shared.CefProcessContainersPageViewModel.Service">
             <summary>
             Información general del servicio relacionado.
             </summary>
         </member>
-        <member name="P:VCashApp.Models.ViewModels.CentroEfectivo.CefProcessContainersPageViewModel.Transaction">
+        <member name="P:VCashApp.Models.ViewModels.CentroEfectivo.Shared.CefProcessContainersPageViewModel.Transaction">
             <summary>
             Datos principales de la transacción.
             </summary>
         </member>
-        <member name="P:VCashApp.Models.ViewModels.CentroEfectivo.CefProcessContainersPageViewModel.Containers">
+        <member name="P:VCashApp.Models.ViewModels.CentroEfectivo.Shared.CefProcessContainersPageViewModel.Containers">
             <summary>
             Contenedores a procesar dentro de la transacción.
             </summary>
         </member>
-        <member name="P:VCashApp.Models.ViewModels.CentroEfectivo.CefProcessContainersPageViewModel.TotalDeclaredAll">
+        <member name="P:VCashApp.Models.ViewModels.CentroEfectivo.Shared.CefProcessContainersPageViewModel.TotalDeclaredAll">
             <summary>
             Total de valores declarados en todos los contenedores.
             </summary>
         </member>
-        <member name="P:VCashApp.Models.ViewModels.CentroEfectivo.CefProcessContainersPageViewModel.TotalCountedAll">
+        <member name="P:VCashApp.Models.ViewModels.CentroEfectivo.Shared.CefProcessContainersPageViewModel.TotalCountedAll">
             <summary>
             Total de valores contados en todos los contenedores.
             </summary>
         </member>
-        <member name="P:VCashApp.Models.ViewModels.CentroEfectivo.CefProcessContainersPageViewModel.DifferenceAll">
+        <member name="P:VCashApp.Models.ViewModels.CentroEfectivo.Shared.CefProcessContainersPageViewModel.DifferenceAll">
             <summary>
             Diferencia total entre valores declarados y contados.
             </summary>
         </member>
-        <member name="T:VCashApp.Models.ViewModels.CentroEfectivo.ServiceHeaderVM">
+        <member name="T:VCashApp.Models.ViewModels.CentroEfectivo.Shared.ServiceHeaderVM">
             <summary>
             Datos de encabezado del servicio asociado a la transacción.
             </summary>
         </member>
-        <member name="P:VCashApp.Models.ViewModels.CentroEfectivo.ServiceHeaderVM.ServiceOrderId">
+        <member name="P:VCashApp.Models.ViewModels.CentroEfectivo.Shared.ServiceHeaderVM.ServiceOrderId">
             <summary>
             Número de orden del servicio.
             </summary>
         </member>
-        <member name="P:VCashApp.Models.ViewModels.CentroEfectivo.ServiceHeaderVM.BranchCode">
+        <member name="P:VCashApp.Models.ViewModels.CentroEfectivo.Shared.ServiceHeaderVM.BranchCode">
             <summary>
             Código de la sucursal donde se registró el servicio.
             </summary>
         </member>
-        <member name="P:VCashApp.Models.ViewModels.CentroEfectivo.ServiceHeaderVM.BranchName">
+        <member name="P:VCashApp.Models.ViewModels.CentroEfectivo.Shared.ServiceHeaderVM.BranchName">
             <summary>
             Nombre de la sucursal asociada.
             </summary>
         </member>
-        <member name="P:VCashApp.Models.ViewModels.CentroEfectivo.ServiceHeaderVM.ServiceDate">
+        <member name="P:VCashApp.Models.ViewModels.CentroEfectivo.Shared.ServiceHeaderVM.ServiceDate">
             <summary>
             Fecha programada del servicio.
             </summary>
         </member>
-        <member name="P:VCashApp.Models.ViewModels.CentroEfectivo.ServiceHeaderVM.ServiceTime">
+        <member name="P:VCashApp.Models.ViewModels.CentroEfectivo.Shared.ServiceHeaderVM.ServiceTime">
             <summary>
             Hora programada del servicio.
             </summary>
         </member>
-        <member name="P:VCashApp.Models.ViewModels.CentroEfectivo.ServiceHeaderVM.ConceptName">
+        <member name="P:VCashApp.Models.ViewModels.CentroEfectivo.Shared.ServiceHeaderVM.ConceptName">
             <summary>
             Nombre del concepto del servicio.
             </summary>
         </member>
-        <member name="P:VCashApp.Models.ViewModels.CentroEfectivo.ServiceHeaderVM.OriginName">
+        <member name="P:VCashApp.Models.ViewModels.CentroEfectivo.Shared.ServiceHeaderVM.OriginName">
             <summary>
             Nombre del origen del servicio.
             </summary>
         </member>
-        <member name="P:VCashApp.Models.ViewModels.CentroEfectivo.ServiceHeaderVM.DestinationName">
+        <member name="P:VCashApp.Models.ViewModels.CentroEfectivo.Shared.ServiceHeaderVM.DestinationName">
             <summary>
             Nombre del destino del servicio.
             </summary>
         </member>
-        <member name="P:VCashApp.Models.ViewModels.CentroEfectivo.ServiceHeaderVM.ClientName">
+        <member name="P:VCashApp.Models.ViewModels.CentroEfectivo.Shared.ServiceHeaderVM.ClientName">
             <summary>
             Nombre del cliente asociado al servicio.
             </summary>
         </member>
-        <member name="T:VCashApp.Models.ViewModels.CentroEfectivo.TransactionHeaderVM">
+        <member name="T:VCashApp.Models.ViewModels.CentroEfectivo.Shared.TransactionHeaderVM">
             <summary>
             Datos de encabezado de la transacción de efectivo.
             </summary>
         </member>
-        <member name="P:VCashApp.Models.ViewModels.CentroEfectivo.TransactionHeaderVM.Id">
+        <member name="P:VCashApp.Models.ViewModels.CentroEfectivo.Shared.TransactionHeaderVM.Id">
             <summary>
             Identificador único de la transacción.
             </summary>
         </member>
-        <member name="P:VCashApp.Models.ViewModels.CentroEfectivo.TransactionHeaderVM.SlipNumber">
+        <member name="P:VCashApp.Models.ViewModels.CentroEfectivo.Shared.TransactionHeaderVM.SlipNumber">
             <summary>
             Número de volante o comprobante, si aplica.
             </summary>
         </member>
-        <member name="P:VCashApp.Models.ViewModels.CentroEfectivo.TransactionHeaderVM.Currency">
+        <member name="P:VCashApp.Models.ViewModels.CentroEfectivo.Shared.TransactionHeaderVM.Currency">
             <summary>
             Moneda en la que se realiza la transacción.
             </summary>
         </member>
-        <member name="P:VCashApp.Models.ViewModels.CentroEfectivo.TransactionHeaderVM.TransactionType">
+        <member name="P:VCashApp.Models.ViewModels.CentroEfectivo.Shared.TransactionHeaderVM.TransactionType">
             <summary>
             Tipo de transacción realizada.
             </summary>
         </member>
-        <member name="P:VCashApp.Models.ViewModels.CentroEfectivo.TransactionHeaderVM.Status">
+        <member name="P:VCashApp.Models.ViewModels.CentroEfectivo.Shared.TransactionHeaderVM.Status">
             <summary>
             Estado actual de la transacción.
             </summary>
         </member>
-        <member name="P:VCashApp.Models.ViewModels.CentroEfectivo.TransactionHeaderVM.RegistrationDate">
+        <member name="P:VCashApp.Models.ViewModels.CentroEfectivo.Shared.TransactionHeaderVM.RegistrationDate">
             <summary>
             Fecha y hora de registro de la transacción.
             </summary>
         </member>
-        <member name="P:VCashApp.Models.ViewModels.CentroEfectivo.TransactionHeaderVM.RegistrationUserName">
+        <member name="P:VCashApp.Models.ViewModels.CentroEfectivo.Shared.TransactionHeaderVM.RegistrationUserName">
             <summary>
             Usuario que registró la transacción.
             </summary>
         </member>
-        <member name="P:VCashApp.Models.ViewModels.CentroEfectivo.TransactionHeaderVM.InformativeIncident">
+        <member name="P:VCashApp.Models.ViewModels.CentroEfectivo.Shared.TransactionHeaderVM.InformativeIncident">
             <summary>
             Observaciones de la transacción.
             </summary>
         </member>
-        <member name="T:VCashApp.Models.ViewModels.CentroEfectivo.CefServiceCreationViewModel">
+        <member name="T:VCashApp.Models.ViewModels.CentroEfectivo.Shared.CefServiceCreationViewModel">
             <summary>
             ViewModel temporal para la creación unificada de un Servicio y su Transacción CEF inicial.
             Combina campos necesarios de AdmServicio y CefTransaction.
             </summary>
         </member>
-        <member name="T:VCashApp.Models.ViewModels.CentroEfectivo.CefTransactionCheckinViewModel">
+        <member name="T:VCashApp.Models.ViewModels.CentroEfectivo.Shared.CefTransactionCheckinViewModel">
             <summary>
             ViewModel para la entrada de datos durante el proceso de Check-in de una nueva Transacción de Centro de Efectivo.
             </summary>
         </member>
-        <member name="T:VCashApp.Models.ViewModels.CentroEfectivo.CefTransactionReviewViewModel">
+        <member name="T:VCashApp.Models.ViewModels.CentroEfectivo.Shared.CefTransactionReviewViewModel">
             <summary>
             ViewModel para la visualización y procesamiento de la revisión final de una transacción de Centro de Efectivo.
             </summary>
         </member>
-        <member name="P:VCashApp.Models.ViewModels.CentroEfectivo.CefTransactionReviewViewModel.Id">
+        <member name="P:VCashApp.Models.ViewModels.CentroEfectivo.Shared.CefTransactionReviewViewModel.Id">
             <summary>
             Identificador de la transacción.
             </summary>
         </member>
-        <member name="P:VCashApp.Models.ViewModels.CentroEfectivo.CefTransactionReviewViewModel.ServiceOrderId">
+        <member name="P:VCashApp.Models.ViewModels.CentroEfectivo.Shared.CefTransactionReviewViewModel.ServiceOrderId">
             <summary>
             Número de orden de servicio asociado.
             </summary>
         </member>
-        <member name="P:VCashApp.Models.ViewModels.CentroEfectivo.CefTransactionReviewViewModel.SlipNumber">
+        <member name="P:VCashApp.Models.ViewModels.CentroEfectivo.Shared.CefTransactionReviewViewModel.SlipNumber">
             <summary>
             Número de planilla de la transacción.
             </summary>
         </member>
-        <member name="P:VCashApp.Models.ViewModels.CentroEfectivo.CefTransactionReviewViewModel.TransactionType">
+        <member name="P:VCashApp.Models.ViewModels.CentroEfectivo.Shared.CefTransactionReviewViewModel.TransactionType">
             <summary>
             Tipo de transacción realizada.
             </summary>
         </member>
-        <member name="P:VCashApp.Models.ViewModels.CentroEfectivo.CefTransactionReviewViewModel.TransactionTypeCode">
+        <member name="P:VCashApp.Models.ViewModels.CentroEfectivo.Shared.CefTransactionReviewViewModel.TransactionTypeCode">
             <summary>
             Codigo de la transacción
             </summary>
         </member>
-        <member name="P:VCashApp.Models.ViewModels.CentroEfectivo.CefTransactionReviewViewModel.TransactionTypeName">
+        <member name="P:VCashApp.Models.ViewModels.CentroEfectivo.Shared.CefTransactionReviewViewModel.TransactionTypeName">
             <summary>
             Nombre de la transacción
             </summary>
         </member>
-        <member name="P:VCashApp.Models.ViewModels.CentroEfectivo.CefTransactionReviewViewModel.Currency">
+        <member name="P:VCashApp.Models.ViewModels.CentroEfectivo.Shared.CefTransactionReviewViewModel.Currency">
             <summary>
             Divisa en la que se realiza la transacción.
             </summary>
         </member>
-        <member name="P:VCashApp.Models.ViewModels.CentroEfectivo.CefTransactionReviewViewModel.TotalDeclaredValue">
+        <member name="P:VCashApp.Models.ViewModels.CentroEfectivo.Shared.CefTransactionReviewViewModel.TotalDeclaredValue">
             <summary>
             Valor total declarado en la transacción.
             </summary>
         </member>
-        <member name="P:VCashApp.Models.ViewModels.CentroEfectivo.CefTransactionReviewViewModel.TotalCountedValue">
+        <member name="P:VCashApp.Models.ViewModels.CentroEfectivo.Shared.CefTransactionReviewViewModel.TotalCountedValue">
             <summary>
             Valor total contado en la transacción.
             </summary>
         </member>
-        <member name="P:VCashApp.Models.ViewModels.CentroEfectivo.CefTransactionReviewViewModel.ValueDifference">
+        <member name="P:VCashApp.Models.ViewModels.CentroEfectivo.Shared.CefTransactionReviewViewModel.ValueDifference">
             <summary>
             Diferencia entre los valores declarado y contado.
             </summary>
         </member>
-        <member name="P:VCashApp.Models.ViewModels.CentroEfectivo.CefTransactionReviewViewModel.CurrentStatus">
+        <member name="P:VCashApp.Models.ViewModels.CentroEfectivo.Shared.CefTransactionReviewViewModel.CurrentStatus">
             <summary>
             Estado actual de la transacción.
             </summary>
         </member>
-        <member name="P:VCashApp.Models.ViewModels.CentroEfectivo.CefTransactionReviewViewModel.ReviewerUserName">
+        <member name="P:VCashApp.Models.ViewModels.CentroEfectivo.Shared.CefTransactionReviewViewModel.ReviewerUserName">
             <summary>
             Usuario que realiza la revisión.
             </summary>
         </member>
-        <member name="P:VCashApp.Models.ViewModels.CentroEfectivo.CefTransactionReviewViewModel.ReviewDate">
+        <member name="P:VCashApp.Models.ViewModels.CentroEfectivo.Shared.CefTransactionReviewViewModel.ReviewDate">
             <summary>
             Fecha y hora en que se realizó la revisión.
             </summary>
         </member>
-        <member name="P:VCashApp.Models.ViewModels.CentroEfectivo.CefTransactionReviewViewModel.ContainerSummaries">
+        <member name="P:VCashApp.Models.ViewModels.CentroEfectivo.Shared.CefTransactionReviewViewModel.ContainerSummaries">
             <summary>
             Resumen de los contenedores asociados.
             </summary>
         </member>
-        <member name="P:VCashApp.Models.ViewModels.CentroEfectivo.CefTransactionReviewViewModel.IncidentSummaries">
+        <member name="P:VCashApp.Models.ViewModels.CentroEfectivo.Shared.CefTransactionReviewViewModel.IncidentSummaries">
             <summary>
             Resumen de las novedades registradas.
             </summary>
         </member>
-        <member name="P:VCashApp.Models.ViewModels.CentroEfectivo.CefTransactionReviewViewModel.FinalObservations">
+        <member name="P:VCashApp.Models.ViewModels.CentroEfectivo.Shared.CefTransactionReviewViewModel.FinalObservations">
             <summary>
             Observaciones finales de la revisión.
             </summary>
         </member>
-        <member name="P:VCashApp.Models.ViewModels.CentroEfectivo.CefTransactionReviewViewModel.NewStatus">
+        <member name="P:VCashApp.Models.ViewModels.CentroEfectivo.Shared.CefTransactionReviewViewModel.NewStatus">
             <summary>
             Estado final elegido tras la revisión.
             </summary>
         </member>
-        <member name="P:VCashApp.Models.ViewModels.CentroEfectivo.CefTransactionReviewViewModel.AvailableStatuses">
+        <member name="P:VCashApp.Models.ViewModels.CentroEfectivo.Shared.CefTransactionReviewViewModel.AvailableStatuses">
             <summary>
             Listado de estados disponibles para selección.
             </summary>
         </member>
-        <member name="T:VCashApp.Models.ViewModels.CentroEfectivo.CefContainerSummaryViewModel">
+        <member name="T:VCashApp.Models.ViewModels.CentroEfectivo.Shared.CefContainerSummaryViewModel">
             <summary>
             ViewModel para el resumen de un contenedor en la vista de revisión.
             </summary>
         </member>
-        <member name="P:VCashApp.Models.ViewModels.CentroEfectivo.CefContainerSummaryViewModel.Id">
+        <member name="P:VCashApp.Models.ViewModels.CentroEfectivo.Shared.CefContainerSummaryViewModel.Id">
             <summary>
             Identificador del contenedor.
             </summary>
         </member>
-        <member name="P:VCashApp.Models.ViewModels.CentroEfectivo.CefContainerSummaryViewModel.ContainerType">
+        <member name="P:VCashApp.Models.ViewModels.CentroEfectivo.Shared.CefContainerSummaryViewModel.ContainerType">
             <summary>
             Tipo de contenedor.
             </summary>
         </member>
-        <member name="P:VCashApp.Models.ViewModels.CentroEfectivo.CefContainerSummaryViewModel.ContainerCode">
+        <member name="P:VCashApp.Models.ViewModels.CentroEfectivo.Shared.CefContainerSummaryViewModel.ContainerCode">
             <summary>
             Código asignado al contenedor.
             </summary>
         </member>
-        <member name="P:VCashApp.Models.ViewModels.CentroEfectivo.CefContainerSummaryViewModel.DeclaredValue">
+        <member name="P:VCashApp.Models.ViewModels.CentroEfectivo.Shared.CefContainerSummaryViewModel.DeclaredValue">
             <summary>
             Valor declarado en el contenedor.
             </summary>
         </member>
-        <member name="P:VCashApp.Models.ViewModels.CentroEfectivo.CefContainerSummaryViewModel.CountedValue">
+        <member name="P:VCashApp.Models.ViewModels.CentroEfectivo.Shared.CefContainerSummaryViewModel.CountedValue">
             <summary>
             Valor contado en el contenedor.
             </summary>
         </member>
-        <member name="P:VCashApp.Models.ViewModels.CentroEfectivo.CefContainerSummaryViewModel.ContainerStatus">
+        <member name="P:VCashApp.Models.ViewModels.CentroEfectivo.Shared.CefContainerSummaryViewModel.ContainerStatus">
             <summary>
             Estado actual del contenedor.
             </summary>
         </member>
-        <member name="P:VCashApp.Models.ViewModels.CentroEfectivo.CefContainerSummaryViewModel.ProcessingUserName">
+        <member name="P:VCashApp.Models.ViewModels.CentroEfectivo.Shared.CefContainerSummaryViewModel.ProcessingUserName">
             <summary>
             Usuario que procesó el contenedor.
             </summary>
         </member>
-        <member name="P:VCashApp.Models.ViewModels.CentroEfectivo.CefContainerSummaryViewModel.IncidentCount">
+        <member name="P:VCashApp.Models.ViewModels.CentroEfectivo.Shared.CefContainerSummaryViewModel.IncidentCount">
             <summary>
             Cantidad de novedades registradas.
             </summary>
         </member>
-        <member name="P:VCashApp.Models.ViewModels.CentroEfectivo.CefContainerSummaryViewModel.ValueDetailSummaries">
+        <member name="P:VCashApp.Models.ViewModels.CentroEfectivo.Shared.CefContainerSummaryViewModel.ValueDetailSummaries">
             <summary>
             Detalles de los valores declarados y contados.
             </summary>
         </member>
-        <member name="P:VCashApp.Models.ViewModels.CentroEfectivo.CefContainerSummaryViewModel.IncidentList">
+        <member name="P:VCashApp.Models.ViewModels.CentroEfectivo.Shared.CefContainerSummaryViewModel.IncidentList">
             <summary>
             Lista de novedades asociadas al contenedor.
             </summary>
         </member>
-        <member name="P:VCashApp.Models.ViewModels.CentroEfectivo.CefContainerSummaryViewModel.ChildContainers">
+        <member name="P:VCashApp.Models.ViewModels.CentroEfectivo.Shared.CefContainerSummaryViewModel.ChildContainers">
             <summary>
             Contenedores hijos en caso de contenedores anidados.
             </summary>
         </member>
-        <member name="T:VCashApp.Models.ViewModels.CentroEfectivo.CefValueDetailSummaryViewModel">
+        <member name="T:VCashApp.Models.ViewModels.CentroEfectivo.Shared.CefValueDetailSummaryViewModel">
             <summary>
             ViewModel para el resumen de un detalle de valor en la vista de revisión.
             </summary>
         </member>
-        <member name="P:VCashApp.Models.ViewModels.CentroEfectivo.CefValueDetailSummaryViewModel.Id">
+        <member name="P:VCashApp.Models.ViewModels.CentroEfectivo.Shared.CefValueDetailSummaryViewModel.Id">
             <summary>
             Identificador del detalle de valor.
             </summary>
         </member>
-        <member name="P:VCashApp.Models.ViewModels.CentroEfectivo.CefValueDetailSummaryViewModel.ValueType">
+        <member name="P:VCashApp.Models.ViewModels.CentroEfectivo.Shared.CefValueDetailSummaryViewModel.ValueType">
             <summary>
             Tipo de valor registrado.
             </summary>
         </member>
-        <member name="P:VCashApp.Models.ViewModels.CentroEfectivo.CefValueDetailSummaryViewModel.DetailDescription">
+        <member name="P:VCashApp.Models.ViewModels.CentroEfectivo.Shared.CefValueDetailSummaryViewModel.DetailDescription">
             <summary>
             Descripción del detalle.
             </summary>
         </member>
-        <member name="P:VCashApp.Models.ViewModels.CentroEfectivo.CefValueDetailSummaryViewModel.CalculatedAmount">
+        <member name="P:VCashApp.Models.ViewModels.CentroEfectivo.Shared.CefValueDetailSummaryViewModel.CalculatedAmount">
             <summary>
             Monto calculado para el detalle.
             </summary>
         </member>
-        <member name="P:VCashApp.Models.ViewModels.CentroEfectivo.CefValueDetailSummaryViewModel.IncidentCount">
+        <member name="P:VCashApp.Models.ViewModels.CentroEfectivo.Shared.CefValueDetailSummaryViewModel.IncidentCount">
             <summary>
             Número de novedades registradas.
             </summary>
         </member>
-        <member name="T:VCashApp.Models.ViewModels.CentroEfectivo.CefIncidentSummaryViewModel">
+        <member name="T:VCashApp.Models.ViewModels.CentroEfectivo.Shared.CefIncidentSummaryViewModel">
             <summary>
             ViewModel para el resumen de una novedad en la vista de revisión.
             </summary>
         </member>
-        <member name="P:VCashApp.Models.ViewModels.CentroEfectivo.CefIncidentSummaryViewModel.Id">
+        <member name="P:VCashApp.Models.ViewModels.CentroEfectivo.Shared.CefIncidentSummaryViewModel.Id">
             <summary>
             Identificador de la novedad.
             </summary>
         </member>
-        <member name="P:VCashApp.Models.ViewModels.CentroEfectivo.CefIncidentSummaryViewModel.IncidentType">
+        <member name="P:VCashApp.Models.ViewModels.CentroEfectivo.Shared.CefIncidentSummaryViewModel.IncidentType">
             <summary>
             Tipo de novedad reportada.
             </summary>
         </member>
-        <member name="P:VCashApp.Models.ViewModels.CentroEfectivo.CefIncidentSummaryViewModel.Description">
+        <member name="P:VCashApp.Models.ViewModels.CentroEfectivo.Shared.CefIncidentSummaryViewModel.Description">
             <summary>
             Descripción de la novedad.
             </summary>
         </member>
-        <member name="P:VCashApp.Models.ViewModels.CentroEfectivo.CefIncidentSummaryViewModel.AffectedAmount">
+        <member name="P:VCashApp.Models.ViewModels.CentroEfectivo.Shared.CefIncidentSummaryViewModel.AffectedAmount">
             <summary>
             Monto afectado por la novedad.
             </summary>
         </member>
-        <member name="P:VCashApp.Models.ViewModels.CentroEfectivo.CefIncidentSummaryViewModel.ReportingUserName">
+        <member name="P:VCashApp.Models.ViewModels.CentroEfectivo.Shared.CefIncidentSummaryViewModel.ReportingUserName">
             <summary>
             Usuario que reportó la novedad.
             </summary>
         </member>
-        <member name="T:VCashApp.Models.ViewModels.CentroEfectivo.CefTransactionSummaryViewModel">
+        <member name="T:VCashApp.Models.ViewModels.CentroEfectivo.Shared.CefTransactionSummaryViewModel">
             <summary>
             ViewModel para la visualización resumida de una transacción de Centro de Efectivo en listados.
             </summary>
         </member>
-        <member name="P:VCashApp.Models.ViewModels.CentroEfectivo.CefTransactionSummaryViewModel.Id">
+        <member name="P:VCashApp.Models.ViewModels.CentroEfectivo.Shared.CefTransactionSummaryViewModel.Id">
             <summary>
             Identificador de la transacción.
             </summary>
         </member>
-        <member name="P:VCashApp.Models.ViewModels.CentroEfectivo.CefTransactionSummaryViewModel.ServiceOrderId">
+        <member name="P:VCashApp.Models.ViewModels.CentroEfectivo.Shared.CefTransactionSummaryViewModel.ServiceOrderId">
             <summary>
             Número de orden de servicio.
             </summary>
         </member>
-        <member name="P:VCashApp.Models.ViewModels.CentroEfectivo.CefTransactionSummaryViewModel.SlipNumber">
+        <member name="P:VCashApp.Models.ViewModels.CentroEfectivo.Shared.CefTransactionSummaryViewModel.SlipNumber">
             <summary>
             Número de planilla de la transacción.
             </summary>
         </member>
-        <member name="P:VCashApp.Models.ViewModels.CentroEfectivo.CefTransactionSummaryViewModel.Currency">
+        <member name="P:VCashApp.Models.ViewModels.CentroEfectivo.Shared.CefTransactionSummaryViewModel.Currency">
             <summary>
             Divisa utilizada en la transacción.
             </summary>
         </member>
-        <member name="P:VCashApp.Models.ViewModels.CentroEfectivo.CefTransactionSummaryViewModel.TransactionType">
+        <member name="P:VCashApp.Models.ViewModels.CentroEfectivo.Shared.CefTransactionSummaryViewModel.TransactionType">
             <summary>
             Tipo de transacción representado como texto.
             </summary>
         </member>
-        <member name="P:VCashApp.Models.ViewModels.CentroEfectivo.CefTransactionSummaryViewModel.TotalDeclaredValue">
+        <member name="P:VCashApp.Models.ViewModels.CentroEfectivo.Shared.CefTransactionSummaryViewModel.TotalDeclaredValue">
             <summary>
             Valor total declarado.
             </summary>
         </member>
-        <member name="P:VCashApp.Models.ViewModels.CentroEfectivo.CefTransactionSummaryViewModel.TotalCountedValue">
+        <member name="P:VCashApp.Models.ViewModels.CentroEfectivo.Shared.CefTransactionSummaryViewModel.TotalCountedValue">
             <summary>
             Valor total contado.
             </summary>
         </member>
-        <member name="P:VCashApp.Models.ViewModels.CentroEfectivo.CefTransactionSummaryViewModel.ValueDifference">
+        <member name="P:VCashApp.Models.ViewModels.CentroEfectivo.Shared.CefTransactionSummaryViewModel.ValueDifference">
             <summary>
             Diferencia entre valores declarado y contado.
             </summary>
         </member>
-        <member name="P:VCashApp.Models.ViewModels.CentroEfectivo.CefTransactionSummaryViewModel.TransactionStatus">
+        <member name="P:VCashApp.Models.ViewModels.CentroEfectivo.Shared.CefTransactionSummaryViewModel.TransactionStatus">
             <summary>
             Estado de la transacción representado como texto.
             </summary>
         </member>
-        <member name="P:VCashApp.Models.ViewModels.CentroEfectivo.CefTransactionSummaryViewModel.RegistrationDate">
+        <member name="P:VCashApp.Models.ViewModels.CentroEfectivo.Shared.CefTransactionSummaryViewModel.RegistrationDate">
             <summary>
             Fecha de registro de la transacción.
             </summary>
         </member>
-        <member name="P:VCashApp.Models.ViewModels.CentroEfectivo.CefTransactionSummaryViewModel.BranchName">
+        <member name="P:VCashApp.Models.ViewModels.CentroEfectivo.Shared.CefTransactionSummaryViewModel.BranchName">
             <summary>
             Nombre de la sucursal donde se realizó la transacción.
             </summary>
         </member>
-        <member name="P:VCashApp.Models.ViewModels.CentroEfectivo.CefTransactionSummaryViewModel.HeadOfShiftName">
+        <member name="P:VCashApp.Models.ViewModels.CentroEfectivo.Shared.CefTransactionSummaryViewModel.HeadOfShiftName">
             <summary>
             Nombre del jefe de turno asignado.
             </summary>
@@ -3095,7 +3095,7 @@
         <member name="M:VCashApp.Services.Cef.CefContainerService.PrepareProcessContainersPageAsync(System.Int32)">
             <inheritdoc/>
         </member>
-        <member name="M:VCashApp.Services.Cef.CefContainerService.SaveContainerAndDetailsAsync(VCashApp.Models.ViewModels.CentroEfectivo.CefContainerProcessingViewModel,System.String)">
+        <member name="M:VCashApp.Services.Cef.CefContainerService.SaveContainerAndDetailsAsync(VCashApp.Models.ViewModels.CentroEfectivo.Shared.CefContainerProcessingViewModel,System.String)">
             <inheritdoc/>
         </member>
         <member name="M:VCashApp.Services.Cef.CefContainerService.GetPointCapsAsync(System.String)">
@@ -3142,7 +3142,7 @@
             <param name="context">The database context used to interact with the application's data store.  This parameter cannot be <see
             langword="null"/>.</param>
         </member>
-        <member name="M:VCashApp.Services.Cef.CefIncidentService.RegisterIncidentAsync(VCashApp.Models.ViewModels.CentroEfectivo.CefIncidentViewModel,System.String)">
+        <member name="M:VCashApp.Services.Cef.CefIncidentService.RegisterIncidentAsync(VCashApp.Models.ViewModels.CentroEfectivo.Shared.CefIncidentViewModel,System.String)">
             <inheritdoc/>
         </member>
         <member name="M:VCashApp.Services.Cef.CefIncidentService.ResolveIncidentAsync(System.Int32,System.String)">
@@ -3198,7 +3198,7 @@
         <member name="M:VCashApp.Services.Cef.CefServiceCreationService.PrepareCefServiceCreationViewModelAsync(System.String,System.String,System.String)">
             <inheritdoc/>
         </member>
-        <member name="M:VCashApp.Services.Cef.CefServiceCreationService.ProcessCefServiceCreationAsync(VCashApp.Models.ViewModels.CentroEfectivo.CefServiceCreationViewModel,System.String,System.String)">
+        <member name="M:VCashApp.Services.Cef.CefServiceCreationService.ProcessCefServiceCreationAsync(VCashApp.Models.ViewModels.CentroEfectivo.Shared.CefServiceCreationViewModel,System.String,System.String)">
             <inheritdoc/>
         </member>
         <member name="M:VCashApp.Services.Cef.CefServiceCreationService.GetServiceConceptsForDropdownAsync">
@@ -3258,7 +3258,7 @@
         <member name="M:VCashApp.Services.Cef.CefTransactionService.PrepareReviewViewModelAsync(System.Int32)">
             <inheritdoc/>
         </member>
-        <member name="M:VCashApp.Services.Cef.CefTransactionService.ProcessReviewApprovalAsync(VCashApp.Models.ViewModels.CentroEfectivo.CefTransactionReviewViewModel,System.String)">
+        <member name="M:VCashApp.Services.Cef.CefTransactionService.ProcessReviewApprovalAsync(VCashApp.Models.ViewModels.CentroEfectivo.Shared.CefTransactionReviewViewModel,System.String)">
             <summary>
             
             </summary>
@@ -3312,6 +3312,26 @@
             -1 si “explica sobrante” (Sobrante/MezclaSobrante).
             </summary>
         </member>
+        <member name="T:VCashApp.Services.CentroEfectivo.Collection.Application.CollectionService">
+            <summary>
+            Orquesta reglas de negocio para la Provisión. No conoce EF ni UI.
+            </summary>
+        </member>
+        <member name="T:VCashApp.Services.CentroEfectivo.Collection.Application.ICollectionReadService">
+            <summary>Consultas para vistas (queries) de Collection.</summary>
+        </member>
+        <member name="T:VCashApp.Services.CentroEfectivo.Collection.Application.ICollectionService">
+            <summary>Casos de uso de Recolección (commands).</summary>
+        </member>
+        <member name="T:VCashApp.Services.CentroEfectivo.Collection.Domain.CollectionStateMachine">
+            <summary>Reglas de transición para Recolección + mapeo a estados de Servicio (0..7).</summary>
+        </member>
+        <member name="M:VCashApp.Services.CentroEfectivo.Collection.Domain.CollectionStateMachine.SyncServiceIfAdvanceAsync(VCashApp.Data.AppDbContext,System.String,VCashApp.Enums.CefTransactionStatusEnum)">
+            <summary>Sincroniza estado CGS si avanza (no retrocede salvo terminales 2/5/6).</summary>
+        </member>
+        <member name="T:VCashApp.Services.CentroEfectivo.Collection.Domain.CountingPolicy">
+            <summary>Reglas simples de negocio (precondiciones de creación/cierre/aprobación).</summary>
+        </member>
         <member name="T:VCashApp.Services.CentroEfectivo.Provision.Application.IProvisionReadService">
             <summary>Consultas para vistas (queries).</summary>
         </member>
@@ -3355,26 +3375,32 @@
         <member name="T:VCashApp.Services.CentroEfectivo.Provision.Domain.ZeroTolerancePolicy">
             <summary>Tolerancia absoluta (por defecto 0).</summary>
         </member>
-        <member name="T:VCashApp.Services.CentroEfectivo.Provision.Infrastructure.CefContainerRepository">
-            <summary>Repositorio EF para contenedores y detalles de valor.</summary>
+        <member name="T:VCashApp.Services.CentroEfectivo.Shared.Domain.IAuditLogger">
+            <summary>Logger de auditoría simple (puedes apuntarlo a Serilog sinks).</summary>
         </member>
-        <member name="T:VCashApp.Services.CentroEfectivo.Provision.Infrastructure.CefTransactionRepository">
-            <summary>Repositorio EF para CefTransaction en el contexto de Provisión.</summary>
-        </member>
-        <member name="M:VCashApp.Services.CentroEfectivo.Provision.Infrastructure.CefTransactionRepository.RecalculateTotalsAsync(System.Int32)">
-            <summary>Recalcula totales del encabezado a partir de detalles.</summary>
-        </member>
-        <member name="T:VCashApp.Services.CentroEfectivo.Provision.Infrastructure.IUnitOfWork">
-            <summary>UoW mínimo usando AppDbContext.</summary>
-        </member>
-        <member name="T:VCashApp.Services.CentroEfectivo.Provision.Infrastructure.CefTransactionNewArgs">
+        <member name="T:VCashApp.Services.CentroEfectivo.Shared.Domain.CefTransactionNewArgs">
             <summary>Argumentos para crear transacción de provisión.</summary>
         </member>
-        <member name="T:VCashApp.Services.CentroEfectivo.Provision.Infrastructure.ICefTransactionRepository">
+        <member name="T:VCashApp.Services.CentroEfectivo.Shared.Domain.ICefTransactionRepository">
             <summary>Acceso a transacciones CEF para provisión.</summary>
         </member>
-        <member name="T:VCashApp.Services.CentroEfectivo.Provision.Infrastructure.IAuditLogger">
-            <summary>Logger de auditoría simple (puedes apuntarlo a Serilog sinks).</summary>
+        <member name="T:VCashApp.Services.CentroEfectivo.Shared.Domain.IUnitOfWork">
+            <summary>UoW mínimo usando AppDbContext.</summary>
+        </member>
+        <member name="M:VCashApp.Services.CentroEfectivo.Shared.Incidents.IncidentCategoryExtensions.EffectSign(VCashApp.Enums.CefIncidentTypeCategoryEnum)">
+            <summary>
+            Devuelve +1 si “explica faltante” (Faltante/False/MezclaFaltante),
+            -1 si “explica sobrante” (Sobrante/MezclaSobrante).
+            </summary>
+        </member>
+        <member name="T:VCashApp.Services.CentroEfectivo.Shared.Infrastructure.CefContainerRepository">
+            <summary>Repositorio EF para contenedores y detalles de valor.</summary>
+        </member>
+        <member name="T:VCashApp.Services.CentroEfectivo.Shared.Infrastructure.CefTransactionRepository">
+            <summary>Repositorio EF para CefTransaction en el contexto de Provisión.</summary>
+        </member>
+        <member name="M:VCashApp.Services.CentroEfectivo.Shared.Infrastructure.CefTransactionRepository.RecalculateTotalsAsync(System.Int32)">
+            <summary>Recalcula totales del encabezado a partir de detalles.</summary>
         </member>
         <member name="T:VCashApp.Services.EmployeeLog.EmployeeLogService">
             <summary>
@@ -3416,7 +3442,7 @@
             <param name="cefTransactionId">ID de la transacción CEF a la que pertenece (requerido para nuevos contenedores).</param>
             <returns>Un ViewModel listo para la vista de procesamiento del contenedor.</returns>
         </member>
-        <member name="M:VCashApp.Services.ICefContainerService.SaveContainerAndDetailsAsync(VCashApp.Models.ViewModels.CentroEfectivo.CefContainerProcessingViewModel,System.String)">
+        <member name="M:VCashApp.Services.ICefContainerService.SaveContainerAndDetailsAsync(VCashApp.Models.ViewModels.CentroEfectivo.Shared.CefContainerProcessingViewModel,System.String)">
             <summary>
             Crea o actualiza un contenedor de efectivo (bolsa/sobre) y sus detalles de valores.
             </summary>
@@ -3475,7 +3501,7 @@
             Define las operaciones de servicio para la gestión de Novedades de Centro de Efectivo.
             </summary>
         </member>
-        <member name="M:VCashApp.Services.ICefIncidentService.RegisterIncidentAsync(VCashApp.Models.ViewModels.CentroEfectivo.CefIncidentViewModel,System.String)">
+        <member name="M:VCashApp.Services.ICefIncidentService.RegisterIncidentAsync(VCashApp.Models.ViewModels.CentroEfectivo.Shared.CefIncidentViewModel,System.String)">
             <summary>
             Registra una nueva novedad asociada a una transacción, contenedor o detalle de valor.
             </summary>
@@ -3568,7 +3594,7 @@
             <param name="isAdmin">Indica si el usuario es administrador.</param>
             <returns>Una tupla con las listas de SelectListItem para Sucursales y Modalidades de Servicio.</returns>
         </member>
-        <member name="M:VCashApp.Services.ICefServiceCreationService.ProcessCefServiceCreationAsync(VCashApp.Models.ViewModels.CentroEfectivo.CefServiceCreationViewModel,System.String,System.String)">
+        <member name="M:VCashApp.Services.ICefServiceCreationService.ProcessCefServiceCreationAsync(VCashApp.Models.ViewModels.CentroEfectivo.Shared.CefServiceCreationViewModel,System.String,System.String)">
             <summary>
             Processes the ViewModel, creates a new entry in AdmServicio (CgsService) and CefTransaction transactionally.
             Procesa el ViewModel, crea una nueva entrada en AdmServicio y CefTransaction de forma transaccional.
@@ -3658,7 +3684,7 @@
             <param name="currentIP">La dirección IP del usuario actual.</param>
             <returns>Un ViewModel listo para la vista de Check-in.</returns>
         </member>
-        <member name="M:VCashApp.Services.ICefTransactionService.ProcessCheckinViewModelAsync(VCashApp.Models.ViewModels.CentroEfectivo.CefTransactionCheckinViewModel,System.String,System.String)">
+        <member name="M:VCashApp.Services.ICefTransactionService.ProcessCheckinViewModelAsync(VCashApp.Models.ViewModels.CentroEfectivo.Shared.CefTransactionCheckinViewModel,System.String,System.String)">
             <summary>
             Procesa los datos del Check-in y crea una nueva transacción de Centro de Efectivo.
             </summary>
@@ -3712,7 +3738,7 @@
             <param name="transactionId">ID de la transacción a revisar.</param>
             <returns>Un ViewModel con los datos de revisión de la transacción.</returns>
         </member>
-        <member name="M:VCashApp.Services.ICefTransactionService.ProcessReviewApprovalAsync(VCashApp.Models.ViewModels.CentroEfectivo.CefTransactionReviewViewModel,System.String)">
+        <member name="M:VCashApp.Services.ICefTransactionService.ProcessReviewApprovalAsync(VCashApp.Models.ViewModels.CentroEfectivo.Shared.CefTransactionReviewViewModel,System.String)">
             <summary>
             Procesa la aprobación o rechazo final de una transacción por parte del supervisor revisor.
             </summary>
@@ -4545,6 +4571,15 @@
             <summary>
             GUIDs de roles estructurales. Renombrar el rol no afecta su Id.
             </summary>
+        </member>
+        <member name="M:CollectionController.SetCommonViewBagsCefAsync(VCashApp.Models.ApplicationUser,System.String,System.String[])">
+            <summary>
+            Método auxiliar para configurar ViewBags comunes específicos de CEF.
+            Hereda y extiende el SetCommonViewBagsBaseAsync del BaseController.
+            </summary>
+            <param name="currentUser">El usuario actual autenticado.</param>
+            <param name="pageName">El nombre de la página para el ViewBag.</param>
+            <returns>Tarea asíncrona completada.</returns>
         </member>
     </members>
 </doc>

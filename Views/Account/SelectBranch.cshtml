@@ -14,6 +14,7 @@
             <label class="form-label">Sucursal</label>
             <select class="form-select" name="branchId" required>
                 <option value="" disabled selected>-- Selecciona una sucursal --</option>
+                <option value="-1">Todas mis sucursales</option>
                 @foreach (var b in Model.Branches)
                 {
                     <option value="@b.Id">@b.Name (@b.Id)</option>

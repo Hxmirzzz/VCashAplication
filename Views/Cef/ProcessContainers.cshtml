@@ -1,4 +1,4 @@
-﻿@model VCashApp.Models.ViewModels.CentroEfectivo.CefProcessContainersPageViewModel
+﻿@model VCashApp.Models.ViewModels.CentroEfectivo.Shared.CefProcessContainersPageViewModel
 @using VCashApp.Enums;
 @{
     Layout = "~/Views/Shared/_Layout.cshtml";
@@ -19,6 +19,7 @@
             <form id="form-containers" asp-action="ProcessContainers" asp-route-transactionId="@Model.CefTransactionId" method="post">
                 @Html.AntiForgeryToken()
                 <input type="hidden" id="txIdGlobal" asp-for="CefTransactionId" />
+                <input type="hidden" id="CefTransactionId" asp-for="CefTransactionId" />
 
                 <div class="progress-stepper" id="progressStepper">
                     <div class="step active" data-step="1">
@@ -251,7 +252,7 @@
                             vddT.TemplateInfo.HtmlFieldPrefix = "Containers[__idx__]";
                         }
                         @Html.Partial("_ContainerEditorPartial",
-                            new VCashApp.Models.ViewModels.CentroEfectivo.CefContainerProcessingViewModel {
+                            new VCashApp.Models.ViewModels.CentroEfectivo.Shared.CefContainerProcessingViewModel {
                                 ContainerType = VCashApp.Enums.CefContainerTypeEnum.Bolsa,
                                 ParentContainerId = null
                             },
@@ -268,7 +269,7 @@
                              data-env-idx="__idx__"
                              data-container-id="0">
                             @Html.Partial("_ContainerEditorPartial",
-                                new VCashApp.Models.ViewModels.CentroEfectivo.CefContainerProcessingViewModel {
+                                new VCashApp.Models.ViewModels.CentroEfectivo.Shared.CefContainerProcessingViewModel {
                                     ContainerType = VCashApp.Enums.CefContainerTypeEnum.Sobre
                                 },
                                 vddE
@@ -509,7 +510,7 @@
         vddT.TemplateInfo.HtmlFieldPrefix = "Containers[__idx__]";
     }
     @Html.Partial("_ContainerEditorPartial",
-    new VCashApp.Models.ViewModels.CentroEfectivo.CefContainerProcessingViewModel(),
+    new VCashApp.Models.ViewModels.CentroEfectivo.Shared.CefContainerProcessingViewModel(),
         vddT)
 </div>
 
@@ -2372,7 +2373,7 @@
                 const msg = (xhr.responseJSON && xhr.responseJSON.message) || xhr.responseText || 'Error inesperado al eliminar.';
                 Swal.fire('Error', msg, 'error');
               }).always(function () {
-                $xBtn.prop('disabled', false);
+                $close.prop('disabled', false);
               });
             });
           });

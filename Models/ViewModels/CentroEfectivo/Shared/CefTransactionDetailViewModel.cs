@@ -1,4 +1,4 @@
-﻿namespace VCashApp.Models.ViewModels.CentroEfectivo
+﻿namespace VCashApp.Models.ViewModels.CentroEfectivo.Shared
 {
     public class CefTransactionDetailViewModel
     {

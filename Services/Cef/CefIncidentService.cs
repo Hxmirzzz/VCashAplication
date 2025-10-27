@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using VCashApp.Data;
 using VCashApp.Enums;
 using VCashApp.Models.Entities;
-using VCashApp.Models.ViewModels.CentroEfectivo;
+using VCashApp.Models.ViewModels.CentroEfectivo.Shared;
 
 namespace VCashApp.Services.Cef
 {

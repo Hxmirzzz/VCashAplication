@@ -32,6 +32,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <Folder Include="Models\ViewModels\CentroEfectivo\Collection\" />
 	  <Folder Include="wwwroot\assets\icon-img\" />
 	</ItemGroup>
 

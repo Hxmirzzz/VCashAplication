@@ -1,15 +1,8 @@
 ﻿using Microsoft.Extensions.Logging;
+using VCashApp.Services.CentroEfectivo.Shared.Domain;
 
-namespace VCashApp.Services.CentroEfectivo.Provision.Infrastructure
+namespace VCashApp.Services.CentroEfectivo.Shared.Infrastructure
 {
-    /// <summary>Logger de auditoría simple (puedes apuntarlo a Serilog sinks).</summary>
-    public interface IAuditLogger
-    {
-        void Info(string code, string message, string result, string entity, string entityId, string? extra = null);
-        void Warn(string code, string message, string result, string entity, string entityId, string? extra = null);
-        void Error(string code, string message, string result, string entity, string entityId, string? extra = null);
-    }
-
     public sealed class SerilogAuditLogger : IAuditLogger
     {
         private readonly ILogger<SerilogAuditLogger> _logger;

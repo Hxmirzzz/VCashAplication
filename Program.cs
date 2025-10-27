@@ -1,3 +1,4 @@
+using DocumentFormat.OpenXml.Office2016.Drawing.ChartDrawing;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Identity;
@@ -17,9 +18,12 @@ using VCashApp.Infrastructure.Middleware;
 using VCashApp.Models;
 using VCashApp.Services;
 using VCashApp.Services.Cef;
-using VCashApp.Services.CentroEfectivo.Provision.Application;
+using VCashApp.Services.CentroEfectivo.Collection.Domain;
+using VCashApp.Services.CentroEfectivo.Collection.Application;
 using VCashApp.Services.CentroEfectivo.Provision.Domain;
-using VCashApp.Services.CentroEfectivo.Provision.Infrastructure;
+using VCashApp.Services.CentroEfectivo.Provision.Application;
+using VCashApp.Services.CentroEfectivo.Shared.Domain;
+using VCashApp.Services.CentroEfectivo.Shared.Infrastructure;
 using VCashApp.Services.EmployeeLog;
 using VCashApp.Services.Range;
 using VCashApp.Services.Service;
@@ -185,21 +189,31 @@ builder.Services.AddScoped<IRangeService, RangeService>();
 builder.Services.AddScoped<VCashApp.Services.Logging.IAuditLogger, VCashApp.Services.Logging.AuditLogger>();
 builder.Services.AddScoped<AuditActionFilter>();
 
-// Application
-builder.Services.AddScoped<IProvisionService, ProvisionService>();
-builder.Services.AddScoped<IProvisionReadService, ProvisionReadService>();
+// Shared
+builder.Services.AddScoped<IUnitOfWork, EfUnitOfWork>();
+builder.Services.AddScoped<ICefTransactionRepository, CefTransactionRepository>(); // (tu repo existente)
+builder.Services.AddScoped<ICefTransactionQueries, CefTransactionQueries>();
+builder.Services.AddScoped<IAuditLogger, SerilogAuditLogger>();
 
-// Domain policies
+builder.Services.AddScoped<ICefContainerRepository, CefContainerRepository>();
+builder.Services.AddScoped<ICefIncidentRepository, CefIncidentRepository>();
+builder.Services.AddScoped<ICefCatalogRepository, CefCatalogRepository>();
+
+// Policies (stateless)
 builder.Services.AddSingleton<IProvisionStateMachine, ProvisionStateMachine>();
 builder.Services.AddSingleton<IAllowedValueTypesPolicy, ProvisionAllowedValueTypesPolicy>();
 builder.Services.AddSingleton<IEnvelopePolicy>(_ => new ProvisionEnvelopePolicy { AllowEnvelopes = true });
-builder.Services.AddSingleton<ITolerancePolicy>(_ => new ZeroTolerancePolicy(0m)); // o tolerancia > 0
+builder.Services.AddSingleton<ITolerancePolicy>(_ => new ZeroTolerancePolicy(0m));
+builder.Services.AddSingleton<ICollectionStateMachine, CollectionStateMachine>();
+builder.Services.AddSingleton<ICountingPolicy, CountingPolicy>();
 
-// Infra repos (adapters a tus servicios/DbContext)
-builder.Services.AddScoped<ICefTransactionRepository, CefTransactionRepository>();
+// Collection Application
+builder.Services.AddScoped<ICollectionService, CollectionService>();
+builder.Services.AddScoped<ICollectionReadService, CollectionReadService>();
+
+builder.Services.AddScoped<ICefCatalogRepository, CefCatalogRepository>();
+builder.Services.AddScoped<ICefIncidentService, CefIncidentService>();
 builder.Services.AddScoped<ICefContainerRepository, CefContainerRepository>();
-builder.Services.AddScoped<IUnitOfWork, EfUnitOfWork>();
-
 builder.Services.AddHttpClient();
 
 builder.Services.AddControllersWithViews(o =>

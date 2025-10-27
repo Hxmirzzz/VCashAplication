@@ -18,8 +18,20 @@ namespace VCashApp.Infrastructure.Branches
             var existing = claims.FirstOrDefault(c => c.Type == ActiveBranch);
             if (existing != null)
                 await sm.UserManager.RemoveClaimAsync(user, existing);
+            await sm.UserManager.AddClaimAsync(user, new Claim(ActiveBranch, branchId.ToString()));
+            await sm.RefreshSignInAsync(user);
+        }
 
-            await sm.UserManager.AddClaimAsync(user, new Claim(BranchClaimTypes.ActiveBranch, branchId.ToString()));
+        public static async Task SetAllBranchesAsync(
+            HttpContext http,
+            SignInManager<ApplicationUser> sm,
+            ApplicationUser user)
+        {
+            var claims = await sm.UserManager.GetClaimsAsync(user);
+            var existing = claims.FirstOrDefault(c => c.Type == ActiveBranch);
+            if (existing != null)
+                await sm.UserManager.RemoveClaimAsync(user, existing);
+            await sm.UserManager.AddClaimAsync(user, new Claim(ActiveBranch, AllBranches));
             await sm.RefreshSignInAsync(user);
         }
     }

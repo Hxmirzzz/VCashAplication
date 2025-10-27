@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Mvc.Rendering;
 using System.ComponentModel.DataAnnotations;
 
-namespace VCashApp.Models.ViewModels.CentroEfectivo
+namespace VCashApp.Models.ViewModels.CentroEfectivo.Shared
 {
     /// <summary>
     /// ViewModel que agrupa la información necesaria para procesar contenedores

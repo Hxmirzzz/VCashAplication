@@ -1,0 +1,231 @@
+@model VCashApp.Models.ViewModels.CentroEfectivo.Shared.CefTransactionCheckinViewModel
+@{
+    ViewData["Title"] = "Tesorería";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    bool canCreate = ViewBag.HasCreate ?? false;
+}
+
+<div class="form-container">
+    <div class="card">
+        <form id="cefCheckinForm"
+              asp-action="Checkin"
+              asp-controller="Collection"
+              method="post"
+              novalidate
+              data-amount-words-url="@Url.Action("AmountInWords", "Cef")">
+            @Html.AntiForgeryToken()
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+            <input type="hidden" asp-for="ServiceOrderId" />
+            <input type="hidden" asp-for="RouteId" />
+            <input type="hidden" asp-for="TransactionType" />
+            <input type="hidden" asp-for="DeclaredBillValue" />
+            <input type="hidden" asp-for="DeclaredCoinValue" />
+
+            <div class="row g-2 mb-2 top-summary">
+                <div class="col-12 col-xl-7">
+                    <div class="card h-100">
+                        <div class="card-header">
+                            <h6 class="mb-0"><i class="ri-survey-fill"></i> Información del Servicio</h6>
+                        </div>
+                        <div class="card-body p-2">
+                            <div class="row gx-3 gy-1 small">
+                                <div class="col-12 col-lg-6">
+                                    <ul class="meta-list">
+                                        <li><span class="meta-k">Orden</span><span class="meta-v">@Model.ServiceOrderId</span></li>
+                                        <li><span class="meta-k">Cliente</span><span class="meta-v">@Model.ClientName</span></li>
+                                        <li><span class="meta-k">Sucursal</span><span class="meta-v">@Model.BranchName</span></li>
+                                        <li><span class="meta-k">Tipo</span><span class="meta-v">@Model.TransactionType</span></li>
+                                    </ul>
+                                </div>
+                                <div class="col-12 col-lg-6">
+                                    <ul class="meta-list">
+                                        <li><span class="meta-k">Divisa</span><span class="meta-v"><span id="summaryCurrency">@Model.Currency</span></span></li>
+                                        <li><span class="meta-k">Origen</span><span class="meta-v">@Model.OriginLocationName</span></li>
+                                        <li><span class="meta-k">Destino</span><span class="meta-v">@Model.DestinationLocationName</span></li>
+                                        <li><span class="meta-k">Planilla</span><span class="meta-v"><span id="summarySlip">@Model.SlipNumber</span></span></li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-12 col-xl-5">
+                    <div class="card h-100">
+                        <div class="card-header d-flex align-items-center">
+                            <h6 class="mb-0"><i class="ri-list-check"></i> Totales</h6>
+                            <span class="chip-live ms-auto">En vivo</span>
+                        </div>
+                        <div class="card-body p-2">
+                            <div class="stats-grid small">
+                                <div class="label">Bolsas declaradas</div>
+                                <div class="value" id="sumBags">@Model.DeclaredBagCount</div>
+
+                                <div class="label">Total declarado</div>
+                                <div class="value" id="sumTotal">@Model.TotalDeclaredValue.ToString("N0")</div>
+                            </div>
+                            <div class="form-text mt-2">
+                                <small id="declaredWordsText"></small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== Datos del Check-in ===== -->
+            <div class="card mb-3">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="ri-list-check-2"></i> Datos del Check-in</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-12 col-lg-4">
+                            <div class="form-floating has-validation">
+                                <input asp-for="SlipNumber"
+                                       class="form-control"
+                                       placeholder="Número de planilla"
+                                       type="number" min="1" required />
+                                <label for="SlipNumber" class="required">Número de planilla</label>
+                                <div class="invalid-feedback">⚠ Este campo es requerido</div>
+                                <div class="valid-feedback">✓ Correcto</div>
+                            </div>
+                            <span asp-validation-for="SlipNumber" class="text-danger"></span>
+                        </div>
+
+                        <div class="col-12 col-lg-4">
+                            <div class="form-floating has-validation">
+                                <select asp-for="Currency"
+                                        asp-items="Model.Currencies"
+                                        class="form-select" required aria-required="true">
+                                    <option value="">Seleccionar divisa...</option>
+                                </select>
+                                <label asp-for="Currency" class="required">Divisa</label>
+                                <div class="invalid-feedback">⚠ Este campo es requerido</div>
+                            </div>
+                            <span asp-validation-for="Currency" class="text-danger"></span>
+                        </div>
+
+                        <div class="col-12 col-lg-4">
+                            <div class="form-check form-switch mt-2">
+                                <input asp-for="IsCustody" class="form-check-input" id="isCustodySwitch" />
+                                <label class="form-check-label" for="isCustodySwitch">Servicio de Custodia</label>
+                            </div>
+                            <div class="form-check form-switch mt-2">
+                                <input asp-for="IsPointToPoint" class="form-check-input" id="isPointToPointSwitch" />
+                                <label class="form-check-label" for="isPointToPointSwitch">Punto a Punto</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row g-3">
+                        <div class="col-12 col-lg-6">
+                            <div class="form-floating">
+                                <input asp-for="DeclaredBagCount"
+                                       type="number" min="0"
+                                       class="form-control" />
+                                <label asp-for="DeclaredBagCount">Bolsas</label>
+                            </div>
+                            <span asp-validation-for="DeclaredBagCount" class="text-danger"></span>
+                        </div>
+                        <div class="col-12 col-lg-6">
+                            <div class="form-floating has-validation">
+                                <input asp-for="TotalDeclaredValue"
+                                       type="text" min="1"
+                                       class="form-control js-calc-total js-num js-num-int"
+                                       required />
+                                <label asp-for="TotalDeclaredValue" class="required">Total Declarado</label>
+                                <div class="invalid-feedback">⚠ Requerido</div>
+                            </div>
+                            <span asp-validation-for="TotalDeclaredValue" class="text-danger"></span>
+                        </div>
+                        <div class="col-12">
+                            <div class="form-floating">
+                                <textarea asp-for="InformativeIncident"
+                                          class="form-control"
+                                          placeholder="Novedad Informativa"
+                                          style="height: 100px;"></textarea>
+                                <label asp-for="InformativeIncident">Novedad Informativa</label>
+                            </div>
+                            <span asp-validation-for="InformativeIncident" class="text-danger"></span>
+                        </div>
+
+                        <!-- Si no usas estos, los dejamos como hidden para no romper el binder -->
+                        <input type="hidden" asp-for="DeclaredEnvelopeCount" />
+                        <input type="hidden" asp-for="DeclaredCheckCount" />
+                        <input type="hidden" asp-for="DeclaredDocumentCount" />
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== Datos del Operador ===== -->
+            <div class="card mb-3">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="ri-shield-user-fill"></i> Datos del Operador</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-12 col-lg-4">
+                            <div class="form-floating">
+                                <input asp-for="RegistrationDate" type="datetime-local" class="form-control" readonly />
+                                <label asp-for="RegistrationDate">Fecha de Registro</label>
+                            </div>
+                        </div>
+                        <div class="col-12 col-lg-4">
+                            <div class="form-floating">
+                                <input asp-for="RegistrationUserName" class="form-control" readonly />
+                                <label asp-for="RegistrationUserName">Usuario</label>
+                            </div>
+                        </div>
+                        <div class="col-12 col-lg-4">
+                            <div class="form-floating">
+                                <input asp-for="IPAddress" class="form-control" readonly />
+                                <label asp-for="IPAddress">IP</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="submit-container form-group col-12 mt-3">
+                @if (canCreate)
+                {
+                    <button type="submit" class="btn btn-primary" data-step-action="submit-final">Guardar</button>
+                } else
+                {
+                    <button type="button" class="btn btn-primary" disabled title="No tiene permiso para crear">Guardar</button>
+                }
+                <a asp-action="Reception" asp-controller="Cef" class="btn btn-danger">Cancelar</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    <script src="~/js/form-control/cef-common.js"></script>
+    <script src="~/js/form-control/cef-checkin.js"></script>
+    <script>
+        $(function () {
+          window.CEF.markNumericFields('#cefCheckinForm');
+          window.CEF.formatAllNumbers('#cefCheckinForm');
+          window.CEF.bindNumericUXDelegates();
+
+          function syncBags(){ $('#sumBags').text($('#DeclaredBagCount').val() || '0'); }
+          function syncSlip(){ $('#summarySlip').text($('#SlipNumber').val() || '—'); }
+          function syncCurr(){
+            const $opt = $('#Currency option:selected');
+            $('#summaryCurrency').text($opt.text() || $('#Currency').val() || '—');
+          }
+          $('#DeclaredBagCount').on('input change', syncBags); syncBags();
+          $('#SlipNumber').on('input change',    syncSlip);    syncSlip();
+          $('#Currency').on('change',            syncCurr);    syncCurr();
+        });
+
+        $(window).on('load', function(){
+          window.CEF.formatAllNumbers('#cefCheckinForm');
+        });
+    </script>
+}

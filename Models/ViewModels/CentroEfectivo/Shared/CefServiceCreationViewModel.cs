@@ -2,7 +2,7 @@
 using VCashApp.Enums;
 using Microsoft.AspNetCore.Mvc.Rendering;
 
-namespace VCashApp.Models.ViewModels.CentroEfectivo
+namespace VCashApp.Models.ViewModels.CentroEfectivo.Shared
 {
     /// <summary>
     /// ViewModel temporal para la creación unificada de un Servicio y su Transacción CEF inicial.

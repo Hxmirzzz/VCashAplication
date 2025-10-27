@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using VCashApp.Enums;
 
-namespace VCashApp.Models.ViewModels.CentroEfectivo
+namespace VCashApp.Models.ViewModels.CentroEfectivo.Shared
 {
     /// <summary>
     /// ViewModel para la visualización y procesamiento de la revisión final de una transacción de Centro de Efectivo.

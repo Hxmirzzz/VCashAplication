@@ -1,4 +1,5 @@
-﻿using VCashApp.Models.ViewModels.CentroEfectivo;
+﻿using VCashApp.Models.ViewModels.CentroEfectivo.Shared;
+using VCashApp.Models.ViewModels.CentroEfectivo.Provision;
 
 namespace VCashApp.Services.CentroEfectivo.Provision.Application
 {

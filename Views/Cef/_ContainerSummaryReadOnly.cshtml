@@ -1,4 +1,4 @@
-﻿@model VCashApp.Models.ViewModels.CentroEfectivo.DetailContainerVM
+﻿@model VCashApp.Models.ViewModels.CentroEfectivo.Shared.DetailContainerVM
 
 @if (Model == null)
 {
@@ -7,10 +7,10 @@
 }
 
 @{
-    var bills = Model.Values?.Where(v => string.Equals(v.ValueType, "Billete", StringComparison.OrdinalIgnoreCase)).ToList() ?? new List<VCashApp.Models.ViewModels.CentroEfectivo.DetailValueRowVM>();
-    var coins = Model.Values?.Where(v => string.Equals(v.ValueType, "Moneda", StringComparison.OrdinalIgnoreCase)).ToList() ?? new List<VCashApp.Models.ViewModels.CentroEfectivo.DetailValueRowVM>();
-    var docs = Model.Values?.Where(v => string.Equals(v.ValueType, "Documento", StringComparison.OrdinalIgnoreCase)).ToList() ?? new List<VCashApp.Models.ViewModels.CentroEfectivo.DetailValueRowVM>();
-    var checks = Model.Values?.Where(v => string.Equals(v.ValueType, "Cheque", StringComparison.OrdinalIgnoreCase)).ToList() ?? new List<VCashApp.Models.ViewModels.CentroEfectivo.DetailValueRowVM>();
+    var bills = Model.Values?.Where(v => string.Equals(v.ValueType, "Billete", StringComparison.OrdinalIgnoreCase)).ToList() ?? new List<VCashApp.Models.ViewModels.CentroEfectivo.Shared.DetailValueRowVM>();
+    var coins = Model.Values?.Where(v => string.Equals(v.ValueType, "Moneda", StringComparison.OrdinalIgnoreCase)).ToList() ?? new List<VCashApp.Models.ViewModels.CentroEfectivo.Shared.DetailValueRowVM>();
+    var docs = Model.Values?.Where(v => string.Equals(v.ValueType, "Documento", StringComparison.OrdinalIgnoreCase)).ToList() ?? new List<VCashApp.Models.ViewModels.CentroEfectivo.Shared.DetailValueRowVM>();
+    var checks = Model.Values?.Where(v => string.Equals(v.ValueType, "Cheque", StringComparison.OrdinalIgnoreCase)).ToList() ?? new List<VCashApp.Models.ViewModels.CentroEfectivo.Shared.DetailValueRowVM>();
 }
 
 <div class="mb-2">

@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using Microsoft.AspNetCore.Mvc.Rendering;
 
-namespace VCashApp.Models.ViewModels.CentroEfectivo
+namespace VCashApp.Models.ViewModels.CentroEfectivo.Provision
 {
     public sealed class CefProvisionDeliveryViewModel
     {

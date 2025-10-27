@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace VCashApp.Services.CentroEfectivo.Provision.Domain
+﻿namespace VCashApp.Services.CentroEfectivo.Provision.Domain
 {
     /// <summary>Tolerancia absoluta (por defecto 0).</summary>
     public sealed class ZeroTolerancePolicy : ITolerancePolicy

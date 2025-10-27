@@ -1,14 +1,8 @@
-﻿using System.Threading.Tasks;
+﻿using VCashApp.Services.CentroEfectivo.Shared.Domain;
 using VCashApp.Data;
 
-namespace VCashApp.Services.CentroEfectivo.Provision.Infrastructure
+namespace VCashApp.Services.CentroEfectivo.Shared.Infrastructure
 {
-    /// <summary>UoW mínimo usando AppDbContext.</summary>
-    public interface IUnitOfWork
-    {
-        Task<int> SaveChangesAsync();
-    }
-
     public sealed class EfUnitOfWork : IUnitOfWork
     {
         private readonly AppDbContext _db;

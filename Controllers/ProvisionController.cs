@@ -1,5 +1,4 @@
-﻿using DocumentFormat.OpenXml.Bibliography;
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -7,7 +6,8 @@ using VCashApp.Data;
 using VCashApp.Enums;
 using VCashApp.Filters;
 using VCashApp.Models;
-using VCashApp.Models.ViewModels.CentroEfectivo;
+using VCashApp.Models.ViewModels.CentroEfectivo.Shared;
+using VCashApp.Models.ViewModels.CentroEfectivo.Provision;
 using VCashApp.Services;
 using VCashApp.Services.CentroEfectivo.Provision.Application;
 using VCashApp.Services.DTOs;

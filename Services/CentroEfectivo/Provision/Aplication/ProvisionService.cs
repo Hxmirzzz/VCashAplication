@@ -1,7 +1,7 @@
 ﻿using VCashApp.Enums;
-using VCashApp.Models.ViewModels.CentroEfectivo;
+using VCashApp.Models.ViewModels.CentroEfectivo.Shared;
 using VCashApp.Services.CentroEfectivo.Provision.Domain;
-using VCashApp.Services.CentroEfectivo.Provision.Infrastructure;
+using VCashApp.Services.CentroEfectivo.Shared.Domain;
 using LoggingAudit = VCashApp.Services.Logging.IAuditLogger;
 
 namespace VCashApp.Services.CentroEfectivo.Provision.Application
@@ -78,7 +78,6 @@ namespace VCashApp.Services.CentroEfectivo.Provision.Application
             if (tx.TransactionStatus != nameof(CefTransactionStatusEnum.ProvisionEnProceso))
                 throw new InvalidOperationException("La provisión no está en proceso.");
 
-            // Políticas: solo Billete/Moneda, sobres efectivo.
             foreach (var c in cmd.Containers ?? Array.Empty<CefContainerProcessingViewModel>())
             {
                 var isEnv = c.ContainerType == CefContainerTypeEnum.Sobre;

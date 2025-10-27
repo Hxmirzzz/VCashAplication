@@ -671,17 +671,33 @@ namespace VCashApp.Data
                 entity.HasOne(e => e.Servicio).WithMany().HasForeignKey(e => e.IdServicio).IsRequired(false);
                 entity.HasOne(e => e.SucursalPunto).WithMany().HasForeignKey(e => e.CodSucursal).IsRequired(false);
                 entity.HasOne(e => e.UsuarioAtencionObj).WithMany().HasForeignKey(e => e.UsuarioAtencion).IsRequired(false);
-            });*/ 
+            });*/
 
             if (_branchContext != null)
             {
                 builder.Entity<CgsService>()
-                    .HasQueryFilter(s => !_branchContext.CurrentBranchId.HasValue
-                    || s.BranchCode == _branchContext.CurrentBranchId.Value);
+                    .HasQueryFilter(s =>
+                        _branchContext.AllBranches
+                            ? (
+                                !_branchContext.PermittedBranchIds.Any()
+                                || _branchContext.PermittedBranchIds.Contains(s.BranchCode)
+                              )
+                            : (
+                                !_branchContext.CurrentBranchId.HasValue
+                                || s.BranchCode == _branchContext.CurrentBranchId
+                              ));
 
                 builder.Entity<CefTransaction>()
-                    .HasQueryFilter(t => !_branchContext.CurrentBranchId.HasValue
-                    || t.BranchCode == _branchContext.CurrentBranchId.Value);
+                    .HasQueryFilter(t =>
+                        _branchContext.AllBranches
+                            ? (
+                                !_branchContext.PermittedBranchIds.Any()
+                                || _branchContext.PermittedBranchIds.Contains(t.BranchCode)
+                              )
+                            : (
+                                !_branchContext.CurrentBranchId.HasValue
+                                || t.BranchCode == _branchContext.CurrentBranchId
+                              ));
             }
         }
     }

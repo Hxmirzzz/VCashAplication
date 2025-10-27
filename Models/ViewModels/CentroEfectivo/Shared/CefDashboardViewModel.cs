@@ -2,7 +2,7 @@
 using VCashApp.Enums;
 using Microsoft.AspNetCore.Mvc.Rendering;
 
-namespace VCashApp.Models.ViewModels.CentroEfectivo
+namespace VCashApp.Models.ViewModels.CentroEfectivo.Shared
 {
     /// <summary>
     /// ViewModel para los filtros y paginación del dashboard de Centro de Efectivo.

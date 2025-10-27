@@ -1,4 +1,4 @@
-﻿@model IEnumerable<VCashApp.Models.ViewModels.CentroEfectivo.CefTransactionSummaryViewModel>
+﻿@model IEnumerable<VCashApp.Models.ViewModels.CentroEfectivo.Shared.CefTransactionSummaryViewModel>
 @using VCashApp.Enums;
 @{
     int currentPage = ViewBag.CurrentPage ?? 1;
@@ -89,14 +89,14 @@
                                         {
                                             @if (transaction.TransactionStatus == nameof(CefTransactionStatusEnum.RegistroTesoreria))
                                             {
-                                                <a asp-controller="Cef" asp-action="Checkin" asp-route-serviceOrderId="@transaction.ServiceOrderId" class="btn-edit" title="Editar">
+                                                <a asp-controller="Collection" asp-action="Checkin" asp-route-serviceOrderId="@transaction.ServiceOrderId" class="btn-edit" title="Editar">
                                                     <i class="ri-pencil-fill"></i>
                                                 </a>
                                             }
                                             @if (transaction.TransactionStatus == nameof(CefTransactionStatusEnum.EncoladoParaConteo) ||
                                                 transaction.TransactionStatus == nameof(CefTransactionStatusEnum.Conteo))
                                             {
-                                                <a asp-action="ProcessContainers" asp-route-transactionId="@transaction.Id" class="btn-detail" title="Procesar Bolsas">
+                                                <a asp-action="Process" asp-controller="Collection" asp-route-txId="@transaction.Id" class="btn-detail" title="Procesar Bolsas">
                                                     <i class="ri-money-dollar-circle-fill"></i>
                                                 </a>
                                             }

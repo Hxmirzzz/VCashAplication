@@ -1,6 +1,4 @@
-﻿using System.Threading.Tasks;
-
-namespace VCashApp.Services.CentroEfectivo.Provision.Infrastructure
+﻿namespace VCashApp.Services.CentroEfectivo.Shared.Domain
 {
     /// <summary>Argumentos para crear transacción de provisión.</summary>
     public sealed class CefTransactionNewArgs

@@ -213,27 +213,6 @@
                 <ul>
                     <li><a href="#" class="sidebar__link"><i class="fas fa-cog"></i> <span class="nav-text">Ajustes</span></a></li>
                     <li>
-                        <form id="switch-branch-form" method="post" action="/Account/SelectBranch">
-                            <input type="hidden" name="returnUrl" value="@Context.Request.Path@Context.Request.QueryString" />
-                            <input type="hidden" name="rememberAsDefault" value="false" />
-                            @Html.AntiForgeryToken()
-                            <select name="branchId" class="form-select form-select-sm" onchange="document.getElementById('switch-branch-form').submit();">
-                                <option value="" value="">(Cambiar Sucursal...)</option>
-                                @{
-                                    var userId = User?.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
-                                    var db = Context.RequestServices.GetService(typeof(VCashApp.Data.AppDbContext)) as VCashApp.Data.AppDbContext;
-                                    var ids = db?.UserClaims.Where(c => c.UserId == userId && c.ClaimType == "SucursalId").Select(c => c.ClaimValue).ToList() ?? new List<string>();
-                                    var ints = ids.Select(v => int.TryParse(v, out var n) ? (int?)n : null).Where(n => n.HasValue).Select(n => n!.Value).Distinct().ToList();
-                                    var branches = db?.AdmSucursales.Where(s => ints.Contains(s.CodSucursal)).OrderBy(s => s.NombreSucursal).ToList() ?? new List<VCashApp.Models.Entities.AdmSucursal>();
-                                }
-                                @foreach (var b in branches)
-                                {
-                                    <option value="@b.CodSucursal">@b.NombreSucursal (@b.CodSucursal)</option>
-                                }
-                            </select>
-                        </form>
-                    </li>
-                    <li>
                         <button id="theme-button" class="sidebar__link theme-toggle-btn">
                             <i class="ri-moon-line"></i> <span class="nav-text">Theme</span>
                         </button>
@@ -250,9 +229,14 @@
         </button>
 
         <main class="main-content">
-            <header class="main-header">
+            <header class="main-header d-flex justify-content-between align-items-center">
                 <h1>@ViewData["Title"]</h1>
-                <img src="~/assets/vcash-logo.png" alt="VCash Logo" class="main-header-logo">
+
+                <div class="d-flex align-items-center gap-3">
+                    @await Component.InvokeAsync("BranchBadge")
+                    <img src="~/assets/vcash-logo.png" alt="VCash Logo" class="main-header-logo">
+                </div>
+                
             </header>
 
             @RenderBody()

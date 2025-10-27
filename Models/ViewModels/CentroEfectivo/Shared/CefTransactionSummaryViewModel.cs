@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace VCashApp.Models.ViewModels.CentroEfectivo
+namespace VCashApp.Models.ViewModels.CentroEfectivo.Shared
 {
     /// <summary>
     /// ViewModel para la visualización resumida de una transacción de Centro de Efectivo en listados.

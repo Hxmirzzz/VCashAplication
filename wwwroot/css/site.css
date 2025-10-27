@@ -1305,6 +1305,28 @@ body.dark-theme .login-brand {
     text-align: center;
 }
 
+.branch-chip__btn {
+    background: var(--table-header-bg);
+    color: var(--table-header-text);
+    display: inline-flex;
+    align-items: center;
+    gap: .5rem;
+    border-radius: 9999px;
+    padding: .35rem .75rem;
+    box-shadow: 0 2px 10px rgba(0,0,0,.06);
+    white-space: nowrap;
+}
+
+    .branch-chip__btn i {
+        font-size: 1.05rem;
+    }
+
+.branch-chip__menu {
+    min-width: 360px;
+    background: var(--table-header-bg);
+}
+
+
 /* -------- Compatibilidad con Bootstrap form-floating + iconos/btn -------- */
 
 /* Ícono al inicio (izquierda) dentro de un form-floating */
@@ -1322,13 +1344,13 @@ body.dark-theme .login-brand {
         pointer-events: none;
         z-index: 3;
     }
-    /* Empuja el texto del input y el LABEL flotante */
+
     .main-content .form-floating.has-leading-icon > .form-control {
-        padding-left: 2.75rem; /* ~44px para despejar el icono */
+        padding-left: 2.75rem;
     }
 
     .main-content .form-floating.has-leading-icon > label {
-        left: 2.75rem; /* mueve el label flotante para que no se monte con el icono */
+        left: 2.75rem;
     }
 
 /* Botón ojo (derecha) dentro de un form-floating */
@@ -1350,9 +1372,9 @@ body.dark-theme .login-brand {
     }
 
     .main-content .form-floating.has-trailing-btn > .form-control {
-        padding-right: 2.5rem; /* despejar el botón ojo */
+        padding-right: 2.5rem;
     }
-/* Asegura que el botón sea clickeable aunque el label esté encima por z-index */
+
 .main-content .form-floating > label {
     pointer-events: none;
 }

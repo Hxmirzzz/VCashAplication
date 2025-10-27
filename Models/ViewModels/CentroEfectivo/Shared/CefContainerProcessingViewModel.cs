@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations;
 using VCashApp.Enums;
 using VCashApp.Models.Entities;
 
-namespace VCashApp.Models.ViewModels.CentroEfectivo
+namespace VCashApp.Models.ViewModels.CentroEfectivo.Shared
 {
     /// <summary>
     /// ViewModel para la entrada de datos durante el conteo de un contenedor de efectivo.

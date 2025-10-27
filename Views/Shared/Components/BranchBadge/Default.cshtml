@@ -1,0 +1,50 @@
+﻿@model VCashApp.ViewComponents.BranchBadgeViewComponent.Vm
+
+@if (User?.Identity?.IsAuthenticated == true)
+{
+    <div class="branch-chip dropdown">
+        <button class="btn btn-sm branch-chip__btn dropdown-toggle"
+                type="button"
+                data-bs-toggle="dropdown"
+                aria-expanded="false"
+                title="Sucursal activa">
+            <i class="ri-map-pin-line"></i>
+            <span>@Model.Display</span>
+        </button>
+
+        <div class="dropdown-menu dropdown-menu-end p-2 branch-chip__menu">
+            <form method="post" action="/Account/SelectBranch" class="d-flex gap-2 align-items-center">
+                @Html.AntiForgeryToken()
+                <input type="hidden" name="returnUrl" value="@Model.ReturnUrl" />
+                <input type="hidden" name="rememberAsDefault" value="false" />
+
+                <select name="branchId" class="form-select form-select-sm">
+                    @* Opción "todas" *@
+                    @if (Model.AllBranches)
+                    {
+                        <option value="-1" selected>Todas mis sucursales</option>
+                    }
+                    else
+                    {
+                        <option value="-1">Todas mis sucursales</option>
+                    }
+
+                    @* Resto de sucursales *@
+                    @foreach (var o in Model.Options)
+                    {
+                        if (!Model.AllBranches && Model.ActiveBranchId == o.Id)
+                        {
+                            <option value="@o.Id" selected>@o.Name (@o.Id)</option>
+                        }
+                        else
+                        {
+                            <option value="@o.Id">@o.Name (@o.Id)</option>
+                        }
+                    }
+                </select>
+
+                <button type="submit" class="btn btn-primary btn-sm">Aplicar</button>
+            </form>
+        </div>
+    </div>
+}

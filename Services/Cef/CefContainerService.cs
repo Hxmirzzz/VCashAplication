@@ -4,7 +4,7 @@ using System.Text.Json;
 using VCashApp.Data;
 using VCashApp.Enums;
 using VCashApp.Models.Entities;
-using VCashApp.Models.ViewModels.CentroEfectivo;
+using VCashApp.Models.ViewModels.CentroEfectivo.Shared;
 using VCashApp.Utils;
 using VCashApp.Services.Logging;
 

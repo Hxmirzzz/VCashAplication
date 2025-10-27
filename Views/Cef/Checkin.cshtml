@@ -1,4 +1,4 @@
-@model VCashApp.Models.ViewModels.CentroEfectivo.CefTransactionCheckinViewModel
+@model VCashApp.Models.ViewModels.CentroEfectivo.Shared.CefTransactionCheckinViewModel
 @{
     ViewData["Title"] = "Tesorería";
     Layout = "~/Views/Shared/_Layout.cshtml";
@@ -187,7 +187,7 @@
                 </div>
 
                 <div class="submit-container form-group col-12 mt-3">
-                    @if (!canCreate)
+                    @if (canCreate)
                     {
                         <button type="submit" class="btn btn-primary" data-step-action="submit-final">Guardar</button>
                     } else

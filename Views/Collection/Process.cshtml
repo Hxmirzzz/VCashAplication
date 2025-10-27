@@ -1,0 +1,3115 @@
+﻿@model VCashApp.Models.ViewModels.CentroEfectivo.Shared.CefProcessContainersPageViewModel
+@using VCashApp.Enums;
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+    bool canEdit = ViewBag.HasEdit ?? false;
+    bool canBills  = ViewBag.CanCountBills ?? false;
+    bool canCoins  = ViewBag.CanCountCoins ?? false;
+    bool canSupInc = ViewBag.CanApproveIncidents ?? false;
+}
+<style>
+  .readonly-locked { background-color:#f5f6f8 !important; pointer-events:none; }
+  .disabled { pointer-events:none; opacity:.6; }
+</style>
+
+<div class="form-container">
+    <div class="card">
+        <div class="card-body">
+            <form id="form-containers" asp-action="Process" asp-route-txId="@Model.CefTransactionId" method="post">
+                @Html.AntiForgeryToken()
+                <input type="hidden" id="txIdGlobal" asp-for="CefTransactionId" />
+                <input type="hidden" id="CefTransactionId" asp-for="CefTransactionId" />
+
+                <div class="progress-stepper" id="progressStepper">
+                    <div class="step active" data-step="1">
+                        <div class="step-number">1</div>
+                        <div class="step-label">Conteo y Detalles</div>
+                    </div>
+                    <div class="step" data-step="2">
+                        <div class="step-number">2</div>
+                        <div class="step-label">Resumen</div>
+                    </div>
+                    <div class="step" data-step="3">
+                        <div class="step-number">3</div>
+                        <div class="step-label">Novedades</div>
+                    </div>
+                </div>
+
+                <div class="tab-content" id="myTabContent">
+                    <div class="tab-pane fade show active" role="tabpanel" data-step="1">
+                        <div class="step-content">
+                            <div class="row g-2 mb-2 top-summary">
+                                <div class="col-12 col-xl-7">
+                                    <div class="card h-100">
+                                        <div class="card-header">
+                                            <h6 class="mb-0"><i class="ri-survey-fill"></i> Información del Servicio</h6>
+                                        </div>
+                                        <div class="card-body p-2">
+                                            <div class="row gx-3 gy-1 small">
+                                                <div class="col-12 col-lg-6">
+                                                    <ul class="meta-list">
+                                                        <li><span class="meta-k">Planilla</span><span class="meta-v">@Model.Transaction.SlipNumber</span></li>
+                                                        <li><span class="meta-k">Cliente</span><span class="meta-v">@Model.Service.ClientName</span></li>
+                                                        <li><span class="meta-k">Sucursal</span><span class="meta-v">@Model.Service.BranchName</span></li>
+                                                        <li><span class="meta-k">Concepto</span><span class="meta-v">@Model.Service.ConceptName</span></li>
+                                                    </ul>
+                                                </div>
+                                                <div class="col-12 col-lg-6">
+                                                    <ul class="meta-list">
+                                                        <li><span class="meta-k">Orden</span><span class="meta-v">@Model.Service.ServiceOrderId</span></li>
+                                                        <li><span class="meta-k">Divisa</span><span class="meta-v">@Model.Transaction.Currency</span></li>
+                                                        <li><span class="meta-k">Origen</span><span class="meta-v">@Model.Service.OriginName</span></li>
+                                                        <li><span class="meta-k">Destino</span><span class="meta-v">@Model.Service.DestinationName</span></li>
+                                                    </ul>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-12 col-xl-5">
+                                    <div class="card h-100">
+                                        <div class="card-header">
+                                            <h6 class="mb-0"><i class="ri-list-check"></i> Totales</h6>
+                                            <span class="chip-live ms-auto">En vivo</span>
+                                        </div>
+                                        <div class="card-body p-2">
+                                            <input type="hidden" id="declaredTransaction" value="@Model.TotalDeclaredAll" />
+                                            <div class="stats-grid small">
+                                                <div class="label">Declarado</div>
+                                                <div class="value" id="totDeclaredGlobal">@Model.TotalDeclaredAll.ToString("N0")</div>
+
+                                                <div class="label">Contado</div>
+                                                <div class="value" id="totCountedGlobal">@Model.TotalCountedAll.ToString("N0")</div>
+
+                                                <div class="label">Diferencia</div>
+                                                <div class="value tile-diff" id="totDiffGlobal">@Model.DifferenceAll.ToString("N0")</div>
+
+                                                <div class="divider-xs"></div>
+
+                                                <div class="label">Total</div>
+                                                <div class="value" id="totOverallGlobal">@Model.TotalOverallAll.ToString("N0")</div>
+                                            </div>
+
+                                            <div class="row gx-3 gy-1 mt-2 small">
+                                                <div class="col-6 d-flex justify-content-between">
+                                                    <span class="text-muted">Bolsas</span><strong id="countBagsHeader">0</strong>
+                                                </div>
+                                                <div class="col-6 d-flex justify-content-between">
+                                                    <span class="text-muted">Sobres</span><strong id="countEnvelopesHeader">0</strong>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="card">
+                                <div class="card-header d-flex align-items-center justify-content-between">
+                                    <h5 class="mb-0"><i class="ri-shopping-bag-3-fill"></i> Bolsas</h5>
+                                    <div class="d-flex gap-2">
+                                        <button type="button" class="btn btn-outline-primary" id="btnAddBag">+ Agregar Bolsa</button>
+                                    </div>
+                                </div>
+
+                                <div class="card-body">
+                                    @{
+                                        var bagItems = Model.Containers
+                                            .Select((c, idx) => new { c, idx })
+                                            .Where(x => x.c.ParentContainerId == null && x.c.ContainerType == VCashApp.Enums.CefContainerTypeEnum.Bolsa)
+                                            .ToList();
+                                    }
+
+                                    <div class="tabs-scroll-wrap">
+                                        <button class="tabs-arrow tabs-arrow--left" type="button" aria-label="Desplazar tabs a la izquierda">‹</button>
+
+                                        <div class="tabs-viewport">
+                                            <ul class="nav nav-tabs" id="bagsTabs" role="tablist">
+                                                @for (var b = 0; b < bagItems.Count; b++)
+                                                {
+                                                    var bagIdx = bagItems[b].idx;
+                                                    var tabId = $"bag-tab-{bagIdx}";
+                                                    var bagId = bagItems[b].c.Id;
+
+                                                    <li class="nav-item" role="presentation">
+                                                        <button class="nav-link @(b==0 ? "active" : "") d-inline-flex align-items-center gap-1" 
+                                                                id="@($"{tabId}-btn")"
+                                                                data-bs-toggle="tab" data-bs-target="@($"#{tabId}")"
+                                                                type="button" role="tab">
+                                                            <span>Bolsa @(@b + 1)</span>
+
+                                                            <span class="badge bg-primary ms-2 tab-badge" title="Billetes">
+                                                                <i class="ri-money-dollar-box-line"></i>
+                                                                <span class="js-bag-badge-bills">0</span>
+                                                            </span>
+                                                            <span class="badge bg-warning text-dark ms-1 tab-badge" title="Monedas">
+                                                                <i class="ri-coins-line"></i>
+                                                                <span class="js-bag-badge-coins">0</span>
+                                                            </span>
+                                                            <span class="badge bg-info ms-1 tab-badge" title="Total bolsa">
+                                                                <i class="ri-equalizer-line"></i>
+                                                                <span class="js-bag-badge-total">0</span>
+                                                            </span>
+
+                                                            <span class="tab-action js-go-incidents ms-1"
+                                                                    role="button" title="Novedades"
+                                                                    data-transaction-id="@Model.CefTransactionId"
+                                                                    data-container-id="@bagId"
+                                                                    data-bag-label="Bolsa @(@b + 1)- @bagItems[b].c.ContainerCode">
+                                                                <i class="ri-information-2-fill"></i>
+                                                            </span>
+
+                                                            <span class="btn-close btn-close-sm tab-close js-close-bag-tab ms-1"
+                                                                  role="button" aria-label="Eliminar bolsa" title="Eliminar bolsa"
+                                                                  data-container-id="@bagId"
+                                                                  data-bag-idx="@bagIdx"></span>
+                                                        </button>
+                                                    </li>
+                                                }
+                                            </ul>
+                                        </div>
+
+                                        <button class="tabs-arrow tabs-arrow--right" type="button" aria-label="Desplazar tabs a la derecha">›</button>
+
+                                        <span class="tabs-shadow tabs-shadow--left"></span>
+                                        <span class="tabs-shadow tabs-shadow--right"></span>
+                                    </div>
+
+                                    <div class="tab-content mt-3" id="bagsTabContent">
+                                        @for (var b = 0; b < bagItems.Count; b++)
+                                        {
+                                            var bagIdx = bagItems[b].idx;
+                                            var tabId = $"bag-tab-{bagIdx}";
+                                            <div class="tab-pane fade @(b==0 ? "show active" : "")" id="@tabId" role="tabpanel" data-bag-idx="@bagIdx">
+                                                @{
+                                                    var vddBag = new ViewDataDictionary(ViewData);
+                                                    vddBag.TemplateInfo.HtmlFieldPrefix = $"Containers[{bagIdx}]";
+                                                }
+                                                @Html.Partial(
+                                                  "~/Views/Cef/_ContainerEditorPartial.cshtml",
+                                                  Model.Containers[bagIdx],
+                                                  vddBag
+                                                )
+                                                <div class="card mt-3">
+                                                    <div class="card-header d-flex align-items-center justify-content-between">
+                                                        <h6 class="mb-0"><i class="ri-mail-fill"></i> Sobres de esta Bolsa</h6>
+                                                        <div class="d-flex gap-2 align-items-center small js-env-badges mt-2">
+                                                            <span class="badge bg-primary">Billetes: <span class="js-env-bills">0</span></span>
+                                                            <span class="badge bg-warning text-dark">Monedas: <span class="js-env-coins">0</span></span>
+                                                            <span class="badge bg-secondary">Docs: <span class="js-env-docs">0</span></span>
+                                                            <span class="badge bg-info">Cheques: <span class="js-env-checks">0</span></span>
+                                                            <span class="ms-auto text-muted">Total: <strong class="js-env-total">0</strong></span>
+                                                        </div>
+                                                        <button type="button" class="btn btn-outline-secondary btn-sm js-add-envelope-in-this-bag">
+                                                            + Agregar Sobre
+                                                        </button>
+                                                    </div>
+                                                    <div class="card-body">
+                                                        <div class="small text-muted">Puedes añadir varios sobres; cada sobre puede ser Efectivo, Documentos/Voucher o Cheques.</div>
+                                                        <div class="bag-envelopes-list mt-3">
+                                                            @{
+                                                                var bagId = Model.Containers[bagIdx].Id;
+                                                                var childEnvelopes = Model.Containers
+                                                                    .Select((c, idx) => new { c, idx })
+                                                                    .Where(x => x.c.ParentContainerId == bagId && x.c.ContainerType == CefContainerTypeEnum.Sobre)
+                                                                    .ToList();
+                                                            }
+                                                            @for (var e = 0; e < childEnvelopes.Count; e++)
+                                                            {
+                                                                var envIdx = childEnvelopes[e].idx;
+                                                                var env    = Model.Containers[envIdx];
+                                                                <div class="envelope-card mb-3"
+                                                                     data-env-idx="@envIdx"
+                                                                     data-container-id="@env.Id">
+                                                                    @{
+                                                                        var vddEnv = new ViewDataDictionary(ViewData);
+                                                                        vddEnv.TemplateInfo.HtmlFieldPrefix = $"Containers[{envIdx}]";
+                                                                    }
+                                                                    @Html.Partial(
+                                                                        "~/Views/Cef/_ContainerEditorPartial.cshtml",
+                                                                        env,
+                                                                        vddEnv
+                                                                    )                                                                    
+                                                                    <div class="d-flex justify-content-end pt-2">
+                                                                        <button type="button"
+                                                                                class="btn btn-outline-danger btn-sm js-remove-envelope-card"
+                                                                                data-env-idx="@envIdx"
+                                                                                data-container-id="@env.Id">
+                                                                            Eliminar sobre
+                                                                        </button>
+                                                                    </div>
+                                                                </div>
+                                                            }
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="bag-template" class="d-none">
+                        @{
+                            var vddT = new ViewDataDictionary(ViewData);
+                            vddT.TemplateInfo.HtmlFieldPrefix = "Containers[__idx__]";
+                        }
+                        @Html.Partial("~/Views/Cef/_ContainerEditorPartial.cshtml",
+                            new VCashApp.Models.ViewModels.CentroEfectivo.Shared.CefContainerProcessingViewModel {
+                                ContainerType = VCashApp.Enums.CefContainerTypeEnum.Bolsa,
+                                ParentContainerId = null
+                            },
+                            vddT
+                        )
+                    </div>
+
+                    <div id="envelope-template" class="d-none">
+                        @{
+                          var vddE = new ViewDataDictionary(ViewData);
+                          vddE.TemplateInfo.HtmlFieldPrefix = "Containers[__idx__]";
+                        }
+                        <div class="envelope-card mb-2"
+                             data-env-idx="__idx__"
+                             data-container-id="0">
+                            @Html.Partial("~/Views/Cef/_ContainerEditorPartial.cshtml",
+                                new VCashApp.Models.ViewModels.CentroEfectivo.Shared.CefContainerProcessingViewModel {
+                                    ContainerType = VCashApp.Enums.CefContainerTypeEnum.Sobre
+                                },
+                                vddE
+                            )
+                            <div class="d-flex justify-content-end">
+                                <button type="button"
+                                        class="btn btn-outline-danger btn-sm js-remove-envelope-card"
+                                        data-env-idx="__idx__"
+                                        data-container-id="0">
+                                    Eliminar sobre
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="tab-pane fade" role="tabpanel" data-step="2">
+                        <div class="step-content">
+                            <div class="card mb-3">
+                                <div class="card-header d-flex align-items-center justify-content-between">
+                                    <h5 class="mb-0"><i class="ri-list-check"></i> Resumen de la transacción</h5>
+                                    <small class="sub-title">Se actualiza en vivo con lo que capturas</small>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row g-3 stat-tiles">
+                                        <div class="col-12 col-md-3">
+                                            <div class="tile shadow-sm">
+                                                <div class="tile-label">Total declarado</div>
+                                                <div class="tile-value" id="sumDeclaredAllDisplay">@Model.TotalDeclaredAll.ToString("N0")</div>
+                                                <input type="hidden" id="sumDeclaredAll" value="@Model.TotalDeclaredAll.ToString("N0")" />
+                                            </div>
+                                        </div>
+                                        <div class="col-12 col-md-3">
+                                            <div class="tile shadow-sm">
+                                                <div class="tile-label">Total Contado</div>
+                                                <div class="tile-value" id="sumCountedAllDisplay">@Model.TotalCountedAll.ToString("N0")</div>
+                                                <input type="hidden" id="sumCountedAll" value="@Model.TotalCountedAll.ToString("N0")" />
+                                            </div>
+                                        </div>
+                                        <div class="col-12 col-md-3">
+                                            <div class="tile shadow-sm">
+                                                <div class="tile-label">Diferencia</div>
+                                                <div class="tile-value tile-diff" id="sumDiffAllDisplay">@Model.DifferenceAll.ToString("N0")</div>
+                                                <input type="hidden" id="sumDiffAll" value="@Model.DifferenceAll.ToString("N0")" />
+                                            </div>
+                                        </div>
+                                        <div class="col-12 col-md-3">
+                                            <div class="tile shadow-sm">
+                                                <div class="tile-label">Total</div>
+                                                <div class="tile-value" id="sumOverallDisplay">@Model.TotalOverallAll.ToString("N0")</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <hr class="my-4">
+                                    <div class="row g-3">
+                                        <div class="col-12 col-lg-6">
+                                            <div class="card h-100">
+                                                <div class="card-header"><h6 class="mb-0"><i class="ri-shopping-bag-3-fill"></i> Desglose por tipo (conteo)</h6></div>
+                                                <div class="card-body">
+                                                    <ul class="list-group list-group-flush">
+                                                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                                                            <span>Billetes</span>
+                                                            <span class="badge bg-primary rounded-pill" id="sumBillsCounted">@Model.CountedBillsAll.ToString("N0")</span>
+                                                            <small class="text-muted ms-2 d-none d-md-inline">
+                                                                Alta: <strong id="sumBillHigh">@Model.CountedBillHighAll.ToString("N0")</strong>
+                                                            </small>
+                                                            <small class="text-muted ms-2 d-none d-md-inline">
+                                                                Baja: <strong id="sumBillLow">@Model.CountedBillLowAll.ToString("N0")</strong>
+                                                            </small>
+                                                        </li>
+                                                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                                                            <span>Monedas</span>
+                                                            <span class="badge bg-primary rounded-pill" id="sumCoinsCounted">@Model.CountedCoinsAll.ToString("N0")</span>
+                                                        </li>
+                                                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                                                            <span>Documentos/Voucher</span>
+                                                            <span class="badge bg-primary rounded-pill" id="sumDocsCounted">@Model.CountedDocsAll.ToString("N0")</span>
+                                                        </li>
+                                                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                                                            <span>Cheques</span>
+                                                            <span class="badge bg-primary rounded-pill" id="sumChecksCounted">@Model.CountedChecksAll.ToString("N0")</span>
+                                                        </li>
+                                                    </ul>
+                                                    <div class="d-flex justify-content-between align-items-center mt-3">
+                                                        <small class="text-muted">Total</small>
+                                                        <strong id="sumTotalCountedDisplay">@Model.TotalOverallAll.ToString("N0")</strong>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-12 col-lg-6">
+                                            <div class="card h-100">
+                                                <div class="card-header"><h6 class="mb-0"><i class="ri-shopping-bag-3-fill"></i> Estructura de bolsas</h6></div>
+                                                <div class="card-body">
+                                                    <div class="d-flex justify-content-between mb-2">
+                                                        <span>Bolsas</span>
+                                                        <span class="badge bg-secondary" id="countBags">0</span>
+                                                    </div>
+                                                    <div class="d-flex justify-content-between mb-3">
+                                                        <span>Sobres</span>
+                                                        <span class="badge bg-secondary" id="countEnvelopes">0</span>
+                                                    </div>
+
+                                                    <div class="small text-muted mb-2">Por bolsa</div>
+                                                    <div id="perBagList" class="list-group small">
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="tab-pane fade" role="tabpanel" data-step="3">
+                        <div class="step-content">
+                            <div class="card mb-3">
+                                <div class="card-header d-flex align-items-center">
+                                    <h6 class="mb-0"><i class="ri-list-check"></i> Totales de la transacción</h6>
+                                    <span class="chip-live ms-auto">En vivo</span>
+                                </div>
+                                <div class="card-body p-2">
+                                    <div class="stats-grid small">
+                                        <div class="label">Declarado</div>
+                                        <div class="value" id="totDeclaredStep3">@Model.TotalDeclaredAll.ToString("N0")</div>
+                                        <div class="label">Contado</div>
+                                        <div class="value" id="totCountedStep3">@Model.TotalCountedAll.ToString("N0")</div>
+                                        <div class="label">Diferencia</div>
+                                        <div class="value tile-diff" id="totDiffStep3">@Model.DifferenceAll.ToString("N0")</div>
+                                        <div class="divider-xs"></div>
+                                        <div class="label">Total</div>
+                                        <div class="value" id="totOverallStep3">@Model.TotalOverallAll.ToString("N0")</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row g-3">
+                                <div class="col-12 col-lg-5">
+                                    <div class="card">
+                                        <div class="card-header"><h6 class="mb-0">Registrar novedad</h6></div>
+                                        <div class="card-body">
+                                            <div id="formIncident3" data-action="@Url.Action("CreateIncident","Collection")">
+                                                @Html.AntiForgeryToken()
+                                                <input type="hidden" name="CefTransactionId" id="incTxId3" value="@Model.CefTransactionId" />
+                                                <input type="hidden" name="CefContainerId" id="incContainerId3" />
+                                                <input type="hidden" name="CefValueDetailId" id="incDetailId3" />
+
+                                                <div class="mb-2">
+                                                    <label class="form-label">Tipo de novedad</label>
+                                                    <select class="form-select" name="IncidentTypeCode" required>
+                                                        @foreach (var t in (List<SelectListItem>)ViewBag.IncidentTypes)
+                                                        { <option value="@t.Value">@t.Text</option> }
+                                                    </select>
+                                                </div>
+
+                                                <div class="row g-2">
+                                                    <div class="col-6">
+                                                        <label class="form-label">Denominación</label>
+                                                        <select class="form-select" name="AffectedDenomination" id="incDenom3"></select>
+                                                    </div>
+                                                    <div class="col-6">
+                                                        <label class="form-label">Cantidad</label>
+                                                        <input type="number" step="1" class="form-control" name="AffectedQuantity" id="incQty3" />
+                                                    </div>
+                                                </div>
+
+                                                <div class="mt-2">
+                                                    <label class="form-label">Monto afectado (opcional)</label>
+                                                    <input type="number" step="1" class="form-control" name="AffectedAmount" id="incAmount3" />
+                                                    <small class="text-muted">Si lo dejas vacío, se calcula con (Denominación × Cantidad).</small>
+                                                </div>
+
+                                                <div class="mt-2">
+                                                    <label class="form-label">Descripción</label>
+                                                    <textarea class="form-control" name="Description" rows="3" required></textarea>
+                                                </div>
+
+                                                <div class="mt-3 d-flex gap-2">
+                                                    <button type="button" id="btnSaveIncident3" class="btn btn-primary">Guardar novedad</button>
+                                                    <button type="button" class="btn btn-light" data-step-action="back-to-bags">Volver a bolsas</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="col-12 col-lg-7">
+                                    <div class="card">
+                                        <div class="card-header d-flex align-items-center justify-content-between">
+                                            <h6 class="mb-0">Novedades de la bolsa seleccionada</h6>
+                                            <div class="small text-muted">
+                                                Bolsa actual:
+                                                <select id="incCurrentBagSelect" class="form-select form-select-sm d-inline-block" style="width: auto; display: inline-block;"></select>
+                                            </div> 
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="table-container-responsive">
+                                                <table class="table table-sm align-middle">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Fecha</th><th>Tipo</th><th>Descripción</th>
+                                                            <th class="text-end">Monto</th><th>Estado</th><th style="width:120px">Acciones</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody id="inc-table-body-step3"><!-- AJAX --></tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+
+                <div class="submit-container-spacer"></div>
+                <div class="submit-container form-group col-12 mt-4 fixed">
+                    <button type="button" class="btn btn-secondary" data-step-action="prev" style="display:none;">Anterior</button>
+                    @if (canEdit) {
+                        <button type="button" class="btn btn-primary" data-step-action="next">Continuar</button>
+                        <button type="submit" class="btn btn-primary" data-step-action="save" style="display:none;">Guardar</button>
+                        <button type="button" class="btn btn-success js-finalize-counting" style="display:none;">Finalizar</button>
+                    } else {
+                        <button type="button" class="btn btn-primary" disabled title="No tiene permiso">Continuar</button>
+                        <button type="button" class="btn btn-primary" disabled style="display:none;">Guardar</button>
+                        <button type="button" class="btn btn-success" disabled style="display:none;">Finalizar</button>
+                    }
+                    <a asp-action="Collections" asp-controller="Cef" class="btn btn-danger js-cancel">Cancelar</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<div id="container-template" class="d-none">
+    @{
+        var vddT = new ViewDataDictionary(ViewData);
+        vddT.TemplateInfo.HtmlFieldPrefix = "Containers[__idx__]";
+    }
+    @Html.Partial("~/Views/Cef/_ContainerEditorPartial.cshtml",
+    new VCashApp.Models.ViewModels.CentroEfectivo.Shared.CefContainerProcessingViewModel(),
+        vddT)
+</div>
+
+<script id="denoms-json" type="application/json">
+    @{
+        string denomsJson = ViewBag.DenomsJson?.ToString() ?? "{}";
+    }
+    @Html.Raw(denomsJson)
+</script>
+
+<script id="qualities-json" type="application/json">
+    @{
+        string qualitiesJson = ViewBag.QualitiesJson?.ToString() ?? "{}";
+    }
+    @Html.Raw(qualitiesJson)
+</script>
+
+<script id="banks-json" type="application/json">
+  @Html.Raw(ViewBag.BanksJson ?? "[]")
+</script>
+
+<script id="pointcaps-json" type="application/json">
+  @Html.Raw(ViewBag.PointCapsJson ?? "{\"sobres\":false,\"cheques\":false,\"documentos\":false}")
+</script>
+
+<script>
+  window.CEF = window.CEF || {};
+  window.CEF.canCountBills = @( (ViewBag.CanCountBills ?? false) ? "true" : "false");
+  window.CEF.canCountCoins = @( (ViewBag.CanCountCoins ?? false) ? "true" : "false");
+  window.CEF.canIncCreateEdit = @( (ViewBag.CanIncCreateEdit ?? false) ? "true" : "false");
+  window.CEF.canIncApprove = @( (ViewBag.CanIncApprove ?? false) ? "true" : "false");
+  window.CEF.canFinalize = @( (ViewBag.CanFinalize ?? false) ? "true" : "false");
+</script>
+
+<div class="validation-scape"></div>
+
+<div class="modal fade" id="incEditModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-sm">
+        <div class="modal-content">
+            <form id="incEditForm" data-action-update="@Url.Action("UpdateIncident","Collection")">
+                @Html.AntiForgeryToken()
+                <div class="modal-header">
+                  <h6 class="modal-title">Editar novedad</h6>
+                  <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" name="Id" id="incEditId" />
+                    <div class="mb-2">
+                        <label class="form-label">Tipo</label>
+                        <select class="form-select" name="IncidentTypeId" id="incEditType" required>
+                            @foreach (var t in (List<SelectListItem>)ViewBag.IncidentTypesForEdit)
+                            {
+                                <option value="@t.Value">@t.Text</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="mb-2">
+                        <label class="form-label">Denominación</label>
+                        <select class="form-select" name="AffectedDenomination" id="incEditDenom"></select>
+                    </div>
+                    <div class="row g-2">
+                        <div class="col-6">
+                            <label class="form-label">Cantidad</label>
+                            <input type="number" class="form-control" name="AffectedQuantity" id="incEditQty" />
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label">Monto</label>
+                            <input type="number" class="form-control" name="AffectedAmount" id="incEditAmount" />
+                        </div>
+                    </div>
+                    <div class="mt-2">
+                        <label class="form-label">Descripción</label>
+                        <textarea class="form-control" name="Description" id="incEditDesc" rows="2"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer flex-nowrap">
+                    <button type="submit" class="btn btn-primary">Guardar</button>
+                    <button type="button" class="btn btn-exit" data-bs-dismiss="modal">Cancelar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{ await Html.RenderPartialAsync("_ValidationScriptsPartial"); }
+
+    <script>
+        $(function () {
+          // =====================================================================
+          // 0) BOOT / CONSTANTES / CACHÉS / DIRTY STATE
+          // =====================================================================
+          $('#bag-template :input, #envelope-template :input, #container-template :input')
+            .prop('disabled', true);
+
+          let currentStep = 1, totalSteps = 3;
+          let INCIDENT_EFFECT = 0;
+
+          const DENOMS = JSON.parse(document.getElementById('denoms-json')?.textContent || '{}');
+          const QUALS  = JSON.parse(document.getElementById('qualities-json')?.textContent || '{}');
+          const BANKS = JSON.parse(document.getElementById('banks-json')?.textContent || '[]');
+          const CAPS = JSON.parse(document.getElementById('pointcaps-json')?.textContent || '{}');
+
+          // === INCIDENCIAS: rutas backend ===
+          const IncidentRoutes = {
+            list: '@Url.Action("ListIncidents","Collection")',
+            create: '@Url.Action("CreateIncident","Collection")',
+            resolve: '@Url.Action("ResolveIncident","Collection")',
+            checkPending: '@Url.Action("CheckPendingIncidents","Collection")',
+            totals: '@Url.Action("GetTotals","Collection")',
+            get: '@Url.Action("GetIncident","Collection")',
+            update: '@Url.Action("UpdateIncident","Collection")',
+            delete: '@Url.Action("DeleteIncident","Collection")'
+          };
+
+          const SOBRES_OK  = !!CAPS.sobres;
+          const CHEQUES_OK = !!CAPS.cheques;
+          const DOCS_OK    = !!CAPS.documentos;
+          
+          // Lista ordenada de modos permitidos por el punto
+          function allowedModesOrdered(){
+            const arr = [];
+            if (SOBRES_OK)  arr.push('Efectivo');  // Efectivo primero
+            if (DOCS_OK)    arr.push('Documento');
+            if (CHEQUES_OK) arr.push('Cheque');
+            return arr;
+          }
+
+          const $form   = $('#form-containers');
+          const $next   = $('button[data-step-action="next"]');
+          const $prev   = $('button[data-step-action="prev"]');
+          const $submit = $('button[data-step-action="submit-final"]');
+          const DECLARED_TX = Number($('#declaredTransaction').val() || 0);
+
+          let isDirty = false;
+          let skipUnload = false;
+
+          $form.on('input change', ':input', function () {
+            if (!$(this).is('[type="hidden"]')) isDirty = true;
+          });
+          $(document).on('click',
+            '.js-add-detail,.js-remove-detail,.js-add-cheque,.js-remove-cheque,.js-add-envelope-in-this-bag,#btnAddBag,.js-remove-envelope-card',
+            function(){ isDirty = true; });
+
+          let nextIdx = @Model.Containers.Count;
+
+          const CAN_BILLS = !!(window.CEF && window.CEF.canCountBills);
+          const CAN_COINS = !!(window.CEF && window.CEF.canCountCoins);
+          const CAN_INC_CREATE_EDIT = !!(window.CEF && window.CEF.canIncCreateEdit);
+          const CAN_INC_APPROVE     = !!(window.CEF && window.CEF.canIncApprove);
+          const CAN_FINALIZE = !!(window.CEF && window.CEF.canFinalize);    
+
+          // =====================================================================
+          // 1) STEPPER + VALIDACIÓN
+          // =====================================================================
+          function updateStepButtons() {
+            const $prev = $('button[data-step-action="prev"]');
+            const $next = $('button[data-step-action="next"]');
+            const $submit = $('button[data-step-action="save"]');
+            const $final = $('.js-finalize-counting');
+
+            $prev.hide();
+            $next.hide();
+            $submit.hide();
+            $final.hide();
+
+            if (currentStep === 1) {
+                $next.show();
+            }
+            else if (currentStep === 2) {
+                $prev.show();
+                $submit.show();
+                if (CAN_FINALIZE) $final.show();
+            }
+            else if (currentStep === 3) {
+                $prev.show();
+            }
+          }
+
+          function updateStepper() {
+            $('.progress-stepper .step').removeClass('active completed');
+            for (let i = 1; i <= totalSteps; i++) {
+              const $s = $('.step[data-step="' + i + '"]');
+              if (i < currentStep) { $s.addClass('completed'); $s.find('.step-number').html('&#10003;'); }
+              else if (i === currentStep) { $s.addClass('active'); $s.find('.step-number').text(i); }
+              else { $s.find('.step-number').text(i); }
+            }
+            showCurrentStep();
+            updateStepButtons();
+          }
+          function showCurrentStep() {
+            $('#myTabContent .tab-pane[data-step]').removeClass('show active');
+            $('#myTabContent div[data-step="' + currentStep + '"]').addClass('show active');
+            $prev.toggle(currentStep > 1);
+            $next.toggle(currentStep < totalSteps);
+            $submit.toggle(currentStep === totalSteps);
+
+            if (currentStep ===3) {
+                fillBagSelectorStep3();
+                refreshTotalsFromServer();
+            }
+          }
+          function validateField($f) {
+            if ($f.prop('disabled')) { $f.removeClass('is-invalid is-valid'); return true; }
+            const ok = $f[0].checkValidity();
+            $f.toggleClass('is-valid', ok).toggleClass('is-invalid', !ok);
+            const $c = $f.closest('.has-validation');
+            $c.find('.invalid-feedback')[ok ? 'hide' : 'show']();
+            $c.find('.valid-feedback')[ok ? 'show' : 'hide']();
+            return ok;
+          }
+          function validateCurrentStep() {
+            let ok = true;
+            $('#myTabContent .tab-pane[data-step].active :input[required]').each(function(){
+              if (!$(this).is(':disabled')) ok = validateField($(this)) && ok;
+            });
+            return ok;
+          }
+
+          $('.progress-stepper .step').on('click', function () {
+            const target = parseInt($(this).data('step'));
+            if (target < currentStep || validateCurrentStep()) { currentStep = target; updateStepper(); }
+          });
+          $next.on('click', function () {
+            if (validateCurrentStep() && currentStep < totalSteps) { currentStep++; updateStepper(); }
+            else if (!validateCurrentStep()) Swal.fire('Campos incompletos', 'Complete los requeridos.', 'warning');
+          });
+          $prev.on('click', function () { if (currentStep > 1) { currentStep--; updateStepper(); } });
+
+          // === TABS SCROLLER ===
+          const $tabsScrollWrap = $('.tabs-scroll-wrap');
+          const $tabsScroll     = $('.tabs-viewport');      // el DIV que hace overflow-x
+          const $tabsUl         = $('#bagsTabs');           // sigue igual
+          const $arrowLeft      = $('.tabs-arrow--left');
+          const $arrowRight     = $('.tabs-arrow--right');
+
+          function updateTabsOverflowState(){
+            const el = $tabsScroll.get(0);
+            if (!el) return;
+            const scrollable = el.scrollWidth > el.clientWidth + 2; // tolerancia
+            $tabsScrollWrap.toggleClass('is-scrollable', scrollable);
+
+            if (!scrollable){
+              $arrowLeft.prop('disabled', true);
+              $arrowRight.prop('disabled', true);
+              $tabsScrollWrap.removeClass('at-start at-end');
+              return;
+            }
+
+            const atStart = el.scrollLeft <= 0;
+            const atEnd   = el.scrollLeft + el.clientWidth >= el.scrollWidth - 1;
+            $tabsScrollWrap.toggleClass('at-start', atStart);
+            $tabsScrollWrap.toggleClass('at-end',   atEnd);
+            $arrowLeft.prop('disabled', atStart);
+            $arrowRight.prop('disabled', atEnd);
+          }
+
+          function scrollTabsBy(delta){
+            const el = $tabsScroll.get(0);
+            if (!el) return;
+            el.scrollTo({ left: el.scrollLeft + delta, behavior: 'smooth' });
+          }
+
+          function scrollTabBtnIntoView(btn){
+            const el = $tabsScroll.get(0);
+            if (!el || !btn) return;
+            const item = $(btn).closest('li').get(0) || btn;
+            const itemLeft  = item.offsetLeft;
+            const itemRight = itemLeft + item.offsetWidth;
+            const viewLeft  = el.scrollLeft;
+            const viewRight = viewLeft + el.clientWidth;
+
+            if (itemLeft < viewLeft){
+              el.scrollTo({ left: itemLeft - 8, behavior: 'smooth' });
+            } else if (itemRight > viewRight){
+              el.scrollTo({ left: itemRight - el.clientWidth + 8, behavior: 'smooth' });
+            }
+          }
+
+          // Mapear rueda del mouse vertical a scroll horizontal dentro del viewport
+          $tabsScroll.on('wheel', function(e){
+            const dy = e.originalEvent.deltaY;
+            const dx = e.originalEvent.deltaX;
+            if (Math.abs(dy) > Math.abs(dx)) {
+              this.scrollLeft += dy;
+              e.preventDefault();
+            }
+          });
+
+          // Flechas
+          $arrowLeft.on('click',  () => scrollTabsBy(-220));
+          $arrowRight.on('click', () => scrollTabsBy( 220));
+
+          // Al hacer scroll/resize recalcular estados
+          $tabsScroll.on('scroll', updateTabsOverflowState);
+          $(window).on('resize',  updateTabsOverflowState);
+
+          // Asegurar que la pestaña activa quede visible cuando cambia
+          $(document).on('shown.bs.tab', '#bagsTabs button[data-bs-toggle="tab"]', function(){
+            scrollTabBtnIntoView(this);
+            updateTabsOverflowState();
+          });
+
+          requestAnimationFrame(updateTabsOverflowState); 
+          setTimeout(updateTabsOverflowState, 50);
+
+          $(window).on('load', updateTabsOverflowState);
+
+          // Si el navegador soporta Font Loading API, recalcula tras cargar fuentes
+          if (document.fonts && document.fonts.ready) {
+            document.fonts.ready.then(updateTabsOverflowState);
+          }
+
+          // Observa cambios de tamaño del viewport y del <ul> de tabs
+          if ('ResizeObserver' in window) {
+            const ro = new ResizeObserver(() => updateTabsOverflowState());
+            if ($tabsScroll.get(0)) ro.observe($tabsScroll.get(0));
+            if ($tabsUl.get(0))     ro.observe($tabsUl.get(0));
+          }
+
+          // Renumera los textos "Bolsa N" en las pestañas
+          function renumberBagTabTitles(){
+            $('#bagsTabs li > button.nav-link').each(function(i){
+              const $btn = $(this);
+              const textNodes = $btn.contents().filter(function(){ return this.nodeType === 3; });
+              if (textNodes.length) textNodes[0].nodeValue = `Bolsa ${i+1} `;
+              else $btn.prepend(document.createTextNode(`Bolsa ${i+1} `));
+            });
+          }
+
+          // =====================================================================
+          // 2) UTILIDADES GENERALES
+          // =====================================================================
+          function bagCount(){
+                return $('#bagsTabContent .tab-pane[id^="bag-tab-"]').length;
+          }
+
+          function envelopeModesInBag($bagPane){
+              const modes = [];
+              $bagPane.find('.envelope-card').each(function(){
+                const mode = $(this).find('.container-editor .js-sobre-mode:checked').val();
+                if (mode) modes.push(mode);
+              });
+              return modes;
+          }
+
+          function nextAvailableEnvelopeType($bagPane){
+              const have = new Set(envelopeModesInBag($bagPane));
+              const order = allowedModesOrdered();
+              for (const t of order) if (!have.has(t)) return t;
+              return null;
+          }
+
+          function updateAddEnvelopeButtonState($bagPane){
+            const canAdd = !!nextAvailableEnvelopeType($bagPane);
+            const $btn = $bagPane.find('.js-add-envelope-in-this-bag');
+          
+            $btn.prop('disabled', !canAdd);
+          
+            if (!canAdd) {
+              $btn.attr('title','Ya tienes Efectivo, Documento y Cheque en esta bolsa');
+            } else {
+              $btn.removeAttr('title');
+            }
+          }
+
+          function applyPointCapsUI(){
+            $('#bagsTabContent .tab-pane[id^="bag-tab-"]').each(function(){
+              const $pane = $(this);
+
+              // Botón "+ Agregar Sobre" de la bolsa
+              const $btn = $pane.find('.js-add-envelope-in-this-bag');
+              $btn.prop('disabled', !SOBRES_OK).toggleClass('disabled', !SOBRES_OK);
+
+              // (Opcional) ocultar toda la sección si el punto NO admite sobres:
+              //$pane.find('.card:has(.js-add-envelope-in-this-bag)').toggleClass('d-none', !SOBRES_OK);
+
+              // Ajustar radios de sobres existentes (mostrar/ocultar segun CAPS)
+              updateEnvelopeModeRadios($pane);
+              updateAddEnvelopeButtonState($pane);
+            });
+          }
+
+          function getModeOwnerMap($bagPane){
+            const owners = {};
+            $bagPane.find('.envelope-card').each(function(){
+              const $card = $(this);
+              const mode = $card.find('.js-sobre-mode:checked').val();
+              if (mode) owners[mode] = $card;
+            });
+            return owners;
+          }
+
+          function updateEnvelopeModeRadios($bagPane){
+            const owners = getModeOwnerMap($bagPane);
+            const allowed = new Set(allowedModesOrdered());
+
+            $bagPane.find('.envelope-card .js-sobre-mode').each(function(){
+                const val = $(this).val();
+                const ok = allowed.has(val);
+                $(this).prop('disabled', !ok);
+                const $wrap = $(this).closest('.form-check, .form-group, .col, label');
+                if ($wrap.length) $wrap.toggleClass('d-none', !ok);
+            });
+
+            const modes = ['Efectivo', 'Documento', 'Cheque'];
+            $bagPane.find('.envelope-card').each(function(){
+              const $card = $(this);
+              modes.forEach(m=>{
+                const $radio = $card.find(`.js-sobre-mode[value="${m}"]`);
+                if (!$radio.length) return;
+                const owner = owners[m];
+                const isOwner = owner && owner.get(0) === $card.get(0);
+
+                if (owner && !isOwner) $radio.prop('disabled', true);
+              });
+            });
+
+            $bagPane.find('.envelope-card').each(function() {
+                const $card = $(this);
+                const $sel = $card.find('.js-sobre-mode:checked');
+                const isAllowed = $sel.length && allowed.has($sel.val());
+
+                if (!isAllowed) {
+                    const fallback = allowedModesOrdered().find(m => {
+                        const owner = owners[m];
+                        return !owner || owner.get(0) === $card.get(0);
+                    });
+                    if (fallback) {
+                        $card.find(`.js-sobre-mode[value="${fallback}"]`).prop('checked', true).trigger('change');
+                    }
+                }
+            });
+
+            updateAddEnvelopeButtonState($bagPane);
+          }
+
+          function setSectionEnabled($section, enabled) {
+            $section.find(':input').prop('disabled', !enabled);
+          }
+
+          function containerTypeOf($ce){
+            return String(
+              $ce.find('input[name$=".ContainerType"]').val() ||
+              $ce.find('.js-container-type').val() ||
+              ''
+            ).trim();
+          }
+
+          function getRowKind($row) {
+            const $sel = $row.find('.js-vtype');
+            if ($sel.length && $sel.val()) return String($sel.val());
+
+            const hidden = $row.find('input[name$=".ValueType"]').val();
+            if (hidden) return String(hidden);
+
+            const $table = $row.closest('table.js-details-table');
+            const fk = $table.data('fixed-kind');
+            if (fk) return String(fk);
+
+            return null;
+          }
+
+          function sumEditor($editor){
+            let s = 0;
+            const typeVal = containerTypeOf($editor);
+
+            if (typeVal === 'Bolsa') {
+              $editor.find('.sec-bolsa .js-details-table tbody input[name$=".CalculatedAmount"]').each(function(){
+                s += toNumber($(this).val());
+              });
+            } else {
+              const mode = $editor.find('.js-sobre-mode:checked').val();
+
+              if (mode === 'Efectivo') {
+                $editor.find('.sec-sobre-cash .js-details-table tbody input[name$=".CalculatedAmount"]').each(function(){
+                  s += toNumber($(this).val());
+                });
+              } else if (mode === 'Documento') {
+                $editor.find('.sec-sobre-docs .js-details-table tbody input[name$=".CalculatedAmount"]').each(function(){
+                  s += toNumber($(this).val());
+                });
+              } else if (mode === 'Cheque') {
+                $editor.find('.sec-sobre-cheque .js-cheques-table tbody input[name$=".CalculatedAmount"]').each(function(){
+                  s += toNumber($(this).val());
+                });
+              }
+            }
+            return s;
+          }
+
+          function bankOptionsHtml(selected) {
+            let html = '<option value="">-- Seleccione entidad --</option>';
+            BANKS.forEach(b => {
+              const sel = (String(selected || '') === String(b.value)) ? ' selected' : '';
+              html += `<option value="${b.value}"${sel}>${b.text}</option>`;
+            });
+            return html;
+          }
+
+          // ======== NUM FORMAT HELPERS (es-CO) ========
+          const NF_INT = new Intl.NumberFormat('es-CO');
+
+          // Convierte string con miles '.' y decimal ',' a número JS
+          function toNumber(v){
+            if (v == null) return 0;
+            v = String(v).trim();
+            if (v === '') return 0;
+            v = v.replace(/\./g,'').replace(',', '.');
+            const n = Number(v);
+            return isNaN(n) ? 0 : n;
+          }
+
+          // Formatear enteros (miles con '.')
+          function fmtInt(n){ return NF_INT.format(Number(n) || 0); }
+
+          // (por si luego usas decimales en algún campo)
+          function fmtDec(n, d){ 
+            return new Intl.NumberFormat('es-CO', { minimumFractionDigits:d, maximumFractionDigits:d })
+                   .format(Number(n) || 0);
+          }
+
+          // Desformatea un input (pasa de "456.454" -> "456454" o deja decimales con '.')
+          function unformatInput($i){
+            const raw = toNumber($i.val());
+            if ($i.hasClass('js-num-int')) {
+              $i.val(raw ? String(Math.round(raw)) : '');
+            } else {
+              const d = Number($i.data('decimals') || 2);
+              $i.val(raw ? raw.toFixed(d) : '');
+            }
+          }
+
+          // Formatea un input con miles (para mostrar bonito)
+          function formatInput($i){
+            const val = $i.val();
+            if (val === '') return;
+            const n = toNumber(val);
+            if ($i.hasClass('js-num-int')) $i.val(fmtInt(Math.round(n)));
+            else {
+              const d = Number($i.data('decimals') || 2);
+              $i.val(fmtDec(n, d));
+            }
+          }
+
+          // Marca campos numéricos (ajusta/añade selectores si hace falta)
+          function markNumericFields(){
+            $('input[name$=".Quantity"], input[name$=".BundlesCount"], input[name$=".LoosePiecesCount"], input[name$=".UnitValue"], input[name$=".CalculatedAmount"]')
+              .filter(':not([type="hidden"])')
+              .addClass('js-num js-num-int');
+
+            $('.js-num').attr('type','text').attr('inputmode','numeric');
+          }
+
+          // Formatea / desformatea en lote (útil en init y submit)
+          function formatAllNumbers(){ $('.js-num').each(function(){ formatInput($(this)); }); }
+          function unformatAllNumbers(){ $('.js-num').each(function(){ unformatInput($(this)); }); }
+
+          function newRowKey(){ return 'k' + Date.now().toString(36) + Math.random().toString(36).slice(2,8); }
+
+          function sumInputs($scope, selector) {
+            let s = 0;
+            $scope.find(selector).each(function(){ s += toNumber($(this).val()); });
+            return s;
+          }
+
+          // ======== PESOS (solo para textos) ========
+          function fmtPeso(n){
+            const x = Number(n) || 0;
+            if (x < 0) return '-$ ' + NF_INT.format(Math.abs(x)); // signo antes del $
+            return '$ ' + NF_INT.format(x);
+          }
+
+          function breakdownForEditor($editor){
+            const isSobre = containerTypeOf($editor) === 'Sobre';
+
+            let bills = 0, coins = 0, docs = 0, checks = 0;
+
+            if (!isSobre) {
+              bills = sumInputs($editor, '.sec-bolsa .js-details-table[data-detail-scope="bolsa-billete"] tbody input[name$=".CalculatedAmount"]');
+              coins = sumInputs($editor, '.sec-bolsa .js-details-table[data-detail-scope="bolsa-moneda"]  tbody input[name$=".CalculatedAmount"]');
+            } else {
+              bills = sumInputs($editor, '.sec-sobre-cash .js-details-table[data-detail-scope="sobre-billete"] tbody input[name$=".CalculatedAmount"]');
+              coins = sumInputs($editor, '.sec-sobre-cash .js-details-table[data-detail-scope="sobre-moneda"]  tbody input[name$=".CalculatedAmount"]');
+              docs  = sumInputs($editor, '.sec-sobre-docs .js-details-table[data-detail-scope="sobre-docs"] tbody input[name$=".CalculatedAmount"]');
+              checks = sumInputs($editor, '.sec-sobre-cheque .js-cheques-table tbody input[name$=".CalculatedAmount"]');
+            }
+
+            const total = bills + coins + docs + checks;
+            return { bills, coins, docs, checks, total };
+          }
+
+          function updateEnvelopeBadges($envCard){
+            const $editor = $envCard.find('.container-editor').first();
+            const br = breakdownForEditor($editor);
+
+            $envCard.find('.js-env-bills').text(fmtPeso(br.bills));
+            $envCard.find('.js-env-coins').text(fmtPeso(br.coins));
+            $envCard.find('.js-env-docs').text(fmtPeso(br.docs));
+            $envCard.find('.js-env-checks').text(fmtPeso(br.checks));
+            $envCard.find('.js-env-total').text(fmtPeso(br.total));
+          }
+
+          function setHighBadge($row, highVal) {
+            const $badge  = $row.find('.js-high-badge');
+            const $hidden = $row.find('input[name$=".IsHighDenomination"]');
+            if (!$badge.length || !$hidden.length) return;
+
+            if (highVal === null || typeof highVal === 'undefined') {
+              $badge.text('—')
+                .removeClass('bg-primary bg-secondary')
+                .addClass('bg-light text-dark');
+              $hidden.val('');
+            } else if (highVal) {
+              $badge.text('Alto')
+                .removeClass('bg-secondary bg-light text-dark')
+                .addClass('bg-primary');
+              $hidden.val('true');
+            } else {
+              $badge.text('Bajo')
+                .removeClass('bg-primary bg-light text-dark')
+                .addClass('bg-secondary');
+              $hidden.val('false');
+            }
+          }
+
+          function applyHighFromSelectedDenom($row) {
+            const $opt = $row.find('.js-denom option:selected');
+            if (!$opt.length) { setHighBadge($row, null); return; }
+            const attr = $opt.data('high');
+            const isHigh = (typeof attr === 'undefined') ? null : (String(attr) === 'true');
+            setHighBadge($row, isHigh);
+          }
+
+          function lockCountingTable($tbl, lock) {
+            $tbl.find('input, textarea')
+                .prop('readonly', lock)
+                .toggleClass('readonly-locked', lock);
+
+            $tbl.find('select').each(function () {
+              const $sel = $(this);
+              const name = $sel.attr('name');
+
+              if (lock) {
+                if (name && !$sel.next('input.mirror-hidden').length) {
+                  $('<input type="hidden" class="mirror-hidden">')
+                    .attr('name', name)
+                    .val($sel.val())
+                    .insertAfter($sel);
+                }
+                $sel.prop('disabled', true)
+                    .on('change.mirror', function(){ $(this).next('input.mirror-hidden').val($(this).val()); });
+                $sel.addClass('readonly-locked');
+              } else {
+                $sel.prop('disabled', false).off('change.mirror').removeClass('readonly-locked');
+                if ($sel.next('input.mirror-hidden').length) $sel.next('input.mirror-hidden').remove();
+              }
+            });
+
+            $tbl.closest('.card, .mb-3')
+                .find('.js-add-detail, .js-remove-detail, .js-add-cheque, .js-remove-cheque')
+                .prop('disabled', lock)
+                .toggleClass('disabled', lock);
+          }
+
+          function applyCountingPermissionsUI(scope){
+            const $root = scope ? $(scope) : $(document);
+
+            $root.find('table.js-details-table[data-detail-scope="bolsa-billete"], table.js-details-table[data-detail-scope="sobre-billete"]').each(function(){
+              const $tbl = $(this);
+              lockCountingTable($tbl, !CAN_BILLS);
+            });
+
+            $root.find('table.js-details-table[data-detail-scope="bolsa-moneda"], table.js-details-table[data-detail-scope="sobre-moneda"]').each(function(){
+              const $tbl = $(this);
+              lockCountingTable($tbl, !CAN_COINS);
+            });
+          }
+
+          // =====================================================================
+          // 3) CATÁLOGOS (DENOM / CALIDAD)
+          // =====================================================================
+          function getMoneyFlag(kind) {
+            const k = (kind || '').toString().trim().toLowerCase();
+            if (k === 'billete') return 'B';
+            if (k === 'moneda')  return 'M';
+            return null;
+          }
+
+          function getDenomFamilyForRow($row) {
+            const fam = $row.find('.js-denom option:selected').data('family');
+            return (fam ? String(fam).toUpperCase() : 'T');
+          }
+          function mapUsedQualitiesByDenom($table) {
+            const map = {};
+            $table.find('tbody tr').each(function () {
+              const $r     = $(this);
+              const denom  = String($r.find('.js-denom').val() || '');
+              const qVal   = String($r.find('.js-quality').val() || '');
+              if (!denom || !qVal) return;
+              if (!map[denom]) map[denom] = new Set();
+              map[denom].add(qVal);
+            });
+            return map;
+          }
+          function findDenom(kind, denomId) {
+            const arr = (DENOMS && DENOMS[kind]) ? DENOMS[kind] : [];
+            return arr.find(d => String((d.id ?? d.codDenominacion ?? d.CodDenominacion)) === String(denomId));
+          }
+          function getDenomFamily(kind, denomId) {
+            const d = findDenom(kind, denomId);
+            return d ? (d.family ?? d.familia ?? d.FamiliaDenominacion ?? d.fam ?? 'T') : 'T';
+          }
+
+          function denomOptionsHtml(kind, excludeValues = []) {
+            const arr = (DENOMS && DENOMS[kind]) ? DENOMS[kind] : [];
+            if (!arr.length) return '<option value="">-- Sin denominaciones --</option>';
+
+            let html = '<option value="">-- Seleccione denominación --</option>';
+            arr.forEach(d => {
+              const id    = d.id ?? d.codDenominacion ?? d.CodDenominacion;
+              const value = d.value ?? d.valor ?? d.ValorDenominacion ?? d.valorDenominacion ?? '';
+              const label = d.label ?? d.text ?? d.name ?? d.Denominacion ?? `${value}`;
+              const fam   = (d.family ?? d.FamiliaDenominacion ?? 'T');
+              const high = !!(d.isHigh ?? d.AltaDenominacion);
+              if (!excludeValues.includes(String(id))) {
+                html += `<option value="${id}" data-value="${value}" data-family="${fam}" data-high="${high}">${label}</option>`;
+              }
+            });
+            return html;
+          }
+          function qualityOptionsHtml(kind, denomFamily, excludeIds = []) {
+            const money = getMoneyFlag(kind);
+            const arr   = (QUALS && QUALS[money]) ? QUALS[money] : [];
+            if (!arr.length) return '<option value="">-- Sin calidades --</option>';
+
+            const keepFamilies = (money === 'B' || money === 'M')
+              ? ['N','A','T']
+              : (String(denomFamily).toUpperCase() === 'N') ? ['N','T']
+              : (String(denomFamily).toUpperCase() === 'A') ? ['A','T']
+              : ['T'];
+
+            let html = '<option value="">-- Seleccione calidad --</option>';
+            arr.forEach(q => {
+              const qId = String(q.id);
+              const fam = (q.family ?? q.FamiliaDenominacion ?? 'T').toString().trim().toUpperCase();
+              if (keepFamilies.includes(fam) && !excludeIds.includes(qId)) {
+                html += `<option value="${qId}">${q.name ?? q.QualityName ?? ''}</option>`;
+              }
+            });
+            return html;
+          }
+          function updateQualityForRow($row) {
+            const kind        = getRowKind($row);
+            const denomFamily = getDenomFamilyForRow($row);
+            const denomId     = String($row.find('.js-denom').val() || '');
+            const $q          = $row.find('.js-quality');
+            if (!$q.length) return;
+
+            const prev = String($q.val() || '');
+            const $table     = $row.closest('table');
+            const usedByDen  = mapUsedQualitiesByDenom($table)[denomId] || new Set();
+            const excludeIds = Array.from(usedByDen).filter(x => x !== prev);
+            $q.html(qualityOptionsHtml(kind, denomFamily, excludeIds));
+            if (prev && $q.find(`option[value="${prev}"]`).length) $q.val(prev);
+          }
+          function updateQualitiesInTable($table) {
+            const usedMap = mapUsedQualitiesByDenom($table);
+            $table.find('tbody tr').each(function () {
+              const $r       = $(this);
+              const denomId  = String($r.find('.js-denom').val() || '');
+              const currentQ = String($r.find('.js-quality').val() || '');
+              const $q       = $r.find('.js-quality');
+              if (!denomId || !$q.length) return;
+
+              const usedSet = usedMap[denomId] || new Set();
+              $q.find('option').each(function () {
+                const val = String(this.value || '');
+                if (!val) return;
+                this.disabled = (usedSet.has(val) && val !== currentQ);
+              });
+            });
+          }
+
+          // =====================================================================
+          // 4) CÁLCULOS (FAJOS/PICOS, MONTO, SUBTOTALES)
+          // =====================================================================
+          function calculateBundlesAndLoose($row) {
+            // Lee cantidad respetando separadores de miles
+            const qtyNum = toNumber($row.find('input[name$=".Quantity"]').val());
+
+            if (qtyNum <= 0) {
+              $row.find('input[name$=".BundlesCount"]').val('0');
+              $row.find('input[name$=".LoosePiecesCount"]').val('0');
+              return;
+            }
+
+            const $denomSelect   = $row.find('select[name$=".DenominationId"]');
+            const selectedOption = $denomSelect.find('option:selected');
+
+            if (!selectedOption.length || !selectedOption.val()) {
+              $row.find('input[name$=".BundlesCount"]').val('0');
+              $row.find('input[name$=".LoosePiecesCount"]').val('0');
+              return;
+            }
+
+            const denomId = selectedOption.val();
+            const kind    = getRowKind($row);
+
+            // Tamaño del fajo
+            let bundleSize = 1;
+            const arr       = (DENOMS && DENOMS[kind]) ? DENOMS[kind] : [];
+            const denomInfo = arr.find(d => String((d.id ?? d.codDenominacion ?? d.CodDenominacion)) === String(denomId));
+            if (denomInfo && (denomInfo.bundleSize ?? denomInfo.tamañoFajo ?? denomInfo.bundle)) {
+              bundleSize = denomInfo.bundleSize ?? denomInfo.tamañoFajo ?? denomInfo.bundle;
+            }
+
+            // Aritmética entera para evitar residuos por decimales
+            const qtyInt    = Math.max(0, Math.floor(qtyNum));
+            const bSizeInt  = Math.max(1, Math.floor(bundleSize));
+            const bundles   = Math.floor(qtyInt / bSizeInt);
+            const loose     = qtyInt % bSizeInt;
+
+            $row.find('input[name$=".BundlesCount"]').val(bundles);
+            $row.find('input[name$=".LoosePiecesCount"]').val(loose);
+
+            // UnitValue (con toNumber por si viene formateado)
+            let unitValue = toNumber(selectedOption.data('value'));
+            if (unitValue === 0 && denomInfo) {
+              unitValue = denomInfo.value ?? denomInfo.valor ?? denomInfo.ValorDenominacion ?? denomInfo.valorDenominacion ?? 0;
+            }
+            const currentUnitValue = toNumber($row.find('input[name$=".UnitValue"]').val());
+            if (unitValue === 0 && currentUnitValue > 0) unitValue = currentUnitValue;
+
+            $row.find('input[name$=".UnitValue"]').val(unitValue || 0);
+
+            // (Opcional) Si tienes formatInput activo, deja bonito fajos/picos:
+            if (typeof formatInput === 'function') {
+              formatInput($row.find('input[name$=".BundlesCount"]'));
+              formatInput($row.find('input[name$=".LoosePiecesCount"]'));
+            }
+          }
+
+          // ===================== CÁLCULO (monto) =====================
+          function triggerAmountCalculation($row) {
+            const $calcInput = $row.find('input[name$=".CalculatedAmount"]');
+            const $table     = $row.closest('.js-details-table');
+            const isDocScope = $table.data('detail-scope') === 'sobre-docs';
+
+            if (isDocScope) {
+              const $unit = $row.find('input[name$=".UnitValue"]');
+              const unitVal = toNumber($unit.val());
+            
+              $calcInput.val(unitVal || '');
+            
+              formatInput($unit);
+            
+              updateContainerSubtotal($row.closest('.container-editor'));
+              return;
+            }
+
+            const qty       = toNumber($row.find('input[name$=".Quantity"]').val());
+            let unitValue   = toNumber($row.find('input[name$=".UnitValue"]').val());
+
+            if (unitValue === 0) {
+              const $denSel = $row.find('select[name$=".DenominationId"]');
+              const denomId = $denSel.val();
+              const kind    = $row.find('.js-vtype').val();
+
+              if (denomId && kind) {
+                const selectedOption = $denSel.find('option:selected');
+                unitValue = toNumber(selectedOption.data('value') || 0);
+
+                if (unitValue === 0) {
+                  const arr = (DENOMS && DENOMS[kind]) ? DENOMS[kind] : [];
+                  const denomInfo = arr.find(d => String((d.id ?? d.codDenominacion ?? d.CodDenominacion)) === String(denomId));
+                  if (denomInfo) {
+                    unitValue = toNumber(denomInfo.value ?? denomInfo.valor ?? denomInfo.ValorDenominacion ?? denomInfo.valorDenominacion ?? 0);
+                  }
+                }
+
+                if (unitValue > 0) {
+                  const $unit = $row.find('input[name$=".UnitValue"]');
+                  $unit.val(unitValue);
+                  formatInput($unit);
+                }
+              }
+            }
+
+            const amt = qty * unitValue;
+            $calcInput.val(amt.toFixed(0));
+            formatInput($calcInput);
+
+            const $ce = $row.closest('.container-editor');
+            updateContainerSubtotal($ce);
+          }
+
+          function billsHighLowForEditor($ce) {
+            let high = 0, low = 0;
+
+            const collect = ($scope) => {
+              $scope.find('tbody tr').each(function(){
+                const $r = $(this);
+                if (getRowKind($r) !== 'Billete') return;
+
+                const amt = toNumber($r.find('input[name$=".CalculatedAmount"]').val());
+                if (!amt) return;
+
+                let flag = $r.find('input[name$=".IsHighDenomination"]').val();
+
+                if (flag == null || flag === '') {
+                  const a = $r.find('.js-denom option:selected').data('high');
+                  if (typeof a !== 'undefined') flag = String(a);
+                }
+
+                if (String(flag) === 'true')      high += amt;
+                else if (String(flag) === 'false') low  += amt;
+              });
+            };
+
+            const typeVal = containerTypeOf($ce);
+            if (typeVal === 'Bolsa') {
+              collect($ce.find('.sec-bolsa .js-details-table[data-detail-scope="bolsa-billete"]'));
+            } else {
+              const mode = $ce.find('.js-sobre-mode:checked').val();
+              if (mode === 'Efectivo') {
+                collect($ce.find('.sec-sobre-cash .js-details-table[data-detail-scope="sobre-billete"]'));
+              }
+            }
+            return { high, low };
+          }
+
+          function updateContainerSubtotal($ce) {
+            let total = 0;
+            const typeVal = containerTypeOf($ce);
+
+            if (typeVal === 'Bolsa') {
+              total += sumInputs($ce, '.sec-bolsa .js-details-table tbody input[name$=".CalculatedAmount"]');
+            } else {
+              const mode = $ce.find('.js-sobre-mode:checked').val();
+              if (mode === 'Efectivo') {
+                total += sumInputs($ce, '.sec-sobre-cash .js-details-table tbody input[name$=".CalculatedAmount"]');
+              } else if (mode === 'Documento') {
+                total += sumInputs($ce, '.sec-sobre-docs .js-details-table tbody input[name$=".CalculatedAmount"]');
+              } else if (mode === 'Cheque') {
+                total += sumInputs($ce, '.sec-sobre-cheque .js-cheques-table tbody input[name$=".CalculatedAmount"]');
+              }
+            }
+
+            $ce.find('.js-container-subtotal').text(fmtPeso(total));
+
+            const bl  = billsHighLowForEditor($ce);
+            const $blk = $ce.find('.js-sub-bills-block');
+
+            if ((bl.high + bl.low) > 0) {
+              $ce.find('.js-sub-bills-high, .js-bills-high').text(fmtPeso(bl.high));
+              $ce.find('.js-sub-bills-low,  .js-bills-low').text(fmtPeso(bl.low));
+              $blk.show();
+            } else {
+              $blk.hide();
+              $ce.find('.js-sub-bills-high, .js-bills-high').text('$ 0');
+              $ce.find('.js-sub-bills-low,  .js-bills-low').text('$ 0');
+            }
+          }
+
+          // =====================================================================
+          // 5) MOSTRAR/OCULTAR BLOQUES (TOGGLES) + COMBOS PADRE
+          // =====================================================================
+          function toggleSobreMode($containerEditor) {
+            const mode = $containerEditor.find('.js-sobre-mode:checked').val(); // Efectivo / Documento / Cheque
+            const $cash   = $containerEditor.find('.sec-sobre-cash');
+            const $docs   = $containerEditor.find('.sec-sobre-docs');
+            const $cheque = $containerEditor.find('.sec-sobre-cheque');
+
+            $cash.toggle(mode === 'Efectivo');
+            $docs.toggle(mode === 'Documento');
+            $cheque.toggle(mode === 'Cheque');
+
+            setSectionEnabled($cash,   mode === 'Efectivo');
+            setSectionEnabled($docs,   mode === 'Documento');
+            setSectionEnabled($cheque, mode === 'Cheque');
+
+            updateContainerSubtotal($containerEditor);
+          }
+          function toggleContainerSections($containerEditor) {
+            const typeVal = containerTypeOf($containerEditor);
+            const isSobre = (typeVal === 'Sobre');
+
+            const $secBolsa = $containerEditor.find('.sec-bolsa');
+            const $secSobre = $containerEditor.find('.sec-sobre');
+
+            $secBolsa.toggle(!isSobre);
+            $secSobre.toggle(isSobre);
+
+            setSectionEnabled($secBolsa, !isSobre);
+            setSectionEnabled($secSobre,  isSobre);
+
+            $containerEditor.find('.js-parent-bag-block').toggle(isSobre);
+
+            if (isSobre) {
+              if ($containerEditor.find('.js-sobre-mode:checked').length === 0) {
+                $containerEditor.find('.js-sobre-mode[value="Efectivo"]').prop('checked', true);
+              }
+              toggleSobreMode($containerEditor);
+            }
+
+            updateContainerSubtotal($containerEditor);
+          }
+
+          function refreshAllParentBagCombos() {
+            const bags = [];
+            $('#bagsTabContent .tab-pane[id^="bag-tab-"]').each(function () {
+              const $bagPane   = $(this);
+              const $bagEditor = $bagPane.find('.container-editor').first();
+              const bagId = $bagEditor.find('input[name$=".Id"]').val() || '';
+              const code  = $bagEditor.find('input[name$=".ContainerCode"]').val() || '';
+              const idx   = $('#bagsTabContent .tab-pane[id^="bag-tab-"]').index($bagPane) + 1;
+              const label = code ? `Bolsa ${idx} — ${code}` : `Bolsa ${idx}`;
+              bags.push({ id: bagId, label });
+            });
+
+            $('.container-editor').each(function(){
+              const $ce = $(this);
+              if ($ce.find('.js-container-type').val() !== 'Sobre') return;
+              const prefix   = $ce.data('prefix');
+              const $visible = $ce.find('.js-parent-bag-block select[name="VisibleBagName"]');
+              const $hidden  = $ce.find(`input[name="${prefix}.ParentContainerId"]`);
+
+              $visible.empty().append($('<option/>', { value:'', text:'-- Seleccione bolsa --' }));
+              bags.forEach(b => $visible.append($('<option/>', { value: b.id, text: b.label })));
+
+              if ($hidden.val()) $visible.val($hidden.val());
+
+              $visible.off('change.parentbag').on('change.parentbag', function(){
+                $hidden.val($(this).val() || '');
+              });
+            });
+          }
+
+          // =====================================================================
+          // 6) BADGES (TAB SUMMARY)
+          // =====================================================================
+          function updateBagBadgeFromPane($bagPane){
+            const tabId   = $bagPane.attr('id');
+            const $tabBtn = $(`#bagsTabs button[data-bs-target="#${tabId}"]`);
+            const $envHdr = $bagPane.find('.js-env-badges');
+
+            const $bagEd  = $bagPane.find('.container-editor').first();
+            const brBag   = breakdownForEditor($bagEd);
+
+            let brEnv = { bills:0, coins:0, docs:0, checks:0, total:0 };
+            $bagPane.find('.envelope-card').each(function(){
+              const $envEd = $(this).find('.container-editor').first();
+              const b = breakdownForEditor($envEd);
+              brEnv.bills  += b.bills;
+              brEnv.coins  += b.coins;
+              brEnv.docs   += b.docs;
+              brEnv.checks += b.checks;
+              brEnv.total  += b.total;
+
+              updateEnvelopeBadges($(this));
+            });
+
+            const billsTotal = brBag.bills + brEnv.bills;
+            const coinsTotal = brBag.coins + brEnv.coins;
+            const grandTotal = billsTotal + coinsTotal + brEnv.docs + brEnv.checks;
+
+            const envelopeBill = brEnv.bills;
+            const envelopeCoin = brEnv.coins;
+            const envelopeDoc  = brEnv.docs;
+            const envelopeCheck = brEnv.checks;
+            const envelopeTotal = envelopeBill + envelopeCoin + envelopeDoc + envelopeCheck;
+            
+
+            $tabBtn.find('.js-bag-badge-bills').text(fmtPeso(billsTotal));
+            $tabBtn.find('.js-bag-badge-coins').text(fmtPeso(coinsTotal));
+            $tabBtn.find('.js-bag-badge-total').text(fmtPeso(grandTotal));
+
+            $envHdr.find('.js-env-bills').text(fmtPeso(envelopeBill));
+            $envHdr.find('.js-env-coins').text(fmtPeso(envelopeCoin));
+            $envHdr.find('.js-env-docs').text(fmtPeso(envelopeDoc));
+            $envHdr.find('.js-env-checks').text(fmtPeso(envelopeCheck));
+            $envHdr.find('.js-env-total').text(fmtPeso(envelopeTotal));
+
+            updateTabsOverflowState();
+            updateAddEnvelopeButtonState($bagPane);
+          }
+
+          function updateAllBagBadges(){
+            $('#bagsTabContent .tab-pane[id^="bag-tab-"]').each(function(){
+              updateBagBadgeFromPane($(this));
+            });
+          }
+
+          // =====================================================================
+          // X) RESUMEN (UI)
+          // =====================================================================
+          function computeLiveSummary(){
+            const declaredTotal = DECLARED_TX;
+
+            let bills = 0, coins = 0, docs = 0, checks = 0
+            let bagsCount = 0, envCount = 0;
+
+            $('#bagsTabContent .tab-pane .container-editor').each(function(){
+              const $ce = $(this);
+              const isSobre = containerTypeOf($ce) === 'Sobre';
+              const br = breakdownForEditor($ce);
+
+              bills        += br.bills;
+              coins        += br.coins;
+              docs         += br.docs;
+              checks       += br.checks;
+
+              if(!isSobre) bagsCount++; else envCount++;
+            });
+
+            const cashTotal = bills + coins;
+            const overallTotal = cashTotal + docs + checks;
+
+            return { declaredTotal, cashTotal, overallTotal, bills, coins, docs, checks, bagsCount, envCount };
+          }
+
+          // Suma global de billetes Alta/Baja a partir de todos los editores
+          function computeGlobalBillsHighLow(){
+            let high = 0, low = 0;
+            $('#bagsTabContent .container-editor').each(function(){
+              const bl = billsHighLowForEditor($(this));
+              high += bl.high;
+              low  += bl.low;
+            });
+            return { high, low };
+          }
+
+          // lista por bolsa (Declarado vs Contado)
+          function renderPerBagList(){
+            const $list = $('#perBagList').empty();
+
+            $('#bagsTabContent .tab-pane[id^="bag-tab-"]').each(function(idx){
+              const $pane = $(this);
+              const $bagEd = $pane.find('.container-editor').first();
+
+              // contado bolsa + sobres hijos en la UI actual
+              let counted = sumEditor($bagEd);
+              $pane.find('.envelope-card').each(function(){ counted += sumEditor($(this)); });
+
+              const html = `
+                <div class="list-group-item d-flex justify-content-between align-items-center">
+                  <span>Bolsa ${idx+1}</span>
+                  <span class="badge bg-info" title="Contado">${fmtPeso(counted)}</span>
+                </div>`;
+              $list.append(html);
+            });
+          }
+
+          function updateProcessSummary(){
+            const s  = computeLiveSummary();
+            const bl = computeGlobalBillsHighLow();
+
+            const declared = DECLARED_TX;
+            const diff = (s.cashTotal - declared) + (Number(INCIDENT_EFFECT) || 0);
+
+            $('#totDeclaredGlobal').text(fmtPeso(declared));
+            $('#totCountedGlobal').text(fmtPeso(s.cashTotal));
+            $('#totDiffGlobal')
+              .text((diff>=0?'+':'') + fmtPeso(diff))
+              .removeClass('positive negative')
+              .addClass(diff < 0 ? 'negative' : 'positive');
+            $('#totOverallGlobal').text(fmtPeso(s.overallTotal));
+            $('#countBagsHeader').text(s.bagsCount);
+            $('#countEnvelopesHeader').text(s.envCount);
+
+            if (document.getElementById('totIncidentsEffectGlobal')) {
+              $('#totIncidentsEffectGlobal').text(
+                (INCIDENT_EFFECT>=0?'+':'') + fmtPeso(INCIDENT_EFFECT)
+              );
+            }
+
+            $('#sumDeclaredAllDisplay').text(fmtPeso(declared));
+            $('#sumCountedAllDisplay').text(fmtPeso(s.cashTotal));
+            $('#sumDiffAllDisplay')
+              .text((diff>=0?'+':'') + fmtPeso(diff))
+              .removeClass('positive negative')
+              .addClass(diff < 0 ? 'negative' : 'positive');
+
+            $('#sumBillsCounted').text(fmtPeso(s.bills));
+            $('#sumCoinsCounted').text(fmtPeso(s.coins));
+            $('#sumDocsCounted').text(fmtPeso(s.docs));
+            $('#sumChecksCounted').text(fmtPeso(s.checks));
+            $('#sumTotalCountedDisplay').text(fmtPeso(s.overallTotal));
+            $('#sumBillHigh').text(fmtPeso(bl.high));
+            $('#sumBillLow').text(fmtPeso(bl.low));
+            $('#countBags').text(s.bagsCount);
+            $('#countEnvelopes').text(s.envCount);
+
+            renderPerBagList();
+          }
+
+          // =====================================================================
+          // 7) POBLAR SELECTS (DENOMS/QUALS) + INIT EXISTENTES
+          // =====================================================================
+          function ensureDenomDataValue($row) {
+            const $denomSelect = $row.find('select[name$=".DenominationId"]');
+            const selectedValue = $denomSelect.val();
+            const kind = $row.find('.js-vtype').val();
+
+            if (selectedValue && kind) {
+              const selectedOption = $denomSelect.find('option:selected');
+              if (!selectedOption.data('value')) {
+                const arr = (DENOMS && DENOMS[kind]) ? DENOMS[kind] : [];
+                const denomInfo = arr.find(d => String((d.id ?? d.codDenominacion ?? d.CodDenominacion)) === String(selectedValue));
+                if (denomInfo) {
+                  const value = denomInfo.value ?? denomInfo.valor ?? denomInfo.ValorDenominacion ?? denomInfo.valorDenominacion ?? 0;
+                  const family = denomInfo.family ?? denomInfo.familia ?? denomInfo.FamiliaDenominacion ?? denomInfo.fam ?? 'T';
+                  selectedOption.attr('data-value', value);
+                  selectedOption.attr('data-family', family);
+                }
+              }
+            }
+          }
+
+          function populateDenomsAndQuals() {
+            document.querySelectorAll('table.js-details-table tbody tr').forEach(row => {
+              const tipoSelect = row.querySelector('.js-vtype');
+              const tipo = (tipoSelect?.value || 'Billete');
+
+              const denomSel   = row.querySelector('.js-denom');
+              const qualitySel = row.querySelector('.js-quality');
+
+              if (!denomSel) return;
+
+              denomSel.innerHTML = denomOptionsHtml(tipo);
+              if (denomSel.dataset.selected) {
+                denomSel.value = denomSel.dataset.selected;
+              }
+
+              if (qualitySel) {
+                qualitySel.innerHTML = '';
+                const denoms = (DENOMS && DENOMS[tipo]) ? DENOMS[tipo] : [];
+                const selectedDenomId = denomSel.dataset.selected || denomSel.value;
+                const selectedDenom = denoms.find(x => String(x.id) === String(selectedDenomId));
+                const family = (selectedDenom?.family || 'T').toString().toUpperCase();
+
+                let keepFamilies;
+                if (tipo === 'Billete' || tipo === 'Moneda') keepFamilies = ['N','A','T'];
+                else if (family === 'N') keepFamilies = ['N','T'];
+                else if (family === 'A') keepFamilies = ['A','T'];
+                else keepFamilies = ['T'];
+
+                const arr = (QUALS && QUALS[tipo.charAt(0)]) ? QUALS[tipo.charAt(0)] : [];
+                arr
+                  .filter(q => keepFamilies.includes(String(q.family ?? q.FamiliaDenominacion ?? 'T').toUpperCase()))
+                  .forEach(q => {
+                    const opt = document.createElement('option');
+                    opt.value = q.id;
+                    opt.textContent = q.name ?? q.QualityName ?? '';
+                    if (qualitySel.dataset.selected == String(q.id)) opt.selected = true;
+                    qualitySel.appendChild(opt);
+                  });
+              }
+            });
+
+            setTimeout(initializeExistingData, 50);
+          }
+
+          function initializeExistingData() {
+            $('table.js-details-table tbody tr').each(function() {
+              const $row = $(this);
+              const $denomSelect = $row.find('select[name$=".DenominationId"]');
+              if ($denomSelect.val()) {
+                ensureDenomDataValue($row);
+                const qty = toNumber($row.find('input[name$=".Quantity"]').val());
+                if (qty > 0) {
+                  calculateBundlesAndLoose($row);
+                }
+                triggerAmountCalculation($row);
+              }
+              const $hid = $row.find('input[name$=".IsHighDenomination"]');
+              if (getRowKind($row) === 'Billete' && $row.find('.js-high-badge').length) {
+                if ($hid.length && $hid.val() !== undefined && $hid.val() !== '') {
+                  setHighBadge($row, $hid.val() === 'true');
+                } else {
+                  applyHighFromSelectedDenom($row);
+                }
+              }
+            });
+          }
+
+          // =====================================================================
+          // 8) DETALLES (AGREGAR/QUITAR) + DENOM DISPONIBLES
+          // =====================================================================
+          function updateAvailableDenominations($table) {
+            if ($table.find('select[name$=".QualityId"].js-quality').length) return;
+
+            const selectedDenoms = [];
+            $table.find('.js-denom').each(function() {
+              const val = $(this).val();
+              if (val) selectedDenoms.push(val);
+            });
+            $table.find('.js-denom').each(function() {
+              const $select = $(this);
+              const currentValue = $select.val();
+              const valueType = $select.closest('tr').find('.js-vtype').val();
+              const excludeValues = selectedDenoms.filter(val => val !== currentValue);
+              const filteredOptions = denomOptionsHtml(valueType, excludeValues);
+              $select.html(filteredOptions);
+              $select.val(currentValue);
+            });
+          }
+
+          function reindexValueDetailsForContainer($ce) {
+            // Usamos claves + .Index -> no renumerar ni tocar los name
+            return;
+          }
+
+          // -> Agregar fila detalle
+          $(document).on('click', '.js-add-detail', function () {
+            const $btn  = $(this);
+            const scope = $btn.data('detail-scope');
+            const $card = $btn.closest('.card');
+            const $table = $card.find('.js-details-table[data-detail-scope="' + scope + '"]');
+
+            if (scope === 'sobre-docs') {
+              if ($table.find('tbody tr').length > 0) {
+                Swal.fire('Solo un detalle', 'En Documento/Voucher solo se permite un detalle.', 'info');
+                return;
+              }
+            }
+
+            const $ce   = $btn.closest('.container-editor');
+            const basePrefix = $ce.data('prefix');
+            const key = newRowKey();
+            const name = (field) => `${basePrefix}.ValueDetails[${key}].${field}`;
+
+            let showDenom = true, showQuality = true, showBundleFields = true, showUnit = true;
+            let fixedKind = null;
+            let valueTypeOptions = [], denomKindDefault = null;
+
+            if (scope === 'bolsa-billete' || scope === 'sobre-billete') {
+              fixedKind = 'Billete';
+            } else if (scope === 'bolsa-moneda' || scope === 'sobre-moneda') {
+              fixedKind = 'Moneda';
+            } else if (scope === 'sobre-docs') {
+              valueTypeOptions = [{ value: 'Documento', text: 'Documento' }];
+              denomKindDefault = 'Documento';
+              showDenom = false; showQuality = false; showBundleFields = false;
+              showUnit = true;
+            }
+
+            const vtHtml    = valueTypeOptions.map(v => `<option value="${v.value}">${v.text}</option>`).join('');
+            const denomHtml = denomOptionsHtml(fixedKind || denomKindDefault);
+
+            const hasQualityColInTable = $table.find('thead th')
+              .filter(function(){ return $(this).text().trim().toLowerCase().includes('calidad'); }).length > 0;
+
+            const hasHighColInTable = String($table.data('has-high')) === 'true';
+
+            let cells = '';
+
+            cells += `
+              <td style="display:none;">
+                <input type="hidden" name="${basePrefix}.ValueDetails.Index" value="${key}">
+              </td>`;
+
+            if (fixedKind) {
+              cells += `
+                <td style="display:none;">
+                  <input type="hidden" name="${name('ValueType')}" value="${fixedKind}" class="js-vtype" />
+                </td>`;
+            } else {
+              cells += `
+                <td>
+                  <select name="${name('ValueType')}" class="form-select form-select-sm js-vtype">${vtHtml}</select>
+                </td>`;
+            }
+
+            if (showDenom) {
+              cells += `
+                <td>
+                  <select name="${name('DenominationId')}" class="form-select form-select-sm js-denom">${denomHtml}</select>
+                </td>`;
+            }
+            if (hasQualityColInTable && showQuality) {
+              cells += `
+                <td>
+                  <select name="${name('QualityId')}" class="form-select form-select-sm js-quality">
+                    <option value="">-- Seleccione calidad --</option>
+                  </select>
+                </td>`;
+            }
+
+            if ((fixedKind === 'Billete' || scope === 'sobre-billete' || scope === 'bolsa-billete') && hasHighColInTable) {
+              cells += `
+                <td class="text-center">
+                  <span class="badge js-high-badge bg-light text-dark">—</span>
+                  <input type="hidden" name="${name('IsHighDenomination')}" value="">
+                </td>`;
+            }
+
+            cells += `
+              <td><input name="${name('Quantity')}" type="number" class="form-control form-control-sm js-calc" /></td>`;
+
+            if (showBundleFields) {
+              cells += `
+                <td><input name="${name('BundlesCount')}"     type="number" class="form-control form-control-sm js-calc" readonly /></td>
+                <td><input name="${name('LoosePiecesCount')}" type="number" class="form-control form-control-sm js-calc" readonly /></td>`;
+            }
+
+            if (showUnit) {
+              const unitReadonly = (scope === 'sobre-docs') ? '' : ' readonly';
+              cells += `
+                <td><input name="${name('UnitValue')}" type="number" step="1"
+                           class="form-control form-control-sm js-calc"${unitReadonly} /></td>`;
+            }
+
+            if (scope === 'sobre-docs') {
+              cells += `<td style="display:none;"><input name="${name('CalculatedAmount')}" type="hidden" /></td>`;
+            } else {
+              cells += `<td><input name="${name('CalculatedAmount')}" type="number" step="1" class="form-control form-control-sm" readonly /></td>`;
+            }
+            cells += `
+              <td><button type="button" class="btn btn-sm btn-outline-danger js-remove-detail">×</button></td>`;
+
+            $table.find('tbody').append(`<tr>${cells}</tr>`);
+            const $newRow = $table.find('tbody tr').last();
+
+            if (getRowKind($newRow) === 'Billete') {
+              applyHighFromSelectedDenom($newRow);
+            }
+
+            if (hasQualityColInTable && showQuality) updateQualityForRow($newRow);
+
+            setTimeout(() => {
+              if (showDenom) updateAvailableDenominations($table);
+              if (hasQualityColInTable && showQuality) updateQualitiesInTable($table);
+            }, 10);
+
+            if (scope === 'sobre-docs') triggerAmountCalculation($newRow);
+
+            const $pane = $btn.closest('.tab-pane[id^="bag-tab-"]');
+            if ($pane.length) setTimeout(()=>updateBagBadgeFromPane($pane), 0);
+            updateContainerSubtotal($ce);
+            markNumericFields();
+            formatAllNumbers();
+            updateProcessSummary();
+            applyCountingPermissionsUI($(this).closest('.container-editor'));
+          });
+
+          // -> Eliminar fila detalle
+          $(document).on('click', '.js-remove-detail', function () {
+            const $table = $(this).closest("table");
+            const $pane  = $(this).closest('.tab-pane[id^="bag-tab-"]');
+            const $ce    = $table.closest('.container-editor');
+
+            $(this).closest("tr").remove();
+            reindexValueDetailsForContainer($ce);
+
+            if ($pane.length) updateBagBadgeFromPane($pane);
+            updateContainerSubtotal($ce);
+            updateProcessSummary();
+          });
+
+          // =====================================================================
+          // 9) EVENTOS DE CAMBIO (CÁLCULOS / CATÁLOGOS)
+          // =====================================================================
+          $(document).on('input change', 'input[name$=".Quantity"]', function() {
+            const $row = $(this).closest('tr');
+            calculateBundlesAndLoose($row);
+            triggerAmountCalculation($row);
+          });
+          $(document).on('input change', 'input[name$=".BundlesCount"], input[name$=".LoosePiecesCount"]', function() {
+            const $row    = $(this).closest('tr');
+            const bundles = Math.max(0, Math.floor(toNumber($row.find('input[name$=".BundlesCount"]').val())));
+            const loose   = Math.max(0, Math.floor(toNumber($row.find('input[name$=".LoosePiecesCount"]').val())));
+
+            if (bundles === 0 && loose === 0) {
+              $row.find('input[name$=".Quantity"]').val('');
+              triggerAmountCalculation($row);
+              return;
+            }
+
+            const $denomSelect   = $row.find('select[name$=".DenominationId"]');
+            const selectedOption = $denomSelect.find('option:selected');
+
+            if (selectedOption.length && selectedOption.val()) {
+              const denomId = selectedOption.val();
+              const kind    = getRowKind($row);
+
+              let bundleSize = 1;
+              const arr       = (DENOMS && DENOMS[kind]) ? DENOMS[kind] : [];
+              const denomInfo = arr.find(d => String((d.id ?? d.codDenominacion ?? d.CodDenominacion)) === String(denomId));
+              if (denomInfo && (denomInfo.bundleSize ?? denomInfo.tamañoFajo ?? denomInfo.bundle)) {
+                bundleSize = denomInfo.bundleSize ?? denomInfo.tamañoFajo ?? denomInfo.bundle;
+              }
+
+              const bSizeInt      = Math.max(1, Math.floor(bundleSize));
+              const totalQuantity = (bundles * bSizeInt) + loose;
+
+              $row.find('input[name$=".Quantity"]').val(totalQuantity);
+
+              if (typeof formatInput === 'function') {
+                formatInput($row.find('input[name$=".Quantity"]'));
+              }
+
+              triggerAmountCalculation($row);
+            }
+          });
+          $(document).on('change', '.js-vtype', function () {
+            const v = $(this).val();
+            const kind = (v === 'Billete' ? 'Billete' : v === 'Moneda' ? 'Moneda' : v === 'Documento' ? 'Documento' : null);
+            if (!kind) return;
+
+            const $row = $(this).closest('tr');
+            const $denomSelect = $row.find('.js-denom');
+
+            $denomSelect.val('');
+            $denomSelect.html(denomOptionsHtml(kind));
+
+            updateQualityForRow($row);
+
+            const $table = $(this).closest('table');
+            updateAvailableDenominations($table);
+            updateQualitiesInTable($table);
+          });
+
+          $(document).on('change', '.js-denom', function () {
+            const $table = $(this).closest('table');
+            const $row   = $(this).closest('tr');
+
+            updateQualityForRow($row);
+            if (getRowKind($row) === 'Billete') {
+              applyHighFromSelectedDenom($row);
+            }
+            updateQualitiesInTable($table);
+
+            calculateBundlesAndLoose($row);
+            triggerAmountCalculation($row);
+          });
+
+          $(document).on('change', '.js-quality', function(){
+            const $table = $(this).closest('table');
+            updateQualitiesInTable($table);
+          });
+
+          // -------- UX para inputs numéricos amigables --------
+          $(document).on('focus', '.js-num', function(){
+            unformatInput($(this));
+            this.select();
+          });
+
+          $(document).on('blur', '.js-num', function(){
+            formatInput($(this));
+          });
+
+          // Bloquear caracteres no numéricos (permitir borrar, flechas, tab, etc.)
+          $(document).on('keydown', '.js-num', function(e){
+            const k = e.key;
+            if (['Backspace','Delete','ArrowLeft','ArrowRight','Tab','Home','End'].includes(k)) return;
+
+            // Decimales sólo si NO es entero
+            if ((k === ',' || k === '.') && !$(this).hasClass('js-num-int')) return;
+
+            if (!/^\d$/.test(k)) e.preventDefault();
+          });
+
+          // =====================================================================
+          // 10) BOLSAS Y SOBRES (AGREGAR/QUITAR/TOGGLES)
+          // =====================================================================
+          $('#btnAddBag').on('click', function () {
+            if (bagCount() >= 7) {
+              Swal.fire('Límite de bolsas', 'Solo puedes agregar hasta 7 bolsas en la transacción.', 'info');
+              return;
+            }
+
+            const $tabs = $('#bagsTabs');
+            const $contents = $('#bagsTabContent');
+            const realTransactionId = $('#CefTransactionId').val();
+
+            const bagIdx = nextIdx++;
+            const newId = 'bag-tab-' + bagIdx;
+
+            const idxHuman = $contents.children('.tab-pane').length + 1;
+            const $btn = $(`
+              <li class="nav-item" role="presentation">
+                <button class="nav-link d-inline-flex align-items-center gap-1" id="${newId}-btn"
+                        data-bs-toggle="tab" data-bs-target="#${newId}"
+                        type="button" role="tab">
+                  <span>Bolsa ${idxHuman}</span>
+                  <span class="badge bg-primary ms-2 tab-badge" title="Billetes"><i class="ri-money-dollar-box-line"></i><span class="js-bag-badge-bills">0</span></span>
+                  <span class="badge bg-warning text-dark ms-1 tab-badge" title="Monedas"><i class="ri-coins-line"></i><span class="js-bag-badge-coins">0</span></span>
+                  <span class="badge bg-info ms-1 tab-badge" title="Total bolsa"><i class="ri-equalizer-line"></i><span class="js-bag-badge-total">0</span></span>
+                  <span class="btn-close btn-close-sm tab-close js-close-bag-tab ms-1"
+                    role="button" aria-label="Eliminar bolsa" title="Eliminar bolsa"
+                    data-container-id="0"
+                    data-bag-idx="${bagIdx}"></span>
+                </button>
+              </li>
+            `);
+            $tabs.append($btn);
+
+            let html = $('#bag-template').html().replaceAll('__idx__', bagIdx);
+            const $pane = $(`<div class="tab-pane fade" id="${newId}" role="tabpanel" data-bag-idx="${bagIdx}">${html}
+                <div class="card mt-3">
+                  <div class="card-header d-flex align-items-center justify-content-between">
+                    <h6 class="mb-0">✉️ Sobres de esta Bolsa</h6>
+                    <div class="d-flex gap-2 align-items-center small js-env-badges mt-2">
+                        <span class="badge bg-primary">Billetes: <span class="js-env-bills">0</span></span>
+                        <span class="badge bg-warning text-dark">Monedas: <span class="js-env-coins">0</span></span>
+                        <span class="badge bg-secondary">Docs: <span class="js-env-docs">0</span></span>
+                        <span class="badge bg-info">Cheques: <span class="js-env-checks">0</span></span>
+                        <span class="ms-auto text-muted">Total: <strong class="js-env-total">0</strong></span>
+                    </div>
+                    <button type="button" class="btn btn-outline-secondary btn-sm js-add-envelope-in-this-bag">+ Agregar Sobre</button>
+                  </div>
+                  <div class="card-body">
+                    <div class="small text-muted">Puedes añadir varios sobres; cada sobre puede ser Efectivo, Documentos/Voucher o Cheques.</div>
+                    <div class="bag-envelopes-list mt-3"></div>
+                  </div>
+                </div>
+            </div>`);
+            $contents.append($pane);
+
+            $tabs.find('button.nav-link').removeClass('active');
+            $contents.find('.tab-pane').removeClass('show active');
+            $btn.find('> .nav-link').addClass('active');
+            $pane.addClass('show active');
+
+            scrollTabBtnIntoView($btn.find('> .nav-link').get(0));
+            updateTabsOverflowState();
+
+            const $bagEditor = $pane.find('.container-editor').first();
+            $bagEditor.find(':input').prop('disabled', false);
+            $bagEditor.find('.js-container-type').val('Bolsa');
+            $bagEditor.find('input[name$=".CefTransactionId"]').val(realTransactionId);
+            toggleContainerSections($bagEditor);
+            applyCountingPermissionsUI($pane);
+            markNumericFields();
+            formatAllNumbers();
+            refreshAllParentBagCombos();
+            setTimeout(updateAllBagBadges, 0);
+            applyPointCapsUI();
+          });
+
+          $(document).on('click', '.js-add-envelope-in-this-bag', function () {
+            const $bagPane = $(this).closest('.tab-pane[id^="bag-tab-"]');
+            const typeToUse = nextAvailableEnvelopeType($bagPane);
+            const envIdx = nextIdx++;
+            const realtransactionId = $('#CefTransactionId').val();
+            const $bagEditor = $bagPane.find('.container-editor').first();
+            const realBagId = $bagEditor.find('input[name$=".Id"]').val();
+            const bagLabel  = $bagEditor.find('input[name$=".ContainerCode"]').val();
+
+            if (!SOBRES_OK) {
+              Swal.fire('No permitido','Este punto no admite sobres.','info');
+              return;
+            }
+
+            if (!typeToUse) {
+              Swal.fire('Límite de sobres', 'No puedes agregar más sobres a esta bolsa.', 'info');
+              return;
+            }
+
+            let html = $('#envelope-template').html().replaceAll('__idx__', envIdx);
+            const $card = $(html);
+            $bagPane.find('.bag-envelopes-list').append($card);
+
+            $card.find(':input').prop('disabled', false);
+
+            const $envEditor = $card.find('.container-editor').first();
+            const prefix = $envEditor.data('prefix');
+
+            $envEditor.find('.js-container-type').val('Sobre');
+            $envEditor.find('input[name$=".CefTransactionId"]').val(realtransactionId);
+            $envEditor.find(`input[name="${prefix}.ParentContainerId"]`).val(realBagId || '');
+
+            const $visualSelect = $envEditor.find('.js-parent-bag-block select[name="VisibleBagName"]');
+            $visualSelect.empty().append(`<option value="${realBagId}" selected>${bagLabel}</option>`);
+
+            toggleContainerSections($envEditor);
+            $envEditor.find(`.js-sobre-mode[value="${typeToUse}"]`).prop('checked', true);
+            toggleSobreMode($envEditor);
+            applyCountingPermissionsUI($card);
+            markNumericFields();
+            formatAllNumbers();
+            refreshAllParentBagCombos();
+            updateAddEnvelopeButtonState($bagPane);
+            updateEnvelopeModeRadios($bagPane);
+            setTimeout(updateAllBagBadges, 0);
+          });
+
+          // Eliminar sobre (con confirmación si ya existe)
+          $(document).on('click', '.js-remove-envelope-card', function () {
+            const $btn         = $(this);
+            const $card        = $btn.closest('.envelope-card');
+            const containerId  = parseInt($btn.data('container-id') || $card.data('container-id') || 0, 10);
+            const transactionId= $('#CefTransactionId').val();
+            const token        = $('input[name="__RequestVerificationToken"]').val();
+
+            if (!containerId || containerId === 0) {
+              $card.remove();
+              refreshAllParentBagCombos();
+              Swal.fire('Eliminado', 'El sobre (sin guardar) fue eliminado del formulario.', 'success');
+              return;
+            }
+
+            Swal.fire({
+              title: '¿Eliminar sobre?',
+              text: 'Se eliminará el sobre y todos sus detalles.',
+              icon: 'warning',
+              showCancelButton: true,
+              confirmButtonText: 'Sí, eliminar',
+              cancelButtonText: 'Cancelar'
+            }).then((res) => {
+              if (!res.isConfirmed) return;
+
+              $btn.prop('disabled', true);
+
+              $.ajax({
+                type: 'POST',
+                url: '@Url.Action("DeleteContainer", "Cef")',
+                data: {
+                  transactionId: transactionId,
+                  containerId: containerId,
+                  __RequestVerificationToken: token
+                }
+              }).done(function (r) {
+                if (r && r.success) {
+                    Swal.fire('Eliminado', 'El sobre fue eliminado correctamente.', 'success')
+                    .then(() => {
+                        skipUnload = true;
+                        window.location.reload();
+                    });
+                    return;
+                } else {
+                  Swal.fire('Atención', (r && r.message) || 'No se pudo eliminar el sobre.', 'info');
+                }
+              }).fail(function (xhr) {
+                const msg = (xhr.responseJSON && xhr.responseJSON.message)
+                          || xhr.responseText
+                          || 'Error inesperado al eliminar.';
+                Swal.fire('Error', msg, 'error');
+              }).always(function () {
+                $btn.prop('disabled', false);
+              });
+            });
+          });
+
+          // Toggles de tipo bolsa / modo sobre
+          $(document).on('change', '.js-container-type', function () {
+            const $ce = $(this).closest('.container-editor');
+            toggleContainerSections($ce);
+            refreshAllParentBagCombos();
+          });
+
+          $(document).on('change', '.js-sobre-mode', function () {
+            const $ce = $(this).closest('.container-editor');
+            const $bagPane = $ce.closest('.tab-pane[id^="bag-tab-"]');
+
+            toggleSobreMode($ce);
+
+            const mode = $ce.find('.js-sobre-mode:checked').val();
+            if (mode === 'Documento') {
+              $ce.find('.js-details-table[data-detail-scope="sobre-docs"] tbody tr').each(function(){
+                triggerAmountCalculation($(this));
+              });
+            }
+
+            updateContainerSubtotal($ce);
+            updateProcessSummary();
+            updateEnvelopeModeRadios($bagPane);
+          });
+
+          // Eliminar bolsa clic en X
+          $(document).on('click', '.js-close-bag-tab', function(e){
+            e.stopPropagation();
+            e.preventDefault();
+          
+            const $close       = $(this);
+            const $btnTab      = $close.closest('button.nav-link');
+            const target       = $btnTab.attr('data-bs-target');
+            const $pane        = $(target);
+            const $li          = $btnTab.closest('li.nav-item');
+            const containerId  = parseInt($close.data('container-id') || 0, 10);
+          
+            // 1) Debe quedar al menos 1 bolsa
+            if (bagCount() <= 1) {
+              Swal.fire('No permitido', 'Debe existir al menos una bolsa en la transacción.', 'info');
+              return;
+            }
+          
+            // 2) Si tiene sobres hijos, bloquear (evita error por FK en backend)
+            const hasEnvelopes = $pane.find('.envelope-card').length > 0;
+            if (hasEnvelopes && containerId === 0) {
+              Swal.fire('No permitido', 'Esta bolsa tiene sobres asociados. Elimínelos primero.', 'info');
+              return;
+            }
+
+            function removeBagFromUI() {
+              const isActive = $btnTab.hasClass('active');
+          
+              $li.remove();
+              $pane.remove();
+          
+              if (isActive) {
+                const $firstBtn = $('#bagsTabs button.nav-link').first();
+                if ($firstBtn.length) {
+                  const t = new bootstrap.Tab($firstBtn[0]);
+                  t.show();
+                }
+              }
+          
+              refreshAllParentBagCombos();
+              updateTabsOverflowState();
+              updateAllBagBadges();
+              updateProcessSummary();
+            }
+          
+            // 3) Bolsa nueva (Id=0) -> borrar del DOM
+            if (!containerId || containerId === 0) {
+                removeBagFromUI();
+                Swal.fire('Eliminado', 'La bolsa (sin guardar) fue eliminada del formulario.', 'success');
+                return;
+            }
+          
+            // 4) Bolsa existente -> confirmar y eliminar por AJAX
+            const transactionId = $('#CefTransactionId').val();
+            const token         = $('input[name="__RequestVerificationToken"]').val();
+          
+            const preMsg = hasEnvelopes ? 'Esta bolsa tiene sobres asociados. Para eliminarla, primero debes eliminar todos sus sobres.' : '';
+            Swal.fire({
+              title: '¿Eliminar bolsa?',
+              text: 'Se eliminará la bolsa y sus detalles. Debe quedar al menos una bolsa.' + preMsg,
+              icon: 'warning',
+              showCancelButton: true,
+              confirmButtonText: 'Sí, eliminar',
+              cancelButtonText: 'Cancelar'
+            }).then((res) => {
+              if (!res.isConfirmed) return;
+          
+              $close.prop('disabled', true);
+          
+              $.ajax({
+                type: 'POST',
+                url: '@Url.Action("DeleteContainer", "Cef")',
+                data: {
+                  transactionId: transactionId,
+                  containerId: containerId,
+                  __RequestVerificationToken: token
+                }
+              }).done(function (r) {
+                if (r && r.success) {
+                  Swal.fire('Eliminado', 'La bolsa fue eliminada correctamente.', 'success')
+                    .then(() => {
+                      skipUnload = true;
+                      window.location.reload();
+                    });
+                } else {
+                  Swal.fire('Atención', (r && r.message) || 'No se pudo eliminar la bolsa.', 'info');
+                }
+              }).fail(function (xhr) {
+                const msg = (xhr.responseJSON && xhr.responseJSON.message) || xhr.responseText || 'Error inesperado al eliminar.';
+                Swal.fire('Error', msg, 'error');
+              }).always(function () {
+                $close.prop('disabled', false);
+              });
+            });
+          });
+
+          // =====================================================================
+          // 11) CHEQUES (AGREGAR/QUITAR)
+          // =====================================================================
+          $(document).on('click', '.js-add-cheque', function () {
+            const $ce = $(this).closest('.container-editor');
+            const basePrefix = $ce.data('prefix');
+
+            const key = newRowKey();
+            const name = f => `${basePrefix}.ValueDetails[${key}].${f}`;
+
+            const row = `
+              <tr>
+                <td style="display:none;">
+                  <input type="hidden" name="${basePrefix}.ValueDetails.Index" value="${key}" />
+                  <input type="hidden" name="${name('Quantity')}"  value="1" />
+                  <input type="hidden" name="${name('ValueType')}" value="Cheque" />
+                </td>
+                <td>
+                  <select name="${name('EntitieBankId')}" class="form-select form-select-sm js-bank">
+                    ${bankOptionsHtml()}
+                  </select>
+                </td>
+                <td><input name="${name('AccountNumber')}" class="form-control form-control-sm" /></td>
+                <td><input name="${name('CheckNumber')}"   class="form-control form-control-sm" /></td>
+                <td><input name="${name('IssueDate')}"     type="date" class="form-control form-control-sm" /></td>
+                <td><input name="${name('UnitValue')}"     type="number" step="1" class="form-control form-control-sm js-calc" /></td>
+                <td style="display:none;"><input name="${name('CalculatedAmount')}" type="number" step="1" class="form-control form-control-sm" readonly /></td>
+                <td><button type="button" class="btn btn-sm btn-outline-danger js-remove-cheque">×</button></td>
+              </tr>`;
+
+            $(this).closest('.card').find('.js-cheques-table tbody').append(row);
+
+            const $pane = $(this).closest('.tab-pane[id^="bag-tab-"]');
+            if ($pane.length) setTimeout(()=>updateBagBadgeFromPane($pane), 0);
+
+            updateContainerSubtotal($ce);
+            markNumericFields();
+            formatAllNumbers();
+            updateProcessSummary();
+            applyCountingPermissionsUI($(this).closest('.container-editor'));
+          });
+
+          $(document).on('click', '.js-remove-cheque', function () {
+            const $pane = $(this).closest('.tab-pane[id^="bag-tab-"]');
+            const $ce   = $(this).closest('.container-editor');
+
+            $(this).closest('tr').remove();
+
+            reindexValueDetailsForContainer($ce);
+
+            if ($pane.length) updateBagBadgeFromPane($pane);
+            updateContainerSubtotal($ce);
+            updateProcessSummary();
+          });
+
+          // =====================================================================
+          // 12) CÁLCULOS EN CAMBIO (REACCIONES GENÉRICAS)
+          // =====================================================================
+          $(document).on('input change', '.js-calc, .js-denom', function () {
+            const $row  = $(this).closest('tr');
+            triggerAmountCalculation($row);
+
+            const $pane = $(this).closest('.tab-pane[id^="bag-tab-"]');
+            if ($pane.length) updateBagBadgeFromPane($pane);
+            updateProcessSummary();
+          });
+
+          // =====================================================================
+          // 12.5) NOVEDADES (abrir, crear, listar, ajustar) + refresco de totales
+          // =====================================================================
+          function buildDenomOptionsFromJson(){
+            const kinds = ['Billete','Moneda'];
+            let html = '<option value="">-- Seleccione denominación --</option>';
+            kinds.forEach(k=>{
+                const arr = (DENOMS && DENOMS[k]) ? DENOMS[k] : [];
+                arr.forEach(d=>{
+                    const id    = d.id ?? d.codDenominacion ?? d.CodDenominacion;
+                    const label = d.label ?? d.text ?? d.name ?? d.Denominacion ?? `${d.valor ?? d.value ?? ''}`;
+                    const value = d.value ?? d.valor ?? d.ValorDenominacion ?? d.valorDenominacion ?? 0;
+                    html += `<option value="${id}" data-value="${value}">${label}</option>`;
+                });
+            });
+            return html;
+          }
+
+          function getDenomValueById(denomId){
+            if (!denomId) return 0;
+              const kinds = ['Billete', 'Moneda'];
+              for (const k of kinds) {
+                const arr = (DENOMS && DENOMS[k]) ? DENOMS[k] : [];
+                const d = arr.find(x =>
+                  String((x.id ?? x.codDenominacion ?? x.CodDenominacion)) === String(denomId))
+                ;
+                if (d) return Number(d.value ?? d.valor ?? d.ValorDenominacion ?? d.valorDenominacion ?? 0) || 0;
+              }
+              return 0;
+          }
+
+          function fetchIncidentStep3(transactionId, containerId) {
+            $.get(IncidentRoutes.list, { transactionId, containerId }, function(r){
+              const $tb = $('#inc-table-body-step3').empty();
+              if (!r || !r.ok) return;
+
+              const rows = (r.data || []).map(x => ({
+                Id: x.Id ?? x.id,
+                Type: x.Type ?? x.type,
+                Description: x.Description ?? x.description,
+                AffectedAmount: x.AffectedAmount ?? x.affectedAmount,
+                AffectedDenomination: x.AffectedDenomination ?? x.affectedDenomination,
+                AffectedQuantity: x.AffectedQuantity ?? x.affectedQuantity,
+                IncidentStatus: x.IncidentStatus ?? x.incidentStatus,
+                Date: x.Date ?? x.date
+              }));
+
+              rows.forEach(x => {
+                const fallback = getDenomValueById(x.AffectedDenomination) * (Number(x.AffectedQuantity || 0));
+                const amt = Number((x.AffectedAmount ?? 0)) || fallback || 0;
+                const status = String(x.IncidentStatus || '').trim();
+
+                // helper para aceptar español/inglés
+                function isStatus(s, ...values){
+                  const map = {
+                    Reportada: ['Reportada','Reported'],
+                    Ajustada:  ['Ajustada','Adjusted'],
+                    Aprobada:  ['Aprobada','Approved'],
+                    Revision:  ['En revisión','UnderReview','Under Review']
+                  };
+                  const flat = values.flatMap(v => map[v] || [v]);
+                  return flat.some(v => s === v);
+                }
+
+                // reglas por rol/estado
+                const canApprove = CAN_INC_APPROVE && (isStatus(status,'Reportada') || isStatus(status,'Revision'));
+
+                const canEdit = (CAN_INC_CREATE_EDIT && isStatus(status,'Reportada')) || CAN_INC_APPROVE;
+
+                const canDelete =
+                  // Contadores pueden borrar si está Reportada
+                  (CAN_INC_CREATE_EDIT && isStatus(status,'Reportada')) ||
+                  // Supervisor puede borrar si está Ajustada o Aprobada
+                  (CAN_INC_APPROVE && (isStatus(status,'Ajustada') || isStatus(status,'Aprobada')));
+
+                const approveBtn = canApprove ? `
+                  <button type="button" class="btn btn-success btn-sm p-2 js-inc-approve"
+                    data-id="${x.Id}" data-tx="${transactionId}" data-cont="${containerId}">
+                    <i class="ri-check-double-line"></i>
+                  </button>` : '';
+
+                const editBtn = canEdit ? `
+                  <button type="button" class="btn btn-outline-primary btn-sm p-2 js-inc-edit"
+                    data-id="${x.Id}" data-tx="${transactionId}" data-cont="${containerId}">
+                    <i class="ri-edit-box-line"></i>
+                  </button>` : '';
+
+                const delBtn = canDelete ? `
+                  <button type="button" class="btn btn-outline-danger btn-sm p-2 js-inc-delete"
+                    data-id="${x.Id}" data-tx="${transactionId}" data-cont="${containerId}">
+                    <i class="ri-delete-bin-line"></i>
+                  </button>` : '';
+
+                $tb.append(`
+                  <tr>
+                    <td>${x.Date ?? ''}</td>
+                    <td>${x.Type ?? ''}</td>
+                    <td>${x.Description ?? ''}</td>
+                    <td class="text-end">${amt.toLocaleString('es-CO')}</td>
+                    <td>${x.IncidentStatus ?? ''}</td>
+                    <td class="d-flex gap-1">${approveBtn} ${editBtn} ${delBtn}</td>
+                  </tr>
+                `);
+              });
+            });
+          }
+
+          $(document).on('click', '.js-go-incidents', function(e){
+              e.preventDefault();
+              e.stopPropagation();
+
+              const txId  = $(this).data('transaction-id');
+              const contId= $(this).data('container-id');
+              const label= $(this).data('bag-label') || '';
+
+              $('#incTxId3').val(txId);
+              $('#incContainerId3').val(contId);
+              $('#incDetailId3').val('');
+              $('#incCurrentBagLabel').text(label);
+
+              if (contId && Number(contId) > 0) {
+                  fetchIncidentStep3(txId, contId);
+              } else {
+                  $('#inc-table-body-step3').html(
+                      `<tr><td colspan="6" class="text-center text-muted">Guarda la bolsa para asociar novedades...</td></tr>`
+                  );
+              }
+              
+              currentStep = 3;
+              updateStepper();
+              fillBagSelectorStep3();
+          });
+
+          function fillBagSelectorStep3() {
+              const bags = [];
+              $('#bagsTabContent .tab-pane[id^="bag-tab-"]').each(function(idx){
+                    const $pane = $(this);
+                    const $bagEd = $pane.find('.container-editor').first();
+                    const id    = $bagEd.find('input[name$=".Id"]').val() || '';
+                    const code  = $bagEd.find('input[name$=".ContainerCode"]').val() || '';
+                    const label = code ? `Bolsa ${idx + 1} - (${code})` : `Bolsa ${idx + 1} (sin guardar)`;
+                    bags.push({ id, label });
+              });
+
+              const $select = $('#incCurrentBagSelect');
+              $select.empty();
+              bags.forEach((b, i) => {
+                  $select.append($('<option>', {value: b.id, text: b.label }));
+              });
+
+              if (bags.length > 0) {
+                $select.val(bags[0].id);
+                $('#incContainerId3').val(bags[0].id);
+                fetchIncidentStep3($('#incTxId3').val(), bags[0].id);
+              }
+          }
+
+          $(document).on('change', '#incCurrentBagSelect', function(){
+              const contId = $(this).val() || '';
+              $('#incContainerId3').val(contId);
+              fetchIncidentStep3($('#incTxId3').val(), contId);
+          });
+
+          function tryAutoAmountStep3(){
+              const unit = Number($('#incDenom3 option:selected').data('value') || 0);
+              const qty = Number($('#incQty3').val() || 0);
+              if (!$('#incAmount3').val()) {
+                  $('#incAmount3').attr('placeholder', unit && qty ? String(unit * qty) : '');
+              }
+          }
+          $(document).on('input change', '#incDenom3, #incQty3', tryAutoAmountStep3);
+          
+          // Crear novedad (POST)
+          $('#btnSaveIncident3').on('click', function () {
+            const $box  = $('#formIncident3');
+            const url   = $box.data('action') || IncidentRoutes.create;
+
+            const token = $('input[name="__RequestVerificationToken"]').first().val() || '';
+
+            const data  = $box.find(':input').serialize()
+                         + '&__RequestVerificationToken=' + encodeURIComponent(token);
+
+            $.post({
+              url,
+              data,
+              success: function (r) {
+                if (!r || !r.ok) { Swal.fire('Error', (r && r.message) || 'Error al registrar novedad'); return; }
+                const txId = $('#incTxId3').val();
+                const cont = $('#incContainerId3').val();
+                fetchIncidentStep3(txId, cont);
+                refreshTotalsFromServer(txId);
+                Swal.fire('OK', 'Novedad registrada', 'success');
+                // limpiar
+                $box.find('textarea[name="Description"]').val('');
+                $box.find('input[name="AffectedAmount"]').val('');
+                $box.find('input[name="AffectedQuantity"]').val('');
+                $box.find('select[name="AffectedDenomination"]').val('');
+                tryAutoAmountStep3();
+              },
+              error: function(){ Swal.fire('Error', 'No se pudo guardar.', 'error'); }
+            });
+          });
+          
+          // Aprobar/Ajustar novedad
+          $(document).on('click', '.js-inc-approve', function(){
+            const id   = $(this).data('id');
+            const txId = $(this).data('tx');
+            const cont = $(this).data('cont');
+          
+            if (!confirm('¿Ajustar esta novedad? Se aplicará al cálculo de la diferencia.')) return;
+          
+            $.post({
+              url: IncidentRoutes.resolve,
+              data: {
+                id: id,
+                newStatus: 'Ajustada',
+                __RequestVerificationToken: $('input[name="__RequestVerificationToken"]').first().val()
+              },
+              success: function(r){
+                if(!r || !r.ok) { alert((r && r.message) || 'No se pudo ajustar.'); return; }
+                fetchIncidentStep3(txId, cont);
+                refreshTotalsFromServer(txId);
+              },
+              error: function(){ alert('Error al ajustar novedad.'); }
+            });
+          });
+          
+          function refreshTotalsFromServer(transactionId) {
+            const txId = Number(
+              transactionId
+              || $('#txIdGlobal').val()
+              || $('#incTxId3').val()
+              || 0
+            );
+
+            if (!txId) {
+              console.warn('[GetTotals] Sin transactionId. No llamo al backend.');
+              return;
+            }
+
+            $.get(IncidentRoutes.totals, { transactionId: txId }, function (r) {
+              if (!r || !r.ok) { 
+                console.warn('GetTotals error:', r && r.message);
+                return; 
+              }
+
+              const fmt  = (n) => (Number(n)||0).toLocaleString('es-CO');
+              const sign = (n) => (Number(n) >= 0 ? '+' : '');
+              const cls  = (n) => (Number(n) < 0 ? 'negative' : 'positive');
+
+              // ==== Paso 1 ====
+              $('#totDeclaredGlobal').text(fmt(r.totalDeclared));
+              $('#totCountedGlobal').text(fmt(r.totalCounted));
+              $('#totDiffGlobal')
+                .text(sign(r.netDiff) + fmt(r.netDiff))
+                .removeClass('positive negative')
+                .addClass(cls(r.netDiff));
+              if (typeof r.totalOverall !== 'undefined') {
+                $('#totOverallGlobal').text(fmt(r.totalOverall));
+              }
+
+              // ==== Paso 2 ====
+              $('#sumDeclaredAllDisplay').text(fmt(r.totalDeclared));
+              $('#sumCountedAllDisplay').text(fmt(r.totalCounted));
+              $('#sumDiffAllDisplay')
+                .text(sign(r.netDiff) + fmt(r.netDiff))
+                .removeClass('positive negative')
+                .addClass(cls(r.netDiff));
+              if (typeof r.totalOverall !== 'undefined') {
+                $('#sumOverallDisplay').text(fmt(r.totalOverall));
+              }
+
+              // ==== Paso 3 ====
+              $('#totDeclaredStep3').text(fmt(r.totalDeclared));
+              $('#totCountedStep3').text(fmt(r.totalCounted));
+              $('#totDiffStep3')
+                .text(sign(r.netDiff) + fmt(r.netDiff))
+                .removeClass('positive negative')
+                .addClass(cls(r.netDiff));
+              if (typeof r.totalOverall !== 'undefined') {
+                $('#totOverallStep3').text(fmt(r.totalOverall));
+              }
+            });
+          }
+
+          $('#incDenom3').html(buildDenomOptionsFromJson());
+          tryAutoAmountStep3();
+          
+          $(document).on('click', '[data-step-action="back-to-bags"]', function(){
+              currentStep = 1;
+              updateStepper();
+          });
+
+          function incidentSignByCode(code){
+            const c = String(code || '').toUpperCase();
+            if (c === 'FAL' || c === 'MF') return +1; 
+            if (c === 'SOB' || c === 'MS') return -1;
+            return 0;
+          }
+
+          function incidentAmount(x){
+            const explicit = Number(x.AffectedAmount || 0);
+            if (explicit) return explicit;
+            const face = getDenomValueById(x.AffectedDenomination) || 0;
+            const qty  = Number(x.AffectedQuantity || 0);
+            return face * qty;
+          }
+
+          function refreshIncidentEffectAll(transactionId){
+            return $.get(IncidentRoutes.list, { transactionId }, function(r){
+              if (!r || !r.ok) { INCIDENT_EFFECT = 0; updateProcessSummary(); return; }
+
+              const rows = (r.data || []).map(x => ({
+                Type: x.Type ?? x.type,
+                Status: x.IncidentStatus ?? x.incidentStatus,
+                AffectedAmount: x.AffectedAmount ?? x.affectedAmount,
+                AffectedDenomination: x.AffectedDenomination ?? x.affectedDenomination,
+                AffectedQuantity: x.AffectedQuantity ?? x.affectedQuantity
+              }));
+
+              let effect = 0;
+              rows.forEach(x => {
+                if (String(x.Status) !== 'Ajustada') return;
+                const sign = incidentSignByCode(x.Type);
+                const amt  = incidentAmount(x);
+                effect += sign * (Number(amt) || 0);
+              });
+
+              INCIDENT_EFFECT = effect;
+              updateProcessSummary();
+            });
+          }
+
+          let incEditAmountTouched = false;
+
+          $(document).on('input', '#incEditAmount', function () {
+            // Si el usuario escribe algo, no volvemos a auto-llenar
+            incEditAmountTouched = $.trim($(this).val()).length > 0;
+          });
+
+          function calcEditAmount() {
+            const unit = Number($('#incEditDenom option:selected').data('value') || 0);
+            const qty  = Number($('#incEditQty').val() || 0);
+            return unit * qty;
+          }
+
+          function tryAutoAmountEdit() {
+            if (!incEditAmountTouched) {
+              const amt = calcEditAmount();
+              // Escribe el valor (no placeholder) para que viaje en el POST
+              $('#incEditAmount').val(amt ? String(Math.round(amt)) : '');
+            } 
+          }
+
+          $(document).on('input change', '#incEditDenom, #incEditQty', tryAutoAmountEdit);
+
+          $(document).on('click', '.js-inc-edit', function () {
+            const id   = $(this).data('id');
+            const txId = $(this).data('tx');
+            const cont = $(this).data('cont');
+
+            $.get(IncidentRoutes.get, { id }, function (r) {
+              if (!r || !r.ok) { Swal.fire('Error', (r && r.message) || 'No se pudo cargar la novedad.'); return; }
+
+              const d = r.data || {};
+              const typeId = d.IncidentTypeId ?? d.incidentTypeId ?? '';
+              $('#incEditType').val(typeId);
+
+              $('#incEditId').val(d.Id ?? d.id);
+              $('#incEditDenom').html(buildDenomOptionsFromJson());
+              if (d.AffectedDenomination != null || d.affectedDenomination != null) {
+                const denom = String(d.AffectedDenomination ?? d.affectedDenomination);
+                $('#incEditDenom').val(denom);
+              } else {
+                $('#incEditDenom').val('');
+              }
+              $('#incEditQty').val(d.AffectedQuantity ?? d.affectedQuantity ?? '');
+              $('#incEditAmount').val(d.AffectedAmount ?? d.affectedAmount ?? '');
+              $('#incEditDesc').val(d.Description ?? d.description ?? '');
+
+              if (typeof tryAutoAmountEdit === 'function') tryAutoAmountEdit();
+
+              const $m = $('#incEditModal');
+              $m.data('tx', txId);
+              $m.data('cont', cont);
+              bootstrap.Modal.getOrCreateInstance($m[0]).show();
+            });
+          });
+
+          $(document).on('submit', '#incEditForm', function (e) {
+            e.preventDefault();
+
+            let amount = Number($('#incEditAmount').val() || 0);
+            if (!amount) {
+              const denom = Number($('#incEditDenom').val() || 0);
+              const qty   = Number($('#incEditQty').val()   || 0);
+              const face  = getDenomValueById(denom) || 0;
+              amount = face * qty;
+              $('#incEditAmount').val(amount ? String(Math.round(amount)) : '0');
+            }
+
+            const $form = $('#incEditForm');
+            const url   = $form.data('action-update');
+            if (!url) { Swal.fire('Error', 'Ruta de actualización no definida.'); return; }
+
+            const data = $form.serialize();
+
+            $.post({
+              url,
+              data,
+              success: function (r) {
+                if (!r || !r.ok) {
+                  Swal.fire('Error', (r && r.message) || 'No se pudo actualizar.');
+                  return;
+                }
+                const txId = $('#incEditModal').data('tx');
+                const cont = $('#incEditModal').data('cont');
+
+                const modal = bootstrap.Modal.getOrCreateInstance(document.getElementById('incEditModal'));
+                modal.hide();
+
+                fetchIncidentStep3(txId, cont);
+                refreshTotalsFromServer(txId);
+                Swal.fire('OK', 'Novedad actualizada', 'success');
+              },
+              error: function (xhr) {
+                const msg = (xhr.responseJSON && xhr.responseJSON.message) || xhr.responseText || 'Error inesperado.';
+                console.error('UpdateIncident ERROR:', msg);
+                Swal.fire('Error', msg, 'error');
+              }
+            });
+          });
+
+          $(document).on('click', '.js-inc-delete', function(){
+              const id   = $(this).data('id');
+              const txId = $(this).data('tx');
+              const cont = $(this).data('cont');
+              const token = $('input[name="__RequestVerificationToken"]').first().val() || '';
+
+              Swal.fire({
+                  title: '¿Eliminar novedad?',
+                  text: 'Se eliminará la novedad de la transacción.',
+                  icon: 'warning',
+                  showCancelButton: true,
+                  confirmButtonText: 'Sí, eliminar',
+                  cancelButtonText: 'Cancelar'
+              }).then((res) => {
+                  if (!res.isConfirmed) return;
+
+                  $.post({
+                      url: IncidentRoutes.delete,
+                      data: {
+                          id: id,
+                          __RequestVerificationToken: token
+                      },
+                      success: function(r){
+                          if (!r || !r.ok) { Swal.fire('Error', (r && r.message) || 'No se pudo eliminar.'); return; }
+                          fetchIncidentStep3(txId, cont);
+                          refreshTotalsFromServer(txId);
+                          Swal.fire('OK', 'Novedad eliminada', 'success');
+                      },
+                      error: function(){ Swal.fire('Error', 'No se pudo eliminar.', 'error'); }
+                  });
+              });
+          });
+
+          // =====================================================================
+          // 13) SUBMIT / NAVEGACIÓN
+          // =====================================================================
+          $('button[data-step-action="submit-final"]').on('click', function (e) {
+            if (!validateCurrentStep()) {
+              e.preventDefault();
+              Swal.fire('Campos incompletos', 'Revise los campos requeridos.', 'warning');
+            }
+          });
+
+          window.addEventListener('beforeunload', function (e) {
+            if (!isDirty || skipUnload) return;
+            e.preventDefault();
+            e.returnValue = '';
+          });
+
+          $(document).on('click', '.js-cancel', function (e) {
+            if (!isDirty) return;
+            e.preventDefault();
+            const href = this.href;
+
+            Swal.fire({
+              title: 'Hay cambios sin guardar',
+              text: 'Si sales, perderás lo no guardado. ¿Deseas salir de todas formas?',
+              icon: 'warning',
+              showCancelButton: true,
+              confirmButtonText: 'Salir sin guardar',
+              cancelButtonText: 'Cancelar'
+            }).then(res => {
+              if (res.isConfirmed) {
+                isDirty = false;
+                skipUnload = true;
+                window.location.href = href;
+              }
+            });
+          });
+
+          $(document).on('click', '.js-finalize-counting', function (e) {
+            if (!CAN_FINALIZE) { e.preventDefault(); return; }
+
+            if (typeof isDirty !== 'undefined' && isDirty) {
+              Swal.fire({
+                icon: 'warning',
+                title: 'Cambios sin guardar',
+                text: 'Tienes cambios sin guardar. Guarda antes de finalizar el conteo.',
+                confirmButtonText: 'Entendido'
+              });
+              return;
+            }
+
+            // 1) Validar novedades pendientes
+            $.get(IncidentRoutes.checkPending, { transactionId: '@Model.CefTransactionId' }, function (r) {
+              if (!r || !r.ok) {
+                Swal.fire('Error', 'No se pudo validar novedades. Intenta de nuevo.', 'error');
+                return;
+              }
+              if (r.hasPending) {
+                Swal.fire('Novedades pendientes', 'Hay novedades sin ajustar/cerrar. Debes resolverlas antes de finalizar.', 'info');
+                return;
+              }
+
+              // 2) Confirmar y finalizar
+              Swal.fire({
+                title: '¿Finalizar el conteo?',
+                text: 'Se enviará la transacción a revisión.',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonText: 'Sí, finalizar',
+                cancelButtonText: 'Cancelar'
+              }).then(res => {
+                if (!res.isConfirmed) return;
+
+                const token  = $('input[name="__RequestVerificationToken"]').first().val() || '';
+                const action = '@Url.Action("Finalize","Collection", new { txId = Model.CefTransactionId })';
+                const $tmp = $('<form>', { method: 'post', action: action, style: 'display:none' });
+                $tmp.append($('<input>', { type: 'hidden', name: '__RequestVerificationToken', value: token }));
+                $('body').append($tmp);
+                $tmp.trigger('submit');
+              });
+            });
+          });
+
+          $form.on('submit', function (e) {
+            e.preventDefault();
+
+            if (!validateCurrentStep()) {
+              Swal.fire('Campos incompletos', 'Revise los campos requeridos.', 'warning');
+              return;
+            }
+
+            Swal.fire({
+              title: '¿Guardar bolsas?',
+              text: 'Se guardará toda la información capturada.',
+              icon: 'question',
+              showCancelButton: true,
+              confirmButtonText: 'Sí, guardar',
+              cancelButtonText: 'Cancelar'
+            }).then((res) => {
+              if (!res.isConfirmed) return;
+
+              Swal.fire({
+                title: 'Guardando...',
+                allowOutsideClick: false,
+                didOpen: () => Swal.showLoading()
+              });
+
+              $('.container-editor').each(function () {
+                reindexValueDetailsForContainer($(this));
+              });
+              $form.find('input[name$=".BundlesCount"], input[name$=".LoosePiecesCount"]').each(function(){
+                if ($.trim($(this).val()) === '') $(this).val('0');
+              });
+              $('#bag-template :input, #envelope-template :input, #container-template :input')
+                .prop('disabled', true);
+              $form.find('[name*="Containers[__idx__]"]').remove();
+              unformatAllNumbers();
+              const payload = $form.serialize();
+              formatAllNumbers();
+
+              $.ajax({
+                type: 'POST',
+                url: $form.attr('action'),
+                data: payload,
+                headers: { 'X-Requested-With': 'XMLHttpRequest' },
+                success: function (response) {
+                  if (response.success) {
+                    isDirty = false;
+                    skipUnload = true;
+
+                    Swal.fire({ icon: 'success', title: '¡Éxito!', text: response.message })
+                      .then(() => {
+                        if (response.data?.redirectUrl) {
+                          window.location.href = response.data.redirectUrl;
+                        } else {
+                          location.reload();
+                        }
+                      });
+                  } else {
+                    const flatErrors = Object.values(response.errors ?? {}).flat();
+                    Swal.fire({
+                      icon: 'error',
+                      title: 'Error al guardar',
+                      html: (response.message ?? 'Error') + (flatErrors.length ? '<br>' + flatErrors.join('<br>') : '')
+                    });
+                  }
+                },
+                error: function () {
+                  Swal.fire({
+                    icon: 'error',
+                    title: 'Error de red',
+                    text: 'No se pudo guardar. Verifica tu conexión e intenta de nuevo.'
+                  });
+                }
+              });
+            });
+          });
+          // =====================================================================
+          // 14) INICIALIZACIÓN
+          // =====================================================================
+          $('.container-editor').each(function () {
+            const $ce = $(this);
+            toggleContainerSections($ce);
+            updateContainerSubtotal($(this));
+          });
+          markNumericFields();
+          formatAllNumbers();
+          populateDenomsAndQuals();
+          setTimeout(initializeExistingData, 100);
+          $('.js-details-table[data-detail-scope="sobre-docs"] tbody tr').each(function(){
+            triggerAmountCalculation($(this));
+          });
+          $('.sec-sobre-cheque .js-cheques-table tbody tr').each(function(){
+            const $row = $(this);
+            const $sel = $row.find('select[name$=".EntitieBankId"]');
+            if ($sel.length) {
+              const selected = $sel.data('selected') || $sel.val() || '';
+              $sel.html(bankOptionsHtml(selected));
+            }
+          });
+          $('#bagsTabContent .tab-pane[id^="bag-tab-"]').each(function(){
+            updateAddEnvelopeButtonState($(this));
+            updateEnvelopeModeRadios($(this));
+          });
+          setTimeout(updateAllBagBadges, 150);
+          updateProcessSummary();
+          applyPointCapsUI();
+          refreshIncidentEffectAll('@Model.CefTransactionId');
+          $('#incEditDenom').html(buildDenomOptionsFromJson());
+          applyCountingPermissionsUI();
+          if (!CAN_INC_CREATE_EDIT) {
+            $('#formIncident3 :input').prop('disabled', true);
+            $('#btnSaveIncident3').prop('disabled', true).addClass('disabled');
+          }
+        });
+    </script>
+}

@@ -2,8 +2,11 @@
 using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using VCashApp.Models;
 using VCashApp.Infrastructure.Branches;
+using static VCashApp.Infrastructure.Branches.BranchClaimTypes;
+using VCashApp.Data;
 
 namespace VCashApp.Infrastructure.Middleware
 {
@@ -19,10 +22,11 @@ namespace VCashApp.Infrastructure.Middleware
             HttpContext http,
             IBranchContext context,
             IBranchResolver resolver,
-            UserManager<ApplicationUser> um)
+            UserManager<ApplicationUser> um,
+            AppDbContext db)
         {
             var path = http.Request.Path.Value?.ToLowerInvariant() ?? "";
-            if (path.StartsWith("/Identity") ||
+            if (path.StartsWith("/identity") ||
                 path.StartsWith("/account/selectbranch") ||
                 path.StartsWith("/css") || path.StartsWith("/js") || path.StartsWith("/assets") ||
                 path.StartsWith("/lib") || path.StartsWith("/swagger") || path.StartsWith("/health") ||
@@ -34,6 +38,31 @@ namespace VCashApp.Infrastructure.Middleware
 
             if (http.User?.Identity?.IsAuthenticated == true)
             {
+                var rawActive = http.User.Claims.FirstOrDefault(c => c.Type == ActiveBranch)?.Value;
+
+                if (string.Equals(rawActive, AllBranches, StringComparison.Ordinal))
+                {
+                    var appUser = await um.GetUserAsync(http.User);
+                    if (appUser != null)
+                    {
+                        var ids = await db.UserClaims
+                            .Where(uc => uc.UserId == appUser.Id && uc.ClaimType == AssignedBranch)
+                            .Select(uc => uc.ClaimValue)
+                            .ToListAsync();
+
+                        var parsed = ids.Select(v => int.TryParse(v, out var n) ? (int?)n : null)
+                            .Where(n => n.HasValue)
+                            .Select(n => n!.Value)
+                            .Distinct()
+                            .ToList();
+
+                        context.SetAllBranches(parsed);
+                    }
+
+                    await _next(http);
+                    return;
+                }
+
                 var active = await resolver.ResolveAsync(http.User);
                 if (active.HasValue)
                 {

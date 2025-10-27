@@ -1,10 +1,8 @@
-﻿using System;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using VCashApp.Data;
+using VCashApp.Services.CentroEfectivo.Shared.Domain;
 
-namespace VCashApp.Services.CentroEfectivo.Provision.Infrastructure
+namespace VCashApp.Services.CentroEfectivo.Shared.Infrastructure
 {
     /// <summary>Repositorio EF para CefTransaction en el contexto de Provisión.</summary>
     public sealed class CefTransactionRepository : ICefTransactionRepository
