@@ -1297,6 +1297,11 @@
             <param name="id">El ID del registro de log a mostrar.</param>
             <returns>La vista de detalles del log.</returns>
         </member>
+        <member name="M:VCashApp.Controllers.ProvisionController.SetCommonViewBagsCefAsync(VCashApp.Models.ApplicationUser,System.String,System.String[])">
+            <summary>
+            Sucursales, estados y permisos por vista.
+            </summary>
+        </member>
         <member name="T:VCashApp.Controllers.RangeController">
             <summary>
             Controlador para administrar rangos de atención (AdmRangos).

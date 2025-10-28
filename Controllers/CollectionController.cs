@@ -180,7 +180,12 @@ public sealed class CollectionController : BaseController
         ViewBag.BanksJson = await _catalogs.BuildBankEntitiesJsonAsync();
 
         var pointCaps = await _containers.GetPointCapsAsync(vm.Service.ServiceOrderId);
-        ViewBag.PointCapsJson = System.Text.Json.JsonSerializer.Serialize(caps);
+        ViewBag.PointCapsJson = System.Text.Json.JsonSerializer.Serialize(new
+        {
+            pointCaps.sobres,
+            pointCaps.documentos,
+            pointCaps.cheques
+        }, new System.Text.Json.JsonSerializerOptions { PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase });
 
         ViewBag.IncidentTypesForEdit = (await _incidents.GetAllIncidentTypesAsync())
             .Select(it => new SelectListItem { Value = it.Id.ToString(), Text = it.Description })

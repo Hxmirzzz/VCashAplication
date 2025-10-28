@@ -211,6 +211,10 @@ builder.Services.AddSingleton<ICountingPolicy, CountingPolicy>();
 builder.Services.AddScoped<ICollectionService, CollectionService>();
 builder.Services.AddScoped<ICollectionReadService, CollectionReadService>();
 
+// Provision Application
+builder.Services.AddScoped<IProvisionService, ProvisionService>();
+builder.Services.AddScoped<IProvisionReadService, ProvisionReadService>();
+
 builder.Services.AddScoped<ICefCatalogRepository, CefCatalogRepository>();
 builder.Services.AddScoped<ICefIncidentService, CefIncidentService>();
 builder.Services.AddScoped<ICefContainerRepository, CefContainerRepository>();

@@ -244,7 +244,7 @@ namespace VCashApp.Services.CentroEfectivo.Shared.Infrastructure
 
                 foreach (var dvm in incoming)
                 {
-                    if (!allowed.IsAllowed(dvm.ValueType))
+                    if (!isSobre && !allowed.IsAllowed(dvm.ValueType))
                         throw new InvalidOperationException($"Tipo de valor '{dvm.ValueType}' no permitido.");
 
                     if (isSobre && !IsEnvelopeDetailValid(cvm.EnvelopeSubType, dvm.ValueType))

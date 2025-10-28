@@ -239,10 +239,9 @@
         <!-- Sobre: EFECTIVO (separado Billetes / Monedas) -->
         <div class="sec-sobre-cash" style="display:@(Model.EnvelopeSubType == CefEnvelopeSubTypeEnum.Efectivo ? "block" : "none")">
             <div class="card">
-                <div class="card-header"><h6 class="mb-0">💵 Sobre — Efectivo</h6></div>
+                <div class="card-header"><h6 class="mb-0"><i class="ri-money-dollar-box-line"></i> Sobre — Efectivo</h6></div>
                 <div class="card-body">
 
-                    <!-- ===== Billetes ===== -->
                     <div class="mb-3">
                         <div class="d-flex align-items-center justify-content-between mb-2">
                             <h6 class="mb-0">Billetes</h6>
@@ -313,7 +312,6 @@
                         </table>
                     </div>
 
-                    <!-- ===== Monedas ===== -->
                     <div>
                         <div class="d-flex align-items-center justify-content-between mb-2">
                             <h6 class="mb-0">Monedas</h6>
@@ -376,7 +374,7 @@
         <!-- Sobre: DOCUMENTOS/VOUCHERS -->
         <div class="sec-sobre-docs" style="display:@(Model.EnvelopeSubType == CefEnvelopeSubTypeEnum.Documento ? "block" : "none")">
             <div class="card">
-                <div class="card-header"><h6 class="mb-0">📄 Sobre — Documentos/Vouchers</h6></div>
+                <div class="card-header"><h6 class="mb-0"><i class="ri-file-2-fill"></i> Sobre — Documentos/Vouchers</h6></div>
                 <div class="card-body">
                     <div class="row g-3 mb-3">
                         <div class="col-12 col-lg-4">
@@ -408,7 +406,6 @@
                                 <th>Tipo</th>
                                 <th>Cantidad</th>
                                 <th>Valor</th>
-                                <th>Prueba</th>
                                 <th></th>
                             </tr>
                         </thead>
@@ -423,6 +420,7 @@
                                         <input type="hidden" name="@($"{prefix}.ValueDetails.Index")" value="@key" />
                                         <input type="hidden" name="@($"{prefixDetail}.Id")" value="@d.Id" />
                                         <input type="hidden" name="@($"{prefixDetail}.ValueType")" value="Documento" class="js-vtype" />
+                                        <input name="@($"{prefixDetail}.CalculatedAmount")" type="number" value="@d.CalculatedAmount" />
                                     </td>
 
                                     <td>
@@ -444,11 +442,6 @@
                                                value="@d.UnitValue" />
                                     </td>
                                     <td>
-                                        <input name="@($"{prefixDetail}.CalculatedAmount")"
-                                               type="number"
-                                               value="@d.CalculatedAmount" />
-                                    </td>
-                                    <td>
                                         <button type="button" class="btn btn-sm btn-outline-danger js-remove-detail">×</button>
                                     </td>
                                 </tr>
@@ -468,7 +461,7 @@
         <!-- Sobre: CHEQUES -->
         <div class="sec-sobre-cheque" style="display:@(Model.EnvelopeSubType == CefEnvelopeSubTypeEnum.Cheque ? "block" : "none")">
             <div class="card">
-                <div class="card-header"><h6 class="mb-0">🏦 Sobre — Cheques</h6></div>
+                <div class="card-header"><h6 class="mb-0"><i class="ri-file-list-fill"></i> Sobre — Cheques</h6></div>
                 <div class="card-body">
                     <table class="table table-sm align-middle js-cheques-table">
                         <thead>

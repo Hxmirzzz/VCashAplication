@@ -1,15 +1,20 @@
 ﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.EntityFrameworkCore;
 using VCashApp.Data;
 using VCashApp.Enums;
 using VCashApp.Filters;
 using VCashApp.Models;
-using VCashApp.Models.ViewModels.CentroEfectivo.Shared;
 using VCashApp.Models.ViewModels.CentroEfectivo.Provision;
+using VCashApp.Models.ViewModels.CentroEfectivo.Shared;
 using VCashApp.Services;
 using VCashApp.Services.CentroEfectivo.Provision.Application;
+using VCashApp.Services.CentroEfectivo.Shared.Domain;
+using VCashApp.Services.CentroEfectivo.Shared.Incidents;
 using VCashApp.Services.DTOs;
 
 namespace VCashApp.Controllers
@@ -21,36 +26,77 @@ namespace VCashApp.Controllers
         private readonly IProvisionService _svc;
         private readonly IProvisionReadService _read;
         private readonly UserManager<ApplicationUser> _um;
-        private readonly ICefContainerService _cefContainerService;
+        private readonly ICefCatalogRepository _catalogs;
+        private readonly ICefIncidentService _incidents;
+        private readonly ICefContainerRepository _containers;
+        private readonly ICefTransactionQueries _transactions;
+        private readonly AppDbContext _db;
 
         public ProvisionController(
-            AppDbContext context,
-            UserManager<ApplicationUser> um,
-            IProvisionService svc, 
+            IProvisionService svc,
             IProvisionReadService read,
-            ICefContainerService cefContainerService,
-            ICefIncidentService cefIncidentService
+            UserManager<ApplicationUser> um,
+            ICefCatalogRepository catalogs,
+            ICefIncidentService incidents,
+            ICefContainerRepository containers,
+            ICefTransactionQueries transactions,
+            AppDbContext context
+            
         ): base(context, um)
         { 
             _svc = svc; 
             _read = read; 
             _um = um;
-            _cefContainerService = cefContainerService;
+            _catalogs = catalogs;
+            _incidents = incidents;
+            _containers = containers;
+            _transactions = transactions;
+            _db = context;
+        }
+
+        /// <summary>
+        /// Sucursales, estados y permisos por vista.
+        /// </summary>
+        private async Task SetCommonViewBagsCefAsync(ApplicationUser currentUser, string pageName, params string[] codVistas)
+        {
+            await base.SetCommonViewBagsBaseAsync(currentUser, pageName);
+            bool isAdmin = ViewBag.IsAdmin;
+
+            var (sucursales, estados) = await _transactions.GetDropdownListsAsync(currentUser.Id, isAdmin);
+            ViewBag.AvailableBranches = sucursales;
+            ViewBag.TransactionStatuses = estados;
+
+            var vistas = (codVistas != null && codVistas.Length > 0)
+                ? codVistas
+                : new[] { "CEF_SUP", "CEF_REC", "CEF_COL", "CEF_DEL" };
+
+            var userRoles = await _userManager.GetRolesAsync(currentUser);
+
+            async Task<bool> HasAsync(PermissionType p)
+            {
+                foreach (var v in vistas)
+                {
+                    if (await HasPermisionForView(userRoles, v, p))
+                        return true;
+                }
+                return false;
+            }
+
+            ViewBag.HasCreate = await HasAsync(PermissionType.Create);
+            ViewBag.HasEdit = await HasAsync(PermissionType.Edit);
+            ViewBag.HasView = await HasAsync(PermissionType.View);
         }
 
         [HttpGet("Process/{txId:int}")]
         [RequiredPermission(PermissionType.Edit, "CEF_SUP")]
         public async Task<IActionResult> Process(int txId)
         {
-            var currentUser = await GetCurrentApplicationUserAsync();
-            if (currentUser is null) return RedirectToPage("/Account/Login", new { area = "Identity" });
+            var user = await GetCurrentApplicationUserAsync();
+            if (user is null) return RedirectToPage("/Account/Login", new { area = "Identity" });
 
-            await SetCommonViewBagsBaseAsync(currentUser, "CEF - Provisión");
+            await SetCommonViewBagsCefAsync(user, "CEF - Provisión", "CEF_SUP", "CEF_COL", "CEF_REC", "CEF_DEL");
 
-            var roleNames = await _userManager.GetRolesAsync(currentUser);
-            ViewBag.HasEdit = await HasPermisionForView(roleNames, "CEF_SUP", PermissionType.Edit);
-
-            var caps = await GetCefCapsAsync(currentUser);
+            var caps = await GetCefCapsAsync(user);
             ViewBag.CanCountBills = caps.CanCountBills;
             ViewBag.CanCountCoins = caps.CanCountCoins;
             ViewBag.CanIncCreateEdit = caps.CanIncCreateEdit;
@@ -60,16 +106,16 @@ namespace VCashApp.Controllers
             var vm = await _read.GetProcessPageAsync(txId);
             if (vm is null) return NotFound();
 
-            ViewBag.DenomsJson = await _cefContainerService.BuildDenomsJsonForTransactionAsync(txId);
-            ViewBag.QualitiesJson = await _cefContainerService.BuildQualitiesJsonAsync();
-            ViewBag.BanksJson = await _cefContainerService.BuildBankEntitiesJsonAsync();
+            ViewBag.DenomsJson = await _catalogs.BuildDenomsJsonForTransactionAsync(txId);
+            ViewBag.QualitiesJson = await _catalogs.BuildQualitiesJsonAsync();
+            ViewBag.BanksJson = await _catalogs.BuildBankEntitiesJsonAsync();
 
-            var pointCaps = await _cefContainerService.GetPointCapsAsync(vm.Service.ServiceOrderId);
+            var pointCaps = await _containers.GetPointCapsAsync(vm.Service.ServiceOrderId);
             ViewBag.PointCapsJson = System.Text.Json.JsonSerializer.Serialize(new
             {
-                sobres = pointCaps.sobres,
-                cheques = pointCaps.cheques,
-                documentos = pointCaps.documentos
+                pointCaps.sobres,
+                pointCaps.cheques,
+                pointCaps.documentos
             }, new System.Text.Json.JsonSerializerOptions { PropertyNamingPolicy = System.Text.Json.JsonNamingPolicy.CamelCase });
 
             var selected = vm.Transaction.Currency?.Trim();
@@ -83,6 +129,7 @@ namespace VCashApp.Controllers
                 })
                 .ToList();
 
+            ViewData["Title"] = "Provisión - Procesamiento de Bolsas";
             return View("~/Views/Provision/Process.cshtml", vm);
         }
 
@@ -92,12 +139,13 @@ namespace VCashApp.Controllers
         [RequiredPermission(PermissionType.Edit, "CEF_SUP")]
         public async Task<IActionResult> Process([FromRoute] int txId, [FromForm] SaveProvisionContainersCmd cmd)
         {
-            var currentUser = await GetCurrentApplicationUserAsync();
-            if (currentUser is null) return Unauthorized();
+            var user = await _um.GetUserAsync(User);
+            if (user is null) return Unauthorized();
 
             var page = await _read.GetProcessPageAsync(txId);
             if (page is null) return NotFound();
-            var (capEfectivo, capDocs, capCheques) = await _cefContainerService.GetPointCapsAsync(page.Service.ServiceOrderId);
+
+            var (capEfectivo, capDocs, capCheques) = await _containers.GetPointCapsAsync(page.Service.ServiceOrderId);
 
             foreach (var c in cmd.Containers ?? Enumerable.Empty<CefContainerProcessingViewModel>())
             {
@@ -157,8 +205,9 @@ namespace VCashApp.Controllers
                     ["Cabecera"] = errors.ToArray()
                 }));
 
-            await _svc.SaveHeaderAsync(txId, cmd.SlipNumber!.Value, cmd.InformativeIncident!, currentUser.Id);
-            await _svc.SaveContainersAsync(txId, cmd, currentUser.Id);
+            await _svc.SaveHeaderAsync(txId, cmd.SlipNumber!.Value, cmd.InformativeIncident ?? string.Empty, user.Id);
+            await _svc.SaveContainersAsync(txId, cmd, user.Id);
+
             return Json(ServiceResult.SuccessResult("Guardado."));
         }
 
