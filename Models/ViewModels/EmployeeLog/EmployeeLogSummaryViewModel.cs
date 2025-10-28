@@ -18,5 +18,7 @@ namespace VCashApp.Models.ViewModels.EmployeeLog
 
         public bool IndicadorEntrada { get; set; }
         public bool IndicadorSalida { get; set; }
+
+        public int BranchId { get; set; }
     }
 }

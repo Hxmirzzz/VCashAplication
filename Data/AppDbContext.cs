@@ -613,15 +613,14 @@ namespace VCashApp.Data
 
                 entity.Property(it => it.Code).IsRequired().HasMaxLength(50);
                 entity.Property(it => it.Description).HasMaxLength(255);
-                entity.Property(it => it.AppliesTo).IsRequired().HasMaxLength(50); // 'Container', 'ValueDetail', 'Transaction'
+                entity.Property(it => it.AppliesTo).IsRequired().HasMaxLength(50);
 
                 entity.Property(it => it.AppliesTo).HasConversion<string>();
             });
 
-            // Mapeo para TdvRutasDiarias (definido en Models/Entities/TdvRutasDiarias.cs)
             builder.Entity<TdvRutaDiaria>(entity => {
                 entity.HasKey(e => e.Id);
-                entity.Property(e => e.Id).HasColumnType("VARCHAR(12)").IsRequired(); // Id es requerido
+                entity.Property(e => e.Id).HasColumnType("VARCHAR(12)").IsRequired();
 
                 entity.Property(e => e.KmInicial).HasColumnType("NUMERIC(18,0)");
                 entity.Property(e => e.KmFinal).HasColumnType("NUMERIC(18,0)");
@@ -630,7 +629,6 @@ namespace VCashApp.Data
                 entity.Property(e => e.FechaSalidaJT).HasColumnType("DATE");
                 entity.Property(e => e.HoraSalidaJT).HasColumnType("TIME(0)");
 
-                // Definir las relaciones FK explícitamente (algunas pueden inferirse)
                 entity.HasOne(e => e.RutaMaster).WithMany().HasForeignKey(e => e.CodRutaSuc).HasPrincipalKey(r => r.CodRutaSuc).OnDelete(DeleteBehavior.Restrict);
                 entity.HasOne(e => e.Sucursal).WithMany().HasForeignKey(e => e.CodSucursal).HasPrincipalKey(s => s.CodSucursal).OnDelete(DeleteBehavior.Restrict);
                 entity.HasOne(e => e.Vehiculo).WithMany().HasForeignKey(e => e.CodVehiculo).HasPrincipalKey(v => v.CodVehiculo).OnDelete(DeleteBehavior.Restrict);
@@ -641,7 +639,6 @@ namespace VCashApp.Data
                 entity.HasOne(e => e.CargoConductorObj).WithMany().HasForeignKey(e => e.CodCargoConductor).HasPrincipalKey(c => c.CodCargo).OnDelete(DeleteBehavior.Restrict);
                 entity.HasOne(e => e.CargoTripulanteObj).WithMany().HasForeignKey(e => e.CodCargoTripulante).HasPrincipalKey(c => c.CodCargo).OnDelete(DeleteBehavior.Restrict);
 
-                // FKs a ApplicationUser (Id es string GUID)
                 entity.HasOne(e => e.UsuarioPlaneacionObj).WithMany().HasForeignKey(e => e.UsuarioPlaneacion).HasPrincipalKey(u => u.Id).IsRequired(false);
                 entity.HasOne(e => e.UsuarioCEFCargueObj).WithMany().HasForeignKey(e => e.UsuarioCEFCargue).HasPrincipalKey(u => u.Id).IsRequired(false);
                 entity.HasOne(e => e.UsuarioCEFDescargueObj).WithMany().HasForeignKey(e => e.UsuarioCEFDescargue).HasPrincipalKey(u => u.Id).IsRequired(false);

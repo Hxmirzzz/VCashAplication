@@ -18,13 +18,15 @@ using VCashApp.Infrastructure.Middleware;
 using VCashApp.Models;
 using VCashApp.Services;
 using VCashApp.Services.Cef;
-using VCashApp.Services.CentroEfectivo.Collection.Domain;
 using VCashApp.Services.CentroEfectivo.Collection.Application;
-using VCashApp.Services.CentroEfectivo.Provision.Domain;
+using VCashApp.Services.CentroEfectivo.Collection.Domain;
 using VCashApp.Services.CentroEfectivo.Provision.Application;
+using VCashApp.Services.CentroEfectivo.Provision.Domain;
 using VCashApp.Services.CentroEfectivo.Shared.Domain;
 using VCashApp.Services.CentroEfectivo.Shared.Infrastructure;
-using VCashApp.Services.EmployeeLog;
+using VCashApp.Services.EmployeeLog.Application;
+using VCashApp.Services.EmployeeLog.Integration;
+using VCashApp.Services.EmployeeLog.Queries;
 using VCashApp.Services.Range;
 using VCashApp.Services.Service;
 
@@ -177,7 +179,6 @@ builder.Services.AddScoped<IBranchResolver, BranchResolver>();
 
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IEmployeeService, EmployeeService>();
-builder.Services.AddScoped<IEmployeeLogService, EmployeeLogService>();
 builder.Services.AddScoped<IRutaDiariaService, RutaDiariaService>();
 builder.Services.AddScoped<IExportService, ExportService>();
 builder.Services.AddScoped<ICefTransactionService, CefTransactionService>();
@@ -219,6 +220,10 @@ builder.Services.AddScoped<ICefCatalogRepository, CefCatalogRepository>();
 builder.Services.AddScoped<ICefIncidentService, CefIncidentService>();
 builder.Services.AddScoped<ICefContainerRepository, CefContainerRepository>();
 builder.Services.AddHttpClient();
+
+builder.Services.AddScoped<IEmployeeLogService, EmployeeLogService>();
+builder.Services.AddScoped<IDailyRouteUpdater, DailyRouteUpdater>();
+builder.Services.AddScoped<IEmployeeLogLookupsService, EmployeeLogLookupsService>();
 
 builder.Services.AddControllersWithViews(o =>
 {

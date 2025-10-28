@@ -5,89 +5,140 @@ using Microsoft.EntityFrameworkCore;
 using Serilog;
 using VCashApp.Data;
 using VCashApp.Filters;
+using VCashApp.Infrastructure.Branches;
 using VCashApp.Models;
+using VCashApp.Models.Entities;
 using VCashApp.Models.ViewModels.EmployeeLog;
 using VCashApp.Services;
 using VCashApp.Services.DTOs;
+using VCashApp.Services.EmployeeLog.Application;
+using VCashApp.Services.EmployeeLog.Queries;
 using VCashApp.Services.Helpers;
 
 namespace VCashApp.Controllers
 {
     /// <summary>
-    /// Controlador para la gestión de registros de entrada y salida de empleados.
-    /// Incluye funcionalidades de registro, actualización, historial y búsqueda de empleados.
+    /// Gestión de registros de entrada/salida (Employee Log).
+    /// - Usa IBranchContext para filtrar/validar sucursal activa y sucursales permitidas
+    /// - No usa procedimientos almacenados desde el controlador
+    /// - Delegación de negocio al IEmployeeLogService (EF puro)
     /// </summary>
     [ApiController]
-    [Route("/EmployeeLog")] 
+    [Route("/EmployeeLog")]
     public class EmployeeLogController : BaseController
     {
         private readonly IEmployeeLogService _employeeLogService;
+        private readonly IBranchContext _branchContext;
+        private readonly IEmployeeLogLookupsService _lookups;
 
         public EmployeeLogController(
             IEmployeeLogService employeeLogService,
             AppDbContext context,
-            UserManager<ApplicationUser> userManager
+            UserManager<ApplicationUser> userManager,
+            IBranchContext branchContext,
+            IEmployeeLogLookupsService lookups
         ) : base(context, userManager)
         {
             _employeeLogService = employeeLogService;
+            _branchContext = branchContext;
+            _lookups = lookups;
         }
 
-        // Método auxiliar para configurar ViewBags comunes específicos de este controlador
-        private async Task SetCommonViewBagsEmployeeLogAsync(ApplicationUser currentUser, string pageName)
+        // --------------------------------------------------------------------
+        // Helpers
+        // --------------------------------------------------------------------
+        /// <summary>
+        /// Sucursales, estados y permisos por vista (patrón CEF).
+        /// No arma listas aquí; delega a LookupsService.
+        /// </summary>
+        private async Task SetCommonViewBagsEmployeeLogAsync(ApplicationUser currentUser, string pageName, params string[] codVistas)
         {
             await base.SetCommonViewBagsBaseAsync(currentUser, pageName);
+            bool isAdmin = ViewBag.IsAdmin;
 
-            var cargos = await _context.AdmCargos.ToListAsync();
-            var unidades = await _context.AdmUnidades.ToListAsync();
-            var sucursales = await _context.AdmSucursales.Where(s => s.Estado == true).ToListAsync();
+            var dds = await _lookups.GetDropdownListsAsync(currentUser.Id, isAdmin);
+            ViewBag.AvailableBranches = dds.Branches;
+            ViewBag.Cargos = dds.Cargos;
+            ViewBag.Unidades = dds.Unidades;
+            ViewBag.LogStatusFilterList = dds.LogStatuses;
 
-            var cargosSelectListItems = cargos.Select(c => new SelectListItem
-            {
-                Value = c.CodCargo.ToString(),
-                Text = c.NombreCargo
-            }).ToList();
-            cargosSelectListItems.Insert(0, new SelectListItem { Value = "", Text = "-- Selecciona Cargo --" });
-            ViewBag.Cargos = new SelectList(cargosSelectListItems, "Value", "Text", ViewBag.CurrentCargoId);
-
-            var unidadesSelectListItems = unidades.Select(u => new SelectListItem
-            {
-                Value = u.CodUnidad,
-                Text = u.NombreUnidad
-            }).ToList();
-
-            unidadesSelectListItems.Insert(0, new SelectListItem { Value = "", Text = "-- Selecciona Unidad --" });
-            ViewBag.Unidades = new SelectList(unidadesSelectListItems, "Value", "Text", ViewBag.CurrentUnitId);
-
-            var sucursalesSelectListItems = sucursales.Select(s => new SelectListItem
-            {
-                Value = s.CodSucursal.ToString(),
-                Text = s.NombreSucursal
-            }).ToList();
-
-            sucursalesSelectListItems.Insert(0, new SelectListItem { Value = "", Text = "-- Selecciona Sucursal --" });
-            ViewBag.Sucursales = new SelectList(sucursalesSelectListItems, "Value", "Text", ViewBag.CurrentBranchId);
-
-            var logStatusList = new List<SelectListItem>
-            {
-                new SelectListItem { Value = "", Text = "-- Selecciona Estado --" },
-                new SelectListItem { Value = "1", Text = "Completo" },
-                new SelectListItem { Value = "0", Text = "Entrada Abierta" }
-            };
-                    ViewBag.LogStatusFilterList = new SelectList(logStatusList, "Value", "Text", ViewBag.CurrentLogStatus);
+            // Códigos de vista por defecto para EmployeeLog
+            var vistas = (codVistas != null && codVistas.Length > 0)
+                ? codVistas
+                : new[] { "REG", "REGHIS" };
 
             var userRoles = await _userManager.GetRolesAsync(currentUser);
-            ViewBag.CanCreateLog = await HasPermisionForView(userRoles, "REG", PermissionType.Create);
-            ViewBag.CanEditLog = await HasPermisionForView(userRoles, "REG", PermissionType.Edit);
-            ViewBag.CanViewHistory = await HasPermisionForView(userRoles, "REGHIS", PermissionType.View);
+
+            async Task<bool> HasAsync(PermissionType p)
+            {
+                foreach (var v in vistas)
+                {
+                    if (await HasPermisionForView(userRoles, v, p))
+                        return true;
+                }
+                return false;
+            }
+
+            ViewBag.HasCreate = await HasAsync(PermissionType.Create);
+            ViewBag.HasEdit = await HasAsync(PermissionType.Edit);
+            ViewBag.HasView = await HasAsync(PermissionType.View);
+            ViewBag.CanCreateLog = ViewBag.HasCreate;
+            ViewBag.CanEditLog = ViewBag.HasEdit;
+            ViewBag.CanViewHistory = ViewBag.HasView;
         }
 
-        /// <summary>
-        /// Muestra el formulario para registrar la entrada o salida de un empleado.
-        /// </summary>
-        /// <remarks>
-        /// Requiere el permiso de 'Create' para la vista 'REG'.
-        /// </remarks>
-        /// <returns>La vista del formulario de registro de empleados.</returns>
+        private async Task<List<int>> GetUserAssignedBranchIdsAsync(string userId)
+        {
+            var ids = await _context.UserClaims
+                .Where(uc => uc.UserId == userId && uc.ClaimType == Infrastructure.Branches.BranchClaimTypes.AssignedBranch)
+                .Select(uc => uc.ClaimValue)
+                .ToListAsync();
+
+            return ids
+                .Select(v => int.TryParse(v, out var n) ? (int?)n : null)
+                .Where(n => n.HasValue)
+                .Select(n => n!.Value)
+                .Distinct()
+                .ToList();
+        }
+
+        private async Task<(bool isAdmin, List<int> permittedBranchIds)> ResolveBranchScopeAsync(ApplicationUser user)
+        {
+            var isAdmin = await _userManager.IsInRoleAsync(user, "Admin");
+            if (isAdmin)
+            {
+                // Admin ve todas activas, pero si hay CurrentBranchId se usa como filtro por UX
+                var allActive = await _context.AdmSucursales
+                    .AsNoTracking()
+                    .Where(s => s.Estado)
+                    .Select(s => s.CodSucursal)
+                    .ToListAsync();
+                return (true, allActive);
+            }
+
+            // No Admin -> sucursales asignadas (y opcionalmente filtra por CurrentBranchId)
+            var assigned = await GetUserAssignedBranchIdsAsync(user.Id);
+            if (_branchContext.CurrentBranchId.HasValue)
+            {
+                var only = _branchContext.CurrentBranchId.Value;
+                if (assigned.Contains(only)) return (false, new List<int> { only });
+                // Si no es dueña de esa sucursal, no puede ver nada.
+                return (false, new List<int>());
+            }
+
+            // Todas mis sucursales (chip) -> assigned
+            return (false, assigned);
+        }
+
+        private bool EnforceBranchAccessForEntity(SegRegistroEmpleado log, List<int> permittedBranchIds, bool isAdmin)
+        {
+            if (isAdmin) return true;
+            return permittedBranchIds.Contains(log.CodSucursal);
+        }
+
+        // --------------------------------------------------------------------
+        // UI: Crear / LogEntry
+        // --------------------------------------------------------------------
         [HttpGet("LogEntry")]
         [RequiredPermission(PermissionType.Create, "REG")]
         public async Task<IActionResult> LogEntry()
@@ -106,113 +157,69 @@ namespace VCashApp.Controllers
                 ViewBag.CanEditLog ?? false
             );
 
-            Log.Information("| User: {User} | IP: {Ip} | Action: Accessing Log Entry Form | Result: Access Granted |", user.UserName, ViewBag.Ip);
+            Log.Information("| User: {User} | IP: {Ip} | Action: Access LogEntry | OK |", user.UserName, ViewBag.Ip);
             return View(vm);
         }
 
-        /// <summary>
-        /// Busca empleados por cédula o nombre para la funcionalidad de autocompletado en el formulario de registro.
-        /// </summary>
-        /// <remarks>
-        /// Esta es una llamada AJAX que devuelve una lista de empleados activos que coinciden con el término de búsqueda,
-        /// filtrados por las sucursales permitidas del usuario.
-        /// </remarks>
-        /// <param name="searchInput">Término de búsqueda (puede ser cédula parcial o nombre/apellido).</param>
-        /// <returns>Un JSON con una lista de objetos anónimos que representan la información de los empleados.</returns>
+        // --------------------------------------------------------------------
+        // API: Búsqueda de empleados (autocomplete)
+        // --------------------------------------------------------------------
         [HttpGet("GetEmployeeInfo")]
         public async Task<IActionResult> GetEmployeeInfo(string searchInput)
         {
-            var currentUser = await GetCurrentApplicationUserAsync();
-            if (currentUser == null) return Unauthorized();
+            var user = await GetCurrentApplicationUserAsync();
+            if (user == null) return Unauthorized();
 
             try
             {
                 if (string.IsNullOrWhiteSpace(searchInput))
-                {
                     return Json(new { error = "El campo de búsqueda no puede estar vacío." });
-                }
 
-                bool isAdmin = await _userManager.IsInRoleAsync(currentUser, "Admin");
-
-                List<int> permittedBranchIds = new List<int>();
-                if (!isAdmin)
-                {
-                    var userClaims = await _context.UserClaims
-                                                   .Where(uc => uc.UserId == currentUser.Id && uc.ClaimType == "SucursalId")
-                                                   .Select(uc => uc.ClaimValue)
-                                                   .ToListAsync();
-                    permittedBranchIds = new List<int>();
-                    foreach (var claimValue in userClaims)
-                    {
-                        if (int.TryParse(claimValue, out int parsedId))
-                        {
-                            permittedBranchIds.Add(parsedId);
-                        }
-                    }
-
-                    if (!permittedBranchIds.Any())
-                    {
-                        return Json(new { error = "No tiene sucursales asignadas para buscar empleados." });
-                    }
-                }
-                else
-                {
-                    permittedBranchIds = await _context.AdmSucursales.Where(s => s.Estado == true).Select(s => s.CodSucursal).ToListAsync();
-                    if (!permittedBranchIds.Any())
-                    {
-                        return Json(new { error = "No hay sucursales activas en el sistema para buscar empleados (Administrador)." });
-                    }
-                }
+                var (isAdmin, permitted) = await ResolveBranchScopeAsync(user);
+                if (!isAdmin && !permitted.Any())
+                    return Json(new { error = "No tiene sucursales asignadas para buscar empleados." });
 
                 var employees = await _employeeLogService.GetEmployeeInfoAsync(
-                    currentUser.Id,
-                    permittedBranchIds,
-                    searchInput,
-                    isAdmin
-                );
+                    user.Id, permitted, searchInput, isAdmin);
 
                 if (!employees.Any())
-                {
                     return Json(new { error = "No se encontraron empleados activos con los criterios especificados." });
-                }
 
-                var result = employees.Select(employee => new
+                var result = employees.Select(e => new
                 {
-                    employeeName = employee.NombreCompleto ?? $"{employee.PrimerNombre} {employee.PrimerApellido}",
-                    firstName = employee.PrimerNombre ?? "",
-                    middleName = employee.SegundoNombre ?? "",
-                    lastName = employee.PrimerApellido ?? "",
-                    secondLastName = employee.SegundoApellido ?? "",
-                    employeeId = employee.CodCedula,
-                    cargoId = employee.CodCargo,
-                    cargoName = employee.Cargo?.NombreCargo ?? "",
-                    unitId = employee.Cargo?.Unidad?.CodUnidad ?? "",
-                    unitName = employee.Cargo?.Unidad?.NombreUnidad ?? "",
-                    branchId = employee.CodSucursal,
-                    branchName = employee.Sucursal?.NombreSucursal ?? "",
-                    unitType = employee.Cargo?.Unidad?.TipoUnidad ?? "",
-                    photoUrl = employee.FotoUrl != null ? $"assets/profile-img/{Path.GetFileName(employee.FotoUrl)}" : ""
+                    employeeName = e.NombreCompleto ?? $"{e.PrimerNombre} {e.PrimerApellido}",
+                    firstName = e.PrimerNombre ?? "",
+                    middleName = e.SegundoNombre ?? "",
+                    lastName = e.PrimerApellido ?? "",
+                    secondLastName = e.SegundoApellido ?? "",
+                    employeeId = e.CodCedula,
+                    cargoId = e.CodCargo,
+                    cargoName = e.Cargo?.NombreCargo ?? "",
+                    unitId = e.Cargo?.Unidad?.CodUnidad ?? "",
+                    unitName = e.Cargo?.Unidad?.NombreUnidad ?? "",
+                    branchId = e.CodSucursal,
+                    branchName = e.Sucursal?.NombreSucursal ?? "",
+                    unitType = e.Cargo?.Unidad?.TipoUnidad ?? "",
+                    photoUrl = e.FotoUrl != null ? $"assets/profile-img/{Path.GetFileName(e.FotoUrl)}" : ""
                 });
 
                 return Json(result);
             }
             catch (Exception ex)
             {
-                Log.Error(ex, "CONTROLADOR: Error interno en GetEmployeeInfo para usuario {UserId}. Mensaje: {ErrorMessage}", currentUser.Id, ex.Message);
+                Log.Error(ex, "GetEmployeeInfo error user {UserId}", user.Id);
                 return Json(new { error = $"Error interno del servidor: {ex.Message}" });
             }
         }
 
-        /// <summary>
-        /// Obtiene el estado actual de registro de un empleado (entrada abierta, salida completada, etc.).
-        /// </summary>
-        /// <param name="employeeId">La cédula del empleado.</param>
-        /// <returns>Un objeto EmployeeLogStateDto que describe el estado del log.</returns>
+        // --------------------------------------------------------------------
+        // API: Estado del empleado (abierto/cerrado/hoy/ayer)
+        // --------------------------------------------------------------------
         [HttpGet("GetEmployeeStatus")]
         public async Task<IActionResult> GetEmployeeLogStatus(int employeeId)
         {
-            var currentUser = await GetCurrentApplicationUserAsync();
-            if (currentUser == null) return Unauthorized();
+            var user = await GetCurrentApplicationUserAsync();
+            if (user == null) return Unauthorized();
 
             try
             {
@@ -221,276 +228,212 @@ namespace VCashApp.Controllers
             }
             catch (Exception ex)
             {
-                Log.Error(ex, "CONTROLLER: Error in GetEmployeeLogStatus for employee {EmployeeId} by user {UserId}. Message: {ErrorMessage}", employeeId, currentUser.Id, ex.Message);
+                Log.Error(ex, "GetEmployeeLogStatus error for {EmployeeId} by {UserId}", employeeId, user.Id);
                 return Json(new { status = "error", error = $"Internal server error: {ex.Message}" });
             }
         }
 
-        /// <summary>
-        /// Registra una nueva entrada de empleado o una entrada/salida combinada.
-        /// </summary>
-        /// <remarks>
-        /// Requiere el permiso de 'Create' para la vista 'REG'.
-        /// Si se detectan condiciones que requieren confirmación (ej. horas trabajadas inusuales), se devuelve una solicitud de confirmación.
-        /// </remarks>
-        /// <param name="logDto">Objeto EmployeeLogDto con los datos del registro.</param>
-        /// <param name="confirmedValidation">Parámetro opcional para indicar que una validación previa ha sido confirmada por el usuario (ej. "minHours").</param>
-        /// <returns>Un ServiceResult indicando el éxito, fallo o necesidad de confirmación.</returns>
+        // --------------------------------------------------------------------
+        // API: Crear entrada o combinado
+        // --------------------------------------------------------------------
         [HttpPost("RecordEntryExit")]
         [ValidateAntiForgeryToken]
-        [RequiredPermission(PermissionType.Create, "REG")] // Assuming "REG" for create permission
+        [RequiredPermission(PermissionType.Create, "REG")]
         public async Task<IActionResult> RecordEntryExit([FromBody] EmployeeLogDto logDto, string? confirmedValidation = null)
         {
-            var currentUser = await GetCurrentApplicationUserAsync();
-            if (currentUser == null) return Unauthorized();
+            var user = await GetCurrentApplicationUserAsync();
+            if (user == null) return Unauthorized();
 
-            var result = await _employeeLogService.RecordEmployeeEntryExitAsync(logDto, currentUser.Id, confirmedValidation);
-
+            var result = await _employeeLogService.RecordEmployeeEntryExitAsync(logDto, user.Id, confirmedValidation);
             if (result.Success)
-            {
-                Log.Information("| User: {User} | IP: {Ip} | Action: Employee Log Recorded | EmployeeId: {EmployeeId} | Result: Success |", currentUser.UserName, ViewBag.Ip, logDto.EmployeeId);
-            }
+                Log.Information("| User: {User} | IP: {Ip} | RecordEntryExit OK | Emp:{Emp} |", user.UserName, ViewBag.Ip, logDto.EmployeeId);
             else
-            {
-                Log.Warning("| User: {User} | IP: {Ip} | Action: Employee Log Failed | EmployeeId: {EmployeeId} | Result: {Message} |", currentUser.UserName, ViewBag.Ip, logDto.EmployeeId, result.Message);
-            }
+                Log.Warning("| User: {User} | RecordEntryExit FAIL | Emp:{Emp} | {Msg}", user.UserName, logDto.EmployeeId, result.Message);
+
             return Json(result);
         }
 
-        /// <summary>
-        /// Muestra el formulario para editar un registro de log de empleado existente.
-        /// </summary>
-        /// <remarks>
-        /// Requiere el permiso de 'Edit' para la vista 'REG'.
-        /// </remarks>
-        /// <param name="id">El ID del registro de log a editar.</param>
-        /// <returns>La vista del formulario de edición con los datos del log.</returns>
+        // --------------------------------------------------------------------
+        // UI: Editar log
+        // --------------------------------------------------------------------
         [HttpGet("EditLog/{id}")]
         [RequiredPermission(PermissionType.Edit, "REG")]
         public async Task<IActionResult> EditLog(int id)
         {
-            var currentUser = await GetCurrentApplicationUserAsync();
-            if (currentUser == null) return RedirectToPage("/Account/Login", new { area = "Identity" });
+            var user = await GetCurrentApplicationUserAsync();
+            if (user == null) return RedirectToPage("/Account/Login", new { area = "Identity" });
 
-            await SetCommonViewBagsEmployeeLogAsync(currentUser, "Edit Employee Log");
+            await SetCommonViewBagsEmployeeLogAsync(user, "Editar");
 
-            var logEntry = await _context.SegRegistroEmpleados
-                                         .Include(r => r.Empleado).ThenInclude(e => e.Cargo).ThenInclude(c => c.Unidad)
-                                         .Include(r => r.Sucursal)
-                                         .FirstOrDefaultAsync(r => r.Id == id);
+            var entity = await _context.SegRegistroEmpleados
+                .Include(r => r.Empleado).ThenInclude(e => e.Cargo).ThenInclude(c => c.Unidad)
+                .Include(r => r.Sucursal)
+                .FirstOrDefaultAsync(r => r.Id == id);
 
-            if (logEntry == null)
+            if (entity == null)
             {
-                Log.Warning("| User: {User} | IP: {Ip} | Action: Accessing Edit Log Form | LogId: {LogId} | Result: Not Found |", currentUser.UserName, ViewBag.Ip, id);
                 TempData["ErrorMessage"] = "Log entry not found.";
                 return RedirectToAction(nameof(EmployeeLogHistory));
             }
 
-            bool isAdmin = (bool)ViewBag.IsAdmin;
-            if (!isAdmin)
-            {
-                var permitted = await GetUserPermittedSucursalesAsync(currentUser.Id);
-                if (!permitted.Contains(logEntry.CodSucursal))
-                {
-                    Log.Warning("| User: {User} | IP: {Ip} | Action: Accessing Edit Log Form | LogId: {LogId} | Result: Forbidden (Branch access denied) |", currentUser.UserName, ViewBag.Ip, id);
-                    return Forbid();
-                }
-            }
+            var (isAdmin, permitted) = await ResolveBranchScopeAsync(user);
+            if (!EnforceBranchAccessForEntity(entity, permitted, isAdmin))
+                return Forbid();
 
             var vm = await _employeeLogService.GetEditViewModelAsync(id, ViewBag.CanEditLog ?? false);
             if (vm == null)
             {
-                Log.Warning("| User: {User} | IP: {Ip} | Action: Accessing Edit Log Form | LogId: {LogId} | Result: Not Found (VM) |", currentUser.UserName, ViewBag.Ip, id);
                 TempData["ErrorMessage"] = "Log entry not found.";
                 return RedirectToAction(nameof(EmployeeLogHistory));
             }
 
-            ViewBag.EntryDateVal = TimeFormatHelper.ToDateInput(logEntry.FechaEntrada);
-            ViewBag.EntryTimeVal = TimeFormatHelper.ToTimeInput24(logEntry.HoraEntrada);
-            ViewBag.ExitDateVal = TimeFormatHelper.ToDateInput(logEntry.FechaSalida);
-            ViewBag.ExitTimeVal = TimeFormatHelper.ToTimeInput24(logEntry.HoraSalida);
+            // Prefills HTML
+            ViewBag.EntryDateVal = TimeFormatHelper.ToDateInput(entity.FechaEntrada);
+            ViewBag.EntryTimeVal = TimeFormatHelper.ToTimeInput24(entity.HoraEntrada);
+            ViewBag.ExitDateVal = TimeFormatHelper.ToDateInput(entity.FechaSalida);
+            ViewBag.ExitTimeVal = TimeFormatHelper.ToTimeInput24(entity.HoraSalida);
 
-            Log.Information("| User: {User} | IP: {Ip} | Action: Accessing Edit Log Form | LogId: {LogId} | Result: Access Granted |", currentUser.UserName, ViewBag.Ip, id);
             return View(vm);
         }
 
-        /// <summary>
-        /// Actualiza un registro de log de empleado existente, utilizado para registrar salidas o modificar detalles.
-        /// </summary>
-        /// <remarks>
-        /// Requiere el permiso de 'Create' para la vista 'REG' (para completar el registro).
-        /// </remarks>
-        /// <param name="id">El ID del registro de log a actualizar.</param>
-        /// <param name="logDto">Objeto EmployeeLogDto con los datos actualizados.</param>
-        /// <param name="confirmedValidation">Tipo de validación confirmada, si aplica.</param>
-        /// <returns>Un ServiceResult indicando el éxito o fallo de la actualización.</returns>
+        // --------------------------------------------------------------------
+        // API: Actualizar log (salida o corrección)
+        // --------------------------------------------------------------------
         [HttpPost("UpdateLog/{id}")]
         [ValidateAntiForgeryToken]
         [RequiredPermission(PermissionType.Create, "REG")]
         public async Task<IActionResult> UpdateLog([FromRoute] int id, [FromBody] EmployeeLogDto logDto, string? confirmedValidation)
         {
-            var currentUser = await GetCurrentApplicationUserAsync();
-            if (currentUser == null) return Unauthorized();
+            var user = await GetCurrentApplicationUserAsync();
+            if (user == null) return Unauthorized();
 
-            var result = await _employeeLogService.UpdateEmployeeLogAsync(id, logDto, currentUser.Id, confirmedValidation);
+            // Protección extra por sucursal antes de delegar
+            var entity = await _context.SegRegistroEmpleados.FirstOrDefaultAsync(e => e.Id == id);
+            if (entity == null) return Json(ServiceResult.FailureResult("Registro no encontrado."));
 
+            var (isAdmin, permitted) = await ResolveBranchScopeAsync(user);
+            if (!EnforceBranchAccessForEntity(entity, permitted, isAdmin))
+                return Forbid();
+
+            var result = await _employeeLogService.UpdateEmployeeLogAsync(id, logDto, user.Id, confirmedValidation);
             if (result.Success)
-            {
-                Log.Information("| User: {User} | IP: {Ip} | Action: Employee Log Updated | LogId: {LogId} | EmployeeId: {EmployeeId} | Result: Success |", currentUser.UserName, ViewBag.Ip, id, logDto.EmployeeId);
-            }
+                Log.Information("| User:{User} | UpdateLog OK | Id:{Id}", user.UserName, id);
             else
-            {
-                Log.Warning("| User: {User} | IP: {Ip} | Action: Employee Log Update Failed | LogId: {LogId} | EmployeeId: {EmployeeId} | Result: {Message} |", currentUser.UserName, ViewBag.Ip, id, logDto.EmployeeId, result.Message);
-            }
+                Log.Warning("| User:{User} | UpdateLog FAIL | Id:{Id} | {Msg}", user.UserName, id, result.Message);
+
             return Json(result);
         }
 
-        /// <summary>
-        /// Muestra el formulario para registrar la salida manual de un vehículo asociado a un log.
-        /// </summary>
-        /// <param name="id">El ID del registro de log.</param>
-        /// <returns>La vista del formulario de salida manual.</returns>
+        // --------------------------------------------------------------------
+        // UI: Salida manual
+        // --------------------------------------------------------------------
         [HttpGet("RecordManualExit/{id}")]
         [RequiredPermission(PermissionType.Create, "REG")]
         public async Task<IActionResult> RecordManualExit(int id)
         {
-            var currentUser = await GetCurrentApplicationUserAsync();
-            if (currentUser == null) return RedirectToPage("/Account/Login", new { area = "Identity" });
+            var user = await GetCurrentApplicationUserAsync();
+            if (user == null) return RedirectToPage("/Account/Login", new { area = "Identity" });
 
-            await SetCommonViewBagsEmployeeLogAsync(currentUser, "Manual Exit");
+            await SetCommonViewBagsEmployeeLogAsync(user, "Salida Manual");
 
-            var logEntry = await _context.SegRegistroEmpleados
-                                         .Include(r => r.Empleado)
-                                         .FirstOrDefaultAsync(r => r.Id == id);
+            var entity = await _context.SegRegistroEmpleados.Include(r => r.Empleado)
+                .FirstOrDefaultAsync(r => r.Id == id);
 
-            if (logEntry == null)
+            if (entity == null)
             {
-                Log.Warning("| User: {User} | IP: {Ip} | Action: Accessing Manual Exit Form | LogId: {LogId} | Result: Not Found |", currentUser.UserName, ViewBag.Ip, id);
                 TempData["ErrorMessage"] = "Log entry not found.";
                 return RedirectToAction(nameof(EmployeeLogHistory));
             }
 
-            bool isAdmin = (bool)ViewBag.IsAdmin;
-            if (!isAdmin)
-            {
-                var permitted = await GetUserPermittedSucursalesAsync(currentUser.Id);
-                if (!permitted.Contains(logEntry.CodSucursal))
-                {
-                    Log.Warning("| User: {User} | IP: {Ip} | Action: Accessing Manual Exit Form | LogId: {LogId} | Result: Forbidden (Branch access denied) |", currentUser.UserName, ViewBag.Ip, id);
-                    return Forbid();
-                }
-            }
+            var (isAdmin, permitted) = await ResolveBranchScopeAsync(user);
+            if (!EnforceBranchAccessForEntity(entity, permitted, isAdmin))
+                return Forbid();
 
-            logEntry.FechaSalida = DateOnly.FromDateTime(DateTime.Now.Date);
-            logEntry.HoraSalida = TimeOnly.FromDateTime(DateTime.Now);
+            // Propuesta por defecto
+            entity.FechaSalida = DateOnly.FromDateTime(DateTime.Now.Date);
+            entity.HoraSalida = TimeOnly.FromDateTime(DateTime.Now);
 
-            ViewBag.EntryDateVal = TimeFormatHelper.ToDateInput(logEntry.FechaEntrada);
-            ViewBag.EntryTimeVal = TimeFormatHelper.ToTimeInput24(logEntry.HoraEntrada);
-
-            ViewBag.ExitDateVal = TimeFormatHelper.ToDateInput(logEntry.FechaSalida);
-            ViewBag.ExitTimeVal = TimeFormatHelper.ToTimeInput24(logEntry.HoraSalida);
+            ViewBag.EntryDateVal = TimeFormatHelper.ToDateInput(entity.FechaEntrada);
+            ViewBag.EntryTimeVal = TimeFormatHelper.ToTimeInput24(entity.HoraEntrada);
+            ViewBag.ExitDateVal = TimeFormatHelper.ToDateInput(entity.FechaSalida);
+            ViewBag.ExitTimeVal = TimeFormatHelper.ToTimeInput24(entity.HoraSalida);
 
             var vm = await _employeeLogService.GetManualExitViewModelAsync(
                 id, ViewBag.CanCreateLog ?? false, ViewBag.CanEditLog ?? false);
+
             if (vm == null)
             {
-                Log.Warning("| User: {User} | IP: {Ip} | Action: Accessing Manual Exit Form | LogId: {LogId} | Result: Not Found (VM) |", currentUser.UserName, ViewBag.Ip, id);
                 TempData["ErrorMessage"] = "Log entry not found.";
                 return RedirectToAction(nameof(EmployeeLogHistory));
             }
 
-            Log.Information("| User: {User} | IP: {Ip} | Action: Accessing Manual Exit Form | LogId: {LogId} | Result: Access Granted |", currentUser.UserName, ViewBag.Ip, id);
             return View(vm);
         }
 
-        /// <summary>
-        /// Registra la salida manual de un vehículo.
-        /// </summary>
-        /// <param name="id">El ID del registro de log a actualizar.</param>
-        /// <param name="logDto">Objeto EmployeeLogDto con la fecha y hora de salida.</param>
-        /// <returns>Un ServiceResult indicando el éxito o fallo.</returns>
         [HttpPost("RecordManualExit/{id}")]
         [ValidateAntiForgeryToken]
         [RequiredPermission(PermissionType.Create, "REG")]
         public async Task<IActionResult> RecordManualExit([FromRoute] int id, [FromBody] EmployeeLogDto logDto)
         {
-            var currentUser = await GetCurrentApplicationUserAsync();
-            if (currentUser == null) return Unauthorized();
+            var user = await GetCurrentApplicationUserAsync();
+            if (user == null) return Unauthorized();
 
             if (string.IsNullOrWhiteSpace(logDto.ExitDate) || string.IsNullOrWhiteSpace(logDto.ExitTime))
-            {
-                return Json(ServiceResult.FailureResult("La fecha y hora de salida son obligatorias para el registro manual."));
-            }
+                return Json(ServiceResult.FailureResult("La fecha y hora de salida son obligatorias."));
 
-            DateOnly parsedExitDate;
-            TimeOnly parsedExitTime;
+            if (!DateOnly.TryParse(logDto.ExitDate, out var exitDate))
+                return Json(ServiceResult.FailureResult("Formato de fecha de salida inválido."));
+            if (!TimeOnly.TryParse(logDto.ExitTime, out var exitTime))
+                return Json(ServiceResult.FailureResult("Formato de hora de salida inválido."));
 
-            if (!DateOnly.TryParse(logDto.ExitDate, out parsedExitDate))
-            {
-                return Json(ServiceResult.FailureResult("El formato de la fecha de salida es inválido."));
-            }
-            if (!TimeOnly.TryParse(logDto.ExitTime, out parsedExitTime))
-            {
-                return Json(ServiceResult.FailureResult("El formato de la hora de salida es inválido."));
-            }
+            // Chequeo de sucursal
+            var entity = await _context.SegRegistroEmpleados.FirstOrDefaultAsync(e => e.Id == id);
+            if (entity == null) return Json(ServiceResult.FailureResult("Registro no encontrado."));
+
+            var (isAdmin, permitted) = await ResolveBranchScopeAsync(user);
+            if (!EnforceBranchAccessForEntity(entity, permitted, isAdmin))
+                return Forbid();
 
             var result = await _employeeLogService.RecordManualEmployeeExitAsync(
-                id,
-                parsedExitDate,
-                parsedExitTime,
-                currentUser.Id,
-                logDto.ConfirmedValidation
-            );
+                id, exitDate, exitTime, user.Id, logDto.ConfirmedValidation);
 
-
-            if (result.Success)
-            {
-                Log.Information("| User: {User} | IP: {Ip} | Action: Manual Exit Recorded | LogId: {LogId} | Result: Success |", currentUser.UserName, ViewBag.Ip, id);
-            }
-            else
-            {
-                Log.Warning("| User: {User} | IP: {Ip} | Action: Manual Exit Failed | LogId: {LogId} | Result: {Message} |", currentUser.UserName, ViewBag.Ip, id, result.Message);
-            }
             return Json(result);
         }
 
-        /// <summary>
-        /// Muestra el registros de empleados entre un dia actual y un dia anterior al actual, con opciones de filtrado y paginación.
-        /// </summary>
-        /// <param name="cargoId">Filtro por ID de cargo.</param>
-        /// <param name="unitId">Filtro por ID de unidad.</param>
-        /// <param name="branchId">Filtro por ID de sucursal.</param>
-        /// <param name="startDate">Fecha de inicio para el filtro de rango.</param>
-        /// <param name="endDate">Fecha de fin para el filtro de rango.</param>
-        /// <param name="logStatus">Estado del log (0: abierto, 1: cerrado).</param>
-        /// <param name="searchTerm">Término de búsqueda por cédula o nombre.</param>
-        /// <param name="page">Número de página actual.</param>
-        /// <param name="pageSize">Número de elementos por página.</param>
-        /// <returns>La vista de logs del registro de empleados, con datos paginados.</returns>
+        // --------------------------------------------------------------------
+        // UI: Dashboard (Hoy / Ayer por defecto)
+        // --------------------------------------------------------------------
         [HttpGet("EmployeeLog")]
         [RequiredPermission(PermissionType.View, "REG")]
-        public async Task<IActionResult> EmployeeLog(int? cargoId, string? unitId, int? branchId, DateOnly? startDate, DateOnly? endDate, int? logStatus, string? search, int page = 1, int pageSize = 15)
+        public async Task<IActionResult> EmployeeLog(
+            int? cargoId, string? unitId, int? branchId,
+            DateOnly? startDate, DateOnly? endDate, int? logStatus,
+            string? search, int page = 1, int pageSize = 15)
         {
-            var currentUser = await GetCurrentApplicationUserAsync();
-            if (currentUser == null) return RedirectToPage("/Account/Login", new { area = "Identity" });
+            var user = await GetCurrentApplicationUserAsync();
+            if (user == null) return RedirectToPage("/Account/Login", new { area = "Identity" });
 
             DateOnly today = DateOnly.FromDateTime(DateTime.Today);
             DateOnly yesterday = DateOnly.FromDateTime(DateTime.Today.AddDays(-1));
-            DateOnly? filterStartDate = startDate ?? yesterday;
-            DateOnly? filterEndDate = endDate ?? today;
 
-            await SetCommonViewBagsEmployeeLogAsync(currentUser, "Registro de Empleados");
+            var filterStart = startDate ?? yesterday;
+            var filterEnd = endDate ?? today;
 
-            bool isAdmin = (bool)ViewBag.IsAdmin;
+            await SetCommonViewBagsEmployeeLogAsync(user, "Registro de Empleados");
 
-            var (data, totalData) = await _employeeLogService.GetFilteredEmployeeLogsAsync(
-                currentUser.Id, cargoId, unitId, branchId,
-                filterStartDate, filterEndDate, logStatus, search,
+            // Si hay sucursal activa en chip y no viene branchId, la imponemos para coherencia visual
+            if (!_branchContext.AllBranches && _branchContext.CurrentBranchId.HasValue && branchId is null)
+                branchId = _branchContext.CurrentBranchId.Value;
+
+            var isAdmin = (bool)ViewBag.IsAdmin;
+            var (rows, total) = await _employeeLogService.GetFilteredEmployeeLogsAsync(
+                user.Id, cargoId, string.IsNullOrWhiteSpace(unitId) ? null : unitId, branchId,
+                filterStart, filterEnd, logStatus, string.IsNullOrWhiteSpace(search) ? null : search,
                 page, pageSize, isAdmin);
 
             ViewBag.CurrentPage = page;
-            ViewBag.TotalPages = (int)Math.Ceiling((double)totalData / pageSize);
-            ViewBag.TotalData = totalData;
+            ViewBag.TotalPages = (int)Math.Ceiling((double)total / pageSize);
+            ViewBag.TotalData = total;
             ViewBag.PageSize = pageSize;
 
             var vm = new EmployeeLogDashboardViewModel
@@ -499,15 +442,14 @@ namespace VCashApp.Controllers
                 CargoId = cargoId,
                 UnitId = unitId,
                 BranchId = branchId,
-                StartDate = filterStartDate,
-                EndDate = filterEndDate,
+                StartDate = filterStart,
+                EndDate = filterEnd,
                 LogStatus = logStatus,
                 CurrentPage = page,
                 PageSize = pageSize,
-                TotalData = totalData,
+                TotalData = total,
                 TotalPages = ViewBag.TotalPages,
-                Logs = data,
-
+                Logs = rows,
                 Cargos = ViewBag.Cargos,
                 Unidades = ViewBag.Unidades,
                 Sucursales = ViewBag.Sucursales,
@@ -518,52 +460,40 @@ namespace VCashApp.Controllers
             };
 
             if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
-            {
                 return PartialView("~/Views/EmployeeLog/_MainLogTablePartial.cshtml", vm.Logs);
-            }
 
             return View(vm);
         }
 
-        /// <summary>
-        /// Muestra el historial de registros de empleados, con opciones de filtrado y paginación.
-        /// </summary>
-        /// <param name="cargoId">Filtro por ID de cargo.</param>
-        /// <param name="unitId">Filtro por ID de unidad.</param>
-        /// <param name="branchId">Filtro por ID de sucursal.</param>
-        /// <param name="startDate">Fecha de inicio para el filtro de rango.</param>
-        /// <param name="endDate">Fecha de fin para el filtro de rango.</param>
-        /// <param name="logStatus">Estado del log (0: abierto, 1: cerrado).</param>
-        /// <param name="search">Término de búsqueda por cédula o nombre.</param>
-        /// <param name="page">Número de página actual.</param>
-        /// <param name="pageSize">Número de elementos por página.</param>
-        /// <returns>La vista del historial de logs de empleados, con datos paginados.</returns>
+        // --------------------------------------------------------------------
+        // UI: Historial
+        // --------------------------------------------------------------------
         [HttpGet("EmployeeLogHistory")]
         [RequiredPermission(PermissionType.View, "REGHIS")]
         public async Task<IActionResult> EmployeeLogHistory(
             int? cargoId, string? unitId, int? branchId,
-            DateOnly? startDate, DateOnly? endDate,
-            int? logStatus, string? search,
-            int page = 1, int pageSize = 15)
+            DateOnly? startDate, DateOnly? endDate, int? logStatus,
+            string? search, int page = 1, int pageSize = 15)
         {
-            var currentUser = await GetCurrentApplicationUserAsync();
-            if (currentUser == null) return RedirectToPage("/Account/Login", new { area = "Identity" });
+            var user = await GetCurrentApplicationUserAsync();
+            if (user == null) return RedirectToPage("/Account/Login", new { area = "Identity" });
 
-            await SetCommonViewBagsEmployeeLogAsync(currentUser, "Historial");
+            await SetCommonViewBagsEmployeeLogAsync(user, "Historial");
 
-            bool isAdmin = (bool)ViewBag.IsAdmin;
+            // Si hay sucursal activa en chip y no viene branchId, la imponemos
+            if (!_branchContext.AllBranches && _branchContext.CurrentBranchId.HasValue && branchId is null)
+                branchId = _branchContext.CurrentBranchId.Value;
 
-            unitId = string.IsNullOrWhiteSpace(unitId) ? null : unitId;
-            search = string.IsNullOrWhiteSpace(search) ? null : search;
+            var isAdmin = (bool)ViewBag.IsAdmin;
 
-            var (data, totalData) = await _employeeLogService.GetFilteredEmployeeLogsAsync(
-                currentUser.Id, cargoId, unitId, branchId,
-                startDate, endDate, logStatus, search,
+            var (rows, total) = await _employeeLogService.GetFilteredEmployeeLogsAsync(
+                user.Id, cargoId, string.IsNullOrWhiteSpace(unitId) ? null : unitId, branchId,
+                startDate, endDate, logStatus, string.IsNullOrWhiteSpace(search) ? null : search,
                 page, pageSize, isAdmin);
 
             ViewBag.CurrentPage = page;
-            ViewBag.TotalPages = (int)Math.Ceiling((double)totalData / pageSize);
-            ViewBag.TotalData = totalData;
+            ViewBag.TotalPages = (int)Math.Ceiling((double)total / pageSize);
+            ViewBag.TotalData = total;
             ViewBag.PageSize = pageSize;
 
             var vm = new EmployeeLogDashboardViewModel
@@ -577,10 +507,9 @@ namespace VCashApp.Controllers
                 LogStatus = logStatus,
                 CurrentPage = page,
                 PageSize = pageSize,
-                TotalData = totalData,
+                TotalData = total,
                 TotalPages = ViewBag.TotalPages,
-                Logs = data,
-
+                Logs = rows,
                 Cargos = ViewBag.Cargos,
                 Unidades = ViewBag.Unidades,
                 Sucursales = ViewBag.Sucursales,
@@ -591,63 +520,51 @@ namespace VCashApp.Controllers
             };
 
             if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
-                return PartialView("~/Views/EmployeeLog/_EmployeeLogTablePartial.cshtml", data);
+                return PartialView("~/Views/EmployeeLog/_EmployeeLogTablePartial.cshtml", rows);
 
             return View(vm);
         }
 
-        /// <summary>
-        /// Muestra los detalles de un registro de log de empleado específico.
-        /// </summary>
-        /// <param name="id">El ID del registro de log a mostrar.</param>
-        /// <returns>La vista de detalles del log.</returns>
+        // --------------------------------------------------------------------
+        // UI: Detalle
+        // --------------------------------------------------------------------
         [HttpGet("LogDetails/{id}")]
         [RequiredPermission(PermissionType.View, "REG")]
         public async Task<IActionResult> LogDetails(int id)
         {
-            var currentUser = await GetCurrentApplicationUserAsync();
-            if (currentUser == null) return RedirectToPage("/Account/Login", new { area = "Identity" });
+            var user = await GetCurrentApplicationUserAsync();
+            if (user == null) return RedirectToPage("/Account/Login", new { area = "Identity" });
 
-            await SetCommonViewBagsEmployeeLogAsync(currentUser, "Log Details");
+            await SetCommonViewBagsEmployeeLogAsync(user, "Detalles");
 
-            var logEntry = await _context.SegRegistroEmpleados
-                                         .Include(r => r.Empleado).ThenInclude(e => e.Cargo).ThenInclude(c => c.Unidad)
-                                         .Include(r => r.Sucursal)
-                                         .Include(r => r.UsuarioRegistro)
-                                         .FirstOrDefaultAsync(r => r.Id == id);
+            var entity = await _context.SegRegistroEmpleados
+                .Include(r => r.Empleado).ThenInclude(e => e.Cargo).ThenInclude(c => c.Unidad)
+                .Include(r => r.Sucursal)
+                .Include(r => r.UsuarioRegistro)
+                .FirstOrDefaultAsync(r => r.Id == id);
 
-            if (logEntry == null)
+            if (entity == null)
             {
-                Log.Warning("| User: {User} | IP: {Ip} | Action: Accessing Log Details | LogId: {LogId} | Result: Not Found |", currentUser.UserName, ViewBag.Ip, id);
                 TempData["ErrorMessage"] = "Log entry not found.";
                 return RedirectToAction(nameof(EmployeeLogHistory));
             }
 
-            bool isAdmin = (bool)ViewBag.IsAdmin;
-            if (!isAdmin)
-            {
-                var permitted = await GetUserPermittedSucursalesAsync(currentUser.Id);
-                if (!permitted.Contains(logEntry.CodSucursal))
-                {
-                    Log.Warning("| User: {User} | IP: {Ip} | Action: Accessing Log Details | LogId: {LogId} | Result: Forbidden (Branch access denied) |", currentUser.UserName, ViewBag.Ip, id);
-                    return Forbid();
-                }
-            }
+            var (isAdmin, permitted) = await ResolveBranchScopeAsync(user);
+            if (!EnforceBranchAccessForEntity(entity, permitted, isAdmin))
+                return Forbid();
 
             var vm = await _employeeLogService.GetDetailsViewModelAsync(id);
             if (vm == null)
             {
-                Log.Warning("| User: {User} | IP: {Ip} | Action: Accessing Log Details | LogId: {LogId} | Result: Not Found (VM) |", currentUser.UserName, ViewBag.Ip, id);
                 TempData["ErrorMessage"] = "Log entry not found.";
                 return RedirectToAction(nameof(EmployeeLogHistory));
             }
 
-            ViewBag.EntryDateVal = TimeFormatHelper.ToDateInput(logEntry.FechaEntrada);
-            ViewBag.EntryTimeVal = TimeFormatHelper.ToTimeInput24(logEntry.HoraEntrada);
-            ViewBag.ExitDateVal = TimeFormatHelper.ToDateInput(logEntry.FechaSalida);
-            ViewBag.ExitTimeVal = TimeFormatHelper.ToTimeInput24(logEntry.HoraSalida);
+            ViewBag.EntryDateVal = TimeFormatHelper.ToDateInput(entity.FechaEntrada);
+            ViewBag.EntryTimeVal = TimeFormatHelper.ToTimeInput24(entity.HoraEntrada);
+            ViewBag.ExitDateVal = TimeFormatHelper.ToDateInput(entity.FechaSalida);
+            ViewBag.ExitTimeVal = TimeFormatHelper.ToTimeInput24(entity.HoraSalida);
 
-            Log.Information("| User: {User} | IP: {Ip} | Action: Accessing Log Details | LogId: {LogId} | Result: Access Granted |", currentUser.UserName, ViewBag.Ip, id);
             return View("LogDetails", vm);
         }
     }

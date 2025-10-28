@@ -17,5 +17,7 @@
         public TimeOnly EntryTime { get; set; }
         public DateOnly? ExitDate { get; set; }
         public TimeOnly? ExitTime { get; set; }
+
+        public int BranchId { get; set; }
     }
 }

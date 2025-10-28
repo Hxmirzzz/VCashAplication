@@ -1180,122 +1180,17 @@
         </member>
         <member name="T:VCashApp.Controllers.EmployeeLogController">
             <summary>
-            Controlador para la gestión de registros de entrada y salida de empleados.
-            Incluye funcionalidades de registro, actualización, historial y búsqueda de empleados.
+            Gestión de registros de entrada/salida (Employee Log).
+            - Usa IBranchContext para filtrar/validar sucursal activa y sucursales permitidas
+            - No usa procedimientos almacenados desde el controlador
+            - Delegación de negocio al IEmployeeLogService (EF puro)
             </summary>
         </member>
-        <member name="M:VCashApp.Controllers.EmployeeLogController.LogEntry">
+        <member name="M:VCashApp.Controllers.EmployeeLogController.SetCommonViewBagsEmployeeLogAsync(VCashApp.Models.ApplicationUser,System.String,System.String[])">
             <summary>
-            Muestra el formulario para registrar la entrada o salida de un empleado.
+            Sucursales, estados y permisos por vista (patrón CEF).
+            No arma listas aquí; delega a LookupsService.
             </summary>
-            <remarks>
-            Requiere el permiso de 'Create' para la vista 'REG'.
-            </remarks>
-            <returns>La vista del formulario de registro de empleados.</returns>
-        </member>
-        <member name="M:VCashApp.Controllers.EmployeeLogController.GetEmployeeInfo(System.String)">
-            <summary>
-            Busca empleados por cédula o nombre para la funcionalidad de autocompletado en el formulario de registro.
-            </summary>
-            <remarks>
-            Esta es una llamada AJAX que devuelve una lista de empleados activos que coinciden con el término de búsqueda,
-            filtrados por las sucursales permitidas del usuario.
-            </remarks>
-            <param name="searchInput">Término de búsqueda (puede ser cédula parcial o nombre/apellido).</param>
-            <returns>Un JSON con una lista de objetos anónimos que representan la información de los empleados.</returns>
-        </member>
-        <member name="M:VCashApp.Controllers.EmployeeLogController.GetEmployeeLogStatus(System.Int32)">
-            <summary>
-            Obtiene el estado actual de registro de un empleado (entrada abierta, salida completada, etc.).
-            </summary>
-            <param name="employeeId">La cédula del empleado.</param>
-            <returns>Un objeto EmployeeLogStateDto que describe el estado del log.</returns>
-        </member>
-        <member name="M:VCashApp.Controllers.EmployeeLogController.RecordEntryExit(VCashApp.Services.DTOs.EmployeeLogDto,System.String)">
-            <summary>
-            Registra una nueva entrada de empleado o una entrada/salida combinada.
-            </summary>
-            <remarks>
-            Requiere el permiso de 'Create' para la vista 'REG'.
-            Si se detectan condiciones que requieren confirmación (ej. horas trabajadas inusuales), se devuelve una solicitud de confirmación.
-            </remarks>
-            <param name="logDto">Objeto EmployeeLogDto con los datos del registro.</param>
-            <param name="confirmedValidation">Parámetro opcional para indicar que una validación previa ha sido confirmada por el usuario (ej. "minHours").</param>
-            <returns>Un ServiceResult indicando el éxito, fallo o necesidad de confirmación.</returns>
-        </member>
-        <member name="M:VCashApp.Controllers.EmployeeLogController.EditLog(System.Int32)">
-            <summary>
-            Muestra el formulario para editar un registro de log de empleado existente.
-            </summary>
-            <remarks>
-            Requiere el permiso de 'Edit' para la vista 'REG'.
-            </remarks>
-            <param name="id">El ID del registro de log a editar.</param>
-            <returns>La vista del formulario de edición con los datos del log.</returns>
-        </member>
-        <member name="M:VCashApp.Controllers.EmployeeLogController.UpdateLog(System.Int32,VCashApp.Services.DTOs.EmployeeLogDto,System.String)">
-            <summary>
-            Actualiza un registro de log de empleado existente, utilizado para registrar salidas o modificar detalles.
-            </summary>
-            <remarks>
-            Requiere el permiso de 'Create' para la vista 'REG' (para completar el registro).
-            </remarks>
-            <param name="id">El ID del registro de log a actualizar.</param>
-            <param name="logDto">Objeto EmployeeLogDto con los datos actualizados.</param>
-            <param name="confirmedValidation">Tipo de validación confirmada, si aplica.</param>
-            <returns>Un ServiceResult indicando el éxito o fallo de la actualización.</returns>
-        </member>
-        <member name="M:VCashApp.Controllers.EmployeeLogController.RecordManualExit(System.Int32)">
-            <summary>
-            Muestra el formulario para registrar la salida manual de un vehículo asociado a un log.
-            </summary>
-            <param name="id">El ID del registro de log.</param>
-            <returns>La vista del formulario de salida manual.</returns>
-        </member>
-        <member name="M:VCashApp.Controllers.EmployeeLogController.RecordManualExit(System.Int32,VCashApp.Services.DTOs.EmployeeLogDto)">
-            <summary>
-            Registra la salida manual de un vehículo.
-            </summary>
-            <param name="id">El ID del registro de log a actualizar.</param>
-            <param name="logDto">Objeto EmployeeLogDto con la fecha y hora de salida.</param>
-            <returns>Un ServiceResult indicando el éxito o fallo.</returns>
-        </member>
-        <member name="M:VCashApp.Controllers.EmployeeLogController.EmployeeLog(System.Nullable{System.Int32},System.String,System.Nullable{System.Int32},System.Nullable{System.DateOnly},System.Nullable{System.DateOnly},System.Nullable{System.Int32},System.String,System.Int32,System.Int32)">
-            <summary>
-            Muestra el registros de empleados entre un dia actual y un dia anterior al actual, con opciones de filtrado y paginación.
-            </summary>
-            <param name="cargoId">Filtro por ID de cargo.</param>
-            <param name="unitId">Filtro por ID de unidad.</param>
-            <param name="branchId">Filtro por ID de sucursal.</param>
-            <param name="startDate">Fecha de inicio para el filtro de rango.</param>
-            <param name="endDate">Fecha de fin para el filtro de rango.</param>
-            <param name="logStatus">Estado del log (0: abierto, 1: cerrado).</param>
-            <param name="searchTerm">Término de búsqueda por cédula o nombre.</param>
-            <param name="page">Número de página actual.</param>
-            <param name="pageSize">Número de elementos por página.</param>
-            <returns>La vista de logs del registro de empleados, con datos paginados.</returns>
-        </member>
-        <member name="M:VCashApp.Controllers.EmployeeLogController.EmployeeLogHistory(System.Nullable{System.Int32},System.String,System.Nullable{System.Int32},System.Nullable{System.DateOnly},System.Nullable{System.DateOnly},System.Nullable{System.Int32},System.String,System.Int32,System.Int32)">
-            <summary>
-            Muestra el historial de registros de empleados, con opciones de filtrado y paginación.
-            </summary>
-            <param name="cargoId">Filtro por ID de cargo.</param>
-            <param name="unitId">Filtro por ID de unidad.</param>
-            <param name="branchId">Filtro por ID de sucursal.</param>
-            <param name="startDate">Fecha de inicio para el filtro de rango.</param>
-            <param name="endDate">Fecha de fin para el filtro de rango.</param>
-            <param name="logStatus">Estado del log (0: abierto, 1: cerrado).</param>
-            <param name="search">Término de búsqueda por cédula o nombre.</param>
-            <param name="page">Número de página actual.</param>
-            <param name="pageSize">Número de elementos por página.</param>
-            <returns>La vista del historial de logs de empleados, con datos paginados.</returns>
-        </member>
-        <member name="M:VCashApp.Controllers.EmployeeLogController.LogDetails(System.Int32)">
-            <summary>
-            Muestra los detalles de un registro de log de empleado específico.
-            </summary>
-            <param name="id">El ID del registro de log a mostrar.</param>
-            <returns>La vista de detalles del log.</returns>
         </member>
         <member name="M:VCashApp.Controllers.ProvisionController.SetCommonViewBagsCefAsync(VCashApp.Models.ApplicationUser,System.String,System.String[])">
             <summary>
@@ -3407,25 +3302,33 @@
         <member name="M:VCashApp.Services.CentroEfectivo.Shared.Infrastructure.CefTransactionRepository.RecalculateTotalsAsync(System.Int32)">
             <summary>Recalcula totales del encabezado a partir de detalles.</summary>
         </member>
-        <member name="T:VCashApp.Services.EmployeeLog.EmployeeLogService">
+        <member name="T:VCashApp.Services.EmployeeLog.Application.EmployeeLogService">
             <summary>
-            Servicio de negocio para Registro de Empleados (Entrada/Salida),
-            estructurado al estilo de CefContainerService:
-             - Preparación de páginas (ViewModels)
-             - Guardado/Actualización (vía DTO y vía VM)
-             - Consultas/Reportes auxiliares
-             - Mapeadores internos y helpers
+            Servicio de negocio para Registro de Empleados (Entrada/Salida) sin SPs.
+            Orquesta preparación de VMs, guardado/actualización y consultas usando EF Core + LINQ.
             </summary>
         </member>
-        <member name="M:VCashApp.Services.EmployeeLog.EmployeeLogService.GetEmployeeInfoAsync(System.String,System.Collections.Generic.List{System.Int32},System.String,System.Boolean)">
+        <member name="T:VCashApp.Services.EmployeeLog.Integration.DailyRouteUpdater">
             <summary>
-            Obtener información de empleados con filtros y permisos.
+            Encapsula la integración con TDV_RutasDiarias para JT (cargo 64).
             </summary>
-            <param name="userId"></param>
-            <param name="permittedBranchIds"></param>
-            <param name="searchInput"></param>
-            <param name="isAdmin"></param>
-            <returns>informacion del empleado</returns>
+        </member>
+        <member name="T:VCashApp.Services.EmployeeLog.Queries.EmployeeLogLookupsService">
+            <summary>
+            Arma los SelectList para EmployeeLog (sucursales, cargos, unidades, estados),
+            siguiendo el patrón de CEF (el controlador no arma listas).
+            </summary>
+        </member>
+        <member name="T:VCashApp.Services.EmployeeLog.Queries.EmployeeLogQueryBuilder">
+            <summary>
+            Punto de composición si luego quieres sumar includes/joins condicionales.
+            </summary>
+        </member>
+        <member name="M:VCashApp.Services.EmployeeLog.Queries.IEmployeeLogLookupsService.GetDropdownListsAsync(System.String,System.Boolean)">
+            <summary>
+            Retorna los dropdowns (sucursales visibles, cargos, unidades, estados de log)
+            filtrados por el alcance del usuario (admin vs asignadas / sucursal activa).
+            </summary>
         </member>
         <member name="T:VCashApp.Services.EmployeeService">
             <summary>
@@ -3891,161 +3794,6 @@
             <param name="clientId">Client ID.</param>
             <param name="isPoint">True if it's a point, false if it's a fund.</param>
             <returns>A dynamic object with details (Name, City, Branch, Range).</returns>
-        </member>
-        <member name="T:VCashApp.Services.IEmployeeLogService">
-            <summary>
-            Interfaz para los servicios de lógica de negocio relacionados con los registros de empleados (entrada y salida).
-            </summary>
-        </member>
-        <member name="M:VCashApp.Services.IEmployeeLogService.GetEmployeeLogStatusAsync(System.Int32)">
-            <summary>
-            Recupera el estado actual de registro de un empleado, indicando si está actualmente dentro o fuera.
-            </summary>
-            <param name="employeeId">La cédula del empleado para la cual se desea consultar el estado.</param>
-            <returns>
-            Un objeto <see cref="T:VCashApp.Services.DTOs.EmployeeLogStateDto"/> que describe el estado actual del registro del empleado,
-            incluyendo información sobre el último registro abierto si existe.
-            </returns>
-        </member>
-        <member name="M:VCashApp.Services.IEmployeeLogService.RecordEmployeeEntryExitAsync(VCashApp.Services.DTOs.EmployeeLogDto,System.String,System.String)">
-            <summary>
-            Registra la entrada o salida de un empleado, creando un nuevo registro o actualizando uno existente.
-            Este método es utilizado para registros automáticos o basados en la acción del usuario.
-            </summary>
-            <param name="logDto">Objeto <see cref="T:VCashApp.Services.DTOs.EmployeeLogDto"/> que contiene los datos del registro (cédula del empleado, fecha, hora, etc.).</param>
-            <param name="currentUserId">El ID del usuario que está realizando la operación de registro (supervisor, sistema, etc.).</param>
-            <param name="confirmedValidation">Parámetro opcional para validaciones adicionales o confirmaciones (e.g., código de supervisor).</param>
-            <returns>
-            Un objeto <see cref="T:VCashApp.Services.DTOs.ServiceResult"/> que indica el éxito o fracaso de la operación,
-            junto con mensajes de error o información adicional.
-            </returns>
-        </member>
-        <member name="M:VCashApp.Services.IEmployeeLogService.UpdateEmployeeLogAsync(System.Int32,VCashApp.Services.DTOs.EmployeeLogDto,System.String,System.String)">
-            <summary>
-            Actualiza un registro de empleado existente, típicamente para registrar una salida,
-            modificar detalles de un registro ya creado o corregir una entrada previa.
-            </summary>
-            <param name="logId">El ID del registro de empleado a actualizar.</param>
-            <param name="logDto">Objeto <see cref="T:VCashApp.Services.DTOs.EmployeeLogDto"/> con los datos actualizados para el registro.</param>
-            <param name="currentUserId">El ID del usuario que está realizando la actualización.</param>
-            <param name="confirmedValidation">Parámetro opcional para validaciones o confirmaciones adicionales.</param>
-            <returns>
-            Un objeto <see cref="T:VCashApp.Services.DTOs.ServiceResult"/> que indica el éxito o fracaso de la operación,
-            junto con mensajes de error o información adicional.
-            </returns>
-        </member>
-        <member name="M:VCashApp.Services.IEmployeeLogService.RecordManualEmployeeExitAsync(System.Int32,System.DateOnly,System.TimeOnly,System.String,System.String)">
-            <summary>
-            Registra una salida manual para un registro de empleado existente que aún se encuentra abierto (sin salida registrada).
-            Este método permite cerrar un turno que no fue cerrado automáticamente.
-            </summary>
-            <param name="logId">El ID del registro de empleado a cerrar manualmente.</param>
-            <param name="exitDate">La fecha de la salida manual.</param>
-            <param name="exitTime">La hora de la salida manual.</param>
-            <param name="currentUserId">El ID del usuario (ej. supervisor) que está registrando la salida manual.</param>
-            <param name="confirmedValidation">Parámetro opcional para validaciones o confirmaciones adicionales.</param>
-            <returns>
-            Un objeto <see cref="T:VCashApp.Services.DTOs.ServiceResult"/> que indica el éxito o fracaso de la operación.
-            </returns>
-        </member>
-        <member name="M:VCashApp.Services.IEmployeeLogService.GetFilteredEmployeeLogsAsync(System.String,System.Nullable{System.Int32},System.String,System.Nullable{System.Int32},System.Nullable{System.DateOnly},System.Nullable{System.DateOnly},System.Nullable{System.Int32},System.String,System.Int32,System.Int32,System.Boolean)">
-            <summary>
-            Recupera una lista de registros de empleados filtrados y paginados.
-            Este método es utilizado para mostrar el historial o reportes de registros.
-            </summary>
-            <param name="currentUserId">El ID del usuario actual que realiza la consulta (para aplicar filtros de permiso por sucursal/unidad si aplica).</param>
-            <param name="cargoId">Filtro opcional por el ID del cargo del empleado.</param>
-            <param name="unitId">Filtro opcional por el ID de la unidad del empleado.</param>
-            <param name="branchId">Filtro opcional por el ID de la sucursal del empleado.</param>
-            <param name="startDate">Filtro opcional para la fecha de inicio del período de búsqueda.</param>
-            <param name="endDate">Filtro opcional para la fecha de fin del período de búsqueda.</param>
-            <param name="logStatus">Filtro opcional por el estado del registro (ej., abierto, cerrado).</param>
-            <param name="search">Término de búsqueda opcional para campos como nombre de empleado, cédula, etc.</param>
-            <param name="page">El número de página a recuperar (usado para paginación).</param>
-            <param name="pageSize">El número de registros por página (usado para paginación).</param>
-            <param name="isAdmin">Indica si el usuario actual tiene rol de administrador (afecta los permisos de filtrado).</param>
-            <returns>
-            Un <see cref="T:System.Tuple`2"/> donde T1 es una <see cref="T:System.Collections.Generic.List`1"/> con los registros encontrados
-            y T2 es el número total de registros que cumplen los criterios de filtro (antes de la paginación).
-            </returns>
-        </member>
-        <member name="M:VCashApp.Services.IEmployeeLogService.GetEmployeeInfoAsync(System.String,System.Collections.Generic.List{System.Int32},System.String,System.Boolean)">
-            <summary>
-            Obtiene la información básica de empleados para propósitos de selección o asignación,
-            </summary>
-            <param name="userId">El ID del usuario actual para validación de permisos.</param>
-            <param name="permittedBranchIds">Lista de IDs de sucursales a las que el usuario tiene acceso (si aplica).</param>
-            <param name="searchInput">Buscador</param>
-            <param name="isAdmin">Indica si el usuario actual tiene rol de administrador (afecta los permisos de filtrado).</param>
-            <returns>Una lista de empleados que cumplen con los criterios de búsqueda y permisos.</returns>
-        </member>
-        <member name="M:VCashApp.Services.IEmployeeLogService.GetEditViewModelAsync(System.Int32,System.Boolean)">
-            <summary>
-            Obtiene los datos necesarios para mostrar los detalles de un registro de empleado específico.
-            </summary>
-            <param name="id">El ID del registro de empleado a consultar.</param>
-            <param name="canEditLog">Indica si el usuario actual tiene permiso para editar el registro (afecta los datos retornados).</param>
-            <returns>Muestra el formulario de edición del registro de empleado o null si no se encuentra.</returns>
-        </member>
-        <member name="M:VCashApp.Services.IEmployeeLogService.GetDetailsViewModelAsync(System.Int32)">
-            <summary>
-            Obtiene los datos necesarios para mostrar los detalles de un registro de empleado específico en una vista de solo lectura.
-            </summary>
-            <param name="id">El ID del registro de empleado a consultar.</param>
-            <returns>Muestra el formulario de detalles del registro de empleado o null si no se encuentra.</returns>
-        </member>
-        <member name="M:VCashApp.Services.IEmployeeLogService.GetManualExitViewModelAsync(System.Int32,System.Boolean,System.Boolean)">
-            <summary>
-            Obtiene los datos necesarios para mostrar el formulario de creación de un nuevo registro de empleado.
-            </summary>
-            <param name="id">El ID del empleado para el cual se creará el registro.</param>
-            <param name="canCreateLog">Permiso para crear</param>
-            <param name="canEditLog">Permiso para editar</param>
-        </member>
-        <member name="M:VCashApp.Services.IEmployeeLogService.GetEntryViewModelAsync(System.String,System.String,System.String,System.String,System.Boolean,System.Boolean)">
-            <summary>
-            Obtiene los datos necesarios para mostrar el formulario de creación de un nuevo registro de empleado.
-            </summary>
-            <param name="userName">Nombre de usuario</param>
-            <param name="unidadName">Nombre de unidad</param>
-            <param name="branchName">Nombre de sucursal</param>
-            <param name="fullName">Nombre completo del empleado</param>
-            <param name="canCreate">Permiso para crear</param>
-            <param name="canEdit">Permiso para editar</param>
-        </member>
-        <member name="M:VCashApp.Services.IEmployeeLogService.RecordEmployeeEntryExitAsync(VCashApp.Models.ViewModels.EmployeeLog.EmployeeLogEntryViewModel,System.String,System.String)">
-            <summary>
-            Gestiona el registro de entrada o salida de un empleado basado en la información proporcionada en el ViewModel.
-            </summary>
-            <param name="currentUserId">Usuario</param>
-            <param name="confirmedValidation">Validación</param>
-            <param name="vm">ViewModel con los datos del registro</param>
-            <returns>Resultado del servicio indicando éxito o fracaso de la operación.</returns>
-        </member>
-        <member name="M:VCashApp.Services.IEmployeeLogService.UpdateEmployeeLogAsync(VCashApp.Models.ViewModels.EmployeeLog.EmployeeLogEditViewModel,System.String,System.String)">
-            <summary>
-            Gestiona la actualización de un registro de empleado existente basado en la información proporcionada en el ViewModel.
-            </summary>
-            <param name="currentUserId">Usuario</param>
-            <param name="confirmedValidation">Validacion</param>
-            <param name="vm">ViewModel con los datos del registro a actualizar</param>
-            <returns>Resultado del servicio indicando éxito o fracaso de la operación.</returns>
-        </member>
-        <member name="M:VCashApp.Services.IEmployeeLogService.RecordManualEmployeeExitAsync(VCashApp.Models.ViewModels.EmployeeLog.EmployeeLogManualExitViewModel,System.String,System.String)">
-            <summary>
-            Gestiona el registro de una salida manual para un registro de empleado existente basado en la información proporcionada en el ViewModel.
-            </summary>
-            <param name="currentUserId">Usuario</param>
-            <param name="confirmedValidation">Validacion</param>
-            <param name="vm">ViewModel con los datos del registro a actualizar</param>
-            <returns>Resultado del servicio indicando éxito o fracaso de la operación.</returns>
-        </member>
-        <member name="M:VCashApp.Services.IEmployeeLogService.GetLogByIdAsync(System.Int32)">
-            <summary>
-            Obtiene el registro de empleado por ID, incluyendo empleado/cargo/unidad/sucursal.
-            </summary>
-            <param name="id">ID del registro.</param>
-            <returns>La entidad <see cref="T:VCashApp.Models.Entities.SegRegistroEmpleado"/> o null si no existe.</returns>
         </member>
         <member name="T:VCashApp.Services.IEmployeeService">
             <summary>
