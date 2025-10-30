@@ -16,6 +16,21 @@
     bool canEditLog = ViewBag.CanEditLog ?? false;
 }
 
+<style>
+    /* estado resaltado para teclado */
+    .autocomplete-item.highlight {
+        background: var(--bs-light);
+    }
+    /* ancho mínimo para evitar “saltos” entre estados */
+    .autocomplete-results {
+        min-width: 420px;
+    }
+    /* cursor coherente */
+    .autocomplete-item {
+        cursor: pointer;
+    }
+</style>
+
 <div class="form-container">
     <div class="row">
         <div class="col-12">
@@ -27,7 +42,7 @@
     <form id="employeeLogForm">
         @Html.AntiForgeryToken()
         <div class="card">
-            <div class="card-header"><h5 class="mb-0">🔎 Buscar empleado</h5></div>
+            <div class="card-header"><h5 class="mb-0"><i class="ri-user-search-fill"></i> Buscar empleado</h5></div>
             <div class="card-body">
                 <div class="row">
                     <div class="col-md-12">
@@ -40,7 +55,9 @@
                                    required>
                             <label for="employeeSearchInput">Buscar empleado (Cédula o Nombre)</label>
 
-                            <div id="employeeSearchResults" class="autocomplete-results" style="display:none;"></div>
+                            <div id="employeeSearchResults" class="autocomplete-results" 
+                                role="listbox" aria-label="Resultados de empleados" aria-live="polite" style="display:none;">
+                            </div>
                         </div>
 
                         <small class="form-text text-muted">Ejemplo: 12345 o Juan Pérez</small>
@@ -50,7 +67,7 @@
         </div>
 
         <div class="card mt-3" id="cardDatosEmpleado">
-            <div class="card-header"><h5 class="mb-0">👤 Datos del empleado</h5></div>
+            <div class="card-header"><h5 class="mb-0"><i class="ri-account-box-fill"></i> Datos del empleado</h5></div>
             <div class="card-body">
                 <div class="row d-flex justify-content-center align-items-center" id="employeeDetailsSection">
                     <div class="col-md-2">
@@ -120,7 +137,7 @@
         </div>
 
         <div class="card mt-3" id="cardRegistro">
-            <div class="card-header"><h5 class="mb-0">⏱️ Registro</h5></div>
+            <div class="card-header"><h5 class="mb-0"><i class="ri-time-fill"></i> Registro</h5></div>
             <div class="card-body">
                 <div class="row g-3">
                     <div class="col-md-6">
@@ -218,16 +235,12 @@
             const SAFE_SEARCH = {
               seq: 0,
               ctrl: null,
-              cache: new Map()
+              cache: new Map(),
+              store: new Map(),
+              highlighted: -1
             };
 
-            function debounce(fn, delay) {
-              let t; return (...args) => {
-                clearTimeout(t);
-                t = setTimeout(() => fn.apply(null, args), delay);
-              };
-            }
-
+            function debounce(fn, delay){ let t; return (...a)=>{ clearTimeout(t); t=setTimeout(()=>fn(...a),delay); }; }
             function wait(ms){ return new Promise(res => setTimeout(res, ms)); }
 
             function mergeAbort(controller, externalSignal){
@@ -236,40 +249,41 @@
               else externalSignal.addEventListener('abort', () => controller.abort(), { once: true });
             }
 
-            async function fetchWithTimeout(url, { timeout = 4000, signal } = {}) { // CAMBIO: timeout de 8000 a 4000
+            async function fetchWithTimeout(url, { timeout=5000, signal } = {}){
               const ctrl = new AbortController();
-              const tid = setTimeout(() => ctrl.abort(), timeout);
+              const tid = setTimeout(()=> ctrl.abort(), timeout);
               mergeAbort(ctrl, signal);
               try {
-                const res = await fetch(url, { signal: ctrl.signal });
+                const res = await fetch(url, { signal: ctrl.signal, headers: { 'Accept':'application/json' }});
                 return res;
-              } finally {
-                clearTimeout(tid);
-              }
+              } finally { clearTimeout(tid); }
             }
 
-            function isRetryableStatus(status){
-              return [408, 429, 500, 502, 503, 504].includes(status);
-            }
+            function isRetryableStatus(s){ return [408,429,500,502,503,504].includes(s); }
 
-            async function fetchJsonSafe(url, { timeout = 4000, retries = 0, signal } = {}) { // CAMBIO: timeout 4000, retries 0
+            async function fetchJsonSafe(url, { timeout = 5000, retries = 0, signal } = {}) {
               let attempt = 0;
               while (true) {
                 try {
                   const res = await fetchWithTimeout(url, { timeout, signal });
+                  if (res.status === 401 || res.status === 403){
+                    window.location.href = '/Identity/Account/Login';
+                    throw new Error('AuthRequired');
+                  }
                   if (!res.ok) {
                     const text = await res.text().catch(()=> '');
                     const err = new Error(`HTTP ${res.status} ${res.statusText} ${text ? '- '+text : ''}`);
                     err.status = res.status;
                     throw err;
                   }
+                  if (res.status === 204) return [];
                   return await res.json();
                 } catch (err) {
                   if (signal?.aborted) throw err;
                   const status = err.status || 0;
                   const networkish = err.name === 'TypeError' || err.name === 'AbortError';
                   if (attempt < retries && (networkish || isRetryableStatus(status))) {
-                    await wait(200); // CAMBIO: espera más corta
+                    await wait(300 + Math.random()*300);
                     attempt++;
                     continue;
                   }
@@ -278,39 +292,90 @@
               }
             }
 
-            function renderSearchMessage($results, text, extraClass = 'no-results-message'){
-              $results
-                .html(`<div class="autocomplete-item ${extraClass}">${text}</div>`)
+            function renderMessage(text, css='no-results-message'){
+              employeeSearchResults
+                .attr('aria-busy','false')
+                .html(`<div class="autocomplete-item ${css}" role="option" aria-disabled="true">${text}</div>`)
                 .show();
+              SAFE_SEARCH.highlighted = -1;
             }
 
-            function setSearchingUI($results){
-              renderSearchMessage($results, 'Buscando…', 'loading');
+            function setLoadingUI(){
+              employeeSearchResults
+                .attr('aria-busy','true')
+                .html(`<div class="autocomplete-item loading" role="option" aria-disabled="true">Buscando…</div>`)
+                .show();
+              SAFE_SEARCH.highlighted = -1;
             }
 
-            function renderResults(data) {
-              employeeSearchResults.empty();
+            function sanitize(text){
+              return String(text ?? '').replace(/[<>&"]/g, s => ({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[s]));
+            }
 
-              if (data?.error) {
-                renderSearchMessage(employeeSearchResults, data.error);
+            function renderResults(list){
+              employeeSearchResults.empty().attr('aria-busy','false');
+
+              if (list?.error){
+                renderMessage(sanitize(list.error));
+                return;
+              }
+              if (!Array.isArray(list) || list.length === 0){
+                renderMessage('No se encontraron empleados.');
                 return;
               }
 
-              if (Array.isArray(data) && data.length > 0) {
-                // OPTIMIZACIÓN: HTML más directo
-                const html = data.map(emp => `
-                  <div class="autocomplete-item" data-employee-json='${JSON.stringify(emp)}'>
-                    <img src="${emp.photoUrl ? `/${emp.photoUrl.startsWith('/') ? emp.photoUrl.substring(1) : emp.photoUrl}` : '/assets/profile-img/default-profile.jpg'}"
-                         class="autocomplete-item-icon" alt="Foto">
-                    <span class="autocomplete-item-text">${emp.employeeName}</span>
-                    <span class="autocomplete-item-details">(${emp.employeeId}) - ${emp.branchName || 'N/A'}</span>
-                  </div>
-                `).join('');
+              SAFE_SEARCH.store.clear();
+              SAFE_SEARCH.highlighted = -1;
 
-                employeeSearchResults.html(html).show();
-              } else {
-                renderSearchMessage(employeeSearchResults, 'No se encontraron empleados.');
+              const html = list.map((emp, idx) => {
+                const key = `${Date.now()}_${idx}_${emp.employeeId}`;
+                SAFE_SEARCH.store.set(key, emp);
+                const img = emp.photoUrl
+                  ? `/${emp.photoUrl.startsWith('/') ? emp.photoUrl.substring(1) : emp.photoUrl}`
+                  : '/assets/profile-img/default-profile.jpg';
+                const displayName = sanitize(emp.employeeName);
+                const displayDet  = `(${sanitize(emp.employeeId)}) - ${sanitize(emp.branchName || 'N/A')}`;
+                return `
+                  <div class="autocomplete-item"
+                       role="option"
+                       id="empopt_${idx}"
+                       data-key="${key}"
+                       aria-selected="false"
+                       tabindex="-1">
+                    <img src="${img}" class="autocomplete-item-icon" alt="">
+                    <span class="autocomplete-item-text">${displayName}</span>
+                    <span class="autocomplete-item-details">${displayDet}</span>
+                  </div>`;
+              }).join('');
+
+              employeeSearchResults.html(html).show();
+            }
+
+            function highlight(indexDelta){
+              const $items = employeeSearchResults.find('.autocomplete-item').not('.no-results-message,.loading');
+              if ($items.length === 0) return;
+
+              // quitar anterior
+              if (SAFE_SEARCH.highlighted >= 0 && SAFE_SEARCH.highlighted < $items.length){
+                const $prev = $items.eq(SAFE_SEARCH.highlighted);
+                $prev.removeClass('highlight').attr('aria-selected','false');
               }
+
+              // calcular nuevo
+              if (indexDelta === 'reset'){ SAFE_SEARCH.highlighted = -1; return; }
+              if (SAFE_SEARCH.highlighted === -1 && indexDelta > 0) SAFE_SEARCH.highlighted = 0;
+              else SAFE_SEARCH.highlighted = (SAFE_SEARCH.highlighted + indexDelta + $items.length) % $items.length;
+
+              const $cur = $items.eq(SAFE_SEARCH.highlighted);
+              $cur.addClass('highlight').attr('aria-selected','true')[0]?.scrollIntoView({ block:'nearest' });
+            }
+
+            function pickHighlighted(){
+              const $items = employeeSearchResults.find('.autocomplete-item').not('.no-results-message,.loading');
+              if ($items.length === 0 || SAFE_SEARCH.highlighted < 0) return;
+              const key = $items.eq(SAFE_SEARCH.highlighted).data('key');
+              const emp = SAFE_SEARCH.store.get(key);
+              if (emp) selectEmployee(emp);
             }
 
             function resetForm() {
@@ -395,74 +460,68 @@
             }
 
             async function getEmployeeLogStatus(employeeId) {
-                btnRecordEntry.prop('disabled', true);
-                btnRecordExit.prop('disabled', true);
-                hdnConfirmedValidation.val('');
-                hdnLogId.val('0');
+              btnRecordEntry.prop('disabled', true);
+              btnRecordExit.prop('disabled', true);
+              hdnConfirmedValidation.val('');
+              hdnLogId.val('0');
 
-                entryDateInput.prop('readonly', true).val('');
-                entryTimeInput.prop('readonly', true).val('');
-                exitDateInput.prop('readonly', true).val('');
-                exitTimeInput.prop('readonly', true).val('');
+              entryDateInput.prop('readonly', true).val('');
+              entryTimeInput.prop('readonly', true).val('');
+              exitDateInput.prop('readonly', true).val('');
+              exitTimeInput.prop('readonly', true).val('');
 
-                try {
-                    const response = await fetch(`@Url.Action("GetEmployeeLogStatus", "EmployeeLog")?employeeId=${employeeId}`);
-                    const data = await response.json();
+              const url = `@Url.Action("GetEmployeeLogStatus", "EmployeeLog")?employeeId=${employeeId}`;
 
-                    if (data.status === 'error') {
-                        Swal.fire({ icon: 'error', title: 'Error', text: data.errorMessage });
-                        return;
-                    }
-
-                    if (data.status === 'noEntry') {
-                        btnRecordEntry.prop('disabled', false);
-                        hdnIsEntryRecorded.val('true');
-                        hdnIsExitRecorded.val('false');
-
-                        entryDateInput.val(data.currentDate);
-                        entryTimeInput.val(data.currentTime);
-                        exitDateInput.val('');
-                        exitTimeInput.val('');
-                        exitDateInput.prop('readonly', true);
-                        exitTimeInput.prop('readonly', true);
-
-                    } else if (data.status === 'openEntry' || data.status === 'openEntryYesterday') {
-                        btnRecordExit.prop('disabled', false);
-                        hdnIsEntryRecorded.val('true');
-                        hdnIsExitRecorded.val('true');
-                        hdnLogId.val(data.openLogId);
-
-                        entryDateInput.val(data.entryDate || '');
-                        entryTimeInput.val(data.entryTime || '');
-
-                        exitDateInput.val(data.currentDate || '');
-                        exitTimeInput.val(data.currentTime || '');
-                        exitDateInput.prop('readonly', false);
-                        exitTimeInput.prop('readonly', false);
-
-                    } else if (data.status === 'completeEntry') {
-                        Swal.fire({
-                            icon: 'warning',
-                            title: 'Estado del Registro',
-                            text: 'Este empleado ya tiene un registro completo (entrada y salida) para hoy.'
-                        });
-                        btnRecordEntry.prop('disabled', true);
-                        btnRecordExit.prop('disabled', true);
-
-                        entryDateInput.val(data.entryDate);
-                        entryTimeInput.val(data.entryTime);
-                        exitDateInput.val(data.exitDate);
-                        exitTimeInput.val(data.exitTime);
-
-                        entryDateInput.prop('readonly', true);
-                        entryTimeInput.prop('readonly', true);
-                        exitDateInput.prop('readonly', true);
-                        exitTimeInput.prop('readonly', true);
-                    }
-                } catch (error) {
-                    console.error('Error al obtener estado del registro de empleado:', error);
-                    Swal.fire({ icon: 'error', title: 'Error', text: 'Error al obtener el estado del empleado.' });
+              try {
+                const data = await fetchJsonSafe(url, { timeout: 5000, retries: 0 });
+                if (data.status === 'error') {
+                  Swal.fire({ icon: 'error', title: 'Error', text: data.errorMessage || 'No se pudo obtener el estado.' });
+                  return;
                 }
+
+                if (data.status === 'noEntry') {
+                  btnRecordEntry.prop('disabled', false);
+                  hdnIsEntryRecorded.val('true');
+                  hdnIsExitRecorded.val('false');
+                  entryDateInput.val(data.currentDate || '');
+                  entryTimeInput.val(data.currentTime || '');
+                  exitDateInput.val('').prop('readonly', true);
+                  exitTimeInput.val('').prop('readonly', true);
+                  return;
+                }
+
+                if (data.status === 'openEntry' || data.status === 'openEntryYesterday') {
+                  btnRecordExit.prop('disabled', false);
+                  hdnIsEntryRecorded.val('true');
+                  hdnIsExitRecorded.val('true');
+                  hdnLogId.val(data.openLogId);
+
+                  entryDateInput.val(data.entryDate || '');
+                  entryTimeInput.val(data.entryTime || '');
+
+                  exitDateInput.val(data.currentDate || '').prop('readonly', false);
+                  exitTimeInput.val(data.currentTime || '').prop('readonly', false);
+                  return;
+                }
+
+                if (data.status === 'completeEntry') {
+                  Swal.fire({ icon: 'warning', title: 'Estado del Registro', text: 'Este empleado ya tiene un registro completo para hoy.' });
+                  btnRecordEntry.prop('disabled', true);
+                  btnRecordExit.prop('disabled', true);
+
+                  entryDateInput.val(data.entryDate || '');
+                  entryTimeInput.val(data.entryTime || '');
+                  exitDateInput.val(data.exitDate || '');
+                  exitTimeInput.val(data.exitTime || '');
+                  return;
+                }
+              } catch (err) {
+                console.error('Estado log:', err);
+                const msg = err.name === 'AbortError'
+                  ? 'Consulta cancelada.'
+                  : (err.message?.includes('HTTP 408') ? 'Tiempo de espera agotado.' : 'Error al obtener el estado del empleado.');
+                Swal.fire({ icon: 'error', title: 'Error', text: msg });
+              }
             }
 
             async function sendLogData(actionName, data, logIdForUpdate = null) {
@@ -552,29 +611,25 @@
             const runSafeSearch = debounce(async function () {
               const term = employeeSearchInput.val().trim();
 
-              if (!term) {
+              if (!term){
                 employeeSearchResults.hide().empty();
                 resetCoreFields();
-                SAFE_SEARCH.ctrl?.abort();
-                SAFE_SEARCH.ctrl = null;
+                SAFE_SEARCH.ctrl?.abort(); SAFE_SEARCH.ctrl=null;
                 return;
               }
 
               const isNumber = /^\d+$/.test(term);
               const isTextSearchValid = term.length >= 2 && !isNumber;
-              if (!(isNumber || isTextSearchValid)) {
+              if (!(isNumber || isTextSearchValid)){
                 employeeSearchResults.hide().empty();
                 return;
               }
 
-              if (SAFE_SEARCH.cache.has(term)) {
-                const cachedData = SAFE_SEARCH.cache.get(term);
-                renderResults(cachedData);
-                return;
-              }
+              const cached = SAFE_SEARCH.cache.get(term);
+              if (cached){ renderResults(cached); }
 
-              if (!navigator.onLine) {
-                renderSearchMessage(employeeSearchResults, 'Sin conexión. Intenta nuevamente.', 'no-results-message');
+              if (!navigator.onLine){
+                if (!cached) renderMessage('Sin conexión. Intenta nuevamente.');
                 return;
               }
 
@@ -583,18 +638,16 @@
               SAFE_SEARCH.ctrl = ctrl;
               const mySeq = ++SAFE_SEARCH.seq;
 
-              setSearchingUI(employeeSearchResults);
+              if (!cached) setLoadingUI();
 
               const url = `@Url.Action("GetEmployeeInfo", "EmployeeLog")?searchInput=${encodeURIComponent(term)}`;
 
               try {
-                const data = await fetchJsonSafe(url, { timeout: 4000, retries: 0, signal: ctrl.signal });
+                const data = await fetchJsonSafe(url, { timeout: 5000, retries: 0, signal: ctrl.signal });
 
                 if (mySeq !== SAFE_SEARCH.seq) return;
-
-                // NUEVO: Guardar en cache
                 SAFE_SEARCH.cache.set(term, data);
-                if (SAFE_SEARCH.cache.size > 30) {
+                if (SAFE_SEARCH.cache.size > 40) {
                   const firstKey = SAFE_SEARCH.cache.keys().next().value;
                   SAFE_SEARCH.cache.delete(firstKey);
                 }
@@ -603,74 +656,46 @@
 
               } catch (err) {
                 if (ctrl.signal.aborted && mySeq !== SAFE_SEARCH.seq) return;
-                if (!ctrl.signal.aborted) {
-                  console.error('Error al buscar empleados:', err);
-                  const msg = err.name === 'AbortError' ? 'Búsqueda cancelada.' : 'Error al buscar. Intenta de nuevo.';
-                  renderSearchMessage(employeeSearchResults, msg);
+                if (!ctrl.signal.aborted){
+                  console.error('Buscar empleados:', err);
+                  const msg = (err.name === 'AbortError')
+                    ? 'Búsqueda cancelada.'
+                    : (err.message?.includes('HTTP 408') ? 'Tiempo de espera agotado.' : 'No se pudo completar la búsqueda. Intenta de nuevo.');
+                  if (!cached) renderMessage(msg);
                 }
               }
-            }, 120);
+            }, 150);
 
-            // input listener
             employeeSearchInput.on('input', runSafeSearch);
-
-            // Enter: si hay un único resultado, seleccionarlo rápido
             employeeSearchInput.on('keydown', function(e){
-                if (e.key === 'Enter') {
-                    const $items = employeeSearchResults.find('.autocomplete-item').not('.no-results-message,.loading');
-                    if ($items.length === 1) {
-                        const employeeDataJson = $items.first().attr('data-employee-json');
-                        if (employeeDataJson) {
-                            try {
-                                const employeeData = JSON.parse(employeeDataJson);
-                                selectEmployee(employeeData);
-                                e.preventDefault();
-                            } catch (parseError) {
-                                console.error('Error al parsear datos del empleado:', parseError);
-                            }
-                        }
-                    }
+              const hasItems = employeeSearchResults.is(':visible') && employeeSearchResults.find('.autocomplete-item').length>0;
+              if (e.key === 'ArrowDown' && hasItems){ e.preventDefault(); highlight(+1); }
+              else if (e.key === 'ArrowUp' && hasItems){ e.preventDefault(); highlight(-1); }
+              else if (e.key === 'Enter' && hasItems){
+                e.preventDefault();
+                const $items = employeeSearchResults.find('.autocomplete-item').not('.no-results-message,.loading');
+                if ($items.length === 1){
+                  const key = $items.first().data('key'); const emp = SAFE_SEARCH.store.get(key);
+                  if (emp) selectEmployee(emp);
+                } else {
+                  pickHighlighted();
                 }
+              } else if (e.key === 'Escape'){
+                employeeSearchResults.hide().empty();
+                SAFE_SEARCH.highlighted = -1;
+              }
+            });
+            employeeSearchInput.on('blur', () => {
+              setTimeout(()=> { employeeSearchResults.hide(); }, 150);
+              SAFE_SEARCH.ctrl?.abort();
             });
 
-            // Antes: .on('click', '.autocomplete-item', ...
-            employeeSearchResults.on('mousedown', '.autocomplete-item', function (e) {
-                e.preventDefault();
-
-                const $item = $(this);
-
-                // Si tiene clases de mensaje, ignorar
-                if ($item.hasClass('no-results-message') || $item.hasClass('loading')) {
-                    return;
-                }
-
-                // Intentar obtener los datos del atributo JSON primero
-                const employeeDataJson = $item.attr('data-employee-json');
-
-                if (employeeDataJson) {
-                    try {
-                        const employeeData = JSON.parse(employeeDataJson);
-                        if (employeeData && employeeData.employeeId) {
-                            // Pausar búsquedas mientras seleccionamos
-                            if (SAFE_SEARCH.ctrl && !SAFE_SEARCH.ctrl.signal.aborted) {
-                                SAFE_SEARCH.ctrl.abort();
-                            }
-                            selectEmployee(employeeData);
-                        } else {
-                            console.warn('Datos de empleado incompletos:', employeeData);
-                        }
-                    } catch (parseError) {
-                        console.error('Error al parsear datos del empleado:', parseError, employeeDataJson);
-                    }
-                } else {
-                    // Fallback: intentar con jQuery.data() (menos confiable)
-                    const employeeData = $item.data('employee');
-                    if (employeeData && employeeData.employeeId) {
-                        selectEmployee(employeeData);
-                    } else {
-                        console.warn('No se pudieron obtener los datos del empleado del item clickeado');
-                    }
-                }
+            employeeSearchResults.on('mousedown', '.autocomplete-item', function(e){
+              e.preventDefault();
+              const $item = $(this);
+              if ($item.hasClass('no-results-message') || $item.hasClass('loading')) return;
+              const key = $item.data('key'); const emp = SAFE_SEARCH.store.get(key);
+              if (emp){ SAFE_SEARCH.ctrl?.abort(); selectEmployee(emp); }
             });
 
             // === Botones ===

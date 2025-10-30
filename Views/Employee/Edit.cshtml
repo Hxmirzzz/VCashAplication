@@ -1,4 +1,4 @@
-﻿@model VCashApp.Models.ViewModels.EmpleadoViewModel
+﻿@model VCashApp.Models.ViewModels.Employee.EmployeeViewModel
 
 @{
     Layout = "_Layout";
@@ -14,156 +14,152 @@
     </div>
 
     <div class="card">
-        <div class="card-header">
-            <h4 class="mb-0">Editar Empleado</h4>
-        </div>
         <div class="card-body">
             <form id="editEmployeeForm" asp-action="Edit" asp-controller="Employee" method="post" enctype="multipart/form-data">
                 @Html.AntiForgeryToken()
 
-                <div class="row">
+                <div class="row gx-3 gy-2">
                     <div class="col-md-4">
-                        <div class="form-group">
-                            <label asp-for="CodCedula" class="control-label"></label>
-                            <input asp-for="CodCedula" class="form-control form-control-sm" readonly/>
-                            <span asp-validation-for="CodCedula" class="text-danger"></span>
+                        <div class="form-floating has-validation">
+                            <input asp-for="CodCedula" class="form-control" placeholder=" " readonly />
+                            <label asp-for="CodCedula" class="required"></label>
+                            <div class="invalid-feedback" data-valmsg-for="CodCedula"></div>
                         </div>
                     </div>
+
                     <div class="col-md-4">
-                        <div class="form-group">
-                            <label asp-for="TipoDocumento" class="control-label"></label>
-                            <select asp-for="TipoDocumento" class="form-control form-control-sm">
-                                <option value="">-- Seleccione un Tipo de Documento --</option>
+                        <div class="form-floating has-validation">
+                            <select asp-for="TipoDocumento" class="form-select" placeholder=" ">
+                                <option value="">-- Selecciona --</option>
                                 <option value="CC">CEDULA DE CIUDADANIA</option>
                                 <option value="CE">CEDULA DE EXTRANJERIA</option>
                                 <option value="PS">PASAPORTE</option>
                             </select>
-                            <span asp-validation-for="TipoDocumento" class="text-danger"></span>
+                            <label asp-for="TipoDocumento" class="required"></label>
+                            <div class="invalid-feedback" data-valmsg-for="TipoDocumento"></div>
                         </div>
                     </div>
+
                     <div class="col-md-4">
-                        <div class="form-group">
-                            <label asp-for="NumeroCarnet" class="control-label"></label>
-                            <input asp-for="NumeroCarnet" class="form-control form-control-sm" />
-                            <span asp-validation-for="NumeroCarnet" class="text-danger"></span>
+                        <div class="form-floating has-validation">
+                            <input asp-for="NumeroCarnet" class="form-control" placeholder=" " />
+                            <label asp-for="NumeroCarnet"></label>
+                            <div class="invalid-feedback" data-valmsg-for="NumeroCarnet"></div>
                         </div>
                     </div>
                 </div>
 
-                <div class="row">
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            <label asp-for="FirstName" class="control-label"></label>
-                            <input asp-for="FirstName" class="form-control form-control-sm" />
-                            <span asp-validation-for="FirstName" class="text-danger"></span>
+                <div class="row gx-3 gy-2 mt-1">
+                    <div class="col-md-3">
+                        <div class="form-floating has-validation">
+                            <input asp-for="FirstName" class="form-control" placeholder=" " />
+                            <label asp-for="FirstName" class="required"></label>
+                            <div class="invalid-feedback" data-valmsg-for="FirstName"></div>
                         </div>
                     </div>
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            <label asp-for="MiddleName" class="control-label"></label>
-                            <input asp-for="MiddleName" class="form-control form-control-sm" />
-                            <span asp-validation-for="MiddleName" class="text-danger"></span>
+
+                    <div class="col-md-3">
+                        <div class="form-floating">
+                            <input asp-for="MiddleName" class="form-control" placeholder=" " />
+                            <label asp-for="MiddleName"></label>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="form-floating has-validation">
+                            <input asp-for="FirstLastName" class="form-control" placeholder=" " />
+                            <label asp-for="FirstLastName" class="required"></label>
+                            <div class="invalid-feedback" data-valmsg-for="FirstLastName"></div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-3">
+                        <div class="form-floating">
+                            <input asp-for="SecondLastName" class="form-control" placeholder=" " />
+                            <label asp-for="SecondLastName"></label>
                         </div>
                     </div>
                 </div>
 
-                <div class="row">
+                <div class="row gx-3 gy-2 mt-1">
                     <div class="col-md-6">
-                        <div class="form-group">
-                            <label asp-for="FirstLastName" class="control-label"></label>
-                            <input asp-for="FirstLastName" class="form-control form-control-sm" />
-                            <span asp-validation-for="FirstLastName" class="text-danger"></span>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            <label asp-for="SecondLastName" class="control-label"></label>
-                            <input asp-for="SecondLastName" class="form-control form-control-sm" />
-                            <span asp-validation-for="SecondLastName" class="text-danger"></span>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="row">
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            <label asp-for="CargoCode" class="control-label"></label>
-                            <select asp-for="CargoCode" class="form-control form-control-sm" asp-items="@(new SelectList(Model.Cargos, "Value", "Text"))">
-                                <option value="">-- Seleccione un Cargo --</option>
+                        <div class="form-floating has-validation">
+                            <select asp-for="CargoCode" class="form-select" asp-items="@(new SelectList(Model.Cargos, "Value", "Text"))">
+                                <option value="">-- Seleccione --</option>
                             </select>
-                            <span asp-validation-for="CargoCode" class="text-danger"></span>
+                            <label asp-for="CargoCode" class="required"></label>
+                            <div class="invalid-feedback" data-valmsg-for="CargoCode"></div>
                         </div>
                     </div>
+
                     <div class="col-md-6">
-                        <div class="form-group">
-                            <label asp-for="BranchCode" class="control-label"></label>
-                            <select asp-for="BranchCode" class="form-control form-control-sm" asp-items="@(new SelectList(Model.Sucursales, "Value", "Text"))">
-                                <option value="">-- Seleccione una Sucursal --</option>
+                        <div class="form-floating has-validation">
+                            <select asp-for="BranchCode" class="form-select" asp-items="@(new SelectList(Model.Sucursales, "Value", "Text"))">
+                                <option value="">-- Seleccione --</option>
                             </select>
-                            <span asp-validation-for="BranchCode" class="text-danger"></span>
+                            <label asp-for="BranchCode" class="required"></label>
+                            <div class="invalid-feedback" data-valmsg-for="BranchCode"></div>
                         </div>
                     </div>
                 </div>
 
-                <div class="row">
+                <div class="row gx-3 gy-2 mt-1">
                     <div class="col-md-4">
-                        <div class="form-group">
-                            <label asp-for="FechaNacimiento" class="control-label"></label>
-                            <input asp-for="FechaNacimiento" type="date" class="form-control form-control-sm" />
-                            <span asp-validation-for="FechaNacimiento" class="text-danger"></span>
+                        <div class="form-floating has-validation">
+                            <input asp-for="FechaNacimiento" type="date" class="form-control" placeholder=" " />
+                            <label asp-for="FechaNacimiento" class="required"></label>
+                            <div class="invalid-feedback" data-valmsg-for="FechaNacimiento"></div>
                         </div>
                     </div>
+
                     <div class="col-md-4">
-                        <div class="form-group">
-                            <label asp-for="FechaExpedicion" class="control-label"></label>
-                            <input asp-for="FechaExpedicion" type="date" class="form-control form-control-sm" />
-                            <span asp-validation-for="FechaExpedicion" class="text-danger"></span>
+                        <div class="form-floating has-validation">
+                            <input asp-for="FechaExpedicion" type="date" class="form-control" placeholder=" " />
+                            <label asp-for="FechaExpedicion" class="required"></label>
+                            <div class="invalid-feedback" data-valmsg-for="FechaExpedicion"></div>
                         </div>
                     </div>
+
                     <div class="col-md-4">
-                        <div class="form-group">
-                            <label asp-for="CiudadExpedicion" class="control-label"></label>
-                            <select asp-for="CiudadExpedicion" class="form-control form-control-sm" asp-items="@(new SelectList(Model.Ciudades, "Value", "Text"))">
-                                <option value="">-- Seleccione una Ciudad --</option>
+                        <div class="form-floating has-validation">
+                            <select asp-for="CiudadExpedicion" class="form-select" asp-items="@(new SelectList(Model.Ciudades, "Value", "Text"))">
+                                <option value="">-- Seleccione --</option>
                             </select>
-                            <span asp-validation-for="CiudadExpedicion" class="text-danger"></span>
+                            <label asp-for="CiudadExpedicion" class="required"></label>
+                            <div class="invalid-feedback" data-valmsg-for="CiudadExpedicion"></div>
                         </div>
                     </div>
                 </div>
 
-                <div class="row">
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            <label asp-for="Celular" class="control-label"></label>
-                            <input asp-for="Celular" class="form-control form-control-sm" />
-                            <span asp-validation-for="Celular" class="text-danger"></span>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="form-group">
-                            <label asp-for="Correo" class="control-label"></label>
-                            <input asp-for="Correo" class="form-control form-control-sm" />
-                            <span asp-validation-for="Correo" class="text-danger"></span>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="row">
-                    <div class="col-md-12">
-                        <div class="form-group">
-                            <label asp-for="Direccion" class="control-label"></label>
-                            <input asp-for="Direccion" class="form-control form-control-sm" />
-                            <span asp-validation-for="Direccion" class="text-danger"></span>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="row">
+                <div class="row gx-3 gy-2 mt-1">
                     <div class="col-md-4">
-                        <div class="form-group">
-                            <label asp-for="BloodType" class="control-label"></label>
-                            <select asp-for="BloodType" class="form-control form-control-sm">
-                                <option value="">-- Seleccione tipo de sangre --</option>
+                        <div class="form-floating has-validation">
+                            <input asp-for="Celular" class="form-control" placeholder=" " />
+                            <label asp-for="Celular"></label>
+                            <div class="invalid-feedback" data-valmsg-for="Celular"></div>
+                        </div>
+                    </div>
+
+                    <div class="col-md-4">
+                        <div class="form-floating has-validation">
+                            <input asp-for="Correo" class="form-control" placeholder=" " />
+                            <label asp-for="Correo"></label>
+                            <div class="invalid-feedback" data-valmsg-for="Correo"></div>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-floating has-validation">
+                            <input asp-for="Direccion" class="form-control" placeholder=" " />
+                            <label asp-for="Direccion"></label>
+                            <div class="invalid-feedback" data-valmsg-for="Direccion"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row gx-3 gy-2 mt-1">
+                    <div class="col-md-4">
+                        <div class="form-floating has-validation">
+                            <select asp-for="BloodType" class="form-select">
+                                <option value="">-- Seleccione --</option>
                                 <option value="A+">A+</option>
                                 <option value="O+">O+</option>
                                 <option value="B+">B+</option>
@@ -173,117 +169,112 @@
                                 <option value="B-">B-</option>
                                 <option value="AB-">AB-</option>
                             </select>
-                            <span asp-validation-for="BloodType" class="text-danger"></span>
+                            <label asp-for="BloodType"></label>
+                            <div class="invalid-feedback" data-valmsg-for="BloodType"></div>
                         </div>
                     </div>
+
                     <div class="col-md-4">
-                        <div class="form-group">
-                            <label asp-for="Genero" class="control-label"></label>
-                            <select asp-for="Genero" class="form-control form-control-sm">
-                                <option value="">-- Seleccione Género --</option>
+                        <div class="form-floating has-validation">
+                            <select asp-for="Genero" class="form-select" id="Genero">
+                                <option value="">-- Selecciona --</option>
                                 <option value="M">Masculino</option>
                                 <option value="F">Femenino</option>
                                 <option value="O">Otro</option>
                             </select>
-                            <span asp-validation-for="Genero" class="text-danger"></span>
+                            <label asp-for="Genero"></label>
+                            <div class="invalid-feedback" data-valmsg-for="Genero"></div>
                         </div>
                     </div>
+
                     <div class="col-md-4" id="otroGeneroField" style="display:none;">
-                        <div class="form-group">
-                            <label asp-for="OtroGenero" class="control-label"></label>
-                            <input asp-for="OtroGenero" class="form-control form-control-sm" />
-                            <span asp-validation-for="OtroGenero" class="text-danger"></span>
+                        <div class="form-floating has-validation">
+                            <input asp-for="OtroGenero" class="form-control" placeholder=" " />
+                            <label asp-for="OtroGenero"></label>
+                            <div class="invalid-feedback" data-valmsg-for="OtroGenero"></div>
                         </div>
                     </div>
                 </div>
 
-                <div class="row">
+                <div class="row gx-3 gy-2 mt-1">
                     <div class="col-md-4">
-                        <div class="form-group">
-                            <label asp-for="FechaVinculacion" class="control-label"></label>
-                            <input asp-for="FechaVinculacion" type="date" class="form-control form-control-sm" readonly/>
-                            <span asp-validation-for="FechaVinculacion" class="text-danger"></span>
+                        <div class="form-floating has-validation">
+                            <input asp-for="FechaVinculacion" type="date" class="form-control readonly-locked" placeholder=" " readonly />
+                            <label asp-for="FechaVinculacion"></label>
+                            <div class="invalid-feedback" data-valmsg-for="FechaVinculacion"></div>
                         </div>
                     </div>
+
                     <div class="col-md-4">
-                        <div class="form-group">
-                            <label asp-for="FechaRetiro" class="control-label"></label>
-                            <input asp-for="FechaRetiro" type="date" class="form-control form-control-sm" />
-                            <span asp-validation-for="FechaRetiro" class="text-danger"></span>
+                        <div class="form-floating has-validation">
+                            <input asp-for="FechaRetiro" type="date" class="form-control" placeholder=" " />
+                            <label asp-for="FechaRetiro"></label>
+                            <div class="invalid-feedback" data-valmsg-for="FechaRetiro"></div>
                         </div>
                     </div>
+
                     <div class="col-md-4">
-                        <div class="form-group">
-                            <label asp-for="EmployeeStatus" class="control-label"></label>
-                            <select asp-for="EmployeeStatus" class="form-control form-control-sm" asp-items="Html.GetEnumSelectList<VCashApp.Enums.EstadoEmpleado>()">
-                                <option value="">-- Seleccione Estado --</option>
+                        <div class="form-floating has-validation">
+                            <select asp-for="EmployeeStatus" class="form-select" asp-items="Html.GetEnumSelectList<VCashApp.Enums.EstadoEmpleado>()">
+                                <option value=""></option>
                             </select>
-                            <span asp-validation-for="EmployeeStatus" class="text-danger"></span>
+                            <label asp-for="EmployeeStatus"></label>
+                            <div class="invalid-feedback" data-valmsg-for="EmployeeStatus"></div>
                         </div>
                     </div>
                 </div>
 
-                <div class="row">
+                <div class="row gx-3 gy-2 mt-2">
                     <div class="col-md-4">
-                        <div class="form-check">
-                            <input asp-for="IndicadorCatalogo" class="form-check-input" type="checkbox" />
-                            <label asp-for="IndicadorCatalogo" class="form-check-label"></label>
+                        <div class="form-check form-switch">
+                            <input asp-for="IndicadorCatalogo" class="form-check-input" type="checkbox" id="IndicadorCatalogo" />
+                            <label class="form-check-label" for="IndicadorCatalogo">@Html.DisplayNameFor(m => m.IndicadorCatalogo)</label>
                         </div>
                     </div>
                     <div class="col-md-4">
-                        <div class="form-check">
-                            <input asp-for="IngresoRepublica" class="form-check-input" type="checkbox" />
-                            <label asp-for="IngresoRepublica" class="form-check-label"></label>
+                        <div class="form-check form-switch">
+                            <input asp-for="IngresoRepublica" class="form-check-input" type="checkbox" id="IngresoRepublica" />
+                            <label class="form-check-label" for="IngresoRepublica">@Html.DisplayNameFor(m => m.IngresoRepublica)</label>
                         </div>
                     </div>
                     <div class="col-md-4">
-                        <div class="form-check">
-                            <input asp-for="IngresoAeropuerto" class="form-check-input" type="checkbox" />
-                            <label asp-for="IngresoAeropuerto" class="form-check-label"></label>
+                        <div class="form-check form-switch">
+                            <input asp-for="IngresoAeropuerto" class="form-check-input" type="checkbox" id="IngresoAeropuerto" />
+                            <label class="form-check-label" for="IngresoAeropuerto">@Html.DisplayNameFor(m => m.IngresoAeropuerto)</label>
                         </div>
                     </div>
                 </div>
 
-                <div class="row mt-4">
-                    <div class="col-md-6">
-                        <label class="control-label mb-2">Foto de Perfil</label>
-                        <div class="drop-zone" id="photoDropZone">
-                            <div class="drop-zone-icon"><i class="ri-image-line"></i></div>
-                            <span class="drop-zone-text">Arrastra tu archivo aquí o <span class="drop-zone-select">Selecciona un archivo</span></span>
-                            <span class="drop-zone-info">Solo JPG, JPEG o PNG. Máx. 3MB.</span>
-                            <input asp-for="PhotoFile" type="file" class="drop-zone-input" accept="image/jpeg,image/png" />
-                            <div class="drop-zone-preview" id="photoPreview">
-                                @if (!string.IsNullOrEmpty(Model.PhotoPath))
-                                {
-                                    <img src="/Employee/images/@(Model.PhotoPath.Replace("\\", "/"))" alt="Foto Actual" class="img-thumbnail" />
-                                    <button type="button" class="drop-zone-remove" data-target="PhotoFile">X</button>
-                                }
-                            </div>
+                <div class="row mt-4 gx-3 gy-3 align-items-stretch">
+                    <div class="col-md-6 d-flex">
+                        <div class="w-100">
+                            @await Html.PartialAsync(
+                            "Components/ImageUploader/_Uploader",
+                                                        ("PhotoFile", Model.PhotoPath, "Foto de Perfil",
+                                                        "image/jpeg,image/png", "JPG o PNG · Máx. 3MB",
+                                                        "/Employee/images/", "is-circle", "fit-cover", "Cambiar foto de perfil")
+                                                        )
+                            <span asp-validation-for="PhotoFile" class="text-danger d-block mt-1"></span>
                         </div>
-                        <span asp-validation-for="PhotoFile" class="text-danger d-block mt-1"></span>
                     </div>
 
-                    <div class="col-md-6">
-                        <label class="control-label mb-2">Firma</label>
-                        <div class="drop-zone" id="signatureDropZone">
-                            <div class="drop-zone-icon"><i class="ri-image-line"></i></div>
-                            <span class="drop-zone-text">Arrastra tu archivo aquí o <span class="drop-zone-select">Selecciona un archivo</span></span>
-                            <span class="drop-zone-info">Solo JPG, JPEG o PNG. Máx. 3MB.</span>
-                            <input asp-for="SignatureFile" type="file" class="drop-zone-input" accept="image/jpeg,image/png" />
-                            <div class="drop-zone-preview" id="signaturePreview">
-                                @if (!string.IsNullOrEmpty(Model.SignaturePath))
-                                {
-                                    <img src="/Employee/images/@(Model.SignaturePath.Replace("\\", "/"))" alt="Firma Actual" class="img-thumbnail" />
-                                    <button type="button" class="drop-zone-remove" data-target="SignatureFile">X</button>
-                                }
-                            </div>
+                    <div class="col-md-6 d-flex">
+                        <div class="w-100">
+                            @await Html.PartialAsync(
+                                                        "Components/ImageUploader/_Uploader",
+                                                        ("SignatureFile", Model.SignaturePath, "Firma",
+                                                        "image/jpeg,image/png", "JPG o PNG · Máx. 3MB",
+                                                        "/Employee/images/", "is-rect", "fit-contain", "Cambiar firma")
+                                                        )
+                            <span asp-validation-for="SignatureFile" class="text-danger d-block mt-1"></span>
                         </div>
-                        <span asp-validation-for="SignatureFile" class="text-danger d-block mt-1"></span>
                     </div>
                 </div>
+
                 <hr class="mt-4" />
 
-                <div class="submit-container form-group col-md-12">
+                <div class="submit-container-spacer"></div>
+                <div class="submit-container form-group col-12 mt-4 fixed">
                     <button type="submit" class="btn btn-primary">Guardar</button>
                     <a asp-action="Index" asp-controller="Employee" class="btn btn-danger">Cancelar</a>
                 </div>
@@ -296,6 +287,7 @@
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
+    <script src="~/js/uploader.js"></script>
     <script src="~/js/form-control/employee-form-handler.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function () {
@@ -303,17 +295,15 @@
             const otroGeneroField = document.getElementById('otroGeneroField');
 
             function toggleOtroGeneroField() {
-                if (generoSelect.value === 'O') { // 'O' para Otro
+                if (generoSelect && generoSelect.value === 'O') {
                     otroGeneroField.style.display = 'block';
                 } else {
                     otroGeneroField.style.display = 'none';
                 }
             }
 
-            toggleOtroGeneroField(); // Set initial state
-            if (generoSelect) {
-                generoSelect.addEventListener('change', toggleOtroGeneroField);
-            }
+            toggleOtroGeneroField();
+            if (generoSelect) generoSelect.addEventListener('change', toggleOtroGeneroField);
         });
     </script>
 }

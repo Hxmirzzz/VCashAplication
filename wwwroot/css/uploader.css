@@ -1,0 +1,241 @@
+﻿/* ===== Base ===== */
+.uploader {
+    --size: 220px;
+    --rect-h: 200px;
+    position: relative;
+}
+
+.uploader__label {
+    font-weight: 600;
+    color: var(--title-color-main);
+    margin-bottom: .35rem;
+    display: block;
+}
+
+.uploader__drop {
+    position: relative;
+    background: var(--grey3);
+    border: 1px dashed var(--border-color);
+    border-radius: .5rem;
+    min-height: var(--rect-h);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: .15s ease;
+}
+
+    .uploader__drop:hover {
+        background: var(--hover-bg);
+    }
+
+.uploader__icon {
+    font-size: 2rem;
+    color: var(--Grey1);
+}
+
+.uploader__text {
+    color: var(--text-color-main);
+    text-align: center;
+}
+
+.uploader__help {
+    color: var(--Grey1);
+    font-size: var(--smaller-font-size);
+    display: block;
+}
+
+.uploader__input {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    cursor: pointer;
+    z-index: 3;
+}
+
+/* Preview */
+.uploader__preview {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255,255,255,.92);
+    padding: 0;
+    border-radius: .5rem;
+    z-index: 1;
+}
+
+    .uploader__preview[hidden] {
+        display: none;
+    }
+
+    .uploader__preview img {
+        width: 100%;
+        height: 100%;
+        display: block;
+    }
+
+/* Overlay hover */
+.uploader__overlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0,0,0,.55);
+    color: #fff;
+    font-weight: 600;
+    text-align: center;
+    padding: 0 1rem;
+    opacity: 0;
+    transition: opacity .2s;
+    pointer-events: none;
+    border-radius: .5rem;
+    z-index: 2;
+}
+
+.uploader__drop:hover .uploader__overlay,
+.uploader__drop:focus-within .uploader__overlay {
+    opacity: 1;
+}
+
+/* Botón X dentro del contenedor (top-right, visible) */
+.uploader__remove {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    width: 32px;
+    height: 32px;
+    border: 0;
+    border-radius: 999px;
+    background: rgba(0,0,0,.65);
+    color: #fff;
+    display: grid;
+    place-items: center;
+    line-height: 1;
+    font-size: 18px;
+    z-index: 4;
+    box-shadow: 0 1px 4px rgba(0,0,0,.25);
+}
+
+.uploader:not(.has-file) .uploader__remove {
+    display: none;
+}
+
+/* ===== Shapes ===== */
+/* Círculo (foto de perfil) */
+.is-circle .uploader__drop {
+    width: var(--size);
+    height: var(--size);
+    aspect-ratio: 1/1;
+    border-radius: 50%;
+    margin-inline: auto;
+    padding: 0;
+    min-height: 0;
+}
+
+.is-circle .uploader__preview, .is-circle .uploader__overlay {
+    border-radius: 50%;
+}
+
+    .is-circle .uploader__preview img {
+        border-radius: 50%;
+    }
+
+/* Rectángulo (firma) */
+.is-rect .uploader__drop {
+    border-radius: .5rem;
+    min-height: var(--rect-h);
+}
+
+/* ===== Fit modes ===== */
+/* Foto de perfil tipo “cover” (como Facebook/WhatsApp) */
+.fit-cover .uploader__preview img {
+    object-fit: cover;
+    object-position: center;
+}
+/* Firma: contener (no recortar) con fondo claro */
+.fit-contain .uploader__preview {
+    background: rgba(255,255,255,.92);
+}
+
+    .fit-contain .uploader__preview img {
+        object-fit: contain;
+        object-position: center;
+    }
+
+/* Tema oscuro */
+body.dark-theme .uploader__preview {
+    background: rgba(0,0,0,.8);
+}
+
+/* Foto circular “tipo perfil” */
+.uploader--avatar {
+    --avatar-size: 220px;
+}
+
+    .uploader--avatar .uploader__drop {
+        width: var(--avatar-size);
+        height: var(--avatar-size);
+        border-radius: 50%;
+        padding: 0;
+        overflow: hidden;
+        display: block;
+        margin-inline: auto;
+    }
+
+    .uploader--avatar .uploader__preview {
+        position: absolute;
+        inset: 0;
+        padding: 0;
+        border-radius: 50%;
+    }
+
+        .uploader--avatar .uploader__preview img {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            display: block;
+        }
+
+    /* Modo cover (idéntico al de Edit) */
+    .uploader--avatar.avatar--cover .uploader__preview img {
+        object-fit: cover;
+        object-position: center;
+    }
+
+/* Firma (idéntico al de Edit) */
+.uploader--signature {
+    --sig-h: 180px;
+}
+
+    .uploader--signature .uploader__drop {
+        min-height: var(--sig-h);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 1px dashed var(--border-color);
+        border-radius: .5rem;
+        background: var(--grey3);
+    }
+
+    .uploader--signature .uploader__preview {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: .25rem;
+        border-radius: .5rem;
+        background: rgba(255,255,255,.92);
+    }
+
+        .uploader--signature .uploader__preview img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain; /* sin estirar */
+        }

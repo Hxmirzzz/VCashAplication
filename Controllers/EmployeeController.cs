@@ -2,18 +2,22 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using VCashApp.Controllers;
 using VCashApp.Data;
-using VCashApp.Models;
-using VCashApp.Models.ViewModels;
-using VCashApp.Services;
 using VCashApp.Enums;
 using VCashApp.Filters;
+using VCashApp.Models;
+using VCashApp.Models.ViewModels.Employee;
+using VCashApp.Services;
 using VCashApp.Services.DTOs;
+using VCashApp.Services.Employee.Application;
+using VCashApp.Services.Employee.Domain;
 
 namespace VCashApp.Controllers
 {
@@ -25,48 +29,53 @@ namespace VCashApp.Controllers
     [Route("/Employee")]
     public class EmployeeController : BaseController
     {
-        private readonly IEmployeeService _employeeService;
-        private readonly IExportService _exportService;
-        private readonly ILogger<EmployeeController> _logger;
+        private readonly IEmployeeReadService _read;
+        private readonly IEmployeeWriteService _write;
+        private readonly IEmployeeFileStorage _storage;
+        private readonly IExportService _export;
+        private readonly ILogger<EmployeeController> _log;
 
         /// <summary>
         /// Constructor del controlador EmployeeController.
         /// </summary>
-        /// <param name="employeeService">Servicio para la lógica de negocio de empleados.</param>
-        /// <param name="exportService">Servicio para funcionalidades de exportación.</param>
+        /// <param name="read">Servicio para operaciones de lectura de empleados.</param>
+        /// <param name="write">Servicio para operaciones de escritura de empleados.</param>
+        /// <param name="storage">Servicio para operaciones de lectura de imagenes.</param> 
+        /// <param name="export">Servicio para funcionalidades de exportación.</param>
         /// <param name="context">Contexto de la base de datos de la aplicación.</param>
-        /// <param name="userManager">Administrador de usuarios para gestionar ApplicationUser.</param>
-        /// <param name="logger">Servicio de logging para el controlador.</param>
+        /// <param name="um">Administrador de usuarios para gestionar ApplicationUser.</param>
+        /// <param name="log">Servicio de logging para el controlador.</param>
         public EmployeeController(
-            IEmployeeService employeeService,
-            IExportService exportService,
             AppDbContext context,
-            UserManager<ApplicationUser> userManager,
-            ILogger<EmployeeController> logger)
-            : base(context, userManager)
+            UserManager<ApplicationUser> um,
+            IEmployeeReadService read,
+            IEmployeeWriteService write,
+            IEmployeeFileStorage storage,
+            IExportService export,
+            ILogger<EmployeeController> log
+        ) : base(context, um)
         {
-            _employeeService = employeeService;
-            _exportService = exportService;
-            _logger = logger;
+            _read = read;
+            _write = write;
+            _storage = storage;
+            _export = export;
+            _log = log;
         }
 
-        // Método auxiliar para configurar ViewBags comunes
-        private async Task SetCommonViewBagsEmployeeAsync(ApplicationUser currentUser, string pageName)
+        private async Task SetCommonViewBagsEmployeeAsync(ApplicationUser user, string pageName)
         {
-            await base.SetCommonViewBagsBaseAsync(currentUser, pageName);
+            await base.SetCommonViewBagsBaseAsync(user, pageName);
+            bool isAdmin = ViewBag.IsAdmin;
 
-            bool isAdmin = (bool)ViewBag.IsAdmin;
-            var (cargos, sucursales, ciudades) = await _employeeService.GetDropdownListsAsync(currentUser.Id, isAdmin);
-
+            var (cargos, sucursales, ciudades) = await _read.GetLookupsAsync(user.Id, isAdmin);
             ViewBag.Cargos = new SelectList(cargos, "Value", "Text");
             ViewBag.Sucursales = new SelectList(sucursales, "Value", "Text");
             ViewBag.Ciudades = new SelectList(ciudades, "Value", "Text");
 
-            // Obtener permisos
-            var userRoles = await _userManager.GetRolesAsync(currentUser);
-            ViewBag.HasCreatePermission = await HasPermisionForView(userRoles, "EMP", PermissionType.Create);
-            ViewBag.HasEditPermission = await HasPermisionForView(userRoles, "EMP", PermissionType.Edit);
-            ViewBag.HasViewPermission = await HasPermisionForView(userRoles, "EMP", PermissionType.View);
+            var roles = await _userManager.GetRolesAsync(user);
+            ViewBag.HasCreatePermission = await HasPermisionForView(roles, "EMP", PermissionType.Create);
+            ViewBag.HasEditPermission = await HasPermisionForView(roles, "EMP", PermissionType.Edit);
+            ViewBag.HasViewPermission = await HasPermisionForView(roles, "EMP", PermissionType.View);
         }
 
         /// <summary>
@@ -88,43 +97,32 @@ namespace VCashApp.Controllers
         [RequiredPermission(PermissionType.View, "EMP")]
         public async Task<IActionResult> Index(int? cargoId, int? branchId, int? employeeStatus, string? search, string? gender, int page = 1, int pageSize = 15)
         {
-            var currentUser = await GetCurrentApplicationUserAsync();
-            if (currentUser == null) return RedirectToPage("/Account/Login", new { area = "Identity" });
+            var user = await GetCurrentApplicationUserAsync();
+            if (user is null) return RedirectToPage("/Account/Login", new { area = "Identity" });
 
-            await SetCommonViewBagsEmployeeAsync(currentUser, "Empleados");
-            bool isAdmin = (bool)ViewBag.IsAdmin;
+            await SetCommonViewBagsEmployeeAsync(user, "Empleados");
+            bool isAdmin = ViewBag.IsAdmin;
 
-            var (data, totalData) = await _employeeService.GetFilteredEmployeesAsync(
-                currentUser.Id,
-                cargoId,
-                branchId,
-                employeeStatus,
-                search,
-                gender,
-                page,
-                pageSize,
-                isAdmin
-            );
+            var (items, total) = await _read.GetPagedAsync(
+                user.Id, cargoId, branchId, employeeStatus, search, gender, page, pageSize, isAdmin);
 
             ViewBag.CurrentPage = page;
             ViewBag.PageSize = pageSize;
-            ViewBag.TotalPages = (int)Math.Ceiling((double)totalData / pageSize);
-            ViewBag.TotalData = totalData;
+            ViewBag.TotalPages = (int)Math.Ceiling((double)total / pageSize);
+            ViewBag.TotalData = total;
             ViewBag.SearchTerm = search;
             ViewBag.CurrentCargoId = cargoId;
             ViewBag.CurrentBranchId = branchId;
             ViewBag.CurrentEmployeeStatus = employeeStatus;
             ViewBag.CurrentGender = gender;
 
-            _logger.LogInformation("Usuario: {Usuario} | IP: {IP} | Acción: Accediendo a la lista de Empleados | Conteo: {Conteo} | Resultado: {Resultado} |",
-                currentUser.UserName, IpAddressForLogging, data.Count(), "Acceso concedido");
+            _log.LogInformation("User {u} IP {ip} -> Employee.Index count={n}",
+                user.UserName, IpAddressForLogging, items.Count());
 
             if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
-            {
-                return PartialView("_EmployeeTablePartial", data);
-            }
+                return PartialView("~/Views/Employee/_EmployeeTablePartial.cshtml", items);
 
-            return View(data);
+            return View("~/Views/Employee/Index.cshtml", items);
         }
 
         /// <summary>
@@ -138,30 +136,27 @@ namespace VCashApp.Controllers
         [RequiredPermission(PermissionType.Create, "EMP")]
         public async Task<IActionResult> Create()
         {
-            var currentUser = await GetCurrentApplicationUserAsync();
-            if (currentUser == null) return RedirectToPage("/Account/Login", new { area = "Identity" });
+            var user = await GetCurrentApplicationUserAsync();
+            if (user is null) return RedirectToPage("/Account/Login", new { area = "Identity" });
 
-            await SetCommonViewBagsBaseAsync(currentUser, "Crear Empleado");
-            bool isAdmin = (bool)ViewBag.IsAdmin;
+            await SetCommonViewBagsEmployeeAsync(user, "Crear Empleado");
+            bool isAdmin = ViewBag.IsAdmin is bool b && b;
 
-            var (cargos, sucursales, ciudades) = await _employeeService.GetDropdownListsAsync(currentUser.Id, isAdmin);
+            var lookups = await _read.GetLookupsAsync(user.Id, isAdmin);
 
-            var model = new EmpleadoViewModel
+            var vm = new EmployeeViewModel
             {
-                Cargos = cargos,
-                Sucursales = sucursales,
-                Ciudades = ciudades,
+                Cargos = lookups.Cargos,
+                Sucursales = lookups.Sucursales,
+                Ciudades = lookups.Ciudades,
                 IndicadorCatalogo = false,
                 IngresoRepublica = false,
                 IngresoAeropuerto = false,
-                FechaVinculacion = DateOnly.FromDateTime(DateTime.Now),
+                FechaVinculacion = DateOnly.FromDateTime(DateTime.Today),
                 EmployeeStatus = (int)EstadoEmpleado.Activo
             };
 
-            _logger.LogInformation("Usuario: {Usuario} | IP: {IP} | Acción: Accediendo al formulario de Creación de Empleado | Resultado: {Resultado} |",
-                currentUser.UserName, IpAddressForLogging, "Acceso concedido");
-
-            return View(model);
+            return View("~/Views/Employee/Create.cshtml", vm);
         }
 
         /// <summary>
@@ -176,40 +171,24 @@ namespace VCashApp.Controllers
         [HttpPost("Create")]
         [ValidateAntiForgeryToken]
         [RequiredPermission(PermissionType.Create, "EMP")]
-        public async Task<IActionResult> Create([FromForm] EmpleadoViewModel model)
+        public async Task<IActionResult> Create([FromForm] EmployeeViewModel model)
         {
-            var currentUser = await GetCurrentApplicationUserAsync();
-            if (currentUser == null) return Unauthorized();
-
-            await SetCommonViewBagsEmployeeAsync(currentUser, "Procesando Creación de Empleado");
+            var user = await GetCurrentApplicationUserAsync();
+            if (user is null) return Unauthorized();
 
             if (!ModelState.IsValid)
             {
-                var fieldErrors = ModelState
-                    .Where(kvp => kvp.Value.Errors.Any())
+                var errors = ModelState
+                    .Where(k => k.Value!.Errors.Any())
                     .ToDictionary(
-                        kvp => kvp.Key,
-                        kvp => kvp.Value.Errors.Select(e => e.ErrorMessage).ToArray()
+                        k => k.Key,
+                        v => v.Value!.Errors.Select(e => e.ErrorMessage).ToArray()
                     );
-                _logger.LogWarning("Usuario: {Usuario} | IP: {IP} | Acción: Creación de Empleado - Modelo Inválido | TipoEntidad: Empleado | Resultado: {Resultado} | Errores: {@Errores} |",
-                    currentUser.UserName, IpAddressForLogging, "Validación Fallida", fieldErrors);
-                return Json(ServiceResult.FailureResult("Hay errores en el formulario.", errors: fieldErrors));
+                return Json(ServiceResult.FailureResult("Hay errores en el formulario.", errors));
             }
 
-            var result = await _employeeService.CreateEmployeeAsync(model, currentUser.Id);
-
-            if (result.Success)
-            {
-                _logger.LogInformation("Usuario: {Usuario} | IP: {IP} | Acción: Empleado Creado Exitosamente | TipoEntidad: Empleado | ID_Entidad: {ID_Entidad} | Resultado: {Resultado} |",
-                    currentUser.UserName, IpAddressForLogging, model.CodCedula, "Éxito");
-            }
-            else
-                {
-                _logger.LogError("Usuario: {Usuario} | IP: {IP} | Acción: Creación de Empleado Fallida | TipoEntidad: Empleado | ID_Entidad: {ID_Entidad} | Razón: {Mensaje} |",
-                    currentUser.UserName, IpAddressForLogging, model.CodCedula, result.Message);
-            }
-
-                return Json(result);
+            var result = await _write.CreateAsync(model, user.Id);
+            return Json(result);
         }
 
         /// <summary>
@@ -220,34 +199,29 @@ namespace VCashApp.Controllers
         /// </remarks>
         /// <param name="id">El ID del empleado a editar.</param>
         /// <returns>La vista para el formulario de edición de empleado.</returns>
-        [HttpGet("Edit/{id}")]
+        [HttpGet("Edit/{id:int}")]
         [RequiredPermission(PermissionType.Edit, "EMP")]
         public async Task<IActionResult> Edit(int id)
         {
-            var currentUser = await GetCurrentApplicationUserAsync();
-            if (currentUser == null) return RedirectToPage("/Account/Login", new { area = "Identity" });
+            var user = await GetCurrentApplicationUserAsync();
+            if (user is null) return RedirectToPage("/Account/Login", new { area = "Identity" });
 
-            await SetCommonViewBagsBaseAsync(currentUser, "Editar Empleado");
-            bool isAdmin = (bool)ViewBag.IsAdmin;
+            await SetCommonViewBagsEmployeeAsync(user, "Editar Empleado");
+            bool isAdmin = ViewBag.IsAdmin is bool b && b;
 
-            var employeeModel = await _employeeService.GetEmployeeForEditAsync(id, currentUser.Id, isAdmin);
-
-            if (employeeModel == null)
+            var vm = await _read.GetForEditAsync(id, user.Id, isAdmin);
+            if (vm is null)
             {
-                _logger.LogWarning("Usuario: {Usuario} | IP: {IP} | Acción: Accediendo a formulario de Edición - No encontrado o Prohibido | TipoEntidad: Empleado | ID_Entidad: {ID_Entidad} |",
-                    currentUser.UserName, IpAddressForLogging, id);
                 TempData["ErrorMessage"] = "Empleado no encontrado o no tiene permiso para verlo.";
                 return RedirectToAction(nameof(Index));
             }
 
-            var (cargos, sucursales, ciudades) = await _employeeService.GetDropdownListsAsync(currentUser.Id, isAdmin);
-            employeeModel.Cargos = cargos;
-            employeeModel.Sucursales = sucursales;
-            employeeModel.Ciudades = ciudades;
+            var lookups = await _read.GetLookupsAsync(user.Id, isAdmin);
+            vm.Cargos = lookups.Cargos;
+            vm.Sucursales = lookups.Sucursales;
+            vm.Ciudades = lookups.Ciudades;
 
-            _logger.LogInformation("Usuario: {Usuario} | IP: {IP} | Acción: Accediendo a formulario de Edición | TipoEntidad: Empleado | ID_Entidad: {ID_Entidad} | Resultado: {Resultado} |",
-                currentUser.UserName, IpAddressForLogging, id, "Acceso concedido");
-            return View(employeeModel);
+            return View("~/Views/Employee/Edit.cshtml", vm);
         }
 
         /// <summary>
@@ -260,92 +234,57 @@ namespace VCashApp.Controllers
         /// <param name="id">El ID del empleado (desde la URL, para verificación).</param>
         /// <param name="model">El EmpleadoViewModel con los datos actualizados del empleado.</param>
         /// <returns>Un JSON ServiceResult indicando éxito, fracaso o errores de validación.</returns>
-        [HttpPost("Edit/{id}")]
+        [HttpPost("Edit/{id:int}")]
         [ValidateAntiForgeryToken]
         [RequiredPermission(PermissionType.Edit, "EMP")]
-        public async Task<IActionResult> Edit(int id, [FromForm] EmpleadoViewModel model)
+        public async Task<IActionResult> Edit([FromRoute] int id, [FromForm] EmployeeViewModel model)
         {
-            var currentUser = await GetCurrentApplicationUserAsync();
-            if (currentUser == null) return Unauthorized();
-
-            await SetCommonViewBagsEmployeeAsync(currentUser, "Procesando Edición de Empleado");
+            var user = await GetCurrentApplicationUserAsync();
+            if (user is null) return Unauthorized();
 
             if (id != model.CodCedula)
-            {
-                _logger.LogWarning("Usuario: {Usuario} | IP: {IP} | Acción: Edición de Empleado - IDs No Coinciden | TipoEntidad: Empleado | ID_URL: {ID_URL}, ID_Modelo: {ID_Modelo} |",
-                    currentUser.UserName, IpAddressForLogging, id, model.CodCedula);
-                return BadRequest(ServiceResult.FailureResult("El ID del empleado en la URL no coincide con el ID del formulario."));
-            }
+                return BadRequest(ServiceResult.FailureResult("El ID de la URL no coincide con el del formulario."));
 
             if (!ModelState.IsValid)
             {
-                var fieldErrors = ModelState
-                    .Where(kvp => kvp.Value.Errors.Any())
+                var errors = ModelState
+                    .Where(k => k.Value!.Errors.Any())
                     .ToDictionary(
-                        kvp => kvp.Key,
-                        kvp => kvp.Value.Errors.Select(e => e.ErrorMessage).ToArray()
+                        k => k.Key,
+                        v => v.Value!.Errors.Select(e => e.ErrorMessage).ToArray()
                     );
-                _logger.LogWarning("Usuario: {Usuario} | IP: {IP} | Acción: Edición de Empleado - Modelo Inválido | TipoEntidad: Empleado | ID_Entidad: {ID_Entidad} | Resultado: {Resultado} | Errores: {@Errores} |",
-                    currentUser.UserName, IpAddressForLogging, model.CodCedula, "Validación Fallida", fieldErrors);
-                return Json(ServiceResult.FailureResult("Hay errores en el formulario.", errors: fieldErrors));
+                return Json(ServiceResult.FailureResult("Hay errores en el formulario.", errors));
             }
 
-            var result = await _employeeService.UpdateEmployeeAsync(model, currentUser.Id);
-
-            if (result.Success)
-            {
-                _logger.LogInformation("Usuario: {Usuario} | IP: {IP} | Acción: Empleado Actualizado Exitosamente | TipoEntidad: Empleado | ID_Entidad: {ID_Entidad} | Resultado: {Resultado} |",
-                    currentUser.UserName, IpAddressForLogging, model.CodCedula, "Éxito");
-            }
-            else
-                {
-                _logger.LogError("Usuario: {Usuario} | IP: {IP} | Acción: Edición de Empleado Fallida | TipoEntidad: Empleado | ID_Entidad: {ID_Entidad} | Razón: {Mensaje} |",
-                    currentUser.UserName, IpAddressForLogging, model.CodCedula, result.Message);
-            }
-
-                return Json(result);
+            var result = await _write.UpdateAsync(model, user.Id);
+            return Json(result);
         }
 
         /// <summary>
         /// Endpoint para cambiar el estado de un empleado.
         /// </summary>
         /// <param name="id">El ID del empleado (CodCedula).</param>
-        /// <param name="statusChangeRequest">Un DTO que contiene el nuevo estado y la razón.</param>
+        /// <param name="EmployeeId">Empleado.</param>
+        /// <param name="NewStatus">Nuevo estado.</param>
+        /// <param name="ReasonForChange">Razon del cambio de estado.</param>
         /// <returns>Un JSON ServiceResult.</returns>
-        [HttpPost("ChangeStatus/{id}")]
+        [HttpPost("ChangeStatus/{id:int}")]
         [ValidateAntiForgeryToken]
         [RequiredPermission(PermissionType.Edit, "EMP")]
-        public async Task<IActionResult> ChangeStatus(int id, [FromBody] StatusChangeRequestDTO statusChangeRequest)
+        public async Task<IActionResult> ChangeStatus(
+            [FromRoute] int id,
+            [FromForm] int EmployeeId,
+            [FromForm] int NewStatus,
+            [FromForm] string ReasonForChange)
         {
-            var currentUser = await GetCurrentApplicationUserAsync();
-            if (currentUser == null) return Unauthorized();
+            var user = await GetCurrentApplicationUserAsync();
+            if (user is null) return Unauthorized();
 
-            await SetCommonViewBagsEmployeeAsync(currentUser, "Procesando Cambio de Estado de Empleado");
+            if (id != EmployeeId)
+                return BadRequest(ServiceResult.FailureResult("El ID de la URL no coincide con el del formulario."));
 
-            if (id != statusChangeRequest.EmployeeId)
-            {
-                return BadRequest(ServiceResult.FailureResult("El ID del empleado en la URL no coincide con el ID del cuerpo de la solicitud."));
-            }
-
-            var result = await _employeeService.ChangeEmployeeStatusAsync(
-                id,
-                statusChangeRequest.NewStatus,
-                statusChangeRequest.ReasonForChange,
-                currentUser.Id
-            );
-
-            if (result.Success)
-            {
-                _logger.LogInformation("Usuario: {Usuario} | IP: {IP} | Acción: Estado de Empleado Cambiado | TipoEntidad: Empleado | ID_Entidad: {ID_Entidad} | Resultado: {Resultado} |",
-                    currentUser.UserName, IpAddressForLogging, id, "Éxito");
-            }
-            else
-            {
-                _logger.LogError("Usuario: {Usuario} | IP: {IP} | Acción: Cambio de Estado de Empleado Fallido | TipoEntidad: Empleado | ID_Entidad: {ID_Entidad} | Razón: {Mensaje} |",
-                    currentUser.UserName, IpAddressForLogging, id, result.Message);
-            }
-
-                return Json(result);
+            var result = await _write.ChangeStatusAsync(EmployeeId, NewStatus, ReasonForChange, user.Id);
+            return Json(result);
         }
 
         ///<summary>
@@ -356,34 +295,29 @@ namespace VCashApp.Controllers
         /// </remarks>
         /// <param name="id">El ID del empleado a visualizar.</param>
         /// <returns>La vista con los detalles del empleado.</returns>
-        [HttpGet("Detail/{id}")]
+        [HttpGet("Detail/{id:int}")]
         [RequiredPermission(PermissionType.View, "EMP")]
         public async Task<IActionResult> Detail(int id)
         {
-            var currentUser = await GetCurrentApplicationUserAsync();
-            if (currentUser == null) return RedirectToPage("/Account/Login", new { area = "Identity" });
+            var user = await GetCurrentApplicationUserAsync();
+            if (user is null) return RedirectToPage("/Account/Login", new { area = "Identity" });
 
-            await SetCommonViewBagsBaseAsync(currentUser, "Detalles del Empleado");
-            bool isAdmin = (bool)ViewBag.IsAdmin;
+            await SetCommonViewBagsEmployeeAsync(user, "Detalles del Empleado");
+            bool isAdmin = ViewBag.IsAdmin is bool b && b;
 
-            var employeeModel = await _employeeService.GetEmployeeForDetailsAsync(id, currentUser.Id, isAdmin);
-
-            if (employeeModel == null)
+            var vm = await _read.GetForDetailsAsync(id, user.Id, ViewBag.IsAdmin);
+            if (vm is null)
             {
-                _logger.LogWarning("Usuario: {Usuario} | IP: {IP} | Acción: Acceso a Detalles de Empleado - No encontrado o Prohibido | TipoEntidad: Empleado | ID_Entidad: {ID_Entidad} |",
-                    currentUser.UserName, IpAddressForLogging, id);
-                TempData["ErrorMessage"] = "Empleado no encontrado o no tiene permiso para verlo.";
+                TempData["ErrorMessage"] = "Empleado no encontrado o no autorizado.";
                 return RedirectToAction(nameof(Index));
             }
 
-            var (cargos, sucursales, ciudades) = await _employeeService.GetDropdownListsAsync(currentUser.Id, isAdmin);
-            employeeModel.Cargos = cargos;
-            employeeModel.Sucursales = sucursales;
-            employeeModel.Ciudades = ciudades;
+            var lookups = await _read.GetLookupsAsync(user.Id, isAdmin);
+            vm.Cargos = lookups.Cargos;
+            vm.Sucursales = lookups.Sucursales;
+            vm.Ciudades = lookups.Ciudades;
 
-            _logger.LogInformation("Usuario: {Usuario} | IP: {IP} | Acción: Accediendo a Detalles de Empleado | TipoEntidad: Empleado | ID_Entidad: {ID_Entidad} | Resultado: {Resultado} |",
-                currentUser.UserName, IpAddressForLogging, id, "Acceso concedido");
-            return View(employeeModel);
+            return View("~/Views/Employee/Detail.cshtml", vm);
         }
 
         /// <summary>
@@ -430,85 +364,71 @@ namespace VCashApp.Controllers
             string? search,
             string? gender)
         {
-            var currentUser = await GetCurrentApplicationUserAsync();
-            if (currentUser == null) return Unauthorized();
+            var user = await GetCurrentApplicationUserAsync();
+            if (user is null) return Unauthorized();
 
             try
             {
-                await SetCommonViewBagsEmployeeAsync(currentUser, "Procesando Exportación de Empleados");
+                await SetCommonViewBagsEmployeeAsync(user, "Exportar Empleados");
 
-                bool isAdmin = await _userManager.IsInRoleAsync(currentUser, "Admin");
+                bool isAdmin = ViewBag.IsAdmin is bool b && b;
 
-                var employeesToExport = await _employeeService.GetExportableEmployeesAsync(
-                    currentUser.Id,
-                    cargoId,
-                    branchId,
-                    employeeStatus,
-                    search,
-                    gender,
-                    isAdmin
-                );
+                var pageProbe = await _read.GetPagedAsync(
+                    user.Id, cargoId, branchId, employeeStatus, search, gender,
+                    page: 1, pageSize: 1, isAdmin: isAdmin);
 
-                if (employeesToExport == null || !employeesToExport.Any())
-                {
-                    _logger.LogInformation("Usuario: {Usuario} | IP: {IP} | Acción: Exportación de Empleados - No se encontraron Datos | TipoEntidad: Empleado |",
-                        currentUser.UserName, IpAddressForLogging);
-                    return NotFound("No se encontraron empleados con los filtros especificados para exportar.");
-                }
+                int total = pageProbe.Total;
+                if (total == 0)
+                    return NotFound("No se encontraron empleados con los filtros especificados.");
 
-                var columnDisplayNames = new Dictionary<string, string>
-                {
-                    {"CodCedula", "Cédula"},
-                    {"TipoDocumento", "Tipo Documento"},
-                    {"NumeroCarnet", "Número Carnet"},
-                    {"FirstName", "Primer Nombre"},
-                    {"MiddleName", "Segundo Nombre"},
-                    {"FirstLastName", "Primer Apellido"},
-                    {"SecondLastName", "Segundo Apellido"},
-                    {"NombreCompleto", "Nombre Completo"},
-                    {"FechaNacimiento", "Fecha Nacimiento"},
-                    {"FechaExpedicion", "Fecha Expedición"},
-                    {"NombreCiudadExpedicion", "Ciudad Expedición"}, 
-                    {"NombreCargo", "Cargo"},
-                    {"NombreUnidad", "Unidad"},
-                    {"NombreSucursal", "Sucursal"},
-                    {"Celular", "Celular"},
-                    {"Direccion", "Dirección"},
-                    {"Correo", "Correo"},
-                    {"BloodType", "RH"},
-                    {"Genero", "Género"},
-                    {"OtroGenero", "Otro Género"},
-                    {"FechaVinculacion", "Fecha Vinculación"},
-                    {"FechaRetiro", "Fecha Retiro"},
-                    {"IndicadorCatalogo", "Indicador Catálogo"},
-                    {"IngresoRepublica", "Ingreso República"},
-                    {"IngresoAeropuerto", "Ingreso Aeropuerto"},
-                    {"EmployeeStatus", "Estado"}
-                };
+                var pageAll = await _read.GetPagedAsync(
+                    user.Id, cargoId, branchId, employeeStatus, search, gender,
+                    page: 1, pageSize: total, isAdmin: isAdmin);
 
-                return await _exportService.ExportDataAsync(
-                    employeesToExport.ToList(),
-                    exportFormat,
-                    "EMPLEADOS",
-                    columnDisplayNames
-                );
+                var items = pageAll.Items.ToList();
+
+                var columns = new Dictionary<string, string>
+        {
+            { "CodCedula", "Cédula" },
+            { "TipoDocumento", "Tipo Documento" },
+            { "NumeroCarnet", "Número Carnet" },
+            { "FirstName", "Primer Nombre" },
+            { "MiddleName", "Segundo Nombre" },
+            { "FirstLastName", "Primer Apellido" },
+            { "SecondLastName", "Segundo Apellido" },
+            { "NombreCompleto", "Nombre Completo" },
+            { "FechaNacimiento", "Fecha Nacimiento" },
+            { "FechaExpedicion", "Fecha Expedición" },
+            { "NombreCiudadExpedicion", "Ciudad Expedición" },
+            { "NombreCargo", "Cargo" },
+            { "NombreUnidad", "Unidad" },
+            { "NombreSucursal", "Sucursal" },
+            { "Celular", "Celular" },
+            { "Direccion", "Dirección" },
+            { "Correo", "Correo" },
+            { "BloodType", "RH" },
+            { "Genero", "Género" },
+            { "OtroGenero", "Otro Género" },
+            { "FechaVinculacion", "Fecha Vinculación" },
+            { "FechaRetiro", "Fecha Retiro" },
+            { "IndicadorCatalogo", "Indicador Catálogo" },
+            { "IngresoRepublica", "Ingreso República" },
+            { "IngresoAeropuerto", "Ingreso Aeropuerto" },
+            { "EmployeeStatus", "Estado" }
+        };
+
+                return await _export.ExportDataAsync(items, exportFormat, "EMPLEADOS", columns);
             }
-            catch (NotImplementedException ex)
+            catch (NotImplementedException)
             {
-                _logger.LogWarning(ex, "Usuario: {Usuario} | IP: {IP} | Acción: Exportación de Empleados - Formato No Implementado | TipoEntidad: Empleado | Formato: {FormatoExportacion} |",
-                    currentUser?.UserName ?? "N/A", IpAddressForLogging, exportFormat);
                 return BadRequest($"El formato de exportación '{exportFormat}' no está implementado.");
             }
             catch (ArgumentException ex)
             {
-                _logger.LogWarning(ex, "Usuario: {Usuario} | IP: {IP} | Acción: Exportación de Empleados - Formato Inválido | TipoEntidad: Empleado | Formato: {FormatoExportacion} |",
-                    currentUser?.UserName ?? "N/A", IpAddressForLogging, exportFormat);
                 return BadRequest(ex.Message);
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                _logger.LogError(ex, "Usuario: {Usuario} | IP: {IP} | Acción: Exportación de Empleados - Error General | TipoEntidad: Empleado |",
-                    currentUser?.UserName ?? "N/A", IpAddressForLogging);
                 return StatusCode(500, "Ocurrió un error interno del servidor al exportar los datos.");
             }
         }
@@ -516,17 +436,15 @@ namespace VCashApp.Controllers
         /// <summary>
         /// Sirve archivos de imagen (fotos o firmas) de empleados desde el repositorio.
         /// </summary>
-        [HttpGet("images/{*filePath}")]
+        [HttpGet("/Employee/images/{*filePath}")]
         public async Task<IActionResult> GetImage(string filePath)
         {
-            var fileStream = await _employeeService.GetEmployeeImageStreamAsync(filePath);
-            if (fileStream == null)
-            {
-                return NotFound();
-            }
+            var stream = await _storage.OpenReadAsync(filePath);
+            if (stream is null) return NotFound();
 
-            string mimeType = "image/jpeg";
-            return File(fileStream, mimeType);
+            var provider = new FileExtensionContentTypeProvider();
+            if (!provider.TryGetContentType(filePath, out var ct)) ct = "application/octet-stream";
+            return File(stream, ct);
         }
     }
 }

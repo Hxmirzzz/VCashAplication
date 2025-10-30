@@ -1,0 +1,38 @@
+﻿@model (string fieldName, string? currentPath, string label, string accept, string help, string baseUrl, string shape, string fit, string overlayText)
+
+@{
+    var inputId = Model.fieldName;
+    var wrapperId = $"{Model.fieldName}-wrap";
+    var previewId = $"{Model.fieldName}-preview";
+    var hasFile = !string.IsNullOrWhiteSpace(Model.currentPath);
+    var src = hasFile ? (Model.baseUrl + Model.currentPath!.Replace("\\", "/")) : "";
+}
+
+<div id="@wrapperId"
+     class="uploader @Model.shape @Model.fit @(hasFile ? "has-file" : "")"
+     data-uploader>
+    <label class="uploader__label">@Model.label</label>
+
+    <div class="uploader__drop" role="button" tabindex="0" aria-label="@Model.label">
+        <div class="uploader__icon"><i class="ri-image-line"></i></div>
+        <div class="uploader__text">
+            <span>Haz clic o arrastra tu archivo</span>
+            <small class="uploader__help">@Model.help</small>
+        </div>
+
+        <input id="@inputId" name="@Model.fieldName" type="file"
+               class="uploader__input" accept="@Model.accept" />
+
+        <div id="@previewId" class="uploader__preview" @(hasFile ? null : @Html.Raw("hidden"))>
+            <img alt="Vista previa" @(hasFile? @Html.Raw($"src=\"{src}\"") : null) />
+            <button type="button" class="uploader__remove" title="Quitar" data-remove>&times;</button>
+        </div>
+
+        <div class="uploader__overlay">
+            <i class="ri-camera-line"></i> @Model.overlayText
+        </div>
+    </div>
+
+    <input type="hidden" name="@(Model.fieldName.Contains("Signature", StringComparison.OrdinalIgnoreCase) ? "SignatureRemoved" : "PhotoRemoved")"
+           value="false" data-removed-flag />
+</div>

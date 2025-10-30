@@ -1050,15 +1050,17 @@
             Proporciona funcionalidades para listar, crear, editar y visualizar información de empleados.
             </summary>
         </member>
-        <member name="M:VCashApp.Controllers.EmployeeController.#ctor(VCashApp.Services.IEmployeeService,VCashApp.Services.IExportService,VCashApp.Data.AppDbContext,Microsoft.AspNetCore.Identity.UserManager{VCashApp.Models.ApplicationUser},Microsoft.Extensions.Logging.ILogger{VCashApp.Controllers.EmployeeController})">
+        <member name="M:VCashApp.Controllers.EmployeeController.#ctor(VCashApp.Data.AppDbContext,Microsoft.AspNetCore.Identity.UserManager{VCashApp.Models.ApplicationUser},VCashApp.Services.Employee.Application.IEmployeeReadService,VCashApp.Services.Employee.Application.IEmployeeWriteService,VCashApp.Services.Employee.Domain.IEmployeeFileStorage,VCashApp.Services.IExportService,Microsoft.Extensions.Logging.ILogger{VCashApp.Controllers.EmployeeController})">
             <summary>
             Constructor del controlador EmployeeController.
             </summary>
-            <param name="employeeService">Servicio para la lógica de negocio de empleados.</param>
-            <param name="exportService">Servicio para funcionalidades de exportación.</param>
+            <param name="read">Servicio para operaciones de lectura de empleados.</param>
+            <param name="write">Servicio para operaciones de escritura de empleados.</param>
+            <param name="storage">Servicio para operaciones de lectura de imagenes.</param> 
+            <param name="export">Servicio para funcionalidades de exportación.</param>
             <param name="context">Contexto de la base de datos de la aplicación.</param>
-            <param name="userManager">Administrador de usuarios para gestionar ApplicationUser.</param>
-            <param name="logger">Servicio de logging para el controlador.</param>
+            <param name="um">Administrador de usuarios para gestionar ApplicationUser.</param>
+            <param name="log">Servicio de logging para el controlador.</param>
         </member>
         <member name="M:VCashApp.Controllers.EmployeeController.Index(System.Nullable{System.Int32},System.Nullable{System.Int32},System.Nullable{System.Int32},System.String,System.String,System.Int32,System.Int32)">
             <summary>
@@ -1086,7 +1088,7 @@
             </remarks>
             <returns>La vista para el formulario de creación de empleado.</returns>
         </member>
-        <member name="M:VCashApp.Controllers.EmployeeController.Create(VCashApp.Models.ViewModels.EmpleadoViewModel)">
+        <member name="M:VCashApp.Controllers.EmployeeController.Create(VCashApp.Models.ViewModels.Employee.EmployeeViewModel)">
             <summary>
             Procesa la creación de un nuevo empleado.
             </summary>
@@ -1107,7 +1109,7 @@
             <param name="id">El ID del empleado a editar.</param>
             <returns>La vista para el formulario de edición de empleado.</returns>
         </member>
-        <member name="M:VCashApp.Controllers.EmployeeController.Edit(System.Int32,VCashApp.Models.ViewModels.EmpleadoViewModel)">
+        <member name="M:VCashApp.Controllers.EmployeeController.Edit(System.Int32,VCashApp.Models.ViewModels.Employee.EmployeeViewModel)">
             <summary>
             Procesa la actualización de un empleado existente.
             </summary>
@@ -1119,12 +1121,14 @@
             <param name="model">El EmpleadoViewModel con los datos actualizados del empleado.</param>
             <returns>Un JSON ServiceResult indicando éxito, fracaso o errores de validación.</returns>
         </member>
-        <member name="M:VCashApp.Controllers.EmployeeController.ChangeStatus(System.Int32,VCashApp.Services.DTOs.StatusChangeRequestDTO)">
+        <member name="M:VCashApp.Controllers.EmployeeController.ChangeStatus(System.Int32,System.Int32,System.Int32,System.String)">
             <summary>
             Endpoint para cambiar el estado de un empleado.
             </summary>
             <param name="id">El ID del empleado (CodCedula).</param>
-            <param name="statusChangeRequest">Un DTO que contiene el nuevo estado y la razón.</param>
+            <param name="EmployeeId">Empleado.</param>
+            <param name="NewStatus">Nuevo estado.</param>
+            <param name="ReasonForChange">Razon del cambio de estado.</param>
             <returns>Un JSON ServiceResult.</returns>
         </member>
         <member name="M:VCashApp.Controllers.EmployeeController.Detail(System.Int32)">
@@ -2733,6 +2737,11 @@
             ViewModel que describe los datos básicos de un empleado.
             </summary>
         </member>
+        <member name="T:VCashApp.Models.ViewModels.Employee.EmployeeViewModel">
+            <summary>
+            ViewModel que describe los datos básicos de un empleado.
+            </summary>
+        </member>
         <member name="T:VCashApp.Models.ViewModels.Range.RangeDashboardViewModel">
             <summary>
             ViewModel para la vista de dashboard de rangos.
@@ -3330,10 +3339,295 @@
             filtrados por el alcance del usuario (admin vs asignadas / sucursal activa).
             </summary>
         </member>
-        <member name="T:VCashApp.Services.EmployeeService">
+        <member name="T:VCashApp.Services.Employee.Application.EmployeeReadService">
             <summary>
-            Servicio para manejar la lógica de negocio relacionada con los empleados.
+            Metodo de manejo de consultas de empleados.
             </summary>
+        </member>
+        <member name="M:VCashApp.Services.Employee.Application.EmployeeReadService.#ctor(VCashApp.Services.Employee.Domain.IEmployeeRepository,VCashApp.Infrastructure.Branches.IBranchContext)">
+            <summary>
+            Manejo de consultas de empleados.
+            </summary>
+            <param name="repo">Servicio de repositorio de empleados</param>
+            <param name="branchCtx">Servicio de contexto de sucursal</param>
+        </member>
+        <member name="M:VCashApp.Services.Employee.Application.EmployeeReadService.GetPagedAsync(System.String,System.Nullable{System.Int32},System.Nullable{System.Int32},System.Nullable{System.Int32},System.String,System.String,System.Int32,System.Int32,System.Boolean)">
+            <summary>
+            Obtiene una lista paginada de empleados según los filtros proporcionados.s
+            </summary>
+            <param name="userId">usuario que realiza la petición</param>
+            <param name="cargoId">Cargo</param>
+            <param name="branchId">Sucursal</param>
+            <param name="employeeStatus">Estado del empleado</param>
+            <param name="search">búsqueda por nombre o documento</param>
+            <param name="gender">genero</param>
+            <param name="page">Pagina</param>
+            <param name="pageSize">Tamaño de página</param>
+            <param name="isAdmin">Es administrador</param>
+            <returns>Tupla con lista de empleados y total de registros</returns>
+        </member>
+        <member name="M:VCashApp.Services.Employee.Application.EmployeeReadService.GetForEditAsync(System.Int32,System.String,System.Boolean)">
+            <summary>
+            Obtiene los datos de un empleado para edición.
+            </summary>
+            <param name="id">Id del empleado</param>
+            <param name="userId">Usuario que realiza la petición</param>
+            <param name="isAdmin">Es administrador</param>
+            <returns>Empleado o nulo si no existe</returns>
+        </member>
+        <member name="M:VCashApp.Services.Employee.Application.EmployeeReadService.GetForDetailsAsync(System.Int32,System.String,System.Boolean)">
+            <summary>
+            Obtiene los datos de un empleado para detalle.
+            </summary>
+            <param name="id">Id del empleado</param>
+            <param name="userId">Usuario que realiza la petición</param>
+            <param name="isAdmin">Es administrador</param>
+            <returns>Empleado o nulo si no existe</returns>
+        </member>
+        <member name="M:VCashApp.Services.Employee.Application.EmployeeReadService.GetLookupsAsync(System.String,System.Boolean)">
+            <summary>
+            Obtiene los datos para los select de cargos, sucursales y ciudades
+            </summary>
+            <param name="userId">Usuario que realiza la petición</param>
+            <param name="isAdmin">Es administrador</param>
+            <returns>Tupla con listas de select items para cargos, sucursales y ciudades</returns>
+        </member>
+        <member name="T:VCashApp.Services.Employee.Application.IEmployeeReadService">
+            <summary>
+            Manejo de consultas de empleados.
+            </summary>
+        </member>
+        <member name="M:VCashApp.Services.Employee.Application.IEmployeeReadService.GetPagedAsync(System.String,System.Nullable{System.Int32},System.Nullable{System.Int32},System.Nullable{System.Int32},System.String,System.String,System.Int32,System.Int32,System.Boolean)">
+            <summary>
+            Obtiene una lista paginada de empleados según los filtros proporcionados.
+            </summary>
+            <param name="userId">usuario que realiza la petición</param>
+            <param name="cargoId">Cargo</param>
+            <param name="branchId">Sucursal</param>
+            <param name="employeeStatus">Estado del empleado</param>
+            <param name="search">búsqueda por nombre o documento</param>
+            <param name="gender">genero</param>
+            <param name="page">Pagina</param>
+            <param name="pageSize">Tamaño de página</param>
+            <param name="isAdmin">Es administrador</param>
+            <returns>Tupla con lista de empleados y total de registros</returns>
+        </member>
+        <member name="M:VCashApp.Services.Employee.Application.IEmployeeReadService.GetForEditAsync(System.Int32,System.String,System.Boolean)">
+            <summary>
+            Obtiene los datos de un empleado para edición.
+            </summary>
+            <param name="id">ID del empleado</param>
+            <param name="userId">usuario que realiza la petición</param>
+            <param name="isAdmin">Es administrador</param>
+            <returns>Empleado o nulo si no existe</returns>
+        </member>
+        <member name="M:VCashApp.Services.Employee.Application.IEmployeeReadService.GetForDetailsAsync(System.Int32,System.String,System.Boolean)">
+            <summary>
+            Obtiene los datos de un empleado para detalle.
+            </summary>
+            <param name="id">ID del empleado</param>
+            <param name="userId">usuario que realiza la petición</param>
+            <param name="isAdmin">Es administrador</param>
+            <returns>Empleado o nulo si no existe</returns>
+        </member>
+        <member name="M:VCashApp.Services.Employee.Application.IEmployeeReadService.GetLookupsAsync(System.String,System.Boolean)">
+            <summary>
+            Obtiene los datos para los select de cargos, sucursales y ciudades
+            </summary>
+            <param name="userId">Usuario que realiza la petición</param>
+            <param name="isAdmin">Es administrador</param>
+            <returns>Tupla con listas de select items para cargos, sucursales y ciudades</returns>
+        </member>
+        <member name="T:VCashApp.Services.Employee.Application.IEmployeeWriteService">
+            <summary>
+            Interfaz para el manejo de comandos de empleados.
+            </summary>
+        </member>
+        <member name="M:VCashApp.Services.Employee.Application.IEmployeeWriteService.CreateAsync(VCashApp.Models.ViewModels.Employee.EmployeeViewModel,System.String)">
+            <summary>
+            Crea un nuevo empleado.
+            </summary>
+            <param name="model">Modelo con la información del empleado</param>
+            <param name="userId">Usuario que realiza la petición</param>
+            <returns>Resultado del servicio</returns>
+        </member>
+        <member name="M:VCashApp.Services.Employee.Application.IEmployeeWriteService.UpdateAsync(VCashApp.Models.ViewModels.Employee.EmployeeViewModel,System.String)">
+            <summary>
+            Actualiza la información de un empleado.
+            </summary>
+            <param name="model">Modelo con la información del empleado</param>
+            <param name="userId">Usuario que realiza la petición</param>
+            <returns>Resultado del servicio</returns>
+        </member>
+        <member name="M:VCashApp.Services.Employee.Application.IEmployeeWriteService.ChangeStatusAsync(System.Int32,System.Int32,System.String,System.String)">
+            <summary>
+            Cambia el estado de un empleado.
+            </summary>
+            <param name="id">ID del empleado</param>
+            <param name="newStatus">Nuevo estado</param>
+            <param name="reason">Razon del cambio de estado</param>
+            <param name="userId">Usuario que realiza la petición</param>
+            <returns>Resultado del servicio</returns>
+        </member>
+        <member name="M:VCashApp.Services.Employee.Application.IEmployeeWriteService.OpenImageAsync(System.String)">
+            <summary>
+            Obtiene un stream de una imagen de empleado dado su path relativo.
+            </summary>
+            <param name="relativePath"> Path relativo de la imagen</param>
+            <returns>Stream de la imagen o nulo si no existe</returns>
+        </member>
+        <member name="T:VCashApp.Services.Employee.Application.Options.RepositoryOptions">
+            <summary>
+            Representa las opciones de configuración para el repositorio de empleados.
+            </summary>
+        </member>
+        <member name="P:VCashApp.Services.Employee.Application.Options.RepositoryOptions.BasePath">
+            <summary>
+            Obtiene o establece la ruta base donde se almacenan los datos de los empleados.
+            </summary>
+        </member>
+        <member name="T:VCashApp.Services.Employee.Domain.IEmployeeFileStorage">
+            <summary>
+            Define las operaciones para el almacenamiento de archivos relacionados con empleados.
+            </summary>
+        </member>
+        <member name="M:VCashApp.Services.Employee.Domain.IEmployeeFileStorage.OpenReadAsync(System.String)">
+            <summary>Devuelve un stream (o null) para una ruta relativa dentro del repositorio unificado.</summary>
+        </member>
+        <member name="M:VCashApp.Services.Employee.Domain.IEmployeeFileStorage.SaveAsync(System.String,System.String,System.IO.Stream)">
+            <summary>Guarda y devuelve la ruta relativa final (carpeta + nombre) para persistir en DB.</summary>
+        </member>
+        <member name="M:VCashApp.Services.Employee.Domain.IEmployeeFileStorage.DeleteIfExistAsync(System.String)">
+            <summary>Elimina un archivo si existe (best-effort).</summary>
+        </member>
+        <member name="T:VCashApp.Services.Employee.Infrastructure.EfEmployeeRepository">
+            <summary>
+            Proporciona una implementación de Entity Framework para el repositorio de empleados.
+            </summary>
+        </member>
+        <member name="M:VCashApp.Services.Employee.Infrastructure.EfEmployeeRepository.#ctor(VCashApp.Data.AppDbContext,VCashApp.Infrastructure.Branches.IBranchContext)">
+            <summary>
+            Inicializa una nueva instancia de la clase <see cref="T:VCashApp.Services.Employee.Infrastructure.EfEmployeeRepository"/>.
+            </summary>
+            <param name="db">Contexto de la base de datos.</param>
+            <param name="branchCtx">Contexto de sucursal.</param>
+        </member>
+        <member name="M:VCashApp.Services.Employee.Infrastructure.EfEmployeeRepository.SearchAsync(System.Nullable{System.Int32},System.Nullable{System.Int32},System.Nullable{System.Int32},System.String,System.String,System.Int32,System.Int32,System.Boolean,System.Nullable{System.Int32},System.Collections.Generic.IEnumerable{System.Int32})">
+            <summary>
+            Busca empleados según los parámetros proporcionados de forma asincrónica.
+            </summary>
+            <param name="cargoId">Código del cargo del empleado.</param>
+            <param name="branchId">Codigo de la sucursal del empleado.</param>
+            <param name="employeeStatus">Estado del empleado.</param>
+            <param name="search">Busqueda de texto libre.</param>
+            <param name="gender">Género del empleado.</param>
+            <param name="page">Página actual para la paginación.</param>
+            <param name="pageSize">Parámetro de tamaño de página para la paginación.</param>
+            <param name="allBranches">Indica si se deben incluir todas las sucursales.</param>
+            <param name="currentBranchId">Id de la sucursal actual (si aplica).</param>
+            <param name="permittedBranches">Lista de sucursales permitidas (si aplica).</param>
+            <returns>Una tarea que representa la operación asincrónica, con una tupla que contiene los empleados encontrados y el total.</returns>
+        </member>
+        <member name="M:VCashApp.Services.Employee.Infrastructure.EfEmployeeRepository.GetByIdAsync(System.Int32)">
+            <summary>
+            Obtiene un empleado por su ID de cédula de forma asincrónica.
+            </summary>
+            <param name="codCedula">Documento de identidad del empleado.</param>
+            <returns>Una tarea que representa la operación asincrónica, con el empleado si se encuentra, o null en caso contrario.</returns>
+        </member>
+        <member name="M:VCashApp.Services.Employee.Infrastructure.EfEmployeeRepository.AddAsync(VCashApp.Models.Entities.AdmEmpleado)">
+            <summary>
+            Asincronamente agrega un nuevo empleado al contexto de la base de datos.
+            </summary>
+            <param name="entity">El empleado a agregar.</param>
+            <returns>Una tarea que representa la operación asincrónica.</returns>
+        </member>
+        <member name="M:VCashApp.Services.Employee.Infrastructure.EfEmployeeRepository.UpdateAsync(VCashApp.Models.Entities.AdmEmpleado)">
+            <summary>
+            Actualiza un empleado existente.
+            </summary>
+            <param name="entity">El empleado a actualizar.</param>
+            <returns>Una tarea que representa la operación asincrónica.</returns>
+        </member>
+        <member name="M:VCashApp.Services.Employee.Infrastructure.EfEmployeeRepository.SaveChangesAsync">
+            <summary>
+            Guarda los cambios pendientes en el contexto de la base de datos.
+            </summary>
+            <returns>Una tarea que representa la operación asincrónica.</returns>
+        </member>
+        <member name="M:VCashApp.Services.Employee.Infrastructure.EfEmployeeRepository.GetCargosAsync">
+            <summary>
+            Obtiene la lista de cargos.
+            </summary>
+            <returns>Una lista de tuplas que contienen el valor y el texto de cada cargo.</returns>
+        </member>
+        <member name="M:VCashApp.Services.Employee.Infrastructure.EfEmployeeRepository.GetSucursalesAsync(System.Boolean,System.Nullable{System.Int32},System.Collections.Generic.IEnumerable{System.Int32})">
+            <summary>
+            Obtiene la lista de sucursales según los parámetros proporcionados.
+            </summary>
+            <param name="allBranches">Indica si se deben incluir todas las sucursales.</param>
+            <param name="currentBranchId">Id de la sucursal actual (si aplica).</param>
+            <param name="permittedBranches">Lista de sucursales permitidas (si aplica).</param>
+            <returns>Una lista de tuplas que contienen el valor y el texto de cada sucursal.</returns>
+        </member>
+        <member name="M:VCashApp.Services.Employee.Infrastructure.EfEmployeeRepository.GetCiudadesAsync">
+            <summary>
+            Obtiene la lista de ciudades.
+            </summary>
+            <returns>Una lista de tuplas que contienen el valor y el texto de cada ciudad.</returns>
+        </member>
+        <member name="T:VCashApp.Services.Employee.Infrastructure.EmployeeMappings">
+            <summary>
+            Mapeos entre la entidad AdmEmpleado y el ViewModel EmployeeViewModel.
+            </summary>
+        </member>
+        <member name="M:VCashApp.Services.Employee.Infrastructure.EmployeeMappings.ToViewModel(VCashApp.Models.Entities.AdmEmpleado)">
+            <summary>
+            Vuelve un EmployeeViewModel a partir de una entidad AdmEmpleado.
+            </summary>
+            <param name="e">Entidad AdmEmpleado</param>
+            <returns>ViewModel EmployeeViewModel</returns>
+        </member>
+        <member name="M:VCashApp.Services.Employee.Infrastructure.EmployeeMappings.UpdateEntity(VCashApp.Models.Entities.AdmEmpleado,VCashApp.Models.ViewModels.Employee.EmployeeViewModel)">
+            <summary>
+            Actualiza la entidad AdmEmpleado con los datos del ViewModel EmployeeViewModel
+            </summary>
+            <param name="e">Entidad AdmEmpleado a actualizar</param>
+            <param name="vm">ViewModel con los datos actualizados</param>
+        </member>
+        <member name="T:VCashApp.Services.Employee.Infrastructure.FileSystemEmployeeStorage">
+            <summary>
+            Manejo de almacenamiento de archivos en el sistema de archivos local.
+            </summary>
+        </member>
+        <member name="M:VCashApp.Services.Employee.Infrastructure.FileSystemEmployeeStorage.#ctor(Microsoft.Extensions.Options.IOptions{VCashApp.Services.Employee.Application.Options.RepositoryOptions})">
+            <summary>
+            Método constructor.
+            </summary>
+            <param name="options">Opciones de configuración para el repositorio de empleados.</param>
+        </member>
+        <member name="M:VCashApp.Services.Employee.Infrastructure.FileSystemEmployeeStorage.OpenReadAsync(System.String)">
+            <summary>
+            Abre un stream (o null) para una ruta relativa dentro del repositorio unificado.
+            </summary>
+            <param name="relativePath">Ruta relativa del archivo a abrir.</param>
+            <returns>Una tarea que representa la operación asincrónica, con el stream del archivo o null si no existe.</returns>
+        </member>
+        <member name="M:VCashApp.Services.Employee.Infrastructure.FileSystemEmployeeStorage.SaveAsync(System.String,System.String,System.IO.Stream)">
+            <summary>
+            Guarda y devuelve la ruta relativa final (carpeta + nombre) para persistir en DB.
+            </summary>
+            <param name="targetFolder">Tarjeta dentro del repositorio unificado.</param>
+            <param name="fileName"> Nombre del archivo.</param>
+            <param name="content">Contenido del archivo.</param>
+            <returns>Una tarea que representa la operación asincrónica, con la ruta relativa del archivo guardado.</returns>
+        </member>
+        <member name="M:VCashApp.Services.Employee.Infrastructure.FileSystemEmployeeStorage.DeleteIfExistAsync(System.String)">
+            <summary>
+            Elimina un archivo si existe (best-effort).
+            </summary>
+            <param name="relativePath">Ruta relativa del archivo a eliminar.</param>
+            <returns>Una tarea que representa la operación asincrónica.</returns>
         </member>
         <!-- Badly formed XML comment ignored for member "M:VCashApp.Services.Helpers.TimeFormatHelper.ToTimeInput24(System.Object)" -->
         <!-- Badly formed XML comment ignored for member "M:VCashApp.Services.Helpers.TimeFormatHelper.ToDateInput(System.Nullable{System.DateOnly})" -->
@@ -3794,88 +4088,6 @@
             <param name="clientId">Client ID.</param>
             <param name="isPoint">True if it's a point, false if it's a fund.</param>
             <returns>A dynamic object with details (Name, City, Branch, Range).</returns>
-        </member>
-        <member name="T:VCashApp.Services.IEmployeeService">
-            <summary>
-            Define el contrato para el servicio de gestión de empleados.
-            </summary>
-        </member>
-        <member name="M:VCashApp.Services.IEmployeeService.GetDropdownListsAsync(System.String,System.Boolean)">
-            <summary>
-            Obtiene las listas necesarias para los dropdowns en las vistas de empleado.
-            </summary>
-            <returns>Una tupla con listas para Cargos, Sucursales y Ciudades.</returns>
-        </member>
-        <member name="M:VCashApp.Services.IEmployeeService.GetFilteredEmployeesAsync(System.String,System.Nullable{System.Int32},System.Nullable{System.Int32},System.Nullable{System.Int32},System.String,System.String,System.Int32,System.Int32,System.Boolean)">
-            <summary>
-            Obtiene una lista paginada y filtrada de empleados como ViewModels.
-            </summary>
-            <returns>Una tupla que contiene la lista de empleados para la página actual y el conteo total de registros filtrados.</returns>
-        </member>
-        <member name="M:VCashApp.Services.IEmployeeService.GetEmployeeForEditAsync(System.Int32,System.String,System.Boolean)">
-            <summary>
-            Obtiene los datos de un empleado específico para el formulario de edición.
-            </summary>
-            <param name="employeeId">El ID (cédula) del empleado.</param>
-            <param name="currentUserId">El ID del usuario que realiza la solicitud.</param>
-            <param name="isAdmin">Indica si el usuario es administrador.</param>
-            <returns>Un EmpleadoViewModel con los datos del empleado, o null si no se encuentra o no hay permiso.</returns>
-        </member>
-        <member name="M:VCashApp.Services.IEmployeeService.CreateEmployeeAsync(VCashApp.Models.ViewModels.EmpleadoViewModel,System.String)">
-            <summary>
-            Crea un nuevo registro de empleado en la base de datos.
-            </summary>
-            <param name="model">El ViewModel con los datos del nuevo empleado.</param>
-            <param name="currentUserId">El ID del usuario que crea el registro.</param>
-            <returns>Un ServiceResult indicando el resultado de la operación.</returns>
-        </member>
-        <member name="M:VCashApp.Services.IEmployeeService.UpdateEmployeeAsync(VCashApp.Models.ViewModels.EmpleadoViewModel,System.String)">
-            <summary>
-            Actualiza un registro de empleado existente.
-            </summary>
-            <param name="model">El ViewModel con los datos actualizados del empleado.</param>
-            <param name="currentUserId">El ID del usuario que actualiza el registro.</param>
-            <returns>Un ServiceResult indicando el resultado de la operación.</returns>
-        </member>
-        <member name="M:VCashApp.Services.IEmployeeService.GetEmployeeImageStreamAsync(System.String)">
-            <summary>
-            Obtiene el stream de un archivo de imagen (foto/firma) de un empleado.
-            </summary>
-            <param name="filePath">La ruta relativa del archivo (ej. "Fotos/12345P.jpg").</param>
-            <returns>Un FileStream de la imagen, o null si no se encuentra.</returns>
-        </member>
-        <member name="M:VCashApp.Services.IEmployeeService.GetEmployeeForDetailsAsync(System.Int32,System.String,System.Boolean)">
-            <summary>
-            Obtiene los detalles de un empleado específico para visualización.
-            Aplica la lógica de permisos basada en el usuario actual y si es administrador.
-            </summary>
-            <param name="employeeId">El ID del empleado a buscar (CodCedula).</param>
-            <param name="currentUserId">El ID del usuario actual para validación de permisos.</param>
-            <param name="isAdmin">Indica si el usuario actual tiene rol de administrador.</param>
-            <returns>Un EmpleadoViewModel con los datos del empleado, o null si no se encuentra o el usuario no tiene permisos.</returns>
-        </member>
-        <member name="M:VCashApp.Services.IEmployeeService.ChangeEmployeeStatusAsync(System.Int32,System.Int32,System.String,System.String)">
-            <summary>
-            Cambia el estado de un empleado específico.
-            </summary>
-            <param name="employeeId">El ID del empleado (CodCedula).</param>
-            <param name="newStatus">El nuevo estado deseado (valor numérico de EstadoEmpleado).</param>
-            <param name="reasonForChange">Una razón para el cambio de estado (opcional, para historial).</param>
-            <param name="currentUserId">ID del usuario que realiza el cambio.</param>
-            <returns>Un ServiceResult indicando éxito o fallo.</returns>
-        </member>
-        <member name="M:VCashApp.Services.IEmployeeService.GetExportableEmployeesAsync(System.String,System.Nullable{System.Int32},System.Nullable{System.Int32},System.Nullable{System.Int32},System.String,System.String,System.Boolean)">
-            <summary>
-            Obtiene una colección COMPLETA de empleados filtrados para propósitos de exportación, sin paginación.
-            </summary>
-            <param name="currentUserId">El ID del usuario actual para validación de permisos.</param>
-            <param name="cargoId">Filtro por ID de cargo.</param>
-            <param name="branchId">Filtro por ID de sucursal.</param>
-            <param name="employeeStatus">Filtro por estado del empleado.</param>
-            <param name="search">Término de búsqueda.</param>
-            <param name="gender">Filtro por género.</param>
-            <param name="isAdmin">Indica si el usuario actual tiene rol de administrador.</param>
-            <returns>Una colección de EmpleadoViewModel con todos los datos necesarios para la exportación.</returns>
         </member>
         <member name="T:VCashApp.Services.IExportService">
             <summary>

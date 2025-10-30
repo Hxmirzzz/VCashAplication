@@ -18,6 +18,9 @@ using VCashApp.Infrastructure.Middleware;
 using VCashApp.Models;
 using VCashApp.Services;
 using VCashApp.Services.Cef;
+using VCashApp.Services.Employee.Application;
+using VCashApp.Services.Employee.Infrastructure;
+using VCashApp.Services.Employee.Domain;
 using VCashApp.Services.CentroEfectivo.Collection.Application;
 using VCashApp.Services.CentroEfectivo.Collection.Domain;
 using VCashApp.Services.CentroEfectivo.Provision.Application;
@@ -178,7 +181,15 @@ builder.Services.AddScoped<IBranchContext, BranchContext>();
 builder.Services.AddScoped<IBranchResolver, BranchResolver>();
 
 builder.Services.AddScoped<IUserService, UserService>();
-builder.Services.AddScoped<IEmployeeService, EmployeeService>();
+
+// Employee Application
+builder.Services.Configure<VCashApp.Services.Employee.Application.Options.RepositoryOptions>(
+    builder.Configuration.GetSection("Repositorio"));
+builder.Services.AddScoped<IEmployeeRepository, EfEmployeeRepository>();
+builder.Services.AddScoped<IEmployeeFileStorage, FileSystemEmployeeStorage>();
+builder.Services.AddScoped<IEmployeeReadService, EmployeeReadService>();
+builder.Services.AddScoped<IEmployeeWriteService, EmployeeWriteService>();
+
 builder.Services.AddScoped<IRutaDiariaService, RutaDiariaService>();
 builder.Services.AddScoped<IExportService, ExportService>();
 builder.Services.AddScoped<ICefTransactionService, CefTransactionService>();

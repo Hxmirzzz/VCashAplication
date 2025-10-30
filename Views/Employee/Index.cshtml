@@ -1,4 +1,4 @@
-﻿@model IEnumerable<VCashApp.Models.ViewModels.EmpleadoViewModel>
+﻿@model IEnumerable<VCashApp.Models.ViewModels.Employee.EmployeeViewModel>
 
 @{
     Layout = "_Layout";
@@ -10,7 +10,6 @@
 
     bool canCreate = ViewBag.HasCreatePermission ?? false;
 }
-
 
 <div class="search-container">
     <div class="table-controls">
@@ -53,8 +52,8 @@
             <label for="filterGender">Genero:</label>
             <select id="filterGender" name="gender" class="form-control form-control-sm">
                 <option value="">Selecciona</option>
-                <option value="M" selected="@(ViewBag.Genero == "M")">MASCULINO</option>
-                <option value="F" selected="@(ViewBag.Genero == "F")">FEMENINO</option>
+                <option value="M" selected="@(ViewBag.CurrentGender == "M")">MASCULINO</option>
+                <option value="F" selected="@(ViewBag.CurrentGender == "F")">FEMENINO</option>
             </select>
         </div>
 
