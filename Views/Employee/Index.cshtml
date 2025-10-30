@@ -1,4 +1,4 @@
-﻿@model IEnumerable<VCashApp.Models.ViewModels.Employee.EmployeeViewModel>
+﻿@model IEnumerable<VCashApp.Models.DTOs.EmpleadoListadoDto>
 
 @{
     Layout = "_Layout";
@@ -18,15 +18,14 @@
             @if (canCreate)
             {
                 <div class="control-button-wrapper">
-                    <a href="@Url.Action("Create", "Employee")" class="control-button-icon" id="addEmployeeButton" title="Crear Empleado">
-                        <img src="/assets/icon-img/add.png" alt="Add Employee">
+                    <a href="@Url.Action("Create", "Employee")" class="control-button-icon" id="addEmployeeButton" title="Crear Empleado" data-loading>
+                        <img src="/assets/icon-img/add.png" alt="Add Employee" loading="lazy">
                     </a>
                 </div>
             }
             <div class="control-button-wrapper">
-                <img src="/assets/icon-img/download.png" alt="Download" class="control-button-icon" id="downloadButton">
+              <img src="/assets/icon-img/download.png" alt="Download" class="control-button-icon" id="downloadButton">
             </div>
-
             <div class="control-button-wrapper">
                 <img src="/assets/icon-img/filter-on.png" alt="Filter" class="control-button-icon" id="filterButton">
             </div>
@@ -92,7 +91,7 @@
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
-    <script src="/js/form-control/employee-form-handler.js"></script>
+    <script src="/js/main-control/employee.js"></script>
     <script>
         $(document).ready(function () {
             setupTablePaginationAndFilters({
@@ -108,34 +107,101 @@
             $('#downloadButton').on('click', function () {
                 showConfirmationModal(
                     "Seleccione el formato de exportación deseado:",
-                    function (format) {
+                    async function (format) {
                         if (!format) {
-                            alert("No se seleccionó un formato de exportación.");
+                            Swal.fire({
+                                icon: 'warning',
+                                title: 'Sin selección',
+                                text: 'No se seleccionó un formato de exportación.',
+                                confirmButtonText: 'Entendido'
+                            });
                             return;
                         }
 
-                        var form = $('<form>', {
-                            'action': '@Url.Action("ExportEmployee", "Employee")',
-                            'method': 'GET',
-                            'target': '_blank',
-                            'style': 'display:none;'    
-                        }).appendTo('body');
+                        AppLoading.show('Preparando archivo...', 'Esto puede tardar unos segundos.');
 
-                        var search = $("#tableSearch").val();
-                        var cargoId = $("#filterCargoId").val();
-                        var branchId = $("#filterBranchId").val();
-                        var gender = $("#filterGender").val();
-                        var employeeStatus = $("#filterEmployeeStatus").val();
+                        try {
+                            const params = new URLSearchParams({
+                                exportFormat: format,
+                                search: $("#tableSearch").val() || '',
+                                cargoId: $("#filterCargoId").val() || '',
+                                branchId: $("#filterBranchId").val() || '',
+                                gender: $("#filterGender").val() || '',
+                                employeeStatus: $("#filterEmployeeStatus").val() || ''
+                            });
 
-                        form.append($('<input>', { name: 'search', value: search }));
-                        form.append($('<input>', { name: 'cargoId', value: cargoId }));
-                        form.append($('<input>', { name: 'branchId', value: branchId }));
-                        form.append($('<input>', { name: 'gender', value: gender }));
-                        form.append($('<input>', { name: 'employeeStatus', value: employeeStatus }));
-                        form.append($('<input>', { name: 'exportFormat', value: format }));
+                            const response = await fetch(`@Url.Action("ExportEmployee", "Employee")?${params.toString()}`, {
+                                method: 'GET',
+                                headers: {
+                                    'X-Requested-With': 'XMLHttpRequest'
+                                }
+                            });
 
-                        form.submit();
-                        form.remove();
+                            if (!response.ok) {
+                                const contentType = response.headers.get('content-type');
+                                let errorMessage = 'Ocurrió un error al exportar los datos.';
+                    
+                                if (contentType && contentType.includes('application/json')) {
+                                    const errorData = await response.json();
+                                    errorMessage = errorData.message || errorData || errorMessage;
+                                } else {
+                                    errorMessage = await response.text();
+                                }
+
+                                throw new Error(errorMessage);
+                            }
+
+                            const contentType = response.headers.get('content-type');
+                
+                            if (contentType && contentType.includes('application/json')) {
+                                const data = await response.json();
+                                throw new Error(data.message || 'Error desconocido al exportar.');
+                            }
+
+                            const blob = await response.blob();
+                
+                            const disposition = response.headers.get('Content-Disposition');
+                            let filename = 'EMPLEADOS.' + format.toLowerCase();
+                
+                            if (disposition && disposition.includes('filename=')) {
+                                const matches = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/.exec(disposition);
+                                if (matches != null && matches[1]) {
+                                    filename = matches[1].replace(/['"]/g, '');
+                                }
+                            }
+
+                            const url = window.URL.createObjectURL(blob);
+                            const a = document.createElement('a');
+                            a.style.display = 'none';
+                            a.href = url;
+                            a.download = filename;
+                            document.body.appendChild(a);
+                            a.click();
+                
+                            window.URL.revokeObjectURL(url);
+                            document.body.removeChild(a);
+
+                            AppLoading.hide();
+
+                            Swal.fire({
+                                icon: 'success',
+                                title: '¡Descarga exitosa!',
+                                text: `El archivo se ha descargado correctamente.`,
+                                timer: 3000,
+                                showConfirmButton: false
+                            });
+
+                        } catch (error) {
+                            AppLoading.hide();
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Error en la exportación',
+                                text: error.message || 'No se pudo completar la exportación.',
+                                confirmButtonText: 'Entendido'
+                            });
+                
+                            console.error('Error al exportar:', error);
+                        }
                     },
                     "Exportar Datos",
                     null,

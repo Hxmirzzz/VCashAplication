@@ -1,4 +1,4 @@
-﻿@model IEnumerable<VCashApp.Models.ViewModels.Employee.EmployeeViewModel>
+﻿@model IEnumerable<VCashApp.Models.DTOs.EmpleadoListadoDto>
 @using VCashApp.Enums
 @using System.Globalization
 
@@ -54,15 +54,15 @@
                             <tr>
                                 <td>@item.CodCedula</td>
                                 <td>@item.NombreCompleto</td>
-                                <td>@item.NombreCargo</td>
+                                <td>@item.CargoNombre</td>
                                 <td>@item.Genero</td>
                                 <td>@item.Celular</td>
-                                <td>@item.NombreSucursal</td>
-                                <td>@item.FechaVinculacion?.ToString("dd/MM/yyyy")</td>
+                                <td>@item.SucursalNombre</td>
+                                <td>@item.FecVinculacion?.ToString("dd/MM/yyyy")</td>
                                 <td class="status-column">
                                     @{
-                                        var estado = (EstadoEmpleado?)item.EmployeeStatus;
-                                        string statusText = estado.ToString();
+                                        var estado = item.EmpleadoEstado;
+                                        string statusText = estado?.ToString() ?? "Desconocido";
                                         string badgeClass = "";
 
                                         switch (estado)
@@ -89,12 +89,14 @@
                                 </td>
                                 <td>
                                     <div class="action-buttons d-flex align-items-center justify-content-center">
-                                        <a href="@Url.Action("Detail", "Employee", new { id = item.CodCedula })" class="btn-detail" title="View Details">
+                                        <a href="@Url.Action("Detail", "Employee", new { id = item.CodCedula })"
+                                           class="btn-detail" title="View Details">
                                             <i class="ri-eye-fill"></i>
                                         </a>
                                         @if (canEdit)
                                         {
-                                            <a href="@Url.Action("Edit", "Employee", new { id = item.CodCedula })" class="btn-edit ml-1" title="Edit">
+                                            <a href="@Url.Action("Edit", "Employee", new { id = item.CodCedula })"
+                                               class="btn-edit ml-1" title="Edit">
                                                 <i class="ri-pencil-fill"></i>
                                             </a>
                                         }
@@ -106,20 +108,25 @@
                                                 @Html.AntiForgeryToken()
 
                                                 <input type="hidden" name="EmployeeId" value="@item.CodCedula" />
-                                                <input type="hidden" name="NewStatus" value="@((item.EmployeeStatus == (int)EstadoEmpleado.Activo ? (int)EstadoEmpleado.Inactivo : (int)EstadoEmpleado.Activo))" class="hidden-new-status" />
-                                                <input type="hidden" name="ReasonForChange" value="Cambio desde la tabla." />
+                                                <input type="hidden" name="NewStatus"
+                                                       value="@(item.EmpleadoEstado == EstadoEmpleado.Activo
+                                                                                                  ? (int)EstadoEmpleado.Inactivo
+                                                                                                  : (int)EstadoEmpleado.Activo)"
+                                           class="hidden-new-status" />
+                                    <input type="hidden" name="ReasonForChange"
+                                           value="Cambio desde la tabla." />
 
                                                 <label class="switch">
                                                     <input type="checkbox" class="employee-status-toggle"
                                                            data-id="@item.CodCedula"
                                                            data-next-status-on="@((int)EstadoEmpleado.Activo)"
                                                            data-next-status-off="@((int)EstadoEmpleado.Inactivo)"
-                                                           @(item.EmployeeStatus == (int)EstadoEmpleado.Activo ? "checked" : "")
+                                                           @(item.EmpleadoEstado == EstadoEmpleado.Activo ? "checked" : "")
                                                            onchange="confirmStatusChange(this)">
                                                     <span class="slider round"></span>
                                                 </label>
                                             </form>
-                                        }
+                                                                }
                                     </div>
                                 </td>
                             </tr>

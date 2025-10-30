@@ -3,12 +3,6 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.AspNetCore.StaticFiles;
-using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using VCashApp.Controllers;
 using VCashApp.Data;
 using VCashApp.Enums;
 using VCashApp.Filters;
@@ -18,6 +12,11 @@ using VCashApp.Services;
 using VCashApp.Services.DTOs;
 using VCashApp.Services.Employee.Application;
 using VCashApp.Services.Employee.Domain;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.Processing;
+using SixLabors.ImageSharp.Formats.Jpeg;
+using Microsoft.Extensions.Caching.Memory;
+using Microsoft.EntityFrameworkCore;
 
 namespace VCashApp.Controllers
 {
@@ -34,6 +33,7 @@ namespace VCashApp.Controllers
         private readonly IEmployeeFileStorage _storage;
         private readonly IExportService _export;
         private readonly ILogger<EmployeeController> _log;
+        private readonly IMemoryCache _cache;
 
         /// <summary>
         /// Constructor del controlador EmployeeController.
@@ -52,7 +52,8 @@ namespace VCashApp.Controllers
             IEmployeeWriteService write,
             IEmployeeFileStorage storage,
             IExportService export,
-            ILogger<EmployeeController> log
+            ILogger<EmployeeController> log,
+            IMemoryCache cache
         ) : base(context, um)
         {
             _read = read;
@@ -60,17 +61,27 @@ namespace VCashApp.Controllers
             _storage = storage;
             _export = export;
             _log = log;
+            _cache = cache;
         }
 
-        private async Task SetCommonViewBagsEmployeeAsync(ApplicationUser user, string pageName)
+        private async Task SetCommonViewBagsEmployeeAsync(ApplicationUser user, string pageName, bool includeCities)
         {
             await base.SetCommonViewBagsBaseAsync(user, pageName);
             bool isAdmin = ViewBag.IsAdmin;
 
-            var (cargos, sucursales, ciudades) = await _read.GetLookupsAsync(user.Id, isAdmin);
+            var (cargos, sucursales, ciudades) = await _cache.GetOrCreateAsync(
+                $"emp-lookups:{user.Id}:{isAdmin}:{includeCities}",
+                async entry =>
+                {
+                    entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromHours(6);
+                    var lk = await _read.GetLookupsAsync(user.Id, isAdmin);
+                    return includeCities ? lk : (lk.Cargos, lk.Sucursales, Enumerable.Empty<SelectListItem>());
+                });
+
             ViewBag.Cargos = new SelectList(cargos, "Value", "Text");
             ViewBag.Sucursales = new SelectList(sucursales, "Value", "Text");
-            ViewBag.Ciudades = new SelectList(ciudades, "Value", "Text");
+            if (includeCities)
+                ViewBag.Ciudades = new SelectList(ciudades, "Value", "Text");
 
             var roles = await _userManager.GetRolesAsync(user);
             ViewBag.HasCreatePermission = await HasPermisionForView(roles, "EMP", PermissionType.Create);
@@ -100,7 +111,7 @@ namespace VCashApp.Controllers
             var user = await GetCurrentApplicationUserAsync();
             if (user is null) return RedirectToPage("/Account/Login", new { area = "Identity" });
 
-            await SetCommonViewBagsEmployeeAsync(user, "Empleados");
+            await SetCommonViewBagsEmployeeAsync(user, "Empleados", includeCities: false);
             bool isAdmin = ViewBag.IsAdmin;
 
             var (items, total) = await _read.GetPagedAsync(
@@ -139,7 +150,7 @@ namespace VCashApp.Controllers
             var user = await GetCurrentApplicationUserAsync();
             if (user is null) return RedirectToPage("/Account/Login", new { area = "Identity" });
 
-            await SetCommonViewBagsEmployeeAsync(user, "Crear Empleado");
+            await SetCommonViewBagsEmployeeAsync(user, "Crear Empleado", includeCities: true);
             bool isAdmin = ViewBag.IsAdmin is bool b && b;
 
             var lookups = await _read.GetLookupsAsync(user.Id, isAdmin);
@@ -206,7 +217,7 @@ namespace VCashApp.Controllers
             var user = await GetCurrentApplicationUserAsync();
             if (user is null) return RedirectToPage("/Account/Login", new { area = "Identity" });
 
-            await SetCommonViewBagsEmployeeAsync(user, "Editar Empleado");
+            await SetCommonViewBagsEmployeeAsync(user, "Editar Empleado", includeCities: true);
             bool isAdmin = ViewBag.IsAdmin is bool b && b;
 
             var vm = await _read.GetForEditAsync(id, user.Id, isAdmin);
@@ -302,7 +313,7 @@ namespace VCashApp.Controllers
             var user = await GetCurrentApplicationUserAsync();
             if (user is null) return RedirectToPage("/Account/Login", new { area = "Identity" });
 
-            await SetCommonViewBagsEmployeeAsync(user, "Detalles del Empleado");
+            await SetCommonViewBagsEmployeeAsync(user, "Detalles del Empleado", includeCities: true);
             bool isAdmin = ViewBag.IsAdmin is bool b && b;
 
             var vm = await _read.GetForDetailsAsync(id, user.Id, ViewBag.IsAdmin);
@@ -365,27 +376,23 @@ namespace VCashApp.Controllers
             string? gender)
         {
             var user = await GetCurrentApplicationUserAsync();
-            if (user is null) return Unauthorized();
+            if (user is null) return Unauthorized(new { message = "Usuario no autenticado." });
 
             try
             {
-                await SetCommonViewBagsEmployeeAsync(user, "Exportar Empleados");
+                if (string.IsNullOrWhiteSpace(exportFormat))
+                {
+                    return BadRequest(new { message = "Debe especificar un formato de exportación." });
+                }
 
                 bool isAdmin = ViewBag.IsAdmin is bool b && b;
+                var items = await _read.GetExportAsync(
+                    user.Id, cargoId, branchId, employeeStatus, search, gender, isAdmin);
 
-                var pageProbe = await _read.GetPagedAsync(
-                    user.Id, cargoId, branchId, employeeStatus, search, gender,
-                    page: 1, pageSize: 1, isAdmin: isAdmin);
-
-                int total = pageProbe.Total;
-                if (total == 0)
-                    return NotFound("No se encontraron empleados con los filtros especificados.");
-
-                var pageAll = await _read.GetPagedAsync(
-                    user.Id, cargoId, branchId, employeeStatus, search, gender,
-                    page: 1, pageSize: total, isAdmin: isAdmin);
-
-                var items = pageAll.Items.ToList();
+                if (items.Count == 0)
+                {
+                    return NotFound(new { message = "No se encontraron empleados con los filtros especificados." });
+                }
 
                 var columns = new Dictionary<string, string>
         {
@@ -421,15 +428,17 @@ namespace VCashApp.Controllers
             }
             catch (NotImplementedException)
             {
-                return BadRequest($"El formato de exportación '{exportFormat}' no está implementado.");
+                return BadRequest(new { message = $"El formato de exportación '{exportFormat}' no está implementado actualmente." });
             }
             catch (ArgumentException ex)
             {
-                return BadRequest(ex.Message);
+                return BadRequest(new { message = ex.Message });
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                return StatusCode(500, "Ocurrió un error interno del servidor al exportar los datos.");
+                // _logger.LogError(ex, "Error al exportar empleados");
+
+                return StatusCode(500, new { message = "Ocurrió un error interno del servidor al exportar los datos." });
             }
         }
 
@@ -437,6 +446,7 @@ namespace VCashApp.Controllers
         /// Sirve archivos de imagen (fotos o firmas) de empleados desde el repositorio.
         /// </summary>
         [HttpGet("/Employee/images/{*filePath}")]
+        [ResponseCache(Duration = 86400, Location = ResponseCacheLocation.Client, NoStore = false)]
         public async Task<IActionResult> GetImage(string filePath)
         {
             var stream = await _storage.OpenReadAsync(filePath);
@@ -444,7 +454,57 @@ namespace VCashApp.Controllers
 
             var provider = new FileExtensionContentTypeProvider();
             if (!provider.TryGetContentType(filePath, out var ct)) ct = "application/octet-stream";
+            Response.Headers["Cache-Control"] = "public, max-age=86400";
             return File(stream, ct);
         }
+
+        [HttpGet("/Employee/thumbs/{w:int}x{h:int}/{*filePath}")]
+        [ResponseCache(Duration = 86400, Location = ResponseCacheLocation.Client, NoStore = false)]
+        public async Task<IActionResult> GetThumb(int w, int h, string filePath)
+        {
+            var src = await _storage.OpenReadAsync(filePath);
+            if (src is null) return NotFound();
+
+            using var image = await Image.LoadAsync(src);
+
+            image.Mutate(x => x.Resize(new ResizeOptions
+            {
+                Mode = ResizeMode.Crop,
+                Position = AnchorPositionMode.Center,
+                Size = new Size(w, h)
+            }));
+
+            var ms = new MemoryStream();
+            await image.SaveAsJpegAsync(ms, new JpegEncoder { Quality = 78 });
+            ms.Position = 0;
+
+            Response.Headers["Cache-Control"] = "public, max-age=86400";
+            return File(ms, "image/jpeg");
+        }
+
+        [HttpGet("/Employee/thumbs-contain/{w:int}x{h:int}/{*filePath}")]
+        [ResponseCache(Duration = 86400, Location = ResponseCacheLocation.Client, NoStore = false)]
+        public async Task<IActionResult> GetThumbContain(int w, int h, string filePath)
+        {
+            var src = await _storage.OpenReadAsync(filePath);
+            if (src is null) return NotFound();
+
+            using var image = await Image.LoadAsync(src);
+
+            image.Mutate(x => x.Resize(new ResizeOptions
+            {
+                Mode = ResizeMode.Pad,
+                Size = new Size(w, h),
+                PadColor = Color.Transparent
+            }));
+
+            var ms = new MemoryStream();
+            await image.SaveAsJpegAsync(ms, new JpegEncoder { Quality = 78 });
+            ms.Position = 0;
+
+            Response.Headers["Cache-Control"] = "public, max-age=86400";
+            return File(ms, "image/jpeg");
+        }
+
     }
 }

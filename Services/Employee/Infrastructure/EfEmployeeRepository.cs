@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using VCashApp.Data;
 using VCashApp.Infrastructure.Branches;
+using VCashApp.Models.DTOs;
 using VCashApp.Models.Entities;
 using VCashApp.Services.Employee.Domain;
 
@@ -39,14 +40,12 @@ namespace VCashApp.Services.Employee.Infrastructure
         /// <param name="currentBranchId">Id de la sucursal actual (si aplica).</param>
         /// <param name="permittedBranches">Lista de sucursales permitidas (si aplica).</param>
         /// <returns>Una tarea que representa la operación asincrónica, con una tupla que contiene los empleados encontrados y el total.</returns>
-        public async Task<(IEnumerable<AdmEmpleado> Items, int Total)> SearchAsync(
+        public async Task<(IEnumerable<EmpleadoListadoDto> Items, int Total)> SearchAsync(
             int? cargoId, int? branchId, int? employeeStatus,
             string? search, string? gender, int page, int pageSize,
             bool allBranches, int? currentBranchId, IEnumerable<int> permittedBranches)
         {
-            var q = _db.AdmEmpleados
-                .Include(e => e.Cargo).ThenInclude(c => c.Unidad)
-                .Include(e => e.Sucursal).AsNoTracking().AsQueryable();
+            var q = _db.AdmEmpleados.AsNoTracking();
 
             if (branchId.HasValue) q = q.Where(e => e.CodSucursal == branchId.Value);
             else
@@ -63,23 +62,37 @@ namespace VCashApp.Services.Employee.Infrastructure
 
             if (!string.IsNullOrWhiteSpace(search))
             {
-                var words = search.Split(' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+                var searchTerm = $"%{search.Replace(" ", "%")}%";
                 q = q.Where(e =>
-                    words.Any(w =>
-                        (e.NombreCompleto ?? "").Contains(w) ||
-                        (e.PrimerNombre ?? "").Contains(w) ||
-                        (e.PrimerApellido ?? "").Contains(w) ||
-                        (e.SegundoNombre ?? "").Contains(w) ||
-                        (e.SegundoApellido ?? "").Contains(w) ||
-                        (e.NumeroCarnet ?? "").Contains(w)
-                    )
+                    EF.Functions.Like(e.NombreCompleto ?? "", searchTerm) ||
+                    EF.Functions.Like(e.NumeroCarnet ?? "", searchTerm)
                 );
             }
 
             var total = await q.CountAsync();
             var items = await q
-                .OrderByDescending(c => c.FecVinculacion).ThenBy(e => e.SegundoApellido).ThenBy(e => e.PrimerNombre)
-                .Skip((page - 1) * pageSize).Take(pageSize)
+                .OrderByDescending(c => c.FecVinculacion)
+                .ThenBy(e => e.SegundoApellido)
+                .ThenBy(e => e.PrimerNombre)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .Select(e => new EmpleadoListadoDto
+                {
+                    CodCedula = e.CodCedula,
+                    PrimerApellido = e.PrimerApellido,
+                    SegundoApellido = e.SegundoApellido,
+                    PrimerNombre = e.PrimerNombre,
+                    SegundoNombre = e.SegundoNombre,
+                    NombreCompleto = e.NombreCompleto,
+                    NumeroCarnet = e.NumeroCarnet,
+                    Genero = e.Genero,
+                    Celular = e.Celular,
+                    FecVinculacion = e.FecVinculacion,
+                    EmpleadoEstado = e.EmpleadoEstado,
+                    CargoNombre = e.Cargo != null ? e.Cargo.NombreCargo : null,
+                    SucursalNombre = e.Sucursal != null ? e.Sucursal.NombreSucursal : null,
+                    UnidadNombre = e.Cargo != null && e.Cargo.Unidad != null ? e.Cargo.Unidad.NombreUnidad : null
+                })
                 .ToListAsync();
 
             return (items, total);
@@ -164,5 +177,75 @@ namespace VCashApp.Services.Employee.Infrastructure
                 .OrderBy(c => c.CodCiudad)
                 .Select(c => new ValueTuple<int, string>(c.CodCiudad, c.CodCiudad + " - " + (c.NombreCiudad ?? "")))
                 .ToListAsync();
+
+        public async Task<List<EmpleadoExportDto>> ExportAsync(
+            int? cargoId, int? branchId, int? employeeStatus,
+            string? search, string? gender,
+            bool allBranches, int? currentBranchId, IEnumerable<int> permittedBranches)
+        {
+            var q = _db.AdmEmpleados.AsNoTracking();
+
+            if (branchId.HasValue) q = q.Where(e => e.CodSucursal == branchId.Value);
+            else
+            {
+                if (!allBranches && currentBranchId.HasValue)
+                    q = q.Where(e => e.CodSucursal == currentBranchId.Value);
+                else if (permittedBranches?.Any() == true)
+                    q = q.Where(e => e.CodSucursal.HasValue && permittedBranches.Contains(e.CodSucursal.Value));
+            }
+
+            if (cargoId.HasValue) q = q.Where(e => e.CodCargo == cargoId.Value);
+            if (employeeStatus.HasValue) q = q.Where(e => (int?)e.EmpleadoEstado == employeeStatus.Value);
+            if (!string.IsNullOrWhiteSpace(gender)) q = q.Where(e => e.Genero == gender);
+
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                var searchTerm = $"%{search.Replace(" ", "%")}%";
+                q = q.Where(e =>
+                    EF.Functions.Like(e.NombreCompleto ?? "", searchTerm) ||
+                    EF.Functions.Like(e.NumeroCarnet ?? "", searchTerm)
+                );
+            }
+
+            var list = await q
+                .OrderByDescending(e => e.FecVinculacion)
+                .ThenBy(e => e.SegundoApellido)
+                .ThenBy(e => e.PrimerNombre)
+                .Select(e => new EmpleadoExportDto
+                {
+                    CodCedula = e.CodCedula,
+                    TipoDocumento = e.TipoDocumento,
+                    NumeroCarnet = e.NumeroCarnet,
+                    PrimerNombre = e.PrimerNombre,
+                    SegundoNombre = e.SegundoNombre,
+                    PrimerApellido = e.PrimerApellido,
+                    SegundoApellido = e.SegundoApellido,
+                    NombreCompleto = e.NombreCompleto,
+
+                    FechaNacimiento = e.FechaNacimiento,
+                    FechaExpedicion = e.FechaExpedicion,
+                    CiudadExpedicion = e.CiudadExpedicion,
+                    CargoNombre = e.Cargo != null ? e.Cargo.NombreCargo : null,
+                    UnidadNombre = e.Cargo != null && e.Cargo.Unidad != null ? e.Cargo.Unidad.NombreUnidad : null,
+                    SucursalNombre = e.Sucursal != null ? e.Sucursal.NombreSucursal : null,
+
+                    Celular = e.Celular,
+                    Direccion = e.Direccion,
+                    Correo = e.Correo,
+                    BloodType = e.RH,
+                    Genero = e.Genero,
+                    OtroGenero = e.OtroGenero,
+                    FechaVinculacion = e.FecVinculacion,
+                    FechaRetiro = e.FecRetiro,
+
+                    IndicadorCatalogo = e.IndicadorCatalogo,
+                    IngresoRepublica = e.IngresoRepublica,
+                    IngresoAeropuerto = e.IngresoAeropuerto,
+                    EmployeeStatus = (int?)e.EmpleadoEstado
+                })
+                .ToListAsync();
+
+            return list;
+        }
     }
 }

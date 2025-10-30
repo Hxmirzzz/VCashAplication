@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc.Rendering;
+using VCashApp.Models.DTOs;
 using VCashApp.Models.ViewModels.Employee;
 
 namespace VCashApp.Services.Employee.Application
@@ -21,7 +22,7 @@ namespace VCashApp.Services.Employee.Application
         /// <param name="pageSize">Tamaño de página</param>
         /// <param name="isAdmin">Es administrador</param>
         /// <returns>Tupla con lista de empleados y total de registros</returns>
-        Task<(IEnumerable<EmployeeViewModel> Items, int Total)> GetPagedAsync(
+        Task<(IEnumerable<EmpleadoListadoDto> Items, int Total)> GetPagedAsync(
             string userId, int? cargoId, int? branchId, int? employeeStatus,
             string? search, string? gender, int page, int pageSize, bool isAdmin);
 
@@ -51,5 +52,8 @@ namespace VCashApp.Services.Employee.Application
         /// <returns>Tupla con listas de select items para cargos, sucursales y ciudades</returns>
         Task<(List<SelectListItem> Cargos, List<SelectListItem> Sucursales, List<SelectListItem> Ciudades)>
             GetLookupsAsync(string userId, bool isAdmin);
+
+        Task<List<EmpleadoExportDto>> GetExportAsync(
+            string userId, int? cargoId, int? branchId, int? employeeStatus, string? search, string? gender, bool isAdmin);
     }
 }

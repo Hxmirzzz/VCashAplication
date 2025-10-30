@@ -90,7 +90,6 @@ function confirmStatusChange(checkbox) {
                         `Ocurrió un error al intentar cambiar el estado: ${error.message}`,
                         'error'
                     );
-                    // Revertir el switch si hubo un error de red o fetch
                     checkbox.checked = !checkbox.checked;
                 });
         } else {
@@ -192,24 +191,5 @@ document.addEventListener("DOMContentLoaded", function () {
     }
     if (editForm) {
         handleFormSubmit(editForm);
-    }
-
-    // Lógica para el campo "Otro Género"
-    const generoSelect = document.getElementById('Genero');
-    const otroGeneroField = document.getElementById('otroGeneroField');
-
-    function toggleOtroGeneroField() {
-        if (generoSelect && otroGeneroField) {
-            if (generoSelect.value === 'O') {
-                otroGeneroField.style.display = 'block';
-            } else {
-                otroGeneroField.style.display = 'none';
-            }
-        }
-    }
-
-    toggleOtroGeneroField();
-    if (generoSelect) {
-        generoSelect.addEventListener('change', toggleOtroGeneroField);
     }
 });

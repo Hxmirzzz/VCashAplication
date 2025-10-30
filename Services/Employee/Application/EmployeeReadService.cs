@@ -1,11 +1,12 @@
-﻿using System.Linq;
-using System.Threading.Tasks;
+﻿using Microsoft.AspNetCore.Mvc.Rendering;
 using System.Collections.Generic;
-using Microsoft.AspNetCore.Mvc.Rendering;
+using System.Linq;
+using System.Threading.Tasks;
 using VCashApp.Infrastructure.Branches;
+using VCashApp.Models.DTOs;
+using VCashApp.Models.ViewModels.Employee;
 using VCashApp.Services.Employee.Domain;
 using VCashApp.Services.Employee.Infrastructure;
-using VCashApp.Models.ViewModels.Employee;
 
 namespace VCashApp.Services.Employee.Application
 {
@@ -41,15 +42,13 @@ namespace VCashApp.Services.Employee.Application
         /// <param name="pageSize">Tamaño de página</param>
         /// <param name="isAdmin">Es administrador</param>
         /// <returns>Tupla con lista de empleados y total de registros</returns>
-        public async Task<(IEnumerable<EmployeeViewModel> Items, int Total)> GetPagedAsync(
-            string userId, int? cargoId, int? branchId, int? employeeStatus,
-            string? search, string? gender, int page, int pageSize, bool isAdmin)
+        public async Task<(IEnumerable<EmpleadoListadoDto> Items, int Total)> GetPagedAsync(
+           string userId, int? cargoId, int? branchId, int? employeeStatus,
+           string? search, string? gender, int page, int pageSize, bool isAdmin)
         {
-            var (items, total) = await _repo.SearchAsync(
+            return await _repo.SearchAsync(
                 cargoId, branchId, employeeStatus, search, gender, page, pageSize,
                 _branchCtx.AllBranches, _branchCtx.CurrentBranchId, _branchCtx.PermittedBranchIds);
-
-            return (items.Select(e => e.ToViewModel()), total);
         }
 
         /// <summary>
@@ -101,6 +100,15 @@ namespace VCashApp.Services.Employee.Application
                 .ToList();
 
             return (cargos, sucursales, ciudades);
+        }
+
+        public async Task<List<EmpleadoExportDto>> GetExportAsync(
+            string userId, int? cargoId, int? branchId, int? employeeStatus,
+            string? search, string? gender, bool isAdmin)
+        {
+            return await _repo.ExportAsync(
+                cargoId, branchId, employeeStatus, search, gender,
+                _branchCtx.AllBranches, _branchCtx.CurrentBranchId, _branchCtx.PermittedBranchIds);
         }
     }
 }

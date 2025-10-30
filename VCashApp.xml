@@ -1050,7 +1050,7 @@
             Proporciona funcionalidades para listar, crear, editar y visualizar información de empleados.
             </summary>
         </member>
-        <member name="M:VCashApp.Controllers.EmployeeController.#ctor(VCashApp.Data.AppDbContext,Microsoft.AspNetCore.Identity.UserManager{VCashApp.Models.ApplicationUser},VCashApp.Services.Employee.Application.IEmployeeReadService,VCashApp.Services.Employee.Application.IEmployeeWriteService,VCashApp.Services.Employee.Domain.IEmployeeFileStorage,VCashApp.Services.IExportService,Microsoft.Extensions.Logging.ILogger{VCashApp.Controllers.EmployeeController})">
+        <member name="M:VCashApp.Controllers.EmployeeController.#ctor(VCashApp.Data.AppDbContext,Microsoft.AspNetCore.Identity.UserManager{VCashApp.Models.ApplicationUser},VCashApp.Services.Employee.Application.IEmployeeReadService,VCashApp.Services.Employee.Application.IEmployeeWriteService,VCashApp.Services.Employee.Domain.IEmployeeFileStorage,VCashApp.Services.IExportService,Microsoft.Extensions.Logging.ILogger{VCashApp.Controllers.EmployeeController},Microsoft.Extensions.Caching.Memory.IMemoryCache)">
             <summary>
             Constructor del controlador EmployeeController.
             </summary>
@@ -2168,6 +2168,18 @@
             <inheritdoc />
         </member>
         <member name="M:VCashApp.Migrations.SetBagNameToCefColumns.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="T:VCashApp.Migrations.AddEmployeeIndexes">
+            <inheritdoc />
+        </member>
+        <member name="M:VCashApp.Migrations.AddEmployeeIndexes.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:VCashApp.Migrations.AddEmployeeIndexes.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:VCashApp.Migrations.AddEmployeeIndexes.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
             <inheritdoc />
         </member>
         <member name="T:VCashApp.Models.ViewModels.BranchViewModel">

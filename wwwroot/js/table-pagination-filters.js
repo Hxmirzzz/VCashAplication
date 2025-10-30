@@ -19,6 +19,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
         const currentControllerUrl = `/${controllerName}/${actionName}`;
+        let currentAjax = null;
 
         function loadTableData(page = 1) {
             let search = '';
@@ -40,46 +41,45 @@ document.addEventListener('DOMContentLoaded', function () {
                     let inputValue = input.value;
                     let inputName = input.name;
 
-                    // Si el valor es una cadena vacía, lo tratamos como null para los filtros opcionales.
-                    // Esto es crucial para que MVC mapee correctamente a int? o DateOnly?.
                     if (inputValue === '') {
                         inputValue = null;
                     }
 
                     if (input.tagName === 'SELECT') {
-                        // Lógica especial para el filtro de estado booleano (específico de Sucursales)
                         if (input.id === 'FilterEstado' && controllerName === 'Sucursales') {
                             let estadoBool = null;
                             if (inputValue === 'true') { estadoBool = true; } else if (inputValue === 'false') { estadoBool = false; }
-                            ajaxData[inputName] = estadoBool; // Asigna el booleano o null
+                            ajaxData[inputName] = estadoBool;
                         }
-                        // Lógica para otros Selects (ej. FilterCodSuc en RutasDiarias, o FilterEstado en RutasDiarias que es int?)
                         else {
-                            ajaxData[inputName] = inputValue; // Asigna la cadena o null
+                            ajaxData[inputName] = inputValue;
                         }
                     }
-                    // Para inputs tipo date, text, number
                     else if (input.type === 'date' || input.type === 'text' || input.type === 'number') {
-                        ajaxData[inputName] = inputValue; // Asigna la cadena o null
+                        ajaxData[inputName] = inputValue;
                     }
-                    // Puedes añadir más tipos si tienes (checkbox, radio, etc.)
                 });
             }
 
-            // Realizar la llamada AJAX
-            $.ajax({
+            if (currentAjax && currentAjax.readyState !== 4) {
+                try { currentAjax.abort(); } catch { }
+            }
+
+            let loaderTimer = setTimeout(() => {
+                AppLoading.show('Cargando datos...', 'Filtrando y paginando resultados.');
+            }, 250);
+
+            currentAjax = $.ajax({
                 url: currentControllerUrl,
                 type: 'GET',
                 data: ajaxData,
-                headers: {
-                    'X-Requested-With': 'XMLHttpRequest'
-                },
+                headers: { 'X-Requested-With': 'XMLHttpRequest' },
                 success: function (result) {
                     tableContainer.innerHTML = result;
+
                     const newUrl = new URL(window.location.href);
                     newUrl.pathname = currentControllerUrl;
                     for (const key in ajaxData) {
-                        // Eliminar parámetros nulos o vacíos de la URL
                         if (ajaxData[key] !== null && ajaxData[key] !== undefined && ajaxData[key] !== '') {
                             newUrl.searchParams.set(key, ajaxData[key]);
                         } else {
@@ -88,19 +88,23 @@ document.addEventListener('DOMContentLoaded', function () {
                     }
                     history.pushState({}, '', newUrl.toString());
 
-                    // Llama a la función global para reiniciar el contador de sesión
                     if (window.initializeSessionTimer) {
                         window.initializeSessionTimer();
                     }
                 },
                 error: function (xhr, status, error) {
-                    console.error("Error al cargar datos de la tabla:", error);
-                    tableContainer.innerHTML = "<div class='alert alert-danger'>Error al cargar los datos. Intente de nuevo.</div>";
+                    if (status !== 'abort') {
+                        console.error("Error al cargar datos de la tabla:", error);
+                        tableContainer.innerHTML = "<div class='alert alert-danger'>Error al cargar los datos. Intente de nuevo.</div>";
+                    }
+                },
+                complete: function () {
+                    clearTimeout(loaderTimer);
+                    AppLoading.hide();
                 }
             });
         }
 
-        // --- Eventos de Paginación ---
         $(document).on('click', `#${tableContainerId} .pagination .page-link`, function (e) {
             e.preventDefault();
             const page = $(this).data('page');
@@ -109,7 +113,6 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         });
 
-        // --- Eventos de Búsqueda y Filtro ---
         if (searchInputId) {
             const searchInput = document.getElementById(searchInputId);
             if (searchInput) {

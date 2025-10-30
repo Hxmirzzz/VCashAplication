@@ -265,6 +265,12 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js" integrity="sha384-ndDqU0Gzau9qJ1lfW4pNLlhNTkCfHzAVBReH9diLvGRem5+R9g2FzA8ZGN954O5Q" crossorigin="anonymous"></script>
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.12.0/dist/sweetalert2.all.min.js"></script>
+    <script src="~/js/ui/global-loading.js"></script>
+    <script>
+        AppLoading.bindLinkLoading();   // loader en <a data-loading>
+        AppLoading.bindFormLoading();   // loader en <form data-loading>
+        AppLoading.bindDownload();      // protección anti-doble clic en [data-download]
+    </script>
     <script src="~/js/table-pagination-filters.js"></script>
     <script src="~/js/modals.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>

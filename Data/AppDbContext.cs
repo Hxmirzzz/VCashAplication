@@ -163,6 +163,14 @@ namespace VCashApp.Data
                 entity.Property(e => e.CodCedula).IsRequired().ValueGeneratedNever();
                 entity.HasOne(e => e.Cargo).WithMany().HasForeignKey(e => e.CodCargo).IsRequired(false);
                 entity.HasOne(e => e.Sucursal).WithMany().HasForeignKey(e => e.CodSucursal).IsRequired(false);
+
+                entity.HasIndex(e => e.NombreCompleto).HasDatabaseName("IX_AdmEmpleados_NombreCompleto");
+                entity.HasIndex(e => e.NumeroCarnet).HasDatabaseName("IX_AdmEmpleados_NumeroCarnet");
+                entity.HasIndex(e => new { e.CodSucursal, e.CodCargo, e.EmpleadoEstado, e.Genero })
+                    .HasDatabaseName("IX_AdmEmpleados_Filters");
+                entity.HasIndex(e => new { e.FecVinculacion, e.SegundoApellido, e.PrimerNombre })
+                    .HasDatabaseName("IX_AdmEmpleados_Sorting")
+                    .IsDescending(true, false, false);
             });
 
             builder.Entity<AdmVehiculo>(entity => {
