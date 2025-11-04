@@ -1,5 +1,3 @@
-using DocumentFormat.OpenXml.Office2016.Drawing.ChartDrawing;
-using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.ResponseCompression;
@@ -31,7 +29,10 @@ using VCashApp.Services.EmployeeLog.Application;
 using VCashApp.Services.EmployeeLog.Integration;
 using VCashApp.Services.EmployeeLog.Queries;
 using VCashApp.Services.Range;
-using VCashApp.Services.Service;
+using VCashApp.Services.GestionServicio.Application;
+using VCashApp.Services.GestionServicio.Domain;
+using VCashApp.Services.GestionServicio.Infrastructure;
+using VCashApp.Services.Logging;
 
 var builder = WebApplication.CreateBuilder(args);
 Log.Logger = new LoggerConfiguration()
@@ -123,6 +124,9 @@ builder.Services.AddDataProtection()
     .PersistKeysToFileSystem(new DirectoryInfo(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "DataProtectionKeysStable")))
     .SetApplicationName("VCashApp");
 
+// ------------------------------
+// Identity & Auth
+// ------------------------------
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
 {
     options.Password.RequireDigit = false;
@@ -159,6 +163,9 @@ builder.Services.ConfigureApplicationCookie(options =>
 
 });
 
+// ------------------------------
+// Infra básica
+// ------------------------------
 builder.Services.AddDistributedMemoryCache();
 builder.Services.AddSession(options =>
 {
@@ -176,65 +183,7 @@ builder.Services.AddResponseCompression(options =>
 });
 
 builder.Services.AddHttpContextAccessor();
-
-builder.Services.AddScoped<IBranchContext, BranchContext>();
-builder.Services.AddScoped<IBranchResolver, BranchResolver>();
-
-builder.Services.AddScoped<IUserService, UserService>();
-
-// Employee Application
-builder.Services.Configure<VCashApp.Services.Employee.Application.Options.RepositoryOptions>(
-    builder.Configuration.GetSection("Repositorio"));
-builder.Services.AddScoped<IEmployeeRepository, EfEmployeeRepository>();
-builder.Services.AddScoped<IEmployeeFileStorage, FileSystemEmployeeStorage>();
-builder.Services.AddScoped<IEmployeeReadService, EmployeeReadService>();
-builder.Services.AddScoped<IEmployeeWriteService, EmployeeWriteService>();
-
-builder.Services.AddScoped<IRutaDiariaService, RutaDiariaService>();
-builder.Services.AddScoped<IExportService, ExportService>();
-builder.Services.AddScoped<ICefTransactionService, CefTransactionService>();
-builder.Services.AddScoped<ICefContainerService, CefContainerService>();
-builder.Services.AddScoped<ICefIncidentService, CefIncidentService>();
-builder.Services.AddScoped<ICefServiceCreationService, CefServiceCreationService>(); // TEMPORAL
-builder.Services.AddScoped<ICgsServiceService, CgsService>();
-builder.Services.AddScoped<IRangeService, RangeService>();
-builder.Services.AddScoped<VCashApp.Services.Logging.IAuditLogger, VCashApp.Services.Logging.AuditLogger>();
-builder.Services.AddScoped<AuditActionFilter>();
-
-// Shared
-builder.Services.AddScoped<IUnitOfWork, EfUnitOfWork>();
-builder.Services.AddScoped<ICefTransactionRepository, CefTransactionRepository>(); // (tu repo existente)
-builder.Services.AddScoped<ICefTransactionQueries, CefTransactionQueries>();
-builder.Services.AddScoped<IAuditLogger, SerilogAuditLogger>();
-
-builder.Services.AddScoped<ICefContainerRepository, CefContainerRepository>();
-builder.Services.AddScoped<ICefIncidentRepository, CefIncidentRepository>();
-builder.Services.AddScoped<ICefCatalogRepository, CefCatalogRepository>();
-
-// Policies (stateless)
-builder.Services.AddSingleton<IProvisionStateMachine, ProvisionStateMachine>();
-builder.Services.AddSingleton<IAllowedValueTypesPolicy, ProvisionAllowedValueTypesPolicy>();
-builder.Services.AddSingleton<IEnvelopePolicy>(_ => new ProvisionEnvelopePolicy { AllowEnvelopes = true });
-builder.Services.AddSingleton<ITolerancePolicy>(_ => new ZeroTolerancePolicy(0m));
-builder.Services.AddSingleton<ICollectionStateMachine, CollectionStateMachine>();
-builder.Services.AddSingleton<ICountingPolicy, CountingPolicy>();
-
-// Collection Application
-builder.Services.AddScoped<ICollectionService, CollectionService>();
-builder.Services.AddScoped<ICollectionReadService, CollectionReadService>();
-
-// Provision Application
-builder.Services.AddScoped<IProvisionService, ProvisionService>();
-builder.Services.AddScoped<IProvisionReadService, ProvisionReadService>();
-
-builder.Services.AddScoped<ICefCatalogRepository, CefCatalogRepository>();
-builder.Services.AddScoped<ICefIncidentService, CefIncidentService>();
-builder.Services.AddScoped<ICefContainerRepository, CefContainerRepository>();
 builder.Services.AddHttpClient();
-
-builder.Services.AddScoped<IEmployeeLogService, EmployeeLogService>();
-builder.Services.AddScoped<IDailyRouteUpdater, DailyRouteUpdater>();
-builder.Services.AddScoped<IEmployeeLogLookupsService, EmployeeLogLookupsService>();
 
 builder.Services.AddControllersWithViews(o =>
 {
@@ -242,6 +191,89 @@ builder.Services.AddControllersWithViews(o =>
 });
 builder.Services.AddRazorPages();
 
+// ------------------------------
+// Branched Context / Infra de sucursal
+// ------------------------------
+builder.Services.AddScoped<IBranchContext, BranchContext>();
+builder.Services.AddScoped<IBranchResolver, BranchResolver>();
+
+// ------------------------------
+// Cross-cutting / Utilidades
+// ------------------------------
+builder.Services.AddScoped<IUserService, UserService>();
+builder.Services.AddScoped<VCashApp.Services.Logging.IAuditLogger, AuditLogger>();
+builder.Services.AddScoped<AuditActionFilter>();
+
+// ======================================================================
+// MÓDULO EMPLOYEE
+// ======================================================================
+builder.Services.Configure<VCashApp.Services.Employee.Application.Options.RepositoryOptions>(
+    builder.Configuration.GetSection("Repositorio"));
+builder.Services.AddScoped<IEmployeeRepository, EfEmployeeRepository>();
+builder.Services.AddScoped<IEmployeeFileStorage, FileSystemEmployeeStorage>();
+builder.Services.AddScoped<IEmployeeReadService, EmployeeReadService>();
+builder.Services.AddScoped<IEmployeeWriteService, EmployeeWriteService>();
+
+// ======================================================================
+// CEF - CAPA SHARED (repos & políticas agnósticas)
+// ======================================================================
+builder.Services.AddScoped<IUnitOfWork, EfUnitOfWork>();
+builder.Services.AddScoped<ICefTransactionRepository, CefTransactionRepository>();
+builder.Services.AddScoped<ICefTransactionQueries, CefTransactionQueries>();
+builder.Services.AddScoped<ICefContainerRepository, CefContainerRepository>();
+builder.Services.AddScoped<ICefIncidentRepository, CefIncidentRepository>();
+builder.Services.AddScoped<ICefCatalogRepository, CefCatalogRepository>();
+builder.Services.AddScoped<VCashApp.Services.CentroEfectivo.Shared.Domain.IAuditLogger, SerilogAuditLogger>();
+
+// Políticas y state machines (stateless → singleton)
+builder.Services.AddSingleton<IProvisionStateMachine, ProvisionStateMachine>();
+builder.Services.AddSingleton<IAllowedValueTypesPolicy, ProvisionAllowedValueTypesPolicy>();
+builder.Services.AddSingleton<IEnvelopePolicy>(_ => new ProvisionEnvelopePolicy { AllowEnvelopes = true });
+builder.Services.AddSingleton<ITolerancePolicy>(_ => new ZeroTolerancePolicy(0m));
+builder.Services.AddSingleton<ICollectionStateMachine, CollectionStateMachine>();
+builder.Services.AddSingleton<ICountingPolicy, CountingPolicy>();
+
+// ======================================================================
+// CEF - PROVISION (Application)
+// ======================================================================
+builder.Services.AddScoped<IProvisionService, ProvisionService>();
+builder.Services.AddScoped<IProvisionReadService, ProvisionReadService>();
+
+// ======================================================================
+// CEF - COLLECTION (Application)
+// ======================================================================
+builder.Services.AddScoped<ICollectionService, CollectionService>();
+builder.Services.AddScoped<ICollectionReadService, CollectionReadService>();
+
+// ======================================================================
+// CGS (nuevo) — DOMAIN / STRUCTURE / APPLICATION
+// ======================================================================
+builder.Services.AddScoped<ICgsServiceQuery, EfCgsServiceQuery>();
+builder.Services.AddScoped<ICgsServiceCreator, SpCgsServiceCreator>();
+builder.Services.AddScoped<ILocationsLookup, EfLocationsLookup>();
+builder.Services.AddScoped<IServiceDropdownsProvider, EfServiceDropdownsProvider>();
+builder.Services.AddScoped<ICgsServiceApp, CgsServiceFacade>();
+
+// ======================================================================
+// EMPLOYEE LOG (por si lo usas en vistas o jobs)
+// ======================================================================
+builder.Services.AddScoped<IEmployeeLogService, EmployeeLogService>();
+builder.Services.AddScoped<IDailyRouteUpdater, DailyRouteUpdater>();
+builder.Services.AddScoped<IEmployeeLogLookupsService, EmployeeLogLookupsService>();
+
+// ======================================================================
+// Export/Rutas/Incidentes (otros servicios CEF existentes)
+// ======================================================================
+builder.Services.AddScoped<IRutaDiariaService, RutaDiariaService>();
+builder.Services.AddScoped<IExportService, ExportService>();
+builder.Services.AddScoped<ICefTransactionService, CefTransactionService>();
+builder.Services.AddScoped<ICefContainerService, CefContainerService>();
+builder.Services.AddScoped<ICefIncidentService, CefIncidentService>();
+builder.Services.AddScoped<ICefServiceCreationService, CefServiceCreationService>();
+
+// ======================================================================
+// Swagger
+// ======================================================================
 builder.Services.AddSwaggerGen(c =>
 {
     c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme

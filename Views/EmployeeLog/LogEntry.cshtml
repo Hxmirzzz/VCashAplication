@@ -71,7 +71,7 @@
             <div class="card-body">
                 <div class="row d-flex justify-content-center align-items-center" id="employeeDetailsSection">
                     <div class="col-md-2">
-                        <div class="reg-preview-container">
+                        <div class="reg-preview-container mt-2">
                             <img id="photo-preview" src="~/assets/profile-img/default-profile.jpg" alt="Vista Previa de Foto">
                         </div>
                     </div>
@@ -178,7 +178,7 @@
         <div class="submit-container-reg form-group col-md-12 mt-4">
             <button type="button" class="btn btn-primary" id="btnRecordEntry" disabled>Registrar Entrada</button>
             <button type="button" class="btn btn-danger" id="btnRecordExit" disabled>Registrar Salida</button>
-            <button type="button" class="btn btn-exit" id="btnCancel">Cancelar</button>
+            <a asp-action="EmployeeLog" asp-controller="EmployeeLog" class="btn btn-exit">Cancelar</a>
         </div>
     </form>
 </div>
@@ -211,7 +211,6 @@
 
             const btnRecordEntry = $('#btnRecordEntry');
             const btnRecordExit = $('#btnRecordExit');
-            const btnCancel = $('#btnCancel');
 
             // Hidden fields
             const hdnEmployeeId = $('#hdnEmployeeId');
@@ -330,8 +329,8 @@
               const html = list.map((emp, idx) => {
                 const key = `${Date.now()}_${idx}_${emp.employeeId}`;
                 SAFE_SEARCH.store.set(key, emp);
-                const img = emp.photoUrl
-                  ? `/${emp.photoUrl.startsWith('/') ? emp.photoUrl.substring(1) : emp.photoUrl}`
+                const img = (emp.photoThumbUrl && emp.photoThumbUrl.trim() !== '')
+                  ? emp.photoThumbUrl
                   : '/assets/profile-img/default-profile.jpg';
                 const displayName = sanitize(emp.employeeName);
                 const displayDet  = `(${sanitize(emp.employeeId)}) - ${sanitize(emp.branchName || 'N/A')}`;
@@ -384,10 +383,14 @@
 
                 cardDatosEmpleado.show();
                 cardRegistro.show();
-                employeeDetailsSection.show(); // con placeholders
+                employeeDetailsSection.show();
                 empHint.hide();
 
-                photoPreview.attr('src', '/assets/profile-img/default-profile.jpg');
+                const fallback = '/assets/profile-img/default-profile.jpg';
+                photoPreview.attr('src', fallback);
+                const dzImg = document.querySelector('#log-photo-dropzone-preview img');
+                if (dzImg) dzImg.src = fallback;
+
                 fullNameDisplay.val('');
                 employeeIdDisplay.val('');
                 cargoNameDisplay.val('');
@@ -444,13 +447,18 @@
                 unitNameDisplay.val(employeeData.unitName);
                 branchNameDisplay.val(employeeData.branchName);
 
-                const photoSrc = employeeData.photoUrl ? `/${employeeData.photoUrl.startsWith('/') ? employeeData.photoUrl.substring(1) : employeeData.photoUrl}` : '/assets/profile-img/default-profile.jpg';
-                photoPreview.attr('src', photoSrc);
+                const fallback = '/assets/profile-img/default-profile.jpg';
+                const thumb = employeeData.photoThumbUrl && employeeData.photoThumbUrl.trim() !== ''
+                    ? employeeData.photoThumbUrl
+                    : fallback;
+
+                photoPreview.attr('src', thumb);
+
+                const dzImg = document.querySelector('#log-photo-dropzone-preview img');
+                if (dzImg) dzImg.src = thumb;
 
                 employeeSearchResults.hide();
                 employeeSearchInput.val('');
-
-                // Muestra bloques 2 y 3
                 employeeDetailsSection.show();
                 cardDatosEmpleado.show();
                 cardRegistro.show();
@@ -770,10 +778,6 @@
                     logDto.ConfirmedValidation = hdnConfirmedValidation.val();
                 }
                 await sendLogData('UpdateLog', logDto, parseInt(hdnLogId.val()));
-            });
-
-            btnCancel.on('click', function() {
-                window.history.back();
             });
 
             function resetCoreFields(){

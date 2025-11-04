@@ -2,9 +2,11 @@
 @{
     Layout = "/Views/Shared/_AuthLayout.cshtml";
     ViewData["Title"] = "Seleccionar Sucursal";
+    var userFullName = ViewBag.UserFullName as string ?? "usuario";
 }
 
 <div class="container p-5 py-5">
+    <p class="text-muted mb-2">Hola, <strong>@userFullName</strong> 👋</p>
     <h2 class="mb-3">Selecciona tu sucursal</h2>
     <p class="text-muted mb-4">Esta selección filtrará todo el sistema por la sucursal elegida. Podrás cambiarla luego desde el perfil.</p>
 

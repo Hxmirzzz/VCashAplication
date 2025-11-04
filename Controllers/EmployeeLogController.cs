@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
 using VCashApp.Data;
@@ -9,7 +8,7 @@ using VCashApp.Infrastructure.Branches;
 using VCashApp.Models;
 using VCashApp.Models.Entities;
 using VCashApp.Models.ViewModels.EmployeeLog;
-using VCashApp.Services;
+using VCashApp.Extensions;
 using VCashApp.Services.DTOs;
 using VCashApp.Services.EmployeeLog.Application;
 using VCashApp.Services.EmployeeLog.Queries;
@@ -104,30 +103,22 @@ namespace VCashApp.Controllers
 
         private async Task<(bool isAdmin, List<int> permittedBranchIds)> ResolveBranchScopeAsync(ApplicationUser user)
         {
-            var isAdmin = await _userManager.IsInRoleAsync(user, "Admin");
-            if (isAdmin)
+            var isAdmin = _branchContext.AllBranches;
+            var permittedBranchIds = new List<int>();
+
+            if (!isAdmin)
             {
-                // Admin ve todas activas, pero si hay CurrentBranchId se usa como filtro por UX
-                var allActive = await _context.AdmSucursales
-                    .AsNoTracking()
-                    .Where(s => s.Estado)
-                    .Select(s => s.CodSucursal)
-                    .ToListAsync();
-                return (true, allActive);
+                if (_branchContext.CurrentBranchId.HasValue)
+                {
+                    permittedBranchIds.Add(_branchContext.CurrentBranchId.Value);
+                }
+                else if (_branchContext.PermittedBranchIds?.Any() == true)
+                {
+                    permittedBranchIds.AddRange(_branchContext.PermittedBranchIds);
+                }
             }
 
-            // No Admin -> sucursales asignadas (y opcionalmente filtra por CurrentBranchId)
-            var assigned = await GetUserAssignedBranchIdsAsync(user.Id);
-            if (_branchContext.CurrentBranchId.HasValue)
-            {
-                var only = _branchContext.CurrentBranchId.Value;
-                if (assigned.Contains(only)) return (false, new List<int> { only });
-                // Si no es dueña de esa sucursal, no puede ver nada.
-                return (false, new List<int>());
-            }
-
-            // Todas mis sucursales (chip) -> assigned
-            return (false, assigned);
+            return (isAdmin, permittedBranchIds);
         }
 
         private bool EnforceBranchAccessForEntity(SegRegistroEmpleado log, List<int> permittedBranchIds, bool isAdmin)
@@ -185,22 +176,32 @@ namespace VCashApp.Controllers
                 if (!employees.Any())
                     return Json(new { error = "No se encontraron empleados activos con los criterios especificados." });
 
-                var result = employees.Select(e => new
+                var result = employees.Select(e =>
                 {
-                    employeeName = e.NombreCompleto ?? $"{e.PrimerNombre} {e.PrimerApellido}",
-                    firstName = e.PrimerNombre ?? "",
-                    middleName = e.SegundoNombre ?? "",
-                    lastName = e.PrimerApellido ?? "",
-                    secondLastName = e.SegundoApellido ?? "",
-                    employeeId = e.CodCedula,
-                    cargoId = e.CodCargo,
-                    cargoName = e.Cargo?.NombreCargo ?? "",
-                    unitId = e.Cargo?.Unidad?.CodUnidad ?? "",
-                    unitName = e.Cargo?.Unidad?.NombreUnidad ?? "",
-                    branchId = e.CodSucursal,
-                    branchName = e.Sucursal?.NombreSucursal ?? "",
-                    unitType = e.Cargo?.Unidad?.TipoUnidad ?? "",
-                    photoUrl = e.FotoUrl != null ? $"assets/profile-img/{Path.GetFileName(e.FotoUrl)}" : ""
+                    var rel = e.FotoUrl?.Replace("\\", "/");
+
+                    var full = !string.IsNullOrWhiteSpace(rel)
+                        ? $"/Employee/images/{rel}"
+                        : null;
+
+                    return new
+                    {
+                        employeeName = e.NombreCompleto ?? $"{e.PrimerNombre} {e.PrimerApellido}",
+                        firstName = e.PrimerNombre ?? "",
+                        middleName = e.SegundoNombre ?? "",
+                        lastName = e.PrimerApellido ?? "",
+                        secondLastName = e.SegundoApellido ?? "",
+                        employeeId = e.CodCedula,
+                        cargoId = e.CodCargo,
+                        cargoName = e.CargoNombre ?? "",
+                        unitId = e.CodUnidad ?? "",
+                        unitName = e.UnidadNombre ?? "",
+                        branchId = e.CodSucursal,
+                        branchName = e.SucursalNombre ?? "",
+                        unitType = e.TipoUnidad ?? "",
+                        photoThumbUrl = full,
+                        photoFullUrl = full
+                    };
                 });
 
                 return Json(result);
@@ -400,9 +401,6 @@ namespace VCashApp.Controllers
             return Json(result);
         }
 
-        // --------------------------------------------------------------------
-        // UI: Dashboard (Hoy / Ayer por defecto)
-        // --------------------------------------------------------------------
         [HttpGet("EmployeeLog")]
         [RequiredPermission(PermissionType.View, "REG")]
         public async Task<IActionResult> EmployeeLog(
@@ -421,7 +419,6 @@ namespace VCashApp.Controllers
 
             await SetCommonViewBagsEmployeeLogAsync(user, "Registro de Empleados");
 
-            // Si hay sucursal activa en chip y no viene branchId, la imponemos para coherencia visual
             if (!_branchContext.AllBranches && _branchContext.CurrentBranchId.HasValue && branchId is null)
                 branchId = _branchContext.CurrentBranchId.Value;
 
@@ -436,6 +433,7 @@ namespace VCashApp.Controllers
             ViewBag.TotalData = total;
             ViewBag.PageSize = pageSize;
 
+            var logsViewModel = rows.ToSummaryViewModels();
             var vm = new EmployeeLogDashboardViewModel
             {
                 SearchTerm = search,
@@ -449,7 +447,7 @@ namespace VCashApp.Controllers
                 PageSize = pageSize,
                 TotalData = total,
                 TotalPages = ViewBag.TotalPages,
-                Logs = rows,
+                Logs = logsViewModel,
                 Cargos = ViewBag.Cargos,
                 Unidades = ViewBag.Unidades,
                 Sucursales = ViewBag.Sucursales,
@@ -480,7 +478,6 @@ namespace VCashApp.Controllers
 
             await SetCommonViewBagsEmployeeLogAsync(user, "Historial");
 
-            // Si hay sucursal activa en chip y no viene branchId, la imponemos
             if (!_branchContext.AllBranches && _branchContext.CurrentBranchId.HasValue && branchId is null)
                 branchId = _branchContext.CurrentBranchId.Value;
 
@@ -496,6 +493,7 @@ namespace VCashApp.Controllers
             ViewBag.TotalData = total;
             ViewBag.PageSize = pageSize;
 
+            var logsViewModel = rows.ToSummaryViewModels();
             var vm = new EmployeeLogDashboardViewModel
             {
                 SearchTerm = search,
@@ -509,7 +507,7 @@ namespace VCashApp.Controllers
                 PageSize = pageSize,
                 TotalData = total,
                 TotalPages = ViewBag.TotalPages,
-                Logs = rows,
+                Logs = logsViewModel,
                 Cargos = ViewBag.Cargos,
                 Unidades = ViewBag.Unidades,
                 Sucursales = ViewBag.Sucursales,
@@ -520,7 +518,7 @@ namespace VCashApp.Controllers
             };
 
             if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
-                return PartialView("~/Views/EmployeeLog/_EmployeeLogTablePartial.cshtml", rows);
+                return PartialView("~/Views/EmployeeLog/_EmployeeLogTablePartial.cshtml", logsViewModel);
 
             return View(vm);
         }

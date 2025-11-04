@@ -138,7 +138,7 @@ namespace VCashApp.Models.Entities
 
         [Column("ModalidadServicio")]
         [StringLength(1)]
-        public string? ServiceModality { get; set; } // ModalidadServicio: '1' (Programado), '2' (Pedido), '3' (Frecuente)
+        public string? ServiceModality { get; set; }
 
         [Column("Observaciones")]
         [StringLength(255)]

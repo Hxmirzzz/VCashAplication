@@ -44,6 +44,8 @@ namespace VCashApp.Controllers
                 .Select(s => new BranchItem { Id = s.CodSucursal, Name = s.NombreSucursal })
                 .ToListAsync();
 
+            ViewBag.UserFullName = user.NombreUsuario ?? user.UserName ?? "usuario";
+
             return View(new SelectBranchVm { Branches = branches, ReturnUrl = returnUrl });
         }
 

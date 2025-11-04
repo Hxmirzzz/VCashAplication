@@ -7,8 +7,7 @@ using VCashApp.Data;
 using VCashApp.Filters;
 using VCashApp.Models;
 using VCashApp.Models.ViewModels.Servicio;
-using VCashApp.Services;
-using VCashApp.Services.Service;
+using VCashApp.Services.GestionServicio.Application;
 using VCashApp.Services.DTOs;
 using VCashApp.Infrastructure.Branches;
 
@@ -21,19 +20,19 @@ namespace VCashApp.Controllers
     [Route("/Service")]
     public class ServiceController : BaseController
     {
-        private readonly ICgsServiceService _cgsService;
+        private readonly ICgsServiceApp _service;
         private readonly ILogger<ServiceController> _logger;
         private readonly IBranchContext _branchContext;
 
         public ServiceController(
-            ICgsServiceService cgsService,
+            ICgsServiceApp service,
             AppDbContext context,
             UserManager<ApplicationUser> userManager,
             ILogger<ServiceController> logger,
             IBranchContext branchContext)
             : base(context, userManager)
         {
-            _cgsService = cgsService;
+            _service = service;
             _logger = logger;
             _branchContext = branchContext;
         }
@@ -42,10 +41,10 @@ namespace VCashApp.Controllers
         {
             await base.SetCommonViewBagsBaseAsync(currentUser, pageName);
 
-            ViewBag.AvailableBranches = (await _cgsService.GetBranchesForDropdownAsync());
-            ViewBag.AvailableClients = (await _cgsService.GetClientsForDropdownAsync());
-            ViewBag.AvailableConcepts = (await _cgsService.GetServiceConceptsForDropdownAsync());
-            ViewBag.AvailableStatuses = (await _cgsService.GetServiceStatusesForDropdownAsync());
+            ViewBag.AvailableBranches = (await _service.GetBranchesForDropdownAsync());
+            ViewBag.AvailableClients = (await _service.GetClientsForDropdownAsync());
+            ViewBag.AvailableConcepts = (await _service.GetServiceConceptsForDropdownAsync());
+            ViewBag.AvailableStatuses = (await _service.GetServiceStatusesForDropdownAsync());
 
             var userRoles = await _userManager.GetRolesAsync(currentUser);
             ViewBag.HasCreatePermission = await HasPermisionForView(userRoles, "CGS", PermissionType.Create);
@@ -73,7 +72,7 @@ namespace VCashApp.Controllers
             await SetCommonViewBagsCgsAsync(currentUser, "Gestión de Servicios");
             bool isAdmin = ViewBag.IsAdmin;
 
-            (List<CgsServiceSummaryViewModel> serviceRequests, int totalRecords) = await _cgsService.GetFilteredServiceRequestsAsync(
+            (List<CgsServiceSummaryViewModel> serviceRequests, int totalRecords) = await _service.GetFilteredServiceRequestsAsync(
                 search, clientCode, branchCode, conceptCode, startDate, endDate, status, page, pageSize, currentUser.Id, isAdmin);
 
             var dashboardViewModel = new CgsDashboardViewModel
@@ -114,7 +113,7 @@ namespace VCashApp.Controllers
         /// Muestra el formulario para crear una nueva solicitud de servicio.
         /// </summary>
         [HttpGet("Create")]
-        [RequiredPermission(PermissionType.Create, "CGS")] // Requiere permiso de Creación
+        [RequiredPermission(PermissionType.Create, "CGS")]
         public async Task<IActionResult> Create()
         {
             var currentUser = await GetCurrentApplicationUserAsync();
@@ -122,8 +121,11 @@ namespace VCashApp.Controllers
 
             await SetCommonViewBagsCgsAsync(currentUser, "Nueva Solicitud CGS");
 
-            var viewModel = await _cgsService.PrepareServiceRequestViewModelAsync(currentUser.Id, IpAddressForLogging);
+            var viewModel = await _service.ServiceRequestAsync(currentUser.Id, IpAddressForLogging);
             viewModel.KeyValue = GenerateGenericKey();
+
+            viewModel.CgsOperatorUserName ??= currentUser.UserName ?? currentUser.Email ?? "N/D";
+            viewModel.OperatorIpAddress ??= IpAddressForLogging ?? HttpContext.Connection.RemoteIpAddress?.ToString();
 
             return View(viewModel);
         }
@@ -166,7 +168,7 @@ namespace VCashApp.Controllers
             try
             {
                 viewModel.KeyValue ??= GenerateGenericKey();
-                var result = await _cgsService.CreateServiceRequestAsync(viewModel, currentUser.Id, IpAddressForLogging);
+                var result = await _service.CreateServiceRequestAsync(viewModel, currentUser.Id, IpAddressForLogging);
 
                 if (result.Success)
                 {
@@ -230,7 +232,7 @@ namespace VCashApp.Controllers
             var currentUser = await GetCurrentApplicationUserAsync();
             if (currentUser == null) return Unauthorized();
 
-            var details = await _cgsService.GetLocationDetailsByCodeAsync(code, clientId, isPoint);
+            var details = await _service.GetLocationDetailsByCodeAsync(code, clientId, isPoint);
 
             if (details == null)
             {
@@ -252,19 +254,17 @@ namespace VCashApp.Controllers
 
             List<SelectListItem> locations = new List<SelectListItem>();
 
-            // Lógica para determinar el tipo de punto a buscar (0=Oficina/Punto, 1=ATM)
-            // Esto es una suposición basada en tu flujo.
-            var pointType = (conceptCode == "3" || conceptCode == "4") ? 1 : 0;
+            var pointType = (locationType == "A") ? 1 : ((conceptCode == "3" || conceptCode == "4") ? 1 : 0);
 
-            if (locationType == "P") // Si el tipo de ubicación es Punto
+            if (locationType == "P" || locationType == "A")
             {
-                locations = await _cgsService.GetPointsByClientAndBranchAsync(clientId, branchId, pointType);
+                locations = await _service.GetPointsByClientAndBranchAsync(clientId, branchId, pointType);
             }
             else if (locationType == "F") // Si el tipo de ubicación es Fondo
             {
                 // Lógica para determinar el tipo de fondo a buscar (0=punto, 1=ATM)
                 var fundType = (conceptCode == "3" || conceptCode == "4") ? 1 : 0;
-                locations = await _cgsService.GetFundsByClientAndBranchAsync(clientId, branchId, fundType);
+                locations = await _service.GetFundsByClientAndBranchAsync(clientId, branchId, fundType);
             }
 
             return Json(locations);
@@ -272,9 +272,9 @@ namespace VCashApp.Controllers
 
         private async Task PopulateViewModelDropdownsAsync(CgsServiceRequestViewModel viewModel)
         {
-            viewModel.AvailableClients = await _cgsService.GetClientsForDropdownAsync();
-            viewModel.AvailableBranches = await _cgsService.GetBranchesForDropdownAsync();
-            viewModel.AvailableConcepts = await _cgsService.GetServiceConceptsForDropdownAsync();
+            viewModel.AvailableClients = await _service.GetClientsForDropdownAsync();
+            viewModel.AvailableBranches = await _service.GetBranchesForDropdownAsync();
+            viewModel.AvailableConcepts = await _service.GetServiceConceptsForDropdownAsync();
             viewModel.AvailableStatuses = await _context.AdmEstados
                                                      .Select(e => new SelectListItem { Value = e.StateCode.ToString(), Text = e.StateName })
                                                      .OrderBy(e => e.Text)
@@ -285,10 +285,8 @@ namespace VCashApp.Controllers
                 new SelectListItem { Value = "I", Text = "Interno" },
                 new SelectListItem { Value = "T", Text = "Transportadora" }
             };
-            viewModel.AvailableServiceModalities = await _cgsService.GetServiceModalitiesForDropdownAsync();
-            viewModel.AvailableCurrencies = typeof(CgsService)
-                .GetMethod("GetCurrenciesForDropdown", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static)!
-                .Invoke(null, null) as List<SelectListItem>;
+            viewModel.AvailableServiceModalities = await _service.GetServiceModalitiesForDropdownAsync();
+            viewModel.AvailableCurrencies = await _service.GetCurrenciesForDropdownAsync();
         }
     }
 }

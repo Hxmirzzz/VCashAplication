@@ -3,8 +3,10 @@ using Microsoft.EntityFrameworkCore;
 using Serilog;
 using System.Globalization;
 using VCashApp.Data;
+using VCashApp.Enums;
 using VCashApp.Infrastructure.Branches;
 using VCashApp.Models;
+using VCashApp.Models.DTOs;
 using VCashApp.Models.Entities;
 using VCashApp.Models.ViewModels.EmployeeLog;
 using VCashApp.Services.DTOs;
@@ -357,46 +359,168 @@ namespace VCashApp.Services.EmployeeLog.Application
             => RecordManualEmployeeExitAsync(new EmployeeLogManualExitViewModel { Id = logId, ExitDate = exitDate, ExitTime = exitTime }, currentUserId, confirmedValidation);
 
         // -------------------- LISTADOS (sin SP) --------------------
-
-        public async Task<Tuple<List<EmployeeLogSummaryViewModel>, int>> GetFilteredEmployeeLogsAsync(
+        public async Task<(IEnumerable<EmployeeLogListadoDto> Items, int Total)> GetFilteredEmployeeLogsAsync(
             string currentUserId, int? cargoId, string? unitId, int? branchId,
             DateOnly? startDate, DateOnly? endDate, int? logStatus,
             string? search, int page, int pageSize, bool isAdmin)
         {
             var baseQuery = _context.SegRegistroEmpleados
                 .AsNoTracking()
-                .ApplyBranchScope(_branch)
-                .ApplyFilters(cargoId, unitId, branchId, startDate, endDate, logStatus, search);
+                .ApplyBranchScope(_branch);
+
+            if (cargoId.HasValue)
+                baseQuery = baseQuery.Where(r => r.CodCargo == cargoId.Value);
+
+            if (!string.IsNullOrWhiteSpace(unitId))
+                baseQuery = baseQuery.Where(r => r.CodUnidad == unitId);
+
+            if (branchId.HasValue)
+                baseQuery = baseQuery.Where(r => r.CodSucursal == branchId.Value);
+
+            if (startDate.HasValue)
+                baseQuery = baseQuery.Where(r => r.FechaEntrada >= startDate.Value);
+
+            if (endDate.HasValue)
+                baseQuery = baseQuery.Where(r => r.FechaEntrada <= endDate.Value);
+
+            if (logStatus.HasValue)
+            {
+                if (logStatus.Value == 0)
+                    baseQuery = baseQuery.Where(r => r.IndicadorEntrada && !r.IndicadorSalida);
+                else if (logStatus.Value == 1)
+                    baseQuery = baseQuery.Where(r => r.IndicadorEntrada && r.IndicadorSalida);
+            }
+
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                baseQuery = baseQuery.Where(r =>
+                    EF.Functions.Like(r.PrimerNombreEmpleado ?? "", $"%{search}%") ||
+                    EF.Functions.Like(r.PrimerApellidoEmpleado ?? "", $"%{search}%") ||
+                    EF.Functions.Like(r.SegundoApellidoEmpleado ?? "", $"%{search}%") ||
+                    EF.Functions.Like(r.NombreCargoEmpleado ?? "", $"%{search}%") ||
+                    r.CodCedula.ToString().Contains(search)
+                );
+            }
 
             var total = await baseQuery.CountAsync();
 
             var rows = await baseQuery
-                .ApplyDefaultOrdering()
+                .OrderByDescending(r => r.FechaEntrada)
+                .ThenByDescending(r => r.HoraEntrada)
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
-                .ToSummary()
+                .Select(r => new EmployeeLogListadoDto
+                {
+                    Id = r.Id,
+                    CodCedula = r.CodCedula,
+
+                    PrimerNombreEmpleado = r.PrimerNombreEmpleado,
+                    SegundoNombreEmpleado = r.SegundoNombreEmpleado,
+                    PrimerApellidoEmpleado = r.PrimerApellidoEmpleado,
+                    SegundoApellidoEmpleado = r.SegundoApellidoEmpleado,
+
+                    NombreCompletoEmpleado =
+                        (r.PrimerNombreEmpleado ?? "") + " " +
+                        (r.SegundoNombreEmpleado ?? "") + " " +
+                        (r.PrimerApellidoEmpleado ?? "") + " " +
+                        (r.SegundoApellidoEmpleado ?? ""),
+
+                    NombreCargoEmpleado = r.NombreCargoEmpleado,
+                    NombreUnidadEmpleado = r.NombreUnidadEmpleado,
+                    NombreSucursalEmpleado = r.NombreSucursalEmpleado,
+
+                    FechaEntrada = r.FechaEntrada,
+                    HoraEntrada = r.HoraEntrada,
+                    FechaSalida = r.FechaSalida,
+                    HoraSalida = r.HoraSalida,
+                    IndicadorEntrada = r.IndicadorEntrada,
+                    IndicadorSalida = r.IndicadorSalida,
+
+                    UsuarioRegistroNombre = r.UsuarioRegistro != null
+                        ? r.UsuarioRegistro.UserName
+                        : null
+                })
                 .ToListAsync();
 
-            return Tuple.Create(rows, total);
+            return (rows, total);
         }
 
-        public async Task<List<AdmEmpleado>> GetEmployeeInfoAsync(
+        public async Task<List<EmpleadoBusquedaDto>> GetEmployeeInfoAsync(
             string userId, List<int> permittedBranchIds, string? searchInput, bool isAdmin)
         {
-            if (string.IsNullOrWhiteSpace(searchInput)) return new();
+            if (string.IsNullOrWhiteSpace(searchInput))
+                return new List<EmpleadoBusquedaDto>();
 
             var q = _context.AdmEmpleados
                 .AsNoTracking()
-                .Include(e => e.Cargo).ThenInclude(c => c.Unidad)
-                .Include(e => e.Sucursal)
-                .ScopedEmployees(_branch)
-                .ApplySearch(searchInput);
+                .Where(e => e.EmpleadoEstado == EstadoEmpleado.Activo)
+                .ScopedEmployees(_branch);
 
-            // Si quieres intersectar adicionalmente con permittedBranchIds:
+            var cleanSearch = searchInput.Trim();
+            var words = cleanSearch.Split(' ', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+
+            if (words.Length > 1)
+            {
+                foreach (var word in words)
+                {
+                    q = q.Where(e =>
+                        EF.Functions.Like(e.NombreCompleto ?? "", $"%{word}%") ||
+                        EF.Functions.Like(e.PrimerNombre ?? "", $"%{word}%") ||
+                        EF.Functions.Like(e.SegundoNombre ?? "", $"%{word}%") ||
+                        EF.Functions.Like(e.PrimerApellido ?? "", $"%{word}%") ||
+                        EF.Functions.Like(e.SegundoApellido ?? "", $"%{word}%") ||
+                        EF.Functions.Like(e.NumeroCarnet ?? "", $"%{word}%") ||
+                        EF.Functions.Like(e.CodCedula.ToString(), $"%{word}%")
+                    );
+                }
+            }
+            else
+            {
+                q = q.Where(e =>
+                    EF.Functions.Like(e.NombreCompleto ?? "", $"%{cleanSearch}%") ||
+                    EF.Functions.Like(e.PrimerNombre ?? "", $"%{cleanSearch}%") ||
+                    EF.Functions.Like(e.SegundoNombre ?? "", $"%{cleanSearch}%") ||
+                    EF.Functions.Like(e.PrimerApellido ?? "", $"%{cleanSearch}%") ||
+                    EF.Functions.Like(e.SegundoApellido ?? "", $"%{cleanSearch}%") ||
+                    EF.Functions.Like(e.NumeroCarnet ?? "", $"%{cleanSearch}%") ||
+                    EF.Functions.Like(e.CodCedula.ToString(), $"%{cleanSearch}%")
+                );
+            }
+
             if (permittedBranchIds?.Count > 0)
-                q = q.Where(e => e.CodSucursal.HasValue && permittedBranchIds.Contains(e.CodSucursal.Value));
+                q = q.Where(e => e.CodSucursal.HasValue
+                    && permittedBranchIds.Contains(e.CodSucursal.Value));
 
-            return await q.Take(20).ToListAsync();
+            var employees = await q
+                .OrderBy(e => EF.Functions.Like(e.NombreCompleto ?? "", $"{cleanSearch}") ? 0 : 1)
+                    .ThenBy(e => EF.Functions.Like(e.NombreCompleto ?? "", $"{cleanSearch}%") ? 0 : 1)
+                .Take(20)
+                .Select(e => new EmpleadoBusquedaDto
+                {
+                    CodCedula = e.CodCedula,
+                    PrimerNombre = e.PrimerNombre,
+                    SegundoNombre = e.SegundoNombre,
+                    PrimerApellido = e.PrimerApellido,
+                    SegundoApellido = e.SegundoApellido,
+                    NombreCompleto = e.NombreCompleto,
+                    CodCargo = e.CodCargo,
+                    CargoNombre = e.Cargo != null ? e.Cargo.NombreCargo : null,
+                    CodUnidad = e.Cargo != null && e.Cargo.Unidad != null
+                        ? e.Cargo.Unidad.CodUnidad
+                        : null,
+                    UnidadNombre = e.Cargo != null && e.Cargo.Unidad != null
+                        ? e.Cargo.Unidad.NombreUnidad
+                        : null,
+                    TipoUnidad = e.Cargo != null && e.Cargo.Unidad != null
+                        ? e.Cargo.Unidad.TipoUnidad
+                        : null,
+                    CodSucursal = e.CodSucursal,
+                    SucursalNombre = e.Sucursal != null ? e.Sucursal.NombreSucursal : null,
+                    FotoUrl = e.FotoUrl
+                })
+                .ToListAsync();
+
+            return employees;
         }
 
         public Task<SegRegistroEmpleado?> GetLogByIdAsync(int id)

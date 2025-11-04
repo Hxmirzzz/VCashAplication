@@ -1,6 +1,7 @@
-﻿using System;
+﻿using Microsoft.AspNetCore.Mvc.Rendering;
+using System;
 using System.Collections.Generic;
-using Microsoft.AspNetCore.Mvc.Rendering;
+using VCashApp.Models.DTOs;
 
 namespace VCashApp.Models.ViewModels.EmployeeLog
 {
@@ -27,7 +28,8 @@ namespace VCashApp.Models.ViewModels.EmployeeLog
         public SelectList? LogStatusList { get; set; }
 
         // Grid
-        public IEnumerable<EmployeeLogSummaryViewModel> Logs { get; set; } = new List<EmployeeLogSummaryViewModel>();
+        public IEnumerable<EmployeeLogSummaryViewModel> Logs { get; set; }
+            = new List<EmployeeLogSummaryViewModel>();
 
         // Permisos UI
         public bool CanCreateLog { get; set; }

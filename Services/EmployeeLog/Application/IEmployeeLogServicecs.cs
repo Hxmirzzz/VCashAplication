@@ -1,4 +1,5 @@
-﻿using VCashApp.Models.Entities;
+﻿using VCashApp.Models.DTOs;
+using VCashApp.Models.Entities;
 using VCashApp.Models.ViewModels.EmployeeLog;
 using VCashApp.Services.DTOs;
 
@@ -26,13 +27,21 @@ namespace VCashApp.Services.EmployeeLog.Application
             string currentUserId,
             string? confirmedValidation = null);
 
-        Task<Tuple<List<EmployeeLogSummaryViewModel>, int>> GetFilteredEmployeeLogsAsync(
-            string currentUserId, int? cargoId, string? unitId, int? branchId,
-            DateOnly? startDate, DateOnly? endDate, int? logStatus,
-            string? search, int page, int pageSize, bool isAdmin);
+        Task<(IEnumerable<EmployeeLogListadoDto> Items, int Total)> GetFilteredEmployeeLogsAsync(
+            string currentUserId,
+            int? cargoId,
+            string? unitId,
+            int? branchId,
+            DateOnly? startDate,
+            DateOnly? endDate,
+            int? logStatus,
+            string? search,
+            int page,
+            int pageSize,
+            bool isAdmin);
 
-        Task<List<AdmEmpleado>> GetEmployeeInfoAsync(
-            string userId, List<int> permittedBranchIds, string? searchInput, bool isAdmin);
+        Task<List<EmpleadoBusquedaDto>> GetEmployeeInfoAsync(
+                    string userId, List<int> permittedBranchIds, string? searchInput, bool isAdmin);
 
         Task<EmployeeLogEditViewModel?> GetEditViewModelAsync(int id, bool canEditLog);
 

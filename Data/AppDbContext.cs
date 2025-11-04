@@ -372,6 +372,27 @@ namespace VCashApp.Data
                 entity.HasOne(re => re.Unidad).WithMany().HasForeignKey(re => re.CodUnidad).OnDelete(DeleteBehavior.Restrict);
                 entity.HasOne(re => re.Sucursal).WithMany().HasForeignKey(re => re.CodSucursal).OnDelete(DeleteBehavior.Restrict);
                 entity.HasOne(re => re.UsuarioRegistro).WithMany().HasForeignKey(re => re.RegistroUsuarioId).IsRequired(false).OnDelete(DeleteBehavior.Restrict); // Nullable en DB
+
+                entity.HasIndex(e => e.FechaEntrada)
+                    .HasDatabaseName("IX_SegRegistroEmpleados_FechaEntrada");
+
+                entity.HasIndex(e => new { e.CodCedula, e.FechaEntrada })
+                    .HasDatabaseName("IX_SegRegistroEmpleados_Empleado_Fecha");
+
+                entity.HasIndex(e => new { e.CodSucursal, e.FechaEntrada })
+                    .HasDatabaseName("IX_SegRegistroEmpleados_Sucursal_Fecha");
+
+                entity.HasIndex(e => new { e.CodCargo, e.FechaEntrada })
+                    .HasDatabaseName("IX_SegRegistroEmpleados_Cargo_Fecha");
+
+                entity.HasIndex(e => new { e.CodUnidad, e.FechaEntrada })
+                    .HasDatabaseName("IX_SegRegistroEmpleados_Unidad_Fecha");
+
+                entity.HasIndex(e => e.PrimerApellidoEmpleado)
+                    .HasDatabaseName("IX_SegRegistroEmpleados_PrimerApellido");
+
+                entity.HasIndex(e => new { e.IndicadorEntrada, e.IndicadorSalida, e.FechaEntrada })
+                    .HasDatabaseName("IX_SegRegistroEmpleados_Indicadores_Fecha");
             });
 
             builder.Entity<AdmConcepto>(entity => {

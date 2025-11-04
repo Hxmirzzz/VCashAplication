@@ -718,7 +718,6 @@
                 const isOrigin = (String(codeSelector).indexOf('originCode') !== -1);
                 const prefix = isOrigin ? 'Origin' : 'Destination';
 
-                // Limpia info derivada
                 $(`#${prefix}Name`).val('');
                 $(`#${prefix}CityName`).val('');
                 $(`#${prefix}CityId`).val('');
@@ -732,7 +731,7 @@
                         const data = await $.get('@Url.Action("GetPointsOrFundsForDropdown", "Cef")', {
                             clientId: clientId,
                             branchId: branchId,
-                            locationType: type, // el backend acepta el value del enum
+                            locationType: type,
                             serviceConceptCode: serviceConceptCode
                         });
                         let options = '<option value="">-- Seleccionar --</option>';

@@ -2182,6 +2182,16 @@
         <member name="M:VCashApp.Migrations.AddEmployeeIndexes.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
             <inheritdoc />
         </member>
+        <member name="T:VCashApp.Models.DTOs.EmployeeLogListadoDto">
+            <summary>
+            DTO para listado de registros de empleados (Dashboard e Historial)
+            </summary>
+        </member>
+        <member name="T:VCashApp.Models.DTOs.EmpleadoBusquedaDto">
+            <summary>
+            DTO para búsqueda de empleados (autocomplete en LogEntry)
+            </summary>
+        </member>
         <member name="T:VCashApp.Models.ViewModels.BranchViewModel">
             <summary>
             Representa la información principal de una sucursal.
@@ -3981,126 +3991,6 @@
             <param name="transactionId">Identificador de la transacción</param>
             <returns>El ViewModel detallado de la transacción, o null si no se encuentra.</returns>
         </member>
-        <member name="T:VCashApp.Services.ICgsServiceService">
-            <summary>
-            Interfaz para los servicios de lógica de negocio del Centro de Gestión de Servicios (CGS).
-            Define las operaciones disponibles para la creación y consulta de solicitudes de servicio.
-            </summary>
-        </member>
-        <member name="M:VCashApp.Services.ICgsServiceService.PrepareServiceRequestViewModelAsync(System.String,System.String)">
-            <summary>
-            Prepara un ViewModel para el formulario de creación de una nueva solicitud de servicio.
-            Carga las listas desplegables necesarias y los datos del usuario actual para la vista.
-            </summary>
-            <param name="currentUserId">El ID del usuario actual autenticado.</param>
-            <param name="currentIP">La dirección IP del cliente que realiza la solicitud.</param>
-            <returns>Un objeto <see cref="T:VCashApp.Models.ViewModels.Servicio.CgsServiceRequestViewModel"/> con datos iniciales y listas preparadas.</returns>
-        </member>
-        <member name="M:VCashApp.Services.ICgsServiceService.CreateServiceRequestAsync(VCashApp.Models.ViewModels.Servicio.CgsServiceRequestViewModel,System.String,System.String)">
-            <summary>
-            Procesa y guarda una nueva solicitud de servicio a partir de un ViewModel.
-            Este método valida la lógica de negocio y llama al Stored Procedure para insertar el registro en la base de datos.
-            </summary>
-            <param name="viewModel">El <see cref="T:VCashApp.Models.ViewModels.Servicio.CgsServiceRequestViewModel"/> con los datos de la solicitud.</param>
-            <param name="currentUserId">El ID del usuario que realiza la operación.</param>
-            <param name="currentIP">La dirección IP del cliente.</param>
-            <returns>Un <see cref="T:VCashApp.Services.DTOs.ServiceResult"/> indicando el éxito o fracaso de la operación, y el ServiceOrderId generado en caso de éxito.</returns>
-        </member>
-        <member name="M:VCashApp.Services.ICgsServiceService.GetPointsByClientAndBranchAsync(System.Int32,System.Int32,System.Int32)">
-            <summary>
-            Obtiene una lista de puntos (oficinas/ATMs) para un cliente y sucursal específicos.
-            </summary>
-            <param name="clientCode">Código del cliente.</param>
-            <param name="branchCode">Código de la sucursal.</param>
-            <param name="pointType">Tipo de punto a buscar (0 para oficina, 1 para ATM).</param>
-            <returns>Una lista de <see cref="T:Microsoft.AspNetCore.Mvc.Rendering.SelectListItem"/> con los puntos encontrados.</returns>
-        </member>
-        <member name="M:VCashApp.Services.ICgsServiceService.GetFundsByClientAndBranchAsync(System.Int32,System.Int32,System.Int32)">
-            <summary>
-            Obtiene una lista de fondos para un cliente y sucursal específicos.
-            </summary>
-            <param name="clientCode">Código del cliente.</param>
-            <param name="branchCode">Código de la sucursal.</param>
-            <param name="fundType">Tipo de fondo a buscar (0 para puntos, 1 para ATM).</param>
-            <returns>Una lista de <see cref="T:Microsoft.AspNetCore.Mvc.Rendering.SelectListItem"/> con los fondos encontrados.</returns>
-        </member>
-        <member name="M:VCashApp.Services.ICgsServiceService.GetPointDetailsAsync(System.String)">
-            <summary>
-            Obtiene los detalles de un punto específico (nombre, dirección, ciudad, etc.) para mostrarlos en el frontend.
-            </summary>
-            <param name="pointCode">El código del punto.</param>
-            <returns>Un objeto anónimo con los detalles del punto si se encuentra; de lo contrario, null.</returns>
-        </member>
-        <member name="M:VCashApp.Services.ICgsServiceService.GetFundDetailsAsync(System.String)">
-            <summary>
-            Obtiene los detalles de un fondo específico (nombre, ciudad, etc.) para mostrarlos en el frontend.
-            </summary>
-            <param name="fundCode">El código del fondo.</param>
-            <returns>Un objeto anónimo con los detalles del fondo si se encuentra; de lo contrario, null.</returns>
-        </member>
-        <member name="M:VCashApp.Services.ICgsServiceService.GetFilteredServiceRequestsAsync(System.String,System.Nullable{System.Int32},System.Nullable{System.Int32},System.Nullable{System.Int32},System.Nullable{System.DateOnly},System.Nullable{System.DateOnly},System.Nullable{System.Int32},System.Int32,System.Int32,System.String,System.Boolean)">
-            <summary>
-            Obtiene una lista paginada y filtrada de solicitudes de servicio para el dashboard.
-            </summary>
-            <param name="searchTerm">Término de búsqueda para filtrar por ID de servicio, cliente o sucursal.</param>
-            <param name="clientCode">Código del cliente para filtrar.</param>
-            <param name="branchCode">Código de la sucursal para filtrar.</param>
-            <param name="conceptCode">Código del concepto de servicio para filtrar.</param>
-            <param name="startDate">Fecha de inicio para el filtro por fecha de solicitud.</param>
-            <param name="endDate">Fecha de fin para el filtro por fecha de solicitud.</param>
-            <param name="status">Código del estado del servicio para filtrar.</param>
-            <param name="pageNumber">Número de página actual para la paginación (por defecto, 1).</param>
-            <param name="pageSize">Tamaño de la página (por defecto, 10).</param>
-            <param name="currentUserId">El ID del usuario actual para aplicar filtros de permisos.</param>
-            <param name="isAdmin">Bandera que indica si el usuario es administrador para omitir filtros de permiso.</param>
-            <returns>Una tupla que contiene la lista de <see cref="T:VCashApp.Models.ViewModels.Servicio.CgsServiceSummaryViewModel"/> y el conteo total de registros.</returns>
-        </member>
-        <member name="M:VCashApp.Services.ICgsServiceService.GetClientsForDropdownAsync">
-            <summary>
-            Obtiene una lista de clientes para ser utilizada en listas desplegables.
-            </summary>
-            <returns>Una lista de <see cref="T:Microsoft.AspNetCore.Mvc.Rendering.SelectListItem"/> de clientes.</returns>
-        </member>
-        <member name="M:VCashApp.Services.ICgsServiceService.GetBranchesForDropdownAsync">
-            <summary>
-            Obtiene una lista de sucursales para ser utilizada en listas desplegables.
-            </summary>
-            <returns>Una lista de <see cref="T:Microsoft.AspNetCore.Mvc.Rendering.SelectListItem"/> de sucursales.</returns>
-        </member>
-        <member name="M:VCashApp.Services.ICgsServiceService.GetServiceConceptsForDropdownAsync">
-            <summary>
-            Obtiene una lista de conceptos de servicio para ser utilizada en listas desplegables.
-            </summary>
-            <returns>Una lista de <see cref="T:Microsoft.AspNetCore.Mvc.Rendering.SelectListItem"/> de conceptos de servicio.</returns>
-        </member>
-        <member name="M:VCashApp.Services.ICgsServiceService.GetServiceStatusesForDropdownAsync">
-            <summary>
-            Obtiene una lista de estados de servicio para ser utilizada en listas desplegables.
-            </summary>
-            <returns>Una lista de <see cref="T:Microsoft.AspNetCore.Mvc.Rendering.SelectListItem"/> de estados de servicio.</returns>
-        </member>
-        <member name="M:VCashApp.Services.ICgsServiceService.GetServiceModalitiesForDropdownAsync">
-            <summary>
-            Obtiene una lista de modalidades de servicio para ser utilizada en listas desplegables.
-            </summary>
-            <returns>Una lista de <see cref="T:Microsoft.AspNetCore.Mvc.Rendering.SelectListItem"/> de modalidades de servicio.</returns>
-        </member>
-        <member name="M:VCashApp.Services.ICgsServiceService.GetFailedResponsiblesForDropdown">
-            <summary>
-            Obtiene la lista de responsables de fallos para los dropdowns.
-            </summary>
-            <returns>Una lista de <see cref="T:Microsoft.AspNetCore.Mvc.Rendering.SelectListItem"/> de responsables fallo del servicio.</returns>
-        </member>
-        <member name="M:VCashApp.Services.ICgsServiceService.GetLocationDetailsByCodeAsync(System.String,System.Int32,System.Boolean)">
-            <summary>
-            Gets details of a point or fund given its code.
-            Obtiene los detalles de un punto o fondo dado su código.
-            </summary>
-            <param name="code">Point or fund code.</param>
-            <param name="clientId">Client ID.</param>
-            <param name="isPoint">True if it's a point, false if it's a fund.</param>
-            <returns>A dynamic object with details (Name, City, Branch, Range).</returns>
-        </member>
         <member name="T:VCashApp.Services.IExportService">
             <summary>
             Interfaz para un servicio que maneja la exportación de datos a diferentes formatos de archivo.
@@ -4447,51 +4337,6 @@
             <summary>
             Método auxiliar para obtener entidad con todos los datos relacionados.
             </summary>
-        </member>
-        <member name="M:VCashApp.Services.Service.CgsService.GetLocationDetailsByCodeAsync(System.String,System.Int32,System.Boolean)">
-            <inheritdoc/>
-        </member>
-        <member name="M:VCashApp.Services.Service.CgsService.GetClientsForDropdownAsync">
-            <summary>
-            Obtiene las opciones de cliente del servicio para los dropdowns.
-            </summary>
-            <returns>Lista de SelectListItem para los clientes</returns>
-        </member>
-        <member name="M:VCashApp.Services.Service.CgsService.GetBranchesForDropdownAsync">
-            <summary>
-            Obtiene las opciones de sucursal del servicio para los dropdowns.
-            </summary>
-            <returns>Lista de SelectListItem para las sucursales del servicio</returns>
-        </member>
-        <member name="M:VCashApp.Services.Service.CgsService.GetServiceConceptsForDropdownAsync">
-            <summary>
-            Obtiene las opciones de concepto del servicio para los dropdowns.
-            </summary>
-            <returns>Lista de SelectListItem para los conceptos del servicio</returns>
-        </member>
-        <member name="M:VCashApp.Services.Service.CgsService.GetServiceStatusesForDropdownAsync">
-            <summary>
-            Obtiene las opciones de estado del servicio para los dropdowns.
-            </summary>
-            <returns>Lista de SelectListItem para los estados del servicio</returns>
-        </member>
-        <member name="M:VCashApp.Services.Service.CgsService.GetServiceModalitiesForDropdownAsync">
-            <summary>
-            Obtiene las opciones de modalidad del servicio para los dropdowns.
-            </summary>
-            <returns>Lista de SelectListItem para las modalidades del servicio</returns>
-        </member>
-        <member name="M:VCashApp.Services.Service.CgsService.GetFailedResponsiblesForDropdown">
-            <summary>
-            Obtiene las opciones de responsables al fallo del servicio para los dropdowns.
-            </summary>
-            <returns>Lista de SelectListItem para los responsables del fallo del servicio</returns>
-        </member>
-        <member name="M:VCashApp.Services.Service.CgsService.GetLocationTypeSelectList">
-            <summary>
-            Obtiene las opciones de tipo de ubicación para los dropdowns.
-            </summary>
-            <returns>Lista de SelectListItem para los tipos de ubicación</returns>
         </member>
         <member name="T:VCashApp.Services.UserService">
             <summary>

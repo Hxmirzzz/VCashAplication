@@ -665,16 +665,15 @@
                 $(`#${prefix}RangeCode`).val('');
                 $(`#${prefix}RangeDetails`).val('');
 
-                // Mapea el tipo a número antes de enviarlo
                 const mappedType = mapLocationTypeToNumber(type);
 
-                if (clientId && mappedType !== null) {
+                if (clientId && type) {
                     $codeDropdown.prop('disabled', false);
                     try {
-                        const data = await $.get('@Url.Action("GetPointsOrFundsForDropdown", "Cef")', {
+                        const data = await $.get('@Url.Action("GetLocations", "Service")', {
                             clientId: clientId,
                             branchId: branchId,
-                            locationType: mappedType,
+                            locationType: type,
                             serviceConceptCode: serviceConceptCode
                         });
                         let options = '<option value="">-- Seleccionar --</option>';
