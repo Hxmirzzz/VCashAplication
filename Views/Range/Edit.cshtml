@@ -5,64 +5,63 @@
 }
 
 <div class="form-container">
-    <div class="card">
-        <div class="card-header d-flex align-items-center justify-content-between">
-            <h4 class="mb-0">Editar Rango de Atención: @Model.CodRange</h4>
-            <a asp-action="Index" class="btn btn-outline-secondary btn-sm">Volver</a>
-        </div>
+    <div class="card-body">
+        <form id="range-edit-form" asp-action="Edit" method="post" data-validate-url="@Url.Action("ValidateUnique","Range")">
+            @Html.AntiForgeryToken()
+            <input type="hidden" asp-for="Id" />
 
-        <div class="card-body">
-            <form id="range-edit-form" asp-action="Edit" method="post" data-validate-url="@Url.Action("ValidateUnique","Range")">
-                @Html.AntiForgeryToken()
-                <input type="hidden" asp-for="Id" />
-                <div class="row g-3">
-                    <div class="col-12 col-lg-4">
-                        <div class="form-floating has-validation">
-                            <input asp-for="CodRange" class="form-control" placeholder="Código" />
-                            <label asp-for="CodRange">Código</label>
-                            <span asp-validation-for="CodRange" class="text-danger"></span>
+            <div class="card">
+                <div class="card-header"><h5 class="mb-0"><i class="ri-information-fill"></i> Información</h5></div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-12 col-lg-4">
+                            <div class="form-floating has-validation">
+                                <input asp-for="CodRange" class="form-control" placeholder="Código" />
+                                <label asp-for="CodRange">Código</label>
+                                <span asp-validation-for="CodRange" class="text-danger"></span>
+                            </div>
                         </div>
-                    </div>
 
-                    <div class="col-12 col-lg-5">
-                        <div class="form-floating">
-                            <select asp-for="ClientId" class="form-select" asp-items="Model.AvailableClients">
-                                <option value="">-- Seleccione cliente --</option>
-                            </select>
-                            <label asp-for="ClientId">Cliente</label>
-                            <span asp-validation-for="ClientId" class="text-danger"></span>
+                        <div class="col-12 col-lg-5">
+                            <div class="form-floating">
+                                <select asp-for="ClientId" class="form-select" asp-items="Model.AvailableClients">
+                                    <option value="">-- Seleccione cliente --</option>
+                                </select>
+                                <label asp-for="ClientId">Cliente</label>
+                                <span asp-validation-for="ClientId" class="text-danger"></span>
+                            </div>
                         </div>
-                    </div>
 
-                    <div class="col-12 col-lg-3">
-                        <div class="form-floating">
-                            <select class="form-select" id="rangeStatusSelect">
-                                <option value="true" selected>Activo</option>
-                                <option value="false">Inactivo</option>
-                            </select>
-                            <label>Estado</label>
+                        <div class="col-12 col-lg-3">
+                            <div class="form-floating">
+                                <select class="form-select" id="rangeStatusSelect">
+                                    <option value="true" selected>Activo</option>
+                                    <option value="false">Inactivo</option>
+                                </select>
+                                <label>Estado</label>
+                            </div>
+                            <input type="hidden" asp-for="RangeStatus" />
                         </div>
-                        <input type="hidden" asp-for="RangeStatus" />
-                    </div>
 
-                    <div class="col-12">
-                        <div class="form-floating">
-                            <textarea asp-for="RangeInformation" class="form-control" placeholder="Descripción" style="height: 80px;"></textarea>
-                            <label asp-for="RangeInformation">Descripción (opcional)</label>
-                            <span asp-validation-for="RangeInformation" class="text-danger"></span>
+                        <div class="col-12">
+                            <div class="form-floating">
+                                <textarea asp-for="RangeInformation" class="form-control" placeholder="Descripción" style="height: 80px;"></textarea>
+                                <label asp-for="RangeInformation">Descripción (opcional)</label>
+                                <span asp-validation-for="RangeInformation" class="text-danger"></span>
+                            </div>
                         </div>
                     </div>
                 </div>
+            </div>
 
-                <hr class="my-4" />
-
-                <div class="card">
-                    <div class="card-header">
-                        <h5 class="mb-0">⏱ Horarios por día (hasta 3 rangos)</h5>
-                    </div>
+            <div class="card mt-3">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="ri-timer-fill"></i> Horarios por día (hasta 3 rangos)</h5>
+                </div>
+                <div class="card-body">
                     <div class="container-editor">
                         <div class="card-body p-0">
-                            <div class="table-responsive">
+                            <div class="table-responsive rounded">
                                 <table class="table table-sm align-middle mb-0">
                                     <thead>
                                         <tr>
@@ -345,19 +344,19 @@
                             </div>
 
                             <small class="text-muted d-block p-3">
-                                Tip: si un día no aplica, desmárcalo para deshabilitar sus horas.
+                                Tip: si un día no aplica, desmárcalo para formatear sus horas.
                             </small>
                         </div>
                     </div>
                 </div>
+            </div>
 
-                <div class="submit-container-spacer"></div>
-                <div class="submit-container form-group col-12 mt-4 fixed">
-                    <button type="submit" class="btn btn-primary">Guardar</button>
-                    <a asp-action="Index" class="btn btn-danger">Cancelar</a>
-                </div>
-            </form>
-        </div>
+            <div class="submit-container-spacer"></div>
+            <div class="submit-container form-group col-12 mt-4 fixed">
+                <button type="submit" class="btn btn-primary">Guardar</button>
+                <a asp-action="Index" class="btn btn-danger">Cancelar</a>
+            </div>
+        </form>
     </div>
 </div>
 

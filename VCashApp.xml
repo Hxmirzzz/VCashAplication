@@ -1254,6 +1254,11 @@
             Útil en la UI para avisar antes de postear el form.
             </summary>
         </member>
+        <member name="M:VCashApp.Controllers.RouteController.SetCommonViewBagsRoutesAsync(VCashApp.Models.ApplicationUser,System.String,System.String[])">
+            <summary>
+            Sucursales (filtradas por permisos), catálogos y banderas de permiso por vista.
+            </summary>
+        </member>
         <member name="T:VCashApp.Controllers.RutasDiariasController">
             <summary>
             Controlador para la gestión de rutas diarias.
@@ -1645,6 +1650,127 @@
             <param name="selectedRoleFilter">Opcional. Filtro por nombre de rol.</param>
             <param name="selectedBranchFilter">Opcional. Filtro por ID de sucursal.</param>
             <returns>Un <see cref="T:Microsoft.AspNetCore.Mvc.IActionResult"/> que devuelve un archivo para descarga en caso de éxito.</returns>
+        </member>
+        <member name="T:VCashApp.Enums.RouteCatalogs">
+            <summary>
+            Proporciona definiciones de catálogos para códigos relacionados con rutas y su lógica de validación.
+            Contiene clases anidadas para tipos de ruta, tipos de servicio y tipos de vehículo utilizados en el sistema VCash.
+            </summary>
+        </member>
+        <member name="T:VCashApp.Enums.RouteCatalogs.RouteTypeCode">
+            <summary>
+            Define códigos de tipos de ruta y sus etiquetas correspondientes.
+            Las rutas pueden ser tradicionales, basadas en ATM, mixtas o de liberación de efectivo.
+            </summary>
+        </member>
+        <member name="F:VCashApp.Enums.RouteCatalogs.RouteTypeCode.Traditional">
+            <summary>
+            Código de ruta tradicional.
+            </summary>
+        </member>
+        <member name="F:VCashApp.Enums.RouteCatalogs.RouteTypeCode.ATM">
+            <summary>
+            Código de ruta ATM.
+            </summary>
+        </member>
+        <member name="F:VCashApp.Enums.RouteCatalogs.RouteTypeCode.Mixed">
+            <summary>
+            Código de ruta mixta (combinación de tradicional y ATM).
+            </summary>
+        </member>
+        <member name="F:VCashApp.Enums.RouteCatalogs.RouteTypeCode.CashLiberation">
+            <summary>
+            Código de ruta de liberación de efectivo.
+            </summary>
+        </member>
+        <member name="M:VCashApp.Enums.RouteCatalogs.RouteTypeCode.IsValid(System.String)">
+            <summary>
+            Valida si el código proporcionado es un tipo de ruta válido.
+            </summary>
+            <param name="code">El código de tipo de ruta a validar.</param>
+            <returns>True si el código es válido (T, A, M o L); de lo contrario, false.</returns>
+        </member>
+        <member name="M:VCashApp.Enums.RouteCatalogs.RouteTypeCode.ToLabel(System.String)">
+            <summary>
+            Convierte un código de tipo de ruta a su etiqueta legible en español.
+            </summary>
+            <param name="code">El código de tipo de ruta.</param>
+            <returns>La etiqueta correspondiente o "Desconocido" si el código es inválido.</returns>
+        </member>
+        <member name="T:VCashApp.Enums.RouteCatalogs.ServiceTypeCode">
+            <summary>
+            Define códigos de tipos de servicio que representan diferentes períodos de tiempo para servicios de ruta.
+            Los servicios pueden programarse para mañana, tarde o franjas horarias adicionales.
+            </summary>
+        </member>
+        <member name="F:VCashApp.Enums.RouteCatalogs.ServiceTypeCode.Morning">
+            <summary>
+            Código de servicio matutino (AM).
+            </summary>
+        </member>
+        <member name="F:VCashApp.Enums.RouteCatalogs.ServiceTypeCode.Afternoon">
+            <summary>
+            Código de servicio vespertino (PM).
+            </summary>
+        </member>
+        <member name="F:VCashApp.Enums.RouteCatalogs.ServiceTypeCode.Additional">
+            <summary>
+            Código de servicio adicional (fuera del horario regular).
+            </summary>
+        </member>
+        <member name="M:VCashApp.Enums.RouteCatalogs.ServiceTypeCode.IsValid(System.String)">
+            <summary>
+            Valida si el código proporcionado es un tipo de servicio válido.
+            </summary>
+            <param name="code">El código de tipo de servicio a validar.</param>
+            <returns>True si el código es válido (AM, PM o AD); de lo contrario, false.</returns>
+        </member>
+        <member name="M:VCashApp.Enums.RouteCatalogs.ServiceTypeCode.ToLabel(System.String)">
+            <summary>
+            Convierte un código de tipo de servicio a su etiqueta legible en español.
+            </summary>
+            <param name="code">El código de tipo de servicio.</param>
+            <returns>La etiqueta correspondiente o "Desconocido" si el código es inválido.</returns>
+        </member>
+        <member name="T:VCashApp.Enums.RouteCatalogs.VehicleTypeCode">
+            <summary>
+            Define códigos de tipos de vehículo utilizados para el transporte en rutas.
+            Incluye vehículos blindados, motocicletas, camionetas y camiones.
+            </summary>
+        </member>
+        <member name="F:VCashApp.Enums.RouteCatalogs.VehicleTypeCode.Armored">
+            <summary>
+            Código de vehículo blindado.
+            </summary>
+        </member>
+        <member name="F:VCashApp.Enums.RouteCatalogs.VehicleTypeCode.Motorcycle">
+            <summary>
+            Código de motocicleta.
+            </summary>
+        </member>
+        <member name="F:VCashApp.Enums.RouteCatalogs.VehicleTypeCode.Van">
+            <summary>
+            Código de camioneta.
+            </summary>
+        </member>
+        <member name="F:VCashApp.Enums.RouteCatalogs.VehicleTypeCode.Truck">
+            <summary>
+            Código de camión.
+            </summary>
+        </member>
+        <member name="M:VCashApp.Enums.RouteCatalogs.VehicleTypeCode.IsValid(System.String)">
+            <summary>
+            Valida si el código proporcionado es un tipo de vehículo válido.
+            </summary>
+            <param name="code">El código de tipo de vehículo a validar.</param>
+            <returns>True si el código es válido (B, M, C o T); de lo contrario, false.</returns>
+        </member>
+        <member name="M:VCashApp.Enums.RouteCatalogs.VehicleTypeCode.ToLabel(System.String)">
+            <summary>
+            Convierte un código de tipo de vehículo a su etiqueta legible en español.
+            </summary>
+            <param name="code">El código de tipo de vehículo.</param>
+            <returns>La etiqueta correspondiente o "Desconocido" si el código es inválido.</returns>
         </member>
         <member name="T:VCashApp.Filters.RequiredPermissionAttribute">
             <summary>

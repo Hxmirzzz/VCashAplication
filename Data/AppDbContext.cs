@@ -33,7 +33,7 @@ namespace VCashApp.Data
         public DbSet<AdmSucursal> AdmSucursales { get; set; }
         public DbSet<AdmFondo> AdmFondos { get; set; }
         public DbSet<AdmPunto> AdmPuntos { get; set; }
-        public DbSet<AdmRuta> AdmRutas { get; set; }
+        public DbSet<AdmRoute> AdmRutas { get; set; }
         public DbSet<AdmRange> AdmRangos { get; set; }
         public DbSet<SegRegistroEmpleado> SegRegistroEmpleados { get; set; }
         public DbSet<AdmConcepto> AdmConceptos { get; set; }
@@ -324,28 +324,33 @@ namespace VCashApp.Data
                       .HasDatabaseName("UX_AdmRangos_ScheduleKey");
             });
 
-            builder.Entity<AdmRuta>(entity => {
-                entity.HasKey(r => r.CodRutaSuc);
-                entity.Property(r => r.CodRutaSuc).IsRequired();
-                entity.Property(r => r.Monto).HasColumnType("DECIMAL(18,0)");
-                entity.Property(r => r.LunesHoraInicio).HasColumnType("TIME(0)");
-                entity.Property(r => r.LunesHoraFin).HasColumnType("TIME(0)");
-                entity.Property(r => r.MartesHoraInicio).HasColumnType("TIME(0)");
-                entity.Property(r => r.MartesHoraFin).HasColumnType("TIME(0)");
-                entity.Property(r => r.MiercolesHoraInicio).HasColumnType("TIME(0)");
-                entity.Property(r => r.MiercolesHoraFin).HasColumnType("TIME(0)");
-                entity.Property(r => r.JuevesHoraInicio).HasColumnType("TIME(0)");
-                entity.Property(r => r.JuevesHoraFin).HasColumnType("TIME(0)");
-                entity.Property(r => r.ViernesHoraInicio).HasColumnType("TIME(0)");
-                entity.Property(r => r.ViernesHoraFin).HasColumnType("TIME(0)");
-                entity.Property(r => r.SabadoHoraInicio).HasColumnType("TIME(0)");
-                entity.Property(r => r.SabadoHoraFin).HasColumnType("TIME(0)");
-                entity.Property(r => r.DomingoHoraInicio).HasColumnType("TIME(0)");
-                entity.Property(r => r.DomingoHoraFin).HasColumnType("TIME(0)");
-                entity.Property(r => r.FestivoHoraInicio).HasColumnType("TIME(0)");
-                entity.Property(r => r.FestivoHoraFin).HasColumnType("TIME(0)");
-
-                entity.HasOne(r => r.Sucursal).WithMany().HasForeignKey(r => r.CodSucursal).IsRequired(false);
+            builder.Entity<AdmRoute>(entity => {
+                entity.HasKey(r => r.BranchRouteCode);
+                entity.Property(r => r.BranchRouteCode).IsRequired();
+                entity.Property(r => r.Amount).HasColumnType("DECIMAL(18,0)");
+                entity.Property(r => r.MondayStartTime).HasColumnType("TIME(0)");
+                entity.Property(r => r.MondayEndTime).HasColumnType("TIME(0)");
+                entity.Property(r => r.TuesdayStartTime).HasColumnType("TIME(0)");
+                entity.Property(r => r.TuesdayEndTime).HasColumnType("TIME(0)");
+                entity.Property(r => r.WednesdayStartTime).HasColumnType("TIME(0)");
+                entity.Property(r => r.WednesdayEndTime).HasColumnType("TIME(0)");
+                entity.Property(r => r.ThursdayStartTime).HasColumnType("TIME(0)");
+                entity.Property(r => r.ThursdayEndTime).HasColumnType("TIME(0)");
+                entity.Property(r => r.FridayStartTime).HasColumnType("TIME(0)");
+                entity.Property(r => r.FridayEndTime).HasColumnType("TIME(0)");
+                entity.Property(r => r.SaturdayStartTime).HasColumnType("TIME(0)");
+                entity.Property(r => r.SaturdayEndTime).HasColumnType("TIME(0)");
+                entity.Property(r => r.SundayStartTime).HasColumnType("TIME(0)");
+                entity.Property(r => r.SundayEndTime).HasColumnType("TIME(0)");
+                entity.Property(r => r.HolidayStartTime).HasColumnType("TIME(0)");
+                entity.Property(r => r.HolidayEndTime).HasColumnType("TIME(0)");
+                entity.ToTable(t =>
+                {
+                    t.HasCheckConstraint("CK_RUTA_TipoRuta", "TipoRuta IN ('T','A','M','L')");
+                    t.HasCheckConstraint("CK_RUTA_TipoAtencion", "TipoAtencion IN ('AM','PM','AD')");
+                    t.HasCheckConstraint("CK_RUTA_TipoVehiculo", "TipoVehiculo IN ('B','M','C','T')");
+                });
+                entity.HasOne(r => r.Branch).WithMany().HasForeignKey(r => r.BranchId).IsRequired(false);
             });
 
             builder.Entity<SegRegistroEmpleado>(entity =>
@@ -658,7 +663,7 @@ namespace VCashApp.Data
                 entity.Property(e => e.FechaSalidaJT).HasColumnType("DATE");
                 entity.Property(e => e.HoraSalidaJT).HasColumnType("TIME(0)");
 
-                entity.HasOne(e => e.RutaMaster).WithMany().HasForeignKey(e => e.CodRutaSuc).HasPrincipalKey(r => r.CodRutaSuc).OnDelete(DeleteBehavior.Restrict);
+                entity.HasOne(e => e.RutaMaster).WithMany().HasForeignKey(e => e.CodRutaSuc).HasPrincipalKey(r => r.BranchRouteCode).OnDelete(DeleteBehavior.Restrict);
                 entity.HasOne(e => e.Sucursal).WithMany().HasForeignKey(e => e.CodSucursal).HasPrincipalKey(s => s.CodSucursal).OnDelete(DeleteBehavior.Restrict);
                 entity.HasOne(e => e.Vehiculo).WithMany().HasForeignKey(e => e.CodVehiculo).HasPrincipalKey(v => v.CodVehiculo).OnDelete(DeleteBehavior.Restrict);
                 entity.HasOne(e => e.JT).WithMany().HasForeignKey(e => e.CedulaJT).HasPrincipalKey(emp => emp.CodCedula).OnDelete(DeleteBehavior.Restrict);

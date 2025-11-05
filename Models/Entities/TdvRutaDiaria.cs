@@ -16,7 +16,7 @@ namespace VCashApp.Models.Entities
         // 🟩 Planeador de Ruta (P)
         public string CodRutaSuc { get; set; }
         [ForeignKey("CodRutaSuc")]
-        public virtual AdmRuta? RutaMaster { get; set; }
+        public virtual AdmRoute? RutaMaster { get; set; }
 
         public string NombreRuta { get; set; }
 

@@ -192,8 +192,36 @@
             throw new Error('La respuesta no es JSON válido');
         }
 
-        return await resp.json(); // esperamos ServiceResult JSON
+        return await resp.json();
     }
+
+    function clear($tr) {
+        $tr.querySelectorAll('.js-t').forEach(i => {
+            i.value = '';
+            i.classList.remove('is-invalid');
+        });
+    }
+
+    function toggleRow($tr) {
+        const checked = $tr.querySelector('.js-day-flag')?.checked;
+
+        if (!checked) {
+            clear($tr);
+        }
+
+        $tr.querySelectorAll('.js-t').forEach(i => {
+            i.disabled = !checked;
+        });
+    }
+
+    document.querySelectorAll('tr[data-day]').forEach(tr => toggleRow(tr));
+
+    form.addEventListener('change', (e) => {
+        const tr = e.target.closest('tr[data-day]');
+        if (tr && e.target.classList.contains('js-day-flag')) {
+            toggleRow(tr);
+        }
+    });
 
     // ====== flujo unificado submit ======
     form.addEventListener('submit', async (e) => {

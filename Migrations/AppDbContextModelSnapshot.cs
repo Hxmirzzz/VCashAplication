@@ -38,7 +38,7 @@ namespace VCashApp.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("DataProtectionKeys");
+                    b.ToTable("DataProtectionKeys", (string)null);
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
@@ -423,7 +423,7 @@ namespace VCashApp.Migrations
                         .HasDatabaseName("UX_AdmRangos_ScheduleKey")
                         .HasFilter("[RangeStatus] = 1");
 
-                    b.ToTable("AdmRangos");
+                    b.ToTable("AdmRangos", (string)null);
                 });
 
             modelBuilder.Entity("VCashApp.Models.ApplicationUser", b =>
@@ -514,7 +514,7 @@ namespace VCashApp.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("AdmEntidadesBancarias");
+                    b.ToTable("AdmEntidadesBancarias", (string)null);
                 });
 
             modelBuilder.Entity("VCashApp.Models.Entities.AdmCargo", b =>
@@ -553,7 +553,7 @@ namespace VCashApp.Migrations
 
                     b.HasIndex("CodUnidad");
 
-                    b.ToTable("AdmCargos");
+                    b.ToTable("AdmCargos", (string)null);
                 });
 
             modelBuilder.Entity("VCashApp.Models.Entities.AdmCiudad", b =>
@@ -584,7 +584,7 @@ namespace VCashApp.Migrations
 
                     b.HasIndex("CodSucursal");
 
-                    b.ToTable("AdmCiudades");
+                    b.ToTable("AdmCiudades", (string)null);
                 });
 
             modelBuilder.Entity("VCashApp.Models.Entities.AdmCliente", b =>
@@ -700,7 +700,7 @@ namespace VCashApp.Migrations
 
                     b.HasKey("CodConcepto");
 
-                    b.ToTable("AdmConceptos");
+                    b.ToTable("AdmConceptos", (string)null);
                 });
 
             modelBuilder.Entity("VCashApp.Models.Entities.AdmConsecutivo", b =>
@@ -725,7 +725,7 @@ namespace VCashApp.Migrations
 
                     b.HasKey("TipoConsecutivo");
 
-                    b.ToTable("AdmConsecutivos");
+                    b.ToTable("AdmConsecutivos", (string)null);
                 });
 
             modelBuilder.Entity("VCashApp.Models.Entities.AdmDenominacion", b =>
@@ -771,7 +771,7 @@ namespace VCashApp.Migrations
 
                     b.HasKey("CodDenominacion");
 
-                    b.ToTable("AdmDenominaciones");
+                    b.ToTable("AdmDenominaciones", (string)null);
                 });
 
             modelBuilder.Entity("VCashApp.Models.Entities.AdmDepartamento", b =>
@@ -792,7 +792,7 @@ namespace VCashApp.Migrations
 
                     b.HasIndex("CodPais");
 
-                    b.ToTable("AdmDepartamentos");
+                    b.ToTable("AdmDepartamentos", (string)null);
                 });
 
             modelBuilder.Entity("VCashApp.Models.Entities.AdmEmpleado", b =>
@@ -895,7 +895,7 @@ namespace VCashApp.Migrations
                     b.HasIndex("CodSucursal", "CodCargo", "EmpleadoEstado", "Genero")
                         .HasDatabaseName("IX_AdmEmpleados_Filters");
 
-                    b.ToTable("AdmEmpleados");
+                    b.ToTable("AdmEmpleados", (string)null);
                 });
 
             modelBuilder.Entity("VCashApp.Models.Entities.AdmFondo", b =>
@@ -979,7 +979,7 @@ namespace VCashApp.Migrations
 
                     b.HasKey("CodPais");
 
-                    b.ToTable("AdmPaises");
+                    b.ToTable("AdmPaises", (string)null);
                 });
 
             modelBuilder.Entity("VCashApp.Models.Entities.AdmPunto", b =>
@@ -1296,7 +1296,7 @@ namespace VCashApp.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("AdmCalidad");
+                    b.ToTable("AdmCalidad", (string)null);
                 });
 
             modelBuilder.Entity("VCashApp.Models.Entities.AdmRuta", b =>
@@ -1404,7 +1404,7 @@ namespace VCashApp.Migrations
 
                     b.HasIndex("CodSucursal");
 
-                    b.ToTable("AdmRutas");
+                    b.ToTable("AdmRutas", (string)null);
                 });
 
             modelBuilder.Entity("VCashApp.Models.Entities.AdmState", b =>
@@ -1421,7 +1421,7 @@ namespace VCashApp.Migrations
 
                     b.HasKey("StateCode");
 
-                    b.ToTable("AdmEstados");
+                    b.ToTable("AdmEstados", (string)null);
                 });
 
             modelBuilder.Entity("VCashApp.Models.Entities.AdmSucursal", b =>
@@ -1455,7 +1455,7 @@ namespace VCashApp.Migrations
 
                     b.HasKey("CodSucursal");
 
-                    b.ToTable("AdmSucursales");
+                    b.ToTable("AdmSucursales", (string)null);
                 });
 
             modelBuilder.Entity("VCashApp.Models.Entities.AdmUnidad", b =>
@@ -1471,7 +1471,7 @@ namespace VCashApp.Migrations
 
                     b.HasKey("CodUnidad");
 
-                    b.ToTable("AdmUnidades");
+                    b.ToTable("AdmUnidades", (string)null);
                 });
 
             modelBuilder.Entity("VCashApp.Models.Entities.AdmVehiculo", b =>
@@ -1553,7 +1553,7 @@ namespace VCashApp.Migrations
 
                     b.HasIndex("ConductorCedula");
 
-                    b.ToTable("AdmVehiculos");
+                    b.ToTable("AdmVehiculos", (string)null);
                 });
 
             modelBuilder.Entity("VCashApp.Models.Entities.AdmVista", b =>
@@ -1572,7 +1572,7 @@ namespace VCashApp.Migrations
 
                     b.HasKey("CodVista");
 
-                    b.ToTable("AdmVistas");
+                    b.ToTable("AdmVistas", (string)null);
                 });
 
             modelBuilder.Entity("VCashApp.Models.Entities.CefContainer", b =>
@@ -2380,7 +2380,7 @@ namespace VCashApp.Migrations
 
                     b.HasIndex("PerfilId");
 
-                    b.ToTable("PermisosPerfil");
+                    b.ToTable("PermisosPerfil", (string)null);
                 });
 
             modelBuilder.Entity("VCashApp.Models.Entities.SegRegistroEmpleado", b =>
@@ -2461,7 +2461,7 @@ namespace VCashApp.Migrations
 
                     b.HasIndex("RegistroUsuarioId");
 
-                    b.ToTable("SegRegistroEmpleados");
+                    b.ToTable("SegRegistroEmpleados", (string)null);
                 });
 
             modelBuilder.Entity("VCashApp.Models.Entities.TdvRutaDiaria", b =>
@@ -2639,7 +2639,7 @@ namespace VCashApp.Migrations
 
                     b.HasIndex("UsuarioSupervisorCierre");
 
-                    b.ToTable("TdvRutasDiarias");
+                    b.ToTable("TdvRutasDiarias", (string)null);
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>

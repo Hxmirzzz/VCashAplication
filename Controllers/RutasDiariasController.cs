@@ -1017,11 +1017,11 @@ namespace VCashApp.Controllers
                     ModelState.AddModelError("FechaEjecucion", "La fecha de ejecución no puede ser una fecha pasada.");
                 }
 
-                AdmRuta rutaMaster = null;
+                AdmRoute rutaMaster = null;
                 if (!string.IsNullOrEmpty(dto.CodRutaSuc))
                 {
                     rutaMaster = await _context.AdmRutas
-                                               .Where(rm => rm.CodRutaSuc == dto.CodRutaSuc && rm.EstadoRuta == true)
+                                               .Where(rm => rm.BranchRouteCode == dto.CodRutaSuc && rm.Status == true)
                                                .FirstOrDefaultAsync();
                     if (rutaMaster == null)
                     {
@@ -1085,9 +1085,9 @@ namespace VCashApp.Controllers
                     CodRutaSuc = dto.CodRutaSuc,
                     FechaEjecucion = dto.FechaEjecucion,
                     CodSucursal = dto.CodSucursal,
-                    NombreRuta = rutaMaster.NombreRuta,
-                    TipoRuta = rutaMaster.TipoRuta,
-                    TipoVehiculo = rutaMaster.TipoVehiculo,
+                    NombreRuta = rutaMaster.RouteName,
+                    TipoRuta = rutaMaster.RouteType,
+                    TipoVehiculo = rutaMaster.VehicleType,
                     NombreSucursal = sucursal.NombreSucursal,
                     FechaPlaneacion = DateOnly.FromDateTime(DateTime.Now),
                     HoraPlaneacion = TimeOnly.FromDateTime(DateTime.Now),
@@ -2659,11 +2659,11 @@ namespace VCashApp.Controllers
             }
 
             var rutasMaestrasQuery = _context.AdmRutas
-                                              .Where(rm => rm.EstadoRuta == true && rm.CodSucursal == codSuc.Value);
+                                              .Where(rm => rm.Status == true && rm.BranchId == codSuc.Value);
 
             var rutasMaestras = await rutasMaestrasQuery
-                                                .OrderBy(rm => rm.NombreRuta)
-                                                .Select(rm => new { value = rm.CodRutaSuc, text = $"{rm.CodRuta} - {rm.NombreRuta}" })
+                                                .OrderBy(rm => rm.RouteName)
+                                                .Select(rm => new { value = rm.BranchRouteCode, text = $"{rm.RouteCode} - {rm.RouteName}" })
                                                 .ToListAsync();
 
             return Json(rutasMaestras);
@@ -2682,12 +2682,12 @@ namespace VCashApp.Controllers
             }
 
             var rutaMaster = await _context.AdmRutas
-                                           .Where(rm => rm.CodRutaSuc == codRutaSuc && rm.EstadoRuta == true)
+                                           .Where(rm => rm.BranchRouteCode == codRutaSuc && rm.Status == true)
                                            .Select(rm => new
                                            {
-                                               nombreRuta = rm.NombreRuta,
-                                               rutaTipo = rm.TipoRuta,
-                                               rutaTipoVeh = rm.TipoVehiculo
+                                               nombreRuta = rm.RouteName,
+                                               rutaTipo = rm.RouteType,
+                                               rutaTipoVeh = rm.VehicleType
                                            })
                                            .FirstOrDefaultAsync();
 

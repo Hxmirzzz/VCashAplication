@@ -1,0 +1,132 @@
+﻿@model VCashApp.Models.DTOs.RouteUpsertDto
+@using Microsoft.AspNetCore.Mvc.Rendering
+
+@{
+    ViewData["Title"] = "Crear Ruta";
+    Layout = "_Layout";
+
+    var branchOptions = ViewBag.AvailableBranches as List<SelectListItem> ?? new();
+    var routeTypeOptions = ViewBag.RouteTypeOptions as List<SelectListItem> ?? new();
+    var serviceTypeOptions = ViewBag.ServiceTypeOptions as List<SelectListItem> ?? new();
+    var vehicleTypeOptions = ViewBag.VehicleTypeOptions as List<SelectListItem> ?? new();
+
+    var postAction = Url.Action("Save", "Route");
+}
+
+<div class="form-container">
+    <div class="card-body">
+        <form id="route-create-form" action="@postAction" method="post">
+            @Html.AntiForgeryToken()
+
+            <input type="hidden" name="IsEdit" value="false" />
+
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="ri-information-fill"></i> Información</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-12 col-lg-3">
+                            <div class="form-floating">
+                                <input id="BranchRouteCodePreview" class="form-control" placeholder="Código" readonly />
+                                <label for="BranchRouteCodePreview">Código (auto)</label>
+                            </div>
+                            <input type="hidden" asp-for="BranchRouteCode" />
+                        </div>
+
+                        <div class="col-12 col-lg-3">
+                            <div class="form-floating has-validation">
+                                <input asp-for="RouteCode" class="form-control" placeholder="Código Ruta" />
+                                <label asp-for="RouteCode">Código Ruta</label>
+                                <span asp-validation-for="RouteCode" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="col-12 col-lg-4">
+                            <div class="form-floating has-validation">
+                                <input asp-for="RouteName" class="form-control" placeholder="Nombre de la Ruta" />
+                                <label asp-for="RouteName">Nombre</label>
+                                <span asp-validation-for="RouteName" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="col-12 col-lg-2">
+                            <div class="form-floating">
+                                <select asp-for="BranchId" class="form-select" asp-items="branchOptions">
+                                </select>
+                                <label asp-for="BranchId">Sucursal</label>
+                                <span asp-validation-for="BranchId" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="col-12 col-lg-2">
+                            <div class="form-floating">
+                                <select asp-for="RouteType" class="form-select" asp-items="routeTypeOptions"></select>
+                                <label asp-for="RouteType">Tipo de Ruta</label>
+                                <span asp-validation-for="RouteType" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="col-12 col-lg-2">
+                            <div class="form-floating">
+                                <select asp-for="ServiceType" class="form-select" asp-items="serviceTypeOptions"></select>
+                                <label asp-for="ServiceType">Jornada</label>
+                                <span asp-validation-for="ServiceType" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="col-12 col-lg-2">
+                            <div class="form-floating">
+                                <select asp-for="VehicleType" class="form-select" asp-items="vehicleTypeOptions"></select>
+                                <label asp-for="VehicleType">Vehículo</label>
+                                <span asp-validation-for="VehicleType" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="col-12 col-lg-3">
+                            <div class="form-floating has-validation">
+                                <input asp-for="Amount" type="number" class="form-control" placeholder="Monto" />
+                                <label asp-for="Amount">Monto</label>
+                                <span asp-validation-for="Amount" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="col-12 col-lg-3">
+                            <div class="form-floating">
+                                <select id="routeStatusSelect" class="form-select">
+                                    <option value="true" selected>Activo</option>
+                                    <option value="false">Inactivo</option>
+                                </select>
+                                <label>Estado</label>
+                            </div>
+                            <input type="hidden" asp-for="IsActive" value="true" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== Card: Horarios por día ===== -->
+            <div class="card mt-3">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="ri-timer-fill"></i> Horarios por día</h5>
+                </div>
+                <div class="card-body">
+                    @Html.Partial("~/Views/Route/_RouteScheduleTablePartial.cshtml", Model)
+                </div>
+            </div>
+
+            <div class="submit-container-spacer"></div>
+            <div class="submit-container form-group col-12 mt-4 fixed">
+                <button type="submit" class="btn btn-primary">Guardar</button>
+                <a asp-action="Index" asp-controller="Route" class="btn btn-danger">Cancelar</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    <script src="~/js/form-control/route-form-handler.js"></script>
+}

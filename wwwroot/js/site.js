@@ -178,17 +178,115 @@ document.addEventListener('DOMContentLoaded', () => {
     // Function to hide the sidebar if a click occurs outside of it or the filter button
     document.addEventListener('click', function (event) {
         if (filterSidebar && filterButton) {
-            // If the click was NOT inside the sidebar AND NOT on the filter button
             if (!filterSidebar.contains(event.target) && !filterButton.contains(event.target)) {
                 filterSidebar.classList.remove('show');
             }
         }
     });
 
-    // Optional: Prevent clicks inside the sidebar (that are not action buttons) from closing it
     if (filterSidebar) {
         filterSidebar.addEventListener('click', function (event) {
             event.stopPropagation();
         });
     }
 });
+
+(function () {
+    // --- util: obtiene hidden asociado ---
+    function findHidden(cb) {
+        const form = cb.closest('form');
+        if (!form) return null;
+        const sel = cb.getAttribute('data-hidden') || 'input[name="isActive"]';
+        return form.querySelector(sel);
+    }
+
+    // --- util: valor que se enviará según estado ---
+    function getValue(cb, checked) {
+        const onVal = cb.getAttribute('data-on');
+        const offVal = cb.getAttribute('data-off');
+        if (checked) return onVal != null ? onVal : 'true';
+        return offVal != null ? offVal : 'false';
+    }
+
+    // --- util: mensaje a mostrar ---
+    function getMessage(cb, checked) {
+        const msgOn = cb.getAttribute('data-msg-on') || '¿Confirmas ACTIVAR este registro?';
+        const msgOff = cb.getAttribute('data-msg-off') || '¿Confirmas DESACTIVAR este registro?';
+        return checked ? msgOn : msgOff;
+    }
+
+    // --- util: envío (ajax opcional) ---
+    async function submitForm(form, useAjax) {
+        if (!useAjax) { form.submit(); return; }
+
+        const action = form.getAttribute('action') || window.location.href;
+        const method = (form.getAttribute('method') || 'POST').toUpperCase();
+        const fd = new FormData(form);
+
+        const anti = form.querySelector('input[name="__RequestVerificationToken"]');
+        const headers = {};
+        if (anti) headers['RequestVerificationToken'] = anti.value;
+
+        try {
+            const resp = await fetch(action, { method, body: fd, headers });
+            let data = null;
+            try { data = await resp.json(); } catch { }
+
+            if (window.Swal) {
+                if (data && (data.ok || data.success)) {
+                    await Swal.fire({ icon: 'success', title: 'Listo', text: (data.message || 'Actualizado.'), timer: 1500, showConfirmButton: false });
+                } else if (data && (data.ok === false || data.success === false)) {
+                    await Swal.fire({ icon: 'error', title: 'Error', text: (data.message || 'No se pudo actualizar.') });
+                } else {
+                    await Swal.fire({ icon: 'success', title: 'Listo', text: 'Actualizado.', timer: 1200, showConfirmButton: false });
+                }
+            }
+        } catch (e) {
+            if (window.Swal) {
+                await Swal.fire({ icon: 'error', title: 'Error', text: 'No se pudo completar la operación.' });
+            }
+            // location.reload();
+        }
+    }
+
+    document.addEventListener('change', async function (e) {
+        const cb = e.target.closest('.status-toggle');
+        if (!cb) return;
+
+        const form = cb.closest('.toggle-status-form');
+        if (!form) return;
+
+        const hidden = findHidden(cb);
+        if (!hidden) { cb.checked = !cb.checked; return; }
+
+        const willBeActive = cb.checked;
+        const msg = getMessage(cb, willBeActive);
+
+        hidden.value = getValue(cb, willBeActive);
+
+        let confirmed = true;
+        if (window.Swal) {
+            const result = await Swal.fire({
+                icon: 'question',
+                title: 'Confirmar',
+                text: msg,
+                showCancelButton: true,
+                confirmButtonText: 'Sí, confirmar',
+                cancelButtonText: 'Cancelar',
+                reverseButtons: true,
+                focusCancel: true
+            });
+            confirmed = result.isConfirmed === true;
+        } else {
+            confirmed = window.confirm(msg);
+        }
+
+        if (confirmed) {
+            const useAjax = true;
+            await submitForm(form, useAjax);
+        } else {
+            cb.checked = !cb.checked;
+            hidden.value = getValue(cb, cb.checked);
+        }
+    }, false);
+})();

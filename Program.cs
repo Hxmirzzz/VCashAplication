@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.OpenApi.Models;
 using Serilog;
 using Serilog.Events;
@@ -16,23 +17,26 @@ using VCashApp.Infrastructure.Middleware;
 using VCashApp.Models;
 using VCashApp.Services;
 using VCashApp.Services.Cef;
-using VCashApp.Services.Employee.Application;
-using VCashApp.Services.Employee.Infrastructure;
-using VCashApp.Services.Employee.Domain;
 using VCashApp.Services.CentroEfectivo.Collection.Application;
 using VCashApp.Services.CentroEfectivo.Collection.Domain;
 using VCashApp.Services.CentroEfectivo.Provision.Application;
 using VCashApp.Services.CentroEfectivo.Provision.Domain;
 using VCashApp.Services.CentroEfectivo.Shared.Domain;
 using VCashApp.Services.CentroEfectivo.Shared.Infrastructure;
+using VCashApp.Services.Employee.Application;
+using VCashApp.Services.Employee.Domain;
+using VCashApp.Services.Employee.Infrastructure;
 using VCashApp.Services.EmployeeLog.Application;
 using VCashApp.Services.EmployeeLog.Integration;
 using VCashApp.Services.EmployeeLog.Queries;
-using VCashApp.Services.Range;
 using VCashApp.Services.GestionServicio.Application;
 using VCashApp.Services.GestionServicio.Domain;
 using VCashApp.Services.GestionServicio.Infrastructure;
 using VCashApp.Services.Logging;
+using VCashApp.Services.Range;
+using VCashApp.Services.Routes;
+using VCashApp.Services.Routes.Infrastucture;
+using VCashApp.Services.Routes.Application;
 
 var builder = WebApplication.CreateBuilder(args);
 Log.Logger = new LoggerConfiguration()
@@ -262,6 +266,15 @@ builder.Services.AddScoped<IDailyRouteUpdater, DailyRouteUpdater>();
 builder.Services.AddScoped<IEmployeeLogLookupsService, EmployeeLogLookupsService>();
 
 // ======================================================================
+// ROUTE
+// ======================================================================
+builder.Services.AddAutoMapper(cfg => {
+    cfg.AddProfile<RoutesProfile>();
+});
+builder.Services.AddScoped<IRouteService, RouteService>();
+builder.Services.AddScoped<IRouteQueries, RouteQueries>();
+
+// ======================================================================
 // Export/Rutas/Incidentes (otros servicios CEF existentes)
 // ======================================================================
 builder.Services.AddScoped<IRutaDiariaService, RutaDiariaService>();
@@ -270,6 +283,7 @@ builder.Services.AddScoped<ICefTransactionService, CefTransactionService>();
 builder.Services.AddScoped<ICefContainerService, CefContainerService>();
 builder.Services.AddScoped<ICefIncidentService, CefIncidentService>();
 builder.Services.AddScoped<ICefServiceCreationService, CefServiceCreationService>();
+builder.Services.AddScoped<IRangeService, RangeService>();
 
 // ======================================================================
 // Swagger

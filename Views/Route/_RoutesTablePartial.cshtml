@@ -1,0 +1,127 @@
+﻿@model IEnumerable<VCashApp.Models.DTOs.RouteListDto>
+@using VCashApp.Enums
+@{
+    int currentPage = ViewBag.CurrentPage ?? 1;
+    int totalData = ViewBag.TotalCount ?? 0;
+    int pageSize = ViewBag.PageSize ?? 15;
+
+    int totalPages = Math.Max(1, (int)Math.Ceiling((double)totalData / Math.Max(1, pageSize)));
+
+    const int maxPagesToShow = 5;
+    int halfPagesToShow = (maxPagesToShow - 1) / 2;
+    int startPage = Math.Max(1, currentPage - halfPagesToShow);
+    int endPage = Math.Min(totalPages, currentPage + halfPagesToShow);
+
+    if (endPage - startPage + 1 < maxPagesToShow)
+    {
+        if (startPage == 1) endPage = Math.Min(totalPages, startPage + maxPagesToShow - 1);
+        else if (endPage == totalPages) startPage = Math.Max(1, endPage - maxPagesToShow + 1);
+    }
+
+    bool canEdit = ViewBag.HasEdit ?? false;
+
+    string LabelRT(string? c) => RouteCatalogs.RouteTypeCode.ToLabel(c);
+    string LabelST(string? c) => RouteCatalogs.ServiceTypeCode.ToLabel(c);
+    string LabelVT(string? c) => RouteCatalogs.VehicleTypeCode.ToLabel(c);
+}
+
+<div class="table-section">
+    <div class="table-container">
+        <div class="table-wrapper">
+            <table class="table" id="dataTable">
+                <thead>
+                    <tr>
+                        <th>Código</th>
+                        <th>Código Ruta</th>
+                        <th>Nombre</th>
+                        <th>Sucursal</th>
+                        <th>Tipo Ruta</th>
+                        <th>Jornada</th>
+                        <th>Vehículo</th>
+                        <th>Monto</th>
+                        <th><i class="ri-list-settings-fill"></i></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model != null && Model.Any())
+                    {
+                        foreach (var r in Model)
+                        {
+                            <tr>
+                                <td>@r.BranchRouteCode</td>
+                                <td>@(r.RouteCode ?? "-")</td>
+                                <td>@(r.RouteName ?? "-")</td>
+                                <td>@(r.BranchName ?? "-")</td>
+                                <td>@LabelRT(r.RouteType)</td>
+                                <td>@LabelST(r.ServiceType)</td>
+                                <td>@LabelVT(r.VehicleType)</td>
+                                <td>@(r.Amount.HasValue? r.Amount.Value.ToString("N0") : "0")</td>
+                                <td>
+                                    <div class="action-buttons d-flex align-items-center justify-content-center">
+                                        <a asp-action="Edit" asp-controller="Route" asp-route-id="@r.BranchRouteCode" class="btn-edit" title="Editar">
+                                            <i class="ri-pencil-fill"></i>
+                                        </a>
+
+                                        @if (canEdit)
+                                        {
+                                            <form class="toggle-status-form d-inline"
+                                                  method="post"
+                                                  asp-action="ToggleStatus"
+                                                  asp-controller="Route"
+                                                  asp-route-id="@r.BranchRouteCode"
+                                                  data-submit="ajax">
+                                                @Html.AntiForgeryToken()
+                                                <input type="hidden" name="isActive" value="@(r.IsActive ? "true" : "false")" class="hidden-is-active" />
+                                                <label class="switch" title="@(r.IsActive ? "Desactivar" : "Activar")">
+                                                    <input type="checkbox"
+                                                           class="status-toggle"
+                                                           @(r.IsActive ? "checked" : null)
+                                                           data-msg-on="¿Confirmas ACTIVAR esta ruta?"
+                                                           data-msg-off="¿Confirmas DESACTIVAR esta ruta?" />
+                                                    <span class="slider round"></span>
+                                                </label>
+                                            </form>
+                                        }
+                                    </div>
+                                </td>
+
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="10" class="text-center">No se encontraron rutas.</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="table-footer">
+        <div class="page-message">Página @currentPage de @totalPages (Total: @totalData registros)</div>
+        <div class="pagination">
+            <button class="page-link" data-page="1" @(currentPage == 1 ? "disabled" : "")>&laquo;</button>
+            <button class="page-link" data-page="@(currentPage - 1)" @(currentPage == 1 ? "disabled" : "")>&lt;</button>
+
+            @if (startPage > 1)
+            {
+                <button class="page-link" data-page="@(startPage - 1)">...</button>
+            }
+
+            @for (int i = startPage; i <= endPage; i++)
+            {
+                <button class="page-link @(currentPage == i ? "active-page" : "")" data-page="@i">@i</button>
+            }
+
+            @if (endPage < totalPages)
+            {
+                <button class="page-link" data-page="@(endPage + 1)">...</button>
+            }
+
+            <button class="page-link" data-page="@(currentPage + 1)" @(currentPage == totalPages ? "disabled" : "")>&gt;</button>
+            <button class="page-link" data-page="@totalPages" @(currentPage == totalPages ? "disabled" : "")>&raquo;</button>
+        </div>
+    </div>
+</div>

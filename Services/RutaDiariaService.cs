@@ -163,7 +163,7 @@ namespace VCashApp.Services
             TimeOnly horaActual = TimeOnly.FromDateTime(DateTime.Now);
 
             var rutasMaestras = await _context.AdmRutas
-                                                .Where(rm => rm.CodSucursal == codSucursal && rm.EstadoRuta == true)
+                                                .Where(rm => rm.BranchId == codSucursal && rm.Status == true)
                                                 .ToListAsync();
 
             if (!rutasMaestras.Any())
@@ -174,18 +174,16 @@ namespace VCashApp.Services
 
             var existingRutasDiariasForBranchAndDate = await _context.TdvRutasDiarias
                 .Where(r => r.CodSucursal == codSucursal && r.FechaEjecucion == fechaEjecucion)
-                .Select(r => r.CodRutaSuc) // Solo necesitamos el CodRutaSuc para comparar
+                .Select(r => r.CodRutaSuc)
                 .ToListAsync();
 
             foreach (var rutaMaster in rutasMaestras)
             {
-                // **Lógica de unicidad interna:**
-                // Solo genera la ruta diaria si NO existe ya una para esta ruta maestra, sucursal y fecha.
-                if (existingRutasDiariasForBranchAndDate.Contains(rutaMaster.CodRutaSuc))
+                if (existingRutasDiariasForBranchAndDate.Contains(rutaMaster.BranchRouteCode))
                 {
-                    Log.Information("Ruta diaria para RutaMaestra {CodRutaMaster} en Sucursal {CodSucursal} para Fecha {Fecha} ya existe. Omitiendo.", rutaMaster.CodRutaSuc, codSucursal, fechaEjecucion);
+                    Log.Information("Ruta diaria para RutaMaestra {CodRutaMaster} en Sucursal {CodSucursal} para Fecha {Fecha} ya existe. Omitiendo.", rutaMaster.BranchRouteCode, codSucursal, fechaEjecucion);
                     rutasOmitidas++;
-                    continue; // Pasa a la siguiente ruta maestra
+                    continue;
                 }
 
                 var resultList = await _context.Database
@@ -196,7 +194,7 @@ namespace VCashApp.Services
 
                 if (string.IsNullOrEmpty(nuevoId))
                 {
-                    Log.Error("Error al generar un nuevo ID para la ruta diaria desde el SP. No se pudo crear la ruta para RutaMaestra.CodRuta={CodRutaMaster} en sucursal {CodSucursal}.", rutaMaster.CodRuta, codSucursal);
+                    Log.Error("Error al generar un nuevo ID para la ruta diaria desde el SP. No se pudo crear la ruta para RutaMaestra.CodRuta={CodRutaMaster} en sucursal {CodSucursal}.", rutaMaster.RouteCode, codSucursal);
                     // Decidir si omitir o lanzar excepción. Para generación masiva, omitir y loguear es mejor.
                     rutasOmitidas++; // Considerar como omitida porque no se pudo crear
                     continue;
@@ -207,15 +205,15 @@ namespace VCashApp.Services
                     Id = nuevoId,
                     CodSucursal = codSucursal,
                     NombreSucursal = (await _context.AdmSucursales.FirstOrDefaultAsync(s => s.CodSucursal == codSucursal))?.NombreSucursal ?? "Desconocida",
-                    CodRutaSuc = rutaMaster.CodRutaSuc,
-                    NombreRuta = rutaMaster.NombreRuta,
+                    CodRutaSuc = rutaMaster.BranchRouteCode,
+                    NombreRuta = rutaMaster.RouteName,
                     FechaPlaneacion = fechaActual,
                     HoraPlaneacion = horaActual,
                     FechaEjecucion = fechaEjecucion,
                     UsuarioPlaneacion = usuarioPlaneacionId,
                     Estado = (int)EstadoRuta.GENERADO,
-                    TipoRuta = rutaMaster.TipoRuta,
-                    TipoVehiculo = rutaMaster.TipoVehiculo,
+                    TipoRuta = rutaMaster.RouteType,
+                    TipoVehiculo = rutaMaster.VehicleType,
                     CodVehiculo = null,
                     CedulaJT = null,
                     NombreJT = null,

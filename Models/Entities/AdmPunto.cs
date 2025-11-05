@@ -125,7 +125,7 @@ namespace VCashApp.Models.Entities
         [StringLength(450)]
         [ForeignKey("RouteBranchCode")]
         public string? RouteBranchCode { get; set; }
-        public virtual AdmRuta? Route { get; set; }
+        public virtual AdmRoute? Route { get; set; }
 
         [Column("TipoNegocio")]
         public int? BusinessType { get; set; }

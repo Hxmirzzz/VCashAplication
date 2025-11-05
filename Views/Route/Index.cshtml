@@ -1,0 +1,271 @@
+﻿@model IEnumerable<VCashApp.Models.DTOs.RouteListDto>
+@using Microsoft.AspNetCore.Mvc.Rendering
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = "Rutas";
+
+    string currentSearchTerm = (ViewBag.Filter?.Search as string) ?? "";
+    int currentPage = ViewBag.CurrentPage ?? 1;
+    int pageSize = ViewBag.PageSize ?? 15;
+
+    bool canCreate = ViewBag.HasCreate ?? false;
+    bool canView   = ViewBag.HasView   ?? true;
+    bool canEdit   = ViewBag.HasEdit   ?? false;
+
+    var branchOptions      = ViewBag.AvailableBranches as List<SelectListItem> ?? new();
+    var routeTypeOptions   = ViewBag.RouteTypeOptions   as List<SelectListItem> ?? new();
+    var serviceTypeOptions = ViewBag.ServiceTypeOptions as List<SelectListItem> ?? new();
+    var vehicleTypeOptions = ViewBag.VehicleTypeOptions as List<SelectListItem> ?? new();
+
+    int? filterBranchId     = ViewBag.Filter?.BranchId as int?;
+    string? filterRouteType = ViewBag.Filter?.RouteType as string;
+    string? filterService   = ViewBag.Filter?.ServiceType as string;
+    string? filterVehicle   = ViewBag.Filter?.VehicleType as string;
+    int? filterIsActive     = ViewBag.Filter?.IsActive as int?;
+}
+
+<div class="section-header">
+    <div class="alert-container">
+        @if (TempData["SuccessMessage"] != null)
+        {
+            <div class="alert alert-success mt-2" role="alert">@TempData["SuccessMessage"]</div>
+        }
+        @if (TempData["ErrorMessage"] != null)
+        {
+            <div class="alert alert-danger mt-2" role="alert">@TempData["ErrorMessage"]</div>
+        }
+    </div>
+</div>
+
+<div class="search-container">
+    <div class="table-controls">
+        <input type="text" id="tableSearch" class="form-control form-control-sm" placeholder="Buscar por Código o Nombre de Ruta..." value="@currentSearchTerm">
+
+        <div class="table-buttons">
+            <div class="control-button-wrapper">
+                @if (canCreate)
+                {
+                    <a href="@Url.Action("Create", "Route")" class="control-button-icon" id="addRouteButton" title="Crear Ruta">
+                        <img src="/assets/icon-img/add.png" alt="Crear Ruta">
+                    </a>
+                }
+            </div>
+            <div class="control-button-wrapper">
+                <img src="/assets/icon-img/download.png" alt="Descargar" class="control-button-icon" id="downloadButton" title="Exportar">
+            </div>
+            <div class="control-button-wrapper">
+                <img src="/assets/icon-img/filter-on.png" alt="Filtros" class="control-button-icon" id="filterButton" title="Filtros">
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="filter-sidebar" id="filterSidebar">
+    <div class="filter-sidebar-content">
+        <h3>Filtros Avanzados</h3>
+
+        <div class="form-group">
+            <label for="filterBranchId">Sucursal:</label>
+            <select id="filterBranchId" name="BranchId" class="form-control form-control-sm">
+                @foreach (var opt in branchOptions)
+                {
+                    <option value="@opt.Value" selected="@(opt.Selected ? "selected" : null)">@opt.Text</option>
+                }
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="filterRouteType">Tipo de Ruta:</label>
+            <select id="filterRouteType" name="RouteType" class="form-control form-control-sm">
+                @foreach (var opt in routeTypeOptions)
+                {
+                    <option value="@opt.Value" selected="@(opt.Selected ? "selected" : null)">@opt.Text</option>
+                }
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="filterServiceType">Jornada:</label>
+            <select id="filterServiceType" name="ServiceType" class="form-control form-control-sm">
+                @foreach (var opt in serviceTypeOptions)
+                {
+                    <option value="@opt.Value" selected="@(opt.Selected ? "selected" : null)">@opt.Text</option>
+                }
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="filterVehicleType">Vehículo:</label>
+            <select id="filterVehicleType" name="VehicleType" class="form-control form-control-sm">
+                @foreach (var opt in vehicleTypeOptions)
+                {
+                    <option value="@opt.Value" selected="@(opt.Selected ? "selected" : null)">@opt.Text</option>
+                }
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="filterIsActive">Estado:</label>
+            <select id="filterIsActive" name="IsActive" class="form-control form-control-sm">
+                <option value="">-- Todos --</option>
+
+                @if (filterIsActive == 1)
+                {
+                    <option value="1" selected="selected">ACTIVO</option>
+                }
+                else
+                {
+                    <option value="1">ACTIVO</option>
+                }
+
+                @if (filterIsActive == 0)
+                {
+                    <option value="0" selected="selected">INACTIVO</option>
+                }
+                else
+                {
+                    <option value="0">INACTIVO</option>
+                }
+            </select>
+        </div>
+
+        <div class="filter-buttons">
+            <div class="cancel-filter-btn" id="clearFilters">
+                <img src="~/assets/icon-img/filter-off.png" alt="Limpiar Filtros" title="Limpiar Filtros" />
+            </div>
+        </div>
+    </div>
+</div>
+
+<input type="hidden" id="currentPage" value="@currentPage" />
+<input type="hidden" id="pageSize" value="@pageSize" />
+
+<div id="dataTablePartial">
+    @Html.Partial("~/Views/Route/_RoutesTablePartial.cshtml", Model)
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    <script>
+        $(document).ready(function () {
+            setupTablePaginationAndFilters({
+                tableContainerId: 'dataTablePartial',
+                controllerName: 'Route',
+                actionName: 'Index',
+                searchInputId: 'tableSearch',
+                filterInputsSelector: '#filterBranchId, #filterRouteType, #filterServiceType, #filterVehicleType, #filterIsActive',
+                clearFiltersButtonId: 'clearFilters',
+                defaultPageSize: @pageSize
+            });
+
+            $('#downloadButton').on('click', function () {
+                showConfirmationModal(
+                    "Seleccione el formato de exportación deseado:",
+                    async function (format) {
+                        if (!format) {
+                            Swal.fire({
+                                icon: 'warning',
+                                title: 'Sin selección',
+                                text: 'No se seleccionó un formato de exportación.',
+                                confirmButtonText: 'Entendido'
+                            });
+                            return;
+                        }
+
+                        AppLoading.show('Preparando archivo...', 'Esto puede tardar unos segundos.');
+
+                        try {
+                            const params = new URLSearchParams({
+                                exportFormat: format,
+                                search: $("#tableSearch").val() || '',
+                                branchId: $("#filterBranchId").val() || '',
+                                routeType: $("#filterRouteType").val() || '',
+                                serviceType: $("#filterServiceType").val() || '',
+                                vehicleType: $("#filterVehicleType").val() || '',
+                                isActive: $("#filterIsActive").val() || ''
+                            });
+
+                            const response = await fetch(`@Url.Action("Export", "Route")?${params.toString()}`, {
+                                method: 'GET',
+                                headers: {
+                                    'X-Requested-With': 'XMLHttpRequest'
+                                }
+                            });
+
+                            if (!response.ok) {
+                                const contentType = response.headers.get('content-type');
+                                let errorMessage = 'Ocurrió un error al exportar los datos.';
+
+                                if (contentType && contentType.includes('application/json')) {
+                                    const errorData = await response.json();
+                                    errorMessage = errorData.message || errorData || errorMessage;
+                                } else {
+                                    errorMessage = await response.text();
+                                }
+
+                                throw new Error(errorMessage);
+                            }
+
+                            const contentType = response.headers.get('content-type');
+
+                            if (contentType && contentType.includes('application/json')) {
+                                const data = await response.json();
+                                throw new Error(data.message || 'Error desconocido al exportar.');
+                            }
+
+                            const blob = await response.blob();
+
+                            const disposition = response.headers.get('Content-Disposition');
+                            let filename = 'RUTAS.' + format.toLowerCase();
+
+                            if (disposition && disposition.includes('filename=')) {
+                                const matches = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/.exec(disposition);
+                                if (matches != null && matches[1]) {
+                                    filename = matches[1].replace(/['"]/g, '');
+                                }
+                            }
+
+                            const url = window.URL.createObjectURL(blob);
+                            const a = document.createElement('a');
+                            a.style.display = 'none';
+                            a.href = url;
+                            a.download = filename;
+                            document.body.appendChild(a);
+                            a.click();
+
+                            window.URL.revokeObjectURL(url);
+                            document.body.removeChild(a);
+
+                            AppLoading.hide();
+
+                            Swal.fire({
+                                icon: 'success',
+                                title: '¡Descarga exitosa!',
+                                text: `El archivo se ha descargado correctamente.`,
+                                timer: 3000,
+                                showConfirmButton: false
+                            });
+
+                        } catch (error) {
+                            AppLoading.hide();
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Error en la exportación',
+                                text: error.message || 'No se pudo completar la exportación.',
+                                confirmButtonText: 'Entendido'
+                            });
+
+                            console.error('Error al exportar:', error);
+                        }
+                    },
+                    "Exportar Datos",
+                    null,
+                    "btn-primary",
+                    true
+                );
+            });
+        });
+    </script>
+}

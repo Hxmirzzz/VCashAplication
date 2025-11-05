@@ -260,9 +260,8 @@ namespace VCashApp.Controllers
             {
                 locations = await _service.GetPointsByClientAndBranchAsync(clientId, branchId, pointType);
             }
-            else if (locationType == "F") // Si el tipo de ubicación es Fondo
+            else if (locationType == "F")
             {
-                // Lógica para determinar el tipo de fondo a buscar (0=punto, 1=ATM)
                 var fundType = (conceptCode == "3" || conceptCode == "4") ? 1 : 0;
                 locations = await _service.GetFundsByClientAndBranchAsync(clientId, branchId, fundType);
             }
