@@ -1,20 +1,14 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using VCashApp.Data;
-using VCashApp.Enums;
 using VCashApp.Filters;
 using VCashApp.Models;
+using VCashApp.Models.DTOs.Range;
 using VCashApp.Models.ViewModels.Range;
 using VCashApp.Services.DTOs;
-using VCashApp.Services;
-using VCashApp.Services.Range;
+using VCashApp.Services.Range.Application;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace VCashApp.Controllers
 {
@@ -26,244 +20,156 @@ namespace VCashApp.Controllers
     [Route("/Range")]
     public class RangeController : BaseController
     {
-        private readonly IRangeService _rangeService;
-        private readonly ILogger<RangeController> _logger;
+        private readonly IRangeService _svc;
+        private readonly IRangeQueries _queries;
+        private readonly UserManager<ApplicationUser> _um;
         private const string CodVista = "RANGE";
 
         public RangeController(
-            IRangeService rangeService,
+            IRangeService svc,
+            IRangeQueries queries,
             AppDbContext context,
-            UserManager<ApplicationUser> userManager,
-            ILogger<RangeController> logger)
-            : base(context, userManager)
+            UserManager<ApplicationUser> um
+        ) : base(context, um)
         {
-            _rangeService = rangeService;
-            _logger = logger;
+            _svc = svc;
+            _queries = queries;
+            _um = um;
         }
 
         /// <summary>
         /// Setea los ViewBags comunes para la UI de rangos (drop-downs, permisos, datos de cabecera).
         /// </summary>
-        private async Task SetCommonViewBagsRangesAsync(ApplicationUser currentUser, string pageName)
+        private async Task SetCommonViewBagsAsync(ApplicationUser currentUser, string pageName)
         {
             await base.SetCommonViewBagsBaseAsync(currentUser, pageName);
 
-            ViewBag.AvailableClients = await _rangeService.GetClientsForDropdownAsync();
+            ViewBag.AvailableClients = await _queries.GetClientsForDropdownAsync();
 
             var userRoles = await _userManager.GetRolesAsync(currentUser);
-            ViewBag.HasCreatePermission = await HasPermisionForView(userRoles, CodVista, PermissionType.Create);
-            ViewBag.HasEditPermission = await HasPermisionForView(userRoles, CodVista, PermissionType.Edit);
-            ViewBag.HasViewPermission = await HasPermisionForView(userRoles, CodVista, PermissionType.View);
+            ViewBag.HasCreate = await HasPermisionForView(userRoles, "RANGE", PermissionType.Create);
+            ViewBag.HasEdit = await HasPermisionForView(userRoles, "RANGE", PermissionType.Edit);
+            ViewBag.HasView = await HasPermisionForView(userRoles, "RANGE", PermissionType.View);
         }
 
         /// <summary>
         /// Muestra el dashboard principal de Rangos, permitiendo filtrar y ver los registros.
         /// </summary>
         [HttpGet("Index")]
-        [RequiredPermission(PermissionType.View, CodVista)]
-        public async Task<IActionResult> Index(
-            string? search, int? clientId, bool? rangeStatus, int page = 1, int pageSize = 15)
+        [RequiredPermission(PermissionType.View, "RANGE")]
+        public async Task<IActionResult> Index([FromQuery] RangeFilterDto filter)
         {
-            var currentUser = await GetCurrentApplicationUserAsync();
-            if (currentUser == null) return RedirectToPage("/Account/Login", new { area = "Identity" });
+            var user = await GetCurrentApplicationUserAsync();
+            if (user is null) return RedirectToPage("/Account/Login", new { area = "Identity" });
 
-            await SetCommonViewBagsRangesAsync(currentUser, "Rangos de Atención");
-            bool isAdmin = ViewBag.IsAdmin;
+            if (filter.Page <= 0) filter.Page = 1;
+            if (filter.PageSize <= 0) filter.PageSize = 15;
 
-            RangeDashboardViewModel vm = await _rangeService.GetPagedAsync(search, clientId, rangeStatus, page, pageSize);
+            await SetCommonViewBagsAsync(user, "Rangos de Atención");
 
-            ViewBag.CurrentPage = vm.CurrentPage;
-            ViewBag.PageSize = vm.PageSize;
-            ViewBag.TotalPages = vm.TotalPages;
-            ViewBag.TotalData = vm.TotalData;
-            ViewBag.SearchTerm = vm.SearchTerm;
+            var (items, total, currentPage, pageSize) = await _queries.GetPagedAsync(filter);
+
+            ViewBag.Filter = filter;
+            ViewBag.TotalData = total;
+            ViewBag.CurrentPage = currentPage;
+            ViewBag.PageSize = pageSize;
+            ViewBag.TotalPages = (int)Math.Ceiling(total / (double)pageSize);
 
             if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
-            {
-                return PartialView("_RangeTablePartial", vm.Ranges);
-            }
+                return PartialView("~/Views/Range/_RangeTablePartial.cshtml", items);
 
-            return View(vm);
+            return View("~/Views/Range/Index.cshtml", items);
         }
 
         /// <summary>
         /// Muestra el formulario de creación.
         /// </summary>
         [HttpGet("Create")]
-        [RequiredPermission(PermissionType.Create, CodVista)]
+        [RequiredPermission(PermissionType.Create, "RANGE")]
         public async Task<IActionResult> Create()
         {
-            var currentUser = await GetCurrentApplicationUserAsync();
-            if (currentUser == null) return RedirectToPage("/Account/Login", new { area = "Identity" });
+            var user = await GetCurrentApplicationUserAsync();
+            if (user is null) return RedirectToPage("/Account/Login", new { area = "Identity" });
 
-            await SetCommonViewBagsRangesAsync(currentUser, "Crear Rango");
+            await SetCommonViewBagsAsync(user, "Crear Rango");
 
-            var vm = await _rangeService.PrepareCreateAsync();
-            return View(vm);
-        }
-
-        /// <summary>
-        /// Procesa la creación de un rango. 
-        /// Aplica validación de unicidad por (cliente + schedule_key) en DB; aquí se captura el error y se retorna JSON o View.
-        /// </summary>
-        [HttpPost("Create")]
-        [ValidateAntiForgeryToken]
-        [RequiredPermission(PermissionType.Create, CodVista)]
-        public async Task<IActionResult> Create(RangeFormViewModel vm)
-        {
-            var currentUser = await GetCurrentApplicationUserAsync();
-            if (currentUser == null) return Unauthorized();
-
-            await SetCommonViewBagsRangesAsync(currentUser, "Crear Rango");
-
-            if (!ModelState.IsValid)
-            {
-                var fieldErrors = ModelState
-                    .Where(kvp => kvp.Value.Errors.Any())
-                    .ToDictionary(kvp => kvp.Key, kvp => kvp.Value.Errors.Select(e => e.ErrorMessage).ToArray());
-
-                _logger.LogWarning(
-                    "Usuario: {User} | IP: {IP} | Acción: AdmRangos - Modelo Inválido | Errores: {@Errors}",
-                    currentUser.UserName, IpAddressForLogging, fieldErrors);
-
-                if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
-                    return Json(ServiceResult.FailureResult("Hay errores en el formulario.", errors: fieldErrors));
-
-                vm.AvailableClients = await _rangeService.GetClientsForDropdownAsync();
-                return View(vm);
-            }
-
-            try
-            {
-                var (ok, message, id) = await _rangeService.CreateAsync(vm);
-                if (!ok)
-                {
-                    ModelState.AddModelError(string.Empty, message ?? "No se pudo crear el rango.");
-
-                    _logger.LogWarning(
-                        "Usuario: {User} | IP: {IP} | Acción: Error al crear rango | Mensaje: {Msg}",
-                        currentUser.UserName, IpAddressForLogging, message);
-
-                    if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
-                        return Json(ServiceResult.FailureResult(message ?? "No se pudo crear el rango."));
-
-                    vm.AvailableClients = await _rangeService.GetClientsForDropdownAsync();
-                    return View(vm);
-                }
-
-                TempData["SuccessMessage"] = "Rango creado correctamente.";
-                _logger.LogInformation(
-                    "Usuario: {User} | IP: {IP} | Acción: Rango creado | Id={Id}",
-                    currentUser.UserName, IpAddressForLogging, id);
-
-                if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
-                    return Json(ServiceResult.SuccessResult("Rango creado correctamente.", id));
-
-                return RedirectToAction(nameof(Details), new { id });
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex,
-                    "Usuario: {User} | IP: {IP} | Acción: Excepción al crear rango.",
-                    currentUser.UserName, IpAddressForLogging);
-
-                ModelState.AddModelError(string.Empty, "Ocurrió un error inesperado al crear el rango.");
-                if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
-                    return Json(ServiceResult.FailureResult("Ocurrió un error inesperado."));
-
-                vm.AvailableClients = await _rangeService.GetClientsForDropdownAsync();
-                return View(vm);
-            }
+            var dto = new RangeUpsertDto { RangeStatus = true };
+            return View("~/Views/Range/Create.cshtml", dto);
         }
 
         /// <summary>
         /// Vista de edición.
         /// </summary>
         [HttpGet("Edit/{id:int}")]
-        [RequiredPermission(PermissionType.Edit, CodVista)]
+        [RequiredPermission(PermissionType.Edit, "RANGE")]
         public async Task<IActionResult> Edit(int id)
         {
-            var currentUser = await GetCurrentApplicationUserAsync();
-            if (currentUser == null) return RedirectToPage("/Account/Login", new { area = "Identity" });
+            var user = await GetCurrentApplicationUserAsync();
+            if (user is null) return RedirectToPage("/Account/Login", new { area = "Identity" });
 
-            await SetCommonViewBagsRangesAsync(currentUser, "Editar Rango");
+            await SetCommonViewBagsAsync(user, "Editar Rango");
 
-            var vm = await _rangeService.PrepareEditAsync(id);
-            if (vm == null) return NotFound();
+            var dto = await _queries.GetForEditAsync(id);
+            if (dto is null) return NotFound();
 
-            return View(vm);
+            return View("~/Views/Range/Edit.cshtml", dto);
         }
 
         /// <summary>
         /// Procesa la edición (validación de unicidad en DB).
         /// </summary>
-        [HttpPost("Edit")]
+        [HttpPost("Save")]
         [ValidateAntiForgeryToken]
-        [RequiredPermission(PermissionType.Edit, CodVista)]
-        public async Task<IActionResult> Edit(RangeFormViewModel vm)
+        [RequiredPermission(PermissionType.Edit, "RANGE")]
+        public async Task<IActionResult> Save([FromForm] RangeUpsertDto dto, [FromForm] bool IsEdit)
         {
-            var currentUser = await GetCurrentApplicationUserAsync();
-            if (currentUser == null) return Unauthorized();
+            var user = await _um.GetUserAsync(User);
+            if (user is null) return Unauthorized();
 
-            await SetCommonViewBagsRangesAsync(currentUser, "Editar Rango");
+            var fieldErrors = new Dictionary<string, string[]>();
+            var errors = new List<string>();
 
-            if (!ModelState.IsValid)
+            // 1) Al menos un día habilitado
+            if (!(dto.Monday || dto.Tuesday || dto.Wednesday || dto.Thursday ||
+                  dto.Friday || dto.Saturday || dto.Sunday || dto.Holiday))
             {
-                var fieldErrors = ModelState
-                    .Where(kvp => kvp.Value.Errors.Any())
-                    .ToDictionary(kvp => kvp.Key, kvp => kvp.Value.Errors.Select(e => e.ErrorMessage).ToArray());
-
-                _logger.LogWarning(
-                    "Usuario: {User} | IP: {IP} | Acción: AdmRangos - Modelo Inválido (Edit) | Errores: {@Errors}",
-                    currentUser.UserName, IpAddressForLogging, fieldErrors);
-
-                if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
-                    return Json(ServiceResult.FailureResult("Hay errores en el formulario.", errors: fieldErrors));
-
-                vm.AvailableClients = await _rangeService.GetClientsForDropdownAsync();
-                return View(vm);
+                errors.Add("Debe seleccionar al menos un día habilitado.");
             }
+
+            // 2) Pares incompletos + orden en cada día habilitado
+            errors.AddRange(ValidateAllDayRows(dto));
+
+            // 3) Al menos un rango completo por día habilitado
+            errors.AddRange(ValidateAtLeastOneRangePerEnabledDay(dto));
+
+            if (errors.Any())
+            {
+                fieldErrors["Horarios"] = errors.ToArray();
+                return Json(ServiceResult.FailureResult("Validación de horarios inválida.", fieldErrors));
+            }
+
+            // 4) Unicidad en DB
+            var unique = await _queries.ValidateUniqueAsync(dto);
+            if (!unique.Success)
+                return Json(ServiceResult.FailureResult(unique.Message, unique.Code));
 
             try
             {
-                var (ok, message) = await _rangeService.UpdateAsync(vm);
-                if (!ok)
-                {
-                    ModelState.AddModelError(string.Empty, message ?? "No se pudo actualizar el rango.");
+                ServiceResult res = IsEdit
+                    ? await _svc.UpdateAsync(dto)
+                    : await _svc.CreateAsync(dto);
 
-                    _logger.LogWarning(
-                        "Usuario: {User} | IP: {IP} | Acción: Error al actualizar rango | Mensaje: {Msg}",
-                        currentUser.UserName, IpAddressForLogging, message);
-
-                    if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
-                        return Json(ServiceResult.FailureResult(message ?? "No se pudo actualizar el rango."));
-
-                    vm.AvailableClients = await _rangeService.GetClientsForDropdownAsync();
-                    return View(vm);
-                }
-
-                TempData["SuccessMessage"] = "Rango actualizado.";
-                _logger.LogInformation(
-                    "Usuario: {User} | IP: {IP} | Acción: Rango actualizado | Id={Id}",
-                    currentUser.UserName, IpAddressForLogging, vm.Id);
-
-                if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
-                    return Json(ServiceResult.SuccessResult("Rango actualizado.", vm.Id));
-
-                return RedirectToAction(nameof(Details), new { id = vm.Id });
+                return res.Success
+                    ? Json(ServiceResult.SuccessResult(res.Message, dto.Id))
+                    : Json(ServiceResult.FailureResult(res.Message, res.Code));
             }
-            catch (Exception ex)
+            catch (InvalidOperationException ex)
             {
-                _logger.LogError(ex,
-                    "Usuario: {User} | IP: {IP} | Acción: Excepción al actualizar rango.",
-                    currentUser.UserName, IpAddressForLogging);
-
-                ModelState.AddModelError(string.Empty, "Ocurrió un error inesperado al actualizar el rango.");
-                if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
-                    return Json(ServiceResult.FailureResult("Ocurrió un error inesperado."));
-
-                vm.AvailableClients = await _rangeService.GetClientsForDropdownAsync();
-                return View(vm);
+                return Json(ServiceResult.FailureResult(ex.Message));
+            }
+            catch
+            {
+                return Json(ServiceResult.FailureResult("Ocurrió un error inesperado al guardar el rango."));
             }
         }
 
@@ -271,68 +177,43 @@ namespace VCashApp.Controllers
         /// Detalle del rango.
         /// </summary>
         [HttpGet("Details/{id:int}")]
-        [RequiredPermission(PermissionType.View, CodVista)]
+        [RequiredPermission(PermissionType.View, "RANGE")]
         public async Task<IActionResult> Details(int id)
         {
-            var currentUser = await GetCurrentApplicationUserAsync();
-            if (currentUser == null) return RedirectToPage("/Account/Login", new { area = "Identity" });
+            var user = await GetCurrentApplicationUserAsync();
+            if (user is null) return RedirectToPage("/Account/Login", new { area = "Identity" });
 
-            await SetCommonViewBagsRangesAsync(currentUser, "Detalle de Rango");
+            await SetCommonViewBagsAsync(user, "Detalle de Rango");
 
-            var dto = await _rangeService.GetByIdAsync(id);
-            if (dto == null) return NotFound();
+            var entityOrDto = await _queries.GetByIdAsync(id);
+            if (entityOrDto is null) return NotFound();
 
-            return View(dto);
+            return View("~/Views/Range/Details.cshtml", entityOrDto);
         }
 
-        /// <summary>
-        /// Desactiva (soft-delete) un rango.
-        /// </summary>
-        [HttpPost("Delete/{id:int}")]
+        // =========================================================
+        // TOGGLE STATUS (ACTIVAR/INACTIVAR)
+        // =========================================================
+        [HttpPost("ToggleStatus/{id:int}")]
         [ValidateAntiForgeryToken]
-        [RequiredPermission(PermissionType.Edit, CodVista)] // usa Edit si no manejas permiso Delete
-        public async Task<IActionResult> Delete(int id)
+        [RequiredPermission(PermissionType.Edit, "RANGE")]
+        public async Task<IActionResult> ToggleStatus(int id, [FromForm] bool isActive)
         {
-            var currentUser = await GetCurrentApplicationUserAsync();
-            if (currentUser == null) return Unauthorized();
+            var user = await _um.GetUserAsync(User);
+            if (user is null) return Unauthorized();
 
             try
             {
-                var (ok, message) = await _rangeService.DeleteAsync(id);
-                if (!ok)
-                {
-                    TempData["ErrorMessage"] = message ?? "No se pudo desactivar el rango.";
-                    _logger.LogWarning(
-                        "Usuario: {User} | IP: {IP} | Acción: Error al desactivar rango | Mensaje: {Msg}",
-                        currentUser.UserName, IpAddressForLogging, message);
-
-                    if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
-                        return Json(ServiceResult.FailureResult(message ?? "No se pudo desactivar el rango."));
-                }
-                else
-                {
-                    TempData["SuccessMessage"] = "Rango desactivado.";
-                    _logger.LogInformation(
-                        "Usuario: {User} | IP: {IP} | Acción: Rango desactivado | Id={Id}",
-                        currentUser.UserName, IpAddressForLogging, id);
-
-                    if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
-                        return Json(ServiceResult.SuccessResult("Rango desactivado.", id));
-                }
-
-                return RedirectToAction(nameof(Index));
+                var result = await _svc.SetStatusAsync(id, isActive);
+                return Json(result);
             }
-            catch (Exception ex)
+            catch (InvalidOperationException ex)
             {
-                _logger.LogError(ex,
-                    "Usuario: {User} | IP: {IP} | Acción: Excepción al desactivar rango.",
-                    currentUser.UserName, IpAddressForLogging);
-
-                TempData["ErrorMessage"] = "Ocurrió un error inesperado.";
-                if (Request.Headers["X-Requested-With"] == "XMLHttpRequest")
-                    return Json(ServiceResult.FailureResult("Ocurrió un error inesperado."));
-
-                return RedirectToAction(nameof(Index));
+                return Json(ServiceResult.FailureResult(ex.Message));
+            }
+            catch
+            {
+                return Json(ServiceResult.FailureResult("No fue posible actualizar el estado."));
             }
         }
 
@@ -345,30 +226,82 @@ namespace VCashApp.Controllers
         /// Útil en la UI para avisar antes de postear el form.
         /// </summary>
         [HttpPost("ValidateUnique")]
-        [RequiredPermission(PermissionType.View, CodVista)]
-        public async Task<IActionResult> ValidateUnique([FromBody] RangeFormViewModel vm)
+        [RequiredPermission(PermissionType.View, "RANGE")]
+        public async Task<IActionResult> ValidateUnique([FromBody] RangeUpsertDto dto)
         {
-            var currentUser = await GetCurrentApplicationUserAsync();
-            if (currentUser == null)
-                return Json(new { success = false, message = "No autorizado.", code = "unauthorized" });
+            var user = await GetCurrentApplicationUserAsync();
+            if (user is null) return Json(new { success = false, message = "No autorizado.", code = "unauthorized" });
 
-            if (vm == null || vm.ClientId <= 0)
+            if (dto is null || dto.ClientId <= 0)
                 return Json(new { success = false, message = "Solicitud inválida.", code = "bad_request" });
 
-            try
-            {
-                var (ok, msg) = await _rangeService.ValidateUniqueAsync(vm);
+            var res = await _queries.ValidateUniqueAsync(dto);
+            return Json(new { success = res.Success, message = res.Message, code = res.Code });
+        }
 
-                if (ok)
-                    return Json(new { success = true, message = "Combinación disponible.", code = "ok" });
+        // ===== Helpers de validación =====
+        private static bool IsPairIncomplete(TimeSpan? hi, TimeSpan? hf)
+            => hi.HasValue ^ hf.HasValue;
 
-                // Duplicado real
-                return Json(new { success = false, message = msg ?? "La combinación ya existe.", code = "duplicate" });
-            }
-            catch
+        private static bool IsPairCompleteValid(TimeSpan? hi, TimeSpan? hf)
+            => hi.HasValue && hf.HasValue && hi.Value < hf.Value;
+
+        private static IEnumerable<string> ValidateIncompletePairs(string day,
+            (TimeSpan? hi, TimeSpan? hf) r1,
+            (TimeSpan? hi, TimeSpan? hf) r2,
+            (TimeSpan? hi, TimeSpan? hf) r3)
+        {
+            var errs = new List<string>();
+            if (IsPairIncomplete(r1.hi, r1.hf)) errs.Add($"{day}, Rango 1: si diligencia una hora debe diligenciar la otra.");
+            if (IsPairIncomplete(r2.hi, r2.hf)) errs.Add($"{day}, Rango 2: si diligencia una hora debe diligenciar la otra.");
+            if (IsPairIncomplete(r3.hi, r3.hf)) errs.Add($"{day}, Rango 3: si diligencia una hora debe diligenciar la otra.");
+            if (r1.hi.HasValue && r1.hf.HasValue && r1.hi.Value >= r1.hf.Value) errs.Add($"{day}, Rango 1: la hora inicial debe ser menor que la final.");
+            if (r2.hi.HasValue && r2.hf.HasValue && r2.hi.Value >= r2.hf.Value) errs.Add($"{day}, Rango 2: la hora inicial debe ser menor que la final.");
+            if (r3.hi.HasValue && r3.hf.HasValue && r3.hi.Value >= r3.hf.Value) errs.Add($"{day}, Rango 3: la hora inicial debe ser menor que la final.");
+            return errs;
+        }
+
+        private static bool HasAtLeastOneCompleteRange(bool enabled,
+            TimeSpan? a1, TimeSpan? b1, TimeSpan? a2, TimeSpan? b2, TimeSpan? a3, TimeSpan? b3)
+        {
+            if (!enabled) return true;
+            return IsPairCompleteValid(a1, b1) || IsPairCompleteValid(a2, b2) || IsPairCompleteValid(a3, b3);
+        }
+
+        private static IEnumerable<string> ValidateAtLeastOneRangePerEnabledDay(RangeUpsertDto d)
+        {
+            var errs = new List<string>();
+            if (!HasAtLeastOneCompleteRange(d.Monday, d.Lr1Hi, d.Lr1Hf, d.Lr2Hi, d.Lr2Hf, d.Lr3Hi, d.Lr3Hf)) errs.Add("Lunes: debe diligenciar al menos un rango completo.");
+            if (!HasAtLeastOneCompleteRange(d.Tuesday, d.Mr1Hi, d.Mr1Hf, d.Mr2Hi, d.Mr2Hf, d.Mr3Hi, d.Mr3Hf)) errs.Add("Martes: debe diligenciar al menos un rango completo.");
+            if (!HasAtLeastOneCompleteRange(d.Wednesday, d.Wr1Hi, d.Wr1Hf, d.Wr2Hi, d.Wr2Hf, d.Wr3Hi, d.Wr3Hf)) errs.Add("Miércoles: debe diligenciar al menos un rango completo.");
+            if (!HasAtLeastOneCompleteRange(d.Thursday, d.Jr1Hi, d.Jr1Hf, d.Jr2Hi, d.Jr2Hf, d.Jr3Hi, d.Jr3Hf)) errs.Add("Jueves: debe diligenciar al menos un rango completo.");
+            if (!HasAtLeastOneCompleteRange(d.Friday, d.Vr1Hi, d.Vr1Hf, d.Vr2Hi, d.Vr2Hf, d.Vr3Hi, d.Vr3Hf)) errs.Add("Viernes: debe diligenciar al menos un rango completo.");
+            if (!HasAtLeastOneCompleteRange(d.Saturday, d.Sr1Hi, d.Sr1Hf, d.Sr2Hi, d.Sr2Hf, d.Sr3Hi, d.Sr3Hf)) errs.Add("Sábado: debe diligenciar al menos un rango completo.");
+            if (!HasAtLeastOneCompleteRange(d.Sunday, d.Dr1Hi, d.Dr1Hf, d.Dr2Hi, d.Dr2Hf, d.Dr3Hi, d.Dr3Hf)) errs.Add("Domingo: debe diligenciar al menos un rango completo.");
+            if (!HasAtLeastOneCompleteRange(d.Holiday, d.Fr1Hi, d.Fr1Hf, d.Fr2Hi, d.Fr2Hf, d.Fr3Hi, d.Fr3Hf)) errs.Add("Festivo: debe diligenciar al menos un rango completo.");
+            return errs;
+        }
+
+        private static IEnumerable<string> ValidateAllDayRows(RangeUpsertDto d)
+        {
+            var errs = new List<string>();
+
+            void Acc(string day, bool enabled, (TimeSpan?, TimeSpan?) r1, (TimeSpan?, TimeSpan?) r2, (TimeSpan?, TimeSpan?) r3)
             {
-                return Json(new { success = false, message = "Error al validar.", code = "error" });
+                if (!enabled) return;
+                errs.AddRange(ValidateIncompletePairs(day, r1, r2, r3));
             }
+
+            Acc("Lunes", d.Monday, (d.Lr1Hi, d.Lr1Hf), (d.Lr2Hi, d.Lr2Hf), (d.Lr3Hi, d.Lr3Hf));
+            Acc("Martes", d.Tuesday, (d.Mr1Hi, d.Mr1Hf), (d.Mr2Hi, d.Mr2Hf), (d.Mr3Hi, d.Mr3Hf));
+            Acc("Miércoles", d.Wednesday, (d.Wr1Hi, d.Wr1Hf), (d.Wr2Hi, d.Wr2Hf), (d.Wr3Hi, d.Wr3Hf));
+            Acc("Jueves", d.Thursday, (d.Jr1Hi, d.Jr1Hf), (d.Jr2Hi, d.Jr2Hf), (d.Jr3Hi, d.Jr3Hf));
+            Acc("Viernes", d.Friday, (d.Vr1Hi, d.Vr1Hf), (d.Vr2Hi, d.Vr2Hf), (d.Vr3Hi, d.Vr3Hf));
+            Acc("Sábado", d.Saturday, (d.Sr1Hi, d.Sr1Hf), (d.Sr2Hi, d.Sr2Hf), (d.Sr3Hi, d.Sr3Hf));
+            Acc("Domingo", d.Sunday, (d.Dr1Hi, d.Dr1Hf), (d.Dr2Hi, d.Dr2Hf), (d.Dr3Hi, d.Dr3Hf));
+            Acc("Festivo", d.Holiday, (d.Fr1Hi, d.Fr1Hf), (d.Fr2Hi, d.Fr2Hf), (d.Fr3Hi, d.Fr3Hf));
+
+            return errs;
         }
     }
 }

@@ -1,4 +1,4 @@
-﻿@model IEnumerable<VCashApp.Models.ViewModels.Range.RangeSummaryViewModel>
+﻿@model IEnumerable<VCashApp.Models.DTOs.Range.RangeListDto>
 @{
     int currentPage = ViewBag.CurrentPage ?? 1;
     int totalPages = ViewBag.TotalPages ?? 1;
@@ -36,32 +36,44 @@
                         <th>Cliente</th>
                         <th>Información</th>
                         <th>Días Activos</th>
-                        <th class="status-column-header">Estado</th>
                         <th style="width: 80px;"><i class="ri-list-settings-fill"></i></th>
                     </tr>
                 </thead>
                 <tbody>
                     @if (Model != null && Model.Any())
                     {
-                        @foreach (var r in Model)
+                        foreach (var r in Model)
                         {
                             <tr>
                                 <td>@r.CodRange</td>
                                 <td>@r.ClientName</td>
                                 <td>@(string.IsNullOrWhiteSpace(r.RangeInformation) ? "-" : r.RangeInformation)</td>
                                 <td>@(string.IsNullOrWhiteSpace(r.ActiveDays) ? "-" : r.ActiveDays.TrimEnd(','))</td>
-                                <td class="status-column">
-                                    @{
-                                        var badgeClass = r.RangeStatus ? "badge bg-success" : "badge bg-secondary";
-                                        var statusText = r.RangeStatus ? "Activo" : "Inactivo";
-                                    }
-                                    <span class="@badgeClass">@statusText</span>
-                                </td>
                                 <td>
                                     <div class="action-buttons d-flex align-items-center justify-content-center">
-                                        <a asp-controller="Range" asp-action="Edit" asp-route-id="@r.Id" class="btn-edit" title="Editar">
-                                            <i class="ri-pencil-fill"></i>
-                                        </a>
+                                        @if (canEdit)
+                                        {
+                                            <a asp-controller="Range" asp-action="Edit" asp-route-id="@r.Id" class="btn-edit" title="Editar">
+                                                <i class="ri-pencil-fill"></i>
+                                            </a>
+                                            <form class="toggle-status-form d-inline"
+                                                  method="post"
+                                                  asp-action="ToggleStatus"
+                                                  asp-controller="Range"
+                                                  asp-route-id="@r.Id"
+                                                  data-submit="ajax">
+                                                @Html.AntiForgeryToken()
+                                                <input type="hidden" name="isActive" value="@(r.RangeStatus ? "true" : "false")" class="hidden-is-active" />
+                                                <label class="switch" title="@(r.RangeStatus ? "Desactivar" : "Activar")">
+                                                    <input type="checkbox"
+                                                           class="status-toggle"
+                                                           @(r.RangeStatus ? "checked" : null)
+                                                           data-msg-on="¿Confirmas ACTIVAR este rango?"
+                                                           data-msg-off="¿Confirmas DESACTIVAR esta rango?" />
+                                                    <span class="slider round"></span>
+                                                </label>
+                                            </form>
+                                        }
                                     </div>
                                 </td>
                             </tr>

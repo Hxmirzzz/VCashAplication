@@ -58,12 +58,11 @@
                                 <td>@(r.Amount.HasValue? r.Amount.Value.ToString("N0") : "0")</td>
                                 <td>
                                     <div class="action-buttons d-flex align-items-center justify-content-center">
-                                        <a asp-action="Edit" asp-controller="Route" asp-route-id="@r.BranchRouteCode" class="btn-edit" title="Editar">
-                                            <i class="ri-pencil-fill"></i>
-                                        </a>
-
                                         @if (canEdit)
                                         {
+                                            <a asp-action="Edit" asp-controller="Route" asp-route-id="@r.BranchRouteCode" class="btn-edit" title="Editar">
+                                                <i class="ri-pencil-fill"></i>
+                                            </a>
                                             <form class="toggle-status-form d-inline"
                                                   method="post"
                                                   asp-action="ToggleStatus"

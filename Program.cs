@@ -33,10 +33,11 @@ using VCashApp.Services.GestionServicio.Application;
 using VCashApp.Services.GestionServicio.Domain;
 using VCashApp.Services.GestionServicio.Infrastructure;
 using VCashApp.Services.Logging;
-using VCashApp.Services.Range;
 using VCashApp.Services.Routes;
 using VCashApp.Services.Routes.Infrastucture;
 using VCashApp.Services.Routes.Application;
+using VCashApp.Services.Range.Application;
+using VCashApp.Services.Range.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
 Log.Logger = new LoggerConfiguration()
@@ -266,6 +267,12 @@ builder.Services.AddScoped<IDailyRouteUpdater, DailyRouteUpdater>();
 builder.Services.AddScoped<IEmployeeLogLookupsService, EmployeeLogLookupsService>();
 
 // ======================================================================
+// RANGE
+// ======================================================================
+builder.Services.AddScoped<IRangeService, RangeService>();
+builder.Services.AddScoped<IRangeQueries, RangeQueries>();
+
+// ======================================================================
 // ROUTE
 // ======================================================================
 builder.Services.AddAutoMapper(cfg => {
@@ -283,7 +290,6 @@ builder.Services.AddScoped<ICefTransactionService, CefTransactionService>();
 builder.Services.AddScoped<ICefContainerService, CefContainerService>();
 builder.Services.AddScoped<ICefIncidentService, CefIncidentService>();
 builder.Services.AddScoped<ICefServiceCreationService, CefServiceCreationService>();
-builder.Services.AddScoped<IRangeService, RangeService>();
 
 // ======================================================================
 // Swagger

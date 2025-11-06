@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using VCashApp.Data;
 using VCashApp.Enums;
@@ -10,10 +9,8 @@ using VCashApp.Infrastructure.Branches;
 using VCashApp.Models;
 using VCashApp.Models.DTOs;
 using VCashApp.Models.Entities;
-using VCashApp.Services;
 using VCashApp.Services.DTOs;
 using VCashApp.Services.Routes.Application;
-using VCashApp.Services.Routes.Infrastucture;
 
 namespace VCashApp.Controllers
 {
@@ -58,7 +55,6 @@ namespace VCashApp.Controllers
             ViewBag.ServiceTypeOptions = serviceTypes;
             ViewBag.VehicleTypeOptions = vehicleTypes;
 
-            // ===== Permisos de vista =====
             var vistas = (codVistas != null && codVistas.Length > 0) ? codVistas : new[] { "ADM_RUTAS" };
             var userRoles = await _userManager.GetRolesAsync(currentUser);
 
