@@ -1,6 +1,4 @@
-﻿// En VCashApp.Models.DTOs/EmployeeLogDtos.cs
-
-namespace VCashApp.Models.DTOs
+﻿namespace VCashApp.Models.DTOs
 {
     /// <summary>
     /// DTO para listado de registros de empleados (Dashboard e Historial)

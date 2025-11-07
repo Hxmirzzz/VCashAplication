@@ -1,4 +1,4 @@
-﻿using VCashApp.Models.DTOs;
+﻿using VCashApp.Models.Dtos.EmployeeLog;
 using VCashApp.Models.Entities;
 using VCashApp.Models.ViewModels.EmployeeLog;
 using VCashApp.Services.DTOs;
@@ -7,7 +7,7 @@ namespace VCashApp.Services.EmployeeLog.Application
 {
     public interface IEmployeeLogService
     {
-        Task<EmployeeLogStateDto> GetEmployeeLogStatusAsync(int employeeId);
+        Task<EmployeeLogStatusDto> GetEmployeeLogStatusAsync(int employeeId);
 
         Task<ServiceResult> RecordEmployeeEntryExitAsync(
             EmployeeLogDto logDto,
@@ -27,7 +27,7 @@ namespace VCashApp.Services.EmployeeLog.Application
             string currentUserId,
             string? confirmedValidation = null);
 
-        Task<(IEnumerable<EmployeeLogListadoDto> Items, int Total)> GetFilteredEmployeeLogsAsync(
+        Task<(IEnumerable<EmployeeLogListDto> Items, int Total)> GetFilteredEmployeeLogsAsync(
             string currentUserId,
             int? cargoId,
             string? unitId,
@@ -40,7 +40,7 @@ namespace VCashApp.Services.EmployeeLog.Application
             int pageSize,
             bool isAdmin);
 
-        Task<List<EmpleadoBusquedaDto>> GetEmployeeInfoAsync(
+        Task<List<EmployeeLogSearchDto>> GetEmployeeInfoAsync(
                     string userId, List<int> permittedBranchIds, string? searchInput, bool isAdmin);
 
         Task<EmployeeLogEditViewModel?> GetEditViewModelAsync(int id, bool canEditLog);

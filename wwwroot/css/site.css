@@ -345,8 +345,8 @@ button {
     column-gap: 12px;
     padding: 10px 15px;
     text-decoration: none;
-    color: var(--text-color-main); /* Use _main variable */
-    font-size: 14px;
+    color: var(--text-color-main);
+    font-size: 0.875rem;
     border-radius: 8px;
     position: relative;
     overflow: hidden;
@@ -521,8 +521,6 @@ button {
     max-height: 200px;
 }
 
-
-/* Compact Mode Styles (apply when sidebar has 'compact' class) */
 .sidebar.compact .user-profile-expanded {
     opacity: 0;
     pointer-events: none;
@@ -1771,4 +1769,147 @@ body.dark-theme .login-brand {
             padding: 5px 8px; /* Reduce el padding */
             min-width: unset; /* Quita el min-width para que se ajusten mejor */
         }
+}
+
+/* =========================================
+   Ajustes "mid-desktop" (1366×768, 1280×800, etc.)
+   Objetivo: que 19" no se vea "todo más grande"
+   ========================================= */
+:root {
+    /* Base fluida controlada (afecta rem si en tus componentes usas rem) */
+    --vcash-base-font: clamp(14px, 0.9vw + 10px, 16px);
+}
+/* Si quieres que rem sea coherente en todo: */
+html {
+    font-size: var(--vcash-base-font);
+}
+
+/* Tipografía de títulos más contenida por defecto */
+:root {
+    --vcash-h1: clamp(1.25rem, 1.05rem + 1.2vw, 1.8rem);
+    --vcash-h2: clamp(1.125rem, 1rem + 0.9vw, 1.5rem);
+    --vcash-h3: clamp(1rem, 0.95rem + 0.6vw, 1.25rem);
+}
+
+/* Aplica la escala nueva donde ahora heredas de --title-font-size */
+.main-header {
+    font-size: var(--vcash-h1);
+}
+
+/* Escala del logo más contenida y fluida */
+.main-header-logo {
+    width: clamp(90px, 8vw, 130px);
+}
+
+/* Sidebar: enlaces y textos con rem en lugar de px duros */
+.sidebar__link {
+    padding: 0.6rem 0.9rem;
+    font-size: 0.95rem; /* ≈ 15px si html=16px */
+}
+
+.sidebar__submenu .sidebar__link.sub-link {
+    padding: 0.5rem 0.9rem 0.5rem 2rem;
+    font-size: 0.875rem;
+}
+
+.section-title {
+    font-size: 0.8125rem; /* 13px -> rem */
+}
+
+/* Avatar y textos compactados un poco */
+.avatar {
+    width: 40px;
+    height: 40px;
+}
+
+.user-details h3 {
+    font-size: 0.95rem;
+}
+
+.user-details small {
+    font-size: 0.8125rem;
+}
+
+/* ----- Rango clave: 1024–1365 px ----- */
+@media (min-width: 1024px) and (max-width: 1365px) {
+    /* Sidebar menos ancho para dejar respiro al contenido */
+    :root {
+        --expanded-sidebar-width: 260px; /* en 19" 316px es muy ancho */
+    }
+
+    .sidebar.expanded {
+        width: var(--expanded-sidebar-width);
+    }
+
+    /* Botón toggle acompasado al nuevo ancho */
+    .toggle-button {
+        left: calc(var(--expanded-sidebar-width) + 0.75rem);
+    }
+
+    /* Tipos ligeramente más pequeños que en >=1150 */
+    :root {
+        --normal-font-size: 0.85rem; /* en tu sistema de vars */
+        --title-font-size: 1.1rem; /* para zonas que aún usan esta var */
+    }
+
+    /* Paddings de contenido un poco menores */
+    .main-content {
+        margin-left: 0.75rem;
+        padding: 14px 16px;
+    }
+
+    /* Header menos alto visualmente */
+    .main-header {
+        padding-bottom: 8px;
+        margin-bottom: 8px;
+        font-size: var(--vcash-h1); /* ya reducido arriba */
+    }
+
+    /* Enlaces y sub-enlaces más densos */
+    .sidebar__link {
+        padding: 0.5rem 0.8rem;
+        font-size: 0.9rem;
+    }
+
+    .sidebar__submenu .sidebar__link.sub-link {
+        padding: 0.45rem 0.8rem 0.45rem 1.6rem;
+        font-size: 0.84rem;
+    }
+
+    /* Badges y flechas más discretos */
+    .dropdown-arrow {
+        font-size: 0.9rem;
+    }
+
+    .badge {
+        transform: scale(.9);
+        transform-origin: right center;
+    }
+
+    /* Botones/íconos de control ligeramente más chicos */
+    .control-button-icon {
+        width: 34px;
+        height: 34px;
+    }
+
+    /* Mesas: celda menos alta si usas tablas grandes en estas pantallas */
+    #dataTable th, #dataTable td {
+        padding: 7px 8px;
+        font-size: 0.85rem;
+    }
+}
+
+/* ----- Ajuste adicional para 1366×768 exacto ----- */
+@media (min-width: 1360px) and (max-width: 1380px) {
+    :root {
+        --expanded-sidebar-width: 260px;
+    }
+
+    .sidebar.expanded {
+        width: var(--expanded-sidebar-width);
+    }
+
+    .toggle-button {
+        left: calc(var(--expanded-sidebar-width) + 0.75rem);
+    }
 }

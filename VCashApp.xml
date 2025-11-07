@@ -1196,6 +1196,11 @@
             No arma listas aquí; delega a LookupsService.
             </summary>
         </member>
+        <member name="M:VCashApp.Controllers.FundController.SetCommonViewBagsAsync(VCashApp.Models.ApplicationUser,System.String)">
+            <summary>
+            Carga ViewBags comunes (cabecera, combos, y permisos).
+            </summary>
+        </member>
         <member name="M:VCashApp.Controllers.ProvisionController.SetCommonViewBagsCefAsync(VCashApp.Models.ApplicationUser,System.String,System.String[])">
             <summary>
             Sucursales, estados y permisos por vista.
@@ -2306,6 +2311,12 @@
             <summary>
             DTO para búsqueda de empleados (autocomplete en LogEntry)
             </summary>
+        </member>
+        <member name="T:VCashApp.Models.Dtos.EmployeeLog.EmployeeLogDto">
+            <summary>DTO para crear/actualizar registros (datos que envía el JS).</summary>
+        </member>
+        <member name="T:VCashApp.Models.Dtos.EmployeeLog.EmployeeLogStatusDto">
+            <summary>DTO para el estado del registro de un empleado (usado por el JS).</summary>
         </member>
         <member name="T:VCashApp.Models.ViewModels.BranchViewModel">
             <summary>
@@ -3765,6 +3776,11 @@
             </summary>
             <param name="relativePath">Ruta relativa del archivo a eliminar.</param>
             <returns>Una tarea que representa la operación asincrónica.</returns>
+        </member>
+        <member name="M:VCashApp.Services.Fund.Infrastructure.FundService.Set``1(``0@,``0)">
+            <summary>
+            Asigna el nuevo valor si es distinto del actual y devuelve true si hubo cambio.
+            </summary>
         </member>
         <!-- Badly formed XML comment ignored for member "M:VCashApp.Services.Helpers.TimeFormatHelper.ToTimeInput24(System.Object)" -->
         <!-- Badly formed XML comment ignored for member "M:VCashApp.Services.Helpers.TimeFormatHelper.ToDateInput(System.Nullable{System.DateOnly})" -->

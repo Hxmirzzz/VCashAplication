@@ -1,3 +1,4 @@
+using DocumentFormat.OpenXml.Office2016.Drawing.ChartDrawing;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.ResponseCompression;
@@ -29,15 +30,17 @@ using VCashApp.Services.Employee.Infrastructure;
 using VCashApp.Services.EmployeeLog.Application;
 using VCashApp.Services.EmployeeLog.Integration;
 using VCashApp.Services.EmployeeLog.Queries;
+using VCashApp.Services.Fund.Application;
+using VCashApp.Services.Fund.Infrastructure;
 using VCashApp.Services.GestionServicio.Application;
 using VCashApp.Services.GestionServicio.Domain;
 using VCashApp.Services.GestionServicio.Infrastructure;
 using VCashApp.Services.Logging;
-using VCashApp.Services.Routes;
-using VCashApp.Services.Routes.Infrastucture;
-using VCashApp.Services.Routes.Application;
 using VCashApp.Services.Range.Application;
 using VCashApp.Services.Range.Infrastructure;
+using VCashApp.Services.Routes;
+using VCashApp.Services.Routes.Application;
+using VCashApp.Services.Routes.Infrastucture;
 
 var builder = WebApplication.CreateBuilder(args);
 Log.Logger = new LoggerConfiguration()
@@ -265,6 +268,13 @@ builder.Services.AddScoped<ICgsServiceApp, CgsServiceFacade>();
 builder.Services.AddScoped<IEmployeeLogService, EmployeeLogService>();
 builder.Services.AddScoped<IDailyRouteUpdater, DailyRouteUpdater>();
 builder.Services.AddScoped<IEmployeeLogLookupsService, EmployeeLogLookupsService>();
+
+// ======================================================================
+// FUND
+// ======================================================================
+builder.Services.AddScoped<IFundService, FundService>();
+builder.Services.AddScoped<IFundQueries, FundQueries>();
+
 
 // ======================================================================
 // RANGE

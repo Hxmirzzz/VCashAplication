@@ -1,0 +1,26 @@
+﻿@model VCashApp.Models.Dtos.Fund.FundUpsertDto
+@using Microsoft.AspNetCore.Mvc.Rendering
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = "Crear Fondo";
+
+    var clients = (IEnumerable<SelectListItem>)ViewBag.Clients ?? Enumerable.Empty<SelectListItem>();
+    var branches = (IEnumerable<SelectListItem>)ViewBag.Branches ?? Enumerable.Empty<SelectListItem>();
+    var cities = (IEnumerable<SelectListItem>)ViewBag.Cities ?? Enumerable.Empty<SelectListItem>();
+    var currencies = (IEnumerable<SelectListItem>)ViewBag.Currencies ?? Enumerable.Empty<SelectListItem>();
+    var fundTypes = (IEnumerable<SelectListItem>)ViewBag.FundTypes ?? Enumerable.Empty<SelectListItem>();
+}
+
+@await Html.PartialAsync("~/Views/Fund/_Form.cshtml", Model, new ViewDataDictionary(ViewData)
+{
+["IsEdit"] = false,
+    ["Clients"] = clients, ["Branches"] = branches, ["Cities"] = cities,
+    ["Currencies"] = currencies, ["FundTypes"] = fundTypes, ["PageName"] = "Crear Fondo"
+})
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    <script src="~/js/form-control/fund-form-handler.js"></script>
+}

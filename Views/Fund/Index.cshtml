@@ -1,0 +1,225 @@
+﻿@model IEnumerable<VCashApp.Models.Dtos.Fund.FundListDto>
+@using Microsoft.AspNetCore.Mvc.Rendering
+@using VCashApp.Models.Dtos.Fund
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = "Fondos";
+
+    var filter = ViewBag.Filter as VCashApp.Models.Dtos.Fund.FundFilterDto ?? new VCashApp.Models.Dtos.Fund.FundFilterDto();
+    string currentSearchTerm = filter.Search ?? "";
+    int currentPage = ViewBag.CurrentPage ?? 1;
+    int pageSize = ViewBag.PageSize ?? 15;
+
+    var clients = (IEnumerable<SelectListItem>)ViewBag.Clients ?? Enumerable.Empty<SelectListItem>();
+    var branches = (IEnumerable<SelectListItem>)ViewBag.Branches ?? Enumerable.Empty<SelectListItem>();
+    var cities = (IEnumerable<SelectListItem>)ViewBag.Cities ?? Enumerable.Empty<SelectListItem>();
+    var currencies = (IEnumerable<SelectListItem>)ViewBag.Currencies ?? Enumerable.Empty<SelectListItem>();
+    var fundTypes = (IEnumerable<SelectListItem>)ViewBag.FundTypes ?? Enumerable.Empty<SelectListItem>();
+
+    bool canCreate = ViewBag.HasCreate ?? false;
+    bool canView = ViewBag.HasView ?? true;
+    bool canEdit = ViewBag.HasEdit ?? false;
+}
+<div class="section-header">
+    <div class="alert-container">
+        @if (TempData["Success"] != null)
+        {
+            <div class="alert alert-success mt-2" role="alert">@TempData["Success"]</div>
+        }
+        @if (TempData["Error"] != null)
+        {
+            <div class="alert alert-danger mt-2" role="alert">@TempData["Error"]</div>
+        }
+    </div>
+</div>
+
+<div class="search-container">
+    <div class="table-controls">
+        <input type="text" id="tableSearch" class="form-control form-control-sm" placeholder="Buscar..." value="@currentSearchTerm">
+        <div class="table-buttons">
+            <div class="control-button-wrapper">
+                @if (canCreate)
+                {
+                    <a href="@Url.Action("Create", "Fund")" class="control-button-icon" id="addFundButton" title="Registrar Nuevo Fondo">
+                        <img src="/assets/icon-img/add.png" alt="Registrar Fondo">
+                    </a>
+                }
+            </div>
+            <div class="control-button-wrapper">
+                <img src="/assets/icon-img/download.png" alt="Descargar" class="control-button-icon" id="downloadButton">
+            </div>
+            <div class="control-button-wrapper">
+                <img src="/assets/icon-img/filter-on.png" alt="Filtros" class="control-button-icon" id="filterButton">
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="filter-sidebar" id="filterSidebar">
+    <div class="filter-sidebar-content">
+        <h3>Filtros Avanzados</h3>
+
+        <div class="row g-3">
+            <div class="col-12">
+                <div class="form-floating">
+                    <select id="filterClientCode" name="ClientCode" class="form-select" asp-items="clients">
+                        <option value="">-- Todos --</option>
+                    </select>
+                    <label for="filterClientCode">Cliente:</label>
+                </div>
+            </div>
+
+            <div class="col-12">
+                <div class="form-floating">
+                    <select id="filterBranchCode" name="BranchCode" class="form-select" asp-items="branches">
+                        <option value="">-- Todas --</option>
+                    </select>
+                    <label for="filterBranchCode">Sucursal:</label>
+                </div>
+            </div>
+
+            <div class="col-12">
+                <div class="form-floating">
+                    <select id="filterCityCode" name="CityCode" class="form-select" asp-items="cities">
+                        <option value="">-- Todas --</option>
+                    </select>
+                    <label for="filterCityCode">Ciudad:</label>
+                </div>
+            </div>
+
+            <div class="col-12">
+                <div class="form-floating">
+                    <select id="filterStatus" class="form-select" name="FundStatus">
+                        <option value="">-- Selecciona --</option>
+                        <option value="true">Activo</option>
+                        <option value="false">Inactivo</option>
+                    </select>
+                    <label for="filterStatus">Estado:</label>
+                </div>
+            </div>
+
+            <div class="col-12">
+                <div class="form-floating">
+                    <select id="filterFundType" class="form-select" name="FundType" asp-items="fundTypes">
+                        <option value="">-- Todos --</option>
+                    </select>
+                    <label for="filterFundType">Tipo de Fondo:</label>
+                </div>
+            </div>
+        </div>
+
+        <div class="filter-buttons">
+            <div class="cancel-filter-btn" id="clearFilters" title="Limpiar Filtros">
+                <img src="~/assets/icon-img/filter-off.png" alt="Limpiar Filtros" />
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="dataTablePartial">
+    @Html.Partial("~/Views/Fund/_FundTablePartial.cshtml", Model)
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    <script>
+        $(document).ready(function () {
+            setupTablePaginationAndFilters({
+                tableContainerId: 'dataTablePartial',
+                controllerName: 'Fund',
+                actionName: 'Index',
+                searchInputId: 'tableSearch',
+                filterInputsSelector: '#filterClientCode, #filterBranchCode, #filterCityCode, #filterStatus, #filterFundType',
+                clearFiltersButtonId: 'clearFilters',
+                defaultPageSize: @pageSize
+            });
+
+            $('#downloadButton').on('click', function () {
+                showConfirmationModal(
+                    "Seleccione el formato de exportación deseado:",
+                    async function (format) {
+                        if (!format) {
+                            Swal.fire({
+                                icon: 'warning',
+                                title: 'Sin selección',
+                                text: 'No se seleccionó un formato de exportación.',
+                                confirmButtonText: 'Entendido'
+                            });
+                            return;
+                        }
+
+                        AppLoading.show('Preparando archivo...', 'Esto puede tardar unos segundos.');
+
+                        try {
+                            const params = new URLSearchParams({
+                                format: format, // en FundsController es 'format'
+                                search: $("#tableSearch").val() || '',
+                                clientCode: $("#filterClientCode").val() || '',
+                                branchCode: $("#filterBranchCode").val() || '',
+                                cityCode: $("#filterCityCode").val() || '',
+                                fundStatus: $("#filterStatus").val() || '',
+                                fundType: $("#filterFundType").val() || ''
+                            });
+
+                            const response = await fetch(`@Url.Action("Export", "Fund")?${params.toString()}`, {
+                                method: 'GET',
+                                headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                            });
+
+                            if (!response.ok) {
+                                const contentType = response.headers.get('content-type');
+                                let errorMessage = 'Ocurrió un error al exportar los datos.';
+                                if (contentType && contentType.includes('application/json')) {
+                                    const errorData = await response.json();
+                                    errorMessage = errorData.message || errorMessage;
+                                } else {
+                                    errorMessage = await response.text();
+                                }
+                                throw new Error(errorMessage);
+                            }
+
+                            const contentType = response.headers.get('content-type');
+                            if (contentType && contentType.includes('application/json')) {
+                                const data = await response.json();
+                                throw new Error(data.message || 'Error desconocido al exportar.');
+                            }
+
+                            const blob = await response.blob();
+                            const disposition = response.headers.get('Content-Disposition');
+                            let filename = 'FONDOS.' + format.toLowerCase();
+                            if (disposition && disposition.includes('filename=')) {
+                                const matches = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/.exec(disposition);
+                                if (matches != null && matches[1]) {
+                                    filename = matches[1].replace(/['"]/g, '');
+                                }
+                            }
+
+                            const url = window.URL.createObjectURL(blob);
+                            const a = document.createElement('a');
+                            a.style.display = 'none';
+                            a.href = url;
+                            a.download = filename;
+                            document.body.appendChild(a);
+                            a.click();
+                            window.URL.revokeObjectURL(url);
+                            document.body.removeChild(a);
+
+                            AppLoading.hide();
+                            Swal.fire({ icon: 'success', title: '¡Descarga exitosa!', text: `El archivo se ha descargado correctamente.`, timer: 3000, showConfirmButton: false });
+                        } catch (error) {
+                            AppLoading.hide();
+                            Swal.fire({ icon: 'error', title: 'Error en la exportación', text: error.message || 'No se pudo completar la exportación.', confirmButtonText: 'Entendido' });
+                            console.error('Error al exportar:', error);
+                        }
+                    },
+                    "Exportar Datos",
+                    null,
+                    "btn-primary",
+                    true
+                );
+            });
+        });
+    </script>
+}

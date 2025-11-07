@@ -1,11 +1,11 @@
-﻿using VCashApp.Models.DTOs;
+﻿using VCashApp.Models.Dtos.EmployeeLog;
 using VCashApp.Models.ViewModels.EmployeeLog;
 
 namespace VCashApp.Extensions
 {
     public static class EmployeeLogMappingExtensions
     {
-        public static EmployeeLogSummaryViewModel ToSummaryViewModel(this EmployeeLogListadoDto dto)
+        public static EmployeeLogSummaryViewModel ToSummaryViewModel(this EmployeeLogListDto dto)
         {
             return new EmployeeLogSummaryViewModel
             {
@@ -27,7 +27,7 @@ namespace VCashApp.Extensions
         }
 
         public static IEnumerable<EmployeeLogSummaryViewModel> ToSummaryViewModels(
-            this IEnumerable<EmployeeLogListadoDto> dtos)
+            this IEnumerable<EmployeeLogListDto> dtos)
         {
             return dtos.Select(dto => dto.ToSummaryViewModel());
         }

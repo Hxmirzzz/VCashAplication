@@ -1,0 +1,167 @@
+﻿@model VCashApp.Models.Dtos.Fund.FundUpsertDto
+@using Microsoft.AspNetCore.Mvc.Rendering
+@{
+    bool isEdit = (bool)(ViewData["IsEdit"] ?? false);
+    string pageName = (string)(ViewData["PageName"] ?? (isEdit ? "Editar Fondo" : "Crear Fondo"));
+
+    var clients    = (IEnumerable<SelectListItem>)ViewData["Clients"]    ?? Enumerable.Empty<SelectListItem>();
+    var branches   = (IEnumerable<SelectListItem>)ViewData["Branches"]   ?? Enumerable.Empty<SelectListItem>();
+    var cities     = (IEnumerable<SelectListItem>)ViewData["Cities"]     ?? Enumerable.Empty<SelectListItem>();
+    var currencies = (IEnumerable<SelectListItem>)ViewData["Currencies"] ?? Enumerable.Empty<SelectListItem>();
+    var fundTypes  = (IEnumerable<SelectListItem>)ViewData["FundTypes"]  ?? Enumerable.Empty<SelectListItem>();
+}
+
+<div class="form-container">
+    <div class="card-body">
+        <form id="funds-form"
+              asp-action="Save"
+              asp-controller="Funds"
+              method="post">
+            @Html.AntiForgeryToken()
+            <input type="hidden" name="IsEdit" value="@(isEdit ? "true" : "false")" />
+
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="ri-information-fill"></i> @pageName</h5>
+                </div>
+
+                <div class="card-body">
+                    <div class="row g-3">
+
+                        <div class="col-12 col-lg-4">
+                            <div class="form-floating">
+                                <select asp-for="ClientCode" class="form-select" asp-items="clients" id="ClientCode">
+                                    <option value="">-- Seleccione cliente --</option>
+                                </select>
+                                <label asp-for="ClientCode">Cliente</label>
+                                <span asp-validation-for="ClientCode" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="col-6 col-lg-2">
+                            <div class="form-floating">
+                                <input asp-for="VatcoFundCode" type="number" min="1" class="form-control" id="VatcoFundCode" placeholder="Fondo Vatco" />
+                                <label asp-for="VatcoFundCode">Fondo Vatco</label>
+                                <span asp-validation-for="VatcoFundCode" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="col-12 col-lg-3">
+                            <div class="form-floating has-validation">
+                                @if (isEdit)
+                                {
+                                    <input asp-for="FundCode" class="form-control" id="FundCode" placeholder="Código" readonly />
+                                }
+                                else
+                                {
+                                    <input asp-for="FundCode" class="form-control" id="FundCode" placeholder="Código" />
+                                }
+                                <label asp-for="FundCode">Código</label>
+                                <span asp-validation-for="FundCode" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="col-6 col-lg-3">
+                            <div class="form-floating">
+                                <select class="form-select" id="FundStatusSelect">
+                                    @if (Model?.FundStatus != false)
+                                    {
+                                        <option value="true" selected>Activo</option>
+                                        <option value="false">Inactivo</option>
+                                    }
+                                    else
+                                    {
+                                        <option value="true">Activo</option>
+                                        <option value="false" selected>Inactivo</option>
+                                    }
+                                </select>
+
+                                <label>Estado</label>
+                            </div>
+                            <input type="hidden" asp-for="FundStatus" id="FundStatus" />
+                        </div>
+
+                        <div class="col-12 col-lg-6">
+                            <div class="form-floating">
+                                <input asp-for="FundName" class="form-control" placeholder="Nombre del Fondo" />
+                                <label asp-for="FundName">Nombre</label>
+                                <span asp-validation-for="FundName" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="col-12 col-lg-3">
+                            <div class="form-floating">
+                                <select asp-for="BranchCode" class="form-select" asp-items="branches" id="BranchCode">
+                                    <option value="">-- Seleccione sucursal --</option>
+                                </select>
+                                <label asp-for="BranchCode">Sucursal</label>
+                                <span asp-validation-for="BranchCode" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="col-12 col-lg-3">
+                            <div class="form-floating">
+                                <select asp-for="CityCode" class="form-select" asp-items="cities" id="CityCode">
+                                    <option value="">-- Seleccione ciudad --</option>
+                                </select>
+                                <label asp-for="CityCode">Ciudad</label>
+                                <span asp-validation-for="CityCode" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="col-12 col-lg-3">
+                            <div class="form-floating">
+                                <input asp-for="CreationDate" type="date" class="form-control" />
+                                <label asp-for="CreationDate">Fecha de creación</label>
+                                <span asp-validation-for="CreationDate" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="col-12 col-lg-3">
+                            <div class="form-floating">
+                                <input asp-for="WithdrawalDate" type="date" class="form-control" />
+                                <label asp-for="WithdrawalDate">Fecha de retiro</label>
+                                <span asp-validation-for="WithdrawalDate" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="col-12 col-lg-3">
+                            <div class="form-floating">
+                                <input asp-for="Cas4uCode" class="form-control" id="Cas4uCode" placeholder="Cod Cash4U" readonly />
+                                <label asp-for="Cas4uCode">Código Cash4U</label>
+                                <span asp-validation-for="Cas4uCode" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="col-12 col-lg-3">
+                            <div class="form-floating">
+                                <select asp-for="FundCurrency" class="form-select" asp-items="currencies" id="FundCurrency">
+                                    <option value="">-- Seleccione divisa --</option>
+                                </select>
+                                <label asp-for="FundCurrency">Divisa</label>
+                                <span asp-validation-for="FundCurrency" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="col-12 col-lg-3">
+                            <div class="form-floating">
+                                <select asp-for="FundType" class="form-select" asp-items="fundTypes" id="FundType">
+                                    <option value="">-- Seleccione tipo --</option>
+                                </select>
+                                <label asp-for="FundType">Tipo de fondo</label>
+                                <span asp-validation-for="FundType" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+            <div class="submit-container-spacer"></div>
+            <div class="submit-container form-group col-12 mt-4 fixed">
+                <button type="submit" class="btn btn-primary">Guardar</button>
+                <a asp-action="Index" asp-controller="Funds" class="btn btn-danger">Cancelar</a>
+            </div>
+        </form>
+    </div>
+</div>

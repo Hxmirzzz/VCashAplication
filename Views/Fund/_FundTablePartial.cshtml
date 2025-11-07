@@ -1,0 +1,121 @@
+﻿@model IEnumerable<VCashApp.Models.Dtos.Fund.FundListDto>
+@{
+    int currentPage = ViewBag.CurrentPage ?? 1;
+    int totalPages = ViewBag.TotalPages ?? 1;
+    int totalData = ViewBag.TotalData ?? 0;
+    int pageSize = ViewBag.PageSize ?? 15;
+
+    bool canEdit = ViewBag.HasEdit ?? false;
+
+    const int maxPagesToShow = 5;
+    int halfPagesToShow = (maxPagesToShow - 1) / 2;
+
+    int startPage = Math.Max(1, currentPage - halfPagesToShow);
+    int endPage = Math.Min(totalPages, currentPage + halfPagesToShow);
+
+    if (endPage - startPage + 1 < maxPagesToShow)
+    {
+        if (startPage == 1) endPage = Math.Min(totalPages, startPage + maxPagesToShow - 1);
+        else if (endPage == totalPages) startPage = Math.Max(1, endPage - maxPagesToShow + 1);
+    }
+
+    string FormatDate(DateOnly? d) => d.HasValue ? d.Value.ToString("yyyy-MM-dd") : "-";
+}
+
+<div class="table-section">
+    <div class="table-container">
+        <div class="table-wrapper">
+            <table class="table" id="dataTable">
+                <thead>
+                    <tr>
+                        <th>Código</th>
+                        <th>Fondo Vatco</th>
+                        <th>Nombre Fondo</th>
+                        <th>Cliente</th>
+                        <th>Sucursal</th>
+                        <th>Ciudad</th>
+                        <th>Divisa</th>
+                        <th style="width: 80px;"><i class="ri-list-settings-fill"></i></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model != null && Model.Any())
+                    {
+                        foreach (var f in Model)
+                        {
+                            <tr>
+                                <td>@f.FundCode</td>
+                                <td>@(f.VatcoFundCode?.ToString() ?? "-")</td>
+                                <td>@(!string.IsNullOrWhiteSpace(f.FundName) ? f.FundName : "-")</td>
+                                <td>@(string.IsNullOrWhiteSpace(f.ClientName) ? "-" : f.ClientName)</td>
+                                <td>@(string.IsNullOrWhiteSpace(f.BranchName) ? "-" : f.BranchName)</td>
+                                <td>@(string.IsNullOrWhiteSpace(f.CityName) ? "-" : f.CityName)</td>
+                                <td>@(string.IsNullOrWhiteSpace(f.FundCurrency) ? "-" : f.FundCurrency)</td>
+                                <td>
+                                    <div class="action-buttons d-flex align-items-center justify-content-center">
+                                        @if (canEdit)
+                                        {
+                                            <a asp-controller="Funds" asp-action="Edit" asp-route-code="@f.FundCode" class="btn-edit" title="Editar">
+                                                <i class="ri-pencil-fill"></i>
+                                            </a>
+
+                                            <form class="toggle-status-form d-inline"
+                                                  method="post"
+                                                  asp-action="ToggleStatus"
+                                                  asp-controller="Funds"
+                                                  asp-route-code="@f.FundCode"
+                                                  data-submit="ajax">
+                                                @Html.AntiForgeryToken()
+                                                <input type="hidden" name="isActive" value="@(f.FundStatus ? "true" : "false")" class="hidden-is-active" />
+                                                <label class="switch" title="@(f.FundStatus ? "Desactivar" : "Activar")">
+                                                    <input type="checkbox"
+                                                           class="status-toggle"
+                                                           @(f.FundStatus ? "checked" : null)
+                                                           data-msg-on="¿Confirmas ACTIVAR este fondo?"
+                                                           data-msg-off="¿Confirmas DESACTIVAR este fondo?" />
+                                                    <span class="slider round"></span>
+                                                </label>
+                                            </form>
+                                        }
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="8" class="text-center">No se encontraron fondos.</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="table-footer">
+        <div class="page-message">Página @currentPage de @totalPages (Total: @totalData registros)</div>
+        <div class="pagination">
+            <button class="page-link" data-page="1" @(currentPage == 1 ? "disabled" : "")>&laquo;</button>
+            <button class="page-link" data-page="@(currentPage - 1)" @(currentPage == 1 ? "disabled" : "")>&lt;</button>
+
+            @if (startPage > 1)
+            {
+                <button class="page-link" data-page="@(startPage - 1)">...</button>
+            }
+
+            @for (int i = startPage; i <= endPage; i++)
+            {
+                <button class="page-link @(currentPage == i ? "active-page" : "")" data-page="@i">@i</button>
+            }
+
+            @if (endPage < totalPages)
+            {
+                <button class="page-link" data-page="@(endPage + 1)">...</button>
+            }
+
+            <button class="page-link" data-page="@(currentPage + 1)" @(currentPage == totalPages ? "disabled" : "")>&gt;</button>
+            <button class="page-link" data-page="@totalPages" @(currentPage == totalPages ? "disabled" : "")>&raquo;</button>
+        </div>
+    </div>
+</div>

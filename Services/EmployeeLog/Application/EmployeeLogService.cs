@@ -6,7 +6,7 @@ using VCashApp.Data;
 using VCashApp.Enums;
 using VCashApp.Infrastructure.Branches;
 using VCashApp.Models;
-using VCashApp.Models.DTOs;
+using VCashApp.Models.Dtos.EmployeeLog;
 using VCashApp.Models.Entities;
 using VCashApp.Models.ViewModels.EmployeeLog;
 using VCashApp.Services.DTOs;
@@ -96,7 +96,7 @@ namespace VCashApp.Services.EmployeeLog.Application
             return EmployeeLogMappers.ToManualExitVm(s, canCreateLog, canEditLog);
         }
 
-        public async Task<EmployeeLogStateDto> GetEmployeeLogStatusAsync(int employeeId)
+        public async Task<EmployeeLogStatusDto> GetEmployeeLogStatusAsync(int employeeId)
         {
             var now = DateTime.Now;
             var currentDate = DateOnly.FromDateTime(now.Date);
@@ -107,7 +107,7 @@ namespace VCashApp.Services.EmployeeLog.Application
                 .FirstOrDefaultAsync(e => e.CodCedula == employeeId);
 
             if (employee == null)
-                return new EmployeeLogStateDto { Status = "error", ErrorMessage = "Empleado no encontrado" };
+                return new EmployeeLogStatusDto { Status = "error", ErrorMessage = "Empleado no encontrado" };
 
             string? unitType = employee.Cargo?.Unidad?.TipoUnidad;
 
@@ -139,7 +139,7 @@ namespace VCashApp.Services.EmployeeLog.Application
             if (openYesterday != null)
                 return EmployeeLogMappers.ToStateDto("openEntryYesterday", openYesterday, currentDate, currentTime, unitType);
 
-            return new EmployeeLogStateDto
+            return new EmployeeLogStatusDto
             {
                 Status = "noEntry",
                 CurrentDate = currentDate.ToString("yyyy-MM-dd"),
@@ -359,7 +359,7 @@ namespace VCashApp.Services.EmployeeLog.Application
             => RecordManualEmployeeExitAsync(new EmployeeLogManualExitViewModel { Id = logId, ExitDate = exitDate, ExitTime = exitTime }, currentUserId, confirmedValidation);
 
         // -------------------- LISTADOS (sin SP) --------------------
-        public async Task<(IEnumerable<EmployeeLogListadoDto> Items, int Total)> GetFilteredEmployeeLogsAsync(
+        public async Task<(IEnumerable<EmployeeLogListDto> Items, int Total)> GetFilteredEmployeeLogsAsync(
             string currentUserId, int? cargoId, string? unitId, int? branchId,
             DateOnly? startDate, DateOnly? endDate, int? logStatus,
             string? search, int page, int pageSize, bool isAdmin)
@@ -409,7 +409,7 @@ namespace VCashApp.Services.EmployeeLog.Application
                 .ThenByDescending(r => r.HoraEntrada)
                 .Skip((page - 1) * pageSize)
                 .Take(pageSize)
-                .Select(r => new EmployeeLogListadoDto
+                .Select(r => new EmployeeLogListDto
                 {
                     Id = r.Id,
                     CodCedula = r.CodCedula,
@@ -445,11 +445,11 @@ namespace VCashApp.Services.EmployeeLog.Application
             return (rows, total);
         }
 
-        public async Task<List<EmpleadoBusquedaDto>> GetEmployeeInfoAsync(
+        public async Task<List<EmployeeLogSearchDto>> GetEmployeeInfoAsync(
             string userId, List<int> permittedBranchIds, string? searchInput, bool isAdmin)
         {
             if (string.IsNullOrWhiteSpace(searchInput))
-                return new List<EmpleadoBusquedaDto>();
+                return new List<EmployeeLogSearchDto>();
 
             var q = _context.AdmEmpleados
                 .AsNoTracking()
@@ -495,7 +495,7 @@ namespace VCashApp.Services.EmployeeLog.Application
                 .OrderBy(e => EF.Functions.Like(e.NombreCompleto ?? "", $"{cleanSearch}") ? 0 : 1)
                     .ThenBy(e => EF.Functions.Like(e.NombreCompleto ?? "", $"{cleanSearch}%") ? 0 : 1)
                 .Take(20)
-                .Select(e => new EmpleadoBusquedaDto
+                .Select(e => new EmployeeLogSearchDto
                 {
                     CodCedula = e.CodCedula,
                     PrimerNombre = e.PrimerNombre,

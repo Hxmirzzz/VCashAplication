@@ -1,50 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 namespace VCashApp.Services.DTOs
 {
-    // DTOs para EmployeeLog
-    public class EmployeeLogStateDto
-    {
-        public string Status { get; set; }
-        public string? EntryDate { get; set; }
-        public string? EntryTime { get; set; }
-        public string? ExitDate { get; set; }
-        public string? ExitTime { get; set; }
-        public string CurrentDate { get; set; }
-        public string CurrentTime { get; set; }
-        public string? UnitType { get; set; }
-        public string? ErrorMessage { get; set; }
-        public double? HoursWorked { get; set; }
-        public string? ValidationType { get; set; }
-        public bool NeedsConfirmation { get; set; }
-        public int? OpenLogId { get; set; }
-    }
-
-    public class EmployeeLogDto
-    {
-        public int Id { get; set; }
-        public int EmployeeId { get; set; }
-        public string FirstName { get; set; }
-        public string? MiddleName { get; set; }
-        public string LastName { get; set; }
-        public string? SecondLastName { get; set; }
-        public int CargoId { get; set; }
-        public string CargoName { get; set; }
-        public string UnitId { get; set; }
-        public string UnitName { get; set; }
-        public int BranchId { get; set; }
-        public string BranchName { get; set; }
-        public string EntryDate { get; set; }
-        public string EntryTime { get; set; }
-        public string? ExitDate { get; set; }
-        public string? ExitTime { get; set; }
-        public bool IsEntryRecorded { get; set; }
-        public bool IsExitRecorded { get; set; }
-        public string? ConfirmedValidation { get; set; }
-    }
-
-    // ServiceResult (la versión completa con Errors)
     public class ServiceResult
     {
         public bool Success { get; set; }
@@ -91,15 +47,5 @@ namespace VCashApp.Services.DTOs
         public int RutasOmitidas { get; set; }
         public bool ExitoParcial { get; set; }
         public string Mensaje { get; set; }
-    }
-
-    public class StatusChangeRequestDTO
-    {
-        [Required]
-        public int EmployeeId { get; set; } // Para asegurarse de que el ID es enviado en el cuerpo
-        [Required(ErrorMessage = "El nuevo estado es obligatorio.")]
-        public int NewStatus { get; set; } // El valor numérico del enum
-        [StringLength(500, ErrorMessage = "La razón no debe exceder los 500 caracteres.")]
-        public string? ReasonForChange { get; set; } // Razón del cambio (opcional)
     }
 }
