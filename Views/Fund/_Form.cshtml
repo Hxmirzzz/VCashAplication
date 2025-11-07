@@ -15,7 +15,7 @@
     <div class="card-body">
         <form id="funds-form"
               asp-action="Save"
-              asp-controller="Funds"
+              asp-controller="Fund"
               method="post">
             @Html.AntiForgeryToken()
             <input type="hidden" name="IsEdit" value="@(isEdit ? "true" : "false")" />
@@ -28,7 +28,7 @@
                 <div class="card-body">
                     <div class="row g-3">
 
-                        <div class="col-12 col-lg-4">
+                        <div class="col-12 col-lg-5">
                             <div class="form-floating">
                                 <select asp-for="ClientCode" class="form-select" asp-items="clients" id="ClientCode">
                                     <option value="">-- Seleccione cliente --</option>
@@ -38,47 +38,27 @@
                             </div>
                         </div>
 
-                        <div class="col-6 col-lg-2">
+                        <div class="col-6 col-lg-3">
                             <div class="form-floating">
-                                <input asp-for="VatcoFundCode" type="number" min="1" class="form-control" id="VatcoFundCode" placeholder="Fondo Vatco" />
+                                @if (isEdit)
+                                {
+                                    <input asp-for="VatcoFundCode" type="number" min="1" class="form-control" id="VatcoFundCode" placeholder="Fondo Vatco" readonly />
+                                }
+                                else
+                                {
+                                    <input asp-for="VatcoFundCode" type="number" min="1" class="form-control" id="VatcoFundCode" placeholder="Fondo Vatco" />
+                                }
                                 <label asp-for="VatcoFundCode">Fondo Vatco</label>
                                 <span asp-validation-for="VatcoFundCode" class="text-danger"></span>
                             </div>
                         </div>
 
-                        <div class="col-12 col-lg-3">
+                        <div class="col-12 col-lg-4">
                             <div class="form-floating has-validation">
-                                @if (isEdit)
-                                {
-                                    <input asp-for="FundCode" class="form-control" id="FundCode" placeholder="Código" readonly />
-                                }
-                                else
-                                {
-                                    <input asp-for="FundCode" class="form-control" id="FundCode" placeholder="Código" />
-                                }
+                                <input asp-for="FundCode" class="form-control" id="FundCode" placeholder="Código" readonly />
                                 <label asp-for="FundCode">Código</label>
                                 <span asp-validation-for="FundCode" class="text-danger"></span>
                             </div>
-                        </div>
-
-                        <div class="col-6 col-lg-3">
-                            <div class="form-floating">
-                                <select class="form-select" id="FundStatusSelect">
-                                    @if (Model?.FundStatus != false)
-                                    {
-                                        <option value="true" selected>Activo</option>
-                                        <option value="false">Inactivo</option>
-                                    }
-                                    else
-                                    {
-                                        <option value="true">Activo</option>
-                                        <option value="false" selected>Inactivo</option>
-                                    }
-                                </select>
-
-                                <label>Estado</label>
-                            </div>
-                            <input type="hidden" asp-for="FundStatus" id="FundStatus" />
                         </div>
 
                         <div class="col-12 col-lg-6">
@@ -125,7 +105,7 @@
                             </div>
                         </div>
 
-                        <div class="col-12 col-lg-3">
+                        <div class="col-12 col-lg-6">
                             <div class="form-floating">
                                 <input asp-for="Cas4uCode" class="form-control" id="Cas4uCode" placeholder="Cod Cash4U" readonly />
                                 <label asp-for="Cas4uCode">Código Cash4U</label>
@@ -133,7 +113,7 @@
                             </div>
                         </div>
 
-                        <div class="col-12 col-lg-3">
+                        <div class="col-12 col-lg-4">
                             <div class="form-floating">
                                 <select asp-for="FundCurrency" class="form-select" asp-items="currencies" id="FundCurrency">
                                     <option value="">-- Seleccione divisa --</option>
@@ -143,7 +123,7 @@
                             </div>
                         </div>
 
-                        <div class="col-12 col-lg-3">
+                        <div class="col-12 col-lg-4">
                             <div class="form-floating">
                                 <select asp-for="FundType" class="form-select" asp-items="fundTypes" id="FundType">
                                     <option value="">-- Seleccione tipo --</option>
@@ -153,6 +133,26 @@
                             </div>
                         </div>
 
+                        <div class="col-6 col-lg-4">
+                            <div class="form-floating">
+                                <select class="form-select" id="FundStatusSelect">
+                                    @if (Model?.FundStatus != false)
+                                    {
+                                        <option value="true" selected>Activo</option>
+                                        <option value="false">Inactivo</option>
+                                    }
+                                    else
+                                    {
+                                        <option value="true">Activo</option>
+                                        <option value="false" selected>Inactivo</option>
+                                    }
+                                </select>
+
+                                <label>Estado</label>
+                            </div>
+                            <input type="hidden" asp-for="FundStatus" id="FundStatus" />
+                        </div>
+
                     </div>
                 </div>
             </div>
@@ -160,7 +160,7 @@
             <div class="submit-container-spacer"></div>
             <div class="submit-container form-group col-12 mt-4 fixed">
                 <button type="submit" class="btn btn-primary">Guardar</button>
-                <a asp-action="Index" asp-controller="Funds" class="btn btn-danger">Cancelar</a>
+                <a asp-action="Index" asp-controller="Fund" class="btn btn-danger">Cancelar</a>
             </div>
         </form>
     </div>

@@ -4,6 +4,8 @@ using VCashApp.Data;
 using VCashApp.Infrastructure.Branches;
 using VCashApp.Models.Dtos.Fund;
 using VCashApp.Services.Fund.Application;
+using VCashApp.Enums;
+using VCashApp.Enums.Fund;
 
 namespace VCashApp.Services.Fund.Infrastructure
 {
@@ -253,8 +255,25 @@ namespace VCashApp.Services.Fund.Infrastructure
                 })
                 .ToListAsync();
 
-            var currencies = new List<SelectListItem>();
-            var fundTypes = new List<SelectListItem>();
+            var currencies = Enum.GetValues(typeof(CurrencyEnum))
+                .Cast<CurrencyEnum>()
+                .Select(e => new SelectListItem
+                {
+                    Value = e.ToString(),
+                    Text = e.ToString()
+                })
+                .ToList();
+            currencies = currencies.OrderBy(c => c.Text).ToList();
+
+            var fundTypes = Enum.GetValues(typeof(FundTypeEnum))
+                .Cast<FundTypeEnum>()
+                .Select(f => new SelectListItem
+                {
+                    Value = ((int)f).ToString(),
+                    Text = f.ToString()
+                })
+                .ToList();
+            fundTypes = fundTypes.OrderBy(c => c.Text).ToList();
 
             return new FundLookupDto
             {

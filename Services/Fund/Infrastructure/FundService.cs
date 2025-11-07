@@ -179,18 +179,5 @@ namespace VCashApp.Services.Fund.Infrastructure
             }
             return false;
         }
-
-        /// <summary>
-        /// Asigna el nuevo valor si es distinto del actual y devuelve true si hubo cambio.
-        /// </summary>
-        private static bool Set<T>(ref T target, T value)
-        {
-            if (!Equals(target, value))
-            {
-                target = value;
-                return true;
-            }
-            return false;
-        }
     }
 }

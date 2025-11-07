@@ -86,12 +86,4 @@
         Incident,
         Both
     }
-
-    public enum CurrencyEnum
-    {
-        COP,
-        USD,
-        EUR,
-        CAD
-    }
 }

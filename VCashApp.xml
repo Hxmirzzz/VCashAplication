@@ -1645,6 +1645,21 @@
             <param name="selectedBranchFilter">Opcional. Filtro por ID de sucursal.</param>
             <returns>Un <see cref="T:Microsoft.AspNetCore.Mvc.IActionResult"/> que devuelve un archivo para descarga en caso de éxito.</returns>
         </member>
+        <member name="T:VCashApp.Enums.Fund.FundTypeEnum">
+            <summary>
+            Tipo de fondo.
+            </summary>
+        </member>
+        <member name="F:VCashApp.Enums.Fund.FundTypeEnum.OFICINA">
+            <summary>
+            Indicador oficina.
+            </summary>
+        </member>
+        <member name="F:VCashApp.Enums.Fund.FundTypeEnum.ATM">
+            <summary>
+            Indicador ATM/Cajero.
+            </summary>
+        </member>
         <member name="T:VCashApp.Enums.RouteCatalogs">
             <summary>
             Proporciona definiciones de catálogos para códigos relacionados con rutas y su lógica de validación.
@@ -3776,11 +3791,6 @@
             </summary>
             <param name="relativePath">Ruta relativa del archivo a eliminar.</param>
             <returns>Una tarea que representa la operación asincrónica.</returns>
-        </member>
-        <member name="M:VCashApp.Services.Fund.Infrastructure.FundService.Set``1(``0@,``0)">
-            <summary>
-            Asigna el nuevo valor si es distinto del actual y devuelve true si hubo cambio.
-            </summary>
         </member>
         <!-- Badly formed XML comment ignored for member "M:VCashApp.Services.Helpers.TimeFormatHelper.ToTimeInput24(System.Object)" -->
         <!-- Badly formed XML comment ignored for member "M:VCashApp.Services.Helpers.TimeFormatHelper.ToDateInput(System.Nullable{System.DateOnly})" -->

@@ -35,13 +35,12 @@
     function refreshAutoCodes() {
         const code = buildFundCode();
         const cash = buildCas4u();
-        // si es Create (FundCode editable), autollenamos
-        if (inputFundCode && !inputFundCode.readOnly) inputFundCode.value = code;
+        if (inputFundCode) inputFundCode.value = code;
         if (inputCas4u) inputCas4u.value = cash;
     }
     selClientCode?.addEventListener('change', refreshAutoCodes);
     inputVatco?.addEventListener('input', refreshAutoCodes);
-    if (inputFundCode && !inputFundCode.readOnly) refreshAutoCodes();
+    if (inputFundCode) refreshAutoCodes();
 
     // ===== envío AJAX =====
     async function postForm(formEl) {
@@ -103,7 +102,7 @@
 
             if (result && result.success) {
                 await Swal.fire({ icon: 'success', title: '¡Éxito!', text: result.message || (isEdit ? 'Fondo actualizado.' : 'Fondo creado.') });
-                window.location.href = '/Funds/Index';
+                window.location.href = '/Fund/Index';
             } else {
                 let html = (result && result.message) ? result.message : 'No se pudo guardar.';
                 if (result && result.errors) {
