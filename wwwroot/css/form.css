@@ -20,7 +20,7 @@ label {
    =================================================================== */
 .form-container {
     width: 100%;
-    border-radius: 1rem;
+    border-radius: 8px;
     transition: margin-left var(--transition-duration) var(--transition-timing-function);
     background-color: var(--div-bg);
 }
@@ -44,8 +44,8 @@ label {
     box-sizing: border-box;
     background: var(--div-bg);
     border: 1px solid var(--border-color);
-    border-radius: .75rem;
-    box-shadow: 0 4px 12px var(--shadow-color-main);
+    border-radius: 8px;
+    box-shadow: 0 2px 8px var(--shadow-color-main);
     color: var(--text-color-main);
 }
 
@@ -53,26 +53,26 @@ label {
     background-color: var(--table-header-bg);
     color: var(--title-color-main);
     text-align: left;
-    border-top-left-radius: .75rem;
-    border-top-right-radius: .75rem;
-    padding: .55rem .9rem;
-    font-size: 1rem;
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
+    padding: 8px 12px;
+    font-size: 0.938rem;
     font-weight: var(--font-semi-bold);
     display: flex;
     align-items: center;
-    gap: .5rem;
+    gap: 6px;
     border-bottom: 1px solid var(--border-color);
 }
 
     .card-header h4, .card-header h5 {
         color: inherit !important;
         margin-bottom: 0;
-        font-size: 1rem;
+        font-size: 0.938rem;
     }
 
 .card-body {
     height: auto;
-    padding: 1rem;
+    padding: 12px;
 }
 
 .table-container-responsive {
@@ -101,14 +101,14 @@ label {
 .form-select,
 textarea.form-control {
     font-size: var(--smaller-font-size) !important;
-    min-height: calc(1.5em + .5rem + 2px) !important;
+    min-height: calc(1.5em + 0.5rem + 2px) !important;
     color: var(--text-color-main);
     background-color: var(--div-bg);
     border: 1px solid var(--border-color);
 }
 
 .form-group {
-    margin-bottom: .75rem;
+    margin-bottom: 10px;
 }
 
 .form-floating > label {
@@ -118,7 +118,7 @@ textarea.form-control {
 
 .form-floating > textarea.form-control {
     height: auto;
-    min-height: 80px;
+    min-height: 70px;
 }
 
 /* Validación */
@@ -274,15 +274,15 @@ textarea.form-control {
     display: none;
     justify-content: center;
     align-items: center;
-    gap: 10px;
-    margin-top: 1.5rem;
+    gap: 8px;
+    margin-top: 12px;
 }
 
 .btn {
     font-size: var(--normal-font-size);
-    padding: .375rem .75rem;
+    padding: 6px 12px;
     font-weight: var(--font-semi-bold);
-    border-radius: .25rem;
+    border-radius: 4px;
     transition: all .2s ease;
 }
 
