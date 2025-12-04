@@ -1,0 +1,225 @@
+﻿@model IEnumerable<VCashApp.Models.Dtos.Point.PointListDto>
+
+@using Microsoft.AspNetCore.Mvc.Rendering
+@using VCashApp.Models.Dtos.Point
+
+@{
+    Layout = "_Layout";
+    ViewData["Title"] = "Puntos";
+
+    var filter = ViewBag.Filter as PointFilterDto ?? new PointFilterDto();
+    string currentSearchTerm = filter.Search ?? "";
+    int currentPage = ViewBag.CurrentPage ?? 1;
+    int pageSize = ViewBag.PageSize ?? 15;
+
+    var clients = (IEnumerable<SelectListItem>)ViewBag.Clientes ?? Enumerable.Empty<SelectListItem>();
+    var cities = (IEnumerable<SelectListItem>)ViewBag.Ciudades ?? Enumerable.Empty<SelectListItem>();
+    var routes = (IEnumerable<SelectListItem>)ViewBag.Rutas ?? Enumerable.Empty<SelectListItem>();
+    var ranges = (IEnumerable<SelectListItem>)ViewBag.Rangos ?? Enumerable.Empty<SelectListItem>();
+
+    bool canCreate = ViewBag.HasCreate ?? false;
+    bool canView = ViewBag.HasView ?? true;
+    bool canEdit = ViewBag.HasEdit ?? false;
+}
+
+<div class="section-header">
+    <div class="alert-container">
+        @if (TempData["Success"] != null)
+        {
+            <div class="alert alert-success mt-2">@TempData["Success"]</div>
+        }
+        @if (TempData["Error"] != null)
+        {
+            <div class="alert alert-danger mt-2">@TempData["Error"]</div>
+        }
+    </div>
+</div>
+
+<div class="search-container">
+    <div class="table-controls">
+        <input type="text" id="tableSearch" class="form-control form-control-sm"
+               placeholder="Buscar..." value="@currentSearchTerm">
+
+        <div class="table-buttons">
+
+            @if (canCreate)
+            {
+                <div class="control-button-wrapper">
+                    <a href="@Url.Action("Create", "Point")"
+                       class="control-button-icon" id="addPointButton" title="Registrar Nuevo Punto">
+                        <img src="/assets/icon-img/add.png" />
+                    </a>
+                </div>
+            }
+
+            <div class="control-button-wrapper">
+                <img src="/assets/icon-img/download.png"
+                     class="control-button-icon" id="downloadButton" title="Exportar" />
+            </div>
+
+            <div class="control-button-wrapper">
+                <img src="/assets/icon-img/filter-on.png"
+                     class="control-button-icon" id="filterButton" title="Filtros" />
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Sidebar Filtros -->
+<div class="filter-sidebar" id="filterSidebar">
+    <div class="filter-sidebar-content">
+        <h3>Filtros Avanzados</h3>
+
+        <div class="row g-3">
+
+            <div class="col-12">
+                <div class="form-floating">
+                    <select id="filterClientCode" class="form-select" name="ClientCode" asp-items="clients">
+                        <option value="">-- Todos --</option>
+                    </select>
+                    <label>Cliente:</label>
+                </div>
+            </div>
+
+            <div class="col-12">
+                <div class="form-floating">
+                    <select id="filterCityCode" class="form-select" name="CityCode" asp-items="cities">
+                        <option value="">-- Todas --</option>
+                    </select>
+                    <label>Ciudad:</label>
+                </div>
+            </div>
+
+            <div class="col-12">
+                <div class="form-floating">
+                    <select id="filterRouteCode" class="form-select" name="RouteCode" asp-items="routes">
+                        <option value="">-- Todas --</option>
+                    </select>
+                    <label>Ruta:</label>
+                </div>
+            </div>
+
+            <div class="col-12">
+                <div class="form-floating">
+                    <select id="filterRangeCode" class="form-select" name="RangeCode" asp-items="ranges">
+                        <option value="">-- Todos --</option>
+                    </select>
+                    <label>Rango Atención:</label>
+                </div>
+            </div>
+
+            <div class="col-12">
+                <div class="form-floating">
+                    <select id="filterStatus" name="IsActive" class="form-select">
+                        <option value="">-- Selecciona --</option>
+                        <option value="true">Activo</option>
+                        <option value="false">Inactivo</option>
+                    </select>
+                    <label>Estado:</label>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="filter-buttons">
+            <div class="cancel-filter-btn" id="clearFilters" title="Limpiar Filtros">
+                <img src="~/assets/icon-img/filter-off.png" />
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<div id="dataTablePartial">
+    @Html.Partial("~/Views/Point/_PointTablePartial.cshtml", Model)
+</div>
+
+<div class="modal fade" id="PointMapModal" tabindex="-1" aria-labelledby="PointMapModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered" style="max-width: 900px;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="PointMapModalLabel">Ubicación del Punto</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body" style="height: 500px;">
+                <div id="pointMap" style="height: 100%; width: 100%; border-radius: 8px;"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    <script src="/js/point/point-index.js"></script>
+    <script>
+        $(document).ready(function () {
+
+            setupTablePaginationAndFilters({
+                tableContainerId: 'dataTablePartial',
+                controllerName: 'Point',
+                actionName: 'Index',
+                searchInputId: 'tableSearch',
+                filterInputsSelector:
+                    '#filterClientCode, #filterMainClientCode, #filterBranchCode, #filterCityCode, #filterStatus, #filterRouteCode, #filterRangeCode',
+                clearFiltersButtonId: 'clearFilters',
+                defaultPageSize: @pageSize
+            });
+
+            $("#downloadButton").on("click", function () {
+
+                showConfirmationModal(
+                    "Seleccione el formato de exportación:",
+                    async function (format) {
+
+                        if (!format) {
+                            Swal.fire({ icon: 'warning', title: 'Sin selección', text: 'No se seleccionó un formato.' });
+                            return;
+                        }
+
+                        AppLoading.show('Preparando archivo...');
+
+                        try {
+
+                            const params = new URLSearchParams({
+                                format: format,
+                                search: $("#tableSearch").val() || '',
+                                clientCode: $("#filterClientCode").val() || '',
+                                mainClientCode: $("#filterMainClientCode").val() || '',
+                                branchCode: $("#filterBranchCode").val() || '',
+                                cityCode: $("#filterCityCode").val() || '',
+                                status: $("#filterStatus").val() || '',
+                                routeCode: $("#filterRouteCode").val() || '',
+                                rangeCode: $("#filterRangeCode").val() || ''
+                            });
+
+                            const response = await fetch(`@Url.Action("Export", "Point")?${params.toString()}`);
+
+                            if (!response.ok) throw new Error(await response.text());
+
+                            const blob = await response.blob();
+                            const url = URL.createObjectURL(blob);
+
+                            const a = document.createElement("a");
+                            a.href = url;
+                            a.download = "PUNTOS." + format.toLowerCase();
+                            document.body.appendChild(a);
+                            a.click();
+
+                            URL.revokeObjectURL(url);
+                            AppLoading.hide();
+
+                        } catch (err) {
+                            AppLoading.hide();
+                            Swal.fire({ icon: 'error', title: 'Error exportando', text: err.message });
+                        }
+                    },
+                    "Exportar Datos",
+                    null, "btn-primary", true
+                );
+            });
+        });
+    </script>
+}

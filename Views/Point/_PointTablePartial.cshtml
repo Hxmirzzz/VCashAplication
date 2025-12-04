@@ -1,0 +1,204 @@
+﻿@model IEnumerable<VCashApp.Models.Dtos.Point.PointListDto>
+
+@{
+    int currentPage = ViewBag.CurrentPage ?? 1;
+    int totalPages = ViewBag.TotalPages ?? 1;
+    int totalData = ViewBag.TotalData ?? 0;
+    int pageSize = ViewBag.PageSize ?? 15;
+
+    bool canEdit = ViewBag.HasEdit ?? false;
+
+    const int maxPagesToShow = 5;
+    int half = (maxPagesToShow - 1) / 2;
+
+    int startPage = Math.Max(1, currentPage - half);
+    int endPage = Math.Min(totalPages, currentPage + half);
+
+    if (endPage - startPage + 1 < maxPagesToShow)
+    {
+        if (startPage == 1) endPage = Math.Min(totalPages, startPage + maxPagesToShow - 1);
+        else if (endPage == totalPages) startPage = Math.Max(1, endPage - maxPagesToShow + 1);
+    }
+}
+
+<div class="table-section">
+    <div class="table-container">
+        <div class="table-wrapper">
+            <table class="table" id="dataTable">
+                <thead>
+                    <tr>
+                        <th>Código</th>
+                        <th>Código Cliente</th>
+                        <th>Nombre Punto</th>
+                        <th>Cliente</th>
+                        <th>Sucursal</th>
+                        <th>Ciudad</th>
+                        <th>Fondo</th>
+                        <th>Ruta</th>
+                        <th>Rango</th>
+                        <th style="width:80px;"><i class="ri-list-settings-fill"></i></th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    @if (Model != null && Model.Any())
+                    {
+                        foreach (var p in Model)
+                        {
+                            <tr>
+                                <td>@p.CodPunto</td>
+                                <td>@p.CodPCliente</td>
+                                <td>@(string.IsNullOrWhiteSpace(p.NombrePunto) ? "-" : p.NombrePunto)</td>
+                                <td>@(string.IsNullOrWhiteSpace(p.ClienteNombre) ? "-" : p.ClienteNombre)</td>
+                                <td>@(string.IsNullOrWhiteSpace(p.NombreSucursal) ? "-" : p.NombreSucursal)</td>
+                                <td>@(string.IsNullOrWhiteSpace(p.NombreCiudad) ? "-" : p.NombreCiudad)</td>
+                                <td>@(string.IsNullOrWhiteSpace(p.FundName) ? "-" : p.FundName)</td>
+                                <td>@(string.IsNullOrWhiteSpace(p.RouteName) ? "-" : p.RouteName)</td>
+                                <td>@(string.IsNullOrWhiteSpace(p.RangeName) ? "-" : p.RangeName) @p.Latitude</td>
+
+                                <td>
+                                    <div class="action-buttons d-flex align-items-center justify-content-center">
+
+                                        @if (canEdit)
+                                        {
+                                            <a asp-controller="Point"
+                                               asp-action="Edit"
+                                               asp-route-code="@p.CodPunto"
+                                               class="btn-edit"
+                                               title="Editar">
+                                                <i class="ri-pencil-fill"></i>
+                                            </a>
+                                        }
+
+                                        @if (ViewBag.HasView ?? false)
+                                        {
+                                            <a asp-controller="Point"
+                                               asp-action="Preview"
+                                               asp-route-code="@p.CodPunto"
+                                               class="btn-detail"
+                                               title="Ver Detalle">
+                                                <i class="ri-eye-fill"></i>
+                                            </a>
+                                        }
+
+                                        @if (ViewBag.HasView ?? false)
+                                        {
+                                            <a asp-controller="Documents"
+                                               asp-action="PuntoPdf"
+                                               asp-route-cod_punto="@p.CodPunto"
+                                               class="btn-print"
+                                               title="Exportar PDF">
+                                                <i class="ri-printer-fill"></i>
+                                            </a>
+                                        }
+
+                                        @if (ViewBag.HasView ?? false)
+                                        {
+                                            <a href="#"
+                                               class="btn-earth btn-map"
+                                               title="Ver ubicación en mapa"
+                                               data-lat="@p.Latitude"
+                                               data-lng="@p.Longitude"
+                                               data-radius="@p.PointRadius"
+                                               data-title="@(p.NombrePunto ?? p.CodPunto)"
+                                               data-cod="@p.CodPunto">
+                                                <i class="ri-earth-fill"></i>
+                                            </a>
+                                        }
+
+                                        @if (ViewBag.HasView ?? false)
+                                        {
+                                            <a href="#"
+                                               class="btn-modal"
+                                               title="Modelamiento"
+                                               data-bs-toggle="modal"
+                                               data-bs-target="#ModelInsPuntosModal"
+                                               data-codpunto="@p.CodPunto">
+                                                <i class="ri-instance-line"></i>
+                                            </a>
+                                        }
+
+                                        @* ============================
+                                           6. TOGGLE STATUS
+                                           ============================ *@
+                                        @if (canEdit)
+                                        {
+                                            <form class="toggle-status-form d-inline"
+                                                  method="post"
+                                                  asp-controller="Point"
+                                                  asp-action="ToggleStatus"
+                                                  asp-route-code="@p.CodPunto"
+                                                  data-submit="ajax">
+                                                @Html.AntiForgeryToken()
+
+                                                <input type="hidden"
+                                                       name="isActive"
+                                                       value="@(p.EstadoPunto ? "true" : "false")"
+                                                       class="hidden-is-active" />
+
+                                                <label class="switch"
+                                                       title="@(p.EstadoPunto ? "Desactivar" : "Activar")">
+                                                    <input type="checkbox"
+                                                           class="status-toggle"
+                                                           @(p.EstadoPunto ? "checked" : null)
+                                                           data-msg-on="¿Confirmas ACTIVAR este punto?"
+                                                           data-msg-off="¿Confirmas DESACTIVAR este punto?" />
+                                                    <span class="slider round"></span>
+                                                </label>
+                                            </form>
+                                        }
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="10" class="text-center">No se encontraron puntos.</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- PAGINACIÓN -->
+    <div class="table-footer">
+        <div class="page-message">
+            Página @currentPage de @totalPages (Total: @totalData registros)
+        </div>
+
+        <div class="pagination">
+            <button class="page-link" data-page="1" @(currentPage == 1 ? "disabled" : "")>&laquo;</button>
+            <button class="page-link" data-page="@(currentPage - 1)" @(currentPage == 1 ? "disabled" : "")>&lt;</button>
+
+            @if (startPage > 1)
+            {
+                <button class="page-link" data-page="@(startPage - 1)">...</button>
+            }
+
+            @for (int i = startPage; i <= endPage; i++)
+            {
+                <button class="page-link @(currentPage == i ? "active-page" : "")"
+                        data-page="@i">
+                    @i
+                </button>
+            }
+
+            @if (endPage < totalPages)
+            {
+                <button class="page-link" data-page="@(endPage + 1)">...</button>
+            }
+
+            <button class="page-link" data-page="@(currentPage + 1)"
+                    @(currentPage == totalPages ? "disabled" : "")>
+                &gt;
+            </button>
+            <button class="page-link" data-page="@totalPages"
+                    @(currentPage == totalPages ? "disabled" : "")>
+                &raquo;
+            </button>
+        </div>
+    </div>
+</div>

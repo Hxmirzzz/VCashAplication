@@ -36,6 +36,8 @@ using VCashApp.Services.GestionServicio.Application;
 using VCashApp.Services.GestionServicio.Domain;
 using VCashApp.Services.GestionServicio.Infrastructure;
 using VCashApp.Services.Logging;
+using VCashApp.Services.Point.Application;
+using VCashApp.Services.Point.Infrastructure;
 using VCashApp.Services.Range.Application;
 using VCashApp.Services.Range.Infrastructure;
 using VCashApp.Services.Routes;
@@ -268,6 +270,12 @@ builder.Services.AddScoped<ICgsServiceApp, CgsServiceFacade>();
 builder.Services.AddScoped<IEmployeeLogService, EmployeeLogService>();
 builder.Services.AddScoped<IDailyRouteUpdater, DailyRouteUpdater>();
 builder.Services.AddScoped<IEmployeeLogLookupsService, EmployeeLogLookupsService>();
+
+// ======================================================================
+// POINT
+// ======================================================================
+builder.Services.AddScoped<IPointService, PointService>();
+builder.Services.AddScoped<IPointQueries, PointQueries>();
 
 // ======================================================================
 // FUND

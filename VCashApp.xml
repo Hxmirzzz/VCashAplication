@@ -2317,6 +2317,30 @@
         <member name="M:VCashApp.Migrations.AddEmployeeIndexes.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
             <inheritdoc />
         </member>
+        <member name="T:VCashApp.Migrations.AddInclusionLetterToAdmPointTable">
+            <inheritdoc />
+        </member>
+        <member name="M:VCashApp.Migrations.AddInclusionLetterToAdmPointTable.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:VCashApp.Migrations.AddInclusionLetterToAdmPointTable.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:VCashApp.Migrations.AddInclusionLetterToAdmPointTable.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="T:VCashApp.Migrations.ChangeStringLengthTo255ForLatitudeLongitudeAndPointOnAdmPointsTable">
+            <inheritdoc />
+        </member>
+        <member name="M:VCashApp.Migrations.ChangeStringLengthTo255ForLatitudeLongitudeAndPointOnAdmPointsTable.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:VCashApp.Migrations.ChangeStringLengthTo255ForLatitudeLongitudeAndPointOnAdmPointsTable.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:VCashApp.Migrations.ChangeStringLengthTo255ForLatitudeLongitudeAndPointOnAdmPointsTable.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
         <member name="T:VCashApp.Models.DTOs.EmployeeLogListadoDto">
             <summary>
             DTO para listado de registros de empleados (Dashboard e Historial)
@@ -4363,6 +4387,46 @@
         <member name="T:VCashApp.Services.Logging.AuditLogger">
             <summary>
             Emite eventos con la marca IsAudit=true y propiedades uniformes para AppLogs.
+            </summary>
+        </member>
+        <member name="M:VCashApp.Services.Point.Application.IPointQueries.GetPagedAsync(VCashApp.Models.Dtos.Point.PointFilterDto)">
+            <summary>Devuelve lista paginada de puntos según filtros.</summary>
+        </member>
+        <member name="M:VCashApp.Services.Point.Application.IPointQueries.ExportAsync(VCashApp.Models.Dtos.Point.PointFilterDto)">
+            <summary>Devuelve lista completa para exportación.</summary>
+        </member>
+        <member name="M:VCashApp.Services.Point.Application.IPointQueries.GetLookupsAsync">
+            <summary>Devuelve datos necesarios para los select del formulario.</summary>
+        </member>
+        <member name="M:VCashApp.Services.Point.Application.IPointQueries.GetForEditAsync(System.String)">
+            <summary>Devuelve datos completos para edición.</summary>
+        </member>
+        <member name="M:VCashApp.Services.Point.Application.IPointQueries.GetPreviewAsync(System.String)">
+            <summary>Devuelve datos listos para Vista Previa (KPIs, datos extendidos).</summary>
+        </member>
+        <member name="M:VCashApp.Services.Point.Application.IPointService.CreateAsync(VCashApp.Models.Dtos.Point.PointUpsertDto,Microsoft.AspNetCore.Http.IFormFile)">
+            <summary>Crear nuevo punto.</summary>
+        </member>
+        <member name="M:VCashApp.Services.Point.Application.IPointService.UpdateAsync(VCashApp.Models.Dtos.Point.PointUpsertDto,Microsoft.AspNetCore.Http.IFormFile,System.Boolean)">
+            <summary>Actualizar un punto existente.</summary>
+        </member>
+        <member name="M:VCashApp.Services.Point.Application.IPointService.ToggleStatusAsync(System.String)">
+            <summary>Activar o desactivar un punto.</summary>
+        </member>
+        <member name="M:VCashApp.Services.Point.Application.IPointService.GenerateCodPuntoAsync(System.Int32)">
+            <summary>Genera el código interno CodPunto según reglas (incremental o lógica propia).</summary>
+        </member>
+        <member name="M:VCashApp.Services.Point.Application.IPointService.ValidateAsync(VCashApp.Models.Dtos.Point.PointUpsertDto,System.Boolean)">
+            <summary>Validaciones antes de Create/Update.</summary>
+        </member>
+        <member name="M:VCashApp.Services.Point.Infrastructure.PointFileManager.SaveCartaAsync(System.Int32,System.String,Microsoft.AspNetCore.Http.IFormFile)">
+            <summary>
+            Guarda la carta de inclusión y devuelve el filename.
+            </summary>
+        </member>
+        <member name="M:VCashApp.Services.Point.Infrastructure.PointFileManager.DeleteCarta(System.Int32,System.String)">
+            <summary>
+            Elimina la carta actual del punto si existe.
             </summary>
         </member>
         <member name="T:VCashApp.Services.UserService">

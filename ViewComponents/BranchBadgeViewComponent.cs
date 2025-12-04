@@ -71,7 +71,7 @@ namespace VCashApp.ViewComponents
                 .ToListAsync();
 
             var display = isAll
-                ? "Todas las sucursales"
+                ? "Todas"
                 : activeId.HasValue
                     ? options.FirstOrDefault(o => o.Id == activeId)?.Name ?? "-"
                     : "-";

@@ -1,0 +1,99 @@
+﻿@* Modal para mostrar el mapa con Leaflet *@
+<div class="modal fade" id="mapModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-xl">
+        <div class="modal-content map-modal-content">
+
+            <div class="modal-header map-modal-header">
+                <h5 class="modal-title">
+                    <i class="ri-earth-fill"></i> Ubicación del Punto
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body p-0">
+                <div id="mapContainer">
+                    <div id="mapCanvas"></div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+@section Styles {
+    <style>
+        /* --- Modal --- */
+        .map-modal-content {
+            border-radius: 14px;
+            overflow: hidden;
+            box-shadow: 0 5px 25px rgba(0,0,0,0.25);
+        }
+
+        .map-modal-header {
+            background: #235286;
+            color: white;
+            padding: 14px 20px;
+            border-bottom: none;
+        }
+
+        /* --- Contenedor del mapa --- */
+        #mapContainer {
+            width: 100%;
+            height: 550px;
+            position: relative;
+            background: #f0f0f0;
+        }
+
+        #mapCanvas {
+            width: 100%;
+            height: 100%;
+        }
+
+        /* --- Fix para que Leaflet respete border-radius --- */
+        .leaflet-container {
+            border-radius: 0 0 14px 14px;
+        }
+
+        /* Botón close más visible */
+        .btn-close {
+            filter: invert(1);
+        }
+    </style>
+}
+
+@section Scripts {
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            document.querySelectorAll(".btn-map").forEach(btn => {
+
+                btn.addEventListener("click", e => {
+                    e.preventDefault();
+
+                    const lat = parseFloat(btn.dataset.lat);
+                    const lng = parseFloat(btn.dataset.lng);
+
+                    if (isNaN(lat) || isNaN(lng)) {
+                        Swal.fire('Sin coordenadas');
+                        return;
+                    }
+
+                    // Crear / resetear mapa
+                    if (window.pointMap) {
+                        window.pointMap.remove();
+                    }
+
+                    window.pointMap = L.map("mapCanvas").setView([lat, lng], 15);
+                    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png").addTo(window.pointMap);
+
+                    L.marker([lat, lng]).addTo(window.pointMap);
+
+                    // Abrir modal
+                    const modal = new bootstrap.Modal(document.getElementById("mapModal"));
+                    modal.show();
+
+                    setTimeout(() => window.pointMap.invalidateSize(), 300);
+                });
+            });
+        });
+    </script>
+}

@@ -712,11 +712,12 @@ button {
     font-weight: var(--font-semi-bold);
 }
 
-.main-header h1 {
-    margin: 0; /* Elimina el margen por defecto del h1 */
-    font-size: inherit; /* Hereda el tamaño de fuente del .main-header */
-    color: inherit; /* Hereda el color del .main-header */
-}
+    .main-header h1 {
+        margin: 0; /* Elimina el margen por defecto del h1 */
+        font-size: inherit; /* Hereda el tamaño de fuente del .main-header */
+        color: inherit;
+        font-size: 1.25rem;
+    }
 
 .main-header-logo {
     width: 120px;
@@ -1030,7 +1031,7 @@ button {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 4px; /* Reducido de espacio implícito */
+    gap: 2px;
 }
 
     .action-buttons .btn-detail,
@@ -1065,9 +1066,20 @@ button {
             color: var(--second-color);
         }
 
-            .action-buttons .btn-edit i.ri-check-double-line {
-                color: var(--status-color);
-            }
+        .action-buttons .btn-print i {
+            color: var(--text-color-main);
+        }
+
+        .action-buttons .btn-modal i{
+            color: #a80602;
+        }
+
+    .action-buttons .btn-earth {
+        color: orange;
+    }
+    .action-buttons .btn-edit i.ri-check-double-line {
+        color: var(--status-color);
+    }
 
 #dataTable td:last-child > .action-icon,
 #dataTable td:last-child > .switch {
@@ -1639,10 +1651,10 @@ body.dark-theme .login-brand {
 
 
     .toggle-button {
-        position: fixed; /* Fijo en la pantalla */
+        position: fixed;
         top: 8px;
         left: 8px;
-        z-index: var(--z-fixed) + 20; /* Por encima de todo */
+        z-index: 9;
     }
 
     /* Ajusta la posición del botón de alternar cuando el sidebar está ABIERTO en móvil */

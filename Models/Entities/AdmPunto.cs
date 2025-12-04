@@ -73,15 +73,15 @@ namespace VCashApp.Models.Entities
         public virtual AdmCiudad? City { get; set; }
 
         [Column("Latitud")]
-        [StringLength(50)]
+        [StringLength(255)]
         public string? Latitude { get; set; }
 
         [Column("Longitud")]
-        [StringLength(50)]
+        [StringLength(255)]
         public string? Longitude { get; set; }
 
         [Column("RadioPunto")]
-        [StringLength(50)]
+        [StringLength(255)]
         public string? PointRadius { get; set; }
 
         [Column("BaseCambio")]
@@ -228,5 +228,9 @@ namespace VCashApp.Models.Entities
 
         [Column("Estado")]
         public bool Status { get; set; }
+
+        [Column("CartaInclusion")]
+        [StringLength(455)]
+        public string? InclusionLetter { get; set; }
     }
 }

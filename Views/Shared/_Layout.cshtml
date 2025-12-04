@@ -50,6 +50,7 @@
     <link href="https://cdn.jsdelivr.net/npm/remixicon@4.5.0/fonts/remixicon.css" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11.12.0/dist/sweetalert2.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 </head>
 <body class="@ViewData["BodyClass"]">
     <div class="app-wrapper">
@@ -121,6 +122,7 @@
                     <div class="sidebar__submenu">
                         <ul>
                             <li><a asp-controller="Fund" asp-action="Index" class="sidebar__link sub-link"><span class="nav-text">Fondos</span></a></li>
+                            <li><a asp-controller="Point" asp-action="Index" class="sidebar__link sub-link"><span class="nav-text">Puntos</span></a></li>
                             <li><a asp-controller="Range" asp-action="Index" class="sidebar__link sub-link"><span class="nav-text">Rangos</span></a></li>
                             <li><a asp-controller="Route" asp-action="Index" class="sidebar__link sub-link"><span class="nav-text">Rutas</span></a></li>
                         </ul>
@@ -267,6 +269,7 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js" integrity="sha384-ndDqU0Gzau9qJ1lfW4pNLlhNTkCfHzAVBReH9diLvGRem5+R9g2FzA8ZGN954O5Q" crossorigin="anonymous"></script>
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.12.0/dist/sweetalert2.all.min.js"></script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="~/js/ui/global-loading.js"></script>
     <script>
         AppLoading.bindLinkLoading();   // loader en <a data-loading>
