@@ -134,20 +134,78 @@
     @Html.Partial("~/Views/Point/_PointTablePartial.cshtml", Model)
 </div>
 
-<div class="modal fade" id="PointMapModal" tabindex="-1" aria-labelledby="PointMapModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg modal-dialog-centered" style="max-width: 900px;">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="PointMapModalLabel">Ubicación del Punto</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+<!-- MODAL MAPA - SUPER UI/UX -->
+<div class="modal fade" id="pointMapModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered">
+        <div class="modal-content map-modal">
+
+            <div class="modal-header map-modal-header">
+                <h5 class="modal-title d-flex align-items-center gap-2" id="pointMapTitle">
+                    <i class="ri-earth-fill map-icon"></i>
+                    Ubicación del Punto
+                </h5>
+
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
 
-            <div class="modal-body" style="height: 500px;">
-                <div id="pointMap" style="height: 100%; width: 100%; border-radius: 8px;"></div>
+            <div class="modal-body map-modal-body">
+
+                <!-- MINI INFO -->
+                <div id="mapInfoPanel" class="map-info-panel">
+                    <div class="info-row">
+                        <span class="label">Lat:</span>
+                        <span id="infoLat"></span>
+                    </div>
+                    <div class="info-row">
+                        <span class="label">Lng:</span>
+                        <span id="infoLng"></span>
+                    </div>
+                    <div class="info-row">
+                        <span class="label">Radio:</span>
+                        <span id="infoRad"></span>
+                    </div>
+                </div>
+
+                <!-- MAPA -->
+                <div id="pointMapCanvas" class="map-canvas"></div>
+
+                <!-- BOTONES ACCIÓN -->
+                <div class="d-flex justify-content-between action-buttons-map mt-3">
+
+                    <div class="d-flex gap-2">
+                        <button id="btnCopyCoords" class="btn btn-map-action">
+                            <i class="ri-file-copy-line"></i> Copiar coords
+                        </button>
+
+                        <button id="btnCopyUrl" class="btn btn-map-action">
+                            <i class="ri-link-m"></i> Copiar URL
+                        </button>
+                    </div>
+
+                    <div class="d-flex gap-2">
+                        <a id="pointStreetViewLink"
+                           href="#"
+                           target="_blank"
+                           class="btn btn-open-street">
+                            <i class="ri-road-map-line"></i> Street View
+                        </a>
+
+                        <a id="pointGmapsLink"
+                           href="#"
+                           target="_blank"
+                           class="btn btn-open-maps">
+                            <i class="ri-map-pin-line"></i> Google Maps
+                        </a>
+                    </div>
+
+                </div>
+
             </div>
+
         </div>
     </div>
 </div>
+
 
 @section Scripts {
     @{

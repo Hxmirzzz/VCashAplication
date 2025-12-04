@@ -24,8 +24,8 @@
             public string? RouteName { get; init; }
             public string? RangeName { get; init; }
 
-            public string? Latitude { get; init; }
-            public string? Longitude { get; init; }
+            public string? Latitude { get; set; }
+            public string? Longitude { get; set; }
             public string? PointRadius { get; init; }
 
             public bool EstadoPunto { get; init; }

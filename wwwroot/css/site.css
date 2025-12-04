@@ -1963,3 +1963,106 @@ html {
         left: calc(var(--expanded-sidebar-width) + 0.75rem);
     }
 }
+
+
+/* ====== MODAL PREMIUM ====== */
+
+.map-modal {
+    background-color: var(--div-bg);
+    color: var(--text-color-main);
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow: 0 10px 40px var(--shadow-color-main);
+    animation: mapModalFade 0.25s ease-in-out;
+}
+
+@keyframes mapModalFade {
+    from {
+        transform: scale(0.92);
+        opacity: 0;
+    }
+
+    to {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+.map-modal-header {
+    background: linear-gradient(90deg, #0f172a, #1e293b);
+    border-bottom: 1px solid var(--border-color);
+    padding: 18px 24px;
+}
+
+.map-icon {
+    font-size: 22px;
+    color: var(--first-color);
+}
+
+.map-modal-body {
+    padding: 20px 24px;
+}
+
+.map-canvas {
+    height: 460px;
+    width: 100%;
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid var(--border-color);
+}
+
+/* BOTONES */
+.btn-open-maps,
+.btn-open-street,
+.btn-map-action {
+    background: var(--first-color);
+    color: var(--active-text) !important;
+    border-radius: 8px;
+    padding: 8px 14px;
+    font-weight: 600;
+    transition: 0.2s;
+}
+
+.btn-open-street {
+    background: var(--status-color);
+}
+
+    .btn-open-street:hover {
+        background: #059669;
+    }
+
+.btn-map-action {
+    background: var(--Grey1);
+}
+
+    .btn-map-action:hover {
+        background: var(--black1);
+    }
+
+.btn-open-maps:hover {
+    background: var(--active-bg);
+}
+
+/* INFO PANEL */
+.map-info-panel {
+    position: absolute;
+    z-index: 999;
+    top: 75px;
+    right: 35px;
+    background: rgba(0, 0, 0, 0.45); /* overlay dinámico */
+    backdrop-filter: blur(6px);
+    padding: 12px 16px;
+    border-radius: 10px;
+    font-size: 13px;
+    border: 1px solid var(--border-color);
+    color: var(--text-color-main);
+}
+
+    .map-info-panel .info-row {
+        display: flex;
+        justify-content: space-between;
+    }
+
+    .map-info-panel .label {
+        opacity: 0.7;
+    }

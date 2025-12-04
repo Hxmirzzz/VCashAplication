@@ -54,7 +54,7 @@
                                 <td>@(string.IsNullOrWhiteSpace(p.NombreCiudad) ? "-" : p.NombreCiudad)</td>
                                 <td>@(string.IsNullOrWhiteSpace(p.FundName) ? "-" : p.FundName)</td>
                                 <td>@(string.IsNullOrWhiteSpace(p.RouteName) ? "-" : p.RouteName)</td>
-                                <td>@(string.IsNullOrWhiteSpace(p.RangeName) ? "-" : p.RangeName) @p.Latitude</td>
+                                <td>@(string.IsNullOrWhiteSpace(p.RangeName) ? "-" : p.RangeName)</td>
 
                                 <td>
                                     <div class="action-buttons d-flex align-items-center justify-content-center">
@@ -96,7 +96,6 @@
                                         {
                                             <a href="#"
                                                class="btn-earth btn-map"
-                                               title="Ver ubicación en mapa"
                                                data-lat="@p.Latitude"
                                                data-lng="@p.Longitude"
                                                data-radius="@p.PointRadius"
@@ -104,6 +103,7 @@
                                                data-cod="@p.CodPunto">
                                                 <i class="ri-earth-fill"></i>
                                             </a>
+
                                         }
 
                                         @if (ViewBag.HasView ?? false)

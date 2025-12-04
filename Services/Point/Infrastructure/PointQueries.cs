@@ -23,7 +23,7 @@ namespace VCashApp.Services.Point.Infrastructure
         // --------------------------------------------------------------------
         public async Task<(IEnumerable<PointListDto> Items, int TotalCount)> GetPagedAsync(PointFilterDto filter)
         {
-            var q = _db.AdmPuntos.AsNoTracking();
+            var q = _db.AdmPuntos.AsNoTracking().Where(q => q.PointType == 0);
 
             int? effectiveBranch = filter.BranchCode ?? _branchCtx.CurrentBranchId;
 
@@ -82,7 +82,8 @@ namespace VCashApp.Services.Point.Infrastructure
             q = q.OrderBy(p => p.Client!.ClientName)
                  .ThenBy(p => p.PointName)
                  .ThenBy(p => p.City!.NombreCiudad)
-                 .ThenBy(p => p.Branch!.NombreSucursal);
+                 .ThenBy(p => p.Branch!.NombreSucursal)
+                 .Where(q => q.PointType == 0);
 
             // --- Paginación ---
             var items = await q
