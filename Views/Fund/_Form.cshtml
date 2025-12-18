@@ -4,11 +4,11 @@
     bool isEdit = (bool)(ViewData["IsEdit"] ?? false);
     string pageName = (string)(ViewData["PageName"] ?? (isEdit ? "Editar Fondo" : "Crear Fondo"));
 
-    var clients    = (IEnumerable<SelectListItem>)ViewData["Clients"]    ?? Enumerable.Empty<SelectListItem>();
-    var branches   = (IEnumerable<SelectListItem>)ViewData["Branches"]   ?? Enumerable.Empty<SelectListItem>();
-    var cities     = (IEnumerable<SelectListItem>)ViewData["Cities"]     ?? Enumerable.Empty<SelectListItem>();
+    var clients = (IEnumerable<SelectListItem>)ViewData["Clients"] ?? Enumerable.Empty<SelectListItem>();
+    var branches = (IEnumerable<SelectListItem>)ViewData["Branches"] ?? Enumerable.Empty<SelectListItem>();
+    var cities = (IEnumerable<SelectListItem>)ViewData["Cities"] ?? Enumerable.Empty<SelectListItem>();
     var currencies = (IEnumerable<SelectListItem>)ViewData["Currencies"] ?? Enumerable.Empty<SelectListItem>();
-    var fundTypes  = (IEnumerable<SelectListItem>)ViewData["FundTypes"]  ?? Enumerable.Empty<SelectListItem>();
+    var fundTypes = (IEnumerable<SelectListItem>)ViewData["FundTypes"] ?? Enumerable.Empty<SelectListItem>();
 }
 
 <div class="form-container">

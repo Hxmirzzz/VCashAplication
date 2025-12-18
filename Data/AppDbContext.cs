@@ -437,7 +437,6 @@ namespace VCashApp.Data
                 entity.Property(s => s.ConceptCode);
                 entity.Property(s => s.TransferType).HasMaxLength(1);
                 entity.Property(s => s.StatusCode);
-                entity.Property(s => s.FlowCode);
                 entity.Property(s => s.OriginClientCode);
                 entity.Property(s => s.OriginPointCode).HasMaxLength(255).IsRequired();
                 entity.Property(s => s.OriginIndicatorType).HasMaxLength(1).IsRequired();

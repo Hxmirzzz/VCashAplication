@@ -15,7 +15,7 @@ namespace VCashApp.Services.Point.Application
         Task<ServiceResult> ToggleStatusAsync(string codPunto);
 
         /// <summary>Genera el código interno CodPunto según reglas (incremental o lógica propia).</summary>
-        Task<string> GenerateCodPuntoAsync(int codCliente);
+        Task<string> GenerateVatcoCodeAsync(int codCliente, int tipoPunto);
 
         /// <summary>Validaciones antes de Create/Update.</summary>
         Task<ServiceResult> ValidateAsync(PointUpsertDto dto, bool isEdit);

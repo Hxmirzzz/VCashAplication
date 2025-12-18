@@ -224,16 +224,6 @@ namespace VCashApp.Controllers
         }
 
         // =========================================================
-        // GENERATE CODE
-        // =========================================================
-        [HttpGet("GenerateCodPunto/{codCliente}")]
-        public async Task<IActionResult> GenerateCodPunto(int codCliente)
-        {
-            var code = await _svc.GenerateCodPuntoAsync(codCliente);
-            return Json(new { code });
-        }
-
-        // =========================================================
         // EXPORT
         // =========================================================
         [HttpGet("Export")]
@@ -256,6 +246,24 @@ namespace VCashApp.Controllers
 
             var bytes = Encoding.UTF8.GetBytes(sb.ToString());
             return File(bytes, "text/csv", "points_export.csv");
+        }
+
+        // =========================================================
+        // GENERATE VATCO CODE (AJAX)
+        // =========================================================
+        [HttpPost("GetNewVatcoCode")]
+        public async Task<IActionResult> GetNewVatcoCode(
+            [FromForm] int codCliente,
+            [FromForm] int tipoPunto)
+        {
+            if (codCliente <= 0)
+                return BadRequest("Cliente inválido.");
+
+            if (tipoPunto is not (0 or 1))
+                return BadRequest("Tipo de punto inválido.");
+
+            var code = await _svc.GenerateVatcoCodeAsync(codCliente, tipoPunto);
+            return Content(code);
         }
 
         private static string EscapeCsv(string? s)

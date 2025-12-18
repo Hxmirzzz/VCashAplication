@@ -1,16 +1,18 @@
-﻿using VCashApp.Data;
-using VCashApp.Models.Entities;
-using VCashApp.Models.ViewModels.CentroEfectivo.Shared;
-using VCashApp.Enums;
-using VCashApp.Services;
+﻿using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
+using System;
+using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc.Rendering;
-using System.Data;
-using Microsoft.Data.SqlClient;
-using System;
+using VCashApp.Data;
+using VCashApp.Enums;
 using VCashApp.Models;
+using VCashApp.Models.Entities;
+using VCashApp.Models.ViewModels.CentroEfectivo.Shared;
+using VCashApp.Services;
+using VCashApp.Services.DTOs;
+using static VCashApp.ViewComponents.BranchBadgeViewComponent;
 
 namespace VCashApp.Services.Cef
 {
@@ -162,8 +164,7 @@ namespace VCashApp.Services.Cef
                 new SqlParameter("@HoraSolicitud", viewModel.RequestTime),
                 new SqlParameter("@CodConcepto", serviceConcept.CodConcepto),
                 new SqlParameter("@TipoTraslado", (object)viewModel.ServiceModality ?? DBNull.Value),
-                new SqlParameter("@CodEstado", '0'), 
-                new SqlParameter("@CodFlujo", 1),
+                new SqlParameter("@CodEstado", '0'),
                 new SqlParameter("@CodClienteOrigen", viewModel.OriginClientId),
                 new SqlParameter("@CodPuntoOrigen", viewModel.OriginCode),
                 new SqlParameter("@IndicadorTipoOrigen", viewModel.OriginType.ToString().Substring(0, 1)),

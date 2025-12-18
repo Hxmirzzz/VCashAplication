@@ -51,9 +51,6 @@ namespace VCashApp.Models.Entities
         [ForeignKey("StatusCode")]
         public virtual AdmState? Status { get; set; }
 
-        [Column("CodFlujo")]
-        public int? FlowCode { get; set; }
-
         // --- Origen ---
         [Column("CodClienteOrigen")]
         [ForeignKey("OriginClientCode")]

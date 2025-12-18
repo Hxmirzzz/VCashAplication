@@ -32,6 +32,7 @@ namespace VCashApp.Services.Point.Infrastructure
             var point = new AdmPunto
             {
                 PointCode = dto.CodPunto.Trim(),
+                VatcoPointCode = dto.VatcoPointCode?.Trim(),
                 ClientPointCode = dto.CodPCliente.Trim(),
                 ClientCode = dto.CodCliente,
                 MainClientCode = dto.CodClientePpal,
@@ -196,28 +197,6 @@ namespace VCashApp.Services.Point.Infrastructure
         }
 
         // ============================================================
-        // GENERACIÓN DE CÓDIGO
-        // ============================================================
-        public async Task<string> GenerateCodPuntoAsync(int codCliente)
-        {
-            var last = await _db.AdmPuntos
-                .Where(p => p.ClientCode == codCliente)
-                .OrderByDescending(p => p.PointCode)
-                .Select(p => p.PointCode)
-                .FirstOrDefaultAsync();
-
-            if (last == null)
-                return $"{codCliente}-001";
-
-            var parts = last.Split('-');
-            if (parts.Length != 2 || !int.TryParse(parts[1], out int num))
-                return $"{codCliente}-001";
-
-            int next = num + 1;
-            return $"{codCliente}-{next:D3}";
-        }
-
-        // ============================================================
         // VALIDACIÓN GENERAL
         // ============================================================
         public async Task<ServiceResult> ValidateAsync(PointUpsertDto dto, bool isEdit)
@@ -238,6 +217,51 @@ namespace VCashApp.Services.Point.Infrastructure
             }
 
             return ServiceResult.SuccessResult("OK.");
+        }
+
+        // ============================================================
+        // GENERACIÓN DE CÓDIGO
+        // ============================================================
+        public async Task<string> GenerateVatcoCodeAsync(int codCliente, int tipoPunto)
+        {
+            // prefijo inicial según tipo
+            int prefijo = tipoPunto == 0 ? 0 : 6;
+            int maxNumero = tipoPunto == 0 ? 999 : 1999;
+
+            // Traer último código VATCO por cliente + tipo
+            var lastCode = await _db.AdmPuntos
+                .Where(p =>
+                    p.ClientCode == codCliente &&
+                    p.PointType == tipoPunto &&
+                    p.VatcoPointCode != null)
+                .OrderByDescending(p => p.VatcoPointCode)
+                .Select(p => p.VatcoPointCode!)
+                .FirstOrDefaultAsync();
+
+            int nuevoNumero = 1;
+
+            if (!string.IsNullOrEmpty(lastCode) &&
+                lastCode.StartsWith(codCliente.ToString()))
+            {
+                // Estructura: {codCliente}{prefijo}{NNN}
+                var clienteLen = codCliente.ToString().Length;
+
+                int ultimoPrefijo = int.Parse(lastCode.Substring(clienteLen, 1));
+                int ultimoNumero = int.Parse(lastCode.Substring(clienteLen + 1));
+
+                if (ultimoNumero >= maxNumero)
+                {
+                    prefijo = ultimoPrefijo + 1;
+                    nuevoNumero = 0;
+                }
+                else
+                {
+                    prefijo = ultimoPrefijo;
+                    nuevoNumero = ultimoNumero + 1;
+                }
+            }
+
+            return $"{codCliente}{prefijo}{nuevoNumero:D3}";
         }
     }
 }

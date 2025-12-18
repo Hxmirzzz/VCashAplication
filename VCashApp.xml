@@ -2341,6 +2341,18 @@
         <member name="M:VCashApp.Migrations.ChangeStringLengthTo255ForLatitudeLongitudeAndPointOnAdmPointsTable.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
             <inheritdoc />
         </member>
+        <member name="T:VCashApp.Migrations.DeleteFlowCodeToCgsServiceTable">
+            <inheritdoc />
+        </member>
+        <member name="M:VCashApp.Migrations.DeleteFlowCodeToCgsServiceTable.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:VCashApp.Migrations.DeleteFlowCodeToCgsServiceTable.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:VCashApp.Migrations.DeleteFlowCodeToCgsServiceTable.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
         <member name="T:VCashApp.Models.DTOs.EmployeeLogListadoDto">
             <summary>
             DTO para listado de registros de empleados (Dashboard e Historial)
@@ -4413,7 +4425,7 @@
         <member name="M:VCashApp.Services.Point.Application.IPointService.ToggleStatusAsync(System.String)">
             <summary>Activar o desactivar un punto.</summary>
         </member>
-        <member name="M:VCashApp.Services.Point.Application.IPointService.GenerateCodPuntoAsync(System.Int32)">
+        <member name="M:VCashApp.Services.Point.Application.IPointService.GenerateVatcoCodeAsync(System.Int32,System.Int32)">
             <summary>Genera el código interno CodPunto según reglas (incremental o lógica propia).</summary>
         </member>
         <member name="M:VCashApp.Services.Point.Application.IPointService.ValidateAsync(VCashApp.Models.Dtos.Point.PointUpsertDto,System.Boolean)">

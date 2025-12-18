@@ -76,8 +76,6 @@ namespace VCashApp.Services.GestionServicio.Infrastructure
                 new SqlParameter("@CodConcepto",            vm.ConceptCode),
                 new SqlParameter("@TipoTraslado",           (object?)vm.TransferType ?? DBNull.Value),
                 new SqlParameter("@CodEstado",              vm.StatusCode),
-                new SqlParameter("@CodFlujo",               (object?)vm.ConceptCode ?? DBNull.Value),
-
                 new SqlParameter("@CodClienteOrigen",       (object?)vm.OriginClientCode ?? DBNull.Value),
                 new SqlParameter("@CodPuntoOrigen",         vm.OriginPointCode),
                 new SqlParameter("@IndicadorTipoOrigen",    vm.OriginIndicatorType),

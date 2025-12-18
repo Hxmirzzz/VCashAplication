@@ -8,10 +8,16 @@ namespace VCashApp.Models.Dtos.Point
         public string CodPunto { get; set; } = string.Empty;
 
         [Required]
+        public string? VatcoPointCode { get; set; } = string.Empty;
+
+        [Required]
         public string CodPCliente { get; set; } = string.Empty;
 
         [Required]
         public int CodCliente { get; set; }
+
+        [Required]
+        public int TipoPunto { get; set; }
 
         public int? CodClientePpal { get; set; }
 
@@ -48,6 +54,7 @@ namespace VCashApp.Models.Dtos.Point
         public string? CodFondo { get; set; }
         public string? CodRutaSuc { get; set; }
         public int? CodRango { get; set; }
+        public int? BusinessType { get; set; }
 
         [DataType(DataType.Date)]
         public DateOnly FecIngreso { get; init; }

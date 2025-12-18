@@ -23,7 +23,7 @@ namespace VCashApp.Services.Point.Infrastructure
         // --------------------------------------------------------------------
         public async Task<(IEnumerable<PointListDto> Items, int TotalCount)> GetPagedAsync(PointFilterDto filter)
         {
-            var q = _db.AdmPuntos.AsNoTracking().Where(q => q.PointType == 0);
+            var q = _db.AdmPuntos.AsNoTracking();
 
             int? effectiveBranch = filter.BranchCode ?? _branchCtx.CurrentBranchId;
 
@@ -40,6 +40,8 @@ namespace VCashApp.Services.Point.Infrastructure
                 if (_branchCtx.CurrentBranchId.HasValue)
                     q = q.Where(f => f.BranchCode == _branchCtx.CurrentBranchId.Value);
             }
+
+            q = q.Where(p => p.PointType == 0);
 
             // --- Search ---
             if (!string.IsNullOrWhiteSpace(filter.Search))
@@ -82,8 +84,7 @@ namespace VCashApp.Services.Point.Infrastructure
             q = q.OrderBy(p => p.Client!.ClientName)
                  .ThenBy(p => p.PointName)
                  .ThenBy(p => p.City!.NombreCiudad)
-                 .ThenBy(p => p.Branch!.NombreSucursal)
-                 .Where(q => q.PointType == 0);
+                 .ThenBy(p => p.Branch!.NombreSucursal);
 
             // --- Paginación ---
             var items = await q
@@ -148,6 +149,7 @@ namespace VCashApp.Services.Point.Infrastructure
             var clientes = await _db.AdmClientes
                 .AsNoTracking()
                 .OrderBy(c => c.ClientName)
+                .Where(c => c.Status)
                 .Select(c => new SelectListItem
                 {
                     Value = c.ClientCode.ToString(),
