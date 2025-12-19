@@ -1201,6 +1201,29 @@
             Carga ViewBags comunes (cabecera, combos, y permisos).
             </summary>
         </member>
+        <member name="M:VCashApp.Controllers.PointController.GetFunds(System.Int32,System.Int32,System.Int32)">
+            <summary>
+            Obtiene el HTML de las opciones de fondos para un punto según sucursal y cliente.
+            </summary>
+            <param name="branchId">Sucursal</param>
+            <param name="clientId">Cliente</param>
+            <param name="mainClientId">Cliente Principal</param>
+            <returns>Lista de opciones en formato HTML</returns>
+        </member>
+        <member name="M:VCashApp.Controllers.PointController.GetRoutes(System.Int32)">
+            <summary>
+            Obtiene el HTML de las opciones de rutas para un punto según ciudad.
+            </summary>
+            <param name="branchId"></param>
+            <returns>Lista de opciones en formato HTML</returns>
+        </member>
+        <member name="M:VCashApp.Controllers.PointController.GetRangesByClient(System.Int32)">
+            <summary>
+            Obtiene el HTML de las opciones de rangos para un punto según cliente.
+            </summary>
+            <param name="clientId">Cliente</param>
+            <returns>De lista de opciones en formato HTML</returns>
+        </member>
         <member name="M:VCashApp.Controllers.ProvisionController.SetCommonViewBagsCefAsync(VCashApp.Models.ApplicationUser,System.String,System.String[])">
             <summary>
             Sucursales, estados y permisos por vista.
@@ -2368,6 +2391,380 @@
         </member>
         <member name="T:VCashApp.Models.Dtos.EmployeeLog.EmployeeLogStatusDto">
             <summary>DTO para el estado del registro de un empleado (usado por el JS).</summary>
+        </member>
+        <member name="T:VCashApp.Models.Dtos.Point.FundOptionDto">
+            <summary>Opción de fondo para select.</summary>
+        </member>
+        <member name="P:VCashApp.Models.Dtos.Point.FundOptionDto.Value">
+            <summary>Código del fondo.</summary>
+        </member>
+        <member name="P:VCashApp.Models.Dtos.Point.FundOptionDto.Text">
+            <summary>Texto descriptivo del fondo.</summary>
+        </member>
+        <member name="T:VCashApp.Models.Dtos.Point.MainClientOptionDto">
+            <summary>Opción de cliente principal para select.</summary>
+        </member>
+        <member name="P:VCashApp.Models.Dtos.Point.MainClientOptionDto.Value">
+            <summary>Código del cliente principal.</summary>
+        </member>
+        <member name="P:VCashApp.Models.Dtos.Point.MainClientOptionDto.Text">
+            <summary>Texto descriptivo del cliente principal.</summary>
+        </member>
+        <member name="P:VCashApp.Models.Dtos.Point.MainClientOptionDto.Selected">
+            <summary>Indica si está seleccionado.</summary>
+        </member>
+        <member name="P:VCashApp.Models.Dtos.Point.MainClientOptionDto.LockSelect">
+            <summary>Indica si la opción está bloqueada para selección.</summary>
+        </member>
+        <member name="T:VCashApp.Models.Dtos.Point.PointFilterDto">
+            <summary>Filtros para listado de puntos.</summary>
+        </member>
+        <member name="P:VCashApp.Models.Dtos.Point.PointFilterDto.Search">
+            <summary>Término de búsqueda libre (código, nombre, dirección, responsable).</summary>
+        </member>
+        <member name="P:VCashApp.Models.Dtos.Point.PointFilterDto.ClientCode">
+            <summary>Tipo de punto.</summary>
+        </member>
+        <member name="P:VCashApp.Models.Dtos.Point.PointFilterDto.MainClientCode">
+            <summary>Código de cliente principal.</summary>
+        </member>
+        <member name="P:VCashApp.Models.Dtos.Point.PointFilterDto.BranchCode">
+            <summary>Código de sucursal.</summary>
+        </member>
+        <member name="P:VCashApp.Models.Dtos.Point.PointFilterDto.CityCode">
+            <summary>Código de ciudad.</summary>
+        </member>
+        <member name="P:VCashApp.Models.Dtos.Point.PointFilterDto.FundCode">
+            <summary>Código de fondo.</summary>
+        </member>
+        <member name="P:VCashApp.Models.Dtos.Point.PointFilterDto.IsActive">
+            <summary>Estado activo/inactivo.</summary>
+        </member>
+        <member name="P:VCashApp.Models.Dtos.Point.PointFilterDto.RouteCode">
+            <summary>Código de ruta.</summary>
+        </member>
+        <member name="P:VCashApp.Models.Dtos.Point.PointFilterDto.RangeCode">
+            <summary>Código de rango.</summary>
+        </member>
+        <member name="P:VCashApp.Models.Dtos.Point.PointFilterDto.Page">
+            <summary>Número de página.</summary>
+        </member>
+        <member name="P:VCashApp.Models.Dtos.Point.PointFilterDto.PageSize">
+            <summary>Tamaño de página.</summary>
+        </member>
+        <member name="T:VCashApp.Models.Dtos.Point.PointListDto">
+            <summary>DTO para lista de puntos.</summary>
+        </member>
+        <member name="P:VCashApp.Models.Dtos.Point.PointListDto.CodPunto">
+            <summary>Código del punto.</summary>
+        </member>
+        <member name="P:VCashApp.Models.Dtos.Point.PointListDto.CodPCliente">
+            <summary>Código Vatco del punto.</summary>
+        </member>
+        <member name="P:VCashApp.Models.Dtos.Point.PointListDto.CodCliente">
+            <summary>Codigo del cliente.</summary>
+        </member>
+        <member name="P:VCashApp.Models.Dtos.Point.PointListDto.ClienteNombre">
+            <summary>Nombre del cliente.</summary>
+        </member>
+        <member name="P:VCashApp.Models.Dtos.Point.PointListDto.CodClientePpal">
+            <summary>Cliente principal.</summary>
+        </member>
+        <member name="P:VCashApp.Models.Dtos.Point.PointListDto.ClientePpalNombre">
+            <summary>Nombre del cliente principal.</summary>
+        </member>
+        <member name="P:VCashApp.Models.Dtos.Point.PointListDto.NombrePunto">
+            <summary>Nombre de punto.</summary>
+        </member>
+        <member name="P:VCashApp.Models.Dtos.Point.PointListDto.NombreCorto">
+            <summary>Nombre corto del punto.</summary>
+        </member>
+        <member name="P:VCashApp.Models.Dtos.Point.PointListDto.CodSuc">
+            <summary>Sucursal.</summary>
+        </member>
+        <member name="P:VCashApp.Models.Dtos.Point.PointListDto.NombreSucursal">
+            <summary>Nombre de la sucursal.</summary>
+        </member>
+        <member name="P:VCashApp.Models.Dtos.Point.PointListDto.CodCiudad">
+            <summary>Ciudad.</summary>
+        </member>
+        <member name="P:VCashApp.Models.Dtos.Point.PointListDto.NombreCiudad">
+            <summary>Nombre de la ciudad.</summary>
+        </member>
+        <member name="P:VCashApp.Models.Dtos.Point.PointListDto.FundName">
+            <summary>Nombre del fondo.</summary>
+        </member>
+        <member name="P:VCashApp.Models.Dtos.Point.PointListDto.RouteName">
+            <summary>Nombre de la ruta.</summary>
+        </member>
+        <member name="P:VCashApp.Models.Dtos.Point.PointListDto.RangeName">
+            <summary>Nombre del rango.</summary>
+        </member>
+        <member name="P:VCashApp.Models.Dtos.Point.PointListDto.Latitude">
+            <summary>Latitud.</summary>
+        </member>
+        <member name="P:VCashApp.Models.Dtos.Point.PointListDto.Longitude">
+            <summary>Longitud.</summary>
+        </member>
+        <member name="P:VCashApp.Models.Dtos.Point.PointListDto.PointRadius">
+            <summary>Radio del punto.</summary>
+        </member>
+        <member name="P:VCashApp.Models.Dtos.Point.PointListDto.EstadoPunto">
+            <summary>Estado.</summary>
+        </member>
+        <member name="T:VCashApp.Models.Dtos.Point.PointLookupDto">
+            <summary>Datos para los select del formulario de puntos.</summary>
+        </member>
+        <member name="P:VCashApp.Models.Dtos.Point.PointLookupDto.Clientes">
+            <summary>Clientes.</summary>
+        </member>
+        <member name="P:VCashApp.Models.Dtos.Point.PointLookupDto.ClientesPrincipales">
+            <summary>Clientes principales.</summary>
+        </member>
+        <member name="P:VCashApp.Models.Dtos.Point.PointLookupDto.Sucursales">
+            <summary>Sucursales.</summary>
+        </member>
+        <member name="P:VCashApp.Models.Dtos.Point.PointLookupDto.Ciudades">
+            <summary>Ciudades.</summary>
+        </member>
+        <member name="P:VCashApp.Models.Dtos.Point.PointLookupDto.Fondos">
+            <summary>Fondos.</summary>
+        </member>
+        <member name="P:VCashApp.Models.Dtos.Point.PointLookupDto.Rutas">
+            <summary>Rutas.</summary>
+        </member>
+        <member name="P:VCashApp.Models.Dtos.Point.PointLookupDto.Rangos">
+            <summary>Rangos.</summary>
+        </member>
+        <member name="P:VCashApp.Models.Dtos.Point.PointLookupDto.TiposNegocio">
+            <summary>Tipos de negocio.</summary>
+        </member>
+        <member name="T:VCashApp.Models.Dtos.Point.PointPreviewDto">
+            <summary>Datos para Vista Previa de Punto (KPIs, datos extendidos).</summary>
+        </member>
+        <member name="P:VCashApp.Models.Dtos.Point.PointPreviewDto.CodPunto">
+            <summary>Código del punto.</summary>
+        </member>
+        <member name="P:VCashApp.Models.Dtos.Point.PointPreviewDto.CodPCliente">
+            <summary>Código CLIENTE del punto.</summary>
+        </member>
+        <member name="P:VCashApp.Models.Dtos.Point.PointPreviewDto.ClienteNombre">
+            <summary>Nombre del cliente.</summary>
+        </member>
+        <member name="P:VCashApp.Models.Dtos.Point.PointPreviewDto.ClientePpalNombre">
+            <summary>Nombre del cliente principal.</summary>
+        </member>
+        <member name="P:VCashApp.Models.Dtos.Point.PointPreviewDto.NombrePunto">
+            <summary>Nombre del punto.</summary>
+        </member>
+        <member name="P:VCashApp.Models.Dtos.Point.PointPreviewDto.NombreCorto">
+            <summary>Nombre corto del punto.</summary>
+        </member>
+        <member name="P:VCashApp.Models.Dtos.Point.PointPreviewDto.NombreSucursal">
+            <summary>Sucursal.</summary>
+        </member>
+        <member name="P:VCashApp.Models.Dtos.Point.PointPreviewDto.NombreCiudad">
+            <summary>Ciudad.</summary>
+        </member>
+        <member name="P:VCashApp.Models.Dtos.Point.PointPreviewDto.EstadoPunto">
+            <summary>Estado.</summary>
+        </member>
+        <member name="P:VCashApp.Models.Dtos.Point.PointPreviewDto.FondoAsociado">
+            <summary>Fondo asociado</summary>
+        </member>
+        <member name="P:VCashApp.Models.Dtos.Point.PointPreviewDto.RutaAsociada">
+            <summary>Ruta asociada</summary>
+        </member>
+        <member name="P:VCashApp.Models.Dtos.Point.PointPreviewDto.RangoAsociado">
+            <summary>Rango asociado</summary>
+        </member>
+        <member name="P:VCashApp.Models.Dtos.Point.PointPreviewDto.NivelRiesgo">
+            <summary>Nivel de riesgo</summary>
+        </member>
+        <member name="P:VCashApp.Models.Dtos.Point.PointPreviewDto.CoberturaPunto">
+            <summary>Cobertura del punto</summary>
+        </member>
+        <member name="P:VCashApp.Models.Dtos.Point.PointPreviewDto.FecIngreso">
+            <summary>Fecha de ingreso</summary>
+        </member>
+        <member name="P:VCashApp.Models.Dtos.Point.PointPreviewDto.FecRetiro">
+            <summary>Fecha de retiro</summary>
+        </member>
+        <member name="P:VCashApp.Models.Dtos.Point.PointPreviewDto.LatPunto">
+            <summary>Latitud.</summary>
+        </member>
+        <member name="P:VCashApp.Models.Dtos.Point.PointPreviewDto.LngPunto">
+            <summary>Longitud.</summary>
+        </member>
+        <member name="P:VCashApp.Models.Dtos.Point.PointPreviewDto.RadioPunto">
+            <summary>Radio del punto.</summary>
+        </member>
+        <member name="P:VCashApp.Models.Dtos.Point.PointPreviewDto.BaseCambio">
+            <summary>Base de cambio.</summary>
+        </member>
+        <member name="P:VCashApp.Models.Dtos.Point.PointPreviewDto.LlavesPunto">
+            <summary>Llaves del punto.</summary>
+        </member>
+        <member name="P:VCashApp.Models.Dtos.Point.PointPreviewDto.DocumentosPunto">
+            <summary>Documentos del punto.</summary>
+        </member>
+        <member name="P:VCashApp.Models.Dtos.Point.PointPreviewDto.ExistenciasPunto">
+            <summary>Existencias del punto.</summary>
+        </member>
+        <member name="P:VCashApp.Models.Dtos.Point.PointPreviewDto.PrediccionPunto">
+            <summary>Predicción del punto.</summary>
+        </member>
+        <member name="P:VCashApp.Models.Dtos.Point.PointPreviewDto.CustodiaPunto">
+            <summary>Custodia del punto.</summary>
+        </member>
+        <member name="P:VCashApp.Models.Dtos.Point.PointPreviewDto.OtrosValoresPunto">
+            <summary>Otros valores del punto.</summary>
+        </member>
+        <member name="P:VCashApp.Models.Dtos.Point.PointPreviewDto.LiberacionEfectivoPunto">
+            <summary>Liberación de efectivo del punto.</summary>
+        </member>
+        <member name="P:VCashApp.Models.Dtos.Point.PointPreviewDto.Otros">
+            <summary>Otros.</summary>
+        </member>
+        <member name="P:VCashApp.Models.Dtos.Point.PointPreviewDto.CartaFilePath">
+            <summary>Archivo.</summary>
+        </member>
+        <member name="T:VCashApp.Models.Dtos.Point.PointUpsertDto">
+            <summary>
+            Modelo DTO para la creación o actualización de un punto.
+            </summary>
+        </member>
+        <member name="P:VCashApp.Models.Dtos.Point.PointUpsertDto.CodPunto">
+            <summary>Código del punto</summary>
+        </member>
+        <member name="P:VCashApp.Models.Dtos.Point.PointUpsertDto.VatcoPointCode">
+            <summary>Código VATCO del punto</summary>
+        </member>
+        <member name="P:VCashApp.Models.Dtos.Point.PointUpsertDto.CodPCliente">
+            <summary>Código del punto según cliente</summary>
+        </member>
+        <member name="P:VCashApp.Models.Dtos.Point.PointUpsertDto.CodCliente">
+            <summary>Código del cliente</summary>
+        </member>
+        <member name="P:VCashApp.Models.Dtos.Point.PointUpsertDto.TipoPunto">
+            <summary>Tipo de punto</summary>
+        </member>
+        <member name="P:VCashApp.Models.Dtos.Point.PointUpsertDto.CodClientePpal">
+            <summary>Código del cliente principal</summary>
+        </member>
+        <member name="P:VCashApp.Models.Dtos.Point.PointUpsertDto.NombrePunto">
+            <summary>Nombre del punto.</summary>
+        </member>
+        <member name="P:VCashApp.Models.Dtos.Point.PointUpsertDto.NombreCorto">
+            <summary>Nombre corto del punto.</summary>
+        </member>
+        <member name="P:VCashApp.Models.Dtos.Point.PointUpsertDto.NombrePuntoFact">
+            <summary>Punto de facturación.</summary>
+        </member>
+        <member name="P:VCashApp.Models.Dtos.Point.PointUpsertDto.DirPunto">
+            <summary>Dirección del punto.</summary>
+        </member>
+        <member name="P:VCashApp.Models.Dtos.Point.PointUpsertDto.TelPunto">
+            <summary>Teléfono del punto.</summary>
+        </member>
+        <member name="P:VCashApp.Models.Dtos.Point.PointUpsertDto.RespPunto">
+            <summary>Responsable del punto.</summary>
+        </member>
+        <member name="P:VCashApp.Models.Dtos.Point.PointUpsertDto.CargoRespPunto">
+            <summary>Cargo del responsable del punto.</summary>
+        </member>
+        <member name="P:VCashApp.Models.Dtos.Point.PointUpsertDto.CorreoRespPunto">
+            <summary>Correo del responsable del punto.</summary>
+        </member>
+        <member name="P:VCashApp.Models.Dtos.Point.PointUpsertDto.CodSuc">
+            <summary>Código de la sucursal asociada al punto.</summary>
+        </member>
+        <member name="P:VCashApp.Models.Dtos.Point.PointUpsertDto.CodCiudad">
+            <summary>Código de la ciudad asociada al punto.</summary>
+        </member>
+        <member name="P:VCashApp.Models.Dtos.Point.PointUpsertDto.LatPunto">
+            <summary>Latitud.</summary>
+        </member>
+        <member name="P:VCashApp.Models.Dtos.Point.PointUpsertDto.LngPunto">
+            <summary>Longitud.</summary>
+        </member>
+        <member name="P:VCashApp.Models.Dtos.Point.PointUpsertDto.RadioPunto">
+            <summary>Radio de cobertura del punto.</summary>
+        </member>
+        <member name="P:VCashApp.Models.Dtos.Point.PointUpsertDto.BaseCambio">
+            <summary>Base de cambio del punto.</summary>
+        </member>
+        <member name="P:VCashApp.Models.Dtos.Point.PointUpsertDto.LlavesPunto">
+            <summary>Llaves del punto.</summary>
+        </member>
+        <member name="P:VCashApp.Models.Dtos.Point.PointUpsertDto.SobresPunto">
+            <summary>Sobres del punto.</summary>
+        </member>
+        <member name="P:VCashApp.Models.Dtos.Point.PointUpsertDto.ChequesPunto">
+            <summary>Cheques del punto.</summary>
+        </member>
+        <member name="P:VCashApp.Models.Dtos.Point.PointUpsertDto.DocumentosPunto">
+            <summary>Documentos del punto.</summary>
+        </member>
+        <member name="P:VCashApp.Models.Dtos.Point.PointUpsertDto.ExistenciasPunto">
+            <summary>Existencias del punto.</summary>
+        </member>
+        <member name="P:VCashApp.Models.Dtos.Point.PointUpsertDto.PrediccionPunto">
+            <summary>Prediccion del punto.</summary>
+        </member>
+        <member name="P:VCashApp.Models.Dtos.Point.PointUpsertDto.CustodiaPunto">
+            <summary>Custodia del punto.</summary>
+        </member>
+        <member name="P:VCashApp.Models.Dtos.Point.PointUpsertDto.OtrosValoresPunto">
+            <summary>Otros valores del punto.</summary>
+        </member>
+        <member name="P:VCashApp.Models.Dtos.Point.PointUpsertDto.Otros">
+            <summary>Descripcion.</summary>
+        </member>
+        <member name="P:VCashApp.Models.Dtos.Point.PointUpsertDto.LiberacionEfectivoPunto">
+            <summary>Liberacion del punto.</summary>
+        </member>
+        <member name="P:VCashApp.Models.Dtos.Point.PointUpsertDto.FondoPunto">
+            <summary>Fondo del punto.</summary>
+        </member>
+        <member name="P:VCashApp.Models.Dtos.Point.PointUpsertDto.CodFondo">
+            <summary>Código del fondo.</summary>
+        </member>
+        <member name="P:VCashApp.Models.Dtos.Point.PointUpsertDto.CodRutaSuc">
+            <summary>Ruta del punto.</summary>
+        </member>
+        <member name="P:VCashApp.Models.Dtos.Point.PointUpsertDto.CodRango">
+            <summary>Rango del punto.</summary>
+        </member>
+        <member name="P:VCashApp.Models.Dtos.Point.PointUpsertDto.BusinessType">
+            <summary>Tipo de negocio del punto.</summary>
+        </member>
+        <member name="P:VCashApp.Models.Dtos.Point.PointUpsertDto.FecIngreso">
+            <summary>Fecha de ingreso del punto.</summary>
+        </member>
+        <member name="P:VCashApp.Models.Dtos.Point.PointUpsertDto.FecRetiro">
+            <summary>Fecha de retiro del punto.</summary>
+        </member>
+        <member name="P:VCashApp.Models.Dtos.Point.PointUpsertDto.CodCas4u">
+            <summary>Codigo Cas4U.</summary>
+        </member>
+        <member name="P:VCashApp.Models.Dtos.Point.PointUpsertDto.NivelRiesgo">
+            <summary>Indica si el punto tiene riesgo.</summary>
+        </member>
+        <member name="P:VCashApp.Models.Dtos.Point.PointUpsertDto.CoberturaPunto">
+            <summary>Cobertura del punto.</summary>
+        </member>
+        <member name="P:VCashApp.Models.Dtos.Point.PointUpsertDto.EscalaInterurbanos">
+            <summary>Escala.</summary>
+        </member>
+        <member name="P:VCashApp.Models.Dtos.Point.PointUpsertDto.Consignacion">
+            <summary>Indica si el punto maneja consignación.</summary>
+        </member>
+        <member name="P:VCashApp.Models.Dtos.Point.PointUpsertDto.EstadoPunto">
+            <summary>Estado del punto (activo/inactivo).</summary>
+        </member>
+        <member name="P:VCashApp.Models.Dtos.Point.PointUpsertDto.CartaFilePath">
+            <summary>Ruta del archivo de la carta asociada al punto.</summary>
         </member>
         <member name="T:VCashApp.Models.ViewModels.BranchViewModel">
             <summary>
@@ -4431,6 +4828,18 @@
         <member name="M:VCashApp.Services.Point.Application.IPointService.ValidateAsync(VCashApp.Models.Dtos.Point.PointUpsertDto,System.Boolean)">
             <summary>Validaciones antes de Create/Update.</summary>
         </member>
+        <member name="M:VCashApp.Services.Point.Application.IPointService.GetMainClientOptionsAsync(System.Int32)">
+            <summary>Obtiene las opciones de clientes principales para un cliente dado.</summary>
+        </member>
+        <member name="M:VCashApp.Services.Point.Application.IPointService.GetFundsOptionsHtmlAsync(System.Int32,System.Int32,System.Int32)">
+            <summary>Metodo asincrono que obtiene el html de los fondos de un punto.</summary>
+        </member>
+        <member name="M:VCashApp.Services.Point.Application.IPointService.GetRoutesOptionsHtmlAsync(System.Int32)">
+            <summary>Metodo asincrono que obtiene el html de las rutas de un punto.</summary>
+        </member>
+        <member name="M:VCashApp.Services.Point.Application.IPointService.GetRangeOptionsHtmlAsync(System.Int32)">
+            <summary>Metodo asincrono que obtiene el html de los rangos de un punto.</summary>
+        </member>
         <member name="M:VCashApp.Services.Point.Infrastructure.PointFileManager.SaveCartaAsync(System.Int32,System.String,Microsoft.AspNetCore.Http.IFormFile)">
             <summary>
             Guarda la carta de inclusión y devuelve el filename.
@@ -4440,6 +4849,82 @@
             <summary>
             Elimina la carta actual del punto si existe.
             </summary>
+        </member>
+        <member name="T:VCashApp.Services.Point.Infrastructure.PointService">
+            <summary>Manejo de puntos.</summary>
+        </member>
+        <member name="M:VCashApp.Services.Point.Infrastructure.PointService.#ctor(VCashApp.Data.AppDbContext,Microsoft.Extensions.Options.IOptions{VCashApp.Extensions.RepositorioOptions})">
+            <summary>Constructor.</summary>
+        </member>
+        <member name="M:VCashApp.Services.Point.Infrastructure.PointService.CreateAsync(VCashApp.Models.Dtos.Point.PointUpsertDto,Microsoft.AspNetCore.Http.IFormFile)">
+            <summary>
+            Método asincrono que crea un nuevo punto.
+            </summary>
+            <param name="dto">Datos del punto.</param>
+            <param name="cartaFile">Archivo.</param>
+            <returns></returns>
+        </member>
+        <member name="M:VCashApp.Services.Point.Infrastructure.PointService.UpdateAsync(VCashApp.Models.Dtos.Point.PointUpsertDto,Microsoft.AspNetCore.Http.IFormFile,System.Boolean)">
+            <summary>
+            Método asincrono que actualiza un punto existente.
+            </summary>
+            <param name="dto">Datos del punto.</param>
+            <param name="cartaFile">Archivo.</param>
+            <param name="removeCartaActual">Remover archivo actual.</param>
+            <returns>Devuelve resultado del servicio.</returns>
+        </member>
+        <member name="M:VCashApp.Services.Point.Infrastructure.PointService.ToggleStatusAsync(System.String)">
+            <summary>
+            Método asincrono que activa o desactiva un punto.
+            </summary>
+            <param name="codPunto">Codigo del punto.</param>
+            <returns>Devuelve resultado del servicio.</returns>
+        </member>
+        <member name="M:VCashApp.Services.Point.Infrastructure.PointService.ValidateAsync(VCashApp.Models.Dtos.Point.PointUpsertDto,System.Boolean)">
+            <summary>
+            Método asincrono que valida los datos antes de crear o actualizar un punto.
+            </summary>
+            <param name="dto">Datos del punto.</param>
+            <param name="isEdit">Verdadero si es edición, falso si es creación.</param>
+            <returns>Devuelve resultado de la validación.</returns>
+        </member>
+        <member name="M:VCashApp.Services.Point.Infrastructure.PointService.GenerateVatcoCodeAsync(System.Int32,System.Int32)">
+            <summary>
+            Método asincrono que genera el código interno CodPunto según reglas (incremental o lógica propia).
+            </summary>
+            <param name="codCliente">Cliente.</param>
+            <param name="tipoPunto">Tipo de punto</param>
+            <returns>Devuelve el código generado.</returns>
+        </member>
+        <member name="M:VCashApp.Services.Point.Infrastructure.PointService.GetMainClientOptionsAsync(System.Int32)">
+            <summary>
+            Método asincrono que obtiene las opciones de clientes principales para un cliente dado.
+            </summary>
+            <param name="codCliente">Cliente.</param>
+            <returns>Devuelve lista de opciones.</returns>
+        </member>
+        <member name="M:VCashApp.Services.Point.Infrastructure.PointService.GetFundsOptionsHtmlAsync(System.Int32,System.Int32,System.Int32)">
+            <summary>
+            Obtiene el HTML con las opciones de fondos asignados a un punto.
+            </summary>
+            <param name="branchId">Sucursal.</param>
+            <param name="clientId">Cliente.</param>
+            <param name="mainClientId">Cliente Principal.</param>
+            <returns>Lista HTML de fondos.</returns>
+        </member>
+        <member name="M:VCashApp.Services.Point.Infrastructure.PointService.GetRoutesOptionsHtmlAsync(System.Int32)">
+            <summary>
+            Metodo asincrono que obtiene el html de las rutas de un punto.
+            </summary>
+            <param name="branchId">Sucursal.</param>
+            <returns>Lista HTML de rutas.</returns>
+        </member>
+        <member name="M:VCashApp.Services.Point.Infrastructure.PointService.GetRangeOptionsHtmlAsync(System.Int32)">
+            <summary>
+            Obtiene el HTML con las opciones de rangos asignados a un punto.
+            </summary>
+            <param name="clientId">Cliente.</param>
+            <returns>Devuelve lista HTML de rangos.</returns>
         </member>
         <member name="T:VCashApp.Services.UserService">
             <summary>

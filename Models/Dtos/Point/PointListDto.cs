@@ -1,33 +1,45 @@
-﻿    namespace VCashApp.Models.Dtos.Point
+﻿namespace VCashApp.Models.Dtos.Point
+{
+    /// <summary>DTO para lista de puntos.</summary>
+    public sealed class PointListDto
     {
-        public sealed class PointListDto
-        {
-            public string CodPunto { get; init; } = string.Empty;
-            public string CodPCliente { get; init; } = string.Empty;
-
-            public int CodCliente { get; init; }
-            public string? ClienteNombre { get; init; }
-
-            public int CodClientePpal { get; init; }
-            public string? ClientePpalNombre { get; init; }
-
-            public string? NombrePunto { get; init; }
-            public string? NombreCorto { get; init; }
-
-            public int CodSuc { get; init; }
-            public string? NombreSucursal { get; init; }
-
-            public int CodCiudad { get; init; }
-            public string? NombreCiudad { get; init; }
-
-            public string? FundName { get; init; }
-            public string? RouteName { get; init; }
-            public string? RangeName { get; init; }
-
-            public string? Latitude { get; set; }
-            public string? Longitude { get; set; }
-            public string? PointRadius { get; init; }
-
-            public bool EstadoPunto { get; init; }
-        }
+        /// <summary>Código del punto.</summary>
+        public string CodPunto { get; init; } = string.Empty;
+        /// <summary>Código Vatco del punto.</summary>
+        public string CodPCliente { get; init; } = string.Empty;
+        /// <summary>Codigo del cliente.</summary>
+        public int CodCliente { get; init; }
+        /// <summary>Nombre del cliente.</summary>
+        public string? ClienteNombre { get; init; }
+        /// <summary>Cliente principal.</summary>
+        public int CodClientePpal { get; init; }
+        /// <summary>Nombre del cliente principal.</summary>
+        public string? ClientePpalNombre { get; init; }
+        /// <summary>Nombre de punto.</summary>
+        public string? NombrePunto { get; init; }
+        /// <summary>Nombre corto del punto.</summary>
+        public string? NombreCorto { get; init; }
+        /// <summary>Sucursal.</summary>
+        public int CodSuc { get; init; }
+        /// <summary>Nombre de la sucursal.</summary>
+        public string? NombreSucursal { get; init; }
+        /// <summary>Ciudad.</summary>
+        public int CodCiudad { get; init; }
+        /// <summary>Nombre de la ciudad.</summary>
+        public string? NombreCiudad { get; init; }
+        /// <summary>Nombre del fondo.</summary>
+        public string? FundName { get; init; }
+        /// <summary>Nombre de la ruta.</summary>
+        public string? RouteName { get; init; }
+        /// <summary>Nombre del rango.</summary>
+        public string? RangeName { get; init; }
+        /// <summary>Latitud.</summary>
+        public string? Latitude { get; set; }
+        /// <summary>Longitud.</summary>
+        public string? Longitude { get; set; }
+        /// <summary>Radio del punto.</summary>
+        public string? PointRadius { get; init; }
+        /// <summary>Estado.</summary>
+        public bool EstadoPunto { get; init; }
     }
+}

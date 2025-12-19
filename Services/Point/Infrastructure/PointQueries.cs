@@ -166,6 +166,7 @@ namespace VCashApp.Services.Point.Infrastructure
 
             var sucursales = await sucursalesQ
                 .OrderBy(s => s.NombreSucursal)
+                .Where(s => s.Estado && s.CodSucursal != 32)
                 .Select(s => new SelectListItem
                 {
                     Value = s.CodSucursal.ToString(),
@@ -179,7 +180,7 @@ namespace VCashApp.Services.Point.Infrastructure
                 .Select(c => new SelectListItem
                 {
                     Value = c.CodCiudad.ToString(),
-                    Text = c.NombreCiudad
+                    Text =  c.NombreCiudad + " (" + c.Departamento!.NombreDepartamento + ")"
                 }).ToListAsync();
 
             // --- Fondos filtrados por regla VCash2 ---

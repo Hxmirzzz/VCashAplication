@@ -6,6 +6,7 @@
     ViewData["Title"] = "Crear Punto";
 
     var clients = (IEnumerable<SelectListItem>)ViewBag.Clientes ?? Enumerable.Empty<SelectListItem>();
+    var mainClients = (IEnumerable<SelectListItem>)ViewBag.ClientesPrincipales ?? Enumerable.Empty<SelectListItem>();
     var branches = (IEnumerable<SelectListItem>)ViewBag.Sucursales ?? Enumerable.Empty<SelectListItem>();
     var cities = (IEnumerable<SelectListItem>)ViewBag.Ciudades ?? Enumerable.Empty<SelectListItem>();
     var funds = (IEnumerable<SelectListItem>)ViewBag.Fondos ?? Enumerable.Empty<SelectListItem>();
@@ -20,6 +21,7 @@
     {
         ["IsEdit"] = false,
         ["Clients"] = clients,
+        ["MainClients"] = mainClients,
         ["Branches"] = branches,
         ["Cities"] = cities,
         ["Funds"] = funds,

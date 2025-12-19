@@ -8,6 +8,7 @@ using VCashApp.Models;
 using VCashApp.Models.Dtos.Point;
 using VCashApp.Services.DTOs;
 using VCashApp.Services.Point.Application;
+using VCashApp.Services.Point.Infrastructure;
 
 namespace VCashApp.Controllers
 {
@@ -264,6 +265,51 @@ namespace VCashApp.Controllers
 
             var code = await _svc.GenerateVatcoCodeAsync(codCliente, tipoPunto);
             return Content(code);
+        }
+
+        [HttpGet("GetMainClientOptions")]
+        public async Task<IActionResult> GetMainClientOptions(int codCliente)
+        {
+            var options = await _svc.GetMainClientOptionsAsync(codCliente);
+            return Ok(options);
+        }
+
+        /// <summary>
+        /// Obtiene el HTML de las opciones de fondos para un punto según sucursal y cliente.
+        /// </summary>
+        /// <param name="branchId">Sucursal</param>
+        /// <param name="clientId">Cliente</param>
+        /// <param name="mainClientId">Cliente Principal</param>
+        /// <returns>Lista de opciones en formato HTML</returns>
+        [HttpGet("GetFunds")]
+        public async Task<IActionResult> GetFunds(int branchId, int clientId, int mainClientId = 0)
+        {
+            var options = await _svc.GetFundsOptionsHtmlAsync(branchId, clientId, mainClientId);
+            return Ok(options);
+        }
+
+        /// <summary>
+        /// Obtiene el HTML de las opciones de rutas para un punto según ciudad.
+        /// </summary>
+        /// <param name="branchId"></param>
+        /// <returns>Lista de opciones en formato HTML</returns>
+        [HttpGet("GetRoutes")]
+        public async Task<IActionResult> GetRoutes(int branchId)
+        {
+            var options = await _svc.GetRoutesOptionsHtmlAsync(branchId);
+            return Ok(options);
+        }
+
+        /// <summary>
+        /// Obtiene el HTML de las opciones de rangos para un punto según cliente.
+        /// </summary>
+        /// <param name="clientId">Cliente</param>
+        /// <returns>De lista de opciones en formato HTML</returns>
+        [HttpGet("GetRangesByClient")]
+        public async Task<IActionResult> GetRangesByClient(int clientId)
+        {
+            var options = await _svc.GetRangeOptionsHtmlAsync(clientId);
+            return Ok(options);
         }
 
         private static string EscapeCsv(string? s)

@@ -191,6 +191,50 @@ function updateCodVatco() {
         });
 }
 
+document.addEventListener('DOMContentLoaded', () => {
+    const clientSelect = document.getElementById('CodCliente');
+    const mainClientSelect = document.getElementById('CodClientePpal');
+
+    if (!clientSelect || !mainClientSelect) return;
+
+    async function refreshMainClient() {
+        const codCliente = clientSelect.value;
+
+        if (!codCliente) {
+            mainClientSelect.innerHTML = '<option value="0">NINGUNO</option>';
+            mainClientSelect.disabled = true;
+            return;
+        }
+
+        try {
+            const data = await fetch(
+                `/Point/GetMainClientOptions?codCliente=${codCliente}`
+            ).then(r => r.json());
+
+            mainClientSelect.innerHTML = '';
+
+            data.forEach(o => {
+                const opt = document.createElement('option');
+                opt.value = o.value;
+                opt.textContent = o.text;
+                opt.selected = o.selected;
+                mainClientSelect.appendChild(opt);
+            });
+
+            mainClientSelect.disabled = data[0]?.lockSelect === true;
+
+        } catch {
+            mainClientSelect.innerHTML = '<option value="0">NINGUNO</option>';
+            mainClientSelect.disabled = true;
+        }
+    }
+
+    clientSelect.addEventListener('change', refreshMainClient);
+
+    // Edición
+    refreshMainClient();
+});
+
 // ============================================================================
 // 5. GESTIÓN DE FONDOS (basado en Sucursal y Cliente Principal)
 // ============================================================================
@@ -284,21 +328,35 @@ document.addEventListener('DOMContentLoaded', function () {
 
     if (!sucSelect || !rutaSelect) return;
 
+    function resetRutas() {
+        rutaSelect.innerHTML = '<option value="">-- Seleccione ruta --</option>';
+        rutaSelect.disabled = true;
+    }
+
+    async function cargarRutas(codSuc) {
+        try {
+            const html = await fetch(`/Point/GetRoutes?branchId=${codSuc}`)
+                .then(r => r.text());
+
+            rutaSelect.innerHTML = html;
+            rutaSelect.disabled = false;
+        } catch {
+            rutaSelect.innerHTML = '<option value="">Error al cargar</option>';
+            rutaSelect.disabled = true;
+        }
+    }
+
+    resetRutas();
+
     sucSelect.addEventListener('change', function () {
         const codSuc = this.value;
 
-        if (codSuc) {
-            fetch(`/Point/GetRoutes?branchId=${codSuc}`)
-                .then(response => response.text())
-                .then(data => {
-                    rutaSelect.innerHTML = data;
-                })
-                .catch(() => {
-                    rutaSelect.innerHTML = '<option value="">Error al cargar</option>';
-                });
-        } else {
-            rutaSelect.innerHTML = '<option value="">-- Seleccione ruta --</option>';
+        if (!codSuc || codSuc === '0') {
+            resetRutas();
+            return;
         }
+
+        cargarRutas(codSuc);
     });
 });
 

@@ -1,28 +1,33 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
+using System.Text;
 using VCashApp.Data;
+using VCashApp.Extensions;
 using VCashApp.Models.Dtos.Point;
 using VCashApp.Models.Entities;
-using VCashApp.Extensions;
 using VCashApp.Services.DTOs;
 using VCashApp.Services.Point.Application;
 
 namespace VCashApp.Services.Point.Infrastructure
 {
+    /// <summary>Manejo de puntos.</summary>
     public sealed class PointService : IPointService
     {
         private readonly AppDbContext _db;
         private readonly PointFileManager _fileMgr;
-
+        /// <summary>Constructor.</summary>
         public PointService(AppDbContext db, IOptions<RepositorioOptions> repoOpts)
         {
             _db = db;
             _fileMgr = new PointFileManager(repoOpts);
         }
 
-        // ============================================================
-        // CREATE
-        // ============================================================
+        /// <summary>
+        /// Método asincrono que crea un nuevo punto.
+        /// </summary>
+        /// <param name="dto">Datos del punto.</param>
+        /// <param name="cartaFile">Archivo.</param>
+        /// <returns></returns>
         public async Task<ServiceResult> CreateAsync(PointUpsertDto dto, IFormFile? cartaFile)
         {
             var valid = await ValidateAsync(dto, isEdit: false);
@@ -96,9 +101,13 @@ namespace VCashApp.Services.Point.Infrastructure
             return ServiceResult.SuccessResult("Punto creado correctamente.");
         }
 
-        // ============================================================
-        // UPDATE
-        // ============================================================
+        /// <summary>
+        /// Método asincrono que actualiza un punto existente.
+        /// </summary>
+        /// <param name="dto">Datos del punto.</param>
+        /// <param name="cartaFile">Archivo.</param>
+        /// <param name="removeCartaActual">Remover archivo actual.</param>
+        /// <returns>Devuelve resultado del servicio.</returns>
         public async Task<ServiceResult> UpdateAsync(PointUpsertDto dto, IFormFile? cartaFile, bool removeCartaActual)
         {
             var valid = await ValidateAsync(dto, isEdit: true);
@@ -181,9 +190,11 @@ namespace VCashApp.Services.Point.Infrastructure
             return ServiceResult.SuccessResult("Punto actualizado correctamente.");
         }
 
-        // ============================================================
-        // TOGGLE STATUS
-        // ============================================================
+        /// <summary>
+        /// Método asincrono que activa o desactiva un punto.
+        /// </summary>
+        /// <param name="codPunto">Codigo del punto.</param>
+        /// <returns>Devuelve resultado del servicio.</returns>
         public async Task<ServiceResult> ToggleStatusAsync(string codPunto)
         {
             var p = await _db.AdmPuntos.FirstOrDefaultAsync(p => p.PointCode == codPunto);
@@ -196,9 +207,12 @@ namespace VCashApp.Services.Point.Infrastructure
             return ServiceResult.SuccessResult("Estado actualizado.");
         }
 
-        // ============================================================
-        // VALIDACIÓN GENERAL
-        // ============================================================
+        /// <summary>
+        /// Método asincrono que valida los datos antes de crear o actualizar un punto.
+        /// </summary>
+        /// <param name="dto">Datos del punto.</param>
+        /// <param name="isEdit">Verdadero si es edición, falso si es creación.</param>
+        /// <returns>Devuelve resultado de la validación.</returns>
         public async Task<ServiceResult> ValidateAsync(PointUpsertDto dto, bool isEdit)
         {
             if (string.IsNullOrWhiteSpace(dto.CodPunto))
@@ -219,9 +233,12 @@ namespace VCashApp.Services.Point.Infrastructure
             return ServiceResult.SuccessResult("OK.");
         }
 
-        // ============================================================
-        // GENERACIÓN DE CÓDIGO
-        // ============================================================
+        /// <summary>
+        /// Método asincrono que genera el código interno CodPunto según reglas (incremental o lógica propia).
+        /// </summary>
+        /// <param name="codCliente">Cliente.</param>
+        /// <param name="tipoPunto">Tipo de punto</param>
+        /// <returns>Devuelve el código generado.</returns>
         public async Task<string> GenerateVatcoCodeAsync(int codCliente, int tipoPunto)
         {
             // prefijo inicial según tipo
@@ -262,6 +279,213 @@ namespace VCashApp.Services.Point.Infrastructure
             }
 
             return $"{codCliente}{prefijo}{nuevoNumero:D3}";
+        }
+
+        /// <summary>
+        /// Método asincrono que obtiene las opciones de clientes principales para un cliente dado.
+        /// </summary>
+        /// <param name="codCliente">Cliente.</param>
+        /// <returns>Devuelve lista de opciones.</returns>
+        public async Task<IReadOnlyList<MainClientOptionDto>> GetMainClientOptionsAsync(int codCliente)
+        {
+            var cliente = await _db.AdmClientes
+                .AsNoTracking()
+                .FirstOrDefaultAsync(c => c.ClientCode == codCliente);
+
+            if (cliente == null)
+            {
+                return new[]
+                {
+                    new MainClientOptionDto
+                    {
+                        Value = 0,
+                        Text = "NINGUNO",
+                        Selected = true,
+                        LockSelect = true
+                    }
+                };
+            }
+
+            // DIRECTO
+            if (cliente.ClientType == 1 || cliente.MainClient == 0)
+            {
+                return new[]
+                {
+                    new MainClientOptionDto
+                    {
+                        Value = 0,
+                        Text = "NINGUNO",
+                        Selected = true,
+                        LockSelect = true
+                    }
+                };
+            }
+
+            var principal = await _db.AdmClientes
+                .AsNoTracking()
+                .FirstOrDefaultAsync(c => c.ClientCode == cliente.MainClient);
+
+            if (principal == null)
+            {
+                return new[]
+                {
+                    new MainClientOptionDto
+                    {
+                        Value = 0,
+                        Text = "NINGUNO",
+                        Selected = true,
+                        LockSelect = true
+                    }
+                };
+            }
+
+            // AMPARADO
+            if (cliente.ClientType == 2)
+            {
+                return new[]
+                {
+                    new MainClientOptionDto
+                    {
+                        Value = principal.ClientCode,
+                        Text = $"PPAL: {principal.ClientCode} — {principal.ClientName}",
+                        Selected = true,
+                        LockSelect = true
+                    }
+                };
+            }
+
+            // MIXTO
+            return new[]
+            {
+                new MainClientOptionDto
+                {
+                    Value = 0,
+                    Text = "NINGUNO",
+                    Selected = true,
+                    LockSelect = false
+                },
+                new MainClientOptionDto
+                {
+                    Value = principal.ClientCode,
+                    Text = $"PPAL: {principal.ClientCode} — {principal.ClientName}",
+                    Selected = false,
+                    LockSelect = false
+                }
+            };
+        }
+
+        /// <summary>
+        /// Obtiene el HTML con las opciones de fondos asignados a un punto.
+        /// </summary>
+        /// <param name="branchId">Sucursal.</param>
+        /// <param name="clientId">Cliente.</param>
+        /// <param name="mainClientId">Cliente Principal.</param>
+        /// <returns>Lista HTML de fondos.</returns>
+        public async Task<string> GetFundsOptionsHtmlAsync(int branchId, int clientId, int mainClientId)
+        {
+            if (branchId <= 0)
+                return "<option value=''>-- Seleccione fondo --</option>";
+
+            var query = _db.AdmFondos
+                .AsNoTracking()
+                .Where(f =>
+                    f.BranchCode == branchId &&
+                    f.FundStatus &&
+                    (
+                        f.ClientCode == clientId ||
+                        (mainClientId > 0 && f.ClientCode == mainClientId)
+                    )
+                )
+                .OrderBy(f => f.FundName)
+                .Select(f => new
+                {
+                    f.FundCode,
+                    f.FundName
+                });
+
+            var fondos = await query.ToListAsync();
+
+            var sb = new StringBuilder();
+            sb.Append("<option value=''>-- Seleccione fondo --</option>");
+
+            foreach (var f in fondos)
+            {
+                sb.AppendFormat(
+                    "<option value=\"{0}\">{1}</option>",
+                    f.FundCode,
+                    System.Net.WebUtility.HtmlEncode(f.FundName)
+                );
+            }
+
+            return sb.ToString();
+        }
+
+        /// <summary>
+        /// Metodo asincrono que obtiene el html de las rutas de un punto.
+        /// </summary>
+        /// <param name="branchId">Sucursal.</param>
+        /// <returns>Lista HTML de rutas.</returns>
+        public async Task<string> GetRoutesOptionsHtmlAsync(int branchId)
+        {
+            if (branchId <= 0)
+                return "<option value=''>-- Seleccione ruta --</option>";
+            var query = _db.AdmRutas
+                .AsNoTracking()
+                .Where(r =>
+                    r.BranchId == branchId &&
+                    r.Status)
+                .OrderBy(r => r.RouteName)
+                .Select(r => new
+                {
+                    r.BranchRouteCode,
+                    r.RouteName
+                });
+            var rutas = await query.ToListAsync();
+            var sb = new StringBuilder();
+            sb.Append("<option value=''>-- Seleccione ruta --</option>");
+            foreach (var r in rutas)
+            {
+                sb.AppendFormat(
+                    "<option value=\"{0}\">{1}</option>",
+                    r.BranchRouteCode,
+                    System.Net.WebUtility.HtmlEncode(r.RouteName)
+                );
+            }
+            return sb.ToString();
+        }
+
+        /// <summary>
+        /// Obtiene el HTML con las opciones de rangos asignados a un punto.
+        /// </summary>
+        /// <param name="clientId">Cliente.</param>
+        /// <returns>Devuelve lista HTML de rangos.</returns>
+        public async Task<string> GetRangeOptionsHtmlAsync(int clientId)
+        {
+            if (clientId <= 0)
+                return "<option value=''>-- Seleccione rango --</option>";
+            var query = _db.AdmRangos
+                .AsNoTracking()
+                .Where(r =>
+                    r.ClientId == clientId &&
+                    r.RangeStatus)
+                .OrderBy(r => r.Id)
+                .Select(r => new
+                {
+                    r.Id,
+                    r.CodRange
+                });
+            var rangos = await query.ToListAsync();
+            var sb = new StringBuilder();
+            sb.Append("<option value=''>-- Seleccione rango --</option>");
+            foreach (var r in rangos)
+            {
+                sb.AppendFormat(
+                    "<option value=\"{0}\">{1}</option>",
+                    r.Id,
+                    System.Net.WebUtility.HtmlEncode(r.CodRange)
+                );
+            }
+            return sb.ToString();
         }
     }
 }

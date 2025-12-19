@@ -6,6 +6,7 @@
     string pageName = (string)(ViewData["PageName"] ?? (isEdit ? "Editar Punto" : "Crear Punto"));
 
     var clients = (IEnumerable<SelectListItem>)ViewData["Clients"] ?? Enumerable.Empty<SelectListItem>();
+    var mainClients = (IEnumerable<SelectListItem>)ViewData["MainClients"] ?? Enumerable.Empty<SelectListItem>();
     var branches = (IEnumerable<SelectListItem>)ViewData["Branches"] ?? Enumerable.Empty<SelectListItem>();
     var cities = (IEnumerable<SelectListItem>)ViewData["Cities"] ?? Enumerable.Empty<SelectListItem>();
     var funds = (IEnumerable<SelectListItem>)ViewData["Funds"] ?? Enumerable.Empty<SelectListItem>();
@@ -37,8 +38,8 @@
                             <div class="form-floating">
                                 <select asp-for="CodCliente" class="form-select" asp-items="clients">
                                     <option value="">-- Seleccione cliente --</option>
-                                </select>
-                                <label asp-for="CodCliente">Cliente</label>
+                                </select>   
+                                <label asp-for="CodCliente" class="label-required">Cliente</label>
                                 <span asp-validation-for="CodCliente" class="text-danger"></span>
                             </div>
                         </div>
@@ -141,7 +142,6 @@
                             </div>
                         </div>
 
-                        <!-- CIUDAD -->
                         <div class="col-12 col-lg-3">
                             <div class="form-floating">
                                 <select asp-for="CodCiudad" class="form-select" asp-items="cities">
@@ -150,32 +150,27 @@
                                 <label asp-for="CodCiudad">Ciudad</label>
                             </div>
                         </div>
-
-                        <!-- CLIENTE PRINCIPAL -->
                         <div class="col-12 col-lg-3">
                             <div class="form-floating">
-                                <input asp-for="CodClientePpal" type="number" class="form-control" />
+                                <select asp-for="CodClientePpal" class="form-select" asp-items="mainClients">
+                                    <option value="">-- Seleccione cliente --</option>
+                                    <option value="0">NINGUNO</option>
+                                </select>
                                 <label asp-for="CodClientePpal">Cliente Principal</label>
                             </div>
                         </div>
-
-                        <!-- LATITUD -->
                         <div class="col-12 col-lg-2">
                             <div class="form-floating">
                                 <input asp-for="LatPunto" class="form-control" />
                                 <label asp-for="LatPunto">Latitud</label>
                             </div>
                         </div>
-
-                        <!-- LONGITUD -->
                         <div class="col-12 col-lg-2">
                             <div class="form-floating">
                                 <input asp-for="LngPunto" class="form-control" />
                                 <label asp-for="LngPunto">Longitud</label>
                             </div>
                         </div>
-
-                        <!-- RADIO -->
                         <div class="col-12 col-lg-2">
                             <div class="form-floating">
                                 <input asp-for="RadioPunto" type="number" class="form-control" />
@@ -409,13 +404,12 @@
                         </div>
                         <div class="col-12 col-lg-2">
                             <div class="form-floating">
-                                <select class="form-select" id="EstadoSelect">
+                                <select class="form-select" asp-for="EstadoPunto">
                                     <option value="true" selected>Activo</option>
                                     <option value="false">Inactivo</option>
                                 </select>
                                 <label>Estado</label>
                             </div>
-                            <input type="hidden" asp-for="EstadoPunto" id="EstadoPunto" />
                         </div>
 
                         <div class="col-12">
@@ -484,23 +478,6 @@
                 <button type="submit" class="btn btn-primary">Guardar</button>
                 <a asp-action="Index" asp-controller="Point" class="btn btn-danger">Cancelar</a>
             </div>
-
         </form>
     </div>
 </div>
-
-@section Scripts {
-    <script>
-        // Sincronizar el select visible con el hidden del estado
-        document.getElementById('EstadoSelect').addEventListener('change', function() {
-            document.getElementById('EstadoPunto').value = this.value;
-        });
-
-        // Inicializar el valor del estado al cargar
-        document.addEventListener('DOMContentLoaded', function() {
-            var estadoPunto = '@Model.EstadoPunto'.toLowerCase();
-            document.getElementById('EstadoSelect').value = estadoPunto;
-            document.getElementById('EstadoPunto').value = estadoPunto;
-        });
-    </script>
-}
