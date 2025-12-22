@@ -1668,6 +1668,18 @@
             <param name="selectedBranchFilter">Opcional. Filtro por ID de sucursal.</param>
             <returns>Un <see cref="T:Microsoft.AspNetCore.Mvc.IActionResult"/> que devuelve un archivo para descarga en caso de éxito.</returns>
         </member>
+        <member name="T:VCashApp.Data.AppDbContext">
+            <summary>Contexto de la base de datos de la aplicación.</summary>
+        </member>
+        <member name="M:VCashApp.Data.AppDbContext.#ctor(Microsoft.EntityFrameworkCore.DbContextOptions{VCashApp.Data.AppDbContext},VCashApp.Infrastructure.Branches.IBranchContext)">
+            <summary>Constructor del contexto de la base de datos.</summary>
+        </member>
+        <member name="P:VCashApp.Data.AppDbContext.AdmTypeBusinesses">
+            <summary>Entidad para tipos de negocio.</summary>
+        </member>
+        <member name="M:VCashApp.Data.AppDbContext.OnModelCreating(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <summary>Configuración del modelo de la base de datos.</summary>
+        </member>
         <member name="T:VCashApp.Enums.Fund.FundTypeEnum">
             <summary>
             Tipo de fondo.
@@ -2376,6 +2388,30 @@
         <member name="M:VCashApp.Migrations.DeleteFlowCodeToCgsServiceTable.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
             <inheritdoc />
         </member>
+        <member name="T:VCashApp.Migrations.AddTypeBusinessTable">
+            <inheritdoc />
+        </member>
+        <member name="M:VCashApp.Migrations.AddTypeBusinessTable.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:VCashApp.Migrations.AddTypeBusinessTable.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:VCashApp.Migrations.AddTypeBusinessTable.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="T:VCashApp.Migrations.AddTypeBusinessFKToAdmPoints">
+            <inheritdoc />
+        </member>
+        <member name="M:VCashApp.Migrations.AddTypeBusinessFKToAdmPoints.Up(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:VCashApp.Migrations.AddTypeBusinessFKToAdmPoints.Down(Microsoft.EntityFrameworkCore.Migrations.MigrationBuilder)">
+            <inheritdoc />
+        </member>
+        <member name="M:VCashApp.Migrations.AddTypeBusinessFKToAdmPoints.BuildTargetModel(Microsoft.EntityFrameworkCore.ModelBuilder)">
+            <inheritdoc />
+        </member>
         <member name="T:VCashApp.Models.DTOs.EmployeeLogListadoDto">
             <summary>
             DTO para listado de registros de empleados (Dashboard e Historial)
@@ -2765,6 +2801,30 @@
         </member>
         <member name="P:VCashApp.Models.Dtos.Point.PointUpsertDto.CartaFilePath">
             <summary>Ruta del archivo de la carta asociada al punto.</summary>
+        </member>
+        <member name="T:VCashApp.Models.Dtos.Point.RangeDayRow">
+            <summary>Fila de rangos por día.</summary>
+        </member>
+        <member name="P:VCashApp.Models.Dtos.Point.RangeDayRow.DayName">
+            <summary>Nombre del día.</summary>
+        </member>
+        <member name="P:VCashApp.Models.Dtos.Point.RangeDayRow.RangeOne">
+            <summary>Rango uno.</summary>
+        </member>
+        <member name="P:VCashApp.Models.Dtos.Point.RangeDayRow.RangeTwo">
+            <summary>Rango dos.</summary>
+        </member>
+        <member name="P:VCashApp.Models.Dtos.Point.RangeDayRow.RangeThree">
+            <summary>Rango tres.</summary>
+        </member>
+        <member name="T:VCashApp.Models.Entities.AdmTypeBusiness">
+            <summary>Tipo de negocio.</summary>
+        </member>
+        <member name="P:VCashApp.Models.Entities.AdmTypeBusiness.Id">
+            <summary>Identificador del tipo de negocio.</summary>
+        </member>
+        <member name="P:VCashApp.Models.Entities.AdmTypeBusiness.Description">
+            <summary>Descripción del tipo de negocio.</summary>
         </member>
         <member name="T:VCashApp.Models.ViewModels.BranchViewModel">
             <summary>
@@ -4840,6 +4900,9 @@
         <member name="M:VCashApp.Services.Point.Application.IPointService.GetRangeOptionsHtmlAsync(System.Int32)">
             <summary>Metodo asincrono que obtiene el html de los rangos de un punto.</summary>
         </member>
+        <member name="M:VCashApp.Services.Point.Application.IPointService.GetRangeInfoHtmlAsync(System.Int32)">
+            <summary>Metodo asincrono que obtiene el html de la informacion de un rango.</summary>
+        </member>
         <member name="M:VCashApp.Services.Point.Infrastructure.PointFileManager.SaveCartaAsync(System.Int32,System.String,Microsoft.AspNetCore.Http.IFormFile)">
             <summary>
             Guarda la carta de inclusión y devuelve el filename.
@@ -4925,6 +4988,13 @@
             </summary>
             <param name="clientId">Cliente.</param>
             <returns>Devuelve lista HTML de rangos.</returns>
+        </member>
+        <member name="M:VCashApp.Services.Point.Infrastructure.PointService.GetRangeInfoHtmlAsync(System.Int32)">
+            <summary>
+            Obtiene el HTML con la información de un rango.
+            </summary>
+            <param name="rangeId">Rango.</param>
+            <returns>Lista HTML de información del rango.</returns>
         </member>
         <member name="T:VCashApp.Services.UserService">
             <summary>

@@ -31,5 +31,8 @@ namespace VCashApp.Services.Point.Application
 
         /// <summary>Metodo asincrono que obtiene el html de los rangos de un punto.</summary>
         Task<string> GetRangeOptionsHtmlAsync(int clientId);
+
+        /// <summary>Metodo asincrono que obtiene el html de la informacion de un rango.</summary>
+        Task<string> GetRangeInfoHtmlAsync(int rangeId);
     }
 }

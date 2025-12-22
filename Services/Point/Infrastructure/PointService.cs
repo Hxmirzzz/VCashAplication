@@ -487,5 +487,89 @@ namespace VCashApp.Services.Point.Infrastructure
             }
             return sb.ToString();
         }
+
+        /// <summary>
+        /// Obtiene el HTML con la información de un rango.
+        /// </summary>
+        /// <param name="rangeId">Rango.</param>
+        /// <returns>Lista HTML de información del rango.</returns>
+        public async Task<string> GetRangeInfoHtmlAsync(int rangeId)
+        {
+            var rango = await _db.AdmRangos
+                .AsNoTracking()
+                .FirstOrDefaultAsync(r => r.Id == rangeId && r.RangeStatus);
+
+            if (rango == null)
+                return "<div class='text-muted'>No hay información disponible</div>";
+
+            var rows = new List<RangeDayRow>
+            {
+                Build("Lunes", rango.Lr1Hi, rango.Lr1Hf, rango.Lr2Hi, rango.Lr2Hf, rango.Lr3Hi, rango.Lr3Hf),
+                Build("Martes", rango.Mr1Hi, rango.Mr1Hf, rango.Mr2Hi, rango.Mr2Hf, rango.Mr3Hi, rango.Mr3Hf),
+                Build("Miércoles", rango.Wr1Hi, rango.Wr1Hf, rango.Wr2Hi, rango.Wr2Hf, rango.Wr3Hi, rango.Wr3Hf),
+                Build("Jueves", rango.Jr1Hi, rango.Jr1Hf, rango.Jr2Hi, rango.Jr2Hf, rango.Jr3Hi, rango.Jr3Hf),
+                Build("Viernes", rango.Vr1Hi, rango.Vr1Hf, rango.Vr2Hi, rango.Vr2Hf, rango.Vr3Hi, rango.Vr3Hf),
+                Build("Sábado", rango.Sr1Hi, rango.Sr1Hf, rango.Sr2Hi, rango.Sr2Hf, rango.Sr3Hi, rango.Sr3Hf),
+                Build("Domingo", rango.Dr1Hi, rango.Dr1Hf, rango.Dr2Hi, rango.Dr2Hf, rango.Dr3Hi, rango.Dr3Hf),
+                Build("Festivo", rango.Fr1Hi, rango.Fr1Hf, rango.Fr2Hi, rango.Fr2Hf, rango.Fr3Hi, rango.Fr3Hf),
+            };
+
+            return BuildHtml(rows);
+        }
+
+        private static RangeDayRow Build(
+            string day,
+            TimeSpan? h1i, TimeSpan? h1f,
+            TimeSpan? h2i, TimeSpan? h2f,
+            TimeSpan? h3i, TimeSpan? h3f)
+        {
+            return new RangeDayRow
+            {
+                DayName = day,
+                RangeOne = Format(h1i, h1f),
+                RangeTwo = Format(h2i, h2f),
+                RangeThree = Format(h3i, h3f)
+            };
+        }
+
+        private static string? Format(TimeSpan? hi, TimeSpan? hf)
+        {
+            if (hi == null || hf == null)
+                return null;
+            return $"{hi:hh\\:mm} - {hf:hh\\:mm}";
+        }
+
+        private static string BuildHtml(List<RangeDayRow> rows)
+        {
+            var sb = new StringBuilder();
+
+            sb.Append("""
+            <table class="table table-sm table-bordered text-center align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th>Día</th>
+                        <th>Rango 1</th>
+                        <th>Rango 2</th>
+                        <th>Rango 3</th>
+                    </tr>
+                </thead>
+                <tbody>
+            """);
+
+            foreach (var r in rows)
+            {
+                sb.Append($"""
+                <tr>
+                    <td><strong>{r.DayName}</strong></td>
+                    <td>{r.RangeOne ?? "-"}</td>
+                    <td>{r.RangeTwo ?? "-"}</td>
+                    <td>{r.RangeThree ?? "-"}</td>
+                </tr>
+                """);
+            }
+
+            sb.Append("</tbody></table>");
+            return sb.ToString();
+        }
     }
 }

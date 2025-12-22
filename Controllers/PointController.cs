@@ -312,6 +312,16 @@ namespace VCashApp.Controllers
             return Ok(options);
         }
 
+        [HttpGet("GetRangeInfo")]
+        public async Task<IActionResult> GetRangeInfo(int rangeId)
+        {
+            if (rangeId <= 0)
+                return BadRequest("Rango inválido.");
+
+            var html = await _svc.GetRangeInfoHtmlAsync(rangeId);
+            return Ok(html);
+        }
+
         private static string EscapeCsv(string? s)
         {
             if (string.IsNullOrEmpty(s)) return "";

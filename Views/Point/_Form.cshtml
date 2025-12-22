@@ -354,11 +354,23 @@
 
                         <!-- RANGO -->
                         <div class="col-12 col-lg-4">
-                            <div class="form-floating">
-                                <select asp-for="CodRango" class="form-select" asp-items="ranges">
-                                    <option value="">-- Seleccione rango --</option>
-                                </select>
-                                <label asp-for="CodRango">Rango</label>
+                            <div class="d-flex align-items-start gap-2">
+
+                                <div class="form-floating flex-grow-1">
+                                    <select asp-for="CodRango" class="form-select" asp-items="ranges" id="CodRango">
+                                        <option value="">-- Seleccione rango --</option>
+                                    </select>
+                                    <label asp-for="CodRango">Rango</label>
+                                </div>
+
+                                <button type="button"
+                                        class="btn btn-outline-secondary mt-1"
+                                        id="btnInfoRango"
+                                        title="Ver información del rango"
+                                        disabled>
+                                    <i class="ri-information-line"></i>
+                                </button>
+
                             </div>
                         </div>
 
@@ -479,5 +491,18 @@
                 <a asp-action="Index" asp-controller="Point" class="btn btn-danger">Cancelar</a>
             </div>
         </form>
+    </div>
+</div>
+
+<div class="modal fade" id="modalRangoInfo" tabindex="-1" role="dialog" aria-labelledby="modalTitulo" aria-modal="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalTitulo">Información del rango</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="modalRangoInfoBody">
+            </div>
+        </div>
     </div>
 </div>

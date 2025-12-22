@@ -9,14 +9,18 @@ using VCashApp.Infrastructure.Branches;
 
 namespace VCashApp.Data
 {
+    /// <summary>Contexto de la base de datos de la aplicación.</summary>
     public class AppDbContext : IdentityDbContext<ApplicationUser>, IDataProtectionKeyContext
     {
         private readonly IBranchContext? _branchContext;
+
+        /// <summary>Constructor del contexto de la base de datos.</summary>
         public AppDbContext(DbContextOptions<AppDbContext> options, IBranchContext? branchContext = null)
             : base(options)
         {
             _branchContext = branchContext;
         }
+
         public DbSet<DataProtectionKey> DataProtectionKeys { get; set; }
         public DbSet<PermisoPerfil> PermisosPerfil { get; set; }
         public DbSet<AdmVista> AdmVistas { get; set; }
@@ -50,6 +54,10 @@ namespace VCashApp.Data
         public DbSet<TdvRutaDiaria> TdvRutasDiarias { get; set; }
         // public DbSet<TdvRutaDetallePunto> TdvRutaDetallePuntos { get; set; }
 
+        /// <summary>Entidad para tipos de negocio.</summary>
+        public DbSet<AdmTypeBusiness> AdmTypeBusinesses { get; set; }
+
+        /// <summary>Configuración del modelo de la base de datos.</summary>
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
@@ -230,6 +238,7 @@ namespace VCashApp.Data
                 entity.HasOne(p => p.Fund).WithMany().HasForeignKey(p => p.FundCode).IsRequired(false).OnDelete(DeleteBehavior.Restrict);
                 entity.HasOne(p => p.Route).WithMany().HasForeignKey(p => p.RouteBranchCode).IsRequired().OnDelete(DeleteBehavior.Restrict);
                 entity.HasOne(p => p.Range).WithMany().HasForeignKey(p => p.RangeCode).IsRequired(false).OnDelete(DeleteBehavior.Restrict);
+                entity.HasOne(p => p.TypeBusiness).WithMany().HasForeignKey(p => p.BusinessType).IsRequired(false).OnDelete(DeleteBehavior.Restrict);
             });
 
             builder.Entity<AdmRange>(entity => {
@@ -702,6 +711,14 @@ namespace VCashApp.Data
                 entity.HasOne(e => e.SucursalPunto).WithMany().HasForeignKey(e => e.CodSucursal).IsRequired(false);
                 entity.HasOne(e => e.UsuarioAtencionObj).WithMany().HasForeignKey(e => e.UsuarioAtencion).IsRequired(false);
             });*/
+
+            builder.Entity<AdmTypeBusiness>(entity =>
+            {
+                entity.HasKey(tb => tb.Id);
+                entity.Property(tb => tb.Id).ValueGeneratedOnAdd();
+
+                entity.Property(tb => tb.Description).IsRequired();
+            });
 
             if (_branchContext != null)
             {

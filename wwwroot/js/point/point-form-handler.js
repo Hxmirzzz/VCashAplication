@@ -411,23 +411,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
-    function cargarInfoRango() {
-        const codRango = rangoSelect.value;
-
-        if (!codRango || !infoRangoInput) return;
-
-        fetch(`/Point/GetRangeInfo?rangeId=${codRango}`)
-            .then(response => response.text())
-            .then(data => {
-                infoRangoInput.value = data;
-            })
-            .catch(() => {
-                infoRangoInput.value = '';
-            });
-    }
-
     codClienteEl.addEventListener('change', cargarRangosPorCliente);
-    rangoSelect.addEventListener('change', cargarInfoRango);
 
     cargarRangosPorCliente();
 });
@@ -522,4 +506,50 @@ document.addEventListener('DOMContentLoaded', function () {
         const i = Math.floor(Math.log(bytes) / Math.log(k));
         return Math.round(bytes / Math.pow(k, i) * 100) / 100 + ' ' + sizes[i];
     }
+});
+
+// ============================================================================
+// 12. INFO DE RANGO (MODAL)
+// ============================================================================
+document.addEventListener('DOMContentLoaded', function () {
+    const rangoSelect = document.getElementById('CodRango');
+    const btnInfo = document.getElementById('btnInfoRango');
+    const modalBody = document.getElementById('modalRangoInfoBody');
+    const modalElement = document.getElementById('modalRangoInfo');
+    const modal = new bootstrap.Modal(modalElement);
+
+    if (!rangoSelect || !btnInfo) return;
+
+    function toggleBtn() {
+        btnInfo.disabled = !rangoSelect.value;
+    }
+
+    btnInfo.addEventListener('click', async () => {
+        const rangeId = rangoSelect.value;
+        if (!rangeId) return;
+
+        modalBody.innerHTML = '<div class="text-center">Cargando...</div>';
+        modal.show();
+
+        try {
+            const html = await fetch(`/Point/GetRangeInfo?rangeId=${rangeId}`)
+                .then(r => r.text());
+            modalBody.innerHTML = html;
+        } catch {
+            modalBody.innerHTML = '<div class="text-danger">Error al cargar información</div>';
+        }
+    });
+
+    modalElement.addEventListener('hide.bs.modal', function (e) {
+        if (document.activeElement && modalElement.contains(document.activeElement)) {
+            document.activeElement.blur();
+        }
+    });
+
+    modalElement.addEventListener('hidden.bs.modal', function (e) {
+        modalBody.innerHTML = '';
+    });
+
+    rangoSelect.addEventListener('change', toggleBtn);
+    toggleBtn();
 });

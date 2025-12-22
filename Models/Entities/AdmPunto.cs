@@ -128,7 +128,9 @@ namespace VCashApp.Models.Entities
         public virtual AdmRoute? Route { get; set; }
 
         [Column("TipoNegocio")]
+        [ForeignKey("BusinessType")]
         public int? BusinessType { get; set; }
+        public virtual AdmTypeBusiness? TypeBusiness { get; set; }
 
         [Column("DocumentosPunto")]
         public bool PointDocuments { get; set; }
