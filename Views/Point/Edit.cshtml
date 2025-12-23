@@ -141,29 +141,46 @@
                         <div class="col-12 col-lg-3">
                             <div class="form-floating">
                                 <select class="form-select" id="CodClientePpal" asp-items="mainClients">
-                                    <option value="">-- Seleccione cliente --</option>
                                     <option value="0">NINGUNO</option>
                                 </select>
                                 <label asp-for="CodClientePpal">Cliente Principal</label>
-                                <input type="text" asp-for="CodClientePpal" id="CodClientePpalHidden" />
+                                <input type="hidden" asp-for="CodClientePpal" id="CodClientePpalHidden" />
                             </div>
                         </div>
-                        <div class="col-12 col-lg-2">
-                            <div class="form-floating">
-                                <input asp-for="LatPunto" class="form-control" />
-                                <label asp-for="LatPunto">Latitud</label>
-                            </div>
-                        </div>
-                        <div class="col-12 col-lg-2">
-                            <div class="form-floating">
-                                <input asp-for="LngPunto" class="form-control" />
-                                <label asp-for="LngPunto">Longitud</label>
-                            </div>
-                        </div>
-                        <div class="col-12 col-lg-2">
-                            <div class="form-floating">
-                                <input asp-for="RadioPunto" type="number" class="form-control" />
-                                <label asp-for="RadioPunto">Radio (m)</label>
+                        <div class="col-12 col-lg-6">
+                            <div class="d-flex align-items-start gap-2">
+
+                                <div class="row flex-grow-1 g-2">
+                                    <div class="col-12 col-lg-4">
+                                        <div class="form-floating">
+                                            <input asp-for="LatPunto" class="form-control" id="LatPunto" />
+                                            <label asp-for="LatPunto">Latitud</label>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-12 col-lg-4">
+                                        <div class="form-floating">
+                                            <input asp-for="LngPunto" class="form-control" id="LngPunto" />
+                                            <label asp-for="LngPunto">Longitud</label>
+                                        </div>
+                                    </div>
+
+                                    <div class="col-12 col-lg-4">
+                                        <div class="form-floating">
+                                            <input asp-for="RadioPunto" type="number" class="form-control" id="RadioPunto" />
+                                            <label asp-for="RadioPunto">Radio (m)</label>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- BOTÓN MAPA -->
+                                <button type="button"
+                                        class="btn btn-outline-primary mt-1"
+                                        id="btnOpenMap"
+                                        title="Ver ubicación en el mapa">
+                                    <i class="ri-earth-fill"></i>
+                                </button>
+
                             </div>
                         </div>
 
@@ -486,9 +503,11 @@
     </div>
 </div>
 
+@await Html.PartialAsync("~/Views/Shared/Components/MapModal/_PointMapModal.cshtml")
 @section Scripts {
     @{
         await Html.RenderPartialAsync("_ValidationScriptsPartial");
     }
-    <script src="~/js/form-control/point-form-handler.js"></script>
+    <script src="~/js/point/point-map.js"></script>
+    <script src="~/js/point/point-form-handler.js"></script>
 }

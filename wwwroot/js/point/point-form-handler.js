@@ -565,3 +565,29 @@ document.addEventListener('DOMContentLoaded', function () {
     rangoSelect.addEventListener('change', toggleBtn);
     toggleBtn();
 });
+
+document.addEventListener("DOMContentLoaded", () => {
+    const btn = document.getElementById("btnOpenMap");
+    if (!btn) return;
+
+    const latInput = document.getElementById("LatPunto");
+    const lngInput = document.getElementById("LngPunto");
+    const radInput = document.getElementById("RadioPunto");
+
+    btn.addEventListener("click", () => {
+        const lat = PointMapModule.parseNum(latInput.value);
+        const lng = PointMapModule.parseNum(lngInput.value);
+        const radius = PointMapModule.parseNum(radInput.value);
+
+        if (!PointMapModule.coordsValid(lat, lng)) {
+            Swal.fire({
+                icon: "warning",
+                title: "Coordenadas inválidas",
+                text: "Ingrese una latitud y longitud válidas antes de abrir el mapa."
+            });
+            return;
+        }
+
+        PointMapModule.show(lat, lng, radius, "Ubicación del Punto");
+    });
+});
