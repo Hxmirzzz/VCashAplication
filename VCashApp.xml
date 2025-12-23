@@ -1201,6 +1201,40 @@
             Carga ViewBags comunes (cabecera, combos, y permisos).
             </summary>
         </member>
+        <member name="T:VCashApp.Controllers.PointController">
+            <summary>
+            Controlador para la gestión de puntos.
+            </summary>
+        </member>
+        <member name="M:VCashApp.Controllers.PointController.#ctor(VCashApp.Services.Point.Application.IPointService,VCashApp.Services.Point.Application.IPointQueries,VCashApp.Data.AppDbContext,Microsoft.AspNetCore.Identity.UserManager{VCashApp.Models.ApplicationUser})">
+            <summary>
+            Método constructor.
+            </summary>
+            <param name="svc">Servicio de puntos.</param>
+            <param name="queries">Servicio de consultas de puntos.</param>
+            <param name="context">Servicio de contexto de base de datos.</param>
+            <param name="um">Servicio de gestión de usuarios.</param>
+        </member>
+        <member name="M:VCashApp.Controllers.PointController.Index(VCashApp.Models.Dtos.Point.PointFilterDto)">
+            <summary>
+            Muestra la lista de puntos con paginación y filtros.
+            </summary>
+            <param name="filter">DTP</param>
+            <returns>Devolución de la vista Index con la lista de puntos.</returns>
+        </member>
+        <member name="M:VCashApp.Controllers.PointController.Create">
+            <summary>
+            Muestra el formulario para crear un nuevo punto.
+            </summary>
+            <returns>Devolución de la vista Create con el DTO inicializado.</returns>
+        </member>
+        <member name="M:VCashApp.Controllers.PointController.Edit(System.String)">
+            <summary>
+            Muestra el formulario para editar un punto existente.
+            </summary>
+            <param name="code">Punto</param>
+            <returns>Devolución de la vista Edit con el DTO cargado.</returns>
+        </member>
         <member name="M:VCashApp.Controllers.PointController.GetFunds(System.Int32,System.Int32,System.Int32)">
             <summary>
             Obtiene el HTML de las opciones de fondos para un punto según sucursal y cliente.
@@ -1815,6 +1849,14 @@
             </summary>
             <param name="code">El código de tipo de vehículo.</param>
             <returns>La etiqueta correspondiente o "Desconocido" si el código es inválido.</returns>
+        </member>
+        <member name="T:VCashApp.Extensions.RepositorioOptions">
+            <summary>
+            Modelo de opções para o repositório.
+            </summary>
+        </member>
+        <member name="P:VCashApp.Extensions.RepositorioOptions.BasePath">
+            <summary>Mapeamento base para o repositório.</summary>
         </member>
         <member name="T:VCashApp.Filters.RequiredPermissionAttribute">
             <summary>
@@ -4903,6 +4945,17 @@
         <member name="M:VCashApp.Services.Point.Application.IPointService.GetRangeInfoHtmlAsync(System.Int32)">
             <summary>Metodo asincrono que obtiene el html de la informacion de un rango.</summary>
         </member>
+        <member name="T:VCashApp.Services.Point.Infrastructure.PointFileManager">
+            <summary>
+            Metodos para gestionar los archivos asociados a los puntos.
+            </summary>
+        </member>
+        <member name="M:VCashApp.Services.Point.Infrastructure.PointFileManager.#ctor(Microsoft.Extensions.Options.IOptions{VCashApp.Extensions.RepositorioOptions})">
+            <summary>
+            Métodos para gestionar los archivos asociados a los puntos.
+            </summary>
+            <param name="opts">Path base del repositorio.</param>
+        </member>
         <member name="M:VCashApp.Services.Point.Infrastructure.PointFileManager.SaveCartaAsync(System.Int32,System.String,Microsoft.AspNetCore.Http.IFormFile)">
             <summary>
             Guarda la carta de inclusión y devuelve el filename.
@@ -4912,6 +4965,52 @@
             <summary>
             Elimina la carta actual del punto si existe.
             </summary>
+        </member>
+        <member name="T:VCashApp.Services.Point.Infrastructure.PointQueries">
+            <summary>
+            Métodos de consulta para puntos.
+            </summary>
+        </member>
+        <member name="M:VCashApp.Services.Point.Infrastructure.PointQueries.#ctor(VCashApp.Data.AppDbContext,VCashApp.Infrastructure.Branches.IBranchContext)">
+            <summary>
+            Metódos de consulta para puntos.
+            </summary>
+            <param name="db">Contexto de base de datos.</param>
+            <param name="branchCtx">Servicio de contexto de sucursal.</param>
+        </member>
+        <member name="M:VCashApp.Services.Point.Infrastructure.PointQueries.GetPagedAsync(VCashApp.Models.Dtos.Point.PointFilterDto)">
+            <summary>
+            Obtiene un listado paginado de puntos según los filtros indicados.
+            </summary>
+            <param name="filter">DTO</param>
+            <returns>DTO con items y total</returns>
+        </member>
+        <member name="M:VCashApp.Services.Point.Infrastructure.PointQueries.ExportAsync(VCashApp.Models.Dtos.Point.PointFilterDto)">
+            <summary>
+            Método para exportar los puntos según los filtros indicados.
+            </summary>
+            <param name="filter">DTO</param>
+            <returns>DTO con items</returns>
+        </member>
+        <member name="M:VCashApp.Services.Point.Infrastructure.PointQueries.GetLookupsAsync">
+            <summary>
+            Obtiene los datos para los select de búsqueda y edición de puntos.
+            </summary>
+            <returns>DTO con los datos de los select.</returns>
+        </member>
+        <member name="M:VCashApp.Services.Point.Infrastructure.PointQueries.GetForEditAsync(System.String)">
+            <summary>
+            Obtiene los datos de un punto para edición.
+            </summary>
+            <param name="pointCode">Punto</param>
+            <returns>Datos del punto para edición.</returns>
+        </member>
+        <member name="M:VCashApp.Services.Point.Infrastructure.PointQueries.GetPreviewAsync(System.String)">
+            <summary>
+            Obtiene los datos para la vista previa de un punto.
+            </summary>
+            <param name="pointCode">Punto</param>
+            <returns>Datos del punto para vista previa.</returns>
         </member>
         <member name="T:VCashApp.Services.Point.Infrastructure.PointService">
             <summary>Manejo de puntos.</summary>

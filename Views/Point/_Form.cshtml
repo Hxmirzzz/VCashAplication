@@ -12,6 +12,7 @@
     var funds = (IEnumerable<SelectListItem>)ViewData["Funds"] ?? Enumerable.Empty<SelectListItem>();
     var routes = (IEnumerable<SelectListItem>)ViewData["Routes"] ?? Enumerable.Empty<SelectListItem>();
     var ranges = (IEnumerable<SelectListItem>)ViewData["Ranges"] ?? Enumerable.Empty<SelectListItem>();
+    var typeBusiness = (IEnumerable<SelectListItem>)ViewData["TypeBusiness"] ?? Enumerable.Empty<SelectListItem>();
 }
 
 <div class="form-container">
@@ -39,7 +40,7 @@
                                 <select asp-for="CodCliente" class="form-select" asp-items="clients">
                                     <option value="">-- Seleccione cliente --</option>
                                 </select>   
-                                <label asp-for="CodCliente" class="label-required">Cliente</label>
+                                <label asp-for="CodCliente">Cliente</label>
                                 <span asp-validation-for="CodCliente" class="text-danger"></span>
                             </div>
                         </div>
@@ -72,7 +73,7 @@
 
                         <div class="col-12 col-lg-6">
                             <div class="form-floating">
-                                <input asp-for="NombrePunto" class="form-control" />
+                                <input asp-for="NombrePunto" class="form-control"/>
                                 <label asp-for="NombrePunto">Nombre Punto</label>
                                 <span asp-validation-for="NombrePunto" class="text-danger"></span>
                             </div>
@@ -83,8 +84,6 @@
                                 <label asp-for="NombreCorto">Nombre Corto</label>
                             </div>
                         </div>
-
-                        <!-- NOMBRE FACTURACION -->
                         <div class="col-12 col-lg-3">
                             <div class="form-floating">
                                 <input asp-for="NombrePuntoFact" class="form-control" />
@@ -92,49 +91,40 @@
                             </div>
                         </div>
 
-                        <!-- DIRECCIÓN -->
                         <div class="col-12 col-lg-6">
                             <div class="form-floating">
                                 <input asp-for="DirPunto" class="form-control" />
                                 <label asp-for="DirPunto">Dirección</label>
                             </div>
                         </div>
-
-                        <!-- TELÉFONO -->
                         <div class="col-12 col-lg-3">
                             <div class="form-floating">
                                 <input asp-for="TelPunto" class="form-control" />
                                 <label asp-for="TelPunto">Teléfono</label>
                             </div>
                         </div>
-
-                        <!-- SUCURSAL -->
                         <div class="col-12 col-lg-3">
                             <div class="form-floating">
                                 <select asp-for="CodSuc" class="form-select" asp-items="branches">
                                     <option value="">-- Seleccione sucursal --</option>
                                 </select>
                                 <label asp-for="CodSuc">Sucursal</label>
+                                <span asp-validation-for="CodSuc" class="text-danger"></span>
                             </div>
                         </div>
 
-                        <!-- RESPONSABLE -->
                         <div class="col-12 col-lg-4">
                             <div class="form-floating">
                                 <input asp-for="RespPunto" class="form-control" />
                                 <label asp-for="RespPunto">Responsable</label>
                             </div>
                         </div>
-
-                        <!-- CARGO RESPONSABLE -->
                         <div class="col-12 col-lg-4">
                             <div class="form-floating">
                                 <input asp-for="CargoRespPunto" class="form-control" />
                                 <label asp-for="CargoRespPunto">Cargo Responsable</label>
                             </div>
                         </div>
-
-                        <!-- CORREO RESPONSABLE -->
                         <div class="col-12 col-lg-4">
                             <div class="form-floating">
                                 <input asp-for="CorreoRespPunto" type="email" class="form-control" />
@@ -144,19 +134,21 @@
 
                         <div class="col-12 col-lg-3">
                             <div class="form-floating">
-                                <select asp-for="CodCiudad" class="form-select" asp-items="cities">
+                                <select asp-for="CodCiudad" class="form-select" asp-items="cities" required>
                                     <option value="">-- Seleccione ciudad --</option>
                                 </select>
                                 <label asp-for="CodCiudad">Ciudad</label>
+                                <span asp-validation-for="CodCiudad" class="text-danger"></span>
                             </div>
                         </div>
                         <div class="col-12 col-lg-3">
                             <div class="form-floating">
-                                <select asp-for="CodClientePpal" class="form-select" asp-items="mainClients">
+                                <select class="form-select" id="CodClientePpal" asp-items="mainClients">
                                     <option value="">-- Seleccione cliente --</option>
                                     <option value="0">NINGUNO</option>
                                 </select>
                                 <label asp-for="CodClientePpal">Cliente Principal</label>
+                                <input type="hidden" asp-for="CodClientePpal" id="CodClientePpalHidden"/>
                             </div>
                         </div>
                         <div class="col-12 col-lg-2">
@@ -178,7 +170,6 @@
                             </div>
                         </div>
 
-                        <!-- BASE CAMBIO -->
                         <div class="col-12 col-lg-3">
                             <div class="form-floating">
                                 <select asp-for="BaseCambio" class="form-select">
@@ -188,8 +179,6 @@
                                 <label asp-for="BaseCambio">Base de Cambio</label>
                             </div>
                         </div>
-
-                        <!-- LLAVES PUNTO -->
                         <div class="col-12 col-lg-3">
                             <div class="form-floating">
                                 <select asp-for="LlavesPunto" class="form-select">
@@ -199,8 +188,6 @@
                                 <label asp-for="LlavesPunto">Llaves</label>
                             </div>
                         </div>
-
-                        <!-- SOBRES PUNTO -->
                         <div class="col-12 col-lg-3">
                             <div class="form-floating">
                                 <select asp-for="SobresPunto" class="form-select">
@@ -210,8 +197,6 @@
                                 <label asp-for="SobresPunto">Sobres</label>
                             </div>
                         </div>
-
-                        <!-- CHEQUES PUNTO -->
                         <div class="col-12 col-lg-3">
                             <div class="form-floating">
                                 <select asp-for="ChequesPunto" class="form-select">
@@ -300,7 +285,6 @@
                         <div class="col-12 col-lg-2">
                             <div class="form-floating">
                                 <select asp-for="NivelRiesgo" class="form-select">
-                                    <option value="">Selecciona</option>
                                     <option value="A">ALTO</option>
                                     <option value="M">MEDIO</option>
                                     <option value="B">BAJO</option>
@@ -339,28 +323,27 @@
                                     <option value="">-- Seleccione fondo --</option>
                                 </select>
                                 <label asp-for="CodFondo">Fondo</label>
+                                <span asp-validation-for="CodFondo" class="text-danger"></span>
                             </div>
                         </div>
 
-                        <!-- RUTA -->
                         <div class="col-12 col-lg-4">
                             <div class="form-floating">
                                 <select asp-for="CodRutaSuc" class="form-select" asp-items="routes">
                                     <option value="">-- Seleccione ruta --</option>
                                 </select>
                                 <label asp-for="CodRutaSuc">Ruta</label>
+                                <span asp-validation-for="CodRutaSuc" class="text-danger"></span>
                             </div>
                         </div>
-
-                        <!-- RANGO -->
                         <div class="col-12 col-lg-4">
                             <div class="d-flex align-items-start gap-2">
-
                                 <div class="form-floating flex-grow-1">
                                     <select asp-for="CodRango" class="form-select" asp-items="ranges" id="CodRango">
                                         <option value="">-- Seleccione rango --</option>
                                     </select>
                                     <label asp-for="CodRango">Rango</label>
+                                    <span asp-validation-for="CodRango" class="text-danger"></span>
                                 </div>
 
                                 <button type="button"
@@ -370,16 +353,15 @@
                                         disabled>
                                     <i class="ri-information-line"></i>
                                 </button>
-
                             </div>
                         </div>
-
                         <div class="col-12 col-lg-4">
                             <div class="form-floating">
-                                <select asp-for="BusinessType" class="form-select">
+                                <select asp-for="BusinessType" class="form-select" asp-items="typeBusiness">
                                     <option value="">Selecciona</option>
                                 </select>
                                 <label asp-for="BusinessType">Tipo de Negocio</label>
+                                <span asp-validation-for="BusinessType" class="text-danger"></span>
                             </div>
                         </div>
 

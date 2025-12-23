@@ -12,6 +12,9 @@ using VCashApp.Services.Point.Infrastructure;
 
 namespace VCashApp.Controllers
 {
+    /// <summary>
+    /// Controlador para la gestión de puntos.
+    /// </summary>
     [Authorize]
     [Route("/Point")]
     public sealed class PointController : BaseController
@@ -22,6 +25,13 @@ namespace VCashApp.Controllers
 
         private const string CodVista = "POINTS";
 
+        /// <summary>
+        /// Método constructor.
+        /// </summary>
+        /// <param name="svc">Servicio de puntos.</param>
+        /// <param name="queries">Servicio de consultas de puntos.</param>
+        /// <param name="context">Servicio de contexto de base de datos.</param>
+        /// <param name="um">Servicio de gestión de usuarios.</param>
         public PointController(
             IPointService svc,
             IPointQueries queries,
@@ -49,7 +59,7 @@ namespace VCashApp.Controllers
             ViewBag.Fondos = lookups.Fondos;
             ViewBag.Rutas = lookups.Rutas;
             ViewBag.Rangos = lookups.Rangos;
-            ViewBag.TiposNeg = lookups.TiposNegocio;
+            ViewBag.TiposNegocio = lookups.TiposNegocio;
 
             var roles = await _userManager.GetRolesAsync(user);
             ViewBag.HasCreate = await HasPermisionForView(roles, CodVista, PermissionType.Create);
@@ -57,9 +67,11 @@ namespace VCashApp.Controllers
             ViewBag.HasView = await HasPermisionForView(roles, CodVista, PermissionType.View);
         }
 
-        // =========================================================
-        // INDEX
-        // =========================================================
+        /// <summary>
+        /// Muestra la lista de puntos con paginación y filtros.
+        /// </summary>
+        /// <param name="filter">DTP</param>
+        /// <returns>Devolución de la vista Index con la lista de puntos.</returns>
         [HttpGet("Index")]
         [RequiredPermission(PermissionType.View, CodVista)]
         public async Task<IActionResult> Index([FromQuery] PointFilterDto filter)
@@ -86,9 +98,10 @@ namespace VCashApp.Controllers
             return View("~/Views/Point/Index.cshtml", items);
         }
 
-        // =========================================================
-        // CREATE
-        // =========================================================
+        /// <summary>
+        /// Muestra el formulario para crear un nuevo punto.
+        /// </summary>
+        /// <returns>Devolución de la vista Create con el DTO inicializado.</returns>
         [HttpGet("Create")]
         [RequiredPermission(PermissionType.Create, CodVista)]
         public async Task<IActionResult> Create()
@@ -102,9 +115,11 @@ namespace VCashApp.Controllers
                 new PointUpsertDto { FecIngreso = DateOnly.FromDateTime(DateTime.Today) });
         }
 
-        // =========================================================
-        // EDIT
-        // =========================================================
+        /// <summary>
+        /// Muestra el formulario para editar un punto existente.
+        /// </summary>
+        /// <param name="code">Punto</param>
+        /// <returns>Devolución de la vista Edit con el DTO cargado.</returns>
         [HttpGet("Edit/{code}")]
         [RequiredPermission(PermissionType.Edit, CodVista)]
         public async Task<IActionResult> Edit(string code)

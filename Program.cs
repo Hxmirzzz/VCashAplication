@@ -12,6 +12,7 @@ using System.Data;
 using System.IO;
 using VCashApp.Data;
 using VCashApp.Data.Seed;
+using VCashApp.Extensions;
 using VCashApp.Extentions;
 using VCashApp.Infrastructure.Branches;
 using VCashApp.Infrastructure.Middleware;
@@ -274,6 +275,9 @@ builder.Services.AddScoped<IEmployeeLogLookupsService, EmployeeLogLookupsService
 // ======================================================================
 // POINT
 // ======================================================================
+builder.Services.Configure<RepositorioOptions>(
+    builder.Configuration.GetSection("Repositorio")
+);
 builder.Services.AddScoped<IPointService, PointService>();
 builder.Services.AddScoped<IPointQueries, PointQueries>();
 

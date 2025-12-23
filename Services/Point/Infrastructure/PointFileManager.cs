@@ -3,6 +3,9 @@ using VCashApp.Extensions;
 
 namespace VCashApp.Services.Point.Infrastructure
 {
+    /// <summary>
+    /// Metodos para gestionar los archivos asociados a los puntos.
+    /// </summary>
     public sealed class PointFileManager
     {
         private readonly string _rootPath;
@@ -10,9 +13,19 @@ namespace VCashApp.Services.Point.Infrastructure
         private static readonly string[] AllowedExtensions = { ".pdf", ".jpg", ".jpeg", ".png" };
         private const long MaxFileSize = 30 * 1024 * 1024; // 30MB
 
+        /// <summary>
+        /// Métodos para gestionar los archivos asociados a los puntos.
+        /// </summary>
+        /// <param name="opts">Path base del repositorio.</param>
         public PointFileManager(IOptions<RepositorioOptions> opts)
         {
             _rootPath = opts.Value.BasePath;
+
+            if (string.IsNullOrWhiteSpace(_rootPath))
+                throw new InvalidOperationException("El path base del repositorio no está configurado.");
+
+            if (!Directory.Exists(_rootPath))
+                Directory.CreateDirectory(_rootPath);
         }
 
         /// <summary>

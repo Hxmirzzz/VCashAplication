@@ -6,28 +6,485 @@
     ViewData["Title"] = "Editar Punto";
 
     var clients = (IEnumerable<SelectListItem>)ViewBag.Clientes ?? Enumerable.Empty<SelectListItem>();
+    var mainClients = (IEnumerable<SelectListItem>)ViewBag.ClientesPrincipales ?? Enumerable.Empty<SelectListItem>();
     var branches = (IEnumerable<SelectListItem>)ViewBag.Sucursales ?? Enumerable.Empty<SelectListItem>();
     var cities = (IEnumerable<SelectListItem>)ViewBag.Ciudades ?? Enumerable.Empty<SelectListItem>();
     var funds = (IEnumerable<SelectListItem>)ViewBag.Fondos ?? Enumerable.Empty<SelectListItem>();
     var routes = (IEnumerable<SelectListItem>)ViewBag.Rutas ?? Enumerable.Empty<SelectListItem>();
     var ranges = (IEnumerable<SelectListItem>)ViewBag.Rangos ?? Enumerable.Empty<SelectListItem>();
+    var typeBusiness = (IEnumerable<SelectListItem>)ViewBag.TiposNegocio ?? Enumerable.Empty<SelectListItem>();
 }
 
-@await Html.PartialAsync(
-"~/Views/Point/_Form.cshtml",
-    Model,
-    new ViewDataDictionary(ViewData)
-    {
-        ["IsEdit"] = true,
-        ["Clients"] = clients,
-        ["Branches"] = branches,
-        ["Cities"] = cities,
-        ["Funds"] = funds,
-        ["Routes"] = routes,
-        ["Ranges"] = ranges,
-        ["PageName"] = "Editar Punto"
-    }
-)
+<div class="form-container">
+    <div class="card-body">
+        <form id="points-form"
+              asp-action="Save"
+              asp-controller="Point"
+              method="post"
+              enctype="multipart/form-data">
+
+            @Html.AntiForgeryToken()
+            <input type="hidden" asp-for="TipoPunto" value="0" />
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="ri-information-fill"></i> Editar punto: @Model.NombrePunto
+                    </h5>
+                </div>
+
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-12 col-lg-4">
+                            <div class="form-floating">
+                                <select asp-for="CodCliente" class="form-select" asp-items="clients" disabled>
+                                    <option value="">-- Seleccione cliente --</option>
+                                </select>
+                                <label asp-for="CodCliente">Cliente</label>
+                                <span asp-validation-for="CodCliente" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="col-12 col-lg-2">
+                            <div class="form-floating">
+                                <input asp-for="CodPCliente" class="form-control" readonly/>
+                                <label asp-for="CodPCliente">Punto del Cliente</label>
+                                <span asp-validation-for="CodPCliente" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="col-12 col-lg-2">
+                            <div class="form-floating">
+                                <input asp-for="CodPunto" class="form-control" readonly />
+                                <label asp-for="CodPunto">Código Punto</label>
+                                <span asp-validation-for="CodPunto" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="col-12 col-lg-2">
+                            <div class="form-floating">
+                                <input asp-for="VatcoPointCode" class="form-control" readonly />
+                                <label asp-for="VatcoPointCode">Código Vatco</label>
+                            </div>
+                        </div>
+                        <div class="col-12 col-lg-2">
+                            <div class="form-floating">
+                                <input asp-for="CodCas4u" class="form-control" readonly />
+                                <label asp-for="CodCas4u">Código Cash4U</label>
+                            </div>
+                        </div>
+
+                        <div class="col-12 col-lg-6">
+                            <div class="form-floating">
+                                <input asp-for="NombrePunto" class="form-control" />
+                                <label asp-for="NombrePunto">Nombre Punto</label>
+                                <span asp-validation-for="NombrePunto" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="col-12 col-lg-3">
+                            <div class="form-floating">
+                                <input asp-for="NombreCorto" class="form-control" />
+                                <label asp-for="NombreCorto">Nombre Corto</label>
+                            </div>
+                        </div>
+                        <div class="col-12 col-lg-3">
+                            <div class="form-floating">
+                                <input asp-for="NombrePuntoFact" class="form-control" />
+                                <label asp-for="NombrePuntoFact">Nombre Facturación</label>
+                            </div>
+                        </div>
+
+                        <div class="col-12 col-lg-6">
+                            <div class="form-floating">
+                                <input asp-for="DirPunto" class="form-control" />
+                                <label asp-for="DirPunto">Dirección</label>
+                            </div>
+                        </div>
+                        <div class="col-12 col-lg-3">
+                            <div class="form-floating">
+                                <input asp-for="TelPunto" class="form-control" />
+                                <label asp-for="TelPunto">Teléfono</label>
+                            </div>
+                        </div>
+                        <div class="col-12 col-lg-3">
+                            <div class="form-floating">
+                                <select asp-for="CodSuc" class="form-select" asp-items="branches">
+                                </select>
+                                <label asp-for="CodSuc">Sucursal</label>
+                                <span asp-validation-for="CodSuc" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="col-12 col-lg-4">
+                            <div class="form-floating">
+                                <input asp-for="RespPunto" class="form-control" />
+                                <label asp-for="RespPunto">Responsable</label>
+                            </div>
+                        </div>
+                        <div class="col-12 col-lg-4">
+                            <div class="form-floating">
+                                <input asp-for="CargoRespPunto" class="form-control" />
+                                <label asp-for="CargoRespPunto">Cargo Responsable</label>
+                            </div>
+                        </div>
+                        <div class="col-12 col-lg-4">
+                            <div class="form-floating">
+                                <input asp-for="CorreoRespPunto" type="email" class="form-control" />
+                                <label asp-for="CorreoRespPunto">Correo Responsable</label>
+                            </div>
+                        </div>
+
+                        <div class="col-12 col-lg-3">
+                            <div class="form-floating">
+                                <select asp-for="CodCiudad" class="form-select" asp-items="cities" required>
+                                </select>
+                                <label asp-for="CodCiudad">Ciudad</label>
+                                <span asp-validation-for="CodCiudad" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="col-12 col-lg-3">
+                            <div class="form-floating">
+                                <select class="form-select" id="CodClientePpal" asp-items="mainClients">
+                                    <option value="">-- Seleccione cliente --</option>
+                                    <option value="0">NINGUNO</option>
+                                </select>
+                                <label asp-for="CodClientePpal">Cliente Principal</label>
+                                <input type="text" asp-for="CodClientePpal" id="CodClientePpalHidden" />
+                            </div>
+                        </div>
+                        <div class="col-12 col-lg-2">
+                            <div class="form-floating">
+                                <input asp-for="LatPunto" class="form-control" />
+                                <label asp-for="LatPunto">Latitud</label>
+                            </div>
+                        </div>
+                        <div class="col-12 col-lg-2">
+                            <div class="form-floating">
+                                <input asp-for="LngPunto" class="form-control" />
+                                <label asp-for="LngPunto">Longitud</label>
+                            </div>
+                        </div>
+                        <div class="col-12 col-lg-2">
+                            <div class="form-floating">
+                                <input asp-for="RadioPunto" type="number" class="form-control" />
+                                <label asp-for="RadioPunto">Radio (m)</label>
+                            </div>
+                        </div>
+
+                        <div class="col-12 col-lg-3">
+                            <div class="form-floating">
+                                <select asp-for="BaseCambio" class="form-select">
+                                    <option value="0">NO</option>
+                                    <option value="1">SI</option>
+                                </select>
+                                <label asp-for="BaseCambio">Base de Cambio</label>
+                            </div>
+                        </div>
+                        <div class="col-12 col-lg-3">
+                            <div class="form-floating">
+                                <select asp-for="LlavesPunto" class="form-select">
+                                    <option value="0">NO</option>
+                                    <option value="1">SI</option>
+                                </select>
+                                <label asp-for="LlavesPunto">Llaves</label>
+                            </div>
+                        </div>
+                        <div class="col-12 col-lg-3">
+                            <div class="form-floating">
+                                <select asp-for="SobresPunto" class="form-select">
+                                    <option value="0">NO</option>
+                                    <option value="1">SI</option>
+                                </select>
+                                <label asp-for="SobresPunto">Sobres</label>
+                            </div>
+                        </div>
+                        <div class="col-12 col-lg-3">
+                            <div class="form-floating">
+                                <select asp-for="ChequesPunto" class="form-select">
+                                    <option value="0">NO</option>
+                                    <option value="1">SI</option>
+                                </select>
+                                <label asp-for="ChequesPunto">Cheques</label>
+                            </div>
+                        </div>
+
+                        <!-- DOCUMENTOS PUNTO -->
+                        <div class="col-12 col-lg-2">
+                            <div class="form-floating">
+                                <select asp-for="DocumentosPunto" class="form-select">
+                                    <option value="0">NO</option>
+                                    <option value="1">SI</option>
+                                </select>
+                                <label asp-for="DocumentosPunto">Documentos</label>
+                            </div>
+                        </div>
+
+                        <!-- EXISTENCIAS PUNTO -->
+                        <div class="col-12 col-lg-2">
+                            <div class="form-floating">
+                                <select asp-for="ExistenciasPunto" class="form-select">
+                                    <option value="0">NO</option>
+                                    <option value="1">SI</option>
+                                </select>
+                                <label asp-for="ExistenciasPunto">Existencias</label>
+                            </div>
+                        </div>
+
+                        <!-- PREDICCION PUNTO -->
+                        <div class="col-12 col-lg-2">
+                            <div class="form-floating">
+                                <select asp-for="PrediccionPunto" class="form-select">
+                                    <option value="0">NO</option>
+                                    <option value="1">SI</option>
+                                </select>
+                                <label asp-for="PrediccionPunto">Predicción</label>
+                            </div>
+                        </div>
+
+                        <!-- CUSTODIA PUNTO -->
+                        <div class="col-12 col-lg-2">
+                            <div class="form-floating">
+                                <select asp-for="CustodiaPunto" class="form-select">
+                                    <option value="0">NO</option>
+                                    <option value="1">SI</option>
+                                </select>
+                                <label asp-for="CustodiaPunto">Custodia</label>
+                            </div>
+                        </div>
+
+                        <!-- OTROS VALORES -->
+                        <div class="col-12 col-lg-2">
+                            <div class="form-floating">
+                                <select asp-for="OtrosValoresPunto" class="form-select">
+                                    <option value="0">NO</option>
+                                    <option value="1">SI</option>
+                                </select>
+                                <label asp-for="OtrosValoresPunto">Otros Valores</label>
+                            </div>
+                        </div>
+
+                        <!-- CUALES OTROS -->
+                        <div class="col-12 col-lg-2">
+                            <div class="form-floating">
+                                <input asp-for="Otros" class="form-control" />
+                                <label asp-for="Otros">¿Cuáles?</label>
+                            </div>
+                        </div>
+
+                        <!-- LIBERACION EFECTIVO -->
+                        <div class="col-12 col-lg-2">
+                            <div class="form-floating">
+                                <select asp-for="LiberacionEfectivoPunto" class="form-select">
+                                    <option value="0">NO</option>
+                                    <option value="1">SI</option>
+                                </select>
+                                <label asp-for="LiberacionEfectivoPunto">Liberación Efectivo</label>
+                            </div>
+                        </div>
+
+                        <!-- NIVEL RIESGO -->
+                        <div class="col-12 col-lg-2">
+                            <div class="form-floating">
+                                <select asp-for="NivelRiesgo" class="form-select">
+                                    <option value="A">ALTO</option>
+                                    <option value="M">MEDIO</option>
+                                    <option value="B">BAJO</option>
+                                </select>
+                                <label asp-for="NivelRiesgo">Nivel de Riesgo</label>
+                            </div>
+                        </div>
+
+                        <!-- CONSIGNACION -->
+                        <div class="col-12 col-lg-2">
+                            <div class="form-floating">
+                                <select asp-for="Consignacion" class="form-select">
+                                    <option value="0">NO</option>
+                                    <option value="1">SI</option>
+                                </select>
+                                <label asp-for="Consignacion">Consignación</label>
+                            </div>
+                        </div>
+
+                        <!-- FONDO PUNTO -->
+                        <div class="col-12 col-lg-2">
+                            <div class="form-floating">
+                                <select asp-for="FondoPunto" class="form-select">
+                                    <option value="0">NO</option>
+                                    <option value="1">UN FONDO</option>
+                                    <option value="2">VARIOS FONDOS</option>
+                                </select>
+                                <label asp-for="FondoPunto">Fondo Punto</label>
+                            </div>
+                        </div>
+
+                        <!-- FONDO -->
+                        <div class="col-12 col-lg-4">
+                            <div class="form-floating">
+                                <select asp-for="CodFondo" class="form-select" asp-items="funds">
+                                    <option value="">-- Seleccione fondo --</option>
+                                </select>
+                                <label asp-for="CodFondo">Fondo</label>
+                                <span asp-validation-for="CodFondo" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="col-12 col-lg-4">
+                            <div class="form-floating">
+                                <select asp-for="CodRutaSuc" class="form-select" asp-items="routes">
+                                    <option value="">-- Seleccione ruta --</option>
+                                </select>
+                                <label asp-for="CodRutaSuc">Ruta</label>
+                                <span asp-validation-for="CodRutaSuc" class="text-danger"></span>
+                            </div>
+                        </div>
+                        <div class="col-12 col-lg-4">
+                            <div class="d-flex align-items-start gap-2">
+                                <div class="form-floating flex-grow-1">
+                                    <select asp-for="CodRango" class="form-select" asp-items="ranges" id="CodRango">
+                                        <option value="">-- Seleccione rango --</option>
+                                    </select>
+                                    <label asp-for="CodRango">Rango</label>
+                                    <span asp-validation-for="CodRango" class="text-danger"></span>
+                                </div>
+
+                                <button type="button"
+                                        class="btn btn-outline-secondary mt-1"
+                                        id="btnInfoRango"
+                                        title="Ver información del rango"
+                                        disabled>
+                                    <i class="ri-information-line"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="col-12 col-lg-4">
+                            <div class="form-floating">
+                                <select asp-for="BusinessType" class="form-select" asp-items="typeBusiness">
+                                    <option value="">Selecciona</option>
+                                </select>
+                                <label asp-for="BusinessType">Tipo de Negocio</label>
+                                <span asp-validation-for="BusinessType" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <div class="col-12 col-lg-3">
+                            <div class="form-floating">
+                                <select asp-for="CoberturaPunto" class="form-select">
+                                    <option value="">Selecciona</option>
+                                    <option value="U">URBANO</option>
+                                    <option value="I">INTERURBANO</option>
+                                    <option value="A">AEREO</option>
+                                </select>
+                                <label asp-for="CoberturaPunto">Cobertura</label>
+                            </div>
+                        </div>
+                        <div class="col-12 col-lg-3">
+                            <div class="form-floating">
+                                <select asp-for="EscalaInterurbanos" class="form-select">
+                                    <option value="0">-- Seleccione --</option>
+                                </select>
+                                <label asp-for="EscalaInterurbanos">Escala</label>
+                            </div>
+                        </div>
+                        <div class="col-12 col-lg-2">
+                            <div class="form-floating">
+                                <input asp-for="FecIngreso" type="date" class="form-control" />
+                                <label asp-for="FecIngreso">Fecha Ingreso</label>
+                            </div>
+                        </div>
+                        <div class="col-12 col-lg-2">
+                            <div class="form-floating">
+                                <input asp-for="FecRetiro" type="date" class="form-control" />
+                                <label asp-for="FecRetiro">Fecha Retiro</label>
+                            </div>
+                        </div>
+                        <div class="col-12 col-lg-2">
+                            <div class="form-floating">
+                                <select class="form-select" asp-for="EstadoPunto">
+                                    <option value="true" selected>Activo</option>
+                                    <option value="false">Inactivo</option>
+                                </select>
+                                <label>Estado</label>
+                            </div>
+                        </div>
+
+                        <div class="col-12">
+                            <label asp-for="CartaFilePath" class="form-label">Carta de Inclusión</label>
+                            <div id="carta-dropzone-puntos" class="carta-dropzone">
+                                <input type="file" id="carta_file" name="cartaFile" class="d-none"
+                                       accept=".pdf,.doc,.docx,.png,.jpg,.jpeg,.gif,.tiff,.bmp,.webp" />
+                                <input type="hidden" asp-for="CartaFilePath" />
+                                <div class="dropzone-icon">
+                                    <svg viewBox="0 0 24 24">
+                                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                        <polyline points="17 8 12 3 7 8"></polyline>
+                                        <line x1="12" y1="3" x2="12" y2="15"></line>
+                                    </svg>
+                                </div>
+                                <div class="dropzone-text">
+                                    <div class="dropzone-title">Arrastra tu archivo aquí</div>
+                                    <div class="dropzone-subtitle">o haz clic para seleccionar</div>
+                                </div>
+                                <div class="carta-actions">
+                                    <button type="button" class="btn btn-primary" onclick="document.getElementById('carta_file').click()">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                            <polyline points="17 8 12 3 7 8"></polyline>
+                                            <line x1="12" y1="3" x2="12" y2="15"></line>
+                                        </svg>
+                                        Seleccionar archivo
+                                    </button>
+                                    <button type="button" class="btn btn-secondary" id="carta_clear_btn_puntos">
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                            <polyline points="3 6 5 6 21 6"></polyline>
+                                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                                        </svg>
+                                        Limpiar
+                                    </button>
+                                </div>
+                                <div class="file-preview" id="file-preview-puntos">
+                                    <div class="file-info">
+                                        <div class="file-icon">
+                                            <svg viewBox="0 0 24 24">
+                                                <polyline points="20 6 9 17 4 12"></polyline>
+                                            </svg>
+                                        </div>
+                                        <div class="file-details">
+                                            <div class="file-name" id="file-name-puntos">archivo.pdf</div>
+                                            <div class="file-size" id="file-size-puntos">1.2 MB</div>
+                                        </div>
+                                    </div>
+                                    <div class="file-path">
+                                        <strong>Se guardará como:</strong><br>
+                                        C:\VCashFiles\Points\cartas_inclusion\<span id="carta_preview_puntos">—</span>
+                                    </div>
+                                </div>
+                                <div class="success-message" id="success-message-puntos">
+                                    ✓ Archivo cargado correctamente
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="submit-container-spacer"></div>
+
+            <div class="submit-container form-group col-12 mt-4 fixed">
+                <button type="submit" class="btn btn-primary">Guardar</button>
+                <a asp-action="Index" asp-controller="Point" class="btn btn-danger">Cancelar</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="modal fade" id="modalRangoInfo" tabindex="-1" role="dialog" aria-labelledby="modalTitulo" aria-modal="true">
+    <div class="modal-dialog modal-xl modal-dialog-centered modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalTitulo">Información del rango</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="modalRangoInfoBody">
+            </div>
+        </div>
+    </div>
+</div>
 
 @section Scripts {
     @{

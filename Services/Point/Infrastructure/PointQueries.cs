@@ -3,15 +3,24 @@ using Microsoft.EntityFrameworkCore;
 using VCashApp.Data;
 using VCashApp.Infrastructure.Branches;
 using VCashApp.Models.Dtos.Point;
+using VCashApp.Models.Entities;
 using VCashApp.Services.Point.Application;
 
 namespace VCashApp.Services.Point.Infrastructure
 {
+    /// <summary>
+    /// Métodos de consulta para puntos.
+    /// </summary>
     public sealed class PointQueries : IPointQueries
     {
         private readonly AppDbContext _db;
         private readonly IBranchContext _branchCtx;
 
+        /// <summary>
+        /// Metódos de consulta para puntos.
+        /// </summary>
+        /// <param name="db">Contexto de base de datos.</param>
+        /// <param name="branchCtx">Servicio de contexto de sucursal.</param>
         public PointQueries(AppDbContext db, IBranchContext branchCtx)
         {
             _db = db;
@@ -21,9 +30,14 @@ namespace VCashApp.Services.Point.Infrastructure
         // --------------------------------------------------------------------
         // 1) LISTADO PAGINADO CON FILTROS
         // --------------------------------------------------------------------
+        /// <summary>
+        /// Obtiene un listado paginado de puntos según los filtros indicados.
+        /// </summary>
+        /// <param name="filter">DTO</param>
+        /// <returns>DTO con items y total</returns>
         public async Task<(IEnumerable<PointListDto> Items, int TotalCount)> GetPagedAsync(PointFilterDto filter)
         {
-            var q = _db.AdmPuntos.AsNoTracking();
+            IQueryable<AdmPunto> q = _db.AdmPuntos.AsNoTracking();
 
             int? effectiveBranch = filter.BranchCode ?? _branchCtx.CurrentBranchId;
 
@@ -43,7 +57,6 @@ namespace VCashApp.Services.Point.Infrastructure
 
             q = q.Where(p => p.PointType == 0);
 
-            // --- Search ---
             if (!string.IsNullOrWhiteSpace(filter.Search))
             {
                 string s = filter.Search.Trim().ToLower();
@@ -55,7 +68,6 @@ namespace VCashApp.Services.Point.Infrastructure
                     p.Client!.ClientName.Contains(s));
             }
 
-            // --- Filtros avanzados ---
             if (filter.ClientCode.HasValue)
                 q = q.Where(p => p.ClientCode == filter.ClientCode);
 
@@ -77,49 +89,53 @@ namespace VCashApp.Services.Point.Infrastructure
             if (filter.IsActive.HasValue)
                 q = q.Where(p => p.Status == filter.IsActive.Value);
 
-            // --- Conteo antes de paginar ---
             int total = await q.CountAsync();
 
-            // --- Ordenamiento estándar ---
+            q = q.Include(p => p.Client)
+                 .Include(p => p.Branch)
+                 .Include(p => p.City)
+                 .Include(p => p.Fund)
+                 .Include(p => p.Route)
+                 .Include(p => p.Range);
+
             q = q.OrderBy(p => p.Client!.ClientName)
                  .ThenBy(p => p.PointName)
                  .ThenBy(p => p.City!.NombreCiudad)
-                 .ThenBy(p => p.Branch!.NombreSucursal);
+                 .ThenBy(p => p.Branch!.NombreSucursal)
+                 .Skip((filter.Page - 1) * filter.PageSize)
+                 .Take(filter.PageSize);
 
-            // --- Paginación ---
-            var items = await q
-                .Skip((filter.Page - 1) * filter.PageSize)
-                .Take(filter.PageSize)
-                .Select(p => new PointListDto
-                {
-                    CodPunto = p.PointCode!,
-                    CodPCliente = p.ClientPointCode ?? "",
-                    CodCliente = p.ClientCode ?? 0,
-                    ClienteNombre = p.Client!.ClientName,
-                    CodClientePpal = p.MainClientCode ?? 0,
-                    ClientePpalNombre = null,
-                    NombrePunto = p.PointName,
-                    NombreCorto = p.ShortName,
-                    CodSuc = p.BranchCode ?? 0,
-                    NombreSucursal = p.Branch!.NombreSucursal,
-                    CodCiudad = p.CityCode ?? 0,
-                    NombreCiudad = p.City!.NombreCiudad,
-                    FundName = p.Fund!.FundName,
-                    RouteName = p.Route!.RouteName,
-                    RangeName = p.Range!.RangeInformation,
-                    Latitude = p.Latitude,
-                    Longitude = p.Longitude,
-                    PointRadius= p.PointRadius,
-                    EstadoPunto = p.Status
-                })
-                .ToListAsync();
+            var items = await q.Select(p => new PointListDto
+            {
+                CodPunto = p.PointCode!,
+                CodPCliente = p.ClientPointCode ?? "",
+                CodCliente = p.ClientCode ?? 0,
+                ClienteNombre = p.Client!.ClientName,
+                CodClientePpal = p.MainClientCode ?? 0,
+                ClientePpalNombre = null,
+                NombrePunto = p.PointName,
+                NombreCorto = p.ShortName,
+                CodSuc = p.BranchCode ?? 0,
+                NombreSucursal = p.Branch!.NombreSucursal,
+                CodCiudad = p.CityCode ?? 0,
+                NombreCiudad = p.City!.NombreCiudad,
+                FundName = p.Fund!.FundName,
+                RouteName = p.Route!.RouteName,
+                RangeName = p.Range!.RangeInformation,
+                Latitude = p.Latitude,
+                Longitude = p.Longitude,
+                PointRadius = p.PointRadius,
+                EstadoPunto = p.Status
+            }).ToListAsync();
 
             return (items, total);
         }
 
-        // --------------------------------------------------------------------
-        // 2) EXPORTACIÓN COMPLETA (sin paginar)
-        // --------------------------------------------------------------------
+        /// <summary>
+        /// Método para exportar los puntos según los filtros indicados.
+        /// </summary>
+        /// <param name="filter">DTO</param>
+        /// <returns>DTO con items</returns>
         public async Task<IEnumerable<PointListDto>> ExportAsync(PointFilterDto filter)
         {
             var (items, _) = await GetPagedAsync(new PointFilterDto
@@ -140,9 +156,10 @@ namespace VCashApp.Services.Point.Infrastructure
             return items;
         }
 
-        // --------------------------------------------------------------------
-        // 3) LOOKUPS PARA FORMULARIO (clientes, sucursales, fondos...)
-        // --------------------------------------------------------------------
+        /// <summary>
+        /// Obtiene los datos para los select de búsqueda y edición de puntos.
+        /// </summary>
+        /// <returns>DTO con los datos de los select.</returns>
         public async Task<PointLookupDto> GetLookupsAsync()
         {
             // --- Clientes ---
@@ -213,6 +230,14 @@ namespace VCashApp.Services.Point.Infrastructure
                     Text = r.CodRange!
                 }).ToListAsync();
 
+            var tiposNegocio = await _db.AdmTypeBusinesses
+                .AsNoTracking()
+                .Select(r => new SelectListItem
+                {
+                    Value = r.Id.ToString(),
+                    Text = r.Description!
+                }).ToListAsync();
+
             return new PointLookupDto
             {
                 Clientes = clientes,
@@ -221,13 +246,15 @@ namespace VCashApp.Services.Point.Infrastructure
                 Fondos = fondos,
                 Rutas = rutas,
                 Rangos = rangos,
-                TiposNegocio = Enumerable.Empty<SelectListItem>()
+                TiposNegocio = tiposNegocio
             };
         }
 
-        // --------------------------------------------------------------------
-        // 4) GET PARA EDICIÓN
-        // --------------------------------------------------------------------
+        /// <summary>
+        /// Obtiene los datos de un punto para edición.
+        /// </summary>
+        /// <param name="pointCode">Punto</param>
+        /// <returns>Datos del punto para edición.</returns>
         public async Task<PointUpsertDto?> GetForEditAsync(string pointCode)
         {
             return await _db.AdmPuntos
@@ -238,6 +265,7 @@ namespace VCashApp.Services.Point.Infrastructure
                     CodPunto = p.PointCode,
                     CodPCliente = p.ClientPointCode!,
                     CodCliente = p.ClientCode ?? 0,
+                    VatcoPointCode = p.VatcoPointCode,
                     CodClientePpal = p.MainClientCode,
 
                     NombrePunto = p.PointName,
@@ -293,9 +321,11 @@ namespace VCashApp.Services.Point.Infrastructure
                 .FirstOrDefaultAsync();
         }
 
-        // --------------------------------------------------------------------
-        // 5) VISTA PREVIA
-        // --------------------------------------------------------------------
+        /// <summary>
+        /// Obtiene los datos para la vista previa de un punto.
+        /// </summary>
+        /// <param name="pointCode">Punto</param>
+        /// <returns>Datos del punto para vista previa.</returns>
         public async Task<PointPreviewDto?> GetPreviewAsync(string pointCode)
         {
             return await _db.AdmPuntos

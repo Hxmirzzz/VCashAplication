@@ -25,6 +25,7 @@ namespace VCashApp.Models.Dtos.Point
         /// <summary>Código del cliente principal</summary>
         public int? CodClientePpal { get; set; }
         /// <summary>Nombre del punto.</summary>
+        [Required]
         public string? NombrePunto { get; set; }
         /// <summary>Nombre corto del punto.</summary>
         public string? NombreCorto { get; set; }
@@ -41,8 +42,10 @@ namespace VCashApp.Models.Dtos.Point
         /// <summary>Correo del responsable del punto.</summary>
         public string? CorreoRespPunto { get; set; }
         /// <summary>Código de la sucursal asociada al punto.</summary>
+        [Required]
         public int CodSuc { get; set; }
         /// <summary>Código de la ciudad asociada al punto.</summary>
+        [Required]
         public int CodCiudad { get; set; }
         /// <summary>Latitud.</summary>
         public string? LatPunto { get; set; }
@@ -77,10 +80,13 @@ namespace VCashApp.Models.Dtos.Point
         /// <summary>Código del fondo.</summary>
         public string? CodFondo { get; set; }
         /// <summary>Ruta del punto.</summary>
+        [Required]
         public string? CodRutaSuc { get; set; }
         /// <summary>Rango del punto.</summary>
+        [Required]
         public int? CodRango { get; set; }
         /// <summary>Tipo de negocio del punto.</summary>
+        [Required]
         public int? BusinessType { get; set; }
 
         /// <summary>Fecha de ingreso del punto.</summary>

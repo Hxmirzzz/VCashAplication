@@ -12,6 +12,7 @@
     var funds = (IEnumerable<SelectListItem>)ViewBag.Fondos ?? Enumerable.Empty<SelectListItem>();
     var routes = (IEnumerable<SelectListItem>)ViewBag.Rutas ?? Enumerable.Empty<SelectListItem>();
     var ranges = (IEnumerable<SelectListItem>)ViewBag.Rangos ?? Enumerable.Empty<SelectListItem>();
+    var typeBusiness = (IEnumerable<SelectListItem>)ViewBag.TiposNegocio ?? Enumerable.Empty<SelectListItem>();
 }
 
 @await Html.PartialAsync(
@@ -27,6 +28,7 @@
         ["Funds"] = funds,
         ["Routes"] = routes,
         ["Ranges"] = ranges,
+        ["TypeBusiness"] = typeBusiness,
         ["PageName"] = "Crear Punto"
     }
 )

@@ -194,8 +194,9 @@ function updateCodVatco() {
 document.addEventListener('DOMContentLoaded', () => {
     const clientSelect = document.getElementById('CodCliente');
     const mainClientSelect = document.getElementById('CodClientePpal');
+    const mainClientHidden = document.getElementById('CodClientePpalHidden');
 
-    if (!clientSelect || !mainClientSelect) return;
+    if (!clientSelect || !mainClientSelect || !mainClientHidden) return;
 
     async function refreshMainClient() {
         const codCliente = clientSelect.value;
@@ -203,6 +204,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!codCliente) {
             mainClientSelect.innerHTML = '<option value="0">NINGUNO</option>';
             mainClientSelect.disabled = true;
+            mainClientHidden.value = '0';
             return;
         }
 
@@ -221,17 +223,25 @@ document.addEventListener('DOMContentLoaded', () => {
                 mainClientSelect.appendChild(opt);
             });
 
-            mainClientSelect.disabled = data[0]?.lockSelect === true;
+            const selectedValue = data.find(x => x.selected)?.value ?? '0';
+            mainClientHidden.value = selectedValue;
+
+            const lock = data[0]?.lockSelect === true;
+            mainClientSelect.disabled = lock;
 
         } catch {
             mainClientSelect.innerHTML = '<option value="0">NINGUNO</option>';
             mainClientSelect.disabled = true;
+            mainClientHidden.value = '0';
         }
     }
 
-    clientSelect.addEventListener('change', refreshMainClient);
+    mainClientSelect.addEventListener('change', () => {
+        mainClientHidden.value = mainClientSelect.value;
+    });
 
-    // Edición
+    clientSelect.addEventListener('change', refreshMainClient);
+    
     refreshMainClient();
 });
 
@@ -250,9 +260,11 @@ document.addEventListener('DOMContentLoaded', function () {
         if (modo === '1') {
             fondosSelect.disabled = false;
             fondosSelect.multiple = false;
+            fondosSelect.required = true;   
         } else {
             fondosSelect.disabled = true;
             fondosSelect.value = '';
+            fondosSelect.required = false;
         }
     }
 

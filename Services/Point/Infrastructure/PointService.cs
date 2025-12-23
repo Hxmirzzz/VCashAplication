@@ -40,7 +40,7 @@ namespace VCashApp.Services.Point.Infrastructure
                 VatcoPointCode = dto.VatcoPointCode?.Trim(),
                 ClientPointCode = dto.CodPCliente.Trim(),
                 ClientCode = dto.CodCliente,
-                MainClientCode = dto.CodClientePpal,
+                MainClientCode = dto.CodClientePpal ?? 0,
 
                 PointName = dto.NombrePunto,
                 ShortName = dto.NombreCorto,
@@ -67,6 +67,8 @@ namespace VCashApp.Services.Point.Infrastructure
                 PointPrediction = dto.PrediccionPunto == 1,
                 PointCustody = dto.CustodiaPunto == 1,
                 PointOtherValues = dto.OtrosValoresPunto == 1,
+                PointType = dto.TipoPunto,
+                BusinessType = dto.BusinessType,
 
                 Others = dto.Otros,
                 CashReleasePoint = dto.LiberacionEfectivoPunto == 1,
@@ -221,7 +223,35 @@ namespace VCashApp.Services.Point.Infrastructure
             if (string.IsNullOrWhiteSpace(dto.CodPCliente))
                 return ServiceResult.FailureResult("CodPCliente vacío.");
 
+            if (string.IsNullOrWhiteSpace(dto.NombrePunto))
+                return ServiceResult.FailureResult("NombrePunto vacío.");
+
             string codPunto = dto.CodPunto.Trim();
+
+            if (dto.FondoPunto == 1)
+            {
+                if (string.IsNullOrWhiteSpace(dto.CodFondo))
+                    return ServiceResult.FailureResult("Debe seleccionar un fondo si 'FondoPunto' está activado.");
+            }
+            else
+            {
+                dto.CodFondo = null;
+            }
+
+            if (dto.CodSuc <= 0)
+                return ServiceResult.FailureResult("Debe seleccionar una 'Sucursal' válida.");
+
+            if (dto.CodCiudad <= 0)
+                return ServiceResult.FailureResult("Debe seleccionar una 'Ciudad' válida.");
+
+            if (string.IsNullOrWhiteSpace(dto.CodRutaSuc))
+                return ServiceResult.FailureResult("Debe seleccionar una 'Ruta' válida.");
+
+            if (dto.CodRango <= 0)
+                return ServiceResult.FailureResult("Debe seleccionar un 'Rango' válido.");
+
+            if (dto.BusinessType == null || dto.BusinessType <= 0)
+                return ServiceResult.FailureResult("Debe seleccionar un 'Tipo de negocio' válido.");
 
             if (!isEdit)
             {
